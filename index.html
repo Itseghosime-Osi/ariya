@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OwambePlan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Jost:wght@300;400;500&display=swap">
+<style>
+/* Layout: a fixed full-screen 3D stage with text beats layered over it. A 900vh scroll track drives one
+   story in seven chapters: box, yes, noise, calm, link, count, dance. One committed dark look, cocoa and platinum. */
+:root {
+  --ink: #120806;
+  --cocoa: #2e170f;
+  --glow: #d58a5c;
+  --gold: #f1d3a0;
+  --platinum: #ece8e3;
+  --muted: #b9a496;
+  --line: rgba(236, 232, 227, 0.2);
+  --bubble: #f6efe8;
+  --bubble-ink: #2a1a12;
+  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --font-body: "Jost", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--ink); }
+body {
+  margin: 0;
+  color: var(--platinum);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.backdrop {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(60% 55% at 50% 42%, rgba(213, 138, 92, 0.32), transparent 70%),
+    linear-gradient(180deg, var(--cocoa), var(--ink) 75%);
+}
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; }
+.track { position: relative; z-index: 0; height: 900vh; }
+
+.overlay {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.beat {
+  position: absolute; left: 0; right: 0; opacity: 0;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  text-shadow: 0 2px 24px rgba(18, 8, 6, 0.85);
+  will-change: opacity, transform;
+}
+.beat.center { top: 50%; text-align: center; transform: translateY(-50%); }
+.beat.low { bottom: max(10vh, calc(env(safe-area-inset-bottom, 0px) + 72px)); text-align: center; }
+.beat.side { top: 50%; transform: translateY(-50%); max-width: 1180px; margin: 0 auto; }
+h1, h2 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.6rem, 7vw, 5.6rem); line-height: 1.02; }
+h2 { font-size: clamp(2rem, 5vw, 3.9rem); line-height: 1.06; }
+h1 em, h2 em { font-style: italic; color: var(--gold); }
+.eyebrow { font-size: 0.74rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--glow); margin: 0 0 18px; }
+.sub { color: var(--muted); max-width: 30em; margin: 18px auto 0; font-size: 1.05rem; }
+.cue { margin-top: 36px; font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+.cue span { display: block; width: 1px; height: 44px; margin: 12px auto 0; background: linear-gradient(var(--gold), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* The noise: chat bubbles */
+.storm { position: absolute; inset: 0; }
+.bub {
+  position: absolute; max-width: min(300px, 70vw);
+  background: var(--bubble); color: var(--bubble-ink);
+  border-radius: 14px 14px 14px 4px; padding: 8px 12px 6px;
+  font-size: 0.92rem; line-height: 1.35;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  opacity: 0; will-change: transform, opacity;
+}
+.bub b { display: block; font-size: 0.72rem; font-weight: 500; color: #9a4d2b; letter-spacing: 0.02em; }
+.bub i { display: block; text-align: right; font-style: normal; font-size: 0.66rem; color: #8b7a6e; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.groupbar {
+  position: absolute; left: 50%; top: max(9vh, calc(env(safe-area-inset-top, 0px) + 56px)); transform: translateX(-50%);
+  background: rgba(246, 239, 232, 0.12); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; opacity: 0;
+}
+.groupbar strong { color: var(--gold); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* The flash into the diamond */
+.flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #fffaf2, #f1d3a0 55%, #d58a5c); opacity: 0; }
+
+/* The link: invitation card */
+.card {
+  position: absolute; left: 50%; top: 46%;
+  width: min(420px, calc(100% - 32px));
+  background: linear-gradient(170deg, #fbf6ef, #efe3d3);
+  color: var(--bubble-ink); border-radius: 6px;
+  padding: clamp(22px, 5vw, 36px);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+  text-align: center; opacity: 0;
+}
+.card .seal { width: 46px; height: 46px; margin: 0 auto 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f6dcae, #b8864b 60%, #7a5226); box-shadow: inset 0 -2px 6px rgba(0,0,0,.3); display: grid; place-items: center; font-family: var(--font-display); font-style: italic; color: #fff7ea; font-size: 1.1rem; }
+.card .tag { font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase; color: #9a4d2b; margin: 0; }
+.card h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 6vw, 2.5rem); line-height: 1.1; margin: 8px 0 10px; text-wrap: balance; }
+.card p { margin: 0; color: #5a463a; font-size: 0.95rem; }
+.card label { display: block; margin-top: 18px; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: #8b7a6e; }
+.card input { width: 100%; text-align: center; font: inherit; font-size: 1rem; color: var(--bubble-ink); background: transparent; border: 0; border-bottom: 1px solid #cdbba8; padding: 6px 0; border-radius: 0; }
+.card input:focus { outline: none; border-bottom-color: #9a4d2b; }
+.card .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+.btn { font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.85rem 1.2rem; border-radius: 2px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: inherit; text-decoration: none; display: inline-block; }
+.btn.solid { background: var(--bubble-ink); color: #fbf6ef; border-color: var(--bubble-ink); }
+.btn.light { background: var(--platinum); color: var(--ink); border-color: var(--platinum); }
+.btn:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+.card .link { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.74rem; color: #8b7a6e; margin-top: 14px; word-break: break-all; }
+.card .reply { min-height: 2.8em; margin-top: 12px; font-size: 0.92rem; color: #2a1a12; }
+
+/* The count */
+.count { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 28px; margin-top: 28px; max-width: 520px; }
+.count dt { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.count dd { margin: 4px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); line-height: 1; font-variant-numeric: tabular-nums; color: var(--platinum); }
+.count div { min-width: 0; }
+.side .sub { margin-left: 0; }
+.finale .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+
+/* Chapter rail */
+.rail {
+  position: fixed; z-index: 3; top: 50%; transform: translateY(-50%);
+  right: max(14px, env(safe-area-inset-right, 0px));
+  list-style: none; margin: 0; padding: 0; display: grid; gap: 14px;
+}
+.rail button {
+  display: flex; align-items: center; gap: 10px; justify-content: flex-end;
+  background: none; border: 0; padding: 2px 0; cursor: pointer; color: var(--muted);
+  font: inherit; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase;
+}
+.rail button span { opacity: 0; transition: opacity .3s; }
+.rail button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--muted); transition: background .3s, transform .3s; }
+.rail button.on { color: var(--gold); }
+.rail button.on span { opacity: 1; }
+.rail button.on::after { background: var(--gold); border-color: var(--gold); transform: scale(1.3); }
+.rail button:hover span, .rail button:focus-visible span { opacity: 1; }
+.rail button:focus-visible { outline: 1px solid var(--glow); outline-offset: 4px; }
+.bar { position: fixed; z-index: 3; left: 0; top: 0; height: 2px; width: 100%; background: var(--gold); transform-origin: left; transform: scaleX(0); margin-top: env(safe-area-inset-top, 0px); }
+.brand {
+  position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 18px);
+  left: max(20px, env(safe-area-inset-left, 0px));
+  font-family: var(--font-display); font-style: italic; font-size: 1.3rem; color: var(--platinum);
+}
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+
+@media (max-width: 700px) {
+  .rail button span { display: none; }
+  .beat.side { text-align: center; }
+  .count { margin-left: auto; margin-right: auto; }
+  .side .sub { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .cue span { animation: none; transform: none; } }
+</style>
+
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="bar" id="bar" aria-hidden="true"></div>
+<div class="brand">OwambePlan</div>
+
+<div class="overlay" id="overlay">
+  <section class="beat center" data-in="0" data-out="0.1" aria-label="The box">
+    <p class="eyebrow">Weddings, planned properly</p>
+    <h1>It starts with<br>a <em>yes.</em></h1>
+    <p class="cue">Scroll slowly<span></span></p>
+  </section>
+
+  <section class="beat low" data-in="0.15" data-out="0.27" aria-label="The yes">
+    <h2>Four seconds.<br><em>One question.</em></h2>
+    <p class="sub">Then four hundred people need to know.</p>
+  </section>
+
+  <div class="storm" id="storm" aria-hidden="true"></div>
+  <div class="groupbar" id="groupbar" aria-hidden="true">Chidinma &amp; Tunde 2026 · <strong id="unread">0</strong> unread</div>
+  <section class="beat low" data-in="0.34" data-out="0.47" aria-label="The noise">
+    <h2>This is how most<br>weddings get planned.</h2>
+  </section>
+
+  <section class="beat center" data-in="0.5" data-out="0.6" aria-label="The calm">
+    <h2>There is a <em>calmer</em> way.</h2>
+  </section>
+
+  <div class="flash" id="flash" aria-hidden="true"></div>
+
+  <div class="card" id="card" role="group" aria-label="The link: a sample guest invitation">
+    <div class="seal" aria-hidden="true">O</div>
+    <p class="tag">Your personal invitation</p>
+    <h3>Hello, <span id="who">Adaeze</span>.</h3>
+    <p>Chidinma and Tunde are getting married.<br>Saturday 12 December 2026 · Victoria Island, Lagos</p>
+    <label for="guestName">Type your own name</label>
+    <input id="guestName" type="text" value="Adaeze" maxlength="24" autocomplete="off">
+    <div class="row">
+      <button class="btn solid" id="yes" type="button">Yes, I will be there</button>
+      <button class="btn" id="no" type="button">I can't make it</button>
+    </div>
+    <p class="reply" id="reply" aria-live="polite"></p>
+    <p class="link">owambeplan.com/r/k7Q2x9mA</p>
+  </div>
+  <section class="beat low" data-in="0.69" data-out="0.77" aria-label="The link">
+    <p class="eyebrow">Every guest gets their own link</p>
+  </section>
+
+  <section class="beat side" data-in="0.78" data-out="0.89" aria-label="The count">
+    <h2>Know who's coming.<br><em>And where they sit.</em></h2>
+    <dl class="count">
+      <div><dt>Invited</dt><dd>320</dd></div>
+      <div><dt>Confirmed</dt><dd id="cConfirmed">0</dd></div>
+      <div><dt>Seated</dt><dd id="cSeated">0</dd></div>
+    </dl>
+  </section>
+
+  <section class="beat center finale" data-in="0.92" data-out="1.01" aria-label="The dance">
+    <p class="eyebrow">The list is done. The tables are full.</p>
+    <h1>Now go and <em>dance.</em></h1>
+    <div class="row">
+      <a class="btn light" href="#top" id="plan">Plan an event</a>
+      <button class="btn" id="replay" type="button">Watch again</button>
+    </div>
+  </section>
+</div>
+
+<ul class="rail" id="rail" aria-label="Chapters"></ul>
+<div class="track" id="track"><a id="top"></a></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var motion = reduceMotion ? 0 : 1;
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+  function seg(p, a, b) { return smooth((p - a) / (b - a)); }
+  function bump(p, a, b, c, d) { return seg(p, a, b) * (1 - seg(p, c, d)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  /* ---------- Scroll progress (GSAP ScrollTrigger, with a plain fallback) ---------- */
+  var track = document.getElementById("track");
+  var target = 0, prog = 0;
+  function nativeProgress() {
+    var total = track.offsetHeight - window.innerHeight;
+    return total > 0 ? clamp(window.scrollY / total, 0, 1) : 0;
+  }
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.create({ trigger: track, start: "top top", end: "bottom bottom", onUpdate: function (s) { target = s.progress; } });
+    target = nativeProgress();
+  } else {
+    window.addEventListener("scroll", function () { target = nativeProgress(); }, { passive: true });
+    target = nativeProgress();
+  }
+  prog = target;
+  function scrollToProgress(p) {
+    var total = track.offsetHeight - window.innerHeight;
+    window.scrollTo({ top: p * total, behavior: reduceMotion ? "auto" : "smooth" });
+  }
+
+  /* ---------- Chapter rail ---------- */
+  var chapters = [["The box", 0], ["The yes", 0.17], ["The noise", 0.37], ["The calm", 0.53], ["The link", 0.72], ["The count", 0.83], ["The dance", 0.97]];
+  var rail = document.getElementById("rail");
+  var railBtns = chapters.map(function (c) {
+    var li = document.createElement("li");
+    var b = document.createElement("button");
+    b.type = "button"; b.innerHTML = "<span>" + c[0] + "</span>";
+    b.setAttribute("aria-label", "Go to " + c[0]);
+    b.addEventListener("click", function () { scrollToProgress(c[1]); });
+    li.appendChild(b); rail.appendChild(li);
+    return b;
+  });
+
+  /* ---------- Text beats ---------- */
+  var beats = Array.prototype.map.call(document.querySelectorAll(".beat"), function (el) {
+    return { el: el, a: parseFloat(el.dataset.in), b: parseFloat(el.dataset.out), base: el.classList.contains("low") ? "" : "translateY(-50%) " };
+  });
+
+  /* ---------- The noise: message storm ---------- */
+  var msgs = [
+    ["Aunty Bisi", "Is it 300 or 450 people now??"],
+    ["Femi", "Pls add my cousin to the group"],
+    ["Mummy C", "My church members are coming o. All of them."],
+    ["Kemi (planner)", "Who has the final list? Anybody?"],
+    ["Tolu", "I didn't get invite o"],
+    ["Uncle Dayo", "Which table am I?"],
+    ["Ngozi", "Send the aso ebi account number again"],
+    ["Aunty Bisi", "Me and my 4 children will be there"],
+    ["Seun", "Is the reception in VI or Lekki?"],
+    ["Caterer", "How many plates did we agree?"],
+    ["Femi", "RSVP to who exactly?"],
+    ["Mummy C", "Add Mrs Okafor. And her sister."],
+    ["Kemi (planner)", "Please stop sending names in the group"],
+    ["Tunde", "Babe I think we've lost count"]
+  ];
+  var storm = document.getElementById("storm");
+  var rnd = (function (s) { return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; })(7);
+  var bubbles = msgs.map(function (m, i) {
+    var el = document.createElement("div");
+    el.className = "bub";
+    var hh = 14 + Math.floor(i / 3), mm = (i * 7 + 3) % 60;
+    el.innerHTML = "<b>" + m[0] + "</b>" + m[1] + "<i>" + hh + ":" + (mm < 10 ? "0" : "") + mm + "</i>";
+    var x = 2 + (i % 3) * 28 + rnd() * 16, y = 13 + Math.floor(i / 3) * 10 + rnd() * 6;
+    el.style.left = x + "%"; el.style.top = y + "%";
+    storm.appendChild(el);
+    var ang = Math.atan2(y - 50, x + 10 - 50);
+    return { el: el, at: 0.3 + i * 0.0105, dx: Math.cos(ang), dy: Math.sin(ang), rot: (rnd() - 0.5) * 70, tilt: (rnd() - 0.5) * 8 };
+  });
+  var groupbar = document.getElementById("groupbar");
+  var unread = document.getElementById("unread");
+
+  /* ---------- Invitation card ---------- */
+  var card = document.getElementById("card");
+  var nameEl = document.getElementById("guestName");
+  var who = document.getElementById("who");
+  var reply = document.getElementById("reply");
+  function guest() { return (nameEl.value || "").trim() || "Guest"; }
+  nameEl.addEventListener("input", function () { who.textContent = guest(); });
+  document.getElementById("yes").addEventListener("click", function (e) {
+    reply.textContent = "You're on the list, " + guest() + ". Table 7, seat 4. A confirmation email is on its way.";
+    var r = e.currentTarget.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top);
+  });
+  document.getElementById("no").addEventListener("click", function () {
+    reply.textContent = "Thank you, " + guest() + ". The couple will see your reply straight away.";
+  });
+  document.getElementById("replay").addEventListener("click", function () { scrollToProgress(0); });
+  document.getElementById("plan").addEventListener("click", function (e) { e.preventDefault(); scrollToProgress(0); });
+
+  var flash = document.getElementById("flash");
+  var bar = document.getElementById("bar");
+  var cConfirmed = document.getElementById("cConfirmed");
+  var cSeated = document.getElementById("cSeated");
+
+  /* ---------- 2D confetti for the RSVP tap ---------- */
+  var cv = document.getElementById("confetti"), cx = cv.getContext("2d"), bits = [], bitsOn = false;
+  function burst(x, y) {
+    if (reduceMotion) return;
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    var cols = ["#f1d3a0", "#ece8e3", "#d58a5c", "#b8864b"];
+    for (var i = 0; i < 160; i++) {
+      var a = -Math.PI / 2 + (Math.random() - 0.5) * 2, s = 6 + Math.random() * 10;
+      bits.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, w: 4 + Math.random() * 6, h: 3 + Math.random() * 5, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, c: cols[i % 4], life: 130 + Math.random() * 60 });
+    }
+    if (!bitsOn) { bitsOn = true; requestAnimationFrame(stepBits); }
+  }
+  function stepBits() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    bits = bits.filter(function (b) { return b.life > 0 && b.y < cv.height + 40; });
+    bits.forEach(function (b) {
+      b.vy += 0.3; b.vx *= 0.985; b.x += b.vx; b.y += b.vy; b.r += b.vr; b.life--;
+      cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r); cx.globalAlpha = Math.min(1, b.life / 40);
+      cx.fillStyle = b.c; cx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); cx.restore();
+    });
+    if (bits.length) requestAnimationFrame(stepBits); else { bitsOn = false; cx.clearRect(0, 0, cv.width, cv.height); }
+  }
+
+  /* ---------- DOM updates driven by progress ---------- */
+  var lastSeated = -1;
+  function updateDom(p) {
+    bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+    beats.forEach(function (bt) {
+      var o = (bt.a <= 0 ? 1 : seg(p, bt.a, bt.a + 0.025)) * (bt.b >= 1 ? 1 : 1 - seg(p, bt.b - 0.025, bt.b));
+      bt.el.style.opacity = o.toFixed(3);
+      bt.el.style.transform = bt.base + "translateY(" + ((1 - o) * 18).toFixed(1) + "px)";
+      bt.el.style.visibility = o < 0.01 ? "hidden" : "visible";
+    });
+    var shatter = seg(p, 0.46, 0.53);
+    var W = window.innerWidth;
+    bubbles.forEach(function (bb) {
+      var inn = seg(p, bb.at, bb.at + 0.012);
+      var o = inn * (1 - shatter);
+      var d = shatter * W * 0.9;
+      bb.el.style.opacity = o.toFixed(3);
+      bb.el.style.transform = "translate(" + (bb.dx * d).toFixed(1) + "px," + (bb.dy * d + (1 - inn) * 24).toFixed(1) + "px) rotate(" + (bb.tilt + bb.rot * shatter).toFixed(1) + "deg) scale(" + (0.9 + inn * 0.1 - shatter * 0.3).toFixed(3) + ")";
+      bb.el.style.visibility = o < 0.01 ? "hidden" : "visible";
+    });
+    var gb = bump(p, 0.29, 0.31, 0.46, 0.5);
+    groupbar.style.opacity = gb.toFixed(3);
+    unread.textContent = String(Math.round(seg(p, 0.3, 0.46) * 312));
+
+    flash.style.opacity = (bump(p, 0.625, 0.66, 0.695, 0.73)).toFixed(3);
+    var co = bump(p, 0.675, 0.7, 0.755, 0.775);
+    card.style.opacity = co.toFixed(3);
+    card.style.transform = "translate(-50%, -50%) translateY(" + ((1 - co) * 40).toFixed(1) + "px) scale(" + (0.94 + co * 0.06).toFixed(3) + ")";
+    card.style.pointerEvents = co > 0.6 ? "auto" : "none";
+    card.style.visibility = co < 0.01 ? "hidden" : "visible";
+
+    var fill = seg(p, 0.79, 0.87);
+    cConfirmed.textContent = String(Math.round(fill * 241));
+    var seated = Math.round(fill * 218);
+    cSeated.textContent = String(seated);
+
+    var active = 0;
+    chapters.forEach(function (c, i) { if (p >= (i === 0 ? 0 : c[1] - 0.06)) active = i; });
+    railBtns.forEach(function (b, i) { b.classList.toggle("on", i === active); });
+    return seated;
+  }
+
+  /* ---------- 3D ---------- */
+  var canvas = document.getElementById("gl");
+  var renderer = null;
+  try {
+    if (!window.THREE) throw new Error("no three");
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  } catch (err) { renderer = null; canvas.style.display = "none"; }
+
+  var tick;
+  if (!renderer) {
+    tick = function () { prog += (target - prog) * 0.12; updateDom(prog); requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.setClearColor(0x000000, 0);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.05, 80);
+
+  // Studio environment painted on a canvas: dark room, bright softboxes, coloured kicks for fake dispersion.
+  (function () {
+    var c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+    var g = c.getContext("2d");
+    var gr = g.createLinearGradient(0, 0, 0, 512);
+    gr.addColorStop(0, "#2a120b"); gr.addColorStop(0.48, "#8e5234"); gr.addColorStop(0.6, "#22100a"); gr.addColorStop(1, "#0d0604");
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 512);
+    g.fillStyle = "#ffffff";
+    [[110, 80, 160, 80], [420, 50, 120, 100], [690, 100, 180, 64], [905, 60, 90, 120], [250, 205, 60, 150], [560, 195, 44, 170], [30, 200, 40, 90]].forEach(function (b) { g.fillRect(b[0], b[1], b[2], b[3]); });
+    [["#7fb2ff", 340, 140, 40, 40], ["#ff9e5e", 800, 210, 50, 30], ["#c79bff", 150, 260, 36, 36], ["#9effe0", 620, 70, 30, 30]].forEach(function (b) { g.fillStyle = b[0]; g.fillRect(b[1], b[2], b[3], b[4]); });
+    g.globalAlpha = 0.6; g.fillStyle = "#ffd9b8"; g.fillRect(0, 248, 1024, 10);
+    var tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding; tex.mapping = THREE.EquirectangularReflectionMapping;
+    var pm = new THREE.PMREMGenerator(renderer);
+    scene.environment = pm.fromEquirectangular(tex).texture;
+    tex.dispose(); pm.dispose();
+  })();
+
+  var key = new THREE.DirectionalLight(0xffd2a8, 1.3); key.position.set(3, 6, 5); scene.add(key);
+  var rim = new THREE.DirectionalLight(0xffffff, 0.8); rim.position.set(-4, 2, -4); scene.add(rim);
+  var hemi = new THREE.HemisphereLight(0xffe6cc, 0x1a0b06, 0.35); scene.add(hemi);
+
+  // Ring box: velvet base, hinged lid, two cushions holding the ring.
+  var velvet = new THREE.MeshStandardMaterial({ color: 0x4a1712, roughness: 0.95, metalness: 0 });
+  var velvetDark = new THREE.MeshStandardMaterial({ color: 0x24090a, roughness: 1, metalness: 0 });
+  var trim = new THREE.MeshStandardMaterial({ color: 0xc9a06a, metalness: 1, roughness: 0.25 });
+  var box = new THREE.Group();
+  var base = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.9, 1.6), velvet);
+  base.position.y = -0.45; box.add(base);
+  var band1 = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.04, 1.62), trim); band1.position.y = -0.02; box.add(band1);
+  [-0.22, 0.22].forEach(function (z) {
+    var cush = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1.6, 24), velvetDark);
+    cush.rotation.z = Math.PI / 2; cush.position.set(0, 0.02, z); box.add(cush);
+  });
+  var lidPivot = new THREE.Group(); lidPivot.position.set(0, 0, -0.8); box.add(lidPivot);
+  var lidGeo = new THREE.BoxGeometry(1.8, 1.1, 1.6); lidGeo.translate(0, 0.55, 0.8);
+  var lid = new THREE.Mesh(lidGeo, velvet); lidPivot.add(lid);
+  var lidInner = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.9), velvetDark);
+  lidInner.position.set(0, 0.55, 1.61); lidPivot.add(lidInner);
+  var lidTrim = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.04, 1.62), trim); lidTrim.position.set(0, 0.02, 0.8); lidPivot.add(lidTrim);
+  scene.add(box);
+
+  // Ring
+  var R = 1.2;
+  var plat = new THREE.MeshStandardMaterial({ color: 0xebe8e4, metalness: 1, roughness: 0.12, envMapIntensity: 1.3 });
+  var ring = new THREE.Group();
+  var bandMesh = new THREE.Mesh(new THREE.TorusGeometry(R, 0.085, 32, 160), plat); bandMesh.scale.z = 1.7; ring.add(bandMesh);
+  var gemY = R + 0.34;
+  var collar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.09, 0.18, 24), plat); collar.position.y = gemY - 0.2; ring.add(collar);
+  for (var k = 0; k < 6; k++) {
+    var a = (k / 6) * Math.PI * 2;
+    var prong = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.03, 0.27, 8), plat);
+    prong.position.set(Math.cos(a) * 0.35, gemY - 0.01, Math.sin(a) * 0.35);
+    prong.rotation.z = -Math.cos(a) * 0.12; prong.rotation.x = Math.sin(a) * 0.12;
+    ring.add(prong);
+  }
+  var profile = [[0, -0.72], [0.48, -0.3], [0.9, -0.02], [0.9, 0.05], [0.68, 0.23], [0.52, 0.3], [0, 0.3]].map(function (q) { return new THREE.Vector2(q[0], q[1]); });
+  var gemMat = new THREE.MeshStandardMaterial({ color: 0xf6f9ff, metalness: 1, roughness: 0, flatShading: true, envMapIntensity: 2.4, side: THREE.DoubleSide });
+  var gem = new THREE.Mesh(new THREE.LatheGeometry(profile, 16), gemMat);
+  gem.scale.setScalar(0.4); gem.position.y = gemY; ring.add(gem);
+  scene.add(ring);
+
+  function starTexture() {
+    var c = document.createElement("canvas"); c.width = c.height = 128;
+    var g = c.getContext("2d");
+    var r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.12, "rgba(255,240,220,0.9)"); r.addColorStop(0.4, "rgba(255,200,150,0.18)"); r.addColorStop(1, "rgba(255,200,150,0)");
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+    ["h", "v"].forEach(function (d) {
+      var l = d === "h" ? g.createLinearGradient(0, 64, 128, 64) : g.createLinearGradient(64, 0, 64, 128);
+      l.addColorStop(0, "rgba(255,255,255,0)"); l.addColorStop(0.5, "rgba(255,255,255,1)"); l.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = l; if (d === "h") g.fillRect(0, 62, 128, 4); else g.fillRect(62, 0, 4, 128);
+    });
+    return new THREE.CanvasTexture(c);
+  }
+  var starTex = starTexture();
+  var glints = [];
+  [[0.55, 0.32, 0.6], [-0.62, 0.3, 0.45], [0.1, 0.34, -0.7], [0.8, 0.08, -0.2], [-0.3, 0.32, 0.8]].forEach(function (pos, i) {
+    var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, color: 0xfff0dc, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+    s.position.set(pos[0], pos[1], pos[2]); s.scale.setScalar(1.7); s.userData.phase = i * 1.7;
+    gem.add(s); glints.push(s);
+  });
+
+  // Reception hall: floor, 24 tables of 10 seats.
+  var hall = new THREE.Group(); hall.visible = false; scene.add(hall);
+  (function () {
+    var c = document.createElement("canvas"); c.width = c.height = 256;
+    var g = c.getContext("2d");
+    var r = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    r.addColorStop(0, "rgba(120,62,38,0.9)"); r.addColorStop(0.7, "rgba(50,22,14,0.6)"); r.addColorStop(1, "rgba(18,8,6,0)");
+    g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+    var floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -0.06; hall.add(floor);
+  })();
+  var tableMat = new THREE.MeshStandardMaterial({ color: 0x3a2016, roughness: 0.55, metalness: 0.2 });
+  var clothMat = new THREE.MeshStandardMaterial({ color: 0xe9dccb, roughness: 0.8 });
+  var tablePos = [];
+  for (var t1 = 0; t1 < 8; t1++) { var a1 = (t1 / 8) * Math.PI * 2 + 0.2; tablePos.push([Math.cos(a1) * 3.3, Math.sin(a1) * 3.3]); }
+  for (var t2 = 0; t2 < 16; t2++) { var a2 = (t2 / 16) * Math.PI * 2; tablePos.push([Math.cos(a2) * 5.8, Math.sin(a2) * 5.8]); }
+  var topGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.06, 28);
+  var seatGeo = new THREE.SphereGeometry(0.075, 12, 10);
+  var seatMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  var seats = new THREE.InstancedMesh(seatGeo, seatMat, 240);
+  var dummy = new THREE.Object3D();
+  var unlit = new THREE.Color(0x5a3c2e), lit = new THREE.Color(0xffd79a);
+  var seatOrder = [];
+  tablePos.forEach(function (tp, ti) {
+    var top = new THREE.Mesh(topGeo, ti < 21 || ti === 21 ? clothMat : tableMat);
+    top.position.set(tp[0], 0, tp[1]); hall.add(top);
+    for (var s = 0; s < 10; s++) {
+      var sa = (s / 10) * Math.PI * 2;
+      dummy.position.set(tp[0] + Math.cos(sa) * 0.72, 0.05, tp[1] + Math.sin(sa) * 0.72);
+      dummy.updateMatrix();
+      var idx = ti * 10 + s;
+      seats.setMatrixAt(idx, dummy.matrix);
+      seats.setColorAt(idx, unlit);
+      if (ti < 21 || (ti === 21 && s < 8)) seatOrder.push(idx);
+    }
+  });
+  seats.instanceColor.needsUpdate = true;
+  hall.add(seats);
+  var seatsLit = 0;
+  function lightSeats(n) {
+    if (n === seatsLit) return;
+    for (var i = 0; i < seatOrder.length; i++) seats.setColorAt(seatOrder[i], i < n ? lit : unlit);
+    seats.instanceColor.needsUpdate = true;
+    seatsLit = n;
+  }
+
+  // Dust and finale confetti
+  var DUST = 140, dustGeo = new THREE.BufferGeometry(), dustPos = new Float32Array(DUST * 3), dustSpd = new Float32Array(DUST);
+  for (var d = 0; d < DUST; d++) { dustPos[d * 3] = (Math.random() - 0.5) * 9; dustPos[d * 3 + 1] = Math.random() * 7 - 2; dustPos[d * 3 + 2] = (Math.random() - 0.5) * 7; dustSpd[d] = 0.0015 + Math.random() * 0.004; }
+  dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
+  var dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ size: 0.035, color: 0xffd9b0, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  scene.add(dust);
+
+  var CONF = 320;
+  var confMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+  var conf = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.09, 0.055), confMat, CONF);
+  var confData = [], confCols = [new THREE.Color(0xf1d3a0), new THREE.Color(0xece8e3), new THREE.Color(0xd58a5c), new THREE.Color(0xb8864b)];
+  for (var ci = 0; ci < CONF; ci++) {
+    confData.push({ x: (Math.random() - 0.5) * 9, z: (Math.random() - 0.5) * 6, y0: Math.random() * 9, sp: 0.6 + Math.random() * 0.9, sw: Math.random() * 6, rs: 1 + Math.random() * 3 });
+    conf.setColorAt(ci, confCols[ci % 4]);
+  }
+  conf.instanceColor.needsUpdate = true;
+  conf.visible = false; scene.add(conf);
+
+  // Camera path: [progress, position, look target]
+  var gemTop = 1.3 + gemY;
+  var keys = [
+    [0.00, [0, 2.3, 7.8], [0, 0.35, 0]],
+    [0.12, [0, 1.9, 5.4], [0, 0.6, 0]],
+    [0.25, [3.3, 1.9, 4.1], [0, 1.3, 0]],
+    [0.35, [-2.6, 2.3, 6.6], [0, 1.3, 0]],
+    [0.45, [0, 1.6, 8.8], [0, 1.3, 0]],
+    [0.54, [0, 1.6, 6.0], [0, 1.4, 0]],
+    [0.62, [0, gemTop + 0.2, 1.3], [0, gemTop, 0]],
+    [0.665, [0, gemTop + 0.05, 0.42], [0, gemTop, 0]],
+    [0.70, [0, 10, 0.6], [0, 0, 0]],
+    [0.86, [0, 11.5, 5.5], [0, 0, 0]],
+    [0.93, [0, 3, 8.2], [0, 1.2, 0]],
+    [1.00, [0, 2.4, 7.6], [0, 1.3, 0]]
+  ];
+  var camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
+  function cameraAt(p) {
+    var i = 0;
+    while (i < keys.length - 2 && p > keys[i + 1][0]) i++;
+    var A = keys[i], B = keys[i + 1];
+    var t = smooth((p - A[0]) / (B[0] - A[0]));
+    camPos.set(lerp(A[1][0], B[1][0], t), lerp(A[1][1], B[1][1], t), lerp(A[1][2], B[1][2], t));
+    camLook.set(lerp(A[2][0], B[2][0], t), lerp(A[2][1], B[2][1], t), lerp(A[2][2], B[2][2], t));
+  }
+
+  function resize() {
+    var w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = w < h ? 46 : 34;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  var px = 0, pxT = 0, pyT = 0, py = 0;
+  window.addEventListener("pointermove", function (e) {
+    if (e.pointerType !== "mouse") return;
+    pxT = (e.clientX / window.innerWidth * 2 - 1) * 0.25;
+    pyT = (e.clientY / window.innerHeight * 2 - 1) * 0.12;
+  });
+
+  var t0 = performance.now();
+  tick = function () {
+    var t = (performance.now() - t0) / 1000;
+    prog += (target - prog) * 0.085;
+    if (Math.abs(target - prog) < 0.00005) prog = target;
+    var p = prog;
+    var seated = updateDom(p);
+    px += (pxT - px) * 0.05; py += (pyT - py) * 0.05;
+
+    // Box: lid opens, then the box sinks away.
+    var open = seg(p, 0.03, 0.13);
+    lidPivot.rotation.x = -1.95 * open;
+    var drop = seg(p, 0.22, 0.33);
+    box.position.y = -drop * 7;
+    box.rotation.y = -0.25 + open * 0.25;
+    box.visible = drop < 0.999;
+
+    // Ring: rises out, dims in the noise, spins through the shatter, lies flat in the hall, rises for the finale.
+    var lift = seg(p, 0.12, 0.25);
+    var flat = bump(p, 0.68, 0.71, 0.88, 0.94);
+    var sc = lerp(0.4, 1, lift);
+    ring.scale.setScalar(sc);
+    ring.position.y = lerp(lerp(0.25, 1.3, lift), 0.12, flat);
+    var spin = seg(p, 0.45, 0.54) * Math.PI * 2 + seg(p, 0.13, 0.3) * Math.PI * 0.6;
+    ring.rotation.y = -0.3 + spin + Math.sin(t * 0.4) * 0.12 * motion * (1 - flat) + px;
+    ring.rotation.x = -Math.PI / 2 * flat + py * (1 - flat);
+    ring.rotation.z = flat * 0.4;
+
+    var dim = 1 - 0.7 * bump(p, 0.29, 0.34, 0.45, 0.48);
+    var flare = 1 + 1.4 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.8 * bump(p, 0.6, 0.64, 0.66, 0.7);
+    plat.envMapIntensity = 1.3 * dim * Math.min(flare, 1.6);
+    gemMat.envMapIntensity = 2.4 * dim * flare;
+    key.intensity = 1.3 * dim;
+    gem.rotation.y = t * 0.3 * motion + p * 6;
+    var glintBoost = (lift > 0.02 ? 1 : open) * dim * flare;
+    glints.forEach(function (s) {
+      var v = Math.max(0, Math.sin(t * 1.6 + s.userData.phase + p * 20));
+      var o = (motion ? Math.pow(v, 6) : 0.45) * glintBoost;
+      s.material.opacity = Math.min(1, o);
+      s.scale.setScalar(1.1 + o * 1.1);
+      s.material.rotation = t * 0.3;
+    });
+
+    // Hall
+    var hv = bump(p, 0.685, 0.72, 0.87, 0.91);
+    hall.visible = hv > 0.001;
+    if (hall.visible) {
+      hall.scale.setScalar(0.85 + hv * 0.15);
+      hall.position.y = (1 - hv) * -1.5;
+      lightSeats(seated);
+    }
+
+    // Finale confetti
+    var cf = seg(p, 0.89, 0.95);
+    conf.visible = cf > 0.001;
+    if (conf.visible) {
+      confMat.opacity = cf;
+      for (var i = 0; i < CONF; i++) {
+        var c = confData[i];
+        var y = 6 - ((c.y0 + t * c.sp * (motion ? 1 : 0.15)) % 9);
+        dummy.position.set(c.x + Math.sin(t + c.sw) * 0.25, y, c.z);
+        dummy.rotation.set(t * c.rs, t * c.rs * 0.7, c.sw);
+        dummy.updateMatrix();
+        conf.setMatrixAt(i, dummy.matrix);
+      }
+      conf.instanceMatrix.needsUpdate = true;
+    }
+
+    var dp = dustGeo.attributes.position;
+    for (var j = 0; j < DUST; j++) { var yy = dp.array[j * 3 + 1] + dustSpd[j] * motion; if (yy > 5) yy = -2; dp.array[j * 3 + 1] = yy; }
+    dp.needsUpdate = true;
+    dust.material.opacity = 0.5 * (1 - bump(p, 0.6, 0.64, 0.68, 0.72));
+
+    cameraAt(p);
+    camera.position.copy(camPos);
+    camera.lookAt(camLook);
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
