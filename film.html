@@ -448,6 +448,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
 </main>
 
 <script src="assets/fine-card.js"></script>
+<script src="assets/scroll.js"></script>
 <script>
 /* Story, sound and page. Runs on its own so the page still tells the story if WebGL or the CDN is unavailable.
    The 3D module plugs in through window.OP.render and reports loading through window.OP.loaded. */
@@ -484,6 +485,8 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   window.addEventListener("load", toTop);
   window.addEventListener("pageshow", function (e) { if (e.persisted) location.reload(); });
   if (!EMBED) document.documentElement.classList.add("locked");
+  // The whole film is scroll-driven, so all of it plays at the slower pace.
+  if (!EMBED && window.AriyaScroll) AriyaScroll.init({ slow: [document.getElementById("track")] });
 
   /* ---------- Score: a generated highlife-ambient soundtrack that follows the story ---------- */
   var Score = (function () {
@@ -630,7 +633,8 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   target = prog = nativeProgress();
   function scrollToRaw(r) {
     var total = track.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: r * total, behavior: reduceMotion ? "auto" : "smooth" });
+    if (window.AriyaScroll && AriyaScroll.enabled) AriyaScroll.to(r * total);
+    else window.scrollTo({ top: r * total, behavior: reduceMotion ? "auto" : "smooth" });
   }
   function storyToRaw(p) { return PRO + p * (1 - PRO); }
 

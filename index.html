@@ -21,6 +21,9 @@ body { background: var(--wine-950); color: var(--on-dark); }
 .btn-primary { background: var(--gold); color: var(--wine-950); }
 .btn-primary:hover { background: #f1d9a6; }
 .caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8125rem; color: var(--gold); }
+/* Foil text paints its gradient only inside its own box, and script swashes overflow it.
+   Padding gives the paint room; equal negative margins keep the layout exactly where it was. */
+.foil-text { padding: 0.22em 0.24em 0.34em; margin: -0.22em -0.24em -0.34em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .foil-text { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); background-size: 220% 100%; background-position: calc(40% + var(--lx, 0) * 40%) 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* Header floats over the film */
@@ -48,8 +51,8 @@ body { background: var(--wine-950); color: var(--on-dark); }
 .c-scrim { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(22, 4, 10, 0.92) 0%, rgba(22, 4, 10, 0.6) 32%, rgba(22, 4, 10, 0) 58%), linear-gradient(0deg, rgba(22, 4, 10, 0.85) 0%, rgba(22, 4, 10, 0) 34%); }
 .c-copy { position: absolute; left: 0; right: 0; bottom: clamp(48px, 9vh, 96px); z-index: 2; }
 .c-copy .wrap > * { max-width: 40rem; }
-.c-hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.8rem, 5.4vw, 5.2rem); line-height: 1; max-width: 10.5em; letter-spacing: -0.02em; margin: 14px 0 18px; }
-.c-hero h1 em { font-family: var(--font-hand); font-style: normal; font-size: 1.32em; line-height: 0.6; display: inline-block; padding: 0 0.12em; }
+.c-hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.8rem, 5.4vw, 5.2rem); line-height: 1; max-width: 10.5em; letter-spacing: -0.02em; margin: 14px 0 0.55em; }
+.c-hero h1 em { font-family: var(--font-hand); font-style: normal; font-size: 1.32em; line-height: 0.6; display: inline-block; }
 .c-hero .lede { color: var(--on-dark-soft); font-size: 1.125rem; max-width: 30rem; }
 .c-hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; align-items: center; }
 .play { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 18px 0 6px; border-radius: 999px; border: 1px solid rgba(233, 201, 138, 0.45); color: var(--on-dark); text-decoration: none; font-weight: 600; background: rgba(22, 4, 10, 0.35); }
@@ -145,7 +148,8 @@ body { background: var(--wine-950); color: var(--on-dark); }
 /* ---------- 4. "yes" ---------- */
 .c-yes { padding-block: clamp(90px, 16vh, 180px); text-align: center; background: radial-gradient(50% 60% at 50% 55%, rgba(233, 201, 138, 0.1), transparent 70%), var(--wine-950); overflow: hidden; }
 .c-yes .l1, .c-yes .l3 { font-family: var(--font-caps); font-size: clamp(1rem, 2.6vw, 1.9rem); letter-spacing: 0.32em; text-transform: uppercase; color: var(--on-dark); }
-.c-yes .l2 { font-family: var(--font-hand); font-size: clamp(9rem, 32vw, 26rem); line-height: 0.75; margin: 0.02em 0 0.12em; transform: scale(var(--ys, 1)); display: inline-block; padding: 0 0.15em; }
+.c-yes .l2 { font-family: var(--font-hand); font-size: clamp(9rem, 32vw, 26rem); line-height: 0.75; transform: scale(var(--ys, 1)); display: inline-block; }
+.c-yes .l2.foil-text { padding: 0.3em 0.3em 0.42em; margin: -0.28em -0.3em -0.08em; }
 .c-yes .l3 { font-family: var(--font-display); font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: clamp(1.6rem, 4vw, 3rem); }
 
 /* ---------- 5. The hall ---------- */
@@ -408,6 +412,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
 <script src="assets/demo.js"></script>
 <script src="assets/fine-card.js"></script>
 <script src="assets/score.js"></script>
+<script src="assets/scroll.js"></script>
 <script>
 (function () {
   "use strict";
@@ -447,6 +452,9 @@ body { background: var(--wine-950); color: var(--on-dark); }
   $("menuClose").addEventListener("click", function () { closeMenu(); });
   sheet.addEventListener("click", function (e) { if (e.target === sheet) closeMenu(); });
   sheet.querySelectorAll("nav a").forEach(function (a) { a.addEventListener("click", function () { closeMenu(false); }); });
+
+  /* ---------- Paced scrolling: every scene plays in order, however fast the flick ---------- */
+  window.AriyaScroll.init({ slow: [$("noise"), $("hall")] });
 
   /* ---------- Music: off until the visitor asks for it ---------- */
   var Score = window.AriyaScore;

@@ -14,6 +14,9 @@
 /* Company pages: ivory reading surfaces between burgundy bands, the same foil type as the film. */
 .caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8125rem; color: var(--gold-ink); }
 .dark .caps, .wineband .caps { color: var(--gold); }
+/* Foil text paints its gradient only inside its own box, and script swashes overflow it.
+   Padding gives the paint room; equal negative margins keep the layout exactly where it was. */
+.foil-text { padding: 0.22em 0.24em 0.34em; margin: -0.22em -0.24em -0.34em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .foil-text { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .wineband { background: radial-gradient(60% 90% at 80% 0%, rgba(196, 70, 100, 0.25), transparent 70%), var(--wine-900); color: var(--on-dark); }
 .page-hero { padding-block: clamp(64px, 10vw, 120px) clamp(56px, 8vw, 96px); }

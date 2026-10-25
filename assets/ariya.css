@@ -166,12 +166,14 @@ p { margin: 0; }
 .fc--ivory { --bg1: #efe5d2; --bg2: #fbf7ef; --ink: #4a1020; --ink-soft: rgba(74, 16, 32, 0.75); }
 .fc-orn { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; filter: drop-shadow(0 0.6px 0 rgba(0, 0, 0, 0.45)); }
 .fc-body { position: absolute; inset: 6% 11% 5.5%; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1cqw; }
+.fc-foil { padding: 0.22em 0.26em 0.34em; margin: -0.22em -0.26em -0.34em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .fc-foil { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); background-size: 220% 100%; background-position: calc(40% + var(--lx, 0) * 30%) 0;
   -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.5)); }
 .fc--ivory .fc-foil { background-image: linear-gradient(105deg, #7a5420, #c9a258 30%, #8c6326 55%, #d7b46c 75%, #7a5420); }
 .fc-wreath { width: 17cqw; height: 17cqw; flex: none; }
 .fc-caps { font-family: var(--font-caps); font-size: 3.1cqw; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin: 0; }
-.fc-script { font-family: var(--font-hand); font-size: 17cqw; line-height: 0.82; margin: 0; padding: 0.6cqw 3cqw 0; }
+.fc-script { font-family: var(--font-hand); font-size: 17cqw; line-height: 0.82; }
+.fc-script.fc-foil { padding: 0.24em 0.3em 0.3em; margin: -0.2em -0.3em -0.26em; }
 .fc-sub { font-family: var(--font-display); font-size: 3.7cqw; letter-spacing: 0.04em; color: var(--ink); margin: 0; }
 .fc-amp { font-family: var(--font-display); font-style: italic; font-size: 7.5cqw; line-height: 0.9; margin: 0; }
 .fc-line { font-family: var(--font-display); font-style: italic; font-size: 3.7cqw; color: var(--ink); margin: 1cqw 0 0; line-height: 1.3; }
