@@ -1,34 +1,40 @@
-# OwambePlan
+# Àríyá
 
-In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and event planner where every guest RSVPs with a personal link.
+In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and event planner where every guest RSVPs with a personal link. Formerly "OwambePlan". Àríyá (ah-ree-YAH) is Yoruba for merriment, the spirit of an owambe.
 
 ## What's here
 
-`index.html` is "The Yes", a scroll-driven story rendered like a camera rather than a 3D animation. Seven chapters:
+`index.html` is the landing page. It opens on "The Yes", a wedding archive in eight chapters rendered like a camera rather than a 3D animation, then becomes the company's site.
 
-1. The box: an emerald velvet ring box (gold seam bands, inner gold lip, clasp, hinge, foil monogram) opens on a walnut table, candles burning behind it
-2. The yes: the ring rises out of the box
-3. The noise: a family WhatsApp group floods the screen, messages drifting in and out of focus
-4. The calm: the messages scatter and the ring turns in the light
-5. The link: the camera pushes into the diamond, flares out, and a paper invitation appears
-6. The count: a reception hall from above, with a live guest list beside it; every guest who says yes takes their seat in aso ebi and lights a candle
-7. The dance: eye level on the dance floor, the couple and their guests dancing under moving lights, naira notes sprayed and foil confetti falling in front of the lens
+0. **Gate.** "Enter the wedding" starts the soundtrack; "Enter in silence" skips it. The hall loads behind the gate.
+1. **Prologue.** A drifting, out-of-focus establishing shot: how the couple met at someone else's owambe.
+2. **The box.** An emerald velvet ring box (gold seam bands, inner gold lip, clasp, three-knuckle hinge, piping, foil monogram) opens on a walnut table, candles behind it. The brand sits at the top of the satin lid lining, clear of the ring.
+3. **The yes.** The ring rises; the diamond throws real fire.
+4. **The noise.** A family WhatsApp group floods the screen, messages drifting in and out of focus, with notification pings in the score.
+5. **The calm.** The messages scatter and the ring turns in the light.
+6. **The invitation.** The camera dives into the diamond and flares out to a paper envelope addressed to the guest. Tap the wax seal: the flap lifts and the card slides out to RSVP.
+7. **The count.** The reception hall from above in ivory, gold and candlelight, with a live guest list. Each guest who says yes takes a seat in emerald-and-gold aso ebi and lights a candle.
+8. **The dance.** The couple and guests dancing under warm moving lights, naira notes sprayed, foil confetti falling in front of the lens.
 
-After the film the page becomes the landing page: features, how it works, pricing (placeholder prices) and an early-access sign-up.
+After the film: what Àríyá does, the occasions it plans, the tools, how it works, pricing (placeholder prices) and an early-access sign-up. The menu doubles as the archive index.
+
+## Sound
+
+The soundtrack is generated live with the Web Audio API, so there are no audio files. It is a highlife-leaning ambient loop at 100 BPM (Fmaj9, Bbmaj7, C6/9, Am7) with pads, a highlife guitar figure, bass, shaker, agogo bell, talking drum and kick. Layers enter and leave with the story: the noise chapter muffles the band under WhatsApp pings, the hall brings in the drums, the dance brings the kick. It only starts after a click, pauses when the tab is hidden, and the nav has a sound toggle.
 
 ## How it is made to look real
 
 Everything renders into a linear HDR buffer, then gets treated like light hitting a sensor:
 
-- **Real light.** Materials are physically based and lit by a photographed ballroom (`assets/hall.exr`, the Poly Haven "hall" HDRI at 512×256, CC0, via `@pmndrs/assets`). Shadows are soft (VSM).
-- **A real diamond.** The stone is a brilliant cut built as a convex hull, and a shader ray-traces light through it: refraction at IOR ~2.42, total internal reflection over up to six bounces, and a separate IOR per colour channel for fire. Sparkle comes from the actual light directions in the scene (key light, candles).
-- **Real surfaces.** Velvet and linen use sheen with procedural weave and pile normal maps; platinum, gold and porcelain use clearcoat; rose petals, tablecloth folds and flower balls are shaped geometry, not textures.
-- **A real lens.** Depth of field with a moving focus plane (the page opens out of focus and racks onto the box), bloom on highlights, slight barrel distortion, chromatic aberration at the edges, vignette, animated film grain, a little handheld drift, and a viewfinder readout of the current f-stop and focus distance.
-- **A hall that is alive.** Emerald and wine table linens, draped walls washed by coloured uplights, moving-head beams sweeping the room, seated guests in gele and fila, dancers in agbada and iro, photographers' flashes, a four-tier cake by the head table.
+- **Real light.** Physically based materials lit by a photographed ballroom (`assets/hall.exr`, the Poly Haven "hall" HDRI at 512×256, CC0, via `@pmndrs/assets`). Soft VSM shadows.
+- **A real diamond.** A brilliant cut built as a convex hull and ray-traced in a shader: refraction at IOR ~2.42, total internal reflection over up to six bounces, and a separate IOR per colour channel for fire. Sparkle comes from the actual light directions in the scene.
+- **Real surfaces.** Velvet, satin and linen use sheen with procedural normal maps; walnut, platinum, gold and porcelain use clearcoat; petals, tablecloth folds, flower balls, gele and agbada are shaped geometry.
+- **A real lens.** Depth of field with a moving focus plane, bloom, slight distortion, chromatic aberration, vignette, film grain, handheld drift, and a viewfinder readout of the current f-stop and focus distance.
+- **A hall that is alive.** Draped walls washed by warm uplights, moving-head beams, chandeliers, a fairy-light wall, seated guests who appear as they RSVP, dancers, photographers' flashes, a four-tier cake.
 - **Colour with contrast.** Emerald and champagne gold against near-black, graded with an S-curve, teal shadows and warm highlights.
-- **Design living inside the photograph.** The brand is foil-stamped into the box's satin lining, the couple's monogram is projected onto the dance floor like a gobo light, headlines pull focus the way the lens does, and the chat bubbles sit at different depths with their own blur.
+- **Design inside the photograph.** The brand is foil-stamped into the satin lining, the couple's monogram is projected onto the dance floor like a gobo light, headlines pull focus the way the lens does.
 
-Three.js 0.169 is loaded as ES modules from jsDelivr through an import map. The story text and the RSVP card work without WebGL; the 3D layer plugs in when it can. Rendering resolution drops automatically if frames run long, and `prefers-reduced-motion` freezes grain, drift, flicker and the focus pull.
+Three.js 0.169 loads as ES modules from jsDelivr through an import map. The story text, envelope and RSVP work without WebGL. Rendering resolution drops automatically if frames run long, and `prefers-reduced-motion` freezes grain, drift, flicker and the focus pull.
 
 ## Run it
 
@@ -40,6 +46,8 @@ npx serve .
 
 ## Next
 
-- Swap in a higher-resolution HDRI shot in a real Lagos event hall
-- Add the soundtrack
+- Engrave the guest's typed name inside the ring band for the final shot
+- A photogrammetry scan of a real Lagos or Benin event hall
+- Filmed dancers on the dance floor
+- A lighter mode for mid-range Android phones
 - Build the real app (Next.js, Supabase, Resend)
