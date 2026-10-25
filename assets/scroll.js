@@ -17,7 +17,7 @@
     for (var i = 0; i < slowEls.length; i++) { var r = slowEls[i].getBoundingClientRect(); if (r.top < c && r.bottom > c) return true; }
     return false;
   }
-  function blocked() { return document.documentElement.classList.contains("locked") || !!document.querySelector(".sheet:not([hidden])"); }
+  function blocked() { return document.documentElement.classList.contains("locked") || !!document.querySelector(".sheet:not([hidden]), .cm:not([hidden])"); }
   function push(d) {
     if (blocked()) return;
     if (!running) cur = tgt = scrollY;

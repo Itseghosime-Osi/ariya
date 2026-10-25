@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Cinzel:wght@400;500&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
 <link rel="stylesheet" href="assets/ariya.css">
+<link rel="stylesheet" href="assets/nav.css">
+<script>try{if(sessionStorage.getItem("ariya-curtain"))document.documentElement.classList.add("cur-in")}catch(e){}</script>
 <style>
 /* Company pages: ivory reading surfaces between burgundy bands, the same foil type as the film. */
 .caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8125rem; color: var(--gold-ink); }
@@ -97,23 +99,17 @@ section { scroll-margin-top: 72px; }
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head on-dark" id="top">
   <div class="wrap">
-    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, home"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, the film"><b>Àríyá</b><span>by OwambePlan</span></a>
     <nav class="site-nav" aria-label="Main">
-      <a href="film.html">The film</a>
+      <a href="./">The film</a>
+      <a href="about.html">About</a>
       <a href="product.html" aria-current="page">What we do</a>
       <a href="pricing.html">Pricing</a>
       <a class="btn btn-primary btn-small" href="planner.html">Start planning</a>
     </nav>
-    <button class="btn btn-ghost btn-small menu-toggle" id="menuOpen" type="button" aria-haspopup="dialog" aria-controls="menuSheet">Menu</button>
+    <button class="btn btn-ghost btn-small cm-btn" type="button" data-cm-open data-cm-label>Menu</button>
   </div>
 </header>
-<div class="sheet mobile-only" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
-  <div class="sheet-panel">
-    <div class="sheet-head"><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.5rem">Àríyá</b><button class="btn btn-ghost btn-small" id="menuClose" type="button">Close</button></div>
-    <nav aria-label="Main, mobile"><a href="./">Home</a><a href="film.html">Watch the film</a><a href="product.html">What we do</a><a href="pricing.html">Pricing</a></nav>
-    <p style="margin-top: 20px"><a class="btn btn-wine" href="planner.html" style="width: 100%">Start planning</a></p>
-  </div>
-</div>
 
 <main id="main">
   <section class="wineband page-hero" aria-labelledby="pTitle">
@@ -188,12 +184,13 @@ section { scroll-margin-top: 72px; }
   <div class="wrap">
     <span><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.3rem; color: var(--on-dark)">Àríyá</b> by OwambePlan</span>
     <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
-    <span><a href="./">Home</a> · <a href="product.html">What we do</a> · <a href="pricing.html">Pricing</a></span>
+    <span><a href="./">The film</a> · <a href="about.html">About</a> · <a href="product.html">What we do</a> · <a href="pricing.html">Pricing</a></span>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" hidden></div>
 <script src="assets/demo.js"></script>
 <script src="assets/fine-card.js"></script>
+<script src="assets/nav.js"></script>
 <script>
 (function () {
   "use strict";
@@ -202,17 +199,7 @@ section { scroll-margin-top: 72px; }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var toastT;
   function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 3200); }
-  var sheet = $("menuSheet"), opener = $("menuOpen");
-  function trap(e) {
-    if (e.key === "Escape") { closeMenu(); return; }
-    if (e.key !== "Tab") return;
-    var f = sheet.querySelectorAll("a, button"), first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
-  function closeMenu(restore) { sheet.hidden = true; document.removeEventListener("keydown", trap); if (restore !== false) opener.focus(); }
-  opener.addEventListener("click", function () { sheet.hidden = false; $("menuClose").focus(); document.addEventListener("keydown", trap); });
-  $("menuClose").addEventListener("click", function () { closeMenu(); });
-  sheet.addEventListener("click", function (e) { if (e.target === sheet) closeMenu(); });
+  AriyaNav.init();
   $("sampleCard").innerHTML = FineCard.html({ variant: "wine", guest: "Adaeze Okonkwo", noCotd: true, label: "Sample personal invitation for Adaeze Okonkwo" });
   /* ---------- Guests and seating preview, from the same sample data ---------- */
   var STATUS = { yes: ["yes", "Confirmed"], no: ["no", "Declined"], pending: ["wait", "Pending"] };

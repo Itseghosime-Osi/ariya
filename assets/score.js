@@ -93,17 +93,19 @@
   }
 
   window.AriyaScore = {
-    start: function () {
+    start: function (at) {
       try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
       on = true;
       if (MUSIC_URL && !fileFailed) {
         // Try the recording first; fall back to the generated groove if it is missing or won't play.
         var fallback = function () { if (fileFailed) return; fileFailed = true; audioEl = null; if (on) window.AriyaScore.start(); };
-        if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.75; audioEl.addEventListener("error", fallback); }
+        if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.55; audioEl.addEventListener("error", fallback); }
+        if (at > 0) { var seekTo = at; audioEl.addEventListener("loadedmetadata", function () { audioEl.currentTime = seekTo % (audioEl.duration || 1e9); }, { once: true }); if (audioEl.readyState >= 1) audioEl.currentTime = at % audioEl.duration; }
         // Fade the song in rather than starting at full volume.
         audioEl.volume = 0; var v0 = performance.now();
-        (function fade() { if (!audioEl || !on) return; var k = Math.min(1, (performance.now() - v0) / 1600); audioEl.volume = 0.75 * k; if (k < 1) requestAnimationFrame(fade); })();
-        var p = audioEl.play(); if (p && p.catch) p.catch(function (e) { if (e && e.name !== "AbortError") fallback(); });
+        (function fade() { if (!audioEl || !on) return; var k = Math.min(1, (performance.now() - v0) / 1600); audioEl.volume = 0.55 * k; if (k < 1) requestAnimationFrame(fade); })();
+        // A browser that blocks sound without a tap leaves the music off rather than falling back.
+        var p = audioEl.play(); if (p && p.catch) p.catch(function (e) { if (!e || e.name === "AbortError") return; if (e.name === "NotAllowedError") { on = false; tell(); } else fallback(); });
         master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.8, ctx.currentTime, 0.2); // for the seal and chime sounds
         return true;
       }
@@ -126,7 +128,18 @@
       if (!on || !ctx) return; var t = ctx.currentTime;
       [72, 77, 81, 84].forEach(function (m, i) { pluck(m, t + i * 0.08, 0.08, true); bell(t + i * 0.08, true); });
     },
+    // Called just before leaving the page, so the next page can carry on from the same moment.
+    handoff: function () { try { sessionStorage.setItem("ariya-music", JSON.stringify({ on: on, t: audioEl ? audioEl.currentTime : 0 })); } catch (e) { /* no handoff */ } },
     pause: function (yes) { if (audioEl) { if (yes) audioEl.pause(); else if (on) audioEl.play(); } if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); } }
   };
   document.addEventListener("visibilitychange", function () { window.AriyaScore.pause(document.hidden); });
+  // Pages listen for this to keep their music buttons in step.
+  function tell() { document.dispatchEvent(new CustomEvent("ariya-music", { detail: { on: on } })); }
+  // Music that was playing on the previous page carries on here, if the browser allows it without a tap.
+  (function resume() {
+    var h = null; try { h = JSON.parse(sessionStorage.getItem("ariya-music") || "null"); sessionStorage.removeItem("ariya-music"); } catch (e) { return; }
+    if (!h || !h.on) return;
+    var go = function () { if (window.AriyaScore.start(h.t || 0)) tell(); };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+  })();
 })();

@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/ariya.css">
+<link rel="stylesheet" href="assets/nav.css">
+<script>try{if(sessionStorage.getItem("ariya-curtain"))document.documentElement.classList.add("cur-in")}catch(e){}</script>
 <style>
 /* Demo planner: a calm working surface. Event header on burgundy, tools on ivory paper. */
 body { background: var(--ivory); }
@@ -141,11 +143,11 @@ tr.r-dup td { background: #fdf8ec; }
 <a class="skip" href="#work">Skip to the planner</a>
 <header class="site-head app-head">
   <div class="wrap">
-    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, back to the site"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, the film"><b>Àríyá</b><span>by OwambePlan</span></a>
     <div class="right">
       <span class="demo-flag">Demo planner · sample data · nothing is sent</span>
       <span id="resetWrap"><button class="btn btn-ghost btn-small" id="resetBtn" type="button">Reset demo</button></span>
-      <a class="btn btn-ghost btn-small" href="./">Back to site</a>
+      <button class="btn btn-ghost btn-small" type="button" data-cm-open data-cm-label>Menu</button>
     </div>
   </div>
 </header>
@@ -522,5 +524,7 @@ tr.r-dup td { background: #fdf8ec; }
   showTab($(start) && $(start).getAttribute("role") === "tabpanel" ? start : "guests");
 })();
 </script>
+<script src="assets/nav.js"></script>
+<script>AriyaNav.init();</script>
 </body>
 </html>
