@@ -10,11 +10,11 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var root = document.documentElement;
   var PAGES = [
-    ["./", "Àríyá", "Invitations, RSVPs and seating for Nigerian celebrations."],
-    ["story.html", "The Yes", "A short film. Watch it, or explore it at your own pace."],
+    ["./", "The film", "Ten chapters of a Lagos wedding. Best with sound."],
+    ["about.html", "About Àríyá", "Invitations, RSVPs and seating, told on one page."],
     ["product.html", "What we do", "Guest lists, personal links, seating and vendors."],
     ["pricing.html", "Pricing", "Pay per event. Placeholder prices for the prototype."],
-    ["planner.html", "Start planning", "Try the demo planner on a sample wedding. Nothing is sent."]
+    ["planner.html", "The demo planner", "Try it on a sample wedding. Nothing is sent."]
   ];
   function here(href) {
     var p = location.pathname.split("/").pop() || "index.html";

@@ -1,11 +1,14 @@
-/* Àríyá's home page music: an original owambe groove generated live with the Web Audio API (no audio files). A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
+/* Àríyá's home page music. For the class demo it loops assets/music.mp3 ("Yori Yori" by Abefe), which is
+   copyrighted: fine for a private demo, not for a public site without a licence.
+   Fallback: an original owambe groove generated live with the Web Audio API (no audio files). A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
    calls, conga and kick, a two-guitar highlife figure, walking bass, warm pads and a short horn hook.
 
-   To loop a licensed recording instead, set MUSIC_URL below; if it is missing or can't play, the groove plays.
+   To play a recording instead, put the file at assets/music.mp3 (or change MUSIC_URL below). It loops in place
+   of the generated groove; if the file is missing or can't play, the generated groove plays instead.
 
    Nothing plays until AriyaScore.start() is called from a click or tap. */
 (function () {
-  var MUSIC_URL = null; // a recording could be looped here; the original groove plays without one
+  var MUSIC_URL = "assets/music.mp3";
   var fileFailed = false;
 
   var ctx = null, master, bus, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf, audioEl = null;
