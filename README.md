@@ -13,6 +13,8 @@ In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and eve
 | `rsvp.html?g=<token>` | A guest's own invitation and RSVP page |
 | `film.html` | "The Yes", the full cinematic film; always starts from the beginning; `?velvet=` sets the box colour |
 
+`assets/score.js` is the home page music: an original owambe groove (juju and highlife feel in 12/8: agogo bell, shekere, talking drum, highlife guitars, bass, horn hook) generated live with the Web Audio API, so there is nothing to license. It only starts when a visitor taps Music. To use a licensed recording instead, add the file to `assets/` and set `MUSIC_URL` at the top of `score.js`. Commercial songs need a licence from their rights holders before they can be played on the site.
+
 `assets/fine-card.js` draws the foil invitations, place cards and wax seals in SVG (corner roses, laurel monogram, embossed crest), styled in `assets/ariya.css`.
 
 ## What is real and what is sample

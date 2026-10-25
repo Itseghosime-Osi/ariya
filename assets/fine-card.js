@@ -67,50 +67,60 @@
     return out + '</svg>';
   }
 
-  // A pressed wax seal: an irregular poured edge, a raised rim around a pressed centre,
-  // an embossed crest and a script monogram, shaded with SVG lighting so it reads as wax, not a flat disc.
+  // A glossy poured wax seal: a scalloped edge, a thick shiny rim, a smooth pressed centre with a thin raised ring,
+  // and a faint engraved monogram. With { breakable: true } it is drawn as two halves along a crack so it can be broken.
   function seal(o) {
     o = o || {};
     var n = ++uid, id = "ws" + n, pts = [];
-    for (var i = 0; i < 90; i++) {
-      var a = (i / 90) * Math.PI * 2;
-      var r = 53 + 2.3 * Math.sin(3 * a + 0.5) + 1.7 * Math.sin(5 * a + 1.3) + 1.1 * Math.sin(8 * a + 2) + 0.7 * Math.sin(13 * a + 0.4);
+    for (var i = 0; i < 120; i++) {
+      var a = (i / 120) * Math.PI * 2;
+      var r = 51 + 3.4 * Math.sin(10 * a + 0.3) + 0.9 * Math.sin(3 * a + 1.1) + 0.5 * Math.sin(17 * a + 0.4);
       pts.push((Math.cos(a) * r).toFixed(2) + " " + (Math.sin(a) * r).toFixed(2));
     }
     var blob = "M" + pts.join(" L") + "Z";
-    var half = '<path d="M-6 -30 c-10 -2 -18 4 -17 12 c1 6 8 7 10 2 c1.5 -4 -3 -6 -5 -3"/>' +
-      '<path d="M-17 -16 c-10 10 -11 25 -2 35"/><path d="M-19 19 c4 8 12 10 17 6 c3 -3 0 -8 -4 -6"/>' +
-      '<path d="M-23 -7 q-9 -3 -11 -12 q8 2 11 12z"/><path d="M-26 4 q-9 0 -13 -8 q9 0 13 8z"/><path d="M-23 14 q-8 2 -13 -4 q8 -2 13 4z"/>' +
-      '<path d="M-8 30 c-6 3 -12 2 -14 -2"/><circle cx="-28" cy="-14" r="1.3"/><circle cx="-30" cy="12" r="1.3"/>' +
-      '<path d="M-14 -26 q-3 -8 2 -13 q3 7 -2 13z"/><path d="M-19 -22 q-8 -4 -9 -11 q7 2 9 11z"/><path d="M-30 -2 q-6 -5 -5 -11 q5 4 5 11z"/>' +
-      '<path d="M-28 22 q-7 -1 -10 -7 q7 0 10 7z"/><path d="M-15 27 q-4 6 -10 7 q2 -6 10 -7z"/><path d="M-33 -18 c-3 -2 -3 -6 0 -7"/><path d="M-35 8 c-3 1 -5 -1 -4 -4"/>';
     var mono = String(o.initials || "C T").split(" ");
-    return '<svg class="wax" viewBox="-62 -62 124 124" aria-hidden="true" focusable="false"><defs>' +
-      '<radialGradient id="' + id + 'g" cx="38%" cy="32%" r="75%"><stop offset="0" style="stop-color:var(--wax-hi,#a12f4a)"/><stop offset=".55" style="stop-color:var(--wax,#7a1830)"/><stop offset="1" style="stop-color:var(--wax-lo,#4a0b1a)"/></radialGradient>' +
-      '<linearGradient id="' + id + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".28"/></linearGradient>' +
+    var defs =
+      '<radialGradient id="' + id + 'g" cx="42%" cy="38%" r="70%"><stop offset="0" style="stop-color:var(--wax-hi,#c2283c)"/><stop offset=".6" style="stop-color:var(--wax,#8e1022)"/><stop offset="1" style="stop-color:var(--wax-lo,#4a0612)"/></radialGradient>' +
+      '<radialGradient id="' + id + 'c" cx="40%" cy="36%" r="72%"><stop offset="0" style="stop-color:var(--wax-hi,#c2283c)"/><stop offset="1" style="stop-color:var(--wax,#8e1022)"/></radialGradient>' +
+      '<linearGradient id="' + id + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient>' +
+      '<radialGradient id="' + id + 's" cx="34%" cy="26%" r="40%"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+      // Wet-looking wax: a tight, bright specular on a soft bevel.
       '<filter id="' + id + 'b" x="-20%" y="-20%" width="140%" height="140%">' +
         '<feGaussianBlur in="SourceAlpha" stdDeviation="2.6" result="bl"/>' +
-        '<feSpecularLighting in="bl" surfaceScale="3.2" specularConstant=".7" specularExponent="18" lighting-color="#ffe6ea" result="sp"><feDistantLight azimuth="225" elevation="42"/></feSpecularLighting>' +
+        '<feSpecularLighting in="bl" surfaceScale="7" specularConstant="1" specularExponent="60" lighting-color="#fff" result="sp"><feDistantLight azimuth="230" elevation="48"/></feSpecularLighting>' +
         '<feComposite in="sp" in2="SourceAlpha" operator="in" result="spi"/>' +
-        '<feComposite in="SourceGraphic" in2="spi" operator="arithmetic" k1="0" k2="1" k3=".32" k4="0"/></filter>' +
+        '<feDiffuseLighting in="bl" surfaceScale="4" diffuseConstant="1.1" lighting-color="#fff" result="df"><feDistantLight azimuth="230" elevation="60"/></feDiffuseLighting>' +
+        '<feComposite in="df" in2="SourceAlpha" operator="in" result="dfi"/>' +
+        '<feBlend in="SourceGraphic" in2="dfi" mode="multiply" result="sh"/>' +
+        '<feComposite in="sh" in2="spi" operator="arithmetic" k1="0" k2="1.15" k3=".8" k4="0"/></filter>' +
       '<filter id="' + id + 'e" x="-10%" y="-10%" width="120%" height="120%">' +
-        '<feGaussianBlur in="SourceAlpha" stdDeviation=".7" result="bl"/>' +
-        '<feSpecularLighting in="bl" surfaceScale="1.6" specularConstant=".9" specularExponent="22" lighting-color="#ffe6ea" result="sp"><feDistantLight azimuth="225" elevation="38"/></feSpecularLighting>' +
+        '<feGaussianBlur in="SourceAlpha" stdDeviation=".9" result="bl"/>' +
+        '<feSpecularLighting in="bl" surfaceScale="2.4" specularConstant="1.1" specularExponent="30" lighting-color="#fff" result="sp"><feDistantLight azimuth="230" elevation="40"/></feSpecularLighting>' +
         '<feComposite in="sp" in2="SourceAlpha" operator="in" result="spi"/>' +
-        '<feOffset in="SourceAlpha" dx=".7" dy=".9" result="sh"/><feComposite in="sh" in2="SourceAlpha" operator="out" result="sho"/>' +
-        '<feFlood flood-color="#000" flood-opacity=".45"/><feComposite in2="sho" operator="in" result="shd"/>' +
-        '<feMerge><feMergeNode in="shd"/><feMergeNode in="SourceGraphic"/><feMergeNode in="spi"/></feMerge></filter>' +
-      '</defs>' +
+        '<feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="spi"/></feMerge></filter>' +
+      '<filter id="' + id + 'i"><feOffset dx="-.8" dy="-1" in="SourceAlpha" result="o1"/><feFlood flood-color="#000" flood-opacity=".5"/><feComposite in2="o1" operator="in" result="d"/>' +
+        '<feOffset dx=".8" dy="1" in="SourceAlpha" result="o2"/><feFlood flood-color="#fff" flood-opacity=".22"/><feComposite in2="o2" operator="in" result="l"/>' +
+        '<feMerge><feMergeNode in="d"/><feMergeNode in="l"/></feMerge></filter>';
+    var body =
       '<path d="' + blob + '" fill="url(#' + id + 'g)" filter="url(#' + id + 'b)"/>' +
-      '<circle r="41.5" style="fill:var(--wax,#7a1830)" opacity=".55"/>' +
-      '<circle r="41.5" fill="none" stroke="url(#' + id + 'r)" stroke-width="3"/>' +
-      '<g fill="none" style="stroke:var(--wax-hi,#a12f4a)" stroke-width="1.7" stroke-linecap="round" filter="url(#' + id + 'e)">' +
-        half + '<g transform="scale(-1 1)">' + half + '</g>' +
-        '<path d="M0 -37 c-3 -4 -8 -4 -9 0 c4 0 6 2 9 6 c3 -4 5 -6 9 -6 c-1 -4 -6 -4 -9 0z"/>' +
-        '<path d="M-5 34 q5 4 10 0"/>' +
-      '</g>' +
-      '<g style="fill:var(--wax-hi,#a12f4a)" font-family="Pinyon Script, Snell Roundhand, cursive" text-anchor="middle" filter="url(#' + id + 'e)">' +
-        '<text x="-6" y="10" font-size="36">' + mono[0] + '</text><text x="9" y="15" font-size="31">' + (mono[1] || "") + '</text></g>' +
+      '<path d="' + blob + '" fill="none" style="stroke:var(--wax-lo,#42050f)" stroke-width="1" opacity=".6"/>' +
+      '<circle r="35.5" fill="url(#' + id + 'c)"/>' +
+      '<circle r="35.5" fill="none" stroke="url(#' + id + 'r)" stroke-width="3.2"/>' +
+      '<circle r="31" fill="none" style="stroke:var(--wax-hi,#c2283c)" stroke-width="1.6" filter="url(#' + id + 'e)"/>' +
+      (o.mono === false ? "" : '<g font-family="Pinyon Script, Snell Roundhand, cursive" text-anchor="middle" filter="url(#' + id + 'i)" fill="#000"><text x="-5" y="9" font-size="28">' + mono[0] + '</text><text x="8" y="13" font-size="24">' + (mono[1] || "") + '</text></g>') +
+      '<ellipse cx="-14" cy="-20" rx="22" ry="13" transform="rotate(-28 -14 -20)" fill="url(#' + id + 's)"/>';
+    var open = '<svg class="wax' + (o.breakable ? " wax-breakable" : "") + '" viewBox="-62 -62 124 124" aria-hidden="true" focusable="false"><defs>' + defs;
+    if (!o.breakable) return open + '</defs>' + body + '</svg>';
+    // The crack runs top to bottom; each half is the same seal clipped to one side of it.
+    var crack = [[3, -66], [-2, -44], [5, -30], [-3, -16], [4, -3], [-4, 9], [3, 22], [-3, 36], [2, 50], [-1, 66]];
+    var line = crack.map(function (p) { return p[0] + " " + p[1]; }).join(" L");
+    var left = "M-70 -70 L" + line + " L-70 70Z", right = "M70 -70 L" + line + " L70 70Z";
+    return open +
+      '<clipPath id="' + id + 'L"><path d="' + left + '"/></clipPath><clipPath id="' + id + 'R"><path d="' + right + '"/></clipPath><clipPath id="' + id + 'B"><path d="' + blob + '"/></clipPath></defs>' +
+      '<g class="half half-l"><g clip-path="url(#' + id + 'L)">' + body + '</g></g>' +
+      '<g class="half half-r"><g clip-path="url(#' + id + 'R)">' + body + '</g></g>' +
+      '<g clip-path="url(#' + id + 'B)"><path class="crack" d="M' + line + '" fill="none" stroke="#120104" stroke-width="1.8" stroke-linejoin="round" pathLength="1"/>' +
+      '<path class="crack" d="M' + line + '" fill="none" stroke="#ffd4da" stroke-opacity=".45" stroke-width=".6" stroke-linejoin="round" pathLength="1" transform="translate(1.2 .6)"/></g>' +
       '</svg>';
   }
 

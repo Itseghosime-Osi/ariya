@@ -186,7 +186,14 @@ p { margin: 0; }
 .fc-tablename { font-family: var(--font-caps); letter-spacing: 0.14em; font-size: 5.4cqw; }
 
 /* Wax seal (FineCard.seal). Colours follow the page's colour of the day. */
-:root { --wax: #651126; --wax-hi: #8e2540; --wax-lo: #320510; }
-[data-cotd="emerald"] { --wax: #0d4a36; --wax-hi: #1f6e53; --wax-lo: #031f15; }
-[data-cotd="olive"] { --wax: #4a5122; --wax-hi: #6c7634; --wax-lo: #22270b; }
+:root { --wax: #8a0f22; --wax-hi: #c1283d; --wax-lo: #42050f; }
+[data-cotd="emerald"] { --wax: #0e5a41; --wax-hi: #22906a; --wax-lo: #032419; }
+[data-cotd="olive"] { --wax: #5a6326; --wax-hi: #8b9844; --wax-lo: #262b0c; }
 .wax { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3)); }
+/* Breaking the seal: a crack draws through the wax, then the halves fall away. */
+.wax-breakable .half { transform-box: fill-box; transform-origin: 50% 50%; transition: transform .9s cubic-bezier(.3, .1, .3, 1), opacity .7s ease .25s; }
+.wax-breakable .crack { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .28s ease-out; }
+.cracking .wax-breakable .crack, .broken .wax-breakable .crack { stroke-dashoffset: 0; }
+.broken .wax-breakable .crack { opacity: 0; transition: opacity .2s; }
+.broken .wax-breakable .half-l { transform: translate(-30px, 70px) rotate(-38deg); opacity: 0; }
+.broken .wax-breakable .half-r { transform: translate(34px, 80px) rotate(44deg); opacity: 0; }
