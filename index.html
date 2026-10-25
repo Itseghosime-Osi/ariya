@@ -152,19 +152,21 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   color: var(--paper-ink); border-radius: 3px; padding: clamp(20px, 4.5vw, 32px); text-align: center;
   box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 3px rgba(20,8,4,.3), 0 18px 40px rgba(20,8,4,.35);
   transition: transform 1.3s cubic-bezier(.3, .7, .2, 1) .45s; }
-.env.open .card { transform: translateY(-56%); }
-.env.out .card { transform: translateY(-64%); transition-delay: 0s; transition-duration: .9s; }
+.env.open .card { transform: translateY(-52%); }
+/* Once the card is out, it carries the words; the chapter heading steps back. */
+.overlay:has(.env.out) .beat[aria-label="The invitation"] { opacity: 0 !important; transition: opacity .6s; }
+.env.out .card { transform: translateY(-57%); transition-delay: 0s; transition-duration: .9s; }
 .card::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(110, 20, 38, 0.3); pointer-events: none; }
 .card .tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a1730; margin: 0; }
-.card h3 { font-size: clamp(1.8rem, 5.5vw, 2.4rem); line-height: 1.1; margin: 6px 0 8px; color: var(--paper-ink); text-shadow: 0 1px 0 rgba(255,255,255,.75); }
-.card p { margin: 0; color: #5a4a3c; font-size: 0.93rem; }
-.card label { display: block; margin-top: 14px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8b7a6e; }
+.card h3 { font-size: clamp(1.45rem, 4.2vw, 1.9rem); line-height: 1.1; margin: 6px 0 8px; white-space: nowrap; color: var(--paper-ink); text-shadow: 0 1px 0 rgba(255,255,255,.75); }
+.card p { margin: 0; color: #5a4a3c; font-size: 0.88rem; line-height: 1.4; }
+.card label { display: block; margin-top: 10px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8b7a6e; }
 .card input { width: 100%; text-align: center; font-family: var(--font-hand); font-size: 1.7rem; color: var(--paper-ink); background: transparent; border: 0; border-bottom: 1px solid #cdbba8; padding: 0 0 2px; border-radius: 0; }
 .card input:focus { outline: none; border-bottom-color: #8a1730; }
-.card .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
-.card .btn { padding: 0.75rem 1.1rem; font-size: 0.68rem; }
+.card .row { display: flex; gap: 8px; justify-content: center; flex-wrap: nowrap; margin-top: 12px; }
+.card .btn { padding: 0.65rem 0.85rem; font-size: 0.6rem; letter-spacing: 0.1em; white-space: nowrap; min-height: 40px; }
 .card .btn.solid { background: #6e1426; color: #fbf6ee; border-color: #6e1426; }
-.card .link { font-family: var(--font-mono); font-size: 0.68rem; color: #8b7a6e; margin-top: 10px; word-break: break-all; }
+.card .link { font-family: var(--font-mono); font-size: 0.62rem; color: #8b7a6e; margin-top: 6px; word-break: break-all; }
 .card .reply { min-height: 2.6em; margin-top: 10px; font-size: 0.9rem; color: var(--paper-ink); }
 .env-front { position: absolute; inset: 0; z-index: 4; border-radius: 6px; pointer-events: none;
   background: linear-gradient(200deg, #f1e8d6, #dfd0b5);
@@ -380,7 +382,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
         <div class="card" id="card" role="group" aria-label="A sample guest invitation">
           <p class="tag">Your personal invitation</p>
           <h3>Hello, <span id="who">Mama Ijeoma</span>.</h3>
-          <p>Chidinma and Tunde are getting married.<br>Saturday 12 December 2026 · Victoria Island, Lagos</p>
+          <p>Chidinma and Tunde are getting married.<br>Sat 12 Dec 2026 · Victoria Island, Lagos</p>
           <label for="guestName">Sign your name</label>
           <input id="guestName" type="text" value="Mama Ijeoma" maxlength="24" autocomplete="off">
           <div class="row">
