@@ -2504,8 +2504,9 @@ async function start() {
     [1.00, V3(-0.55, 0.86, 1.0), V3(0.1, 0.62, 0.12), 34]
   ];
   const keysT = [
-    [0.00, V3(mamaSeat.x + Math.cos(seatA) * 0.9, 1.35, mamaSeat.z + Math.sin(seatA) * 0.9), V3(t1x, 0.8, t1z), 30],
-    [0.45, V3(mamaSeat.x + Math.cos(seatA) * 0.75, 1.3, mamaSeat.z + Math.sin(seatA) * 0.75), V3(t1x, 0.8, t1z), 32],
+    // First her card, close and in focus above the words; then her chair, pulled out.
+    [0.00, V3(t1x + Math.cos(seatA) * 1.05, 0.98, t1z + Math.sin(seatA) * 1.05), V3(t1x + Math.cos(seatA) * 0.5, 0.86, t1z + Math.sin(seatA) * 0.5), 34],
+    [0.45, V3(t1x + Math.cos(seatA) * 0.95, 0.96, t1z + Math.sin(seatA) * 0.95), V3(t1x + Math.cos(seatA) * 0.5, 0.86, t1z + Math.sin(seatA) * 0.5), 36],
     [0.55, V3(mamaSeat.x + Math.cos(seatA + 0.5) * 1.9, 1.3, mamaSeat.z + Math.sin(seatA + 0.5) * 1.9), V3(mamaSeat.x, 0.7, mamaSeat.z), 26],
     [1.00, V3(mamaSeat.x + Math.cos(seatA + 0.5) * 1.75, 1.28, mamaSeat.z + Math.sin(seatA + 0.5) * 1.75), V3(mamaSeat.x, 0.7, mamaSeat.z), 26]
   ];
