@@ -99,6 +99,9 @@
         // Try the recording first; fall back to the generated groove if it is missing or won't play.
         var fallback = function () { if (fileFailed) return; fileFailed = true; audioEl = null; if (on) window.AriyaScore.start(); };
         if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.75; audioEl.addEventListener("error", fallback); }
+        // Fade the song in rather than starting at full volume.
+        audioEl.volume = 0; var v0 = performance.now();
+        (function fade() { if (!audioEl || !on) return; var k = Math.min(1, (performance.now() - v0) / 1600); audioEl.volume = 0.75 * k; if (k < 1) requestAnimationFrame(fade); })();
         var p = audioEl.play(); if (p && p.catch) p.catch(function (e) { if (e && e.name !== "AbortError") fallback(); });
         master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.8, ctx.currentTime, 0.2); // for the seal and chime sounds
         return true;
