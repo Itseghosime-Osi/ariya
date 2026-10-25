@@ -16,7 +16,7 @@
       venue: "The Grand Pavilion",
       area: "Victoria Island, Lagos",
       rsvpBy: "2026-11-20",
-      dressCode: "Aso ebi: emerald and gold"
+      dressCode: "Aso ebi: burgundy and gold"
     };
     var tables = [
       { id: "t_head", name: "Head table", capacity: 10 },

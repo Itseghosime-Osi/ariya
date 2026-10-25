@@ -139,7 +139,7 @@
     },
     html: function (o) {
       o = o || {};
-      var cotd = o.cotd || [["#5a1428", "Burgundy"], ["#48502a", "Olive"], ["#f3ead8", "Ivory"]];
+      var cotd = o.cotd || [["#5a1428", "Burgundy"], ["#a3402a", "Coral"], ["#f3ead8", "Ivory"]];
       return '<div class="fc fc--' + (o.variant || "wine") + (o.cls ? " " + o.cls : "") + '"' + (o.id ? ' id="' + o.id + '"' : "") + (o.label ? ' role="img" aria-label="' + esc(o.label) + '"' : "") + '>' +
         ornament() +
         '<div class="fc-body"' + (o.label ? ' aria-hidden="true"' : "") + '>' + wreath(o.initials) +

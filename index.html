@@ -14,8 +14,8 @@
 /* Home: a film you scroll. Burgundy night, gold foil, one idea per screen.
    Hero (live 3D) → the noise → the invitation → "yes" → the hall (live 3D) → the invitations → the dance. */
 :root { --cotd-1: #2e0711; --cotd-2: #5a1428; --cotd-glow: rgba(196, 70, 100, 0.22); }
-[data-cotd="emerald"] { --cotd-1: #05261b; --cotd-2: #0f523d; --cotd-glow: rgba(60, 190, 140, 0.18); }
-[data-cotd="olive"] { --cotd-1: #22270f; --cotd-2: #48502a; --cotd-glow: rgba(190, 200, 110, 0.18); }
+[data-cotd="ruby"] { --cotd-1: #3a0510; --cotd-2: #96182e; --cotd-glow: rgba(232, 54, 79, 0.2); }
+[data-cotd="coral"] { --cotd-1: #4a140c; --cotd-2: #a3402a; --cotd-glow: rgba(236, 117, 86, 0.2); }
 .fc--auto { --bg1: var(--cotd-1); --bg2: var(--cotd-2); }
 body { background: var(--wine-950); color: var(--on-dark); }
 .btn-primary { background: var(--gold); color: var(--wine-950); }
@@ -281,8 +281,8 @@ body { background: var(--wine-950); color: var(--on-dark); }
       <b class="foil-text" id="cotdName" aria-live="polite">Burgundy</b>
       <div class="sw">
         <button type="button" data-cotd="burgundy" style="--c: #5a1428" aria-pressed="true" aria-label="Burgundy"></button>
-        <button type="button" data-cotd="emerald" style="--c: #0f523d" aria-pressed="false" aria-label="Emerald"></button>
-        <button type="button" data-cotd="olive" style="--c: #4a5226" aria-pressed="false" aria-label="Olive"></button>
+        <button type="button" data-cotd="ruby" style="--c: #96182e" aria-pressed="false" aria-label="Ruby"></button>
+        <button type="button" data-cotd="coral" style="--c: #a3402a" aria-pressed="false" aria-label="Coral"></button>
       </div>
     </div>
     <div class="scroll-hint" aria-hidden="true">Scroll<i></i></div>
@@ -429,9 +429,9 @@ body { background: var(--wine-950); color: var(--on-dark); }
   $("poster").innerHTML = F.html({ variant: "auto", aSub: "Okeke", bSub: "Ajayi" });
   $("cardFront").innerHTML = F.html({ variant: "auto", guest: "Adaeze Okonkwo", noCotd: true, label: "Invitation for Adaeze Okonkwo to Chidinma and Tunde's wedding, Saturday 12 December 2026, The Grand Pavilion, Victoria Island, Lagos" });
   $("fan").innerHTML =
-    F.html({ variant: "olive", a: "Ejiro", b: "Osaze", initials: "E O", date: "Saturday, 6 March 2027", venue: "Uyi Grand Hall<br>Benin City", cotd: [["#48502a", "Olive"], ["#5a1428", "Burgundy"], ["#f3ead8", "Ivory"]], label: "Sample invitation in olive: Ejiro and Osaze" }) +
+    F.html({ variant: "coral", a: "Ejiro", b: "Osaze", initials: "E O", date: "Saturday, 6 March 2027", venue: "Uyi Grand Hall<br>Benin City", cotd: [["#a3402a", "Coral"], ["#5a1428", "Burgundy"], ["#f3ead8", "Ivory"]], label: "Sample invitation in coral: Ejiro and Osaze" }) +
     F.html({ variant: "wine", a: "Chidinma", b: "Tunde", aSub: "Okeke", bSub: "Ajayi", label: "Sample invitation in burgundy: Chidinma and Tunde" }) +
-    F.html({ variant: "emerald", a: "Amaka", b: "Seyi", initials: "A S", date: "Saturday, 17 April 2027", venue: "Transcorp Ballroom<br>Abuja", cotd: [["#0f523d", "Emerald"], ["#c9a256", "Gold"], ["#f3ead8", "Ivory"]], label: "Sample invitation in emerald: Amaka and Seyi" });
+    F.html({ variant: "ruby", a: "Amaka", b: "Seyi", initials: "A S", date: "Saturday, 17 April 2027", venue: "Transcorp Ballroom<br>Abuja", cotd: [["#96182e", "Ruby"], ["#c9a256", "Gold"], ["#f3ead8", "Ivory"]], label: "Sample invitation in ruby: Amaka and Seyi" });
   Array.prototype.forEach.call(document.querySelectorAll("#fan .fc"), function (c) {
     c.tabIndex = 0;
     var toggle = function () { var on = !c.classList.contains("lift"); document.querySelectorAll("#fan .fc").forEach(function (x) { x.classList.remove("lift"); }); if (on) c.classList.add("lift"); };
@@ -490,7 +490,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
   });
 
   /* ---------- Colour of the day: recolours the invitations and the live 3D box ---------- */
-  var COTD = { burgundy: "Burgundy", emerald: "Emerald", olive: "Olive" };
+  var COTD = { burgundy: "Burgundy", ruby: "Ruby", coral: "Coral" };
   function setCotd(name, quiet) {
     if (!COTD[name]) name = "burgundy";
     root.setAttribute("data-cotd", name);

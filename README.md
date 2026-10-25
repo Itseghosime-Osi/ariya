@@ -6,14 +6,14 @@ In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and eve
 
 | Path | What it is |
 |---|---|
-| `/` (`index.html`) | The cinematic home: live 3D ring box with a "Colour of the day" picker (burgundy, emerald, olive) that recolours the velvet box and every invitation; a WhatsApp storm that collapses into one list; a wax-sealed envelope that opens into a foil invitation you can accept, which flips into your place card; a giant foil "yes"; the live 3D hall filling seat by seat; fanned invitations; the finale |
+| `/` (`index.html`) | The cinematic home: live 3D ring box with a "Colour of the day" picker (burgundy, ruby, coral) that recolours the velvet box and every invitation; a WhatsApp storm that collapses into one list; a wax-sealed envelope that opens into a foil invitation you can accept, which flips into your place card; a giant foil "yes"; the live 3D hall filling seat by seat; fanned invitations; the finale |
 | `product.html` | What Àríyá does: invitations and RSVP, guests and seating, vendor checklist, how it works |
 | `pricing.html` | Pay-per-event pricing (placeholder prices) and questions |
 | `planner.html` | Demo planner: guests, CSV import, seating, vendors, on sample data |
 | `rsvp.html?g=<token>` | A guest's own invitation and RSVP page |
 | `film.html` | "The Yes", the full cinematic film; always starts from the beginning; `?velvet=` sets the box colour |
 
-`assets/score.js` is the home page music. For the class demo the Music button fades in and loops `assets/music.mp3` ("Yori Yori" by Abefe); if that file is missing or can't play, it plays an original owambe groove generated live with the Web Audio API (juju and highlife feel in 12/8: agogo bell, shekere, talking drum, highlife guitars, bass, horn hook). Music only starts when a visitor taps Music. Commercial songs are copyrighted: fine for a private class demo, but don't publish them on a public site without a licence.
+`assets/score.js` is the home page music, and the film's Sound button plays the same song. For the class demo the Music button fades in and loops `assets/music.mp3` ("Yori Yori" by Abefe); if that file is missing or can't play, it plays an original owambe groove generated live with the Web Audio API (juju and highlife feel in 12/8: agogo bell, shekere, talking drum, highlife guitars, bass, horn hook). Music only starts when a visitor taps Music. Commercial songs are copyrighted: fine for a private class demo, but don't publish them on a public site without a licence.
 
 `assets/fine-card.js` draws the foil invitations, place cards and wax seals in SVG (corner roses, laurel monogram, embossed crest), styled in `assets/ariya.css`.
 
@@ -34,7 +34,7 @@ Everything in the planner and RSVP pages runs on **sample data** in `assets/demo
 
 ## Design system
 
-`assets/ariya.css`: deep emerald and warm ivory alternate by section, champagne gold is an accent. Bodoni Moda for emotional headlines, Figtree for everything people read or operate, Pinyon Script only for names on paper. Status always pairs colour with a word. Buttons are at least 44px tall, focus is always visible, and `prefers-reduced-motion` removes transitions.
+`assets/ariya.css`: deep burgundy and warm ivory alternate by section, champagne gold is an accent. Bodoni Moda for emotional headlines, Figtree for everything people read or operate, Pinyon Script only for names on paper. Status always pairs colour with a word. Buttons are at least 44px tall, focus is always visible, and `prefers-reduced-motion` removes transitions.
 
 The hero still life and the guest-experience sequence are 2.5D (layered HTML and CSS), not WebGL, so they load instantly, stay sharp, and work everywhere. The RSVP form never depends on animation.
 

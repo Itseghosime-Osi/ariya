@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Planner · Àríyá by OwambePlan</title>
 <meta name="description" content="Àríyá's demo planner: guest list, import, seating and vendor checklist on sample data.">
-<meta name="theme-color" content="#072a1f">
+<meta name="theme-color" content="#250812">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/ariya.css">
 <style>
-/* Demo planner: a calm working surface. Event header on emerald, tools on ivory paper. */
+/* Demo planner: a calm working surface. Event header on burgundy, tools on ivory paper. */
 body { background: var(--ivory); }
 .app-head .wrap { gap: 14px; flex-wrap: wrap; padding-block: 10px; }
 .app-head .right { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.event-band { background: var(--emerald-900); color: var(--on-dark); padding-block: 28px 0; }
+.event-band { background: var(--wine-900); color: var(--on-dark); padding-block: 28px 0; }
 .event-band h1 { font-size: clamp(1.9rem, 4vw, 2.9rem); }
 .event-band .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--on-dark-soft); margin-top: 8px; }
 .event-band .meta b { color: var(--on-dark); font-weight: 600; }
@@ -51,14 +51,14 @@ body { background: var(--ivory); }
 .empty-state { padding: 40px 20px; text-align: center; color: var(--ink-soft); display: grid; gap: 12px; justify-items: center; }
 .empty-state b { color: var(--ink); font-size: 1.0625rem; }
 .notice { border-radius: 12px; padding: 14px 16px; font-weight: 500; }
-.notice.ok { background: var(--ok-bg); color: #10402c; }
+.notice.ok { background: var(--ok-bg); color: #5a0c1c; }
 .notice.bad { background: var(--no-bg); color: #6c1f1e; }
 .notice.warn { background: var(--wait-bg); color: #5d3f0a; }
 
 /* Import */
 .import-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .drop { border: 2px dashed var(--linen-deep); border-radius: 14px; padding: 22px; background: var(--paper); display: grid; gap: 12px; }
-.drop.over { border-color: var(--emerald); background: var(--ok-bg); }
+.drop.over { border-color: var(--wine); background: var(--ok-bg); }
 textarea.input { min-height: 170px; font-family: ui-monospace, Menlo, monospace; font-size: 0.875rem; }
 .res { font-size: 0.875rem; }
 .res ul { margin: 0; padding-left: 18px; }
@@ -74,16 +74,16 @@ tr.r-dup td { background: #fdf8ec; }
 .pick ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .gbtn { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; text-align: left; min-height: 52px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--ivory); font: inherit; color: inherit; cursor: pointer; }
 .gbtn small { color: var(--ink-soft); font-size: 0.8125rem; }
-.gbtn[aria-pressed="true"] { border-color: var(--emerald); background: var(--ok-bg); }
+.gbtn[aria-pressed="true"] { border-color: var(--wine); background: var(--ok-bg); }
 .gbtn[draggable="true"] { cursor: grab; }
-.hall { background: radial-gradient(80% 70% at 50% 40%, rgba(227, 194, 127, 0.12), transparent 70%), var(--emerald-800); border-radius: 16px; padding: clamp(14px, 2.4vw, 26px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2vw, 20px); }
+.hall { background: radial-gradient(80% 70% at 50% 40%, rgba(227, 194, 127, 0.12), transparent 70%), var(--wine-800); border-radius: 16px; padding: clamp(14px, 2.4vw, 26px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2vw, 20px); }
 .hall .head-row { grid-column: 1 / -1; display: flex; justify-content: center; }
 .tbl { background: none; border: 2px solid transparent; border-radius: 14px; color: var(--on-dark); font: inherit; cursor: pointer; padding: 8px 6px 10px; display: grid; justify-items: center; gap: 4px; min-height: 44px; transition: background-color .2s, border-color .2s; }
 .tbl:hover { background: rgba(255, 255, 255, 0.06); }
 .tbl svg { width: min(120px, 100%); height: auto; }
 .tbl b { font-weight: 600; }
 .tbl span { font-size: 0.875rem; color: var(--on-dark-soft); font-variant-numeric: tabular-nums; }
-.tbl.full span { color: #9fe0c0; font-weight: 600; }
+.tbl.full span { color: #f3b8c3; font-weight: 600; }
 .tbl.cant { opacity: 0.5; }
 .tbl.can { border-color: rgba(227, 194, 127, 0.6); }
 .tbl.drop-over { background: rgba(227, 194, 127, 0.18); border-color: var(--gold); }
@@ -104,7 +104,7 @@ tr.r-dup td { background: #fdf8ec; }
 .vlist { list-style: none; margin: 0; padding: 0; }
 .vlist li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .vlist li:last-child { border-bottom: 0; }
-.vlist input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--emerald); }
+.vlist input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--wine); }
 .vlist .t { font-weight: 600; }
 .vlist .m { grid-column: 2; font-size: 0.875rem; color: var(--ink-soft); }
 .vlist .side { grid-column: 3; grid-row: 1 / span 2; display: grid; justify-items: end; gap: 6px; }
@@ -209,7 +209,7 @@ tr.r-dup td { background: #fdf8ec; }
     <div class="seat-grid">
       <div class="pick">
         <div class="field"><label for="sq">Find a confirmed guest</label><input class="input" id="sq" type="search" autocomplete="off"></div>
-        <label class="check" style="display: flex; gap: 8px; align-items: center; min-height: 44px"><input type="checkbox" id="showSeated" style="width: 20px; height: 20px; accent-color: var(--emerald)"> Include guests who already have a table</label>
+        <label class="check" style="display: flex; gap: 8px; align-items: center; min-height: 44px"><input type="checkbox" id="showSeated" style="width: 20px; height: 20px; accent-color: var(--wine)"> Include guests who already have a table</label>
         <ul id="pickList"></ul>
       </div>
       <div>
@@ -398,7 +398,7 @@ tr.r-dup td { background: #fdf8ec; }
       var a = -Math.PI / 2 + i / t.capacity * Math.PI * 2, x = 60 + Math.cos(a) * 46, y = 60 + Math.sin(a) * 46;
       out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="8" fill="' + (i < used ? '#e3c27f' : 'none') + '" stroke="' + (i < used ? '#e3c27f' : 'rgba(244,239,230,.5)') + '" stroke-width="1.5"' + (i < used ? '' : ' stroke-dasharray="3 3"') + '/>';
     }
-    return out + '<text x="60" y="65" text-anchor="middle" font-size="15" font-family="Figtree, sans-serif" font-weight="700" fill="#15211c">' + used + '/' + t.capacity + '</text></svg>';
+    return out + '<text x="60" y="65" text-anchor="middle" font-size="15" font-family="Figtree, sans-serif" font-weight="700" fill="#23141a">' + used + '/' + t.capacity + '</text></svg>';
   }
   function renderSeating() {
     var q = $("sq").value.trim().toLowerCase(), showAll = $("showSeated").checked;

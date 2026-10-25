@@ -12,17 +12,16 @@
 <style>
 /* Àríyá, "The Yes": a wedding archive. A fixed WebGL stage rendered like a camera, with type layered over it.
    A 1000vh track drives eight archive chapters, then the page becomes the company's site.
-   One committed night look: emerald black, ivory, champagne gold. Type pulls focus the way the lens does. */
+   One committed night look: burgundy black, ivory, champagne gold. Type pulls focus the way the lens does. */
 :root {
-  --ink: #050d0a;
-  --night: #0a1813;
-  --emerald: #0f5c45;
-  --jade: #4fcaa0;
+  --ink: #0c0406;
+  --night: #1c070d;
+  --wine: #6e1426;
+  --rose: #f0899b;
   --gold: #e9c98a;
   --ivory: #f4efe6;
-  --mist: #9fb2a8;
+  --mist: #bda5aa;
   --line: rgba(244, 239, 230, 0.16);
-  --wax: #0b4a37;
   --paper: #f3ebdc;
   --paper-ink: #2a2118;
   --font-display: "Bodoni Moda", "Didot", Georgia, serif;
@@ -36,7 +35,7 @@ html, body { background: var(--ink); }
 html.locked, html.locked body { overflow: hidden; }
 body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size: 16px; line-height: 1.55; overflow-x: hidden; }
 ::selection { background: var(--gold); color: var(--ink); }
-.backdrop { position: fixed; inset: 0; z-index: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(15, 92, 69, 0.4), transparent 70%), linear-gradient(180deg, var(--night), var(--ink) 75%); }
+.backdrop { position: fixed; inset: 0; z-index: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(110, 20, 38, 0.4), transparent 70%), linear-gradient(180deg, var(--night), var(--ink) 75%); }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
 #gl.live { opacity: 1; }
 .track { position: relative; z-index: 0; height: 1000vh; }
@@ -48,7 +47,7 @@ body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size:
 .btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 /* ---------- Gate: the archive's front door ---------- */
-.gate { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; text-align: center; background: radial-gradient(70% 60% at 50% 45%, rgba(10, 24, 19, 0.78), rgba(5, 13, 10, 0.97)); padding: 24px max(20px, env(safe-area-inset-left, 0px)); transition: opacity 1.4s ease, visibility 1.4s; }
+.gate { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; text-align: center; background: radial-gradient(70% 60% at 50% 45%, rgba(28, 7, 13, 0.78), rgba(12, 4, 6, 0.97)); padding: 24px max(20px, env(safe-area-inset-left, 0px)); transition: opacity 1.4s ease, visibility 1.4s; }
 .gate { overflow-y: auto; }
 html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .overlay { transition: opacity 1.2s ease; }
@@ -70,8 +69,8 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 /* ---------- Navigation ---------- */
 .nav { position: fixed; z-index: 12; top: 0; left: 0; right: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
   padding: calc(env(safe-area-inset-top, 0px) + 16px) max(20px, env(safe-area-inset-right, 0px)) 16px max(20px, env(safe-area-inset-left, 0px));
-  background: linear-gradient(180deg, rgba(5, 13, 10, 0.7), rgba(5, 13, 10, 0)); transition: background .4s; }
-.nav.solid { background: rgba(5, 13, 10, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  background: linear-gradient(180deg, rgba(12, 4, 6, 0.7), rgba(12, 4, 6, 0)); transition: background .4s; }
+.nav.solid { background: rgba(12, 4, 6, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .wordmark { font-family: var(--font-display); font-style: italic; font-size: 1.55rem; color: var(--ivory); text-decoration: none; line-height: 1; justify-self: start; }
 .nav .where { color: var(--mist); display: flex; gap: 10px; align-items: baseline; white-space: nowrap; }
 .nav .where b { color: var(--gold); font-weight: 400; }
@@ -110,7 +109,7 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 
 /* ---------- Story overlay ---------- */
 .overlay { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.beat { position: absolute; left: 0; right: 0; opacity: 0; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); text-shadow: 0 2px 30px rgba(3, 10, 7, 0.95), 0 0 3px rgba(3, 10, 7, 0.6); will-change: opacity, transform, filter; }
+.beat { position: absolute; left: 0; right: 0; opacity: 0; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); text-shadow: 0 2px 30px rgba(10, 3, 5, 0.95), 0 0 3px rgba(10, 3, 5, 0.6); will-change: opacity, transform, filter; }
 .beat.center { top: 50%; text-align: center; transform: translateY(-50%); }
 .beat.low { bottom: max(13vh, calc(env(safe-area-inset-bottom, 0px) + 84px)); text-align: center; }
 .beat.side { top: 50%; transform: translateY(-50%); max-width: 1240px; margin: 0 auto; }
@@ -118,24 +117,24 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text
 .beat h1 { font-size: clamp(2.8rem, 7.5vw, 6.2rem); line-height: 1; }
 .beat h2 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.04; }
 h1 em, h2 em { font-style: italic; color: var(--gold); }
-.no { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--jade); margin-bottom: 18px; }
-.sub { color: #c8d3cc; max-width: 30em; margin: 18px auto 0; font-size: 1.08rem; }
+.no { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose); margin-bottom: 18px; }
+.sub { color: #dccbc6; max-width: 30em; margin: 18px auto 0; font-size: 1.08rem; }
 .prose { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.35; color: #e9e2d4; max-width: 24em; margin: 0 auto; }
 
 /* The noise: chat bubbles at different depths */
 .storm { position: absolute; inset: 0; }
 .bub { position: absolute; max-width: min(300px, 70vw); background: #f6efe8; color: #2a1a12; border-radius: 14px 14px 14px 4px; padding: 8px 12px 6px; font-size: 0.92rem; line-height: 1.35; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3); opacity: 0; will-change: transform, opacity, filter; }
-.bub b { display: block; font-size: 0.72rem; font-weight: 500; color: #0f6b4e; letter-spacing: 0.02em; }
+.bub b { display: block; font-size: 0.72rem; font-weight: 500; color: #8a1730; letter-spacing: 0.02em; }
 .bub i { display: block; text-align: right; font-style: normal; font-size: 0.66rem; color: #8b7a6e; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .groupbar { position: absolute; left: 50%; top: max(12vh, calc(env(safe-area-inset-top, 0px) + 76px)); transform: translateX(-50%); background: rgba(246, 239, 232, 0.1); border: 1px solid var(--line); border-radius: 999px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; opacity: 0; }
 .groupbar strong { color: var(--gold); font-weight: 500; font-variant-numeric: tabular-nums; }
 /* Light through the diamond: a bright core that opens like an iris, ringed by the stone's spectral fire. */
 .flash { position: absolute; inset: 0; opacity: 0; overflow: hidden; pointer-events: none; }
 .flash .core { position: absolute; left: 50%; top: 46%; width: 150vmax; height: 150vmax; margin: -75vmax 0 0 -75vmax; border-radius: 50%;
-  background: radial-gradient(circle, #fffdf8 0%, rgba(255, 246, 226, 0.95) 9%, rgba(246, 226, 186, 0.6) 18%, rgba(233, 201, 138, 0.2) 30%, rgba(15, 92, 69, 0) 46%);
+  background: radial-gradient(circle, #fffdf8 0%, rgba(255, 246, 226, 0.95) 9%, rgba(246, 226, 186, 0.6) 18%, rgba(233, 201, 138, 0.2) 30%, rgba(110, 20, 38, 0) 46%);
   transform: scale(var(--iris, 0.2)); mix-blend-mode: screen; }
 .flash .fire { position: absolute; left: 50%; top: 46%; width: 110vmax; height: 110vmax; margin: -55vmax 0 0 -55vmax; border-radius: 50%;
-  background: conic-gradient(from var(--spin, 0deg), rgba(255, 96, 96, 0.55), rgba(255, 196, 80, 0.5), rgba(120, 255, 170, 0.45), rgba(90, 170, 255, 0.55), rgba(200, 120, 255, 0.5), rgba(255, 96, 96, 0.55));
+  background: conic-gradient(from var(--spin, 0deg), rgba(255, 96, 96, 0.55), rgba(255, 196, 80, 0.5), rgba(255, 150, 120, 0.45), rgba(90, 170, 255, 0.55), rgba(200, 120, 255, 0.5), rgba(255, 96, 96, 0.55));
   -webkit-mask: radial-gradient(circle, transparent 14%, #000 20%, #000 30%, transparent 40%); mask: radial-gradient(circle, transparent 14%, #000 20%, #000 30%, transparent 40%);
   filter: blur(14px) saturate(1.4); transform: scale(var(--iris, 0.2)); mix-blend-mode: screen; opacity: 1; }
 .flash .glint { position: absolute; width: 46vmin; height: 46vmin; margin: -23vmin 0 0 -23vmin; mix-blend-mode: screen; opacity: var(--glint, 0);
@@ -163,16 +162,16 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   transition: transform 1.3s cubic-bezier(.3, .7, .2, 1) .45s; }
 .env.open .card { transform: translateY(-56%); }
 .env.out .card { transform: translateY(-64%); transition-delay: 0s; transition-duration: .9s; }
-.card::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(15, 92, 69, 0.3); pointer-events: none; }
-.card .tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0f6b4e; margin: 0; }
+.card::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(110, 20, 38, 0.3); pointer-events: none; }
+.card .tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8a1730; margin: 0; }
 .card h3 { font-size: clamp(1.8rem, 5.5vw, 2.4rem); line-height: 1.1; margin: 6px 0 8px; color: var(--paper-ink); text-shadow: 0 1px 0 rgba(255,255,255,.75); }
 .card p { margin: 0; color: #5a4a3c; font-size: 0.93rem; }
 .card label { display: block; margin-top: 14px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8b7a6e; }
 .card input { width: 100%; text-align: center; font-family: var(--font-hand); font-size: 1.7rem; color: var(--paper-ink); background: transparent; border: 0; border-bottom: 1px solid #cdbba8; padding: 0 0 2px; border-radius: 0; }
-.card input:focus { outline: none; border-bottom-color: #0f6b4e; }
+.card input:focus { outline: none; border-bottom-color: #8a1730; }
 .card .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 .card .btn { padding: 0.75rem 1.1rem; font-size: 0.68rem; }
-.card .btn.solid { background: #0b4a37; color: #fbf6ee; border-color: #0b4a37; }
+.card .btn.solid { background: #6e1426; color: #fbf6ee; border-color: #6e1426; }
 .card .link { font-family: var(--font-mono); font-size: 0.68rem; color: #8b7a6e; margin-top: 10px; word-break: break-all; }
 .card .reply { min-height: 2.6em; margin-top: 10px; font-size: 0.9rem; color: var(--paper-ink); }
 .env-front { position: absolute; inset: 0; z-index: 4; border-radius: 6px; pointer-events: none;
@@ -190,14 +189,14 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .seal { position: absolute; left: 50%; top: 52%; z-index: 7; width: 96px; height: 96px; margin: -48px 0 0 -48px; border: 0; padding: 0; background: none; cursor: pointer; transform: rotate(-8deg); transition: transform .4s, opacity .5s; pointer-events: auto; }
 .seal .wax { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3)); }
 :root { --wax: #8a0f22; --wax-hi: #c1283d; --wax-lo: #42050f; }
-:root[data-velvet="emerald"] { --wax: #0e5a41; --wax-hi: #22906a; --wax-lo: #032419; }
-:root[data-velvet="olive"] { --wax: #5a6326; --wax-hi: #8b9844; --wax-lo: #262b0c; }
+:root[data-velvet="ruby"] { --wax: #b0122b; --wax-hi: #e8364f; --wax-lo: #5a0512; }
+:root[data-velvet="coral"] { --wax: #b8452c; --wax-hi: #ec7556; --wax-lo: #5a1a0e; }
 .seal:hover { transform: rotate(-8deg) scale(1.06); }
 .seal-hint { position: absolute; left: 0; right: 0; top: calc(100% + 18px); z-index: 7; text-align: center; color: var(--gold); transition: opacity .4s; }
 .env.open .seal, .env.open .seal-hint { opacity: 0; pointer-events: none; transform: scale(.6); }
 
 /* ---------- The count: a panel with real contrast ---------- */
-.scrim { position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.82) 34%, rgba(5, 13, 10, 0.25) 62%, rgba(5, 13, 10, 0) 80%); }
+.scrim { position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, rgba(12, 4, 6, 0.94) 0%, rgba(12, 4, 6, 0.82) 34%, rgba(12, 4, 6, 0.25) 62%, rgba(12, 4, 6, 0) 80%); }
 .count-beat { max-width: 480px; margin-left: max(0px, calc((100% - 1240px) / 2)); text-align: left; }
 .count-beat .sub { margin-left: 0; }
 .count { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 32px; }
@@ -205,15 +204,15 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .count dt { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); }
 .count dd { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1; font-variant-numeric: tabular-nums; }
 .count div:nth-child(2) dd { color: var(--gold); }
-.guests { position: absolute; right: max(40px, calc(env(safe-area-inset-right, 0px) + 32px)); top: 50%; transform: translateY(-50%); width: min(340px, 30vw); opacity: 0; pointer-events: none; background: rgba(5, 13, 10, 0.78); border: 1px solid var(--line); border-radius: 12px; -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); padding: 16px 16px 10px; font-size: 0.84rem; }
+.guests { position: absolute; right: max(40px, calc(env(safe-area-inset-right, 0px) + 32px)); top: 50%; transform: translateY(-50%); width: min(340px, 30vw); opacity: 0; pointer-events: none; background: rgba(12, 4, 6, 0.78); border: 1px solid var(--line); border-radius: 12px; -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); padding: 16px 16px 10px; font-size: 0.84rem; }
 .guests header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 10px; }
-.guests header span { color: var(--jade); }
-.guests header span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--jade); margin-right: 6px; vertical-align: middle; box-shadow: 0 0 8px var(--jade); }
+.guests header span { color: var(--rose); }
+.guests header span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--rose); margin-right: 6px; vertical-align: middle; box-shadow: 0 0 8px var(--rose); }
 .guests ol { list-style: none; margin: 0; padding: 0; display: grid; }
 .guests li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--line); opacity: 0.3; transition: opacity .4s; font-variant-numeric: tabular-nums; }
 .guests li.in { opacity: 1; }
 .guests li em { font-style: normal; color: var(--mist); font-size: 0.74rem; }
-.guests li i { font-style: normal; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); background: var(--jade); border-radius: 999px; padding: 2px 8px; }
+.guests li i { font-style: normal; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); background: var(--rose); border-radius: 999px; padding: 2px 8px; }
 .guests li:not(.in) i { background: transparent; color: var(--mist); border: 1px solid var(--line); }
 .finale .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; pointer-events: auto; }
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9; pointer-events: none; }
@@ -253,7 +252,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .signup label { position: absolute; left: -9999px; }
 .signup input { font: inherit; font-size: 1.1rem; min-width: 0; width: min(380px, 100%); padding: 10px 2px; border: 0; border-bottom: 1px solid var(--ivory); background: transparent; color: var(--ivory); border-radius: 0; }
 .signup input::placeholder { color: var(--mist); }
-.signup-msg { min-height: 1.5em; color: var(--jade); margin-top: 18px; }
+.signup-msg { min-height: 1.5em; color: var(--rose); margin-top: 18px; }
 .foot { border-top: 1px solid var(--line); }
 .foot .wrap { padding-block: 34px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; color: var(--mist); font-size: 0.85rem; }
 .foot .wordmark { font-size: 1.3rem; }
@@ -269,14 +268,14 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   .nav .where { display: none; }
   .finder { display: none; }
   .count-beat { text-align: center; margin: 0 auto; }
-  .scrim { background: linear-gradient(0deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.8) 45%, rgba(5, 13, 10, 0) 80%); }
+  .scrim { background: linear-gradient(0deg, rgba(12, 4, 6, 0.94) 0%, rgba(12, 4, 6, 0.8) 45%, rgba(12, 4, 6, 0) 80%); }
   .beat.side { top: auto; bottom: max(8vh, calc(env(safe-area-inset-bottom, 0px) + 40px)); transform: none; }
   .icon-btn .lbl { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .scrollcue i, .marquee div, .sound-on .bars span { animation: none; } }
 /* Embed mode (?embed=hero | hall): the landing page shows the live scene without the film's chrome. */
-html.embed, html.embed body { overflow: hidden; background: #072a1f; }
+html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 .embed .gate, .embed .nav, .embed .menu, .embed .overlay, .embed .foot-ui, .embed .progress, .embed .biz, .embed #confetti, .embed .backdrop { display: none !important; }
 .embed .track { height: 100vh; }
 </style>
@@ -488,9 +487,18 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   // The whole film is scroll-driven, so all of it plays at the slower pace.
   if (!EMBED && window.AriyaScroll) AriyaScroll.init({ slow: [document.getElementById("track")] });
 
-  /* ---------- Score: a generated highlife-ambient soundtrack that follows the story ---------- */
+  /* ---------- Score: the song (assets/music.mp3, "Yori Yori" by Abefe, class demo only), with a generated
+     highlife-ambient soundtrack that follows the story as the fallback if the song is missing or won't play ---------- */
   var Score = (function () {
     var ctx = null, master, bus, tone, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf;
+    var SONG = "assets/music.mp3", song = null, songFailed = false;
+    function playSong() {
+      var fallback = function () { if (songFailed) return; songFailed = true; song = null; if (on) { on = false; Score.start(); } };
+      if (!song) { song = new Audio(SONG); song.loop = true; song.preload = "auto"; song.addEventListener("error", fallback); }
+      song.volume = 0; var v0 = performance.now();
+      (function fade() { if (!song || !on) return; var k = Math.min(1, (performance.now() - v0) / 1800); song.volume = 0.8 * k; if (k < 1) requestAnimationFrame(fade); })();
+      var pr = song.play(); if (pr && pr.catch) pr.catch(function (e) { if (e && e.name !== "AbortError") fallback(); });
+    }
     var lv = { pad: 0.7, gtr: 0, bass: 0, perc: 0, drum: 0, bell: 0.3, kick: 0, ping: 0, open: 1 };
     var tg = Object.assign({}, lv);
     var BPM = 100, S16 = 60 / BPM / 4;
@@ -559,11 +567,14 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
     return {
       start: function () {
         try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
+        on = true;
+        master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.85, ctx.currentTime, 0.3); // chimes over the song
+        if (!songFailed) { playSong(); return true; }
         if (!timer) { nextT = ctx.currentTime + 0.1; timer = setInterval(schedule, 25); }
         master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.85, ctx.currentTime, 1.2);
         on = true; return true;
       },
-      stop: function () { if (!ctx) return; master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); on = false; },
+      stop: function () { on = false; if (song) song.pause(); if (!ctx) return; master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); },
       isOn: function () { return on; },
       chime: function () { if (!on) return; var t = ctx.currentTime; [72, 76, 79, 84].forEach(function (m, i) { pluck(m, t + i * 0.09, 0.09); }); },
       scene: function (p, pro) {
@@ -579,7 +590,10 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
         }
         tg = T;
       },
-      suspend: function (yes) { if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); } }
+      suspend: function (yes) {
+        if (song) { if (yes) song.pause(); else if (on) song.play().catch(function () {}); }
+        if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); }
+      }
     };
   })();
   document.addEventListener("visibilitychange", function () { Score.suspend(document.hidden); });
@@ -745,7 +759,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   function burst(x, y) {
     if (reduceMotion) return;
     cv.width = window.innerWidth; cv.height = window.innerHeight;
-    var cols = ["#e9c98a", "#f4efe6", "#4fcaa0", "#b8864b"];
+    var cols = ["#e9c98a", "#f4efe6", "#c1283d", "#b8864b"];
     for (var i = 0; i < 160; i++) {
       var a = -Math.PI / 2 + (Math.random() - 0.5) * 2, s = 6 + Math.random() * 10;
       bits.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, w: 4 + Math.random() * 6, h: 3 + Math.random() * 5, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, c: cols[i % 4], life: 130 + Math.random() * 60 });
@@ -1019,21 +1033,21 @@ async function start() {
   tableTop.rotation.x = -Math.PI / 2; tableTop.position.y = TABLE_Y; tableTop.receiveShadow = true;
   setA.add(tableTop);
 
-  // Emerald velvet, deep pile with a cool sheen at grazing angles.
+  // Burgundy velvet, deep pile with a warm sheen at grazing angles.
   const velvet = new THREE.MeshPhysicalMaterial({
-    color: 0x073226, roughness: 0.84, sheen: 1, sheenRoughness: 0.33, sheenColor: 0x86f0c6,
+    color: 0x3d0715, roughness: 0.84, sheen: 1, sheenRoughness: 0.33, sheenColor: 0xff9cb0,
     normalMap: velvetNormal, normalScale: new THREE.Vector2(0.25, 0.25)
   });
-  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x05241a, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0x4fbf92 });
-  // Colour of the day: the box can be re-covered in burgundy, emerald or olive velvet.
+  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x24030b, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xc75a72 });
+  // Colour of the day: the box can be re-covered in burgundy, ruby or coral velvet.
   const VELVETS = {
-    emerald: [0x073226, 0x86f0c6, 0x05241a, 0x4fbf92],
     burgundy: [0x3d0715, 0xff9cb0, 0x24030b, 0xc75a72],
-    olive: [0x2c3313, 0xe2e9a4, 0x1b2009, 0xa3ae62]
+    ruby: [0x6a0716, 0xff8fa0, 0x3a030b, 0xe0465e],
+    coral: [0x7a2414, 0xffc0a6, 0x431208, 0xe2775a]
   };
   let velvetNow = "";
   function applyVelvet(name) {
-    const v = VELVETS[name] || VELVETS.emerald; velvetNow = name;
+    const v = VELVETS[name] || VELVETS.burgundy; velvetNow = name;
     velvet.color.setHex(v[0]); velvet.sheenColor.setHex(v[1]); velvetDeep.color.setHex(v[2]); velvetDeep.sheenColor.setHex(v[3]);
   }
   const brass = new THREE.MeshPhysicalMaterial({ color: 0xebc27c, metalness: 1, roughness: 0.2, clearcoat: 0.3 });
@@ -1102,22 +1116,23 @@ async function start() {
   }, { srgb: false });
   const mono = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), new THREE.MeshPhysicalMaterial({ color: 0xf0c983, metalness: 1, roughness: 0.24, alphaMap: monoAlpha, alphaTest: 0.5 }));
   mono.rotation.x = -Math.PI / 2; mono.position.set(0, LH + 0.0055, BD / 2); lidPivot.add(mono);
-  // Satin pillow in the lid, foil-stamped with the brand: design printed onto a real surface.
+  // Satin pillow in the lid, foil-stamped with the brand in the centre: design printed onto a real surface.
+  const liningStamp = (g, w, h) => {
+    g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.465);
+    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.565);
+    g.fillRect(w / 2 - 110, h * 0.385, 220, 2); g.fillRect(w / 2 - 110, h * 0.615, 220, 2);
+  };
   const liningMap = canvasTex(1024, 920, (g, w, h) => {
     const gr = g.createLinearGradient(0, 0, w, h);
     gr.addColorStop(0, "#efe6d6"); gr.addColorStop(0.35, "#fdf8ef"); gr.addColorStop(0.55, "#e7dac6"); gr.addColorStop(0.8, "#f8f0e4"); gr.addColorStop(1, "#e4d5c0");
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
     g.fillStyle = "#b8894a"; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.17);
-    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.27);
-    g.fillRect(w / 2 - 110, h * 0.09, 220, 2); g.fillRect(w / 2 - 110, h * 0.32, 220, 2);
+    liningStamp(g, w, h);
   });
   const liningRM = canvasTex(1024, 920, (g, w, h) => {
     g.fillStyle = "rgb(0,100,0)"; g.fillRect(0, 0, w, h);
     g.fillStyle = "rgb(0,55,255)"; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.17);
-    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.27);
-    g.fillRect(w / 2 - 110, h * 0.09, 220, 2); g.fillRect(w / 2 - 110, h * 0.32, 220, 2);
+    liningStamp(g, w, h);
   }, { srgb: false });
   const pillowGeo = (() => {
     const g = new THREE.PlaneGeometry(BW - 0.19, BD - 0.19, 48, 48), p = g.attributes.position, uv = g.attributes.uv;
@@ -1498,7 +1513,7 @@ async function start() {
 
   /* ---------- Hall life: aso ebi colours, light, people, celebration ---------- */
   const mergeAll = (list) => mergeGeometries(list.map((g) => (g.index ? g.toNonIndexed() : g)));
-  // Emerald table linens, the couple's colour.
+  // Ivory table linens.
   const ivoryCloth = new THREE.Color(0xfff8ee);
   tables.forEach((_, ti) => cloths.setColorAt(ti, ivoryCloth));
   cloths.instanceColor.needsUpdate = true;
@@ -1535,7 +1550,7 @@ async function start() {
     return { head, spot, beam, seed: i * 1.7, x, z };
   });
 
-  // Guests: seated guests appear as they RSVP. Aso ebi in emerald and gold, gele and fila.
+  // Guests: seated guests appear as they RSVP. Aso ebi in burgundy, red and gold, gele and fila.
   function limb(a, b, r) {
     const d = new THREE.Vector3().subVectors(b, a), len = d.length();
     const g = new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 4, 10);
@@ -1557,7 +1572,7 @@ async function start() {
   const fabric = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.7, sheen: 0.6, sheenRoughness: 0.45, sheenColor: 0xd8d0c0 });
   const geleMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.35, sheen: 1, sheenColor: 0xfff0c8 });
   const skin = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.48, sheen: 0.4, sheenColor: 0xffc8a0 });
-  const asoEbi = [0x0a4a36, 0x0c5640, 0x083b2b, 0x0e5a43, 0xb8954e, 0x0a4a36].map((c) => new THREE.Color(c));
+  const asoEbi = [0x5e0c1e, 0x7a1228, 0x4a0816, 0x8e1a2e, 0xb8954e, 0x5e0c1e].map((c) => new THREE.Color(c));
   const skins = [0x4a2a1a, 0x5c3420, 0x3a2014, 0x6b3d24, 0x2f1a10].map((c) => new THREE.Color(c));
   const geleGold = new THREE.Color(0xc9a256);
   const seatedBodies = new THREE.InstancedMesh(seatedBodyGeo, fabric, NS);
@@ -1606,7 +1621,7 @@ async function start() {
     dancers.push({
       x: i < 2 ? (i ? 0.33 : -0.33) : Math.cos(a) * r, z: i < 2 ? 0 : Math.sin(a) * r, ry: i < 2 ? (i ? -Math.PI / 2 : Math.PI / 2) : rand() * Math.PI * 2,
       up: bride || groom ? false : rand() < 0.45, woman: bride ? true : groom ? false : rand() < 0.55,
-      cloth: bride ? new THREE.Color(0xf7f1e6) : groom ? new THREE.Color(0x0b5a42) : asoEbi[Math.floor(rand() * asoEbi.length)],
+      cloth: bride ? new THREE.Color(0xf7f1e6) : groom ? new THREE.Color(0x5a0c1c) : asoEbi[Math.floor(rand() * asoEbi.length)],
       skin: skins[Math.floor(rand() * skins.length)], ph: rand() * 6, sp: 3.2 + rand() * 1.6, h: 0.92 + rand() * 0.14
     });
   }
@@ -1793,13 +1808,13 @@ async function start() {
         col = aces(col);
         // Grade: warm, slightly matte blacks, gentle split tone.
         float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-        // Grade: contrast S-curve, emerald-teal shadows, warm gold highlights, richer colour.
+        // Grade: contrast S-curve, wine-tinted shadows, warm gold highlights, richer colour.
         col = col * col * (3.0 - 2.0 * col) * 0.55 + col * 0.45;
         l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-        vec3 shadowTint = vec3(0.86, 1.04, 0.98), highTint = vec3(1.06, 1.0, 0.88);
+        vec3 shadowTint = vec3(1.05, 0.9, 0.93), highTint = vec3(1.06, 1.0, 0.88);
         col *= mix(shadowTint, highTint, smoothstep(0.08, 0.7, l));
         col = mix(vec3(l), col, 1.12 + 0.06 * warmth);
-        col = max(col, 0.0) + vec3(0.004, 0.012, 0.009) * (1.0 - l);
+        col = max(col, 0.0) + vec3(0.012, 0.004, 0.006) * (1.0 - l);
         col *= 1.0 - vignette * smoothstep(0.15, 1.15, r2);
         col = srgb(col);
         float g = (hash(gl_FragCoord.xy + fract(time * 13.7) * 197.0) + hash(gl_FragCoord.xy * 1.37 + fract(time * 7.3) * 91.0) - 1.0);
