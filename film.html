@@ -129,7 +129,18 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .bub i { display: block; text-align: right; font-style: normal; font-size: 0.66rem; color: #8b7a6e; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .groupbar { position: absolute; left: 50%; top: max(12vh, calc(env(safe-area-inset-top, 0px) + 76px)); transform: translateX(-50%); background: rgba(246, 239, 232, 0.1); border: 1px solid var(--line); border-radius: 999px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; opacity: 0; }
 .groupbar strong { color: var(--gold); font-weight: 500; font-variant-numeric: tabular-nums; }
-.flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%, #fffaf2, #f6e8c8 40%, #d9c08a 80%, #7a6a40); opacity: 0; mix-blend-mode: screen; }
+/* Light through the diamond: a bright core that opens like an iris, ringed by the stone's spectral fire. */
+.flash { position: absolute; inset: 0; opacity: 0; overflow: hidden; pointer-events: none; }
+.flash .core { position: absolute; left: 50%; top: 46%; width: 150vmax; height: 150vmax; margin: -75vmax 0 0 -75vmax; border-radius: 50%;
+  background: radial-gradient(circle, #fffdf8 0%, rgba(255, 246, 226, 0.95) 9%, rgba(246, 226, 186, 0.6) 18%, rgba(233, 201, 138, 0.2) 30%, rgba(15, 92, 69, 0) 46%);
+  transform: scale(var(--iris, 0.2)); mix-blend-mode: screen; }
+.flash .fire { position: absolute; left: 50%; top: 46%; width: 110vmax; height: 110vmax; margin: -55vmax 0 0 -55vmax; border-radius: 50%;
+  background: conic-gradient(from var(--spin, 0deg), rgba(255, 96, 96, 0.55), rgba(255, 196, 80, 0.5), rgba(120, 255, 170, 0.45), rgba(90, 170, 255, 0.55), rgba(200, 120, 255, 0.5), rgba(255, 96, 96, 0.55));
+  -webkit-mask: radial-gradient(circle, transparent 14%, #000 20%, #000 30%, transparent 40%); mask: radial-gradient(circle, transparent 14%, #000 20%, #000 30%, transparent 40%);
+  filter: blur(14px) saturate(1.4); transform: scale(var(--iris, 0.2)); mix-blend-mode: screen; opacity: 1; }
+.flash .glint { position: absolute; width: 46vmin; height: 46vmin; margin: -23vmin 0 0 -23vmin; mix-blend-mode: screen; opacity: var(--glint, 0);
+  background: linear-gradient(90deg, transparent 0 49.4%, rgba(255, 255, 255, 0.95) 50%, transparent 50.6% 100%), linear-gradient(0deg, transparent 0 49.4%, rgba(255, 255, 255, 0.95) 50%, transparent 50.6% 100%), radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 2%, rgba(255, 240, 210, 0.3) 8%, transparent 26%);
+  transform: rotate(var(--spin, 0deg)) scale(var(--gs, 1)); }
 
 /* ---------- The invitation: an envelope you open ---------- */
 .envwrap { position: absolute; left: 50%; top: 60%; width: min(460px, calc(100% - 40px)); aspect-ratio: 1.5; transform: translate(-50%, -50%); opacity: 0; perspective: 1600px; }
@@ -353,7 +364,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
     <h2>There is a <em>calmer</em> way.</h2>
   </section>
 
-  <div class="flash" id="flash" aria-hidden="true"></div>
+  <div class="flash" id="flash" aria-hidden="true"><div class="core"></div><div class="fire"></div><i class="glint" style="left: 38%; top: 34%; --gs: .8"></i><i class="glint" style="left: 64%; top: 56%"></i><i class="glint" style="left: 55%; top: 28%; --gs: .55"></i></div>
 
   <section class="beat low" data-in="0.68" data-out="0.775" aria-label="The invitation" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
     <span class="no">No. 005 · The invitation</span>
@@ -763,7 +774,12 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
     });
     groupbar.style.opacity = bump(p, 0.29, 0.31, 0.46, 0.5).toFixed(3);
     unread.textContent = String(Math.round(seg(p, 0.3, 0.46) * 312));
-    flash.style.opacity = bump(p, 0.625, 0.66, 0.695, 0.73).toFixed(3);
+    // The diamond macro stays on screen; light only floods at the cut to the hall (0.675), then clears for the envelope.
+    var fl = bump(p, 0.64, 0.668, 0.676, 0.7);
+    flash.style.opacity = (fl * 0.92).toFixed(3);
+    flash.style.setProperty("--iris", (0.3 + 0.75 * seg(p, 0.64, 0.69)).toFixed(3));
+    flash.style.setProperty("--spin", ((p - 0.6) * 2400).toFixed(1) + "deg");
+    flash.style.setProperty("--glint", (bump(p, 0.645, 0.66, 0.672, 0.69) * 0.9).toFixed(3));
 
     // Envelope: rises in, opens on tap (or on its own if the reader keeps scrolling), leaves with the chapter.
     var eo = bump(p, 0.675, 0.7, 0.765, 0.785);
@@ -1839,7 +1855,7 @@ async function start() {
       ring.rotation.x = py * 0.08 * lift;
       ring.rotation.z = Math.sin(t * 0.5) * 0.05 * lift * motion;
       const dim = 1 - 0.72 * bump(p, 0.29, 0.34, 0.45, 0.48);
-      const flare = 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.9 * bump(p, 0.6, 0.64, 0.66, 0.7);
+      const flare = 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.35 * bump(p, 0.6, 0.64, 0.66, 0.7);
       key.intensity = 140 * dim * Math.min(flare, 1.5);
       rim.intensity = 0.9 * dim;
       scene.environmentIntensity = 0.3 * dim;
