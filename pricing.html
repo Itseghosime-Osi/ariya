@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pricing · Àríyá by OwambePlan</title>
+<meta name="description" content="Àríyá by OwambePlan pricing: pay per event, no subscription.">
+<meta name="theme-color" content="#16040a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Cinzel:wght@400;500&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="assets/ariya.css">
+<style>
+/* Company pages: ivory reading surfaces between burgundy bands, the same foil type as the film. */
+.caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8125rem; color: var(--gold-ink); }
+.dark .caps, .wineband .caps { color: var(--gold); }
+.foil-text { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wineband { background: radial-gradient(60% 90% at 80% 0%, rgba(196, 70, 100, 0.25), transparent 70%), var(--wine-900); color: var(--on-dark); }
+.page-hero { padding-block: clamp(64px, 10vw, 120px) clamp(56px, 8vw, 96px); }
+.page-hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 6vw, 5rem); line-height: 1; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 14em; }
+.page-hero h1 em { font-family: var(--font-hand); font-style: normal; font-size: 1.3em; }
+.page-hero p { color: var(--on-dark-soft); font-size: 1.125rem; max-width: 36rem; }
+.sec { padding-block: clamp(64px, 9vw, 112px); }
+section { scroll-margin-top: 72px; }
+.sec-head { display: grid; gap: 12px; max-width: 44rem; margin-bottom: clamp(30px, 4vw, 48px); }
+.sec-head h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.05; }
+.sec-head h2 em { font-family: var(--font-hand); font-style: normal; font-size: 1.25em; color: var(--wine); }
+.dark .sec-head h2 em, .wineband .sec-head h2 em { color: var(--gold); }
+.btn-wine { background: var(--wine); color: #fff; } .btn-wine:hover { background: var(--wine-600); }
+.site-foot { background: var(--wine-950); }
+.wineband .muted { color: var(--on-dark-soft); }
+.wineband .btn-primary, .wineband .btn-primary:hover { background: var(--gold); color: var(--wine-950); }
+.price-rows { border-top: 1px solid var(--line); }
+.price-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px 32px; align-items: center; padding: 30px 0; border-bottom: 1px solid var(--line); }
+.price-row h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.7rem, 3vw, 2.4rem); }
+.price-row h3 small { display: block; font-family: var(--font-ui); font-size: 0.875rem; color: var(--ink-soft); margin-top: 4px; }
+.price-row .amt { font-family: var(--font-display); font-size: clamp(1.7rem, 3vw, 2.4rem); color: var(--wine); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.price-row .amt small { display: block; font-family: var(--font-ui); font-size: 0.8125rem; color: var(--ink-soft); }
+.price-row.pick h3 { font-family: var(--font-hand); font-size: clamp(2.4rem, 4vw, 3.2rem); color: var(--wine); line-height: 1; }
+.faq { border-top: 1px solid var(--line); max-width: 46rem; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; padding: 18px 0; font-family: var(--font-display); font-size: 1.35rem; list-style: none; display: flex; justify-content: space-between; gap: 16px; min-height: 44px; }
+.faq summary::after { content: "+"; color: var(--wine); font-family: var(--font-ui); }
+.faq details[open] summary::after { content: "–"; }
+.faq p { padding: 0 0 18px; color: var(--ink-soft); }
+.close-band { text-align: center; }
+.close-band h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1; }
+.close-band h2 em { font-family: var(--font-hand); font-style: normal; font-size: 1.3em; }
+.close-band .next { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }
+@media (max-width: 640px) { .price-row { grid-template-columns: minmax(0, 1fr) auto; } .price-row p { grid-column: 1 / -1; grid-row: 2; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head on-dark" id="top">
+  <div class="wrap">
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, home"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="film.html">The film</a>
+      <a href="product.html">What we do</a>
+      <a href="pricing.html" aria-current="page">Pricing</a>
+      <a class="btn btn-primary btn-small" href="planner.html">Start planning</a>
+    </nav>
+    <button class="btn btn-ghost btn-small menu-toggle" id="menuOpen" type="button" aria-haspopup="dialog" aria-controls="menuSheet">Menu</button>
+  </div>
+</header>
+<div class="sheet mobile-only" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="sheet-panel">
+    <div class="sheet-head"><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.5rem">Àríyá</b><button class="btn btn-ghost btn-small" id="menuClose" type="button">Close</button></div>
+    <nav aria-label="Main, mobile"><a href="./">Home</a><a href="film.html">Watch the film</a><a href="product.html">What we do</a><a href="pricing.html">Pricing</a></nav>
+    <p style="margin-top: 20px"><a class="btn btn-wine" href="planner.html" style="width: 100%">Start planning</a></p>
+  </div>
+</div>
+
+<main id="main">
+  <section class="wineband page-hero" aria-labelledby="pTitle">
+    <div class="wrap">
+      <span class="caps">Pricing</span>
+      <h1 id="pTitle">Pay per event. <em class="foil-text">No subscription.</em></h1>
+      <p>Couples pay once for their celebration. Planners pay for each client event they run, and can include it in their own fee.</p>
+    </div>
+  </section>
+  <section class="sec" aria-label="Plans">
+    <div class="wrap">
+      <p style="margin-bottom: 20px"><span class="demo-flag">Placeholder prices for the prototype</span></p>
+      <div class="price-rows">
+        <div class="price-row"><h3>Intimate<small>Up to 80 guests</small></h3><p class="muted">Personal invitations and RSVP links, a live headcount and confirmation emails.</p><div class="amt">Free</div></div>
+        <div class="price-row pick"><h3>Celebration<small style="font-family: var(--font-ui); font-size: 0.875rem; color: var(--ink-soft)">Up to 600 guests · for couples</small></h3><p class="muted">Everything in Intimate, plus guest-list import, seating plan, vendor checklist and SMS reminders.</p><div class="amt">₦45,000<small>per event</small></div></div>
+        <div class="price-row"><h3>Planner<small>For planners running client events</small></h3><p class="muted">Everything in Celebration for each event, your name on every invitation, and access for your ushers and vendors.</p><div class="amt">₦30,000<small>per client event</small></div></div>
+      </div>
+    </div>
+  </section>
+  <section class="sec linen" aria-labelledby="fTitle">
+    <div class="wrap">
+      <div class="sec-head"><span class="caps">Questions</span><h2 id="fTitle">Before you <em>start.</em></h2></div>
+      <div class="faq">
+        <details><summary>Do guests need an app?</summary><p>No. Each guest opens their personal link in any phone browser and replies in a tap.</p></details>
+        <details><summary>Can planners use it for several clients?</summary><p>Yes. The Planner plan is charged per client event, so you only pay for the events you run.</p></details>
+        <details><summary>What happens when a table is full?</summary><p>Àríyá won't seat more people than a table has chairs, and shows how many seats are left before you assign anyone.</p></details>
+        <details><summary>Is it ready to use today?</summary><p>Àríyá is a prototype. The planner runs on sample data so you can try every step; accounts, sending and payments are being built.</p></details>
+      </div>
+    </div>
+  </section>
+  <section class="sec wineband close-band" aria-labelledby="cTitle">
+    <div class="wrap">
+      <h2 id="cTitle">Start with your <em class="foil-text">guest list.</em></h2>
+      <div class="next"><a class="btn btn-primary" href="planner.html">Start planning</a><a class="btn btn-ghost" href="product.html">What Àríyá does</a></div>
+    </div>
+  </section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <span><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.3rem; color: var(--on-dark)">Àríyá</b> by OwambePlan</span>
+    <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
+    <span><a href="./">Home</a> · <a href="product.html">What we do</a> · <a href="pricing.html">Pricing</a></span>
+  </div>
+</footer>
+<script>
+(function () {
+  "use strict";
+  function $(id) { return document.getElementById(id); }
+  var sheet = $("menuSheet"), opener = $("menuOpen");
+  function trap(e) {
+    if (e.key === "Escape") { closeMenu(); return; }
+    if (e.key !== "Tab") return;
+    var f = sheet.querySelectorAll("a, button"), first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  function closeMenu(restore) { sheet.hidden = true; document.removeEventListener("keydown", trap); if (restore !== false) opener.focus(); }
+  opener.addEventListener("click", function () { sheet.hidden = false; $("menuClose").focus(); document.addEventListener("keydown", trap); });
+  $("menuClose").addEventListener("click", function () { closeMenu(); });
+  sheet.addEventListener("click", function (e) { if (e.target === sheet) closeMenu(); });
+})();
+</script>
+</body>
+</html>

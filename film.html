@@ -187,12 +187,12 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .env-flap .outside { background: linear-gradient(180deg, #e8dcc6, #d8c7a8); filter: drop-shadow(0 4px 4px rgba(0,0,0,.2)); }
 .env-flap .inside { transform: rotateX(180deg); clip-path: polygon(50% 0, 100% 100%, 0 100%); background: repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--wax); }
 .env.open .env-flap { transform: perspective(1200px) rotateX(178deg); z-index: 1; }
-.seal { position: absolute; left: 50%; top: 52%; z-index: 7; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; border: 0; cursor: pointer;
-  background: radial-gradient(circle at 38% 32%, #1f7a5c, #0b4a37 55%, #062a20); color: var(--gold);
-  box-shadow: inset 0 -3px 8px rgba(0,0,0,.45), inset 0 3px 4px rgba(255,255,255,.2), 0 4px 10px rgba(0,0,0,.45);
-  font-family: var(--font-display); font-style: italic; font-size: 1.8rem; transition: transform .4s, opacity .5s; pointer-events: auto; }
-.seal::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1px dashed rgba(233, 201, 138, 0.45); }
-.seal:hover { transform: scale(1.06); }
+.seal { position: absolute; left: 50%; top: 52%; z-index: 7; width: 96px; height: 96px; margin: -48px 0 0 -48px; border: 0; padding: 0; background: none; cursor: pointer; transform: rotate(-8deg); transition: transform .4s, opacity .5s; pointer-events: auto; }
+.seal .wax { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3)); }
+:root { --wax: #651126; --wax-hi: #8e2540; --wax-lo: #320510; }
+:root[data-velvet="emerald"] { --wax: #0d4a36; --wax-hi: #1f6e53; --wax-lo: #031f15; }
+:root[data-velvet="olive"] { --wax: #4a5122; --wax-hi: #6c7634; --wax-lo: #22270b; }
+.seal:hover { transform: rotate(-8deg) scale(1.06); }
 .seal-hint { position: absolute; left: 0; right: 0; top: calc(100% + 18px); z-index: 7; text-align: center; color: var(--gold); transition: opacity .4s; }
 .env.open .seal, .env.open .seal-hint { opacity: 0; pointer-events: none; transform: scale(.6); }
 
@@ -390,7 +390,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
       </div>
       <div class="env-front"><p class="to"><small>Hand delivered to</small><span id="toName">Adaeze Okonkwo</span></p></div>
       <div class="env-flap" aria-hidden="true"><div class="outside"></div><div class="inside"></div></div>
-      <button class="seal" id="seal" type="button" aria-label="Break the seal and open the invitation">À</button>
+      <button class="seal" id="seal" type="button" aria-label="Break the seal and open the invitation"></button>
       <p class="seal-hint mono">Tap the seal</p>
     </div>
   </div>
@@ -447,6 +447,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   </footer>
 </main>
 
+<script src="assets/fine-card.js"></script>
 <script>
 /* Story, sound and page. Runs on its own so the page still tells the story if WebGL or the CDN is unavailable.
    The 3D module plugs in through window.OP.render and reports loading through window.OP.loaded. */
@@ -462,6 +463,9 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   var EMBED = new URLSearchParams(location.search).get("embed");
   if (EMBED !== "hero" && EMBED !== "hall") EMBED = null;
   OP.embed = EMBED; OP.paused = false;
+  OP.velvet = new URLSearchParams(location.search).get("velvet") || "burgundy";
+  document.documentElement.setAttribute("data-velvet", OP.velvet);
+  if (window.FineCard) document.getElementById("seal").innerHTML = FineCard.seal({ initials: "C T" });
   var embedP = EMBED === "hall" ? 0.79 : 0, embedT0 = 0, readySent = false, frames = 0;
   if (EMBED) {
     document.documentElement.classList.add("embed");
@@ -470,10 +474,15 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
       if (e.origin !== location.origin || !e.data || e.data.type !== "ariya-stage") return;
       if (typeof e.data.visible === "boolean") OP.paused = !e.data.visible;
       if (typeof e.data.p === "number") embedP = clamp(e.data.p, 0, 1);
+      if (typeof e.data.velvet === "string") OP.velvet = e.data.velvet;
     });
   }
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  window.scrollTo(0, 0);
+  function toTop() { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); }
+  toTop();
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  window.addEventListener("load", toTop);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) location.reload(); });
   if (!EMBED) document.documentElement.classList.add("locked");
 
   /* ---------- Score: a generated highlife-ambient soundtrack that follows the story ---------- */
@@ -587,6 +596,7 @@ html.embed, html.embed body { overflow: hidden; background: #072a1f; }
   var gateStart = performance.now();
   function enter(withSound) {
     if (OP.entered) return;
+    toTop(); target = prog = 0;
     OP.entered = true;
     gate.classList.add("gone");
     document.documentElement.classList.remove("locked");
@@ -1011,6 +1021,17 @@ async function start() {
     normalMap: velvetNormal, normalScale: new THREE.Vector2(0.25, 0.25)
   });
   const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x05241a, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0x4fbf92 });
+  // Colour of the day: the box can be re-covered in burgundy, emerald or olive velvet.
+  const VELVETS = {
+    emerald: [0x073226, 0x86f0c6, 0x05241a, 0x4fbf92],
+    burgundy: [0x3d0715, 0xff9cb0, 0x24030b, 0xc75a72],
+    olive: [0x2c3313, 0xe2e9a4, 0x1b2009, 0xa3ae62]
+  };
+  let velvetNow = "";
+  function applyVelvet(name) {
+    const v = VELVETS[name] || VELVETS.emerald; velvetNow = name;
+    velvet.color.setHex(v[0]); velvet.sheenColor.setHex(v[1]); velvetDeep.color.setHex(v[2]); velvetDeep.sheenColor.setHex(v[3]);
+  }
   const brass = new THREE.MeshPhysicalMaterial({ color: 0xebc27c, metalness: 1, roughness: 0.2, clearcoat: 0.3 });
 
   function rrPath(w, d, r, path) {
@@ -1842,6 +1863,7 @@ async function start() {
       else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
     }
 
+    if (OP.velvet !== velvetNow) applyVelvet(OP.velvet);
     if (inA) {
       // Box: the lid opens on a sprung hinge.
       const open = seg(p, 0.03, 0.13);

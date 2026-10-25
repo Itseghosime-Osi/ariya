@@ -4,12 +4,16 @@ In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and eve
 
 ## Pages
 
-| Path | What it is | Status |
-|---|---|---|
-| `/` (`index.html`) | Landing page: product promise, WhatsApp-to-guest-list demo, the guest experience (invitation → RSVP → place card → table), guest and seating preview, vendor checklist, how it works, pricing | Working, static |
-| `planner.html` | Demo planner: event page header, guest list (search, filters, status counts, personal links with copy), CSV import (preview, row validation, duplicate detection), seating (2D floor plan, click-to-assign, drag-and-drop, list view, full-table feedback, table details sheet), vendor checklist (add, edit, complete, overdue) | Working on sample data |
-| `rsvp.html?g=<token>` | Guest RSVP page: invitation, accept/decline, plus-one only when allowed, note to the couple, confirmation | Working on sample data |
-| `film.html` | "The Yes", the optional cinematic WebGL film (three.js, ray-traced diamond, generated soundtrack) | Optional extra |
+| Path | What it is |
+|---|---|
+| `/` (`index.html`) | The cinematic home: live 3D ring box with a "Colour of the day" picker (burgundy, emerald, olive) that recolours the velvet box and every invitation; a WhatsApp storm that collapses into one list; a wax-sealed envelope that opens into a foil invitation you can accept, which flips into your place card; a giant foil "yes"; the live 3D hall filling seat by seat; fanned invitations; the finale |
+| `product.html` | What Àríyá does: invitations and RSVP, guests and seating, vendor checklist, how it works |
+| `pricing.html` | Pay-per-event pricing (placeholder prices) and questions |
+| `planner.html` | Demo planner: guests, CSV import, seating, vendors, on sample data |
+| `rsvp.html?g=<token>` | A guest's own invitation and RSVP page |
+| `film.html` | "The Yes", the full cinematic film; always starts from the beginning; `?velvet=` sets the box colour |
+
+`assets/fine-card.js` draws the foil invitations, place cards and wax seals in SVG (corner roses, laurel monogram, embossed crest), styled in `assets/ariya.css`.
 
 ## What is real and what is sample
 

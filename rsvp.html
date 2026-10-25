@@ -5,18 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Your invitation · Àríyá</title>
 <meta name="description" content="A personal wedding invitation and RSVP page from Àríyá by OwambePlan.">
-<meta name="theme-color" content="#072a1f">
+<meta name="theme-color" content="#16040a">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Cinzel:wght@400;500&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
 <link rel="stylesheet" href="assets/ariya.css">
 <style>
 /* Guest RSVP page: one invitation, one question. The card sits above the form on phones. */
-body { background: radial-gradient(70% 50% at 50% 0%, rgba(227, 194, 127, 0.14), transparent 70%), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px), var(--emerald-900); min-height: 100vh; }
+body { background: radial-gradient(70% 50% at 50% 0%, rgba(227, 194, 127, 0.14), transparent 70%), var(--wine-950); min-height: 100vh; }
 .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: calc(env(safe-area-inset-top, 0px) + 18px) 10px; color: var(--on-dark); }
 .top b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.5rem; }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; padding-block: 18px 64px; }
+.invite-col { display: grid; gap: 18px; justify-items: center; }
+.invite-col .fc { width: min(380px, 86vw); }
+.invite-col .details { text-align: center; color: var(--on-dark-soft); display: grid; gap: 2px; font-size: 0.9375rem; }
+.invite-col .details b { color: var(--on-dark); }
 .card { position: relative; border-radius: 4px; box-shadow: var(--shadow-paper), 0 40px 80px rgba(0, 0, 0, 0.35); padding: clamp(32px, 6vw, 56px) clamp(24px, 5vw, 48px); text-align: center; display: grid; gap: 16px; }
 .card::before { content: ""; position: absolute; inset: 14px; border: 1.5px solid transparent; border-image: linear-gradient(115deg, #b78a3c, #f2dca6 40%, #a97c32) 1; pointer-events: none; }
 .card small { font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: #6d5a42; }
@@ -32,8 +36,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 legend { font-weight: 700; margin-bottom: 10px; padding: 0; font-size: 1.0625rem; }
 .choice { display: grid; gap: 10px; }
 .choice label { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 16px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; font-weight: 600; }
-.choice input { width: 22px; height: 22px; accent-color: var(--emerald); flex: none; }
-.choice label:has(input:checked) { border-color: var(--emerald); background: var(--ok-bg); }
+.choice input { width: 22px; height: 22px; accent-color: var(--wine); flex: none; }
+.choice label:has(input:checked) { border-color: var(--wine); background: #f6e6ea; }
 .check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 500; }
 .check input { width: 22px; height: 22px; accent-color: var(--emerald); }
 textarea.input { min-height: 90px; resize: vertical; }
@@ -53,14 +57,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 <div class="wrap">
   <div class="top"><b>Àríyá</b><span class="demo-flag">Demo invitation · sample data · nothing is sent</span></div>
   <main class="layout" id="main">
-    <article class="card paper" aria-label="Invitation">
-      <div class="seal" aria-hidden="true">À</div>
-      <small>Together with their families</small>
-      <div class="names">Chidinma <i>&amp;</i> Tunde</div>
-      <small>request the pleasure of the company of</small>
-      <div class="guest" id="guestName">Our guest</div>
-      <div class="details" id="details"></div>
-    </article>
+    <div class="invite-col"><div id="fineCard"></div><div class="details" id="details"></div></div>
     <section class="formbox" aria-labelledby="formTitle">
       <div id="formArea">
         <h1 id="formTitle">Will you join us?</h1>
@@ -71,6 +68,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 </div>
 
 <script src="assets/demo.js"></script>
+<script src="assets/fine-card.js"></script>
 <script>
 (function () {
   "use strict";
@@ -84,12 +82,12 @@ textarea.input { min-height: 90px; resize: vertical; }
 
   if (!g) {
     document.title = "Invitation not found · Àríyá";
-    $("guestName").textContent = "Our guest";
+    $("fineCard").innerHTML = FineCard.html({ variant: "wine", noCotd: true, label: "Invitation to Chidinma and Tunde's wedding" });
     $("formArea").innerHTML = '<h1 id="formTitle">We couldn\'t find this invitation</h1><p class="muted">' + (token ? "The link may be incomplete. Ask the couple or their planner to send it again." : "Personal invitation links end in <code>?g=</code> followed by a code.") + '</p><p><a class="btn btn-primary" href="rsvp.html?g=k701Qx">Open the sample invitation</a></p>';
     return;
   }
   document.title = "Your invitation, " + g.name.split(" ")[0] + " · Àríyá";
-  $("guestName").textContent = g.name;
+  $("fineCard").innerHTML = FineCard.html({ variant: "wine", guest: g.name, noCotd: true, label: "Invitation for " + g.name });
 
   function showForm(prev) {
     var plus = g.plusOneAllowed ? '<div id="plusWrap" style="display:grid;gap:8px"><label class="check"><input type="checkbox" id="plusOne"' + (g.party > 1 ? " checked" : "") + '> I\'m bringing my plus-one</label><div class="field" id="plusNameWrap"' + (g.party > 1 ? "" : " hidden") + '><label for="plusName">Plus-one\'s full name</label><input class="input" id="plusName" autocomplete="off"></div></div>' : '<p class="hint">This invitation is for ' + (g.party > 1 ? "your party of " + g.party : "you") + '.</p>';

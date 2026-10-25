@@ -7,6 +7,13 @@
   --emerald-800: #0a3a2b;
   --emerald: #0f5c45;
   --emerald-600: #17775a;
+  --wine-950: #16040a;
+  --wine-900: #250812;
+  --wine-800: #3a0c1a;
+  --wine: #5e1529;
+  --wine-600: #7d2139;
+  --olive: #4a5226;
+  --olive-900: #262b12;
   --ivory: #f7f2e8;
   --paper: #fcfaf5;
   --linen: #efe7d8;
@@ -29,6 +36,7 @@
   --font-display: "Bodoni Moda", "Didot", Georgia, serif;
   --font-ui: "Figtree", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   --font-hand: "Pinyon Script", "Snell Roundhand", cursive;
+  --font-caps: "Cinzel", "Trajan Pro", Georgia, serif;
   --ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: light;
 }
@@ -86,7 +94,7 @@ p { margin: 0; }
 
 /* Header */
 .site-head { position: sticky; top: 0; z-index: 40; padding-top: env(safe-area-inset-top, 0px); background: rgba(247, 242, 232, 0.94); border-bottom: 1px solid var(--line); -webkit-backdrop-filter: saturate(1.2) blur(10px); backdrop-filter: saturate(1.2) blur(10px); }
-.site-head.on-dark { background: rgba(7, 42, 31, 0.92); color: var(--on-dark); border-bottom-color: var(--line-dark); }
+.site-head.on-dark { background: rgba(37, 8, 18, 0.92); color: var(--on-dark); border-bottom-color: var(--line-dark); }
 .site-head .wrap { display: flex; align-items: center; gap: 24px; min-height: 68px; }
 .lockup { display: inline-flex; align-items: baseline; gap: 10px; text-decoration: none; color: inherit; }
 .lockup b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.6rem; line-height: 1; }
@@ -136,3 +144,49 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+
+/* ---------- Fine invitation card (assets/fine-card.js builds the markup) ----------
+   A 5:7 card printed on coloured stock with gold foil: double rule, corner roses, monogram wreath,
+   script names, Cinzel capitals. Sizes are in container units so the card scales anywhere. */
+.fc { --bg1: #3b0a16; --bg2: #5e1529; --ink: #f2e2c2; --ink-soft: rgba(242, 226, 194, 0.78);
+  position: relative; aspect-ratio: 5 / 7; container-type: inline-size; border-radius: 3px; color: var(--ink); overflow: hidden; isolation: isolate;
+  background:
+    radial-gradient(120% 75% at 28% 12%, rgba(255, 235, 200, 0.16), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)),
+    linear-gradient(160deg, var(--bg2), var(--bg1));
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.35), 0 4px 8px -2px rgba(0, 0, 0, 0.35), 0 22px 40px -12px rgba(0, 0, 0, 0.5), 0 60px 90px -30px rgba(0, 0, 0, 0.55); }
+.fc::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: linear-gradient(calc(118deg + var(--lx, 0) * 14deg), rgba(255, 240, 210, 0.16) 0%, transparent 34%, transparent 62%, rgba(0, 0, 0, 0.18) 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 240, 210, 0.18), inset -1px -1px 0 rgba(0, 0, 0, 0.3); }
+.fc--wine { --bg1: #2e0711; --bg2: #5a1428; }
+.fc--olive { --bg1: #22270f; --bg2: #48502a; }
+.fc--emerald { --bg1: #05261b; --bg2: #0f523d; }
+.fc--ivory { --bg1: #efe5d2; --bg2: #fbf7ef; --ink: #4a1020; --ink-soft: rgba(74, 16, 32, 0.75); }
+.fc-orn { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; filter: drop-shadow(0 0.6px 0 rgba(0, 0, 0, 0.45)); }
+.fc-body { position: absolute; inset: 6% 11% 5.5%; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1cqw; }
+.fc-foil { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); background-size: 220% 100%; background-position: calc(40% + var(--lx, 0) * 30%) 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.5)); }
+.fc--ivory .fc-foil { background-image: linear-gradient(105deg, #7a5420, #c9a258 30%, #8c6326 55%, #d7b46c 75%, #7a5420); }
+.fc-wreath { width: 17cqw; height: 17cqw; flex: none; }
+.fc-caps { font-family: var(--font-caps); font-size: 3.1cqw; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin: 0; }
+.fc-script { font-family: var(--font-hand); font-size: 17cqw; line-height: 0.82; margin: 0; padding: 0.6cqw 3cqw 0; }
+.fc-sub { font-family: var(--font-display); font-size: 3.7cqw; letter-spacing: 0.04em; color: var(--ink); margin: 0; }
+.fc-amp { font-family: var(--font-display); font-style: italic; font-size: 7.5cqw; line-height: 0.9; margin: 0; }
+.fc-line { font-family: var(--font-display); font-style: italic; font-size: 3.7cqw; color: var(--ink); margin: 1cqw 0 0; line-height: 1.3; }
+.fc-guest { font-family: var(--font-hand); font-style: normal; font-size: 8.6cqw; display: block; line-height: 1.15; }
+.fc-rule { width: 46cqw; height: 3.8cqw; margin: 0.6cqw 0; flex: none; }
+.fc-date { font-family: var(--font-display); font-size: 5cqw; margin: 0; }
+.fc-venue { font-family: var(--font-display); font-size: 3.8cqw; color: var(--ink-soft); margin: 0; line-height: 1.4; }
+.fc-cotd { display: flex; gap: 2.4cqw; justify-content: center; margin-top: 0.8cqw; }
+.fc-cotd i { width: 4.4cqw; height: 4.4cqw; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 0.5cqw rgba(233, 201, 138, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5); }
+.fc-table { width: 42cqw; height: 42cqw; margin: 1cqw 0; flex: none; }
+.fc-place .fc-script { font-size: 15cqw; }
+.fc-tablename { font-family: var(--font-caps); letter-spacing: 0.14em; font-size: 5.4cqw; }
+
+/* Wax seal (FineCard.seal). Colours follow the page's colour of the day. */
+:root { --wax: #651126; --wax-hi: #8e2540; --wax-lo: #320510; }
+[data-cotd="emerald"] { --wax: #0d4a36; --wax-hi: #1f6e53; --wax-lo: #031f15; }
+[data-cotd="olive"] { --wax: #4a5122; --wax-hi: #6c7634; --wax-lo: #22270b; }
+.wax { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45)) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3)); }
