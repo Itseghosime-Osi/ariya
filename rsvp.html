@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your invitation · Àríyá</title>
+<meta name="description" content="A personal wedding invitation and RSVP page from Àríyá by OwambePlan.">
+<meta name="theme-color" content="#072a1f">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="assets/ariya.css">
+<style>
+/* Guest RSVP page: one invitation, one question. The card sits above the form on phones. */
+body { background: radial-gradient(70% 50% at 50% 0%, rgba(227, 194, 127, 0.14), transparent 70%), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px), var(--emerald-900); min-height: 100vh; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: calc(env(safe-area-inset-top, 0px) + 18px) 10px; color: var(--on-dark); }
+.top b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.5rem; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; padding-block: 18px 64px; }
+.card { position: relative; border-radius: 4px; box-shadow: var(--shadow-paper), 0 40px 80px rgba(0, 0, 0, 0.35); padding: clamp(32px, 6vw, 56px) clamp(24px, 5vw, 48px); text-align: center; display: grid; gap: 16px; }
+.card::before { content: ""; position: absolute; inset: 14px; border: 1.5px solid transparent; border-image: linear-gradient(115deg, #b78a3c, #f2dca6 40%, #a97c32) 1; pointer-events: none; }
+.card small { font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: #6d5a42; }
+.card .names { font-family: var(--font-display); font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.02; }
+.card .names i { display: block; font-size: 0.55em; color: var(--gold-ink); }
+.card .guest { font-family: var(--font-hand); font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.1; color: #33271b; }
+.card .details { display: grid; gap: 4px; color: #4f4232; }
+.card .details b { color: var(--ink); }
+.seal { width: 58px; height: 58px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 36% 30%, #2a8a69, #0b4a37 55%, #052a1f); color: var(--gold); font-family: var(--font-display); font-style: italic; font-size: 1.5rem; box-shadow: inset 0 -3px 7px rgba(0, 0, 0, 0.45), inset 0 3px 3px rgba(255, 255, 255, 0.2), 0 4px 10px rgba(0, 0, 0, 0.3); }
+.formbox { background: var(--paper); border-radius: 16px; padding: clamp(20px, 4vw, 32px); display: grid; gap: 20px; }
+.formbox h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.8rem, 4vw, 2.4rem); }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { font-weight: 700; margin-bottom: 10px; padding: 0; font-size: 1.0625rem; }
+.choice { display: grid; gap: 10px; }
+.choice label { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 16px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; font-weight: 600; }
+.choice input { width: 22px; height: 22px; accent-color: var(--emerald); flex: none; }
+.choice label:has(input:checked) { border-color: var(--emerald); background: var(--ok-bg); }
+.check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 500; }
+.check input { width: 22px; height: 22px; accent-color: var(--emerald); }
+textarea.input { min-height: 90px; resize: vertical; }
+.done { border-radius: 14px; padding: 18px; display: grid; gap: 10px; }
+.done.yes { background: var(--ok-bg); color: #10402c; }
+.done.no { background: var(--linen); }
+.done h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.7rem; }
+.done dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; }
+.done dt { opacity: 0.8; }
+.done dd { margin: 0; font-weight: 600; }
+.foot-note { color: var(--on-dark-soft); font-size: 0.875rem; text-align: center; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+.foot-note a { color: var(--on-dark); }
+@media (max-width: 820px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><b>Àríyá</b><span class="demo-flag">Demo invitation · sample data · nothing is sent</span></div>
+  <main class="layout" id="main">
+    <article class="card paper" aria-label="Invitation">
+      <div class="seal" aria-hidden="true">À</div>
+      <small>Together with their families</small>
+      <div class="names">Chidinma <i>&amp;</i> Tunde</div>
+      <small>request the pleasure of the company of</small>
+      <div class="guest" id="guestName">Our guest</div>
+      <div class="details" id="details"></div>
+    </article>
+    <section class="formbox" aria-labelledby="formTitle">
+      <div id="formArea">
+        <h1 id="formTitle">Will you join us?</h1>
+      </div>
+    </section>
+  </main>
+  <p class="foot-note">Sent with Àríyá by OwambePlan. This is a demonstration: replies stay in this browser tab. <a href="./">About Àríyá</a> · <a href="planner.html">Open the demo planner</a></p>
+</div>
+
+<script src="assets/demo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.AriyaDemo, e = D.state.event;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var token = new URLSearchParams(location.search).get("g");
+  var g = token ? D.guestByToken(token) : null;
+
+  $("details").innerHTML = "<span><b>" + esc(D.fmtDate(e.date)) + "</b> at 2pm</span><span>" + esc(e.venue) + ", " + esc(e.area) + "</span><span>" + esc(e.dressCode) + "</span><span>Kindly reply by " + esc(D.fmtDate(e.rsvpBy, { day: "numeric", month: "long" })) + "</span>";
+
+  if (!g) {
+    document.title = "Invitation not found · Àríyá";
+    $("guestName").textContent = "Our guest";
+    $("formArea").innerHTML = '<h1 id="formTitle">We couldn\'t find this invitation</h1><p class="muted">' + (token ? "The link may be incomplete. Ask the couple or their planner to send it again." : "Personal invitation links end in <code>?g=</code> followed by a code.") + '</p><p><a class="btn btn-primary" href="rsvp.html?g=k701Qx">Open the sample invitation</a></p>';
+    return;
+  }
+  document.title = "Your invitation, " + g.name.split(" ")[0] + " · Àríyá";
+  $("guestName").textContent = g.name;
+
+  function showForm(prev) {
+    var plus = g.plusOneAllowed ? '<div id="plusWrap" style="display:grid;gap:8px"><label class="check"><input type="checkbox" id="plusOne"' + (g.party > 1 ? " checked" : "") + '> I\'m bringing my plus-one</label><div class="field" id="plusNameWrap"' + (g.party > 1 ? "" : " hidden") + '><label for="plusName">Plus-one\'s full name</label><input class="input" id="plusName" autocomplete="off"></div></div>' : '<p class="hint">This invitation is for ' + (g.party > 1 ? "your party of " + g.party : "you") + '.</p>';
+    $("formArea").innerHTML = '<h1 id="formTitle">Will you join us, ' + esc(g.name.split(" ")[0]) + '?</h1>' +
+      '<form id="f" novalidate style="display:grid;gap:18px">' +
+      '<fieldset><legend>Your reply</legend><div class="choice"><label><input type="radio" name="r" value="yes"' + (prev === "yes" ? " checked" : "") + '> Joyfully accept</label><label><input type="radio" name="r" value="no"' + (prev === "no" ? " checked" : "") + '> Regretfully decline</label></div></fieldset>' +
+      plus +
+      '<div class="field"><label for="note">A note for the couple <span class="hint">(optional)</span></label><textarea class="input" id="note" maxlength="280"></textarea></div>' +
+      '<p class="error-text" id="err" role="alert"></p>' +
+      '<button class="btn btn-primary" type="submit" id="send">Send my reply</button></form>';
+    var po = $("plusOne"); if (po) po.addEventListener("change", function () { $("plusNameWrap").hidden = !po.checked; });
+    $("f").addEventListener("submit", submit);
+  }
+  function submit(ev) {
+    ev.preventDefault();
+    var r = (document.querySelector('input[name="r"]:checked') || {}).value, err = $("err");
+    if (!r) { err.textContent = "Choose accept or decline to send your reply."; return; }
+    var po = $("plusOne"), plus = !!(po && po.checked), pn = plus ? $("plusName").value.trim() : "";
+    if (r === "yes" && plus && !pn) { err.textContent = "Add your plus-one's name, or untick the plus-one box."; $("plusName").focus(); return; }
+    err.textContent = "";
+    var b = $("send"); b.disabled = true; b.textContent = "Sending…";
+    setTimeout(function () {
+      var res = D.respond(g.token, r, { plusOne: plus, plusOneName: pn, note: $("note").value.trim() });
+      if (!res.ok) { b.disabled = false; b.textContent = "Try again"; err.textContent = res.msg + " Your choices are still selected."; return; }
+      g = res.guest; showDone(pn);
+    }, 400);
+  }
+  function showDone(pn) {
+    var t = g.tableId ? D.byId(D.state.tables, g.tableId) : null;
+    $("formArea").innerHTML = g.status === "yes"
+      ? '<div class="done yes" tabindex="-1" id="doneBox"><h2>You\'re on the list, ' + esc(g.name.split(" ")[0]) + '.</h2><dl><dt>Reply</dt><dd>Attending</dd><dt>Party</dt><dd>' + g.party + (pn ? " (with " + esc(pn) + ")" : "") + '</dd><dt>Table</dt><dd>' + (t ? esc(t.name) : "The couple will seat you soon; your table will show here.") + '</dd></dl>' +
+        '<p>In the live product, a confirmation email goes to ' + esc(g.email || "the email you give") + ' with the date, venue and your table. <b>This demo sends nothing.</b></p></div>'
+      : '<div class="done no" tabindex="-1" id="doneBox"><h2>Thank you for letting us know.</h2><p>Chidinma and Tunde will see your reply straight away. In the live product you\'d get a short email confirming it. <b>This demo sends nothing.</b></p></div>';
+    $("formArea").insertAdjacentHTML("beforeend", '<p style="margin-top:16px"><button class="btn btn-ghost" type="button" id="change">Change my reply</button></p>');
+    $("change").addEventListener("click", function () { showForm(g.status); var first = document.querySelector('input[name="r"]:checked') || document.querySelector('input[name="r"]'); first.focus(); });
+    $("doneBox").focus();
+  }
+  if (g.status === "pending") showForm(); else showDone("");
+})();
+</script>
+</body>
+</html>

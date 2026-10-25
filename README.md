@@ -1,53 +1,45 @@
-# Àríyá
+# Àríyá by OwambePlan
 
-In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and event planner where every guest RSVPs with a personal link. Formerly "OwambePlan". Àríyá (ah-ree-YAH) is Yoruba for merriment, the spirit of an owambe.
+In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and event planner for Nigerian couples and planners, replacing guest lists and RSVPs scattered across WhatsApp groups. **OwambePlan** is the product; **Àríyá** (ah-ree-YAH, Yoruba for merriment) is its consumer-facing name.
 
-## What's here
+## Pages
 
-`index.html` is the landing page. It opens on "The Yes", a wedding archive in eight chapters rendered like a camera rather than a 3D animation, then becomes the company's site.
+| Path | What it is | Status |
+|---|---|---|
+| `/` (`index.html`) | Landing page: product promise, WhatsApp-to-guest-list demo, the guest experience (invitation → RSVP → place card → table), guest and seating preview, vendor checklist, how it works, pricing | Working, static |
+| `planner.html` | Demo planner: event page header, guest list (search, filters, status counts, personal links with copy), CSV import (preview, row validation, duplicate detection), seating (2D floor plan, click-to-assign, drag-and-drop, list view, full-table feedback, table details sheet), vendor checklist (add, edit, complete, overdue) | Working on sample data |
+| `rsvp.html?g=<token>` | Guest RSVP page: invitation, accept/decline, plus-one only when allowed, note to the couple, confirmation | Working on sample data |
+| `film.html` | "The Yes", the optional cinematic WebGL film (three.js, ray-traced diamond, generated soundtrack) | Optional extra |
 
-0. **Gate.** "Enter the wedding" starts the soundtrack; "Enter in silence" skips it. The hall loads behind the gate.
-1. **Prologue.** A drifting, out-of-focus establishing shot: how the couple met at someone else's owambe.
-2. **The box.** An emerald velvet ring box (gold seam bands, inner gold lip, clasp, three-knuckle hinge, piping, foil monogram) opens on a walnut table, candles behind it. The brand sits at the top of the satin lid lining, clear of the ring.
-3. **The yes.** The ring rises; the diamond throws real fire.
-4. **The noise.** A family WhatsApp group floods the screen, messages drifting in and out of focus, with notification pings in the score.
-5. **The calm.** The messages scatter and the ring turns in the light.
-6. **The invitation.** The camera dives into the diamond and flares out to a paper envelope addressed to the guest. Tap the wax seal: the flap lifts and the card slides out to RSVP.
-7. **The count.** The reception hall from above in ivory, gold and candlelight, with a live guest list. Each guest who says yes takes a seat in emerald-and-gold aso ebi and lights a candle.
-8. **The dance.** The couple and guests dancing under warm moving lights, naira notes sprayed, foil confetti falling in front of the lens.
+## What is real and what is sample
 
-After the film: what Àríyá does, the occasions it plans, the tools, how it works, pricing (placeholder prices) and an early-access sign-up. The menu doubles as the archive index.
+Everything in the planner and RSVP pages runs on **sample data** in `assets/demo.js`, kept in `sessionStorage` for the current tab only. Nothing is sent: no invitations, SMS, WhatsApp messages, emails or payments. Every demo surface says so. Pricing is labelled as placeholder.
 
-## Sound
+`assets/demo.js` models the project's entities, **events, guests, RSVPs, tables and vendors**, and exposes the operations the UI needs (`respond`, `assign`, `unassign`, `previewImport`, `commitImport`, `counts`, `seatsUsed`). Replacing it with API calls is the integration point.
 
-The soundtrack is generated live with the Web Audio API, so there are no audio files. It is a highlife-leaning ambient loop at 100 BPM (Fmaj9, Bbmaj7, C6/9, Am7) with pads, a highlife guitar figure, bass, shaker, agogo bell, talking drum and kick. Layers enter and leave with the story: the noise chapter muffles the band under WhatsApp pings, the hall brings in the drums, the dance brings the kick. It only starts after a click, pauses when the tab is hidden, and the nav has a sound toggle.
+### Still needed for a live product
 
-## How it is made to look real
+- Accounts and authentication for couples and planners
+- A database and API for events, guests, RSVPs, tables and vendors (the shapes in `demo.js`)
+- Unguessable per-guest tokens issued by the server, so RSVP links can't be enumerated
+- Sending: confirmation emails (e.g. Resend), SMS/WhatsApp delivery of links
+- Payments per event (e.g. Paystack or Flutterwave)
+- Server-side CSV parsing and validation mirroring `previewImport`
 
-Everything renders into a linear HDR buffer, then gets treated like light hitting a sensor:
+## Design system
 
-- **Real light.** Physically based materials lit by a photographed ballroom (`assets/hall.exr`, the Poly Haven "hall" HDRI at 512×256, CC0, via `@pmndrs/assets`). Soft VSM shadows.
-- **A real diamond.** A brilliant cut built as a convex hull and ray-traced in a shader: refraction at IOR ~2.42, total internal reflection over up to six bounces, and a separate IOR per colour channel for fire. Sparkle comes from the actual light directions in the scene.
-- **Real surfaces.** Velvet, satin and linen use sheen with procedural normal maps; walnut, platinum, gold and porcelain use clearcoat; petals, tablecloth folds, flower balls, gele and agbada are shaped geometry.
-- **A real lens.** Depth of field with a moving focus plane, bloom, slight distortion, chromatic aberration, vignette, film grain, handheld drift, and a viewfinder readout of the current f-stop and focus distance.
-- **A hall that is alive.** Draped walls washed by warm uplights, moving-head beams, chandeliers, a fairy-light wall, seated guests who appear as they RSVP, dancers, photographers' flashes, a four-tier cake.
-- **Colour with contrast.** Emerald and champagne gold against near-black, graded with an S-curve, teal shadows and warm highlights.
-- **Design inside the photograph.** The brand is foil-stamped into the satin lining, the couple's monogram is projected onto the dance floor like a gobo light, headlines pull focus the way the lens does.
+`assets/ariya.css`: deep emerald and warm ivory alternate by section, champagne gold is an accent. Bodoni Moda for emotional headlines, Figtree for everything people read or operate, Pinyon Script only for names on paper. Status always pairs colour with a word. Buttons are at least 44px tall, focus is always visible, and `prefers-reduced-motion` removes transitions.
 
-Three.js 0.169 loads as ES modules from jsDelivr through an import map. The story text, envelope and RSVP work without WebGL. Rendering resolution drops automatically if frames run long, and `prefers-reduced-motion` freezes grain, drift, flicker and the focus pull.
+The hero still life and the guest-experience sequence are 2.5D (layered HTML and CSS), not WebGL, so they load instantly, stay sharp, and work everywhere. The RSVP form never depends on animation.
 
 ## Run it
 
-The HDRI is loaded with `fetch`, so serve the folder rather than opening the file directly:
+Static files, no build step. Serve the folder (the film fetches its HDRI):
 
 ```
 npx serve .
 ```
 
-## Next
+## Credits
 
-- Engrave the guest's typed name inside the ring band for the final shot
-- A photogrammetry scan of a real Lagos or Benin event hall
-- Filmed dancers on the dance floor
-- A lighter mode for mid-range Android phones
-- Build the real app (Next.js, Supabase, Resend)
+`assets/hall.exr`: Poly Haven "hall" HDRI (CC0), via `@pmndrs/assets`. three.js 0.169 from jsDelivr (film only).

@@ -3,1999 +3,638 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Àríyá</title>
-<meta name="description" content="Àríyá plans Nigerian weddings and parties with one personal RSVP link per guest. The Yes is a wedding archive in eight chapters.">
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>Àríyá by OwambePlan</title>
+<meta name="description" content="Àríyá by OwambePlan gives every wedding guest a personal RSVP link, keeps a live headcount, seats guests at the right tables and tracks vendors, for Nigerian couples and planners.">
+<meta name="theme-color" content="#072a1f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Jost:wght@300;400;500&family=DM+Mono:wght@400&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="assets/ariya.css">
 <style>
-/* Àríyá, "The Yes": a wedding archive. A fixed WebGL stage rendered like a camera, with type layered over it.
-   A 1000vh track drives eight archive chapters, then the page becomes the company's site.
-   One committed night look: emerald black, ivory, champagne gold. Type pulls focus the way the lens does. */
-:root {
-  --ink: #050d0a;
-  --night: #0a1813;
-  --emerald: #0f5c45;
-  --jade: #4fcaa0;
-  --gold: #e9c98a;
-  --ivory: #f4efe6;
-  --mist: #9fb2a8;
-  --line: rgba(244, 239, 230, 0.16);
-  --wax: #0b4a37;
-  --paper: #f3ebdc;
-  --paper-ink: #2a2118;
-  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
-  --font-body: "Jost", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, Menlo, monospace;
-  --font-hand: "Pinyon Script", "Snell Roundhand", cursive;
-  color-scheme: dark;
+/* Landing page. Rhythm: dark hero → ivory problem → dark guest experience → ivory tools → linen vendors
+   → dark steps → ivory pricing → dark close. Each section does one job. */
+section { scroll-margin-top: 72px; }
+.sec { padding-block: clamp(72px, 10vw, 128px); }
+.sec-head { display: grid; gap: 14px; max-width: 46rem; margin-bottom: clamp(36px, 5vw, 56px); }
+.sec-head h2 { font-size: clamp(2.1rem, 4.6vw, 3.5rem); }
+.sec-head p { font-size: 1.125rem; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; overflow: hidden; background:
+  radial-gradient(60% 70% at 78% 45%, rgba(227, 194, 127, 0.16), transparent 60%),
+  repeating-linear-gradient(90deg, rgba(227, 194, 127, 0.05) 0 2px, transparent 2px 22px),
+  repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 4px),
+  var(--emerald-900); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(48px, 7vw, 96px) clamp(64px, 8vw, 112px); }
+.hero h1 { font-size: clamp(2.6rem, 6vw, 4.9rem); margin-bottom: 22px; }
+.hero h1 em { color: var(--gold); }
+.hero .lede { font-size: clamp(1.06rem, 1.6vw, 1.25rem); color: var(--on-dark-soft); max-width: 34rem; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.hero .fine { margin-top: 22px; font-size: 0.9375rem; color: var(--on-dark-soft); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.hero .fine a { color: var(--on-dark); font-weight: 600; }
+
+/* The hero still life: aso oke weave, envelope, invitation, place card */
+.still { position: relative; aspect-ratio: 1 / 0.92; max-width: 560px; justify-self: end; width: 100%; perspective: 1400px; }
+.weave { position: absolute; inset: 6% -4% 2% 8%; border-radius: 6px; transform: rotate(-4deg); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  /* Aso oke: narrow strip-woven bands sewn edge to edge, with gold lurex warp threads */
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.32) 0 1.5px, transparent 1.5px 74px),
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(227, 194, 127, 0.7) 8px 10px, transparent 10px 14px, rgba(227, 194, 127, 0.35) 14px 15px, transparent 15px 52px, rgba(227, 194, 127, 0.55) 52px 53px, transparent 53px 74px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, rgba(255, 255, 255, 0.03) 1px 2px, transparent 2px 3px),
+    linear-gradient(135deg, #0e4d39, #0a3a2b); }
+.weave::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(80% 70% at 30% 20%, rgba(255, 240, 210, 0.12), transparent 60%); }
+.h-env { position: absolute; left: 4%; bottom: 8%; width: 62%; aspect-ratio: 1.5; border-radius: 4px; transform: rotate(-9deg); background: linear-gradient(165deg, #efe5d2, #dccdb0); box-shadow: var(--shadow-paper); overflow: hidden; }
+.h-env::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom right, transparent 49.6%, rgba(90, 60, 30, 0.13) 50%, transparent 50.5%), linear-gradient(to bottom left, transparent 49.6%, rgba(90, 60, 30, 0.13) 50%, transparent 50.5%); }
+.h-env .liner { position: absolute; left: 0; right: 0; top: 0; height: 46%; clip-path: polygon(0 0, 100% 0, 50% 100%); background: repeating-linear-gradient(45deg, rgba(227, 194, 127, 0.45) 0 1px, transparent 1px 10px), repeating-linear-gradient(-45deg, rgba(227, 194, 127, 0.45) 0 1px, transparent 1px 10px), var(--emerald); }
+.h-card { position: absolute; right: 2%; top: 4%; width: 58%; aspect-ratio: 0.72; border-radius: 3px; transform: rotate(5deg); box-shadow: var(--shadow-paper); padding: 9% 8%; text-align: center; display: grid; align-content: center; gap: 6%; }
+.h-card::before { content: ""; position: absolute; inset: 5%; border: 1.5px solid transparent; border-image: linear-gradient(115deg, #b78a3c, #f2dca6 40%, #a97c32) 1; pointer-events: none; }
+.h-card small { font-size: clamp(0.55rem, 1.1vw, 0.72rem); letter-spacing: 0.18em; text-transform: uppercase; color: #6d5a42; }
+.h-card .names { font-family: var(--font-display); font-size: clamp(1.4rem, 3.2vw, 2.3rem); line-height: 1.05; }
+.h-card .names i { display: block; font-size: 0.6em; color: var(--gold-ink); }
+.h-card .for { font-family: var(--font-hand); font-size: clamp(1.3rem, 2.8vw, 2rem); color: #3a2c1e; line-height: 1.1; }
+.h-card .when { font-size: clamp(0.62rem, 1.1vw, 0.78rem); color: #5c4c3a; line-height: 1.5; }
+.h-seal { position: absolute; left: 30%; bottom: 33%; width: 15%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; transform: rotate(-12deg);
+  background: radial-gradient(circle at 36% 30%, #2a8a69, #0b4a37 55%, #052a1f); box-shadow: inset 0 -3px 7px rgba(0, 0, 0, 0.45), inset 0 3px 3px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-display); font-style: italic; color: var(--gold); font-size: clamp(1rem, 2.4vw, 1.6rem); }
+.h-place { position: absolute; right: 8%; bottom: 0; width: 34%; aspect-ratio: 1.6; border-radius: 3px; transform: rotate(-3deg); box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; gap: 2px; }
+.h-place b { font-family: var(--font-hand); font-weight: 400; font-size: clamp(1rem, 2.1vw, 1.45rem); color: #2c2218; line-height: 1.1; }
+.h-place span { font-size: clamp(0.55rem, 1vw, 0.72rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-ink); }
+
+/* ---------- WhatsApp chaos → list ---------- */
+.chaos { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 28px; align-items: stretch; }
+.phone { background: #e9e1d2; border-radius: 22px; padding: 14px; box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: 10px; align-content: start; }
+.phone header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 6px 10px; border-bottom: 1px solid var(--line); font-weight: 600; }
+.phone header span { font-size: 0.8125rem; font-weight: 600; color: var(--no); background: var(--no-bg); border-radius: 999px; padding: 2px 9px; }
+.msg { justify-self: start; max-width: 88%; background: #fff; border-radius: 12px 12px 12px 4px; padding: 8px 12px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06); transition: opacity .25s var(--ease), transform .25s var(--ease); }
+.msg b { display: block; font-size: 0.8125rem; color: var(--emerald); }
+.msg.sorted { opacity: 0.42; transform: scale(0.98); }
+.msg.sorted::after { content: " · sorted"; font-size: 0.8125rem; color: var(--ok); font-weight: 600; }
+.chaos-mid { display: grid; place-items: center; align-content: center; gap: 10px; text-align: center; }
+.chaos-mid .arrow { font-size: 1.6rem; color: var(--gold-ink); }
+.sheet-list { background: var(--paper); border-radius: 14px; box-shadow: inset 0 0 0 1px var(--line); padding: 8px 16px; min-height: 100%; }
+.sheet-list h3 { font-size: 1rem; padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; }
+.sheet-list ul { list-style: none; margin: 0; padding: 0; }
+.sheet-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); opacity: 0; transform: translateY(8px); transition: opacity .25s var(--ease), transform .25s var(--ease); }
+.sheet-list li.in { opacity: 1; transform: none; }
+.sheet-list li small { grid-column: 1 / -1; color: var(--ink-soft); font-size: 0.875rem; }
+.sheet-list .empty { color: var(--ink-soft); padding: 22px 0; font-size: 0.9375rem; }
+
+/* ---------- The guest experience (signature) ---------- */
+.gx { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(28px, 4vw, 56px); align-items: start; }
+.stage { position: relative; aspect-ratio: 1 / 0.86; border-radius: 16px; overflow: hidden; perspective: 1400px;
+  background: radial-gradient(70% 60% at 50% 40%, rgba(227, 194, 127, 0.14), transparent 70%), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px), var(--emerald-800);
+  box-shadow: inset 0 0 0 1px var(--line-dark); }
+.stage > * { transition: opacity .45s var(--ease), transform .7s var(--ease); }
+.s-env { position: absolute; left: 14%; right: 14%; top: 30%; aspect-ratio: 1.5; border-radius: 4px; background: linear-gradient(170deg, #efe5d2, #dbcbae); box-shadow: var(--shadow-paper); }
+.s-env::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to top right, transparent 49.6%, rgba(90, 60, 30, 0.12) 50%, transparent 50.5%), linear-gradient(to top left, transparent 49.6%, rgba(90, 60, 30, 0.12) 50%, transparent 50.5%); }
+.s-env .to { position: absolute; left: 0; right: 0; bottom: 10%; text-align: center; font-family: var(--font-hand); font-size: clamp(1.3rem, 3vw, 2rem); color: #3a2c1e; z-index: 1; }
+.s-flap { position: absolute; left: 0; right: 0; top: 0; height: 56%; transform-origin: top; transform-style: preserve-3d; transition: transform .6s var(--ease); z-index: 2; }
+.s-flap > i { position: absolute; inset: 0; backface-visibility: hidden; clip-path: polygon(0 0, 100% 0, 50% 100%); background: linear-gradient(180deg, #e9dec8, #d6c5a6); }
+.s-flap > i + i { transform: rotateX(180deg); clip-path: polygon(50% 0, 100% 100%, 0 100%); background: repeating-linear-gradient(45deg, rgba(227, 194, 127, 0.45) 0 1px, transparent 1px 10px), repeating-linear-gradient(-45deg, rgba(227, 194, 127, 0.45) 0 1px, transparent 1px 10px), var(--emerald); }
+.s-seal { position: absolute; left: 50%; top: 56%; width: 64px; height: 64px; margin: -32px 0 0 -32px; z-index: 3; border-radius: 50%; border: 0; cursor: pointer; color: var(--gold); font-family: var(--font-display); font-style: italic; font-size: 1.6rem;
+  background: radial-gradient(circle at 36% 30%, #2a8a69, #0b4a37 55%, #052a1f); box-shadow: inset 0 -3px 7px rgba(0, 0, 0, 0.45), inset 0 3px 3px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(0, 0, 0, 0.35); transition: transform .2s var(--ease), opacity .3s; }
+.s-seal:hover { transform: scale(1.06); }
+.s-card { position: absolute; left: 22%; right: 22%; top: 8%; aspect-ratio: 0.74; border-radius: 3px; box-shadow: var(--shadow-paper); padding: 8% 7%; display: grid; align-content: center; text-align: center; gap: 5%; opacity: 0; transform: translateY(30%) scale(0.92); }
+.s-card::before { content: ""; position: absolute; inset: 5%; border: 1.5px solid transparent; border-image: linear-gradient(115deg, #b78a3c, #f2dca6 40%, #a97c32) 1; pointer-events: none; }
+.s-card small { font-size: clamp(0.55rem, 1.2vw, 0.7rem); letter-spacing: 0.16em; text-transform: uppercase; color: #6d5a42; }
+.s-card .names { font-family: var(--font-display); font-size: clamp(1.3rem, 3vw, 2.1rem); line-height: 1.05; }
+.s-card .for { font-family: var(--font-hand); font-size: clamp(1.4rem, 3.4vw, 2.2rem); color: #3a2c1e; line-height: 1.1; }
+.s-card .when { font-size: clamp(0.62rem, 1.2vw, 0.8rem); color: #5c4c3a; }
+.s-card .stamp { position: absolute; right: 8%; bottom: 10%; transform: rotate(-12deg); border: 2px solid var(--no); color: var(--no); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; opacity: 0; transition: opacity .3s; }
+.s-plan { position: absolute; inset: 0; opacity: 0; transform: scale(1.06); display: grid; place-items: center; }
+.s-plan svg { width: 92%; height: 92%; }
+.s-place { position: absolute; left: 50%; bottom: 7%; width: 40%; aspect-ratio: 2.1; margin-left: -20%; border-radius: 3px; box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; opacity: 0; transform: translateY(-140%) scale(1.6) rotate(4deg); }
+.s-place b { font-family: var(--font-hand); font-weight: 400; font-size: clamp(1.1rem, 2.6vw, 1.6rem); color: #2c2218; line-height: 1.1; }
+.s-place span { font-size: clamp(0.58rem, 1.1vw, 0.72rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-ink); }
+/* states */
+.stage.open .s-flap { transform: rotateX(178deg); z-index: 0; }
+.stage.open .s-seal { opacity: 0; pointer-events: none; transform: scale(.6); }
+.stage.open .s-env { transform: translateY(46%); opacity: 0.9; transition-delay: .25s; }
+.stage.open .s-card { opacity: 1; transform: none; transition-delay: .3s; }
+.stage.declined .s-card .stamp { opacity: 1; }
+.stage.placed .s-env { opacity: 0; transform: translateY(80%); }
+.stage.placed .s-card { opacity: 0; transform: translateY(40%) scale(0.4) rotate(-6deg); transition-delay: 0s; }
+.stage.placed .s-plan { opacity: 1; transform: none; transition-delay: .35s; }
+.stage.placed .s-place { opacity: 1; transform: none; transition-delay: .2s; }
+.seat { transition: fill .3s, stroke .3s; }
+.seat-new { animation: seatpulse 1.6s var(--ease) .9s 2; }
+@keyframes seatpulse { 50% { r: 17; } }
+.stage-note { position: absolute; left: 14px; top: 14px; z-index: 5; }
+
+.panel { display: grid; gap: 22px; }
+.steps-mini { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; counter-reset: s; }
+.steps-mini li { counter-increment: s; font-size: 0.8125rem; color: var(--on-dark-soft); border-top: 3px solid var(--line-dark); padding-top: 8px; min-width: 0; }
+.steps-mini li::before { content: counter(s) " "; font-weight: 700; }
+.steps-mini li[aria-current="step"], .steps-mini li.done { color: var(--on-dark); border-top-color: var(--gold); }
+.invite-box { background: var(--paper); color: var(--ink); border-radius: 14px; padding: clamp(20px, 3vw, 28px); display: grid; gap: 18px; }
+.invite-box h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.7rem, 3vw, 2.2rem); }
+.invite-box dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: 0.9375rem; }
+.invite-box dt { color: var(--ink-soft); }
+.invite-box dd { margin: 0; font-weight: 600; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choice label { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; font-weight: 600; transition: border-color .2s, background-color .2s; }
+.choice input { width: 20px; height: 20px; accent-color: var(--emerald); flex: none; }
+.choice label:has(input:checked) { border-color: var(--emerald); background: var(--ok-bg); }
+.check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 500; }
+.check input { width: 20px; height: 20px; accent-color: var(--emerald); }
+.result { border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; }
+.result.yes { background: var(--ok-bg); color: #10402c; }
+.result.no { background: var(--linen); color: var(--ink); }
+.result h4 { font-size: 1.0625rem; }
+.result p { font-size: 0.9375rem; }
+
+/* ---------- Tools preview ---------- */
+.tools { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); align-items: start; }
+.board { background: var(--paper); border-radius: 16px; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px var(--line), 0 20px 50px rgba(40, 28, 10, 0.08); padding: clamp(16px, 2.4vw, 24px); display: grid; gap: 16px; min-width: 0; }
+.board h3 { font-size: 1.125rem; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.board h3 a { font-size: 0.9375rem; font-weight: 600; color: var(--emerald); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { border-radius: 10px; padding: 12px 14px; background: var(--ivory); }
+.stat b { display: block; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.875rem; color: var(--ink-soft); }
+.gtable { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.gtable th { text-align: left; font-size: 0.8125rem; color: var(--ink-soft); font-weight: 600; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--line); }
+.gtable td { padding: 10px 8px 10px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.gtable td:last-child, .gtable th:last-child { text-align: right; padding-right: 0; }
+.table-scroll { overflow-x: auto; }
+.tables-mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tmini { border-radius: 12px; background: var(--ivory); padding: 12px; display: grid; gap: 6px; justify-items: center; text-align: center; }
+.tmini svg { width: 62px; height: 62px; }
+.tmini b { font-size: 0.9375rem; }
+.tmini span { font-size: 0.8125rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.tmini.full span { color: var(--ok); font-weight: 600; }
+
+/* ---------- Vendors ---------- */
+.vend { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 4vw, 64px); align-items: start; }
+.tasks { list-style: none; margin: 0; padding: 0; background: var(--paper); border-radius: 16px; box-shadow: 0 0 0 1px var(--line); }
+.tasks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.tasks li:last-child { border-bottom: 0; }
+.tasks input { width: 22px; height: 22px; accent-color: var(--emerald); }
+.tasks .t-name { font-weight: 600; }
+.tasks .t-meta { grid-column: 2 / 3; font-size: 0.875rem; color: var(--ink-soft); }
+.tasks li.done .t-name { text-decoration: line-through; color: var(--ink-soft); }
+.tasks .due { font-size: 0.875rem; font-variant-numeric: tabular-nums; text-align: right; grid-row: 1 / span 2; grid-column: 3; }
+.progressbar { height: 8px; border-radius: 999px; background: var(--linen-deep); overflow: hidden; margin-top: 18px; }
+.progressbar b { display: block; height: 100%; background: var(--emerald); transition: width .25s var(--ease); }
+
+/* ---------- Steps ---------- */
+.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 48px); counter-reset: n; }
+.how li { counter-increment: n; border-top: 1px solid var(--line-dark); padding-top: 22px; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.how li::before { content: counter(n); font-family: var(--font-display); font-style: italic; font-size: 3rem; line-height: 1; color: var(--gold); }
+.how h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; }
+
+/* ---------- Pricing ---------- */
+.price-rows { border-top: 1px solid var(--line); }
+.price-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px 32px; align-items: center; padding: 26px 0; border-bottom: 1px solid var(--line); }
+.price-row h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.price-row h3 small { display: block; font-family: var(--font-ui); font-size: 0.875rem; color: var(--ink-soft); margin-top: 4px; }
+.price-row .amt { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--gold-ink); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.price-row .amt small { display: block; font-family: var(--font-ui); font-size: 0.8125rem; color: var(--ink-soft); }
+.price-row.pick h3 { color: var(--emerald); }
+
+/* ---------- Close ---------- */
+.close { text-align: center; background: radial-gradient(60% 80% at 50% 100%, rgba(227, 194, 127, 0.16), transparent 70%), var(--emerald-900); }
+.close h2 { font-size: clamp(2.4rem, 5.6vw, 4.4rem); margin-bottom: 18px; }
+.close h2 em { color: var(--gold); }
+.close .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+.film-link { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; min-height: 48px; }
+.film-link i { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font-style: normal; font-size: 0.75rem; }
+
+/* Reveal: only hides when JS is running, and only until the section scrolls into view */
+.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 960px) {
+  .hero .wrap, .gx, .tools, .vend { grid-template-columns: minmax(0, 1fr); }
+  .still { justify-self: center; max-width: 480px; }
+  .chaos { grid-template-columns: minmax(0, 1fr); }
+  .chaos-mid { grid-auto-flow: column; justify-content: start; }
+  .chaos-mid .arrow { transform: rotate(90deg); }
 }
-* { box-sizing: border-box; }
-html, body { background: var(--ink); }
-html.locked, html.locked body { overflow: hidden; }
-body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size: 16px; line-height: 1.55; overflow-x: hidden; }
-::selection { background: var(--gold); color: var(--ink); }
-.backdrop { position: fixed; inset: 0; z-index: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(15, 92, 69, 0.4), transparent 70%), linear-gradient(180deg, var(--night), var(--ink) 75%); }
-#gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
-#gl.live { opacity: 1; }
-.track { position: relative; z-index: 0; height: 1000vh; }
-.mono { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.btn { font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.9rem 1.3rem; border-radius: 999px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: background .3s, color .3s, transform .3s; }
-.btn:hover { transform: translateY(-1px); }
-.btn.gold { background: var(--gold); color: var(--ink); border-color: var(--gold); }
-.btn.gold:hover { background: #f6dca8; }
-.btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-
-/* ---------- Gate: the archive's front door ---------- */
-.gate { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; text-align: center; background: radial-gradient(70% 60% at 50% 45%, rgba(10, 24, 19, 0.78), rgba(5, 13, 10, 0.97)); padding: 24px max(20px, env(safe-area-inset-left, 0px)); transition: opacity 1.4s ease, visibility 1.4s; }
-.gate { overflow-y: auto; }
-html.locked .overlay, html.locked .foot-ui { opacity: 0; }
-.overlay { transition: opacity 1.2s ease; }
-@media (max-height: 600px) { .gate .inner { gap: 12px; } .gate h1 { font-size: clamp(2.6rem, 9vh, 4rem); } .gate p { font-size: 0.9rem; } }
-.gate.gone { opacity: 0; visibility: hidden; pointer-events: none; }
-.gate .inner { display: grid; gap: 22px; justify-items: center; max-width: 640px; }
-.gate .mark { font-family: var(--font-display); font-style: italic; font-size: 1.4rem; color: var(--gold); }
-.gate h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(3.4rem, 11vw, 8rem); line-height: 0.95; margin: 0; letter-spacing: -0.02em; }
-.gate h1 em { font-style: italic; color: var(--gold); }
-.gate p { margin: 0; color: var(--mist); max-width: 32em; }
-.gate .actions { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
-.gate .quiet { background: none; border: 0; color: var(--mist); font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; text-decoration: underline; text-underline-offset: 5px; }
-.gate .load { display: flex; gap: 14px; align-items: center; color: var(--mist); }
-.gate .load i { display: block; width: 140px; height: 1px; background: var(--line); position: relative; overflow: hidden; }
-.gate .load i b { position: absolute; inset: 0; background: var(--gold); transform-origin: left; transform: scaleX(0); transition: transform .4s; }
-.gate .enter[disabled] { opacity: 0.4; cursor: wait; }
-.gate .enter .ring { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid currentColor; }
-
-/* ---------- Navigation ---------- */
-.nav { position: fixed; z-index: 12; top: 0; left: 0; right: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) max(20px, env(safe-area-inset-right, 0px)) 16px max(20px, env(safe-area-inset-left, 0px));
-  background: linear-gradient(180deg, rgba(5, 13, 10, 0.7), rgba(5, 13, 10, 0)); transition: background .4s; }
-.nav.solid { background: rgba(5, 13, 10, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
-.wordmark { font-family: var(--font-display); font-style: italic; font-size: 1.55rem; color: var(--ivory); text-decoration: none; line-height: 1; justify-self: start; }
-.nav .where { color: var(--mist); display: flex; gap: 10px; align-items: baseline; white-space: nowrap; }
-.nav .where b { color: var(--gold); font-weight: 400; }
-.nav .right { justify-self: end; display: flex; gap: 10px; align-items: center; }
-.icon-btn { background: none; border: 1px solid var(--line); color: var(--ivory); border-radius: 999px; height: 40px; padding: 0 16px; display: inline-flex; gap: 10px; align-items: center; cursor: pointer; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.icon-btn:hover { border-color: var(--gold); }
-.bars { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; }
-.bars span { width: 2px; height: 3px; background: currentColor; }
-.sound-on .bars span { animation: eq 1s ease-in-out infinite; }
-.bars span:nth-child(2) { animation-delay: .2s; } .bars span:nth-child(3) { animation-delay: .45s; } .bars span:nth-child(4) { animation-delay: .1s; }
-@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 12px; } }
-
-/* Full-screen menu: the archive index and the company */
-.menu { position: fixed; inset: 0; z-index: 15; background: var(--night); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px;
-  padding: calc(env(safe-area-inset-top, 0px) + 96px) max(28px, env(safe-area-inset-right, 0px)) 40px max(28px, env(safe-area-inset-left, 0px));
-  clip-path: inset(0 0 100% 0); transition: clip-path .8s cubic-bezier(.7, 0, .2, 1); overflow-y: auto; }
-.menu.open { clip-path: inset(0 0 0 0); }
-.menu h2 { font-family: var(--font-mono); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); margin: 0 0 18px; }
-.menu ol, .menu ul { list-style: none; margin: 0; padding: 0; }
-.menu .index button { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); align-items: baseline; gap: 12px; width: 100%; background: none; border: 0; border-top: 1px solid var(--line); padding: 10px 0; color: var(--ivory); text-align: left; cursor: pointer; font-family: var(--font-display); font-size: clamp(1.4rem, 3.2vw, 2.4rem); line-height: 1.15; }
-.menu .index button span { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gold); }
-.menu .index button:hover { color: var(--gold); }
-.menu .co a { display: block; color: var(--ivory); text-decoration: none; font-size: 1.15rem; padding: 10px 0; border-top: 1px solid var(--line); }
-.menu .co a:hover { color: var(--gold); }
-.menu .co p { color: var(--mist); font-size: 0.9rem; margin-top: 28px; max-width: 26em; }
-
-/* Bottom: archive progress */
-.foot-ui { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; padding: 0 max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(20px, env(safe-area-inset-left, 0px)); display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; pointer-events: none; transition: opacity .5s; }
-.progress { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; height: 2px; background: var(--line); }
-.progress b { position: absolute; inset: 0; background: var(--gold); transform-origin: left; transform: scaleX(0); }
-.finder { color: var(--mist); font-variant-numeric: tabular-nums; }
-.finder b { color: var(--gold); font-weight: 400; }
-.scrollcue { color: var(--mist); display: flex; gap: 10px; align-items: center; }
-.scrollcue i { display: block; width: 1px; height: 28px; background: linear-gradient(var(--gold), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; }
-@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
-
-/* ---------- Story overlay ---------- */
-.overlay { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.beat { position: absolute; left: 0; right: 0; opacity: 0; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); text-shadow: 0 2px 30px rgba(3, 10, 7, 0.95), 0 0 3px rgba(3, 10, 7, 0.6); will-change: opacity, transform, filter; }
-.beat.center { top: 50%; text-align: center; transform: translateY(-50%); }
-.beat.low { bottom: max(13vh, calc(env(safe-area-inset-bottom, 0px) + 84px)); text-align: center; }
-.beat.side { top: 50%; transform: translateY(-50%); max-width: 1240px; margin: 0 auto; }
-h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
-.beat h1 { font-size: clamp(2.8rem, 7.5vw, 6.2rem); line-height: 1; }
-.beat h2 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.04; }
-h1 em, h2 em { font-style: italic; color: var(--gold); }
-.no { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--jade); margin-bottom: 18px; }
-.sub { color: #c8d3cc; max-width: 30em; margin: 18px auto 0; font-size: 1.08rem; }
-.prose { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.35; color: #e9e2d4; max-width: 24em; margin: 0 auto; }
-
-/* The noise: chat bubbles at different depths */
-.storm { position: absolute; inset: 0; }
-.bub { position: absolute; max-width: min(300px, 70vw); background: #f6efe8; color: #2a1a12; border-radius: 14px 14px 14px 4px; padding: 8px 12px 6px; font-size: 0.92rem; line-height: 1.35; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3); opacity: 0; will-change: transform, opacity, filter; }
-.bub b { display: block; font-size: 0.72rem; font-weight: 500; color: #0f6b4e; letter-spacing: 0.02em; }
-.bub i { display: block; text-align: right; font-style: normal; font-size: 0.66rem; color: #8b7a6e; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.groupbar { position: absolute; left: 50%; top: max(12vh, calc(env(safe-area-inset-top, 0px) + 76px)); transform: translateX(-50%); background: rgba(246, 239, 232, 0.1); border: 1px solid var(--line); border-radius: 999px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; opacity: 0; }
-.groupbar strong { color: var(--gold); font-weight: 500; font-variant-numeric: tabular-nums; }
-.flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%, #fffaf2, #f6e8c8 40%, #d9c08a 80%, #7a6a40); opacity: 0; mix-blend-mode: screen; }
-
-/* ---------- The invitation: an envelope you open ---------- */
-.envwrap { position: absolute; left: 50%; top: 60%; width: min(460px, calc(100% - 40px)); aspect-ratio: 1.5; transform: translate(-50%, -50%); opacity: 0; perspective: 1600px; }
-.env { position: absolute; inset: 0; transition: transform 1.2s cubic-bezier(.3, .7, .2, 1); }
-.env.open { transform: translateY(20%); }
-.env.out { transform: translateY(36%); }
-.env-back { position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(170deg, #ece2cf, #d9c9ad); box-shadow: 0 2px 3px rgba(0,0,0,.3), 0 30px 60px rgba(0,0,0,.45), 0 70px 140px rgba(0,0,0,.5); }
-.env-back::after { content: ""; position: absolute; inset: 6px 6px 40% 6px; border-radius: 3px; background:
-  repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px),
-  repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--wax); }
-.slot { position: absolute; left: 6%; right: 6%; bottom: 4%; top: -260%; overflow: hidden; z-index: 2; pointer-events: none; }
-.env.out .slot { overflow: visible; z-index: 6; pointer-events: auto; }
-.card { position: absolute; left: 0; right: 0; bottom: 0; transform: translateY(105%);
-  background-color: var(--paper);
-  background-image: radial-gradient(120% 90% at var(--sx, 30%) var(--sy, 20%), rgba(255, 255, 255, 0.55), transparent 55%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .36 0 0 0 0 .27 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(170deg, #fbf6ee, #eee2cf);
-  color: var(--paper-ink); border-radius: 3px; padding: clamp(20px, 4.5vw, 32px); text-align: center;
-  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 3px rgba(20,8,4,.3), 0 18px 40px rgba(20,8,4,.35);
-  transition: transform 1.3s cubic-bezier(.3, .7, .2, 1) .45s; }
-.env.open .card { transform: translateY(-56%); }
-.env.out .card { transform: translateY(-64%); transition-delay: 0s; transition-duration: .9s; }
-.card::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(15, 92, 69, 0.3); pointer-events: none; }
-.card .tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0f6b4e; margin: 0; }
-.card h3 { font-size: clamp(1.8rem, 5.5vw, 2.4rem); line-height: 1.1; margin: 6px 0 8px; color: var(--paper-ink); text-shadow: 0 1px 0 rgba(255,255,255,.75); }
-.card p { margin: 0; color: #5a4a3c; font-size: 0.93rem; }
-.card label { display: block; margin-top: 14px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8b7a6e; }
-.card input { width: 100%; text-align: center; font-family: var(--font-hand); font-size: 1.7rem; color: var(--paper-ink); background: transparent; border: 0; border-bottom: 1px solid #cdbba8; padding: 0 0 2px; border-radius: 0; }
-.card input:focus { outline: none; border-bottom-color: #0f6b4e; }
-.card .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
-.card .btn { padding: 0.75rem 1.1rem; font-size: 0.68rem; }
-.card .btn.solid { background: #0b4a37; color: #fbf6ee; border-color: #0b4a37; }
-.card .link { font-family: var(--font-mono); font-size: 0.68rem; color: #8b7a6e; margin-top: 10px; word-break: break-all; }
-.card .reply { min-height: 2.6em; margin-top: 10px; font-size: 0.9rem; color: var(--paper-ink); }
-.env-front { position: absolute; inset: 0; z-index: 4; border-radius: 6px; pointer-events: none;
-  background: linear-gradient(200deg, #f1e8d6, #dfd0b5);
-  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
-  box-shadow: inset 0 -20px 40px rgba(120, 90, 50, 0.12); }
-.env-front::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent 49.6%, rgba(90, 60, 30, 0.14) 50%, transparent 50.6%), linear-gradient(to top left, transparent 49.6%, rgba(90, 60, 30, 0.14) 50%, transparent 50.6%); }
-.env-front .to { position: absolute; left: 0; right: 0; bottom: 5%; text-align: center; font-family: var(--font-hand); font-size: clamp(1.6rem, 5vw, 2.3rem); color: #3a2c1e; }
-.env-front .to small { display: block; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8b7a6e; }
-.env-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; z-index: 5; transform-origin: top; transform-style: preserve-3d; transform: perspective(1200px) rotateX(0deg); transition: transform 0.9s cubic-bezier(.5, 0, .2, 1), z-index 0s .45s; }
-.env-flap > div { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); backface-visibility: hidden; }
-.env-flap .outside { background: linear-gradient(180deg, #e8dcc6, #d8c7a8); filter: drop-shadow(0 4px 4px rgba(0,0,0,.2)); }
-.env-flap .inside { transform: rotateX(180deg); clip-path: polygon(50% 0, 100% 100%, 0 100%); background: repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--wax); }
-.env.open .env-flap { transform: perspective(1200px) rotateX(178deg); z-index: 1; }
-.seal { position: absolute; left: 50%; top: 52%; z-index: 7; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; border: 0; cursor: pointer;
-  background: radial-gradient(circle at 38% 32%, #1f7a5c, #0b4a37 55%, #062a20); color: var(--gold);
-  box-shadow: inset 0 -3px 8px rgba(0,0,0,.45), inset 0 3px 4px rgba(255,255,255,.2), 0 4px 10px rgba(0,0,0,.45);
-  font-family: var(--font-display); font-style: italic; font-size: 1.8rem; transition: transform .4s, opacity .5s; pointer-events: auto; }
-.seal::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1px dashed rgba(233, 201, 138, 0.45); }
-.seal:hover { transform: scale(1.06); }
-.seal-hint { position: absolute; left: 0; right: 0; top: calc(100% + 18px); z-index: 7; text-align: center; color: var(--gold); transition: opacity .4s; }
-.env.open .seal, .env.open .seal-hint { opacity: 0; pointer-events: none; transform: scale(.6); }
-
-/* ---------- The count: a panel with real contrast ---------- */
-.scrim { position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.82) 34%, rgba(5, 13, 10, 0.25) 62%, rgba(5, 13, 10, 0) 80%); }
-.count-beat { max-width: 480px; margin-left: max(0px, calc((100% - 1240px) / 2)); text-align: left; }
-.count-beat .sub { margin-left: 0; }
-.count { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 32px; }
-.count div { border-top: 1px solid var(--line); padding-top: 12px; min-width: 0; }
-.count dt { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); }
-.count dd { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1; font-variant-numeric: tabular-nums; }
-.count div:nth-child(2) dd { color: var(--gold); }
-.guests { position: absolute; right: max(40px, calc(env(safe-area-inset-right, 0px) + 32px)); top: 50%; transform: translateY(-50%); width: min(340px, 30vw); opacity: 0; pointer-events: none; background: rgba(5, 13, 10, 0.78); border: 1px solid var(--line); border-radius: 12px; -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); padding: 16px 16px 10px; font-size: 0.84rem; }
-.guests header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 10px; }
-.guests header span { color: var(--jade); }
-.guests header span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--jade); margin-right: 6px; vertical-align: middle; box-shadow: 0 0 8px var(--jade); }
-.guests ol { list-style: none; margin: 0; padding: 0; display: grid; }
-.guests li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--line); opacity: 0.3; transition: opacity .4s; font-variant-numeric: tabular-nums; }
-.guests li.in { opacity: 1; }
-.guests li em { font-style: normal; color: var(--mist); font-size: 0.74rem; }
-.guests li i { font-style: normal; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); background: var(--jade); border-radius: 999px; padding: 2px 8px; }
-.guests li:not(.in) i { background: transparent; color: var(--mist); border: 1px solid var(--line); }
-.finale .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; pointer-events: auto; }
-#confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9; pointer-events: none; }
-
-/* ---------- The company, after the film: minimal, editorial ---------- */
-.biz { position: relative; z-index: 5; background: var(--ink); color: var(--ivory); }
-.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
-.sec { padding-block: clamp(80px, 13vw, 170px); }
-.label { display: flex; gap: 14px; align-items: baseline; color: var(--mist); margin-bottom: 40px; }
-.label b { color: var(--gold); font-weight: 400; }
-.statement { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 4.6vw, 4rem); line-height: 1.12; letter-spacing: -0.015em; margin: 0; max-width: 18em; text-wrap: balance; }
-.statement em { font-style: italic; color: var(--gold); }
-.marquee { border-block: 1px solid var(--line); overflow: hidden; padding-block: 22px; white-space: nowrap; }
-.marquee div { display: inline-flex; gap: 48px; padding-right: 48px; animation: slide 46s linear infinite; font-family: var(--font-display); font-style: italic; font-size: clamp(1.4rem, 3vw, 2.2rem); color: var(--ivory); }
-.marquee span::after { content: "✦"; font-style: normal; font-size: 0.6em; color: var(--gold); margin-left: 48px; vertical-align: middle; }
-@keyframes slide { to { transform: translateX(-100%); } }
-.rows { border-top: 1px solid var(--line); }
-.rows article { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-.rows h3 { font-size: clamp(1.4rem, 2.6vw, 2rem); }
-.rows p { margin: 0; color: var(--mist); max-width: 34em; }
-.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; counter-reset: s; }
-.steps li { counter-increment: s; min-width: 0; }
-.steps li::before { content: "0" counter(s); display: block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold); margin-bottom: 18px; }
-.steps h3 { font-size: 1.7rem; margin-bottom: 10px; }
-.steps p { margin: 0; color: var(--mist); }
-.plans { border-top: 1px solid var(--line); }
-.plan { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 32px; align-items: center; padding: 30px 0; border-bottom: 1px solid var(--line); }
-.plan h3 { font-size: clamp(1.6rem, 3vw, 2.4rem); }
-.plan h3 small { display: block; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist); margin-top: 8px; }
-.plan p { margin: 0; color: var(--mist); }
-.plan .price { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--gold); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.plan.best h3 { color: var(--gold); }
-.note { color: var(--mist); font-size: 0.8rem; margin-top: 20px; }
-.cta { text-align: center; }
-.cta .statement { margin: 0 auto; }
-.signup { display: flex; gap: 16px; justify-content: center; align-items: flex-end; flex-wrap: wrap; margin-top: 48px; }
-.signup label { position: absolute; left: -9999px; }
-.signup input { font: inherit; font-size: 1.1rem; min-width: 0; width: min(380px, 100%); padding: 10px 2px; border: 0; border-bottom: 1px solid var(--ivory); background: transparent; color: var(--ivory); border-radius: 0; }
-.signup input::placeholder { color: var(--mist); }
-.signup-msg { min-height: 1.5em; color: var(--jade); margin-top: 18px; }
-.foot { border-top: 1px solid var(--line); }
-.foot .wrap { padding-block: 34px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; color: var(--mist); font-size: 0.85rem; }
-.foot .wordmark { font-size: 1.3rem; }
-
-@media (max-width: 900px) {
-  .guests { display: none; }
-  .rows article, .plan { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .steps { grid-template-columns: minmax(0, 1fr); }
-  .menu { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 640px) {
+  .how { grid-template-columns: minmax(0, 1fr); }
+  .price-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .price-row p { grid-column: 1 / -1; grid-row: 2; }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tables-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .choice { grid-template-columns: minmax(0, 1fr); }
+  .steps-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gtable .hide-sm { display: none; }
+  .hero .actions .btn { flex: 1 1 100%; }
 }
-@media (max-width: 700px) {
-  .nav { grid-template-columns: 1fr auto; }
-  .nav .where { display: none; }
-  .finder { display: none; }
-  .count-beat { text-align: center; margin: 0 auto; }
-  .scrim { background: linear-gradient(0deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.8) 45%, rgba(5, 13, 10, 0) 80%); }
-  .beat.side { top: auto; bottom: max(8vh, calc(env(safe-area-inset-bottom, 0px) + 40px)); transform: none; }
-  .icon-btn .lbl { display: none; }
-}
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
-@media (prefers-reduced-motion: reduce) { .scrollcue i, .marquee div, .sound-on .bars span { animation: none; } }
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-  }
-}
-</script>
 </head>
 <body>
-<div class="backdrop" aria-hidden="true"></div>
-<canvas id="gl" aria-hidden="true"></canvas>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
-  <div class="inner">
-    <span class="mark">Àríyá presents</span>
-    <span class="mono" style="color: var(--mist)">A wedding archive in eight chapters</span>
-    <h1 id="gateTitle">The <em>Yes</em></h1>
-    <p>Chidinma and Tunde. Victoria Island, Lagos. Saturday 12 December 2026. Best with sound, scrolled slowly.</p>
-    <div class="load mono" aria-live="polite"><i><b id="loadBar"></b></i><span id="loadTxt">Setting the hall 0%</span></div>
-    <div class="actions">
-      <button class="btn gold enter" id="enterSound" type="button" disabled><span class="ring" aria-hidden="true"></span>Enter the wedding</button>
-      <button class="quiet" id="enterQuiet" type="button">Enter in silence</button>
-    </div>
-  </div>
-</div>
-
-<header class="nav" id="nav">
-  <a class="wordmark" href="#top" id="home" aria-label="Àríyá, back to the start">Àríyá</a>
-  <div class="where mono" aria-live="off"><span>Archive</span><b id="whereNo">No. 000</b><span id="whereName">Prologue</span></div>
-  <div class="right">
-    <button class="icon-btn" id="soundBtn" type="button" aria-pressed="false"><span class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="lbl">Sound</span></button>
-    <button class="icon-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
+<header class="site-head on-dark" id="top">
+  <div class="wrap">
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, home"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#invitation">Guest experience</a>
+      <a href="#tools">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary btn-small" href="planner.html">Start planning</a>
+    </nav>
+    <button class="btn btn-ghost btn-small menu-toggle" id="menuOpen" type="button" aria-haspopup="dialog" aria-controls="menuSheet">Menu</button>
   </div>
 </header>
 
-<nav class="menu" id="menu" aria-label="Site menu" hidden>
-  <div class="index"><h2>The archive</h2><ol id="menuIndex"></ol></div>
-  <div class="co">
-    <h2>The company</h2>
-    <ul>
-      <li><a href="#about">What Àríyá does</a></li>
-      <li><a href="#how">How it works</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-      <li><a href="#start">Start planning</a></li>
-    </ul>
-    <p>Àríyá means merriment in Yoruba: the music, the food, the dancing, the spraying. We handle the list so you can have the àríyá.</p>
+<div class="sheet mobile-only" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="sheet-panel">
+    <div class="sheet-head"><b>Àríyá</b><button class="btn btn-ghost btn-small" id="menuClose" type="button">Close</button></div>
+    <nav aria-label="Main, mobile">
+      <a href="#invitation">Guest experience</a>
+      <a href="#tools">Features</a>
+      <a href="#vendors">Vendor checklist</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="film.html">Watch the film</a>
+    </nav>
+    <p style="margin-top: 20px"><a class="btn btn-primary" href="planner.html" style="width: 100%">Start planning</a></p>
   </div>
-</nav>
+</div>
 
-<div class="overlay" id="overlay">
-  <section class="beat center" data-raw-in="0" data-raw-out="0.045" aria-label="Prologue">
-    <span class="no">No. 000 · Prologue</span>
-    <p class="prose">Lagos, December 2021. Two strangers at someone else's owambe, table 14, arguing about whose jollof is better.</p>
-  </section>
-  <section class="beat center" data-raw-in="0.05" data-raw-out="0.095" aria-label="Prologue, continued">
-    <span class="no">No. 000 · Prologue</span>
-    <p class="prose">Five years, one argument settled. Then a small velvet box on a dinner table.</p>
-  </section>
-
-  <section class="beat center" data-in="0.005" data-out="0.1" aria-label="The box">
-    <span class="no">No. 001 · The box</span>
-    <h1>It starts with<br>a <em>yes.</em></h1>
-  </section>
-
-  <section class="beat low" data-in="0.15" data-out="0.27" aria-label="The yes">
-    <span class="no">No. 002 · The yes</span>
-    <h2>Four seconds.<br><em>One question.</em></h2>
-    <p class="sub">Then four hundred people need to know.</p>
-  </section>
-
-  <div class="storm" id="storm" aria-hidden="true"></div>
-  <div class="groupbar" id="groupbar" aria-hidden="true">Chidinma &amp; Tunde 2026 · <strong id="unread">0</strong> unread</div>
-  <section class="beat low" data-in="0.34" data-out="0.47" aria-label="The noise">
-    <span class="no">No. 003 · The noise</span>
-    <h2>This is how most<br>weddings get planned.</h2>
+<main id="main">
+  <section class="hero dark" aria-labelledby="heroTitle">
+    <div class="wrap">
+      <div>
+        <span class="kicker">For Nigerian weddings, introductions and owambes</span>
+        <h1 class="display" id="heroTitle">Get your guest list out of the <em>WhatsApp group.</em></h1>
+        <p class="lede">Àríyá gives every guest their own RSVP link, keeps a live headcount, seats people at the right tables and keeps vendors on schedule. One calm place for couples and the planners who run their day.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="planner.html">Start planning</a>
+          <a class="btn btn-ghost" href="#invitation">Try the guest experience</a>
+        </div>
+        <p class="fine"><span>Prototype: the planner opens with sample data. Nothing is sent.</span><a href="film.html">Watch the film</a></p>
+      </div>
+      <div class="still" aria-hidden="true">
+        <div class="weave"></div>
+        <div class="h-env"><div class="liner"></div></div>
+        <div class="h-card paper"><small>Together with their families</small><div class="names">Chidinma <i>&amp;</i> Tunde</div><div class="for">Adaeze Okonkwo</div><div class="when">Saturday 12 December 2026<br>The Grand Pavilion, Lagos</div></div>
+        <div class="h-seal">À</div>
+        <div class="h-place paper"><b>Adaeze</b><span>Table 7</span></div>
+      </div>
+    </div>
   </section>
 
-  <section class="beat center" data-in="0.5" data-out="0.6" aria-label="The calm">
-    <span class="no">No. 004 · The calm</span>
-    <h2>There is a <em>calmer</em> way.</h2>
-  </section>
-
-  <div class="flash" id="flash" aria-hidden="true"></div>
-
-  <section class="beat low" data-in="0.68" data-out="0.775" aria-label="The invitation" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
-    <span class="no">No. 005 · The invitation</span>
-    <h2>Every guest gets <em>their own.</em></h2>
-  </section>
-  <div class="envwrap" id="envwrap">
-    <div class="env" id="env">
-      <div class="env-back"></div>
-      <div class="slot">
-        <div class="card" id="card" role="group" aria-label="A sample guest invitation">
-          <p class="tag">Your personal invitation</p>
-          <h3>Hello, <span id="who">Adaeze</span>.</h3>
-          <p>Chidinma and Tunde are getting married.<br>Saturday 12 December 2026 · Victoria Island, Lagos</p>
-          <label for="guestName">Sign your name</label>
-          <input id="guestName" type="text" value="Adaeze" maxlength="24" autocomplete="off">
-          <div class="row">
-            <button class="btn solid" id="yes" type="button">Yes, I will be there</button>
-            <button class="btn" id="no" type="button">I can't make it</button>
-          </div>
-          <p class="reply" id="reply" aria-live="polite"></p>
-          <p class="link">ariya.ng/r/k7Q2x9mA</p>
+  <section class="sec" id="problem" aria-labelledby="pTitle">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">The problem</span>
+        <h2 class="display" id="pTitle">312 unread messages. <em>One guest list.</em></h2>
+        <p class="muted">Names, plus-ones and table questions arrive in group chats, voice notes and DMs. Àríyá turns each one into a guest record with a status, a party size and a seat.</p>
+      </div>
+      <div class="chaos reveal">
+        <div class="phone" aria-label="Sample family group chat">
+          <header>Chidinma &amp; Tunde 2026 <span>312 unread</span></header>
+          <div class="msg" data-row="0"><b>Aunty Bisi</b>Me and my 4 children will be there</div>
+          <div class="msg" data-row="1"><b>Tolu</b>I didn't get invite o</div>
+          <div class="msg" data-row="2"><b>Mummy C</b>Add Mrs Okafor. And her sister.</div>
+          <div class="msg" data-row="3"><b>Uncle Dayo</b>Which table am I?</div>
+          <div class="msg" data-row="4"><b>Femi</b>RSVP to who exactly?</div>
+        </div>
+        <div class="chaos-mid">
+          <span class="arrow" aria-hidden="true">→</span>
+          <button class="btn btn-primary" id="sortBtn" type="button">Sort these messages</button>
+        </div>
+        <div class="sheet-list">
+          <h3><span>Guest list</span><span class="muted" id="sortCount">0 sorted</span></h3>
+          <p class="empty" id="sortEmpty">Sorted guests appear here with their status, party size and table.</p>
+          <ul id="sortList" aria-live="polite"></ul>
         </div>
       </div>
-      <div class="env-front"><p class="to"><small>Hand delivered to</small><span id="toName">Adaeze Okonkwo</span></p></div>
-      <div class="env-flap" aria-hidden="true"><div class="outside"></div><div class="inside"></div></div>
-      <button class="seal" id="seal" type="button" aria-label="Break the seal and open the invitation">À</button>
-      <p class="seal-hint mono">Tap the seal</p>
-    </div>
-  </div>
-
-  <div class="scrim" id="scrim" aria-hidden="true"></div>
-  <section class="beat side" data-in="0.78" data-out="0.89" aria-label="The count">
-    <div class="count-beat">
-      <span class="no">No. 006 · The count</span>
-      <h2>Know who's coming.<br><em>And where they sit.</em></h2>
-      <p class="sub">Every guest who says yes takes a seat and lights a candle.</p>
-      <dl class="count">
-        <div><dt>Invited</dt><dd>320</dd></div>
-        <div><dt>Confirmed</dt><dd id="cConfirmed">0</dd></div>
-        <div><dt>Seated</dt><dd id="cSeated">0</dd></div>
-      </dl>
     </div>
   </section>
-  <aside class="guests" id="guests" aria-hidden="true">
-    <header><span class="mono">Live</span><span class="mono" style="color: var(--mist)">Guest list</span></header>
-    <ol id="guestRows"></ol>
-  </aside>
 
-  <section class="beat center finale" data-in="0.92" data-out="1.01" aria-label="The dance">
-    <span class="no">No. 007 · The dance</span>
-    <h1>Now go and <em>dance.</em></h1>
-    <div class="row">
-      <a class="btn gold" href="#start">Plan your event</a>
-      <button class="btn" id="replay" type="button">Watch again</button>
-    </div>
-  </section>
-</div>
-
-<div class="foot-ui" id="footUi" aria-hidden="true">
-  <span class="scrollcue mono" id="scrollcue"><i></i>Scroll slowly</span>
-  <span class="finder mono" id="finder">● Rec · <b id="fStop">f/1.4</b> · <span id="fFocus">0.20 m</span> · ISO 800</span>
-</div>
-<div class="progress" aria-hidden="true"><b id="bar"></b></div>
-<div class="track" id="track"><a id="top"></a></div>
-<canvas id="confetti" aria-hidden="true"></canvas>
-
-<main class="biz" id="biz">
-  <section class="sec" id="about" aria-labelledby="aTitle">
+  <section class="sec dark" id="invitation" aria-labelledby="iTitle">
     <div class="wrap">
-      <p class="label mono"><b>Àríyá</b><span>What we do</span></p>
-      <h2 class="statement" id="aTitle">We keep the list, the seats and the aso ebi in one calm place, so the family can have the <em>àríyá.</em></h2>
-    </div>
-  </section>
+      <div class="sec-head reveal">
+        <span class="kicker">Try the guest experience</span>
+        <h2 class="display" id="iTitle">An invitation becomes a <em>confirmed guest,</em> then a seat.</h2>
+        <p class="muted">This is what one guest sees when they open their personal link. Reply below; the demo shows what happens next. It uses sample data and sends nothing.</p>
+      </div>
+      <div class="gx">
+        <div class="stage" id="stage" aria-hidden="true">
+          <span class="demo-flag stage-note">Sample guest</span>
+          <div class="s-env"><div class="s-flap"><i></i><i></i></div><p class="to" id="envTo">Adaeze Okonkwo</p></div>
+          <button class="s-seal" id="seal" type="button" tabindex="-1">À</button>
+          <div class="s-card paper"><small>Together with their families</small><div class="names">Chidinma &amp; Tunde</div><small>request the pleasure of</small><div class="for" id="cardFor">Adaeze Okonkwo</div><div class="when">Saturday 12 December 2026, 2pm<br>The Grand Pavilion, Victoria Island</div><span class="stamp">Regretfully declines</span></div>
+          <div class="s-plan"><svg id="planSvg" viewBox="0 0 400 340" role="img" aria-label="Seating plan"></svg></div>
+          <div class="s-place paper"><b id="placeName">Adaeze</b><span id="placeTable">Table 7</span></div>
+        </div>
 
-  <div class="marquee" aria-label="Occasions we plan">
-    <div><span>Weddings</span><span>Traditional introductions</span><span>Naming ceremonies</span><span>Fiftieth birthdays</span><span>Chieftaincy titles</span><span>Thanksgivings</span><span>Burials and remembrances</span></div><div aria-hidden="true"><span>Weddings</span><span>Traditional introductions</span><span>Naming ceremonies</span><span>Fiftieth birthdays</span><span>Chieftaincy titles</span><span>Thanksgivings</span><span>Burials and remembrances</span></div>
-  </div>
-
-  <section class="sec" aria-labelledby="fTitle">
-    <div class="wrap">
-      <p class="label mono"><b>The tools</b><span id="fTitle">Everything a big Nigerian party needs</span></p>
-      <div class="rows">
-        <article><h3>Personal RSVP links</h3><p>Every guest opens an invitation with their name on it and replies in one tap. No more "RSVP to who exactly?"</p></article>
-        <article><h3>A live headcount</h3><p>See who has confirmed, who is bringing four children, and who hasn't opened their link yet.</p></article>
-        <article><h3>Seating on your floor plan</h3><p>Drag guests to tables in your actual hall. Guests know their table before they reach the gate.</p></article>
-        <article><h3>Aso ebi, sorted</h3><p>Fabric orders, sizes and payments in one list, without one more screenshot of a bank alert.</p></article>
-        <article><h3>WhatsApp and SMS nudges</h3><p>Gentle reminders to guests who haven't replied, and directions on the morning of the event.</p></article>
-        <article><h3>QR check-in at the gate</h3><p>Ushers scan each code, see the table, and the couple watches the hall fill from their phone.</p></article>
+        <div class="panel">
+          <ol class="steps-mini" id="steps">
+            <li aria-current="step">Open</li><li>Reply</li><li>Place card</li><li>Your table</li>
+          </ol>
+          <div class="invite-box">
+            <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center">
+              <span class="demo-flag">Demo · sample guest</span>
+              <button class="link-btn" id="openBtn" type="button">Open the envelope</button>
+            </div>
+            <h3>Hello, <span id="hello">Adaeze</span>.</h3>
+            <dl>
+              <dt>Event</dt><dd>Chidinma &amp; Tunde's wedding</dd>
+              <dt>Date</dt><dd>Saturday 12 December 2026, 2pm</dd>
+              <dt>Venue</dt><dd>The Grand Pavilion, Victoria Island, Lagos</dd>
+              <dt>Reply by</dt><dd>Friday 20 November 2026</dd>
+            </dl>
+            <form id="rsvpForm" novalidate>
+              <fieldset>
+                <legend>Will you attend?</legend>
+                <div class="choice">
+                  <label><input type="radio" name="resp" value="yes"> Yes, I'll be there</label>
+                  <label><input type="radio" name="resp" value="no"> Sorry, I can't</label>
+                </div>
+              </fieldset>
+              <div id="plusWrap" style="margin-top: 14px; display: grid; gap: 8px">
+                <label class="check"><input type="checkbox" id="plusOne"> I'm bringing my plus-one</label>
+                <div class="field" id="plusNameWrap" hidden><label for="plusName">Plus-one's name</label><input class="input" id="plusName" autocomplete="off"></div>
+              </div>
+              <p class="error-text" id="rsvpErr" role="alert" style="margin-top: 10px"></p>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px">
+                <button class="btn btn-primary" type="submit" id="sendBtn">Send my reply</button>
+              </div>
+            </form>
+            <div class="result" id="result" hidden tabindex="-1" aria-live="polite"></div>
+          </div>
+          <p class="muted" style="font-size: 0.9375rem">The same reply shows up in the <a href="planner.html#seating" style="color: var(--gold)">demo planner's seating view</a>. <button class="link-btn" id="resetGx" type="button" style="color: var(--on-dark)">Reset this demo</button></p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="sec" id="how" aria-labelledby="hTitle" style="padding-top: 0">
+  <section class="sec" id="tools" aria-labelledby="tTitle">
     <div class="wrap">
-      <p class="label mono"><b>How it works</b><span id="hTitle">Three steps</span></p>
-      <ol class="steps">
-        <li><h3>Create the event</h3><p>Add the date, the venue and your guest list. Import contacts from your phone or a spreadsheet.</p></li>
-        <li><h3>Send personal links</h3><p>Share each guest's link on WhatsApp, SMS or email. They reply in seconds, with no app to install.</p></li>
-        <li><h3>Watch the hall fill</h3><p>Replies flow into your seating chart. On the day, check guests in at the gate.</p></li>
+      <div class="sec-head reveal">
+        <span class="kicker">Guests and seating</span>
+        <h2 class="display" id="tTitle">Know who's coming. <em>And where they sit.</em></h2>
+        <p class="muted">Upload your list, send each guest a personal link and watch replies arrive. Confirmed guests drop into your seating plan, and a table never takes more people than it has chairs.</p>
+      </div>
+      <div class="tools reveal">
+        <div class="board">
+          <h3>Guest list <a href="planner.html#guests">Open in the demo planner</a></h3>
+          <div class="stats" id="stats"></div>
+          <div class="field"><label for="gSearch">Search guests</label><input class="input" id="gSearch" type="search" placeholder="Try “Okafor” or “pending”" autocomplete="off"></div>
+          <div class="table-scroll"><table class="gtable"><thead><tr><th scope="col">Guest</th><th scope="col" class="hide-sm">Party</th><th scope="col">Status</th><th scope="col">Table</th></tr></thead><tbody id="gRows"></tbody></table></div>
+          <p class="hint" id="gMore"></p>
+        </div>
+        <div class="board">
+          <h3>Seating <a href="planner.html#seating">Assign tables</a></h3>
+          <div class="tables-mini" id="tmini"></div>
+          <p class="hint">Sample hall with nine tables. In the planner, pick a guest and choose a table, or drag them on a larger screen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec linen" id="vendors" aria-labelledby="vTitle">
+    <div class="wrap vend">
+      <div class="reveal">
+        <span class="kicker">Vendor checklist</span>
+        <h2 class="display" id="vTitle" style="font-size: clamp(2.1rem, 4.6vw, 3.4rem)">Caterer, gele, DJ, cake. <em>Nothing forgotten.</em></h2>
+        <p class="muted" style="margin-top: 16px; font-size: 1.125rem">Every vendor gets tasks with due dates counted back from the day. Tick them off as they're done; overdue ones rise to the top.</p>
+        <div class="progressbar" aria-hidden="true"><b id="vBar" style="width: 0"></b></div>
+        <p style="margin-top: 10px; font-weight: 600" id="vCount" aria-live="polite"></p>
+        <p style="margin-top: 18px"><a class="btn btn-ghost btn-small" href="planner.html#vendors">Edit the checklist</a></p>
+      </div>
+      <ul class="tasks reveal" id="tasks" aria-label="Sample vendor tasks"></ul>
+    </div>
+  </section>
+
+  <section class="sec dark" id="how" aria-labelledby="hTitle">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">How it works</span>
+        <h2 class="display" id="hTitle">Three steps from list to <em>last dance.</em></h2>
+      </div>
+      <ol class="how reveal">
+        <li><h3>Upload your guest list</h3><p class="muted">Import a spreadsheet or paste names and numbers. We flag missing details and duplicates before anything is saved.</p></li>
+        <li><h3>Send personal links</h3><p class="muted">Each guest gets their own link by WhatsApp, SMS or email. They reply in seconds, with no app to install, and get a confirmation email.</p></li>
+        <li><h3>Seat and check in</h3><p class="muted">Confirmed guests fill your seating plan. Vendors work from the same checklist, and on the day you know exactly who's coming.</p></li>
       </ol>
     </div>
   </section>
 
-  <section class="sec" id="pricing" aria-labelledby="pTitle" style="padding-top: 0">
+  <section class="sec" id="pricing" aria-labelledby="prTitle">
     <div class="wrap">
-      <p class="label mono"><b>Pricing</b><span id="pTitle">Pay per event</span></p>
-      <div class="plans">
-        <article class="plan"><h3>Intimate<small>Up to 80 guests</small></h3><p>Personal links and a live headcount.</p><span class="price">Free</span></article>
-        <article class="plan best"><h3>Owambe<small>Up to 600 guests · most chosen</small></h3><p>Seating chart, aso ebi orders, reminders and QR check-in.</p><span class="price">₦45,000</span></article>
-        <article class="plan"><h3>Planner<small>Unlimited events, monthly</small></h3><p>Your logo on every invitation, and team access for ushers and vendors.</p><span class="price">₦150,000</span></article>
+      <div class="sec-head reveal">
+        <span class="kicker">Pricing</span>
+        <h2 class="display" id="prTitle">Pay per event. <em>No subscription.</em></h2>
+        <p class="muted">Couples pay once for their event. Planners pay for each client event they run, and can pass the cost on in their own fee. <span class="demo-flag" style="margin-left: 4px">Placeholder prices</span></p>
       </div>
-      <p class="note">Prices are placeholders for this prototype.</p>
+      <div class="price-rows reveal">
+        <div class="price-row"><h3>Intimate<small>Up to 80 guests</small></h3><p class="muted">Personal RSVP links, a live headcount and confirmation emails.</p><div class="amt">Free</div></div>
+        <div class="price-row pick"><h3>Celebration<small>Up to 600 guests · for couples</small></h3><p class="muted">Everything in Intimate, plus guest-list import, seating plan, vendor checklist and SMS reminders.</p><div class="amt">₦45,000<small>per event</small></div></div>
+        <div class="price-row"><h3>Planner<small>For planners running client events</small></h3><p class="muted">Everything in Celebration for each event, your name on every invitation, and access for your ushers and vendors.</p><div class="amt">₦30,000<small>per client event</small></div></div>
+      </div>
     </div>
   </section>
 
-  <section class="sec cta" id="start" aria-labelledby="sTitle" style="padding-top: 0">
+  <section class="sec close dark" aria-labelledby="cTitle">
     <div class="wrap">
-      <p class="label mono" style="justify-content: center"><b>Start planning</b></p>
-      <h2 class="statement" id="sTitle">Your guests are waiting for <em>their link.</em></h2>
-      <form class="signup" id="signup">
-        <label for="email">Email address</label>
-        <input id="email" type="email" required placeholder="Your email address" autocomplete="email">
-        <button class="btn gold" type="submit">Get early access</button>
-      </form>
-      <p class="signup-msg" id="signupMsg" aria-live="polite"></p>
+      <h2 class="display" id="cTitle">Start with your <em>guest list.</em></h2>
+      <p class="muted" style="max-width: 36rem; margin: 0 auto">Open the planner to see your event, guests, seating and vendors in one place. It runs on sample data while accounts and real sending are being built.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="planner.html">Start planning</a>
+        <a class="film-link" href="film.html"><i aria-hidden="true">▶</i>Watch the film, “The Yes”</a>
+      </div>
     </div>
   </section>
-
-  <footer class="foot">
-    <div class="wrap"><span class="wordmark">Àríyá</span><span>Àríyá (ah-ree-YAH): merriment, in Yoruba.</span><span>Made in Benin City · Tech4Youth Edo</span></div>
-  </footer>
 </main>
 
+<footer class="site-foot">
+  <div class="wrap">
+    <span><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.3rem; color: var(--on-dark)">Àríyá</b> by OwambePlan</span>
+    <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
+    <span>Tech4Youth Edo · Module 06, Project 36 prototype</span>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="assets/demo.js"></script>
 <script>
-/* Story, sound and page. Runs on its own so the page still tells the story if WebGL or the CDN is unavailable.
-   The 3D module plugs in through window.OP.render and reports loading through window.OP.loaded. */
 (function () {
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
-  function seg(p, a, b) { return smooth((p - a) / (b - a)); }
-  function bump(p, a, b, c, d) { return seg(p, a, b) * (1 - seg(p, c, d)); }
-  var PRO = 0.09; // share of the scroll given to the prologue
-  var OP = window.OP = { p: 0, raw: 0, pro: 0, seated: 0, loaded: 0, entered: false, covered: false, reduceMotion: reduceMotion, render: null, seg: seg, bump: bump, smooth: smooth, clamp: clamp };
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  window.scrollTo(0, 0);
-  document.documentElement.classList.add("locked");
+  "use strict";
+  var D = window.AriyaDemo;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.documentElement.classList.add("js");
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var toastT;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 3200); }
 
-  /* ---------- Score: a generated highlife-ambient soundtrack that follows the story ---------- */
-  var Score = (function () {
-    var ctx = null, master, bus, tone, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf;
-    var lv = { pad: 0.7, gtr: 0, bass: 0, perc: 0, drum: 0, bell: 0.3, kick: 0, ping: 0, open: 1 };
-    var tg = Object.assign({}, lv);
-    var BPM = 100, S16 = 60 / BPM / 4;
-    var chords = [
-      { root: 41, notes: [53, 57, 60, 64, 67] }, // Fmaj9
-      { root: 46, notes: [53, 58, 62, 65, 69] }, // Bbmaj7
-      { root: 48, notes: [55, 60, 62, 64, 69] }, // C6/9
-      { root: 45, notes: [52, 55, 60, 64, 67] }  // Am7
-    ];
-    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-    function env(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
-    function osc(type, f, t, dur, dest, detune) { var o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); if (detune) o.detune.value = detune; o.connect(dest); o.start(t); o.stop(t + dur + 0.05); return o; }
-    function build() {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      master = ctx.createGain(); master.gain.value = 0;
-      comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
-      bus = ctx.createGain();
-      tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 16000; tone.Q.value = 0.4;
-      verb = ctx.createConvolver();
-      var len = ctx.sampleRate * 3.4, ir = ctx.createBuffer(2, len, ctx.sampleRate);
-      for (var c = 0; c < 2; c++) { var d = ir.getChannelData(c); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8); }
-      verb.buffer = ir;
-      var wet = ctx.createGain(); wet.gain.value = 0.32;
-      bus.connect(tone); tone.connect(comp); tone.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(master); master.connect(ctx.destination);
-      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-      var nd = noiseBuf.getChannelData(0); for (var j = 0; j < nd.length; j++) nd[j] = Math.random() * 2 - 1;
+  /* ---------- Section reveals (content stays visible if observers are unavailable) ---------- */
+  var reveals = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window && !reduce) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else reveals.forEach(function (el) { el.classList.add("in"); });
+
+  /* ---------- Mobile menu: a dialog with focus handling ---------- */
+  var sheet = $("menuSheet"), opener = $("menuOpen");
+  function openMenu() { sheet.hidden = false; $("menuClose").focus(); document.addEventListener("keydown", trap); }
+  function closeMenu(restore) { sheet.hidden = true; document.removeEventListener("keydown", trap); if (restore !== false) opener.focus(); }
+  function trap(e) {
+    if (e.key === "Escape") { closeMenu(); return; }
+    if (e.key !== "Tab") return;
+    var f = sheet.querySelectorAll("a, button"), first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  opener.addEventListener("click", openMenu);
+  $("menuClose").addEventListener("click", function () { closeMenu(); });
+  sheet.addEventListener("click", function (e) { if (e.target === sheet) closeMenu(); });
+  sheet.querySelectorAll("nav a").forEach(function (a) { a.addEventListener("click", function () { closeMenu(false); }); });
+
+  /* ---------- WhatsApp chaos → guest list ---------- */
+  var sorted = [
+    ["Bisi Adebayo", "Party of 5", "yes", "Confirmed", "Table 3 · from “Me and my 4 children”"],
+    ["Tolu Bankole", "Party of 1", "wait", "Link sent", "Personal invite sent by WhatsApp"],
+    ["Emeka & Ifeoma Okafor", "Party of 2", "wait", "Link sent", "Added by Mummy C, her sister as plus-one"],
+    ["Dayo Ogunleye", "Party of 1", "yes", "Confirmed", "Table 1 · he can see it on his invitation"],
+    ["Femi Adeyemi", "Party of 1", "yes", "Confirmed", "Replied through his own link"]
+  ];
+  var sortDone = false;
+  $("sortBtn").addEventListener("click", function () {
+    var btn = this, list = $("sortList"), msgs = document.querySelectorAll(".msg");
+    if (sortDone) {
+      sortDone = false; list.innerHTML = ""; $("sortEmpty").hidden = false; $("sortCount").textContent = "0 sorted";
+      msgs.forEach(function (m) { m.classList.remove("sorted"); }); btn.textContent = "Sort these messages"; return;
     }
-    function pad(ch, t) {
-      if (lv.pad < 0.02) return;
-      var bar = S16 * 16;
-      ch.notes.forEach(function (m, k) {
-        var g = ctx.createGain(), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 900 + 600 * lv.open; f.Q.value = 0.3;
-        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.022 * lv.pad, t + 1.4); g.gain.linearRampToValueAtTime(0.018 * lv.pad, t + bar); g.gain.linearRampToValueAtTime(0.0001, t + bar + 1.6);
-        f.connect(g); g.connect(bus);
-        osc("sawtooth", hz(m), t, bar + 1.7, f, -7 + k); osc("sawtooth", hz(m), t, bar + 1.7, f, 7 - k); osc("sine", hz(m - 12), t, bar + 1.7, g);
-      });
-    }
-    function pluck(m, t, vol) {
-      var g = ctx.createGain(), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1900; f.Q.value = 0.7;
-      f.connect(g); g.connect(bus); env(g, t, 0.004, vol, 0.42);
-      osc("triangle", hz(m), t, 0.5, f); osc("sine", hz(m + 12), t, 0.3, g);
-    }
-    function bassNote(m, t) { var g = ctx.createGain(), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 420; f.connect(g); g.connect(bus); env(g, t, 0.01, 0.16 * lv.bass, 0.5); osc("triangle", hz(m), t, 0.6, f); osc("sine", hz(m), t, 0.6, f); }
-    function shaker(t, acc) { var s = ctx.createBufferSource(); s.buffer = noiseBuf; var f = ctx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 6500; var g = ctx.createGain(); s.connect(f); f.connect(g); g.connect(bus); env(g, t, 0.006, (acc ? 0.05 : 0.022) * lv.perc, 0.06); s.start(t, Math.random() * 0.4, 0.1); }
-    function talking(t, hi) { var g = ctx.createGain(); g.connect(bus); env(g, t, 0.005, 0.22 * lv.drum, 0.38); var o = ctx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(hi ? 260 : 190, t); o.frequency.exponentialRampToValueAtTime(hi ? 150 : 105, t + 0.28); o.connect(g); o.start(t); o.stop(t + 0.45); }
-    function bell(t, hi) { var g = ctx.createGain(); g.connect(bus); env(g, t, 0.002, 0.05 * lv.bell, 0.32); var f = hi ? 1046 : 784; osc("sine", f, t, 0.4, g); osc("sine", f * 2.76, t, 0.2, g); }
-    function kick(t) { var g = ctx.createGain(); g.connect(bus); env(g, t, 0.003, 0.32 * lv.kick, 0.3); var o = ctx.createOscillator(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.22); o.connect(g); o.start(t); o.stop(t + 0.4); }
-    function ping(t) { var g = ctx.createGain(); g.connect(bus); env(g, t, 0.003, 0.05 * lv.ping, 0.22); osc("sine", 1318, t, 0.12, g); var g2 = ctx.createGain(); g2.connect(bus); env(g2, t + 0.09, 0.003, 0.045 * lv.ping, 0.3); osc("sine", 1760, t + 0.09, 0.35, g2); }
-    var gtrSteps = { 0: 2, 3: 4, 6: 3, 8: 1, 10: 4, 12: 2, 14: 3 }, bellSteps = { 0: 1, 3: 0, 6: 1, 10: 0, 12: 0 }, drumSteps = { 4: 1, 7: 0, 12: 1, 14: 0 };
-    function schedule() {
-      for (var k in tg) lv[k] += (tg[k] - lv[k]) * 0.04;
-      tone.frequency.setTargetAtTime(1200 + 15000 * lv.open * lv.open, ctx.currentTime, 0.4);
-      while (nextT < ctx.currentTime + 0.12) {
-        var s = step % 16, bar = Math.floor(step / 16), ch = chords[bar % 4];
-        if (s === 0) pad(ch, nextT);
-        if (lv.gtr > 0.02 && gtrSteps[s] !== undefined) pluck(ch.notes[gtrSteps[s]] + 12, nextT, 0.07 * lv.gtr);
-        if (lv.bass > 0.02 && (s === 0 || s === 6 || s === 10)) bassNote(s === 6 ? ch.root + 7 : ch.root, nextT);
-        if (lv.perc > 0.02) shaker(nextT, s % 4 === 2);
-        if (lv.bell > 0.02 && bellSteps[s] !== undefined) bell(nextT, bellSteps[s]);
-        if (lv.drum > 0.02 && drumSteps[s] !== undefined && (bar % 2 || s < 10)) talking(nextT, drumSteps[s]);
-        if (lv.kick > 0.02 && (s === 0 || s === 8)) kick(nextT);
-        if (lv.ping > 0.05 && Math.random() < 0.09 * lv.ping) ping(nextT + Math.random() * S16);
-        nextT += S16; step++;
-      }
-    }
-    return {
-      start: function () {
-        try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
-        if (!timer) { nextT = ctx.currentTime + 0.1; timer = setInterval(schedule, 25); }
-        master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.85, ctx.currentTime, 1.2);
-        on = true; return true;
-      },
-      stop: function () { if (!ctx) return; master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); on = false; },
-      isOn: function () { return on; },
-      chime: function () { if (!on) return; var t = ctx.currentTime; [72, 76, 79, 84].forEach(function (m, i) { pluck(m, t + i * 0.09, 0.09); }); },
-      scene: function (p, pro) {
-        var T = { pad: 0.7, gtr: 0, bass: 0, perc: 0, drum: 0, bell: 0.25, kick: 0, ping: 0, open: 1 };
-        if (pro >= 1) {
-          if (p < 0.12) { T.pad = 1; T.gtr = 0.35; T.bell = 0.4; }
-          else if (p < 0.29) { T.pad = 1; T.gtr = 1; T.bass = 0.6; T.bell = 0.5; }
-          else if (p < 0.47) { T.pad = 0.55; T.gtr = 0.4; T.perc = 0.5; T.ping = 1; T.open = 0.25; T.bell = 0; }
-          else if (p < 0.62) { T.pad = 1; T.gtr = 0.15; T.bell = 0.25; }
-          else if (p < 0.78) { T.pad = 1; T.gtr = 0.6; T.bass = 0.5; T.bell = 0.5; }
-          else if (p < 0.89) { T.pad = 0.8; T.gtr = 1; T.bass = 1; T.perc = 0.8; T.drum = 0.6; T.bell = 0.6; }
-          else { T.pad = 0.7; T.gtr = 1; T.bass = 1; T.perc = 1; T.drum = 1; T.bell = 0.8; T.kick = 1; }
-        }
-        tg = T;
-      },
-      suspend: function (yes) { if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); } }
-    };
-  })();
-  document.addEventListener("visibilitychange", function () { Score.suspend(document.hidden); });
-
-  var soundBtn = document.getElementById("soundBtn");
-  function setSound(onOff) {
-    var ok = onOff ? Score.start() : (Score.stop(), false);
-    soundBtn.classList.toggle("sound-on", !!ok);
-    soundBtn.setAttribute("aria-pressed", ok ? "true" : "false");
-    soundBtn.querySelector(".lbl").textContent = ok ? "Sound on" : "Sound off";
-  }
-  soundBtn.addEventListener("click", function () { setSound(!Score.isOn()); });
-
-  /* ---------- Gate ---------- */
-  var gate = document.getElementById("gate"), enterSound = document.getElementById("enterSound");
-  var loadBar = document.getElementById("loadBar"), loadTxt = document.getElementById("loadTxt");
-  var gateStart = performance.now();
-  function enter(withSound) {
-    if (OP.entered) return;
-    OP.entered = true;
-    gate.classList.add("gone");
-    document.documentElement.classList.remove("locked");
-    setSound(withSound);
-    setTimeout(function () { gate.hidden = true; }, 1500);
-  }
-  enterSound.addEventListener("click", function () { enter(true); });
-  document.getElementById("enterQuiet").addEventListener("click", function () { enter(false); });
-  function gateTick() {
-    if (OP.entered) return;
-    // Let people in once the hall is built, or after a while without WebGL.
-    var waited = (performance.now() - gateStart) / 1000;
-    var shown = OP.loaded > 0 ? OP.loaded : Math.min(0.9, waited / 12);
-    loadBar.style.transform = "scaleX(" + shown.toFixed(3) + ")";
-    var ready = OP.loaded >= 1 || OP.failed || waited > 14;
-    loadTxt.textContent = ready ? "The hall is ready" : "Setting the hall " + Math.round(shown * 100) + "%";
-    enterSound.disabled = !ready;
-    requestAnimationFrame(gateTick);
-  }
-  requestAnimationFrame(gateTick);
-
-  /* ---------- Scroll progress ---------- */
-  var track = document.getElementById("track");
-  var target = 0, prog = 0;
-  function nativeProgress() {
-    var total = track.offsetHeight - window.innerHeight;
-    return total > 0 ? clamp(window.scrollY / total, 0, 1) : 0;
-  }
-  window.addEventListener("scroll", function () { target = nativeProgress(); }, { passive: true });
-  window.addEventListener("resize", function () { target = nativeProgress(); });
-  target = prog = nativeProgress();
-  function scrollToRaw(r) {
-    var total = track.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: r * total, behavior: reduceMotion ? "auto" : "smooth" });
-  }
-  function storyToRaw(p) { return PRO + p * (1 - PRO); }
-
-  /* ---------- Archive index: nav label and menu ---------- */
-  var chapters = [["Prologue", -1], ["The box", 0], ["The yes", 0.17], ["The noise", 0.37], ["The calm", 0.53], ["The invitation", 0.72], ["The count", 0.83], ["The dance", 0.97]];
-  var whereNo = document.getElementById("whereNo"), whereName = document.getElementById("whereName");
-  var menu = document.getElementById("menu"), menuBtn = document.getElementById("menuBtn");
-  function setMenu(open) {
-    if (open) { menu.hidden = false; requestAnimationFrame(function () { menu.classList.add("open"); }); }
-    else { menu.classList.remove("open"); setTimeout(function () { if (!menu.classList.contains("open")) menu.hidden = true; }, 800); }
-    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    menuBtn.textContent = open ? "Close" : "Menu";
-  }
-  menuBtn.addEventListener("click", function () { setMenu(menuBtn.getAttribute("aria-expanded") !== "true"); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menuBtn.getAttribute("aria-expanded") === "true") { setMenu(false); menuBtn.focus(); } });
-  chapters.forEach(function (c, i) {
-    var li = document.createElement("li"), b = document.createElement("button");
-    b.type = "button"; b.innerHTML = "<span>No. 00" + i + "</span>" + c[0];
-    b.addEventListener("click", function () { setMenu(false); if (!OP.entered) enter(false); scrollToRaw(c[1] < 0 ? 0 : storyToRaw(c[1])); });
-    li.appendChild(b); document.getElementById("menuIndex").appendChild(li);
+    sortDone = true; $("sortEmpty").hidden = true; btn.textContent = "Show the chat again";
+    sorted.forEach(function (r, i) {
+      var li = document.createElement("li");
+      li.innerHTML = "<b>" + esc(r[0]) + "</b><span class=\"pill " + r[2] + "\">" + r[3] + "</span><small>" + esc(r[1]) + " · " + esc(r[4]) + "</small>";
+      list.appendChild(li);
+      setTimeout(function () { li.classList.add("in"); msgs[i].classList.add("sorted"); $("sortCount").textContent = (i + 1) + " sorted"; }, reduce ? 0 : 140 * i + 30);
+    });
   });
-  Array.prototype.forEach.call(menu.querySelectorAll(".co a"), function (a) { a.addEventListener("click", function () { setMenu(false); if (!OP.entered) enter(false); }); });
-  document.getElementById("home").addEventListener("click", function (e) { e.preventDefault(); scrollToRaw(0); });
-  document.getElementById("replay").addEventListener("click", function () { scrollToRaw(0); });
-  Array.prototype.forEach.call(document.querySelectorAll('a[href="#start"], a[href="#about"], a[href="#how"], a[href="#pricing"]'), function (a) {
-    a.addEventListener("click", function () { if (!OP.entered) enter(false); });
-  });
-  document.getElementById("signup").addEventListener("submit", function (e) {
+
+  /* ---------- Signature: invitation → confirmed guest → seat ---------- */
+  var TOKEN = "k701Qx", PREFER = "t7";
+  var stage = $("stage"), stepsEl = $("steps").children, result = $("result");
+  var SEAT_POS = [];
+  function setStep(n) { for (var i = 0; i < stepsEl.length; i++) { stepsEl[i].classList.toggle("done", i < n); if (i === n) stepsEl[i].setAttribute("aria-current", "step"); else stepsEl[i].removeAttribute("aria-current"); } }
+  function openEnvelope() { if (!stage.classList.contains("open")) { stage.classList.add("open"); setStep(1); $("openBtn").textContent = "Envelope opened"; } }
+  $("seal").addEventListener("click", openEnvelope);
+  $("openBtn").addEventListener("click", openEnvelope);
+  $("plusOne").addEventListener("change", function () { $("plusNameWrap").hidden = !this.checked; });
+
+  function drawPlan(table, highlight) {
+    var svg = $("planSvg"), cx = 200, cy = 150, R = 74, Rs = 112, cap = table.capacity;
+    var occupants = [];
+    D.state.guests.forEach(function (g) { if (g.tableId === table.id && g.status === "yes") for (var k = 0; k < g.party; k++) occupants.push({ g: g, k: k }); });
+    var out = '<defs><radialGradient id="cloth" cx="45%" cy="40%"><stop offset="0" stop-color="#fdfaf3"/><stop offset="1" stop-color="#e6dcc8"/></radialGradient></defs>';
+    out += '<circle cx="' + (cx - 250) + '" cy="' + cy + '" r="' + R + '" fill="#0d4a37" stroke="rgba(227,194,127,.3)"/><circle cx="' + (cx + 250) + '" cy="' + cy + '" r="' + R + '" fill="#0d4a37" stroke="rgba(227,194,127,.3)"/>';
+    out += '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="url(#cloth)" stroke="#c9a256" stroke-width="2"/>';
+    out += '<text x="' + cx + '" y="' + (cy - 6) + '" text-anchor="middle" font-family="Bodoni Moda, Georgia, serif" font-size="24" fill="#15211c">' + esc(table.name) + '</text>';
+    out += '<text x="' + cx + '" y="' + (cy + 20) + '" text-anchor="middle" font-family="Figtree, sans-serif" font-size="14" fill="#4a5751">' + occupants.length + ' of ' + cap + ' seats filled</text>';
+    for (var i = 0; i < cap; i++) {
+      var a = -Math.PI / 2 + i / cap * Math.PI * 2, x = cx + Math.cos(a) * Rs, y = cy + Math.sin(a) * Rs, o = occupants[i];
+      var isNew = o && highlight && o.g.id === highlight;
+      out += '<circle class="seat' + (isNew ? ' seat-new' : '') + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="14" fill="' + (isNew ? '#e3c27f' : o ? '#f4efe6' : 'transparent') + '" stroke="' + (o ? '#e3c27f' : 'rgba(244,239,230,.45)') + '" stroke-width="2"' + (o ? '' : ' stroke-dasharray="4 4"') + '/>';
+      if (o) out += '<text x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle" font-family="Figtree, sans-serif" font-size="11" font-weight="700" fill="#15211c">' + esc(o.g.name.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).map(function (w) { return w[0]; }).slice(0, 2).join("")) + '</text>';
+    }
+    out += '<text x="' + cx + '" y="' + (cy + Rs + 46) + '" text-anchor="middle" font-family="Figtree, sans-serif" font-size="13" fill="#b9c7bf">Sample hall · neighbouring tables shown faded</text>';
+    svg.innerHTML = out;
+  }
+
+  $("rsvpForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    document.getElementById("signupMsg").textContent = "Thank you. We'll email " + document.getElementById("email").value + " within a day to set up your first event.";
+    var choice = (this.querySelector('input[name="resp"]:checked') || {}).value;
+    var err = $("rsvpErr");
+    if (!choice) { err.textContent = "Choose yes or no to send your reply."; return; }
+    var plus = $("plusOne").checked, plusName = $("plusName").value.trim();
+    if (choice === "yes" && plus && !plusName) { err.textContent = "Add your plus-one's name, or untick the plus-one box."; $("plusName").focus(); return; }
+    err.textContent = "";
+    var btn = $("sendBtn"); btn.disabled = true; btn.textContent = "Sending…";
+    setTimeout(function () {
+      btn.disabled = false; btn.textContent = "Update my reply";
+      var r = D.respond(TOKEN, choice, { plusOne: plus, plusOneName: plusName, autoSeat: true, preferTable: PREFER });
+      if (!r.ok) { err.textContent = r.msg + " Try resetting the demo."; return; }
+      var g = r.guest;
+      openEnvelope();
+      if (choice === "yes") {
+        var t = D.byId(D.state.tables, g.tableId);
+        var used = t ? D.seatsUsed(t.id) : 0;
+        $("placeName").textContent = g.name.split(" ")[0] + (plus ? " & " + plusName.split(" ")[0] : "");
+        $("placeTable").textContent = t ? t.name : "Seat to be assigned";
+        stage.classList.remove("declined");
+        setTimeout(function () { if (t) drawPlan(t, g.id); stage.classList.add("placed"); setStep(t ? 4 : 3); }, reduce ? 0 : 650);
+        result.className = "result yes";
+        result.innerHTML = "<h4>You're confirmed, " + esc(g.name.split(" ")[0]) + ".</h4>" +
+          "<p>Party of " + g.party + (plus ? " (with " + esc(plusName) + ")" : "") + ". " + (t ? "Your seat is at <b>" + esc(t.name) + "</b>, now " + used + " of " + t.capacity + " seats filled" + (used === t.capacity ? ", so the table is full." : ".") : "The couple will assign your table soon.") + "</p>" +
+          "<p>In the live product a confirmation email goes to " + esc(g.email || "the guest") + " with the date, venue and table. <b>This demo sends nothing.</b></p>";
+      } else {
+        stage.classList.remove("placed"); stage.classList.add("declined"); setStep(2);
+        result.className = "result no";
+        result.innerHTML = "<h4>Thank you for letting them know.</h4><p>Chidinma and Tunde see your reply straight away, and your seat goes back to the plan. In the live product you'd get a short email confirming your reply. <b>This demo sends nothing.</b></p>";
+      }
+      result.hidden = false; result.focus({ preventScroll: true });
+      renderTools();
+    }, reduce ? 0 : 450);
   });
 
-  /* ---------- Text beats ---------- */
-  var beats = Array.prototype.map.call(document.querySelectorAll(".beat"), function (el) {
-    var raw = el.dataset.rawIn !== undefined;
-    return { el: el, raw: raw, a: parseFloat(raw ? el.dataset.rawIn : el.dataset.in), b: parseFloat(raw ? el.dataset.rawOut : el.dataset.out), base: el.classList.contains("low") ? "" : "translateY(-50%) " };
-  });
-
-  /* ---------- The noise: message storm, each bubble at its own depth ---------- */
-  var msgs = [
-    ["Aunty Bisi", "Is it 300 or 450 people now??"], ["Femi", "Pls add my cousin to the group"], ["Mummy C", "My church members are coming o. All of them."],
-    ["Kemi (planner)", "Who has the final list? Anybody?"], ["Tolu", "I didn't get invite o"], ["Uncle Dayo", "Which table am I?"],
-    ["Ngozi", "Send the aso ebi account number again"], ["Aunty Bisi", "Me and my 4 children will be there"], ["Seun", "Is the reception in VI or Lekki?"],
-    ["Caterer", "How many plates did we agree?"], ["Femi", "RSVP to who exactly?"], ["Mummy C", "Add Mrs Okafor. And her sister."],
-    ["Kemi (planner)", "Please stop sending names in the group"], ["Tunde", "Babe I think we've lost count"]
-  ];
-  var storm = document.getElementById("storm");
-  var rnd = (function (s) { return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; })(7);
-  var bubbles = msgs.map(function (m, i) {
-    var el = document.createElement("div");
-    el.className = "bub";
-    var hh = 14 + Math.floor(i / 3), mm = (i * 7 + 3) % 60;
-    el.innerHTML = "<b>" + m[0] + "</b>" + m[1] + "<i>" + hh + ":" + (mm < 10 ? "0" : "") + mm + "</i>";
-    var x = 2 + (i % 3) * 28 + rnd() * 16, y = 16 + Math.floor(i / 3) * 10 + rnd() * 6;
-    el.style.left = x + "%"; el.style.top = y + "%";
-    var z = rnd();
-    el.style.zIndex = String(Math.round(z * 10));
-    storm.appendChild(el);
-    var ang = Math.atan2(y - 50, x + 10 - 50);
-    return { el: el, at: 0.3 + i * 0.0105, z: z, dx: Math.cos(ang), dy: Math.sin(ang), rot: (rnd() - 0.5) * 70, tilt: (rnd() - 0.5) * 8 };
-  });
-  var groupbar = document.getElementById("groupbar"), unread = document.getElementById("unread");
-
-  /* ---------- The invitation envelope ---------- */
-  var envwrap = document.getElementById("envwrap"), env = document.getElementById("env"), card = document.getElementById("card");
-  var nameEl = document.getElementById("guestName"), who = document.getElementById("who"), toName = document.getElementById("toName"), reply = document.getElementById("reply");
-  var envOpen = false, envTimer = null;
-  function openEnv() {
-    if (envOpen) return;
-    envOpen = true; env.classList.add("open");
-    clearTimeout(envTimer); envTimer = setTimeout(function () { env.classList.add("out"); }, 1700);
+  function resetGx() {
+    var g = D.guestByToken(TOKEN);
+    if (g) { g.status = "pending"; g.tableId = null; g.party = 1; D.state.rsvps = D.state.rsvps.filter(function (r) { return r.guestId !== g.id; }); D.save(); }
+    stage.classList.remove("open", "placed", "declined");
+    $("rsvpForm").reset(); $("plusNameWrap").hidden = true; $("rsvpErr").textContent = "";
+    $("sendBtn").textContent = "Send my reply"; $("openBtn").textContent = "Open the envelope";
+    result.hidden = true; setStep(0); renderTools();
   }
-  function closeEnv() { if (!envOpen) return; envOpen = false; clearTimeout(envTimer); env.classList.remove("open", "out"); }
-  document.getElementById("seal").addEventListener("click", openEnv);
-  function guest() { return (nameEl.value || "").trim() || "Guest"; }
-  nameEl.addEventListener("input", function () { who.textContent = guest(); toName.textContent = guest(); });
-  document.getElementById("yes").addEventListener("click", function (e) {
-    reply.textContent = "You're on the list, " + guest() + ". Table 7, seat 4. A confirmation is on its way.";
-    var r = e.currentTarget.getBoundingClientRect();
-    burst(r.left + r.width / 2, r.top); Score.chime();
-  });
-  document.getElementById("no").addEventListener("click", function () {
-    reply.textContent = "Thank you, " + guest() + ". The couple will see your reply straight away.";
-  });
-  var tiltX = 0, tiltY = 0, tiltTX = 0, tiltTY = 0;
-  envwrap.addEventListener("pointermove", function (e) {
-    if (reduceMotion || e.pointerType !== "mouse") return;
-    var r = envwrap.getBoundingClientRect();
-    var u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height;
-    tiltTX = clamp((u - 0.5) * 2, -1, 1); tiltTY = clamp((v - 0.5) * 2, -1, 1);
-    card.style.setProperty("--sx", (u * 100).toFixed(1) + "%"); card.style.setProperty("--sy", (v * 100).toFixed(1) + "%");
-  });
-  envwrap.addEventListener("pointerleave", function () { tiltTX = tiltTY = 0; });
+  $("resetGx").addEventListener("click", function () { resetGx(); toast("Demo reset. Adaeze's invitation is unanswered again."); });
 
-  // Live guest list shown during the count
-  var guestData = [["Aunty Bisi + 4", "Table 3"], ["Mr & Mrs Okafor", "Table 5"], ["Femi Adeyemi", "Table 12"], ["Ngozi Eze + 1", "Table 7"], ["Uncle Dayo", "Table 1"], ["Kemi (planner)", "Head table"], ["Tolu Bankole", "Table 9"], ["Seun & Ronke", "Table 14"]];
-  var guestsEl = document.getElementById("guests");
-  var guestRows = guestData.map(function (g) {
-    var li = document.createElement("li");
-    li.innerHTML = "<span>" + g[0] + "</span><em>" + g[1] + "</em><i>Coming</i>";
-    document.getElementById("guestRows").appendChild(li);
-    return li;
-  });
-
-  var flash = document.getElementById("flash"), bar = document.getElementById("bar"), scrim = document.getElementById("scrim");
-  var cConfirmed = document.getElementById("cConfirmed"), cSeated = document.getElementById("cSeated");
-  var biz = document.getElementById("biz"), nav = document.getElementById("nav"), footUi = document.getElementById("footUi"), scrollcue = document.getElementById("scrollcue");
-
-  /* ---------- 2D confetti for the RSVP tap ---------- */
-  var cv = document.getElementById("confetti"), cx = cv.getContext("2d"), bits = [], bitsOn = false;
-  function burst(x, y) {
-    if (reduceMotion) return;
-    cv.width = window.innerWidth; cv.height = window.innerHeight;
-    var cols = ["#e9c98a", "#f4efe6", "#4fcaa0", "#b8864b"];
-    for (var i = 0; i < 160; i++) {
-      var a = -Math.PI / 2 + (Math.random() - 0.5) * 2, s = 6 + Math.random() * 10;
-      bits.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, w: 4 + Math.random() * 6, h: 3 + Math.random() * 5, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, c: cols[i % 4], life: 130 + Math.random() * 60 });
-    }
-    if (!bitsOn) { bitsOn = true; requestAnimationFrame(stepBits); }
+  /* ---------- Guests and seating preview, from the same sample data ---------- */
+  var STATUS = { yes: ["yes", "Confirmed"], no: ["no", "Declined"], pending: ["wait", "Pending"] };
+  function renderTools() {
+    var c = D.counts();
+    $("stats").innerHTML = '<div class="stat"><b>' + c.yes + '</b><span>Confirmed · ' + c.people + ' people</span></div><div class="stat"><b>' + c.pending + '</b><span>Pending</span></div><div class="stat"><b>' + c.no + '</b><span>Declined</span></div>';
+    var q = $("gSearch").value.trim().toLowerCase();
+    var rows = D.state.guests.filter(function (g) { return !q || g.name.toLowerCase().indexOf(q) >= 0 || STATUS[g.status][1].toLowerCase().indexOf(q) >= 0; });
+    var shown = rows.slice(0, 7);
+    $("gRows").innerHTML = shown.length ? shown.map(function (g) {
+      var t = g.tableId ? D.byId(D.state.tables, g.tableId) : null;
+      return "<tr><td>" + esc(g.name) + "</td><td class=\"hide-sm\">" + g.party + "</td><td><span class=\"pill " + STATUS[g.status][0] + "\">" + STATUS[g.status][1] + "</span></td><td>" + (t ? esc(t.name) : g.status === "yes" ? "Not seated" : "—") + "</td></tr>";
+    }).join("") : '<tr><td colspan="4" class="muted">No guests match “' + esc(q) + '”.</td></tr>';
+    $("gMore").textContent = rows.length > shown.length ? "Showing " + shown.length + " of " + rows.length + " guests." : rows.length + " guest" + (rows.length === 1 ? "" : "s") + " shown.";
+    $("tmini").innerHTML = D.state.tables.map(function (t) {
+      var used = D.seatsUsed(t.id), pct = used / t.capacity, full = used >= t.capacity;
+      var dash = (pct * 157).toFixed(1);
+      return '<div class="tmini' + (full ? ' full' : '') + '"><svg viewBox="0 0 62 62" aria-hidden="true"><circle cx="31" cy="31" r="25" fill="none" stroke="#e3d8c4" stroke-width="6"/><circle cx="31" cy="31" r="25" fill="none" stroke="' + (full ? '#1b6e4c' : '#c9a256') + '" stroke-width="6" stroke-dasharray="' + dash + ' 157" transform="rotate(-90 31 31)"/></svg><b>' + esc(t.name) + '</b><span>' + used + ' of ' + t.capacity + (full ? ' · full' : ' seats') + '</span></div>';
+    }).join("");
+    renderTasks();
   }
-  function stepBits() {
-    cx.clearRect(0, 0, cv.width, cv.height);
-    bits = bits.filter(function (b) { return b.life > 0 && b.y < cv.height + 40; });
-    bits.forEach(function (b) {
-      b.vy += 0.3; b.vx *= 0.985; b.x += b.vx; b.y += b.vy; b.r += b.vr; b.life--;
-      cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r); cx.globalAlpha = Math.min(1, b.life / 40);
-      cx.fillStyle = b.c; cx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); cx.restore();
-    });
-    if (bits.length) requestAnimationFrame(stepBits); else { bitsOn = false; cx.clearRect(0, 0, cv.width, cv.height); }
+  $("gSearch").addEventListener("input", renderTools);
+
+  /* ---------- Vendor checklist preview ---------- */
+  function renderTasks() {
+    var v = D.state.vendors.slice().sort(function (a, b) { return a.done - b.done || a.due.localeCompare(b.due); });
+    $("tasks").innerHTML = v.map(function (t) {
+      return '<li class="' + (t.done ? 'done' : '') + '"><input type="checkbox" id="vt_' + t.id + '" data-id="' + t.id + '"' + (t.done ? ' checked' : '') + '><label class="t-name" for="vt_' + t.id + '">' + esc(t.task) + '</label><span class="t-meta">' + esc(t.name) + ' · ' + esc(t.category) + '</span><span class="due">' + D.fmtDate(t.due, { day: "numeric", month: "short" }) + '<br><span class="pill ' + (t.done ? 'yes' : 'wait') + '">' + (t.done ? 'Done' : 'To do') + '</span></span></li>';
+    }).join("");
+    var done = D.state.vendors.filter(function (t) { return t.done; }).length, all = D.state.vendors.length;
+    $("vBar").style.width = (done / all * 100).toFixed(1) + "%";
+    $("vCount").textContent = done + " of " + all + " vendor tasks done";
   }
+  $("tasks").addEventListener("change", function (e) {
+    var id = e.target.getAttribute("data-id"); if (!id) return;
+    var t = D.byId(D.state.vendors, id); t.done = e.target.checked; D.save();
+    renderTasks(); toast((t.done ? "Marked done: " : "Back to do: ") + t.task);
+    var again = document.getElementById("vt_" + id); if (again) again.focus();
+  });
 
-  /* ---------- DOM updates driven by progress ---------- */
-  function setBlur(el, px) { el.style.filter = px > 0.15 ? "blur(" + px.toFixed(2) + "px)" : "none"; }
-  var lastChapter = -1;
-  function updateDom(r, p) {
-    bar.style.transform = "scaleX(" + r.toFixed(4) + ")";
-    beats.forEach(function (bt) {
-      var q = bt.raw ? r : p;
-      var o = (bt.a <= 0 ? 1 : seg(q, bt.a, bt.a + (bt.raw ? 0.012 : 0.025))) * (bt.b >= 1 ? 1 : 1 - seg(q, bt.b - (bt.raw ? 0.012 : 0.025), bt.b));
-      if (!bt.raw && r < PRO) o = 0;
-      bt.el.style.opacity = o.toFixed(3);
-      bt.el.style.transform = bt.base + "translateY(" + ((1 - o) * 18).toFixed(1) + "px) scale(" + (1 + (1 - o) * 0.04).toFixed(4) + ")";
-      bt.el.style.visibility = o < 0.01 ? "hidden" : "visible";
-      setBlur(bt.el, reduceMotion ? 0 : (1 - o) * 12);
-    });
-    var shatter = seg(p, 0.46, 0.53), W = window.innerWidth;
-    var focusZ = 0.15 + 0.7 * seg(p, 0.31, 0.45);
-    bubbles.forEach(function (bb) {
-      var inn = seg(p, bb.at, bb.at + 0.012), o = inn * (1 - shatter), d = shatter * W * (0.6 + bb.z * 0.6), depthScale = 0.78 + bb.z * 0.42;
-      bb.el.style.opacity = (o * (0.55 + 0.45 * bb.z)).toFixed(3);
-      bb.el.style.transform = "translate(" + (bb.dx * d).toFixed(1) + "px," + (bb.dy * d + (1 - inn) * 24).toFixed(1) + "px) rotate(" + (bb.tilt + bb.rot * shatter).toFixed(1) + "deg) scale(" + (depthScale * (0.9 + inn * 0.1 - shatter * 0.3)).toFixed(3) + ")";
-      bb.el.style.visibility = o < 0.01 ? "hidden" : "visible";
-      if (o >= 0.01) setBlur(bb.el, reduceMotion ? 0 : Math.abs(bb.z - focusZ) * 9 + shatter * 6);
-    });
-    groupbar.style.opacity = bump(p, 0.29, 0.31, 0.46, 0.5).toFixed(3);
-    unread.textContent = String(Math.round(seg(p, 0.3, 0.46) * 312));
-    flash.style.opacity = bump(p, 0.625, 0.66, 0.695, 0.73).toFixed(3);
-
-    // Envelope: rises in, opens on tap (or on its own if the reader keeps scrolling), leaves with the chapter.
-    var eo = bump(p, 0.675, 0.7, 0.765, 0.785);
-    tiltX += (tiltTX - tiltX) * 0.08; tiltY += (tiltTY - tiltY) * 0.08;
-    var fit = Math.min(1, (window.innerHeight - 110) / 640);
-    envwrap.style.opacity = eo.toFixed(3);
-    envwrap.style.transform = "translate(-50%, -50%) translateY(" + ((1 - eo) * 60).toFixed(1) + "px) scale(" + (fit * (0.92 + eo * 0.08)).toFixed(3) + ") rotateX(" + (-tiltY * 4 + (1 - eo) * 18).toFixed(2) + "deg) rotateY(" + (tiltX * 5).toFixed(2) + "deg)";
-    envwrap.style.visibility = eo < 0.01 ? "hidden" : "visible";
-    envwrap.style.pointerEvents = eo > 0.6 ? "auto" : "none";
-    if (p > 0.735 && p < 0.8) openEnv();
-    if (p < 0.67 || p > 0.8) closeEnv();
-
-    var fill = seg(p, 0.79, 0.87);
-    cConfirmed.textContent = String(Math.round(fill * 241));
-    var seated = Math.round(fill * 218);
-    cSeated.textContent = String(seated);
-    scrim.style.opacity = bump(p, 0.775, 0.8, 0.88, 0.9).toFixed(3);
-    var go = bump(p, 0.785, 0.81, 0.875, 0.895);
-    guestsEl.style.opacity = go.toFixed(3);
-    guestsEl.style.transform = "translateY(-50%) translateX(" + ((1 - go) * 30).toFixed(1) + "px)";
-    guestRows.forEach(function (li, i) { li.classList.toggle("in", fill > (i + 0.5) / guestData.length * 0.95); });
-
-    var bt = biz.getBoundingClientRect().top;
-    OP.covered = bt <= 0;
-    nav.classList.toggle("solid", bt < window.innerHeight * 0.5);
-    footUi.style.opacity = bt < window.innerHeight * 0.8 ? "0" : "1";
-    scrollcue.style.opacity = r < 0.02 ? "1" : "0";
-
-    var active = 0;
-    chapters.forEach(function (c, i) { if (i === 0 || p >= c[1] - 0.06 && r >= PRO) active = i; });
-    if (bt < window.innerHeight * 0.5) active = -1;
-    if (active !== lastChapter) {
-      lastChapter = active;
-      whereNo.textContent = active < 0 ? "" : "No. 00" + active;
-      whereName.textContent = active < 0 ? "Àríyá" : chapters[active][0];
-    }
-    return seated;
-  }
-
-  var t0 = performance.now();
-  function tick() {
-    prog += (target - prog) * 0.085;
-    if (Math.abs(target - prog) < 0.00005) prog = target;
-    var r = prog, p = clamp((r - PRO) / (1 - PRO), 0, 1);
-    OP.raw = r; OP.pro = clamp(r / PRO, 0, 1); OP.p = p;
-    OP.seated = updateDom(r, p);
-    if (OP.entered) Score.scene(p, OP.pro);
-    if (OP.render) OP.render(p, (performance.now() - t0) / 1000);
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+  // Reflect the current demo state (for example after replying in the planner tab).
+  var g0 = D.guestByToken(TOKEN);
+  if (g0 && g0.status !== "pending") { $("result").hidden = true; }
+  renderTools();
+  D.on(function () { /* state saved: views already re-render on their own actions */ });
 })();
-</script>
-
-<script type="module">
-/* The camera. Everything is rendered into a linear HDR buffer, then treated like light hitting a sensor:
-   physically based materials lit by a real ballroom HDRI, a ray-traced brilliant-cut diamond with dispersion,
-   lens depth of field with a moving focus plane, bloom, chromatic aberration, vignette and film grain. */
-import * as THREE from "three";
-import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
-import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-
-const OP = window.OP;
-const { seg, bump, smooth, clamp } = OP;
-const lerp = (a, b, t) => a + (b - a) * t;
-const motion = OP.reduceMotion ? 0 : 1;
-const canvas = document.getElementById("gl");
-const mobile = Math.min(window.innerWidth, window.innerHeight) < 700 || window.matchMedia("(pointer: coarse)").matches;
-
-let renderer;
-try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-  if (!renderer.capabilities.isWebGL2) throw new Error("webgl2");
-} catch (e) {
-  renderer = null;
-  canvas.style.display = "none";
-  OP.failed = true;
-}
-if (renderer) await start();
-
-async function start() {
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.VSMShadowMap;
-  renderer.toneMapping = THREE.NoToneMapping;
-  const maxAniso = renderer.capabilities.getMaxAnisotropy();
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.05, 120);
-  const setA = new THREE.Group(); // the proposal: a ring box on a linen table, 1 unit is about 3 cm
-  const setB = new THREE.Group(); // the reception hall, 1 unit is 1 m
-  scene.add(setA, setB);
-
-  /* ---------- Environment: a real ballroom with chandeliers (Poly Haven, CC0) ---------- */
-  const envTex = await new EXRLoader().loadAsync("assets/hall.exr");
-  envTex.mapping = THREE.EquirectangularReflectionMapping;
-  OP.loaded = 0.35;
-  const envEuler = new THREE.Euler(0, 2.2, 0);
-  scene.environment = envTex;
-  scene.environmentRotation.copy(envEuler);
-  scene.backgroundRotation.copy(envEuler);
-  scene.backgroundBlurriness = 0.32;
-  const hallColor = new THREE.Color(0x0b0503);
-  scene.fog = new THREE.FogExp2(0x0d0604, 0);
-
-  /* ---------- Procedural textures ---------- */
-  function canvasTex(w, h, draw, opts) {
-    opts = opts || {};
-    const c = document.createElement("canvas"); c.width = w; c.height = h;
-    draw(c.getContext("2d"), w, h);
-    const t = new THREE.CanvasTexture(c);
-    if (opts.srgb !== false) t.colorSpace = THREE.SRGBColorSpace;
-    if (opts.repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(opts.repeat[0], opts.repeat[1]); }
-    t.anisotropy = maxAniso;
-    return t;
-  }
-  function heightToNormal(heights, w, h, strength, repeat) {
-    return canvasTex(w, h, (g) => {
-      const img = g.createImageData(w, h);
-      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        const hx = heights[y * w + (x + 1) % w] - heights[y * w + (x - 1 + w) % w];
-        const hy = heights[((y + 1) % h) * w + x] - heights[((y - 1 + h) % h) * w + x];
-        let nx = -hx * strength, ny = hy * strength, nz = 1;
-        const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
-        const i = (y * w + x) * 4;
-        img.data[i] = (nx * 0.5 + 0.5) * 255; img.data[i + 1] = (ny * 0.5 + 0.5) * 255; img.data[i + 2] = (nz * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
-      }
-      g.putImageData(img, 0, 0);
-    }, { srgb: false, repeat });
-  }
-  const rand = (() => { let s = 11; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; })();
-
-  // Linen weave
-  const linenNormal = (() => {
-    const w = 256, h = 256, H = new Float32Array(w * h), T = 4;
-    const rowR = Array.from({ length: h / T }, () => 0.7 + rand() * 0.6), colR = Array.from({ length: w / T }, () => 0.7 + rand() * 0.6);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const cx = Math.floor(x / T), cy = Math.floor(y / T), over = (cx + cy) & 1;
-      const v = over ? Math.sin(Math.PI * (y % T + 0.5) / T) * rowR[cy] : Math.sin(Math.PI * (x % T + 0.5) / T) * colR[cx];
-      H[y * w + x] = v + (rand() - 0.5) * 0.25;
-    }
-    return heightToNormal(H, w, h, 1.4, [26, 26]);
-  })();
-  // Crushed velvet pile
-  const velvetNormal = (() => {
-    const w = 128, h = 128, H = new Float32Array(w * h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const a = x / w * Math.PI * 2, b = y / h * Math.PI * 2;
-      H[y * w + x] = 0.5 * Math.sin(a * 3 + Math.sin(b * 2) * 1.5) + 0.35 * Math.sin(b * 5 + Math.cos(a * 4)) + (rand() - 0.5) * 0.6;
-    }
-    return heightToNormal(H, w, h, 0.9, [2, 2]);
-  })();
-
-  async function fontsReady() {
-    try {
-      await Promise.race([
-        Promise.all([document.fonts.load('italic 400 120px "Bodoni Moda"'), document.fonts.load('400 40px "Jost"')]),
-        new Promise((r) => setTimeout(r, 1500))
-      ]);
-    } catch (e) { /* fall back to Georgia */ }
-  }
-  await fontsReady();
-
-  /* ---------- Lights ---------- */
-  const key = new THREE.SpotLight(0xffdcb8, 95, 0, 0.42, 0.85, 2);
-  key.position.set(2.8, 6.2, 3.6);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.camera.near = 2; key.shadow.camera.far = 16;
-  key.shadow.radius = 7; key.shadow.blurSamples = 16; key.shadow.bias = -0.0004;
-  key.target.position.set(0, 0, 0);
-  scene.add(key, key.target);
-  const rim = new THREE.DirectionalLight(0xcfdcff, 0.9);
-  rim.position.set(-3, 3, -5);
-  scene.add(rim);
-
-  const hallKey = new THREE.DirectionalLight(0xffd3a1, 0);
-  hallKey.position.set(7, 20, 9);
-  hallKey.castShadow = true;
-  hallKey.shadow.mapSize.set(2048, 2048);
-  const sc = hallKey.shadow.camera; sc.left = -17; sc.right = 17; sc.top = 17; sc.bottom = -17; sc.near = 4; sc.far = 45;
-  hallKey.shadow.radius = 3; hallKey.shadow.blurSamples = 12; hallKey.shadow.bias = -0.0006;
-  hallKey.shadow.autoUpdate = false;
-  scene.add(hallKey);
-
-  /* ---------- Set A: the table, the box, the ring ---------- */
-  const TABLE_Y = -0.8;
-  // Polished walnut: dark, glossy, reflects the box and the candles.
-  const walnutMap = canvasTex(1024, 1024, (g, w, h) => {
-    g.fillStyle = "#2a160d"; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 900; i++) {
-      const y = rand() * h, l = 8 + rand() * 16, a = 0.15 + rand() * 0.35;
-      g.strokeStyle = `hsla(${20 + rand() * 10},${45 + rand() * 15}%,${l}%,${a})`; g.lineWidth = 0.5 + rand() * 2.5;
-      g.beginPath(); g.moveTo(0, y);
-      for (let x = 0; x <= w; x += 64) g.lineTo(x, y + Math.sin(x * 0.004 + i) * 6 + Math.sin(x * 0.013 + i * 0.3) * 2);
-      g.stroke();
-    }
-    for (let i = 0; i < 6; i++) { // a few darker figure bands
-      const y = rand() * h; const gr = g.createLinearGradient(0, y - 40, 0, y + 40);
-      gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(0.5, "rgba(10,4,2,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
-      g.fillStyle = gr; g.fillRect(0, y - 40, w, 80);
-    }
-  }, { repeat: [3, 3] });
-  const walnut = new THREE.MeshPhysicalMaterial({ map: walnutMap, roughness: 0.38, clearcoat: 0.85, clearcoatRoughness: 0.14, envMapIntensity: 0.5 });
-  const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), walnut);
-  tableTop.rotation.x = -Math.PI / 2; tableTop.position.y = TABLE_Y; tableTop.receiveShadow = true;
-  setA.add(tableTop);
-
-  // Emerald velvet, deep pile with a cool sheen at grazing angles.
-  const velvet = new THREE.MeshPhysicalMaterial({
-    color: 0x073226, roughness: 0.84, sheen: 1, sheenRoughness: 0.33, sheenColor: 0x86f0c6,
-    normalMap: velvetNormal, normalScale: new THREE.Vector2(0.25, 0.25)
-  });
-  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x05241a, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0x4fbf92 });
-  const brass = new THREE.MeshPhysicalMaterial({ color: 0xebc27c, metalness: 1, roughness: 0.2, clearcoat: 0.3 });
-
-  function rrPath(w, d, r, path) {
-    const x = -w / 2, y = -d / 2;
-    path.moveTo(x + r, y); path.lineTo(x + w - r, y); path.quadraticCurveTo(x + w, y, x + w, y + r);
-    path.lineTo(x + w, y + d - r); path.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
-    path.lineTo(x + r, y + d); path.quadraticCurveTo(x, y + d, x, y + d - r);
-    path.lineTo(x, y + r); path.quadraticCurveTo(x, y, x + r, y);
-    return path;
-  }
-  // A flat rounded-rectangle frame of height h, lying in the xz plane from y = 0 to y = h.
-  function frameGeo(ow, od, or, iw, id, ir, h, bevel) {
-    const sh = rrPath(ow, od, or, new THREE.Shape());
-    sh.holes.push(rrPath(iw, id, ir, new THREE.Path()));
-    const g = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: bevel > 0, bevelSize: bevel, bevelThickness: bevel, bevelSegments: 3, curveSegments: 14 });
-    g.rotateX(-Math.PI / 2);
-    return g;
-  }
-  function edgePiping(w, d, r, y, radius) {
-    const pts = rrPath(w, d, r, new THREE.Path()).getSpacedPoints(160).map((q) => new THREE.Vector3(q.x, y, -q.y));
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 320, radius, 10, true);
-  }
-
-  const BW = 1.6, BD = 1.45, BH = 0.78, LH = 0.56, BR = 0.1;
-  const baseTop = TABLE_Y + BH;
-  const box = new THREE.Group(); setA.add(box);
-  const shadowAll = (o) => o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
-  const base = new THREE.Mesh(new RoundedBoxGeometry(BW, BH, BD, 6, BR), velvet);
-  base.position.y = TABLE_Y + BH / 2; box.add(base);
-  // Gold band around the seam, an inner gold lip the lid closes over, and a dark velvet tray.
-  const seam = frameGeo(BW + 0.018, BD + 0.018, BR + 0.009, BW - 0.05, BD - 0.05, BR - 0.02, 0.032, 0.004);
-  const baseSeam = new THREE.Mesh(seam, brass); baseSeam.position.y = baseTop - 0.034; box.add(baseSeam);
-  const lip = new THREE.Mesh(frameGeo(BW - 0.11, BD - 0.11, 0.06, BW - 0.17, BD - 0.17, 0.035, 0.075, 0.004), brass);
-  lip.position.y = baseTop; box.add(lip);
-  const trayShape = rrPath(BW - 0.17, BD - 0.17, 0.035, new THREE.Shape());
-  const tray = new THREE.Mesh(new THREE.ShapeGeometry(trayShape, 12).rotateX(-Math.PI / 2), velvetDeep);
-  tray.position.y = baseTop + 0.003; box.add(tray);
-  const cushGeo = new THREE.CapsuleGeometry(0.15, BW - 0.52, 10, 28); cushGeo.rotateZ(Math.PI / 2);
-  [-0.152, 0.152].forEach((z) => { const c = new THREE.Mesh(cushGeo, velvetDeep); c.position.set(0, baseTop + 0.03, z); c.scale.set(1, 0.92, 1); box.add(c); });
-  // Front clasp with a push button, and a three-knuckle hinge at the back.
-  const clasp = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.1, 0.05, 3, 0.016), brass);
-  clasp.position.set(0, baseTop - 0.012, BD / 2 + 0.012); box.add(clasp);
-  const button = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.032, 0.02, 24), brass);
-  button.rotation.x = Math.PI / 2; button.position.set(0, baseTop - 0.012, BD / 2 + 0.045); box.add(button);
-  [-0.28, 0, 0.28].forEach((x, i) => {
-    const k = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.17, 20), brass);
-    k.rotation.z = Math.PI / 2; k.position.set(x, baseTop + 0.002, -BD / 2 - 0.018); box.add(k);
-    const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.12, 0.012), brass);
-    leaf.position.set(x, baseTop + (i === 1 ? 0.06 : -0.058), -BD / 2 - 0.006); box.add(leaf);
-  });
-
-  const lidPivot = new THREE.Group(); lidPivot.position.set(0, baseTop, -BD / 2); box.add(lidPivot);
-  const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, LH, BD, 6, BR), velvet);
-  lid.position.set(0, LH / 2 + 0.004, BD / 2); lidPivot.add(lid);
-  const lidSeam = new THREE.Mesh(seam, brass); lidSeam.position.set(0, 0.004, BD / 2); lidPivot.add(lidSeam);
-  const piping = new THREE.Mesh(edgePiping(BW - 0.05, BD - 0.05, BR - 0.02, LH - 0.022, 0.017), velvetDeep);
-  piping.position.z = BD / 2; lidPivot.add(piping);
-  // Gold foil monogram on the lid.
-  const monoAlpha = canvasTex(512, 512, (g, w, h) => {
-    g.fillStyle = "#000"; g.fillRect(0, 0, w, h); g.strokeStyle = g.fillStyle = "#fff";
-    g.lineWidth = 9; g.beginPath(); g.arc(w / 2, h / 2, 228, 0, Math.PI * 2); g.stroke();
-    g.lineWidth = 3; g.beginPath(); g.arc(w / 2, h / 2, 206, 0, Math.PI * 2); g.stroke();
-    g.textAlign = "center"; g.textBaseline = "middle"; g.font = 'italic 400 250px "Bodoni Moda", Georgia, serif'; g.fillText("À", w / 2, h / 2 + 22);
-  }, { srgb: false });
-  const mono = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), new THREE.MeshPhysicalMaterial({ color: 0xf0c983, metalness: 1, roughness: 0.24, alphaMap: monoAlpha, alphaTest: 0.5 }));
-  mono.rotation.x = -Math.PI / 2; mono.position.set(0, LH + 0.0055, BD / 2); lidPivot.add(mono);
-  // Satin pillow in the lid, foil-stamped with the brand: design printed onto a real surface.
-  const liningMap = canvasTex(1024, 920, (g, w, h) => {
-    const gr = g.createLinearGradient(0, 0, w, h);
-    gr.addColorStop(0, "#efe6d6"); gr.addColorStop(0.35, "#fdf8ef"); gr.addColorStop(0.55, "#e7dac6"); gr.addColorStop(0.8, "#f8f0e4"); gr.addColorStop(1, "#e4d5c0");
-    g.fillStyle = gr; g.fillRect(0, 0, w, h);
-    g.fillStyle = "#b8894a"; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.17);
-    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.27);
-    g.fillRect(w / 2 - 110, h * 0.09, 220, 2); g.fillRect(w / 2 - 110, h * 0.32, 220, 2);
-  });
-  const liningRM = canvasTex(1024, 920, (g, w, h) => {
-    g.fillStyle = "rgb(0,100,0)"; g.fillRect(0, 0, w, h);
-    g.fillStyle = "rgb(0,55,255)"; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.17);
-    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.27);
-    g.fillRect(w / 2 - 110, h * 0.09, 220, 2); g.fillRect(w / 2 - 110, h * 0.32, 220, 2);
-  }, { srgb: false });
-  const pillowGeo = (() => {
-    const g = new THREE.PlaneGeometry(BW - 0.19, BD - 0.19, 48, 48), p = g.attributes.position, uv = g.attributes.uv;
-    for (let i = 0; i < p.count; i++) p.setZ(i, 0.055 * Math.pow(Math.sin(Math.PI * uv.getX(i)) * Math.sin(Math.PI * uv.getY(i)), 0.35));
-    g.computeVertexNormals();
-    return g;
-  })();
-  const lining = new THREE.Mesh(pillowGeo, new THREE.MeshPhysicalMaterial({
-    map: liningMap, roughnessMap: liningRM, metalnessMap: liningRM, roughness: 1, metalness: 1, sheen: 0.7, sheenRoughness: 0.28, sheenColor: 0xffffff
-  }));
-  lining.rotation.x = Math.PI / 2; lining.position.set(0, 0.0, BD / 2); lidPivot.add(lining);
-  const liningFrame = new THREE.Mesh(frameGeo(BW - 0.12, BD - 0.12, 0.06, BW - 0.19, BD - 0.19, 0.035, 0.014, 0.003), brass);
-  liningFrame.position.set(0, -0.012, BD / 2); lidPivot.add(liningFrame);
-  shadowAll(box);
-
-  // Ring: platinum band, six-claw setting, brilliant-cut diamond.
-  const R = 0.42;
-  const platinum = new THREE.MeshPhysicalMaterial({ color: 0xe8e5e0, metalness: 1, roughness: 0.09, clearcoat: 0.4, clearcoatRoughness: 0.05 });
-  const ring = new THREE.Group(); setA.add(ring);
-  const bandGeo = new THREE.TorusGeometry(R, 0.048, 40, 200); bandGeo.scale(1, 1, 1.75);
-  const band = new THREE.Mesh(bandGeo, platinum); band.castShadow = true; ring.add(band);
-  const G = 0.15, gemC = R + 0.205;
-  for (let k = 0; k < 6; k++) {
-    const a = (k / 6) * Math.PI * 2 + Math.PI / 6, c = Math.cos(a), s = Math.sin(a);
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(c * 0.05, R + 0.03, s * 0.05),
-      new THREE.Vector3(c * G * 0.7, gemC - 0.09, s * G * 0.7),
-      new THREE.Vector3(c * G * 1.04, gemC, s * G * 1.04),
-      new THREE.Vector3(c * G * 0.86, gemC + 0.05, s * G * 0.86)
-    ]);
-    const prong = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.0115, 10), platinum);
-    prong.castShadow = true; ring.add(prong);
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0125, 12, 10), platinum);
-    tip.position.copy(curve.points[3]); ring.add(tip);
-  }
-  const basket = new THREE.Mesh(new THREE.TorusGeometry(G * 0.72, 0.009, 10, 64), platinum);
-  basket.rotation.x = Math.PI / 2; basket.position.y = gemC - 0.07; ring.add(basket);
-
-  // Round brilliant: a convex hull of the classic proportions (girdle radius 1).
-  const gemPts = [];
-  const P = (r, y, a) => gemPts.push(new THREE.Vector3(r * Math.cos(a), y, r * Math.sin(a)));
-  for (let k = 0; k < 8; k++) P(0.57, 0.324, k * Math.PI / 4);                     // table
-  for (let k = 0; k < 8; k++) P(0.83, 0.17, k * Math.PI / 4 + Math.PI / 8);        // crown mains
-  for (let k = 0; k < 16; k++) { P(1, 0.014, k * Math.PI / 8); P(1, -0.014, k * Math.PI / 8); } // girdle
-  for (let k = 0; k < 8; k++) P(0.58, -0.39, k * Math.PI / 4 + Math.PI / 8);       // pavilion mains
-  gemPts.push(new THREE.Vector3(0, -0.862, 0));                                       // culet
-  const gemGeo = new ConvexGeometry(gemPts);
-  const planes = [];
-  {
-    const pos = gemGeo.attributes.position, a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i += 3) {
-      a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
-      const n = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
-      const d = n.dot(a);
-      if (!planes.some((q) => q.x * n.x + q.y * n.y + q.z * n.z > 0.99995 && Math.abs(q.w - d) < 1e-4)) planes.push(new THREE.Vector4(n.x, n.y, n.z, d));
-    }
-  }
-  const sparkDirs = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-  const gemMat = new THREE.ShaderMaterial({
-    defines: { NP: planes.length, BOUNCES: mobile ? 4 : 6 },
-    uniforms: {
-      envMap: { value: envTex }, envRot: { value: new THREE.Matrix3() }, envIntensity: { value: 1 },
-      camObj: { value: new THREE.Vector3() }, model3: { value: new THREE.Matrix3() },
-      planes: { value: planes }, sparkDirs: { value: sparkDirs }, sparkle: { value: 1 },
-      iors: { value: new THREE.Vector3(2.385, 2.42, 2.475) }
-    },
-    vertexShader: /* glsl */`
-      varying vec3 vPos; varying vec3 vNrm;
-      void main() { vPos = position; vNrm = normal; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: /* glsl */`
-      uniform sampler2D envMap; uniform mat3 envRot; uniform float envIntensity; uniform vec3 camObj; uniform mat3 model3;
-      uniform vec4 planes[NP]; uniform vec3 sparkDirs[3]; uniform float sparkle; uniform vec3 iors;
-      varying vec3 vPos; varying vec3 vNrm;
-      vec3 envSample(vec3 dObj) {
-        vec3 w = normalize(model3 * dObj);
-        vec3 d = envRot * w;
-        vec2 uv = vec2(atan(d.z, d.x) * 0.15915494 + 0.5, asin(clamp(d.y, -1.0, 1.0)) * 0.31830989 + 0.5);
-        vec3 c = textureLod(envMap, uv, 0.0).rgb;
-        // The real lights in the scene (key, candles) as tight specular lobes: this is where the sparkle comes from.
-        for (int i = 0; i < 3; i++) { float k = max(dot(w, sparkDirs[i]), 0.0); c += vec3(1.0, 0.9, 0.78) * pow(k, 1400.0) * 160.0 * sparkle; }
-        return c * envIntensity;
-      }
-      float fresnel(float c, float n) { float f0 = (n - 1.0) / (n + 1.0); f0 *= f0; return f0 + (1.0 - f0) * pow(1.0 - clamp(c, 0.0, 1.0), 5.0); }
-      vec3 trace(vec3 p, vec3 dir, float ior) {
-        vec3 acc = vec3(0.0); float thr = 1.0;
-        for (int b = 0; b < BOUNCES; b++) {
-          float tmin = 1e9; vec3 nh = vec3(0.0, 1.0, 0.0);
-          for (int i = 0; i < NP; i++) {
-            vec3 n = planes[i].xyz; float den = dot(n, dir);
-            if (den > 1e-5) { float t = (planes[i].w - dot(n, p)) / den; if (t < tmin) { tmin = t; nh = n; } }
-          }
-          p += dir * tmin;
-          vec3 o = refract(dir, -nh, ior);
-          if (dot(o, o) < 1e-6) { dir = reflect(dir, -nh); continue; }
-          float F = fresnel(dot(dir, nh), ior);
-          acc += thr * (1.0 - F) * envSample(o);
-          thr *= F; dir = reflect(dir, -nh);
-        }
-        return acc + thr * envSample(dir) * 0.6;
-      }
-      void main() {
-        vec3 n = normalize(vNrm);
-        vec3 v = normalize(vPos - camObj);
-        float ci = dot(-v, n);
-        float Fr = fresnel(ci, iors.y);
-        vec3 col = Fr * envSample(reflect(v, n));
-        vec3 t;
-        t.r = trace(vPos, refract(v, n, 1.0 / iors.r), iors.r).r;
-        t.g = trace(vPos, refract(v, n, 1.0 / iors.g), iors.g).g;
-        t.b = trace(vPos, refract(v, n, 1.0 / iors.b), iors.b).b;
-        col += (1.0 - Fr) * t;
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  });
-  const gem = new THREE.Mesh(gemGeo, gemMat);
-  gem.scale.setScalar(G); gem.position.y = gemC; gem.castShadow = true;
-  ring.add(gem);
-  const RING_REST = baseTop - 0.13, RING_UP = 1.25;
-  ring.position.y = RING_REST;
-
-  // Rose petals scattered on the linen
-  const petalGeo = (() => {
-    const g = new THREE.PlaneGeometry(1, 1, 10, 10), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), y = p.getY(i) + 0.5;
-      const wdt = Math.pow(Math.sin(Math.PI * Math.min(1, y * 0.95 + 0.04)), 0.7) * (0.55 + 0.45 * y);
-      const X = x * wdt;
-      p.setXYZ(i, X, y - 0.5, 0.55 * X * X + 0.22 * (y - 0.3) * (y - 0.3) - 0.05 * Math.sin(y * 9) * y);
-    }
-    g.rotateX(-Math.PI / 2); g.computeVertexNormals();
-    return g;
-  })();
-  const petalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xffffff, side: THREE.DoubleSide });
-  const petals = new THREE.InstancedMesh(petalGeo, petalMat, 14);
-  {
-    const d = new THREE.Object3D();
-    for (let i = 0; i < 14; i++) {
-      let x, z;
-      do { x = (rand() - 0.5) * 10; z = -4 + rand() * 6.5; } while ((Math.abs(x) < 1.5 && Math.abs(z) < 1.3) || (Math.abs(x) < 2.2 && z > 1));
-      d.position.set(x, TABLE_Y + 0.02, z);
-      d.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, (rand() - 0.5) * 0.25);
-      d.scale.setScalar(0.45 + rand() * 0.3); d.updateMatrix(); petals.setMatrixAt(i, d.matrix);
-      petals.setColorAt(i, new THREE.Color().setHSL(0.99 + rand() * 0.02, 0.55, 0.72 + rand() * 0.2));
-    }
-  }
-  petals.castShadow = petals.receiveShadow = true; setA.add(petals);
-
-  // Candles behind the box: real light sources that the lens turns into bokeh.
-  const wax = new THREE.MeshPhysicalMaterial({ color: 0xf2e6d4, roughness: 0.5, sheen: 0.5, sheenColor: 0xffe2b8, emissive: 0x3a1a06, emissiveIntensity: 0.6 });
-  const flameMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 4.2, 1.3) });
-  const candles = [];
-  [[-5.2, -8.5, 3.0, 0.75], [6.0, -11, 2.2, 0.7], [-10.5, -14, 3.6, 0.8]].forEach(([x, z, hgt, r]) => {
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r, hgt, 48), wax);
-    body.position.set(x, TABLE_Y + hgt / 2, z); body.castShadow = true; setA.add(body);
-    const fl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), flameMat);
-    fl.scale.set(1, 2.6, 1); fl.position.set(x, TABLE_Y + hgt + 0.32, z); setA.add(fl);
-    const pl = new THREE.PointLight(0xff9448, 14, 0, 2); pl.position.copy(fl.position); scene.add(pl);
-    candles.push({ fl, pl, base: fl.position.clone(), seed: rand() * 10 });
-  });
-
-  // Dust in the key light
-  const DUST = 110, dustPos = new Float32Array(DUST * 3), dustSeed = new Float32Array(DUST);
-  for (let i = 0; i < DUST; i++) { dustPos[i * 3] = (rand() - 0.5) * 6; dustPos[i * 3 + 1] = TABLE_Y + rand() * 4; dustPos[i * 3 + 2] = (rand() - 0.5) * 5; dustSeed[i] = rand() * 100; }
-  const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-  const dotTex = canvasTex(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, "#fff"); r.addColorStop(0.5, "rgba(255,255,255,.6)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
-  const dustMat = new THREE.PointsMaterial({ size: 0.022, map: dotTex, color: new THREE.Color(1.6, 1.25, 0.9), transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending });
-  const dust = new THREE.Points(dustGeo, dustMat); setA.add(dust);
-
-  /* ---------- Set B: the reception hall ---------- */
-  const floorMap = canvasTex(1024, 1024, (g, w, h) => {
-    const pw = 32, pl = 256;
-    for (let col = 0; col < w / pw; col++) {
-      const off = (col * 97) % pl;
-      for (let y = -off; y < h; y += pl) {
-        const l = 13 + rand() * 9, hue = 18 + rand() * 10;
-        g.fillStyle = `hsl(${hue},${38 + rand() * 12}%,${l}%)`;
-        g.fillRect(col * pw, y, pw, pl);
-        for (let k = 0; k < 9; k++) {
-          g.strokeStyle = `hsla(${hue},40%,${l - 5 + rand() * 8}%,.5)`; g.lineWidth = 0.6 + rand();
-          const gx = col * pw + rand() * pw; g.beginPath(); g.moveTo(gx, y); g.bezierCurveTo(gx + (rand() - 0.5) * 6, y + pl * 0.3, gx + (rand() - 0.5) * 6, y + pl * 0.7, gx + (rand() - 0.5) * 4, y + pl); g.stroke();
-        }
-        g.fillStyle = "rgba(0,0,0,.55)"; g.fillRect(col * pw, y, pw, 2);
-      }
-      g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(col * pw, 0, 1.5, h);
-    }
-  }, { repeat: [15, 15] });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({ map: floorMap, roughness: 0.32, metalness: 0, envMapIntensity: 0.9 }));
-  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; setB.add(floor);
-  const danceFloor = new THREE.Mesh(new THREE.CircleGeometry(3.4, 128), new THREE.MeshPhysicalMaterial({ color: 0xe9e1d6, roughness: 0.14, clearcoat: 1, clearcoatRoughness: 0.06 }));
-  danceFloor.rotation.x = -Math.PI / 2; danceFloor.position.y = 0.006; danceFloor.receiveShadow = true; setB.add(danceFloor);
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xd8a85a, metalness: 1, roughness: 0.32 });
-  const danceEdge = new THREE.Mesh(new THREE.RingGeometry(3.4, 3.48, 128), goldMat);
-  danceEdge.rotation.x = -Math.PI / 2; danceEdge.position.y = 0.008; setB.add(danceEdge);
-  // The couple's monogram, projected onto the floor by a gobo light the way real halls do it.
-  const gobo = canvasTex(1024, 1024, (g, w, h) => {
-    g.fillStyle = "#000"; g.fillRect(0, 0, w, h); g.filter = "blur(3px)";
-    g.strokeStyle = "#fff"; g.lineWidth = 5; g.beginPath(); g.arc(w / 2, h / 2, 440, 0, Math.PI * 2); g.stroke();
-    g.lineWidth = 2; g.beginPath(); g.arc(w / 2, h / 2, 418, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = 'italic 400 300px "Bodoni Moda", Georgia, serif'; g.fillText("C & T", w / 2, h / 2 - 20);
-    g.font = '400 40px "Jost", Arial, sans-serif'; g.letterSpacing = "18px"; g.fillText("12 · 12 · 2026", w / 2, h / 2 + 190);
-  });
-  const goboMat = new THREE.MeshBasicMaterial({ map: gobo, color: new THREE.Color(1.3, 0.95, 0.6), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
-  const goboMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 5.4), goboMat);
-  goboMesh.rotation.x = -Math.PI / 2; goboMesh.position.y = 0.012; setB.add(goboMesh);
-
-  const tables = [];
-  for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2; tables.push([Math.cos(a) * 5.4, Math.sin(a) * 5.4]); }
-  for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2 + 0.1; tables.push([Math.cos(a) * 8.8, Math.sin(a) * 8.8]); }
-  const NT = tables.length, NS = NT * 10, CLOTH_Y = 0.765;
-
-  const clothGeo = (() => {
-    const prof = [[0, CLOTH_Y], [0.86, CLOTH_Y], [0.9, CLOTH_Y - 0.008], [0.93, CLOTH_Y - 0.04], [0.94, 0.62], [0.97, 0.35], [1.0, 0.1], [1.02, 0.0]].map((q) => new THREE.Vector2(q[0], q[1]));
-    const g = new THREE.LatheGeometry(prof, 128), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), y = p.getY(i), z = p.getZ(i), r = Math.hypot(x, z);
-      if (r < 0.9 || y > CLOTH_Y - 0.03) continue;
-      const th = Math.atan2(z, x), drop = 1 - y / CLOTH_Y;
-      const nr = r + (Math.sin(th * 13) * 0.6 + Math.sin(th * 29 + 1.3) * 0.3) * 0.03 * drop;
-      p.setXYZ(i, Math.cos(th) * nr, y, Math.sin(th) * nr);
-    }
-    g.computeVertexNormals();
-    return g;
-  })();
-  const clothMat = new THREE.MeshPhysicalMaterial({ color: 0xece2d4, roughness: 0.8, sheen: 0.7, sheenRoughness: 0.5, sheenColor: 0xffffff, normalMap: linenNormal, normalScale: new THREE.Vector2(0.15, 0.15) });
-  const cloths = new THREE.InstancedMesh(clothGeo, clothMat, NT);
-  const chairGeo = (() => {
-    const parts = [];
-    const add = (geo, x, y, z) => { geo.translate(x, y, z); parts.push(geo); };
-    add(new THREE.BoxGeometry(0.42, 0.035, 0.4), 0, 0.45, 0);
-    [[-0.19, -0.18], [0.19, -0.18]].forEach(([x, z]) => add(new THREE.CylinderGeometry(0.012, 0.014, 0.45, 8), x, 0.225, z));
-    [[-0.19, 0.18], [0.19, 0.18]].forEach(([x, z]) => add(new THREE.CylinderGeometry(0.012, 0.014, 0.95, 8), x, 0.475, z));
-    for (let k = -2; k <= 2; k++) add(new THREE.CylinderGeometry(0.007, 0.007, 0.42, 6), k * 0.07, 0.69, 0.18);
-    add(new THREE.BoxGeometry(0.42, 0.04, 0.03), 0, 0.93, 0.18);
-    add(new THREE.BoxGeometry(0.42, 0.02, 0.025), 0, 0.5, 0.18);
-    return mergeGeometries(parts);
-  })();
-  const chairs = new THREE.InstancedMesh(chairGeo, goldMat, NS);
-  const cushionGeo = new RoundedBoxGeometry(0.4, 0.05, 0.38, 3, 0.02); cushionGeo.translate(0, 0.49, 0);
-  const cushions = new THREE.InstancedMesh(cushionGeo, new THREE.MeshPhysicalMaterial({ color: 0xf1e7da, roughness: 0.75, sheen: 1, sheenColor: 0xffffff, sheenRoughness: 0.4 }), NS);
-  const plateGeo = new THREE.CylinderGeometry(0.14, 0.11, 0.018, 40); plateGeo.translate(0, CLOTH_Y + 0.013, 0);
-  const plates = new THREE.InstancedMesh(plateGeo, new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.12, clearcoat: 1 }), NS);
-  const chargerGeo = new THREE.CylinderGeometry(0.175, 0.175, 0.006, 40); chargerGeo.translate(0, CLOTH_Y + 0.003, 0);
-  const chargers = new THREE.InstancedMesh(chargerGeo, goldMat, NS);
-  const votiveGeo = new THREE.CylinderGeometry(0.032, 0.028, 0.075, 20, 1, true); votiveGeo.translate(0, CLOTH_Y + 0.0375, 0);
-  const votives = new THREE.InstancedMesh(votiveGeo, new THREE.MeshStandardMaterial({ color: 0x9a7440, metalness: 0.6, roughness: 0.15, side: THREE.DoubleSide }), NS);
-  const seatFlameGeo = new THREE.SphereGeometry(0.011, 10, 8); seatFlameGeo.scale(1, 2.3, 1);
-  const seatFlames = new THREE.InstancedMesh(seatFlameGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }), NS);
-  const glowTex = canvasTex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.25, "rgba(255,255,255,.35)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
-  const glowGeo = new THREE.PlaneGeometry(0.75, 0.75); glowGeo.rotateX(-Math.PI / 2);
-  const seatGlows = new THREE.InstancedMesh(glowGeo, new THREE.MeshBasicMaterial({ map: glowTex, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }), NS);
-  // Centrepieces: gold stands with blush and ivory flower balls.
-  const flowerGeo = (() => {
-    const g = new THREE.IcosahedronGeometry(0.3, 5), p = g.attributes.position, col = new Float32Array(p.count * 3);
-    const blooms = Array.from({ length: 70 }, () => new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize());
-    const palette = [[0.96, 0.86, 0.82], [0.93, 0.7, 0.68], [0.99, 0.96, 0.9], [0.82, 0.45, 0.48], [0.35, 0.45, 0.3]];
-    const tone = blooms.map(() => palette[Math.floor(rand() * rand() * palette.length * 1.15) % palette.length]);
-    const v = new THREE.Vector3();
-    for (let i = 0; i < p.count; i++) {
-      v.fromBufferAttribute(p, i).normalize();
-      let best = 0, bi = 0;
-      blooms.forEach((b, j) => { const d = v.dot(b); if (d > best) { best = d; bi = j; } });
-      const ang = Math.acos(Math.min(1, best));
-      const petal = Math.cos(ang * 9 + Math.atan2(v.y, v.x) * 5) * 0.5 + 0.5;
-      const bumpH = Math.max(0, 1 - ang / 0.42);
-      v.multiplyScalar(0.3 * (0.86 + 0.16 * Math.sqrt(bumpH) + 0.03 * petal * bumpH));
-      p.setXYZ(i, v.x, v.y, v.z);
-      const shade = 0.55 + 0.45 * bumpH;
-      col[i * 3] = tone[bi][0] * shade; col[i * 3 + 1] = tone[bi][1] * shade; col[i * 3 + 2] = tone[bi][2] * shade;
-    }
-    g.setAttribute("color", new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
-    g.translate(0, CLOTH_Y + 0.75 + 0.26, 0);
-    return g;
-  })();
-  const flowers = new THREE.InstancedMesh(flowerGeo, new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.6, sheen: 1, sheenRoughness: 0.5, sheenColor: 0xffe8e8 }), NT);
-  const standGeo = mergeGeometries([
-    new THREE.CylinderGeometry(0.018, 0.03, 0.72, 16).translate(0, CLOTH_Y + 0.36, 0),
-    new THREE.CylinderGeometry(0.11, 0.13, 0.025, 32).translate(0, CLOTH_Y + 0.012, 0),
-    new THREE.CylinderGeometry(0.1, 0.03, 0.06, 32).translate(0, CLOTH_Y + 0.73, 0)
-  ]);
-  const stands = new THREE.InstancedMesh(standGeo, goldMat, NT);
-  {
-    const d = new THREE.Object3D();
-    tables.forEach(([tx, tz], ti) => {
-      d.position.set(tx, 0, tz); d.rotation.set(0, rand() * Math.PI, 0); d.scale.setScalar(1); d.updateMatrix();
-      cloths.setMatrixAt(ti, d.matrix); flowers.setMatrixAt(ti, d.matrix); stands.setMatrixAt(ti, d.matrix);
-      for (let s = 0; s < 10; s++) {
-        const sa = (s / 10) * Math.PI * 2 + ti * 0.37, i = ti * 10 + s, c = Math.cos(sa), sn = Math.sin(sa);
-        d.rotation.set(0, Math.PI / 2 - sa, 0);
-        d.position.set(tx + c * 1.2, 0, tz + sn * 1.2); d.updateMatrix(); chairs.setMatrixAt(i, d.matrix); cushions.setMatrixAt(i, d.matrix);
-        d.position.set(tx + c * 0.66, 0, tz + sn * 0.66); d.updateMatrix(); plates.setMatrixAt(i, d.matrix); chargers.setMatrixAt(i, d.matrix);
-        const va = sa + 0.3;
-        d.position.set(tx + Math.cos(va) * 0.5, 0, tz + Math.sin(va) * 0.5); d.updateMatrix(); votives.setMatrixAt(i, d.matrix);
-      }
-    });
-  }
-  [cloths, chairs, cushions, plates, chargers, flowers, stands, votives].forEach((m) => { m.castShadow = true; m.receiveShadow = true; setB.add(m); });
-  setB.add(seatFlames, seatGlows);
-  const seatOrder = [];
-  for (let ti = 0; ti < NT; ti++) for (let s = 0; s < 10; s++) if (ti < 21 || (ti === 21 && s < 8)) seatOrder.push(ti * 10 + s);
-  const flameCol = new THREE.Color(10, 4.6, 1.4), glowCol = new THREE.Color(0.55, 0.3, 0.12), off = new THREE.Color(0, 0, 0);
-  let seatsLit = -1;
-  function lightSeats(n) {
-    if (n === seatsLit) return;
-    const d = new THREE.Object3D();
-    const litSet = new Set(seatOrder.slice(0, n));
-    tables.forEach(([tx, tz], ti) => {
-      for (let s = 0; s < 10; s++) {
-        const i = ti * 10 + s, on = litSet.has(i), va = (s / 10) * Math.PI * 2 + ti * 0.37 + 0.3;
-        d.position.set(tx + Math.cos(va) * 0.5, CLOTH_Y + 0.062, tz + Math.sin(va) * 0.5);
-        d.scale.setScalar(on ? 1 : 0.0001); d.updateMatrix(); seatFlames.setMatrixAt(i, d.matrix);
-        seatFlames.setColorAt(i, on ? flameCol : off);
-        d.position.y = CLOTH_Y + 0.004; d.scale.setScalar(1); d.updateMatrix(); seatGlows.setMatrixAt(i, d.matrix);
-        seatGlows.setColorAt(i, on ? glowCol : off);
-        placeGuest(i, on);
-      }
-    });
-    seatFlames.instanceMatrix.needsUpdate = true; seatFlames.instanceColor.needsUpdate = true;
-    seatGlows.instanceMatrix.needsUpdate = true; seatGlows.instanceColor.needsUpdate = true;
-    [seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
-    hallKey.shadow.needsUpdate = true;
-    seatsLit = n;
-  }
-
-  // Head table and a curtain of fairy lights behind it.
-  const headCloth = new THREE.Mesh(new RoundedBoxGeometry(6, 0.76, 0.9, 3, 0.03), clothMat);
-  headCloth.position.set(0, 0.38, -12.2); headCloth.castShadow = headCloth.receiveShadow = true; setB.add(headCloth);
-  const headFlowers = new THREE.InstancedMesh(flowerGeo, flowers.material, 5);
-  for (let i = 0; i < 5; i++) { const d = new THREE.Object3D(); d.position.set(-2.4 + i * 1.2, -0.95, -12.2); d.scale.setScalar(i === 2 ? 1.3 : 0.9); d.updateMatrix(); headFlowers.setMatrixAt(i, d.matrix); }
-  headFlowers.castShadow = true; setB.add(headFlowers);
-  const drapeGeo = (() => {
-    const g = new THREE.PlaneGeometry(22, 8, 220, 4), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 3.1) * 0.12 + Math.sin(x * 7.3 + 1) * 0.05); }
-    g.computeVertexNormals(); g.translate(0, 4, -13.9);
-    return g;
-  })();
-  setB.add(new THREE.Mesh(drapeGeo, new THREE.MeshPhysicalMaterial({ color: 0xb8a68e, roughness: 0.7, sheen: 1, sheenColor: 0xffe2b8, sheenRoughness: 0.35, emissive: 0x2a1a0a, emissiveIntensity: 1 })));
-  const bulbGeo = new THREE.SphereGeometry(0.018, 8, 6);
-  const NB = 1100, bulbs = new THREE.InstancedMesh(bulbGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(7, 4.6, 2.4) }), NB);
-  {
-    const d = new THREE.Object3D();
-    for (let i = 0; i < NB; i++) {
-      const strand = i % 44, k = Math.floor(i / 44), x = -10.5 + strand * 0.49 + (rand() - 0.5) * 0.06;
-      d.position.set(x, 7.6 - k * 0.3 - rand() * 0.08, -13.6 + Math.sin(x * 3.1) * 0.12); d.updateMatrix(); bulbs.setMatrixAt(i, d.matrix);
-    }
-  }
-  setB.add(bulbs);
-  // Chandeliers: crystal and light hanging between the camera and the tables.
-  const crystalGeo = new THREE.OctahedronGeometry(0.045, 0); crystalGeo.scale(1, 1.8, 1);
-  const crystalMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.04, envMapIntensity: 2.2 });
-  const chand = [[0, 0], [5.4, 3], [-5.4, 3], [5.4, -3], [-5.4, -3], [0, 7.2], [0, -7.2]];
-  const NC = chand.length * 70;
-  const crystals = new THREE.InstancedMesh(crystalGeo, crystalMat, NC);
-  const chBulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(16, 10, 5) }), chand.length * 12);
-  {
-    const d = new THREE.Object3D(); let ci = 0, bi = 0;
-    chand.forEach(([cx, cz]) => {
-      for (let k = 0; k < 70; k++) {
-        const tier = k % 3, a = k * 2.399, rr = 0.35 + tier * 0.28 + rand() * 0.05;
-        d.position.set(cx + Math.cos(a) * rr, 6.6 - tier * 0.35 - rand() * 0.5, cz + Math.sin(a) * rr);
-        d.rotation.set(0, a, 0); d.updateMatrix(); crystals.setMatrixAt(ci++, d.matrix);
-      }
-      for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; d.position.set(cx + Math.cos(a) * 0.55, 6.75, cz + Math.sin(a) * 0.55); d.updateMatrix(); chBulbs.setMatrixAt(bi++, d.matrix); }
-    });
-  }
-  setB.add(crystals, chBulbs);
-
-  // Confetti: gold and champagne foil, lit like everything else.
-  const CONF = mobile ? 360 : 700;
-  const confMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.22, side: THREE.DoubleSide });
-  const conf = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.034, 0.022), confMat, CONF);
-  const confData = [], confCols = [0xf1cf8f, 0xece8e3, 0xe0a57a, 0xc99a4c].map((c) => new THREE.Color(c));
-  for (let i = 0; i < CONF; i++) {
-    confData.push({ x: (rand() - 0.5) * 7, z: -1 + rand() * 7.6, y0: rand() * 5, sp: 0.35 + rand() * 0.45, sw: rand() * 6, rs: 1 + rand() * 4 });
-    conf.setColorAt(i, confCols[i % 4]);
-  }
-  conf.visible = false; conf.frustumCulled = false; setB.add(conf);
-
-  /* ---------- Hall life: aso ebi colours, light, people, celebration ---------- */
-  const mergeAll = (list) => mergeGeometries(list.map((g) => (g.index ? g.toNonIndexed() : g)));
-  // Emerald table linens, the couple's colour.
-  const ivoryCloth = new THREE.Color(0xfff8ee);
-  tables.forEach((_, ti) => cloths.setColorAt(ti, ivoryCloth));
-  cloths.instanceColor.needsUpdate = true;
-
-  // Draped walls washed by coloured uplights.
-  const uplightTex = canvasTex(1024, 256, (g, w, h) => {
-    g.fillStyle = "#000"; g.fillRect(0, 0, w, h);
-    const cols = ["255,176,96", "255,206,150", "255,186,110", "255,220,170"];
-    for (let i = 0; i < 8; i++) {
-      const x = (i + 0.5) * w / 8, c = cols[i % cols.length];
-      const gr = g.createRadialGradient(x, h, 0, x, h, h * 1.1);
-      gr.addColorStop(0, `rgba(${c},1)`); gr.addColorStop(0.45, `rgba(${c},.35)`); gr.addColorStop(1, `rgba(${c},0)`);
-      g.fillStyle = gr; g.fillRect(x - w / 8, 0, w / 4, h);
-    }
-  });
-  const wallMat = new THREE.MeshPhysicalMaterial({ color: 0x6e6252, roughness: 0.75, sheen: 1, sheenColor: 0xffe6c4, sheenRoughness: 0.4, emissive: 0xffffff, emissiveMap: uplightTex, emissiveIntensity: 1.1 });
-  [[-15, 0, Math.PI / 2, 30], [15, 0, -Math.PI / 2, 30], [0, 15, Math.PI, 30]].forEach(([x, z, ry, wd]) => {
-    const g = new THREE.PlaneGeometry(wd, 8.5, 300, 2), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) { const u = p.getX(i); p.setZ(i, Math.sin(u * 2.7) * 0.14 + Math.sin(u * 6.1 + 2) * 0.05); }
-    g.computeVertexNormals();
-    const m = new THREE.Mesh(g, wallMat); m.position.set(x, 4.25, z); m.rotation.y = ry; m.receiveShadow = true; setB.add(m);
-  });
-
-  // Moving-head lights sweeping the room, with visible beams through the haze.
-  const beamTex = canvasTex(4, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.25, "rgba(255,255,255,.35)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
-  const beamGeo = new THREE.CylinderGeometry(0.05, 1.5, 10, 40, 1, true); beamGeo.translate(0, -5, 0);
-  const movers = [[-10, -7, 0xffd9a8], [10, -7, 0xffc785], [-10, 7, 0xffe6c4], [10, 7, 0xffcf96]].map(([x, z, hex], i) => {
-    const col = new THREE.Color(hex);
-    const head = new THREE.Group(); head.position.set(x, 8.2, z); setB.add(head);
-    const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ map: beamTex, color: col.clone().multiplyScalar(0.11), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
-    head.add(beam);
-    const spot = new THREE.SpotLight(col, 0, 0, 0.16, 0.6, 1.2);
-    spot.position.set(x, 8.2, z); scene.add(spot, spot.target);
-    return { head, spot, beam, seed: i * 1.7, x, z };
-  });
-
-  // Guests: seated guests appear as they RSVP. Aso ebi in emerald and gold, gele and fila.
-  function limb(a, b, r) {
-    const d = new THREE.Vector3().subVectors(b, a), len = d.length();
-    const g = new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 4, 10);
-    g.applyMatrix4(new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()), new THREE.Vector3(1, 1, 1)));
-    return g;
-  }
-  const V = (x, y, z) => new THREE.Vector3(x, y, z);
-  const seatedBodyGeo = mergeAll([
-    new THREE.CapsuleGeometry(0.16, 0.3, 6, 14).scale(1, 1, 0.68).translate(0, 0.86, 0.04),
-    new RoundedBoxGeometry(0.34, 0.14, 0.4, 2, 0.06).translate(0, 0.56, -0.12),
-    limb(V(-0.2, 1.0, 0.04), V(-0.17, 0.8, -0.28), 0.055), limb(V(0.2, 1.0, 0.04), V(0.17, 0.8, -0.28), 0.055)
-  ]);
-  const headGeo = new THREE.SphereGeometry(0.095, 18, 14).scale(1, 1.15, 1);
-  const geleGeo = mergeAll([
-    new THREE.SphereGeometry(0.15, 20, 10).scale(1.35, 0.6, 1.1),
-    new THREE.TorusGeometry(0.13, 0.045, 10, 28, Math.PI * 1.3).rotateX(-0.5).translate(0, 0.07, 0.03)
-  ]);
-  const filaGeo = new THREE.CylinderGeometry(0.088, 0.1, 0.11, 20).rotateZ(0.25);
-  const fabric = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.7, sheen: 0.6, sheenRoughness: 0.45, sheenColor: 0xd8d0c0 });
-  const geleMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.35, sheen: 1, sheenColor: 0xfff0c8 });
-  const skin = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.48, sheen: 0.4, sheenColor: 0xffc8a0 });
-  const asoEbi = [0x0a4a36, 0x0c5640, 0x083b2b, 0x0e5a43, 0xb8954e, 0x0a4a36].map((c) => new THREE.Color(c));
-  const skins = [0x4a2a1a, 0x5c3420, 0x3a2014, 0x6b3d24, 0x2f1a10].map((c) => new THREE.Color(c));
-  const geleGold = new THREE.Color(0xc9a256);
-  const seatedBodies = new THREE.InstancedMesh(seatedBodyGeo, fabric, NS);
-  const seatedHeads = new THREE.InstancedMesh(headGeo, skin, NS);
-  const seatedGele = new THREE.InstancedMesh(geleGeo, geleMat, NS);
-  const seatedFila = new THREE.InstancedMesh(filaGeo, geleMat, NS);
-  const gd = new THREE.Object3D();
-  const guestSeat = [];
-  tables.forEach(([tx, tz], ti) => {
-    for (let s = 0; s < 10; s++) {
-      const sa = (s / 10) * Math.PI * 2 + ti * 0.37;
-      guestSeat.push({ x: tx + Math.cos(sa) * 1.17, z: tz + Math.sin(sa) * 1.17, ry: Math.PI / 2 - sa, woman: rand() < 0.55, lean: (rand() - 0.5) * 0.25, cloth: asoEbi[Math.floor(rand() * asoEbi.length)], skin: skins[Math.floor(rand() * skins.length)] });
-    }
-  });
-  guestSeat.forEach((g, i) => {
-    seatedBodies.setColorAt(i, g.cloth); seatedHeads.setColorAt(i, g.skin); seatedGele.setColorAt(i, geleGold); seatedFila.setColorAt(i, geleGold);
-  });
-  [seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.castShadow = true; m.receiveShadow = true; setB.add(m); });
-  function placeGuest(i, on) {
-    const g = guestSeat[i], d = gd;
-    d.position.set(g.x, 0, g.z); d.rotation.set(0, g.ry + g.lean, 0); d.scale.setScalar(on ? 1 : 0.0001); d.updateMatrix();
-    seatedBodies.setMatrixAt(i, d.matrix);
-    d.position.y = 0; d.updateMatrix();
-    const hm = new THREE.Matrix4().makeTranslation(0, 1.24, 0.0);
-    seatedHeads.setMatrixAt(i, new THREE.Matrix4().multiplyMatrices(d.matrix, hm));
-    const cap = new THREE.Matrix4().makeTranslation(0, 1.36, 0.02);
-    const capM = new THREE.Matrix4().multiplyMatrices(d.matrix, cap);
-    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
-    seatedGele.setMatrixAt(i, g.woman ? capM : hidden);
-    seatedFila.setMatrixAt(i, g.woman ? hidden : capM);
-  }
-
-  // The dance floor: the couple at the centre, family and friends around them.
-  const robeGeo = mergeAll([
-    new THREE.CylinderGeometry(0.17, 0.36, 1.12, 20, 1).translate(0, 0.56, 0),
-    new THREE.CapsuleGeometry(0.16, 0.28, 6, 14).scale(1, 1, 0.7).translate(0, 1.3, 0),
-    new THREE.SphereGeometry(0.2, 14, 8).scale(1.25, 0.45, 0.8).translate(0, 1.47, 0)
-  ]);
-  const armsDownGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.3, 0.98, 0.05), 0.052), limb(V(0.22, 1.45, 0), V(0.3, 0.98, 0.05), 0.052)]);
-  const armsUpGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.36, 2.0, 0.08), 0.052), limb(V(0.22, 1.45, 0), V(0.34, 1.98, 0.1), 0.052)]);
-  const ND = 24;
-  const dancers = [];
-  for (let i = 0; i < ND; i++) {
-    const a = rand() * Math.PI * 2, r = i < 2 ? 0.35 : 0.9 + rand() * 2.1;
-    const bride = i === 0, groom = i === 1;
-    dancers.push({
-      x: i < 2 ? (i ? 0.33 : -0.33) : Math.cos(a) * r, z: i < 2 ? 0 : Math.sin(a) * r, ry: i < 2 ? (i ? -Math.PI / 2 : Math.PI / 2) : rand() * Math.PI * 2,
-      up: bride || groom ? false : rand() < 0.45, woman: bride ? true : groom ? false : rand() < 0.55,
-      cloth: bride ? new THREE.Color(0xf7f1e6) : groom ? new THREE.Color(0x0b5a42) : asoEbi[Math.floor(rand() * asoEbi.length)],
-      skin: skins[Math.floor(rand() * skins.length)], ph: rand() * 6, sp: 3.2 + rand() * 1.6, h: 0.92 + rand() * 0.14
-    });
-  }
-  const dBodies = new THREE.InstancedMesh(robeGeo, fabric, ND);
-  const dArmsDown = new THREE.InstancedMesh(armsDownGeo, fabric, ND);
-  const dArmsUp = new THREE.InstancedMesh(armsUpGeo, fabric, ND);
-  const dHands = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045, 8, 6), skin, ND * 2);
-  const dHeads = new THREE.InstancedMesh(headGeo, skin, ND);
-  const dGele = new THREE.InstancedMesh(geleGeo, geleMat, ND);
-  const dFila = new THREE.InstancedMesh(filaGeo, geleMat, ND);
-  dancers.forEach((g, i) => {
-    dBodies.setColorAt(i, g.cloth); dArmsDown.setColorAt(i, g.cloth); dArmsUp.setColorAt(i, g.cloth);
-    dHeads.setColorAt(i, g.skin); dGele.setColorAt(i, i === 0 ? g.cloth : geleGold); dFila.setColorAt(i, geleGold);
-    dHands.setColorAt(i * 2, g.skin); dHands.setColorAt(i * 2 + 1, g.skin);
-  });
-  const danceMeshes = [dBodies, dArmsDown, dArmsUp, dHands, dHeads, dGele, dFila];
-  danceMeshes.forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; setB.add(m); });
-  const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), hand = new THREE.Vector3();
-  function animateDancers(t) {
-    dancers.forEach((g, i) => {
-      const beat = Math.sin(t * g.sp + g.ph), bob = Math.abs(beat) * 0.06 * motion;
-      gd.position.set(g.x + Math.sin(t * 0.7 + g.ph) * 0.08 * motion, bob, g.z);
-      gd.rotation.set(0, g.ry + Math.sin(t * 1.3 + g.ph) * 0.35 * motion, Math.sin(t * g.sp * 0.5 + g.ph) * 0.06 * motion);
-      gd.scale.set(1, g.h, 1); gd.updateMatrix();
-      dBodies.setMatrixAt(i, gd.matrix);
-      dArmsDown.setMatrixAt(i, g.up ? zeroM : gd.matrix);
-      dArmsUp.setMatrixAt(i, g.up ? gd.matrix : zeroM);
-      mA.makeTranslation(0, 1.72, 0); dHeads.setMatrixAt(i, mB.multiplyMatrices(gd.matrix, mA));
-      mA.makeTranslation(0, 1.84, 0.02); mB.multiplyMatrices(gd.matrix, mA);
-      dGele.setMatrixAt(i, g.woman ? mB : zeroM); dFila.setMatrixAt(i, g.woman ? zeroM : mB);
-      [-1, 1].forEach((side, k) => {
-        hand.set(side * (g.up ? 0.35 : 0.3), g.up ? 2.0 : 0.98, g.up ? 0.09 : 0.05).applyMatrix4(gd.matrix);
-        mA.makeTranslation(hand.x, hand.y, hand.z); dHands.setMatrixAt(i * 2 + k, mA);
-      });
-    });
-    danceMeshes.forEach((m) => { m.instanceMatrix.needsUpdate = true; });
-  }
-  animateDancers(0);
-  lightSeats(0);
-
-  // Photographers' flashes popping around the room.
-  const flashes = Array.from({ length: 3 }, () => {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
-    sp.scale.setScalar(0.9); sp.visible = false; setB.add(sp);
-    return { sp, t0: -10 };
-  });
-
-  // The cake, beside the head table.
-  const cake = new THREE.Group(); cake.position.set(4.3, 0, -11.2); setB.add(cake);
-  const cakeTable = new THREE.Mesh(clothGeo, new THREE.MeshPhysicalMaterial({ color: 0xf2ebe0, roughness: 0.8, sheen: 0.7, sheenColor: 0xffffff }));
-  cakeTable.scale.set(0.6, 1, 0.6); cake.add(cakeTable);
-  const fondant = new THREE.MeshPhysicalMaterial({ color: 0xfbf6ee, roughness: 0.45, sheen: 0.8, sheenColor: 0xffffff, clearcoat: 0.3 });
-  let cy = CLOTH_Y;
-  [[0.34, 0.26], [0.27, 0.24], [0.2, 0.22], [0.14, 0.2]].forEach(([r, h]) => {
-    const tier = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 48), fondant); tier.position.y = cy + h / 2; cake.add(tier);
-    const band = new THREE.Mesh(new THREE.TorusGeometry(r + 0.004, 0.012, 8, 64), brass); band.rotation.x = Math.PI / 2; band.position.y = cy + 0.02; cake.add(band);
-    cy += h;
-  });
-  const topper = new THREE.Mesh(flowerGeo, flowers.material); topper.scale.setScalar(0.45); topper.position.y = cy - 0.45 * (CLOTH_Y + 1.01) + 0.08; cake.add(topper);
-  shadowAll(cake);
-
-  // Naira notes sprayed on the dancers in the finale.
-  const noteTex = canvasTex(256, 128, (g, w, h) => {
-    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#6b4a7a"); gr.addColorStop(0.5, "#8a6a5a"); gr.addColorStop(1, "#4f6a8a");
-    g.fillStyle = gr; g.fillRect(0, 0, w, h);
-    g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 2; g.strokeRect(6, 6, w - 12, h - 12);
-    for (let i = 0; i < 40; i++) { g.strokeStyle = `rgba(255,255,255,${0.05 + rand() * 0.1})`; g.beginPath(); g.arc(70, 64, 10 + i * 1.5, 0, Math.PI * 2); g.stroke(); }
-    g.fillStyle = "rgba(40,25,40,.55)"; g.beginPath(); g.ellipse(190, 64, 34, 44, 0, 0, Math.PI * 2); g.fill();
-    g.fillStyle = "#f5ecd8"; g.font = '600 34px "Jost", Arial, sans-serif'; g.fillText("₦1000", 18, 40); g.font = '600 18px "Jost", Arial, sans-serif'; g.fillText("ONE THOUSAND NAIRA", 18, 112);
-  });
-  const NN = mobile ? 90 : 170;
-  const notes = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.072), new THREE.MeshStandardMaterial({ map: noteTex, roughness: 0.65, side: THREE.DoubleSide }), NN);
-  const noteData = Array.from({ length: NN }, () => ({ a: rand() * Math.PI * 2, r: rand() * 2.6, y0: rand() * 3, sp: 0.18 + rand() * 0.22, sw: rand() * 6, rs: 0.6 + rand() * 1.6 }));
-  notes.visible = false; notes.frustumCulled = false; setB.add(notes);
-
-  /* ---------- Camera path ---------- */
-  // [progress, position, look target, aperture (blur in px at 1080p for objects far from focus)]
-  const gemWorldY = RING_UP + gemC;
-  const keysA = [
-    [0.00, [0, 1.45, 5.6], [0, 0.55, 0], 24],
-    [0.12, [0.45, 1.25, 4.0], [0, 0.3, 0], 20],
-    [0.25, [1.6, 1.95, 3.3], [0, RING_UP + 0.05, 0], 24],
-    [0.35, [-1.9, 2.0, 5.2], [0, RING_UP + 0.1, 0], 18],
-    [0.45, [0, 1.75, 7.0], [0, RING_UP + 0.1, 0], 12],
-    [0.54, [0, 1.65, 3.2], [0, RING_UP + 0.15, 0], 22],
-    [0.62, [0, gemWorldY + 0.62, 1.0], [0, gemWorldY + 0.02, 0], 28],
-    [0.675, [0, gemWorldY + 0.32, 0.36], [0, gemWorldY + 0.03, 0], 36]
-  ];
-  const keysB = [
-    [0.675, [0.6, 24, 1.4], [0, 0, 0], 34],
-    [0.775, [-0.6, 21, 1.0], [0, 0, 0], 34],
-    [0.80, [7.5, 12.5, 12.5], [-3.6, 0, 1.0], 26],
-    [0.88, [10, 9.6, 8.6], [-3.0, 0.3, 0.4], 26],
-    [0.94, [1.5, 2.9, 10.3], [0, 0.9, -6], 18],
-    [1.00, [1.0, 2.6, 9.5], [0, 1.0, -6], 20]
-  ];
-  const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
-  [keysA, keysB].forEach((ks) => ks.forEach((k) => { k[1] = v3(k[1]); k[2] = v3(k[2]); }));
-  function catmull(p0, p1, p2, p3, t, out) {
-    const t2 = t * t, t3 = t2 * t;
-    return out.set(0, 0, 0)
-      .addScaledVector(p0, -0.5 * t3 + t2 - 0.5 * t)
-      .addScaledVector(p1, 1.5 * t3 - 2.5 * t2 + 1)
-      .addScaledVector(p2, -1.5 * t3 + 2 * t2 + 0.5 * t)
-      .addScaledVector(p3, 0.5 * t3 - 0.5 * t2);
-  }
-  const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), estPos = new THREE.Vector3(), estLook = new THREE.Vector3(-1.2, 0.2, -2);
-  let camAperture = 14;
-  function cameraAt(p) {
-    const ks = p < 0.675 ? keysA : keysB;
-    let i = 0;
-    while (i < ks.length - 2 && p > ks[i + 1][0]) i++;
-    const A = ks[i], B = ks[i + 1], P0 = ks[Math.max(0, i - 1)], P3 = ks[Math.min(ks.length - 1, i + 2)];
-    const t = clamp((p - A[0]) / (B[0] - A[0]), 0, 1), te = lerp(t, smooth(t), 0.5);
-    catmull(P0[1], A[1], B[1], P3[1], te, camPos);
-    catmull(P0[2], A[2], B[2], P3[2], te, camLook);
-    camAperture = lerp(A[3], B[3], smooth(t));
-  }
-
-  /* ---------- Render pipeline: HDR scene, lens blur, bloom, film ---------- */
-  let pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5);
-  const sceneRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
-  sceneRT.depthTexture = new THREE.DepthTexture(1, 1, THREE.FloatType);
-  const dofRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
-  const quadVS = "varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }";
-  const dofMat = new THREE.ShaderMaterial({
-    defines: { SAMPLES: mobile ? 36 : 72 },
-    uniforms: {
-      tColor: { value: sceneRT.texture }, tDepth: { value: sceneRT.depthTexture },
-      near: { value: 0.05 }, far: { value: 120 }, focus: { value: 5 }, aperture: { value: 10 }, maxBlur: { value: 24 },
-      texel: { value: new THREE.Vector2() }, time: { value: 0 }
-    },
-    vertexShader: quadVS,
-    fragmentShader: /* glsl */`
-      uniform sampler2D tColor; uniform sampler2D tDepth; uniform float near, far, focus, aperture, maxBlur, time; uniform vec2 texel;
-      varying vec2 vUv;
-      float viewZ(vec2 uv) { float d = texture2D(tDepth, uv).x; return (near * far) / ((far - near) * d - far) * -1.0; }
-      float coc(float z) { return min(abs(1.0 - focus / z) * aperture, maxBlur); }
-      float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
-      void main() {
-        float zc = viewZ(vUv), cc = coc(zc);
-        vec3 col = texture2D(tColor, vUv).rgb; float tot = 1.0;
-        float rot = ign(gl_FragCoord.xy + fract(time) * 37.0) * 6.2831853;
-        for (int i = 0; i < SAMPLES; i++) {
-          float fi = float(i) + 0.5;
-          float r = sqrt(fi / float(SAMPLES)) * maxBlur;
-          float a = fi * 2.39996323 + rot;
-          vec2 uv = vUv + vec2(cos(a), sin(a)) * r * texel;
-          float zs = viewZ(uv), cs = coc(zs);
-          if (zs > zc) cs = min(cs, cc * 2.0);
-          float m = smoothstep(r - 1.5, r + 0.5, cs);
-          vec3 s = texture2D(tColor, uv).rgb;
-          col += mix(col / tot, s, m); tot += 1.0;
-        }
-        gl_FragColor = vec4(col / tot, 1.0);
-      }`
-  });
-  const dofQuad = new FullScreenQuad(dofMat);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.5, 1.8);
-  const finalMat = new THREE.ShaderMaterial({
-    uniforms: {
-      tColor: { value: dofRT.texture }, time: { value: 0 }, exposure: { value: 1 }, grain: { value: 0.06 }, ca: { value: 0.0035 },
-      vignette: { value: 0.55 }, fade: { value: 0 }, aspect: { value: 1 }, warmth: { value: 0 }
-    },
-    vertexShader: quadVS,
-    fragmentShader: /* glsl */`
-      uniform sampler2D tColor; uniform float time, exposure, grain, ca, vignette, fade, aspect, warmth;
-      varying vec2 vUv;
-      vec3 aces(vec3 c) {
-        const mat3 IM = mat3(0.59719, 0.07600, 0.02840, 0.35458, 0.90834, 0.13383, 0.04823, 0.01566, 0.83777);
-        const mat3 OM = mat3(1.60475, -0.10208, -0.00327, -0.53108, 1.10813, -0.07276, -0.07367, -0.00605, 1.07602);
-        c = IM * (c / 0.6);
-        c = (c * (c + 0.0245786) - 0.000090537) / (c * (0.983729 * c + 0.4329510) + 0.238081);
-        return clamp(OM * c, 0.0, 1.0);
-      }
-      vec3 srgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-      float hash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
-      void main() {
-        vec2 c = vUv - 0.5; float r2 = dot(c * vec2(aspect, 1.0), c * vec2(aspect, 1.0)) / (aspect * aspect * 0.25 + 0.25);
-        vec2 uv = 0.5 + c * (1.0 - 0.035 * r2) ;
-        vec2 off = c * ca * r2;
-        vec3 col = vec3(texture2D(tColor, uv + off).r, texture2D(tColor, uv).g, texture2D(tColor, uv - off).b);
-        col *= exposure;
-        col = aces(col);
-        // Grade: warm, slightly matte blacks, gentle split tone.
-        float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-        // Grade: contrast S-curve, emerald-teal shadows, warm gold highlights, richer colour.
-        col = col * col * (3.0 - 2.0 * col) * 0.55 + col * 0.45;
-        l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-        vec3 shadowTint = vec3(0.86, 1.04, 0.98), highTint = vec3(1.06, 1.0, 0.88);
-        col *= mix(shadowTint, highTint, smoothstep(0.08, 0.7, l));
-        col = mix(vec3(l), col, 1.12 + 0.06 * warmth);
-        col = max(col, 0.0) + vec3(0.004, 0.012, 0.009) * (1.0 - l);
-        col *= 1.0 - vignette * smoothstep(0.15, 1.15, r2);
-        col = srgb(col);
-        float g = (hash(gl_FragCoord.xy + fract(time * 13.7) * 197.0) + hash(gl_FragCoord.xy * 1.37 + fract(time * 7.3) * 91.0) - 1.0);
-        col += g * grain * (0.35 + 1.4 * l * (1.0 - l));
-        col *= 1.0 - fade;
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  });
-  const finalQuad = new FullScreenQuad(finalMat);
-
-  function resize() {
-    const w = window.innerWidth, h = window.innerHeight;
-    renderer.setPixelRatio(pr);
-    renderer.setSize(w, h, false);
-    const W = Math.floor(w * pr), H = Math.floor(h * pr);
-    sceneRT.setSize(W, H); dofRT.setSize(W, H); bloom.setSize(W, H);
-    dofMat.uniforms.texel.value.set(1 / W, 1 / H);
-    dofMat.uniforms.maxBlur.value = Math.round(H * 0.024);
-    finalMat.uniforms.aspect.value = w / h;
-    camera.aspect = w / h;
-    camera.fov = w < h ? 48 : 34;
-    camera.updateProjectionMatrix();
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  // Compile everything up front so the cut into the hall does not stutter.
-  setA.visible = setB.visible = true; conf.visible = true; notes.visible = true;
-  scene.background = envTex;
-  OP.loaded = 0.8;
-  renderer.compile(scene, camera);
-  OP.loaded = 1;
-  conf.visible = false; notes.visible = false;
-
-  let px = 0, pxT = 0, pyT = 0, py = 0;
-  window.addEventListener("pointermove", (e) => {
-    if (e.pointerType !== "mouse") return;
-    pxT = (e.clientX / window.innerWidth * 2 - 1);
-    pyT = (e.clientY / window.innerHeight * 2 - 1);
-  });
-
-  const finder = document.getElementById("finder"), fStop = document.getElementById("fStop"), fFocus = document.getElementById("fFocus");
-  const tmpV = new THREE.Vector3(), tmpM = new THREE.Matrix4(), dummy = new THREE.Object3D();
-  const envRotM = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-envEuler.x, -envEuler.y, -envEuler.z)));
-  gemMat.uniforms.envRot.value.copy(envRotM);
-  let tStart = -1, lastSet = "", frameAvg = 16, lastT = 0, slowFrames = 0, finderTick = 0;
-
-  OP.render = function (p, t) {
-    if (tStart < 0 && OP.entered) tStart = t;
-    canvas.classList.add("live");
-    if (OP.covered) return;
-    const intro = tStart < 0 ? 0 : motion ? smooth((t - tStart) / 3.2) : 1;
-    px += (pxT - px) * 0.04; py += (pyT - py) * 0.04;
-
-    const inA = p < 0.675;
-    setA.visible = inA; setB.visible = !inA;
-    const setName = inA ? "A" : "B";
-    if (setName !== lastSet) {
-      lastSet = setName;
-      if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.3; scene.fog.density = 0; }
-      else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
-    }
-
-    if (inA) {
-      // Box: the lid opens on a sprung hinge.
-      const open = seg(p, 0.03, 0.13);
-      lidPivot.rotation.x = -(1.86 * open + 0.09 * Math.sin(open * Math.PI));
-      box.rotation.y = -0.22 + open * 0.22;
-      // Ring: lifts out, dims in the noise, spins through the calm.
-      const lift = seg(p, 0.12, 0.25);
-      ring.position.y = lerp(RING_REST, RING_UP, lift) + Math.sin(t * 0.9) * 0.025 * lift * motion;
-      const spin = seg(p, 0.45, 0.54) * Math.PI * 2 + seg(p, 0.13, 0.3) * Math.PI * 0.55;
-      ring.rotation.y = -0.35 + spin + Math.sin(t * 0.35) * 0.1 * motion * lift + px * 0.2 * lift;
-      ring.rotation.x = py * 0.08 * lift;
-      ring.rotation.z = Math.sin(t * 0.5) * 0.05 * lift * motion;
-      const dim = 1 - 0.72 * bump(p, 0.29, 0.34, 0.45, 0.48);
-      const flare = 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.9 * bump(p, 0.6, 0.64, 0.66, 0.7);
-      key.intensity = 140 * dim * Math.min(flare, 1.5);
-      rim.intensity = 0.9 * dim;
-      scene.environmentIntensity = 0.3 * dim;
-      scene.backgroundIntensity = 0.08 * (0.5 + 0.5 * dim);
-      gemMat.uniforms.envIntensity.value = 0.9 * dim * flare;
-      gemMat.uniforms.sparkle.value = dim * flare;
-      candles.forEach((c) => {
-        const f = motion ? 0.82 + 0.1 * Math.sin(t * 9 + c.seed) + 0.08 * Math.sin(t * 23.7 + c.seed * 3) : 0.9;
-        c.pl.intensity = 14 * f * (0.6 + 0.4 * dim);
-        c.fl.scale.set(1, 2.6 * (0.9 + 0.1 * f), 1);
-        c.fl.position.x = c.base.x + (motion ? Math.sin(t * 3 + c.seed) * 0.02 : 0);
-      });
-      // Gem uniforms: camera in gem space, and the real light directions for sparkle.
-      gem.updateWorldMatrix(true, false);
-      gemMat.uniforms.camObj.value.copy(camera.position).applyMatrix4(tmpM.copy(gem.matrixWorld).invert());
-      gemMat.uniforms.model3.value.setFromMatrix4(gem.matrixWorld);
-      gem.getWorldPosition(tmpV);
-      sparkDirs[0].copy(key.position).sub(tmpV).normalize();
-      sparkDirs[1].copy(candles[0].base).sub(tmpV).normalize();
-      sparkDirs[2].copy(candles[1].base).sub(tmpV).normalize();
-      const dp = dustGeo.attributes.position;
-      for (let i = 0; i < DUST; i++) {
-        let y = dp.array[i * 3 + 1] + (0.0012 + 0.0008 * Math.sin(dustSeed[i])) * motion;
-        if (y > TABLE_Y + 4) y = TABLE_Y;
-        dp.array[i * 3 + 1] = y;
-        dp.array[i * 3] += Math.sin(t * 0.3 + dustSeed[i]) * 0.0008 * motion;
-      }
-      dp.needsUpdate = true;
-      dustMat.opacity = 0.55 * dim;
-      key.shadow.autoUpdate = true;
-      hallKey.intensity = 0;
-      movers.forEach((m) => { m.spot.intensity = 0; });
-    } else {
-      key.shadow.autoUpdate = false;
-      key.intensity = 0; rim.intensity = 0;
-      candles.forEach((c) => { c.pl.intensity = 0; });
-      const hv0 = seg(p, 0.675, 0.72);
-      movers.forEach((m) => {
-        const sx = m.x < 0 ? 1 : -1, sz = m.z < 0 ? -1 : 1;
-        m.head.rotation.set(sz * (0.42 + 0.28 * Math.sin(t * 0.37 * motion + m.seed)), 0, sx * (0.5 + 0.3 * Math.sin(t * 0.5 * motion + m.seed * 2)));
-        m.head.updateMatrixWorld();
-        m.spot.target.position.copy(m.head.localToWorld(tmpV.set(0, -10, 0)));
-        m.spot.intensity = 45 * hv0;
-        m.beam.material.opacity = hv0;
-      });
-      animateDancers(motion ? t : 0);
-      flashes.forEach((fl) => {
-        if (motion && t - fl.t0 > 0.9 && Math.random() < 0.015 && OP.seated > 10) {
-          const pick = Math.random() < 0.5 ? guestSeat[seatOrder[Math.floor(Math.random() * OP.seated)]] : dancers[Math.floor(Math.random() * ND)];
-          fl.sp.position.set(pick.x, 1.5, pick.z); fl.t0 = t;
-        }
-        const k = t - fl.t0; fl.sp.visible = k < 0.2;
-        if (fl.sp.visible) { const e = Math.exp(-k * 26); fl.sp.material.color.setScalar(60 * e); fl.sp.scale.setScalar(0.5 + 0.9 * e); }
-      });
-      const hv = seg(p, 0.675, 0.72);
-      hallKey.intensity = 1.35 * hv * (1 - 0.75 * seg(p, 0.89, 0.95));
-      lightSeats(OP.seated);
-      goboMat.opacity = 0.32 + 0.4 * seg(p, 0.84, 0.95);
-      const cf = seg(p, 0.89, 0.95);
-      conf.visible = cf > 0.001;
-      if (conf.visible) {
-        for (let i = 0; i < CONF; i++) {
-          const c = confData[i];
-          const y = 4.6 - ((c.y0 + t * c.sp * (motion ? 1 : 0.1)) % 4.8) - (1 - cf) * 3;
-          dummy.position.set(c.x + Math.sin(t * 1.3 + c.sw) * 0.18, y, c.z + Math.cos(t + c.sw) * 0.1);
-          dummy.rotation.set(t * c.rs, t * c.rs * 0.7, c.sw);
-          dummy.updateMatrix();
-          conf.setMatrixAt(i, dummy.matrix);
-        }
-        conf.instanceMatrix.needsUpdate = true;
-      }
-      notes.visible = cf > 0.001;
-      if (notes.visible) {
-        for (let i = 0; i < NN; i++) {
-          const n = noteData[i];
-          const y = Math.max(0.012, 3.4 - ((n.y0 + t * n.sp * (motion ? 1 : 0.1)) % 3.6)) - (1 - cf) * 3;
-          dummy.position.set(Math.cos(n.a) * n.r + Math.sin(t * 0.9 + n.sw) * 0.25, y, Math.sin(n.a) * n.r);
-          if (y <= 0.012) dummy.rotation.set(-Math.PI / 2, 0, n.sw);
-          else dummy.rotation.set(Math.sin(t * n.rs + n.sw) * 1.2, t * n.rs * 0.5 + n.sw, Math.cos(t * n.rs * 0.8) * 0.8);
-          dummy.updateMatrix(); notes.setMatrixAt(i, dummy.matrix);
-        }
-        notes.instanceMatrix.needsUpdate = true;
-      }
-    }
-
-    // Camera: keyframed path, a little handheld breath, and the pointer as a slight parallax.
-    cameraAt(p);
-    if (OP.pro < 1) {
-      // Prologue: a wide, drifting establishing shot of the table that settles onto the box.
-      const k = smooth(OP.pro);
-      camPos.lerpVectors(estPos.set(3.4 + Math.sin(t * 0.1) * 0.4 * motion, 4.4, 13.5), camPos, k);
-      camLook.lerpVectors(estLook, camLook, k);
-      camAperture = lerp(46, camAperture, k);
-    }
-    camera.position.copy(camPos);
-    camera.position.x += px * 0.12; camera.position.y -= py * 0.06;
-    camera.lookAt(camLook);
-    if (motion) {
-      camera.rotateX((Math.sin(t * 0.71) * 0.6 + Math.sin(t * 1.93) * 0.4) * 0.0022);
-      camera.rotateY((Math.sin(t * 0.53 + 1) * 0.6 + Math.sin(t * 1.61) * 0.4) * 0.0026);
-      camera.rotateZ(Math.sin(t * 0.37) * 0.0015);
-    }
-    const focusDist = camPos.distanceTo(camLook);
-    camera.near = inA ? 0.05 : 0.2; camera.far = inA ? 60 : 90;
-    camera.updateProjectionMatrix();
-
-    // Lens: the page opens out of focus, then pulls focus onto the box.
-    const H1080 = sceneRT.height / 1080;
-    dofMat.uniforms.near.value = camera.near; dofMat.uniforms.far.value = camera.far;
-    dofMat.uniforms.focus.value = focusDist * lerp(0.35, 1, intro) * (1 + (motion ? Math.sin(t * 0.6) * 0.006 : 0));
-    dofMat.uniforms.aperture.value = camAperture * H1080 * lerp(2.2, 1, intro);
-    dofMat.uniforms.time.value = motion ? t : 0;
-
-    renderer.setRenderTarget(sceneRT);
-    renderer.render(scene, camera);
-    renderer.setRenderTarget(dofRT);
-    dofQuad.render(renderer);
-    bloom.render(renderer, null, dofRT, 0, false);
-    renderer.setRenderTarget(null);
-    finalMat.uniforms.time.value = motion ? t : 0;
-    // The hall is pulled down while the invitation is on screen so the paper reads.
-    finalMat.uniforms.exposure.value = (inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
-    finalMat.uniforms.warmth.value = inA ? 0 : 1;
-    finalQuad.render(renderer);
-
-    // Viewfinder readout, matched to the lens.
-    if (++finderTick % 6 === 0) {
-      const fnum = clamp(28 / camAperture, 1.2, 4);
-      fStop.textContent = "f/" + fnum.toFixed(1);
-      fFocus.textContent = (inA ? focusDist * 0.03 : focusDist).toFixed(2) + " m";
-    }
-
-    // Keep the frame rate up: lower the render resolution if frames run long.
-    const dt = (t - lastT) * 1000; lastT = t;
-    if (dt > 0 && dt < 200) frameAvg = frameAvg * 0.95 + dt * 0.05;
-    if (frameAvg > 30 && pr > 0.7) { if (++slowFrames > 90) { pr = Math.max(0.7, pr - 0.2); resize(); slowFrames = 0; frameAvg = 20; } }
-    else slowFrames = 0;
-  };
-}
 </script>
 </body>
 </html>

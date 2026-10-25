@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planner · Àríyá by OwambePlan</title>
+<meta name="description" content="Àríyá's demo planner: guest list, import, seating and vendor checklist on sample data.">
+<meta name="theme-color" content="#072a1f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/ariya.css">
+<style>
+/* Demo planner: a calm working surface. Event header on emerald, tools on ivory paper. */
+body { background: var(--ivory); }
+.app-head .wrap { gap: 14px; flex-wrap: wrap; padding-block: 10px; }
+.app-head .right { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.event-band { background: var(--emerald-900); color: var(--on-dark); padding-block: 28px 0; }
+.event-band h1 { font-size: clamp(1.9rem, 4vw, 2.9rem); }
+.event-band .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--on-dark-soft); margin-top: 8px; }
+.event-band .meta b { color: var(--on-dark); font-weight: 600; }
+.event-band .acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.tabs { display: flex; gap: 2px; margin-top: 24px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { background: transparent; color: var(--on-dark-soft); border: 0; border-radius: 10px 10px 0 0; min-height: 48px; padding: 0 18px; font: 600 1rem var(--font-ui); cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { background: var(--ivory); color: var(--ink); }
+.tabs button:hover:not([aria-selected="true"]) { color: var(--on-dark); }
+.panel { padding-block: 28px 64px; }
+.panel[hidden] { display: none; }
+.row-between { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 18px; }
+.panel h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+.count { background: var(--paper); border-radius: 12px; padding: 14px 16px; box-shadow: 0 0 0 1px var(--line); }
+.count b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.count span { color: var(--ink-soft); font-size: 0.9375rem; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; margin-bottom: 14px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--linen); border-radius: 12px; border: 0; margin: 0; }
+.seg legend { position: absolute; left: -9999px; }
+.seg label { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 9px; cursor: pointer; font-weight: 600; font-size: 0.9375rem; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg label:has(input:checked) { background: var(--paper); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+.seg label:has(input:focus-visible) { outline: 3px solid var(--focus); }
+.sheetbox { background: var(--paper); border-radius: 14px; box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.list { width: 100%; border-collapse: collapse; }
+.list th { text-align: left; font-size: 0.8125rem; color: var(--ink-soft); font-weight: 600; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--paper); }
+.list td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.list tr:last-child td { border-bottom: 0; }
+.list .who b { display: block; }
+.list .who span { font-size: 0.875rem; color: var(--ink-soft); }
+.link-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.link-cell code { font-size: 0.8125rem; color: var(--ink-soft); background: var(--ivory); padding: 4px 8px; border-radius: 6px; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-state { padding: 40px 20px; text-align: center; color: var(--ink-soft); display: grid; gap: 12px; justify-items: center; }
+.empty-state b { color: var(--ink); font-size: 1.0625rem; }
+.notice { border-radius: 12px; padding: 14px 16px; font-weight: 500; }
+.notice.ok { background: var(--ok-bg); color: #10402c; }
+.notice.bad { background: var(--no-bg); color: #6c1f1e; }
+.notice.warn { background: var(--wait-bg); color: #5d3f0a; }
+
+/* Import */
+.import-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.drop { border: 2px dashed var(--linen-deep); border-radius: 14px; padding: 22px; background: var(--paper); display: grid; gap: 12px; }
+.drop.over { border-color: var(--emerald); background: var(--ok-bg); }
+textarea.input { min-height: 170px; font-family: ui-monospace, Menlo, monospace; font-size: 0.875rem; }
+.res { font-size: 0.875rem; }
+.res ul { margin: 0; padding-left: 18px; }
+.res.ok { color: var(--ok); font-weight: 600; }
+.res.dup { color: var(--wait); font-weight: 600; }
+.res.bad { color: var(--no); }
+tr.r-bad td { background: #fdf3f2; }
+tr.r-dup td { background: #fdf8ec; }
+
+/* Seating */
+.seat-grid { display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.pick { background: var(--paper); border-radius: 14px; box-shadow: 0 0 0 1px var(--line); padding: 14px; display: grid; gap: 10px; position: sticky; top: 84px; max-height: calc(100vh - 110px); overflow: auto; }
+.pick ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.gbtn { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; text-align: left; min-height: 52px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--ivory); font: inherit; color: inherit; cursor: pointer; }
+.gbtn small { color: var(--ink-soft); font-size: 0.8125rem; }
+.gbtn[aria-pressed="true"] { border-color: var(--emerald); background: var(--ok-bg); }
+.gbtn[draggable="true"] { cursor: grab; }
+.hall { background: radial-gradient(80% 70% at 50% 40%, rgba(227, 194, 127, 0.12), transparent 70%), var(--emerald-800); border-radius: 16px; padding: clamp(14px, 2.4vw, 26px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2vw, 20px); }
+.hall .head-row { grid-column: 1 / -1; display: flex; justify-content: center; }
+.tbl { background: none; border: 2px solid transparent; border-radius: 14px; color: var(--on-dark); font: inherit; cursor: pointer; padding: 8px 6px 10px; display: grid; justify-items: center; gap: 4px; min-height: 44px; transition: background-color .2s, border-color .2s; }
+.tbl:hover { background: rgba(255, 255, 255, 0.06); }
+.tbl svg { width: min(120px, 100%); height: auto; }
+.tbl b { font-weight: 600; }
+.tbl span { font-size: 0.875rem; color: var(--on-dark-soft); font-variant-numeric: tabular-nums; }
+.tbl.full span { color: #9fe0c0; font-weight: 600; }
+.tbl.cant { opacity: 0.5; }
+.tbl.can { border-color: rgba(227, 194, 127, 0.6); }
+.tbl.drop-over { background: rgba(227, 194, 127, 0.18); border-color: var(--gold); }
+.tbl.flash { animation: flash .6s var(--ease); }
+@keyframes flash { 40% { background: rgba(227, 194, 127, 0.35); } }
+.seat-status { min-height: 1.6em; margin: 12px 0; font-weight: 600; }
+.seat-status.bad { color: var(--no); }
+.seat-status.ok { color: var(--ok); }
+.view-switch { margin-bottom: 14px; }
+.tlist { display: grid; gap: 10px; }
+.tlist section { background: var(--paper); border-radius: 12px; box-shadow: 0 0 0 1px var(--line); padding: 12px 16px; }
+.tlist h3 { font-size: 1rem; display: flex; justify-content: space-between; gap: 10px; }
+.tlist ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.tlist li { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding: 4px 0; }
+
+/* Vendors */
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 20px; align-items: start; }
+.vlist { list-style: none; margin: 0; padding: 0; }
+.vlist li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.vlist li:last-child { border-bottom: 0; }
+.vlist input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--emerald); }
+.vlist .t { font-weight: 600; }
+.vlist .m { grid-column: 2; font-size: 0.875rem; color: var(--ink-soft); }
+.vlist .side { grid-column: 3; grid-row: 1 / span 2; display: grid; justify-items: end; gap: 6px; }
+.vlist li.done .t { text-decoration: line-through; color: var(--ink-soft); }
+.vlist li.overdue .due { color: var(--no); font-weight: 700; }
+.vgroup { padding: 10px 16px; font-size: 0.875rem; font-weight: 700; background: var(--linen); }
+.formcard { background: var(--paper); border-radius: 14px; box-shadow: 0 0 0 1px var(--line); padding: 18px; display: grid; gap: 14px; position: sticky; top: 84px; }
+.formcard h3 { font-size: 1.125rem; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+
+@media (max-width: 900px) {
+  .import-grid, .seat-grid, .vgrid { grid-template-columns: minmax(0, 1fr); }
+  .pick, .formcard { position: static; max-height: none; }
+  .counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .toolbar { grid-template-columns: minmax(0, 1fr); }
+  .hall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Guest table becomes stacked rows */
+  .list.stack thead { position: absolute; left: -9999px; }
+  .list.stack tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .list.stack td { display: block; padding: 0; border: 0; }
+  .list.stack td[data-k]::before { content: attr(data-k) ": "; color: var(--ink-soft); font-size: 0.875rem; }
+  .list.stack td.who { grid-column: 1; }
+  .list.stack td.st { grid-column: 2; grid-row: 1; }
+  .list.stack td.lk { grid-column: 1 / -1; }
+  .two { grid-template-columns: minmax(0, 1fr); }
+  .app-head .right .demo-flag { display: none; }
+  .tabs button { padding: 0 12px; font-size: 0.9375rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#work">Skip to the planner</a>
+<header class="site-head app-head">
+  <div class="wrap">
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, back to the site"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <div class="right">
+      <span class="demo-flag">Demo planner · sample data · nothing is sent</span>
+      <span id="resetWrap"><button class="btn btn-ghost btn-small" id="resetBtn" type="button">Reset demo</button></span>
+      <a class="btn btn-ghost btn-small" href="./">Back to site</a>
+    </div>
+  </div>
+</header>
+
+<div class="event-band">
+  <div class="wrap">
+    <p class="muted" style="font-weight: 600">Event page</p>
+    <h1 class="display" id="evTitle"></h1>
+    <p class="meta" id="evMeta"></p>
+    <div class="acts">
+      <a class="btn btn-gold btn-small" id="evGuestView" href="rsvp.html">See a guest's invitation</a>
+      <a class="btn btn-ghost btn-small" href="#import" data-tab-link="import">Add guests</a>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Planner sections">
+      <button role="tab" id="tab-guests" aria-controls="guests" aria-selected="true">Guests</button>
+      <button role="tab" id="tab-import" aria-controls="import" aria-selected="false" tabindex="-1">Import</button>
+      <button role="tab" id="tab-seating" aria-controls="seating" aria-selected="false" tabindex="-1">Seating</button>
+      <button role="tab" id="tab-vendors" aria-controls="vendors" aria-selected="false" tabindex="-1">Vendors</button>
+    </div>
+  </div>
+</div>
+
+<main id="work">
+  <!-- Guests -->
+  <section class="panel wrap" id="guests" role="tabpanel" aria-labelledby="tab-guests" tabindex="-1">
+    <div class="counts" id="gCounts"></div>
+    <div class="toolbar">
+      <div class="field"><label for="q">Search by name or phone</label><input class="input" id="q" type="search" autocomplete="off"></div>
+      <fieldset class="seg" id="gFilter"><legend>Filter by reply</legend>
+        <label><input type="radio" name="f" value="all" checked>All</label>
+        <label><input type="radio" name="f" value="yes">Confirmed</label>
+        <label><input type="radio" name="f" value="pending">Pending</label>
+        <label><input type="radio" name="f" value="no">Declined</label>
+      </fieldset>
+    </div>
+    <p class="sr-only" id="gLive" aria-live="polite"></p>
+    <div class="sheetbox"><table class="list stack" aria-describedby="gLive"><thead><tr><th scope="col">Guest</th><th scope="col">Party</th><th scope="col">Reply</th><th scope="col">Table</th><th scope="col">Personal RSVP link</th></tr></thead><tbody id="gBody"></tbody></table><div id="gEmpty"></div></div>
+  </section>
+
+  <!-- Import -->
+  <section class="panel wrap" id="import" role="tabpanel" aria-labelledby="tab-import" tabindex="-1" hidden>
+    <div class="row-between"><div><h2>Import a guest list</h2><p class="muted">Upload a CSV with columns <b>name</b>, <b>phone</b> and optionally <b>email</b> and <b>party</b>. Nothing is added until you check the preview.</p></div></div>
+    <div class="import-grid">
+      <div class="drop" id="drop">
+        <div class="field"><label for="file">Choose a CSV file</label><input class="input" id="file" type="file" accept=".csv,text/csv"></div>
+        <div class="field"><label for="csv">Or paste rows</label><textarea class="input" id="csv" spellcheck="false" placeholder="name,phone,email,party&#10;Adunni Fashola,0803 555 0101,adunni@example.com,2"></textarea></div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap"><button class="btn btn-primary btn-small" id="checkBtn" type="button">Check the list</button><button class="btn btn-ghost btn-small" id="sampleBtn" type="button">Use a sample file</button></div>
+        <p class="hint">The sample file has deliberate mistakes so you can see how they're reported.</p>
+      </div>
+      <div id="preview" aria-live="polite"><div class="empty-state sheetbox"><b>No preview yet</b>Choose a file or paste rows, then check the list.</div></div>
+    </div>
+  </section>
+
+  <!-- Seating -->
+  <section class="panel wrap" id="seating" role="tabpanel" aria-labelledby="tab-seating" tabindex="-1" hidden>
+    <div class="row-between">
+      <div><h2>Seating</h2><p class="muted">Choose a confirmed guest, then choose a table. On a larger screen you can also drag a guest onto a table.</p></div>
+      <fieldset class="seg view-switch" id="viewSwitch"><legend>Seating view</legend><label><input type="radio" name="sv" value="plan" checked>Floor plan</label><label><input type="radio" name="sv" value="list">Table list</label></fieldset>
+    </div>
+    <p class="seat-status" id="seatStatus" role="status"></p>
+    <div class="seat-grid">
+      <div class="pick">
+        <div class="field"><label for="sq">Find a confirmed guest</label><input class="input" id="sq" type="search" autocomplete="off"></div>
+        <label class="check" style="display: flex; gap: 8px; align-items: center; min-height: 44px"><input type="checkbox" id="showSeated" style="width: 20px; height: 20px; accent-color: var(--emerald)"> Include guests who already have a table</label>
+        <ul id="pickList"></ul>
+      </div>
+      <div>
+        <div id="hallWrap"><div class="hall" id="hall" aria-label="Floor plan of the sample hall"></div></div>
+        <div class="tlist" id="tlist" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vendors -->
+  <section class="panel wrap" id="vendors" role="tabpanel" aria-labelledby="tab-vendors" tabindex="-1" hidden>
+    <div class="row-between"><div><h2>Vendor checklist</h2><p class="muted" id="vSummary"></p></div></div>
+    <div class="vgrid">
+      <div class="sheetbox"><ul class="vlist" id="vList"></ul></div>
+      <form class="formcard" id="vForm" novalidate>
+        <h3 id="vFormTitle">Add a vendor task</h3>
+        <input type="hidden" id="vId">
+        <div class="field"><label for="vName">Vendor</label><input class="input" id="vName" autocomplete="off" required></div>
+        <div class="two">
+          <div class="field"><label for="vCat">Category</label><select class="select input" id="vCat"><option>Catering</option><option>Venue</option><option>Decor</option><option>Music</option><option>Photography</option><option>Aso ebi &amp; gele</option><option>Cake</option><option>Transport</option><option>Other</option></select></div>
+          <div class="field"><label for="vDue">Due date</label><input class="input" id="vDue" type="date" required></div>
+        </div>
+        <div class="field"><label for="vTask">Task</label><input class="input" id="vTask" autocomplete="off" required></div>
+        <p class="error-text" id="vErr" role="alert"></p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap"><button class="btn btn-primary btn-small" type="submit" id="vSave">Add task</button><button class="btn btn-ghost btn-small" type="button" id="vCancel" hidden>Cancel editing</button></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div class="sheet" id="tSheet" role="dialog" aria-modal="true" aria-labelledby="tSheetTitle" hidden>
+  <div class="sheet-panel">
+    <div class="sheet-head"><h2 id="tSheetTitle" style="font-size: 1.25rem"></h2><button class="btn btn-ghost btn-small" id="tSheetClose" type="button">Close</button></div>
+    <div id="tSheetBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="assets/demo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.AriyaDemo;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var toastT;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 3400); }
+  var STATUS = { yes: ["yes", "Confirmed"], no: ["no", "Declined"], pending: ["wait", "Pending"] };
+
+  /* ---------- Event header ---------- */
+  function renderEvent() {
+    var e = D.state.event;
+    $("evTitle").textContent = e.title;
+    $("evMeta").innerHTML = "<span><b>" + esc(D.fmtDate(e.date)) + "</b>, 2pm</span><span><b>" + esc(e.venue) + "</b>, " + esc(e.area) + "</span><span>Replies by " + esc(D.fmtDate(e.rsvpBy, { day: "numeric", month: "long" })) + "</span>";
+    var g = D.state.guests[0];
+    $("evGuestView").href = "rsvp.html?g=" + encodeURIComponent(g.token);
+  }
+
+  /* ---------- Tabs (arrow keys move between them) ---------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function showTab(name, focus) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute("aria-controls") === name;
+      t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1;
+      $(t.getAttribute("aria-controls")).hidden = !on;
+      if (on && focus) t.focus();
+    });
+    if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    render();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { showTab(t.getAttribute("aria-controls")); });
+    t.addEventListener("keydown", function (e) {
+      var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (d) { e.preventDefault(); showTab(tabs[(i + d + tabs.length) % tabs.length].getAttribute("aria-controls"), true); }
+    });
+  });
+  document.querySelectorAll("[data-tab-link]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); showTab(a.getAttribute("data-tab-link"), true); }); });
+  window.addEventListener("hashchange", function () { var h = location.hash.slice(1); if ($(h) && $(h).getAttribute("role") === "tabpanel") showTab(h); });
+
+  /* ---------- Reset with an in-page confirmation ---------- */
+  $("resetWrap").addEventListener("click", function (e) {
+    if (e.target.id === "resetBtn") {
+      this.innerHTML = '<span style="display:inline-flex;gap:8px;align-items:center"><span class="hint">Reset all sample data?</span><button class="btn btn-primary btn-small" id="resetYes" type="button">Reset</button><button class="btn btn-ghost btn-small" id="resetNo" type="button">Keep</button></span>';
+      $("resetYes").focus();
+    } else if (e.target.id === "resetYes" || e.target.id === "resetNo") {
+      if (e.target.id === "resetYes") { D.reset(); toast("Sample data reset."); }
+      this.innerHTML = '<button class="btn btn-ghost btn-small" id="resetBtn" type="button">Reset demo</button>';
+      $("resetBtn").focus(); render();
+    }
+  });
+
+  /* ---------- Guests ---------- */
+  function guestFilter() { return (document.querySelector('#gFilter input:checked') || {}).value || "all"; }
+  function renderGuests() {
+    var c = D.counts();
+    $("gCounts").innerHTML =
+      '<div class="count"><b>' + c.yes + '</b><span>Confirmed · ' + c.people + ' people</span></div>' +
+      '<div class="count"><b>' + c.pending + '</b><span>Waiting for a reply</span></div>' +
+      '<div class="count"><b>' + c.no + '</b><span>Declined</span></div>' +
+      '<div class="count"><b>' + c.seated + '</b><span>Seated · ' + c.unseated + ' confirmed without a table</span></div>';
+    var q = $("q").value.trim().toLowerCase(), f = guestFilter(), qd = q.replace(/\D/g, "");
+    var rows = D.state.guests.filter(function (g) {
+      if (f !== "all" && g.status !== f) return false;
+      if (!q) return true;
+      return g.name.toLowerCase().indexOf(q) >= 0 || (qd.length >= 3 && g.phone.replace(/\D/g, "").indexOf(qd.replace(/^0/, "")) >= 0);
+    });
+    $("gBody").innerHTML = rows.map(function (g) {
+      var t = g.tableId ? D.byId(D.state.tables, g.tableId) : null, link = D.linkFor(g);
+      return '<tr><td class="who"><b>' + esc(g.name) + '</b><span>' + esc(D.fmtPhone(g.phone)) + (g.plusOneAllowed ? " · plus-one allowed" : "") + '</span></td>' +
+        '<td data-k="Party">' + g.party + '</td><td class="st"><span class="pill ' + STATUS[g.status][0] + '">' + STATUS[g.status][1] + '</span></td>' +
+        '<td data-k="Table">' + (t ? esc(t.name) : g.status === "yes" ? "Not seated yet" : "—") + '</td>' +
+        '<td class="lk"><div class="link-cell"><code title="' + esc(link) + '">' + esc(link.replace(/^https?:\/\//, "")) + '</code>' +
+        '<button class="btn btn-ghost btn-small" type="button" data-copy="' + esc(g.id) + '" aria-label="Copy ' + esc(g.name) + '\'s RSVP link">Copy link</button>' +
+        '<a class="btn btn-ghost btn-small" href="rsvp.html?g=' + encodeURIComponent(g.token) + '" aria-label="Open ' + esc(g.name) + '\'s RSVP page">Open</a></div></td></tr>';
+    }).join("");
+    $("gEmpty").innerHTML = rows.length ? "" : '<div class="empty-state"><b>No guests match</b>' + (q ? 'Nothing found for “' + esc(q) + '”. ' : '') + 'Try another search or filter.<button class="btn btn-ghost btn-small" type="button" id="clearF">Clear search and filter</button></div>';
+    $("gLive").textContent = rows.length + " guest" + (rows.length === 1 ? "" : "s") + " shown";
+  }
+  $("q").addEventListener("input", renderGuests);
+  $("gFilter").addEventListener("change", renderGuests);
+  $("guests").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]");
+    if (b) {
+      var g = D.byId(D.state.guests, b.getAttribute("data-copy")), link = D.linkFor(g);
+      var done = function (ok) { b.textContent = ok ? "Copied" : "Select and copy"; toast(ok ? "Copied " + g.name + "'s link. It opens their personal RSVP page." : "Couldn't copy automatically. The link is selected so you can copy it."); setTimeout(function () { b.textContent = "Copy link"; }, 2000); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(function () { done(true); }, function () { selectCode(b); done(false); });
+      else { selectCode(b); done(false); }
+    }
+    if (e.target.id === "clearF") { $("q").value = ""; document.querySelector('#gFilter input[value="all"]').checked = true; renderGuests(); $("q").focus(); }
+  });
+  function selectCode(b) { var code = b.parentNode.querySelector("code"); var r = document.createRange(); r.selectNodeContents(code); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+  /* ---------- Import ---------- */
+  var lastPreview = null;
+  function readFile(f) {
+    if (!f) return;
+    if (!/\.csv$/i.test(f.name) && f.type !== "text/csv") { $("preview").innerHTML = '<p class="notice bad">“' + esc(f.name) + '” isn\'t a CSV file. Export your spreadsheet as CSV (File → Download → CSV) and try again.</p>'; return; }
+    var r = new FileReader();
+    r.onload = function () { $("csv").value = String(r.result); check(); };
+    r.onerror = function () { $("preview").innerHTML = '<p class="notice bad">That file couldn\'t be read. Try saving it again, or paste the rows instead.</p>'; };
+    r.readAsText(f);
+  }
+  $("file").addEventListener("change", function () { readFile(this.files[0]); });
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { readFile(e.dataTransfer.files[0]); });
+  $("sampleBtn").addEventListener("click", function () { $("csv").value = D.sampleCSV; check(); });
+  $("checkBtn").addEventListener("click", check);
+  function check() {
+    var text = $("csv").value;
+    if (!text.trim()) { $("preview").innerHTML = '<p class="notice warn">Nothing to check yet. Choose a file, paste rows or use the sample file.</p>'; return; }
+    $("preview").innerHTML = '<div class="empty-state sheetbox"><b>Checking your list…</b></div>';
+    setTimeout(function () {
+      var p = D.previewImport(text); lastPreview = p;
+      if (p.error) { $("preview").innerHTML = '<p class="notice bad">' + esc(p.error) + '</p>'; return; }
+      var bad = p.rows.filter(function (r) { return r.errors.length; }).length, dup = p.rows.filter(function (r) { return !r.errors.length && r.duplicate; }).length;
+      var html = '<div class="sheetbox"><div style="padding: 14px 16px; display: grid; gap: 10px"><b>' + p.rows.length + ' rows checked</b><p><span class="pill yes">' + p.valid + ' ready</span> <span class="pill no">' + bad + ' need fixing</span> <span class="pill wait">' + dup + ' duplicate' + (dup === 1 ? '' : 's') + '</span></p></div>';
+      html += '<div style="overflow-x: auto"><table class="list"><thead><tr><th scope="col">Row</th><th scope="col">Guest</th><th scope="col">Party</th><th scope="col">Result</th></tr></thead><tbody>';
+      p.rows.forEach(function (r) {
+        var res = r.errors.length ? '<div class="res bad"><ul>' + r.errors.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul></div>' : r.duplicate ? '<span class="res dup">Skipped: ' + esc(r.duplicate) + '</span>' : '<span class="res ok">Ready</span>';
+        html += '<tr class="' + (r.errors.length ? 'r-bad' : r.duplicate ? 'r-dup' : '') + '"><td>' + r.line + '</td><td><b>' + (esc(r.name) || '<i class="muted">No name</i>') + '</b><br><span class="hint">' + esc(r.phone ? D.fmtPhone(r.phone) : r.phoneRaw) + '</span></td><td>' + esc(isNaN(r.party) ? "?" : r.party) + '</td><td>' + res + '</td></tr>';
+      });
+      html += '</tbody></table></div><div style="padding: 14px 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center">' +
+        (p.valid ? '<button class="btn btn-primary btn-small" id="commitBtn" type="button">Import ' + p.valid + ' guest' + (p.valid === 1 ? '' : 's') + '</button>' : '<p class="notice warn">No rows are ready yet. Fix the highlighted rows and check again.</p>') +
+        (bad || dup ? '<span class="hint">Rows that need fixing or are duplicates won\'t be imported.</span>' : '') + '</div></div>';
+      $("preview").innerHTML = html;
+    }, 250);
+  }
+  $("preview").addEventListener("click", function (e) {
+    if (e.target.id !== "commitBtn" || !lastPreview) return;
+    var n = D.commitImport(lastPreview); lastPreview = null;
+    $("preview").innerHTML = '<p class="notice ok">Imported ' + n + ' guest' + (n === 1 ? '' : 's') + ' as pending. Each now has a personal RSVP link. <a href="#guests" data-goto="guests">See them in Guests</a>.</p>';
+    $("csv").value = ""; $("file").value = "";
+    toast("Imported " + n + " guests into the sample event.");
+  });
+  $("preview").addEventListener("click", function (e) { var a = e.target.closest("[data-goto]"); if (a) { e.preventDefault(); showTab(a.getAttribute("data-goto"), true); } });
+
+  /* ---------- Seating ---------- */
+  var selected = null;
+  function setStatus(msg, kind) { var s = $("seatStatus"); s.textContent = msg; s.className = "seat-status " + (kind || ""); }
+  function tableSvg(t, used) {
+    var out = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="30" fill="#f4efe6" stroke="#c9a256" stroke-width="2"/>';
+    for (var i = 0; i < t.capacity; i++) {
+      var a = -Math.PI / 2 + i / t.capacity * Math.PI * 2, x = 60 + Math.cos(a) * 46, y = 60 + Math.sin(a) * 46;
+      out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="8" fill="' + (i < used ? '#e3c27f' : 'none') + '" stroke="' + (i < used ? '#e3c27f' : 'rgba(244,239,230,.5)') + '" stroke-width="1.5"' + (i < used ? '' : ' stroke-dasharray="3 3"') + '/>';
+    }
+    return out + '<text x="60" y="65" text-anchor="middle" font-size="15" font-family="Figtree, sans-serif" font-weight="700" fill="#15211c">' + used + '/' + t.capacity + '</text></svg>';
+  }
+  function renderSeating() {
+    var q = $("sq").value.trim().toLowerCase(), showAll = $("showSeated").checked;
+    var people = D.state.guests.filter(function (g) { return g.status === "yes" && (showAll || !g.tableId) && (!q || g.name.toLowerCase().indexOf(q) >= 0); });
+    if (selected && !D.byId(D.state.guests, selected)) selected = null;
+    $("pickList").innerHTML = people.length ? people.map(function (g) {
+      var t = g.tableId ? D.byId(D.state.tables, g.tableId) : null;
+      return '<li><button class="gbtn" type="button" draggable="true" data-g="' + g.id + '" aria-pressed="' + (selected === g.id) + '"><b>' + esc(g.name) + '</b><span class="pill ' + (t ? 'yes' : 'wait') + '">' + (t ? esc(t.name) : 'No table') + '</span><small>Party of ' + g.party + '</small></button></li>';
+    }).join("") : '<li class="empty-state" style="padding: 18px 8px"><b>' + (q ? 'No match' : 'Everyone confirmed has a table') + '</b>' + (q ? 'Try another name.' : 'Tick “Include guests who already have a table” to move someone.') + '</li>';
+    var sel = selected ? D.byId(D.state.guests, selected) : null;
+    var tables = D.state.tables;
+    $("hall").innerHTML = tables.map(function (t, i) {
+      var used = D.seatsUsed(t.id), free = t.capacity - used, full = free <= 0;
+      var fits = sel ? sel.party <= t.capacity - D.seatsUsed(t.id, sel.id) : null;
+      var label = t.name + ", " + used + " of " + t.capacity + " seats filled" + (full ? ", full" : "") + (sel ? (fits ? ". Seat " + sel.name + " here" : ". Not enough seats for " + sel.name) : ". Show who is seated");
+      var btn = '<button class="tbl' + (full ? ' full' : '') + (sel ? (fits ? ' can' : ' cant') : '') + '" type="button" data-t="' + t.id + '" aria-label="' + esc(label) + '">' + tableSvg(t, used) + '<b>' + esc(t.name) + '</b><span>' + (full ? 'Full' : free + ' free') + '</span></button>';
+      return i === 0 ? '<div class="head-row">' + btn + '</div>' : btn;
+    }).join("");
+    $("tlist").innerHTML = tables.map(function (t) {
+      var gs = D.state.guests.filter(function (g) { return g.tableId === t.id && g.status === "yes"; }), used = D.seatsUsed(t.id);
+      return '<section aria-label="' + esc(t.name) + '"><h3><span>' + esc(t.name) + '</span><span class="muted">' + used + ' of ' + t.capacity + ' seats' + (used >= t.capacity ? ' · full' : '') + '</span></h3><ul>' +
+        (gs.length ? gs.map(function (g) { return '<li><span>' + esc(g.name) + ' <span class="hint">(' + g.party + ')</span></span><button class="btn btn-ghost btn-small" type="button" data-un="' + g.id + '">Remove from table</button></li>'; }).join("") : '<li class="hint">Nobody seated yet</li>') +
+        (sel && sel.tableId !== t.id ? '<li><span class="hint">Seat ' + esc(sel.name) + ' here?</span><button class="btn btn-primary btn-small" type="button" data-t="' + t.id + '">Seat here</button></li>' : '') + '</ul></section>';
+    }).join("");
+    var view = (document.querySelector('#viewSwitch input:checked') || {}).value;
+    $("hallWrap").hidden = view === "list"; $("tlist").hidden = view !== "list";
+  }
+  function doAssign(gid, tid) {
+    var r = D.assign(gid, tid);
+    setStatus(r.msg, r.ok ? "ok" : "bad");
+    if (r.ok) { selected = null; toast(r.msg); }
+    renderSeating();
+    var el = document.querySelector('.tbl[data-t="' + tid + '"]');
+    if (el && r.ok) { el.classList.add("flash"); el.focus(); }
+  }
+  $("seating").addEventListener("click", function (e) {
+    var gb = e.target.closest("[data-g]"), tb = e.target.closest("[data-t]"), un = e.target.closest("[data-un]");
+    if (gb) {
+      selected = selected === gb.getAttribute("data-g") ? null : gb.getAttribute("data-g");
+      var g = selected && D.byId(D.state.guests, selected);
+      setStatus(g ? "Selected " + g.name + " (party of " + g.party + "). Now choose a table." : "Selection cleared.", "");
+      renderSeating();
+      var again = document.querySelector('.gbtn[data-g="' + gb.getAttribute("data-g") + '"]'); if (again) again.focus();
+    } else if (tb) {
+      if (selected) doAssign(selected, tb.getAttribute("data-t"));
+      else openTable(tb.getAttribute("data-t"), tb);
+    } else if (un) {
+      var gg = D.byId(D.state.guests, un.getAttribute("data-un")); D.unassign(gg.id);
+      setStatus(gg.name + " no longer has a table.", "ok"); renderSeating();
+      if (!$("tSheet").hidden) openTable(lastSheetTable, lastSheetOpener);
+    }
+  });
+  $("sq").addEventListener("input", renderSeating);
+  $("showSeated").addEventListener("change", renderSeating);
+  $("viewSwitch").addEventListener("change", renderSeating);
+  // Drag and drop is an enhancement for pointer users; click-to-assign always works.
+  $("seating").addEventListener("dragstart", function (e) { var gb = e.target.closest("[data-g]"); if (gb) { e.dataTransfer.setData("text/plain", gb.getAttribute("data-g")); e.dataTransfer.effectAllowed = "move"; } });
+  $("hall").addEventListener("dragover", function (e) { var tb = e.target.closest(".tbl"); if (tb) { e.preventDefault(); document.querySelectorAll(".tbl.drop-over").forEach(function (x) { x.classList.remove("drop-over"); }); tb.classList.add("drop-over"); } });
+  $("hall").addEventListener("dragleave", function (e) { var tb = e.target.closest(".tbl"); if (tb && !tb.contains(e.relatedTarget)) tb.classList.remove("drop-over"); });
+  $("hall").addEventListener("drop", function (e) { var tb = e.target.closest(".tbl"); if (!tb) return; e.preventDefault(); tb.classList.remove("drop-over"); var gid = e.dataTransfer.getData("text/plain"); if (gid) doAssign(gid, tb.getAttribute("data-t")); });
+
+  // Table details in a bottom sheet
+  var lastSheetTable = null, lastSheetOpener = null;
+  function openTable(tid, opener) {
+    var t = D.byId(D.state.tables, tid), gs = D.state.guests.filter(function (g) { return g.tableId === tid && g.status === "yes"; }), used = D.seatsUsed(tid);
+    lastSheetTable = tid; lastSheetOpener = opener;
+    $("tSheetTitle").textContent = t.name + " · " + used + " of " + t.capacity + " seats";
+    $("tSheetBody").innerHTML = (gs.length ? '<ul style="list-style:none;margin:0;padding:0">' + gs.map(function (g) { return '<li style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:6px 0"><span>' + esc(g.name) + ' <span class="hint">party of ' + g.party + '</span></span><button class="btn btn-ghost btn-small" type="button" data-un="' + g.id + '">Remove</button></li>'; }).join("") + '</ul>' : '<p class="muted">Nobody is seated here yet. Choose a guest from the list, then this table.</p>');
+    var sh = $("tSheet"); sh.hidden = false; $("tSheetClose").focus();
+  }
+  function closeSheet() { $("tSheet").hidden = true; if (lastSheetOpener && document.body.contains(lastSheetOpener)) lastSheetOpener.focus(); else { var el = document.querySelector('.tbl[data-t="' + lastSheetTable + '"]'); if (el) el.focus(); } }
+  $("tSheetClose").addEventListener("click", closeSheet);
+  $("tSheet").addEventListener("click", function (e) { if (e.target === this) closeSheet(); var un = e.target.closest("[data-un]"); if (un) { D.unassign(un.getAttribute("data-un")); renderSeating(); openTable(lastSheetTable, null); setStatus("Removed from " + D.byId(D.state.tables, lastSheetTable).name + ".", "ok"); } });
+  document.addEventListener("keydown", function (e) {
+    var sh = $("tSheet");
+    if (sh.hidden) return;
+    if (e.key === "Escape") closeSheet();
+    if (e.key === "Tab") { var f = sh.querySelectorAll("button"), first = f[0], last = f[f.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+  });
+
+  /* ---------- Vendors ---------- */
+  var today = new Date().toISOString().slice(0, 10);
+  function renderVendors() {
+    var v = D.state.vendors, todo = v.filter(function (t) { return !t.done; }).sort(function (a, b) { return a.due.localeCompare(b.due); }), done = v.filter(function (t) { return t.done; });
+    var overdue = todo.filter(function (t) { return t.due < today; }).length;
+    $("vSummary").textContent = todo.length + " to do · " + done.length + " done" + (overdue ? " · " + overdue + " overdue" : "") + ". Due dates count back from " + D.fmtDate(D.state.event.date, { day: "numeric", month: "long" }) + ".";
+    function item(t) {
+      var od = !t.done && t.due < today;
+      return '<li class="' + (t.done ? 'done' : '') + (od ? ' overdue' : '') + '"><input type="checkbox" id="c_' + t.id + '" data-v="' + t.id + '"' + (t.done ? ' checked' : '') + '><label class="t" for="c_' + t.id + '">' + esc(t.task) + '</label><span class="m">' + esc(t.name) + ' · ' + esc(t.category) + '</span>' +
+        '<span class="side"><span class="due">' + (od ? 'Overdue · ' : '') + esc(D.fmtDate(t.due, { day: "numeric", month: "short", year: "numeric" })) + '</span><button class="btn btn-ghost btn-small" type="button" data-edit="' + t.id + '" aria-label="Edit ' + esc(t.task) + '">Edit</button></span></li>';
+    }
+    $("vList").innerHTML = (todo.length ? '<li class="vgroup">To do</li>' + todo.map(item).join("") : '<li class="vgroup">To do</li><li><span></span><span class="t">Nothing outstanding.</span></li>') + (done.length ? '<li class="vgroup">Done</li>' + done.map(item).join("") : "");
+  }
+  $("vList").addEventListener("change", function (e) {
+    var id = e.target.getAttribute("data-v"); if (!id) return;
+    var t = D.byId(D.state.vendors, id); t.done = e.target.checked; D.save(); renderVendors();
+    toast((t.done ? "Done: " : "Back on the list: ") + t.task);
+    var el = $("c_" + id); if (el) el.focus();
+  });
+  $("vList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-edit]"); if (!b) return;
+    var t = D.byId(D.state.vendors, b.getAttribute("data-edit"));
+    $("vId").value = t.id; $("vName").value = t.name; $("vCat").value = t.category; $("vDue").value = t.due; $("vTask").value = t.task;
+    $("vFormTitle").textContent = "Edit task"; $("vSave").textContent = "Save changes"; $("vCancel").hidden = false; $("vName").focus();
+  });
+  function resetVForm() { $("vForm").reset(); $("vId").value = ""; $("vFormTitle").textContent = "Add a vendor task"; $("vSave").textContent = "Add task"; $("vCancel").hidden = true; $("vErr").textContent = ""; }
+  $("vCancel").addEventListener("click", resetVForm);
+  $("vForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("vName").value.trim(), task = $("vTask").value.trim(), due = $("vDue").value;
+    var miss = [!name && "vendor", !task && "task", !due && "due date"].filter(Boolean);
+    if (miss.length) { $("vErr").textContent = "Add the " + miss.join(", ").replace(/, ([^,]*)$/, " and $1") + "."; $(!name ? "vName" : !due ? "vDue" : "vTask").focus(); return; }
+    var id = $("vId").value;
+    if (id) { var t = D.byId(D.state.vendors, id); t.name = name; t.category = $("vCat").value; t.due = due; t.task = task; toast("Saved: " + task); }
+    else { D.state.vendors.push({ id: "v" + Date.now().toString(36), name: name, category: $("vCat").value, task: task, due: due, done: false }); toast("Added: " + task); }
+    D.save(); resetVForm(); renderVendors();
+  });
+
+  function render() { renderEvent(); renderGuests(); renderSeating(); renderVendors(); }
+  var start = location.hash.slice(1);
+  showTab($(start) && $(start).getAttribute("role") === "tabpanel" ? start : "guests");
+})();
+</script>
+</body>
+</html>
