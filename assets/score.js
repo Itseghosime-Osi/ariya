@@ -2,12 +2,13 @@
    A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
    calls, conga and kick, a two-guitar highlife figure, walking bass, warm pads and a short horn hook.
 
-   To play a licensed recording instead (for example a song you have the rights to), put the file in
-   assets/ and set MUSIC_URL below, e.g. "assets/music.mp3". It will loop in place of the generated groove.
+   To play a recording instead, put the file at assets/music.mp3 (or change MUSIC_URL below). It loops in place
+   of the generated groove; if the file is missing or can't play, the generated groove plays instead.
 
    Nothing plays until AriyaScore.start() is called from a click or tap. */
 (function () {
-  var MUSIC_URL = null;
+  var MUSIC_URL = "assets/music.mp3";
+  var fileFailed = false;
 
   var ctx = null, master, bus, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf, audioEl = null;
   var BPM = 104, STEP = 60 / BPM / 3; // 12 eighth-note triplet steps per bar
@@ -92,19 +93,23 @@
 
   window.AriyaScore = {
     start: function () {
-      if (MUSIC_URL) {
-        if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.7; }
-        var p = audioEl.play(); on = true; if (p && p.catch) p.catch(function () { on = false; });
+      try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
+      on = true;
+      if (MUSIC_URL && !fileFailed) {
+        // Try the recording first; fall back to the generated groove if it is missing or won't play.
+        var fallback = function () { if (fileFailed) return; fileFailed = true; audioEl = null; if (on) window.AriyaScore.start(); };
+        if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.75; audioEl.addEventListener("error", fallback); }
+        var p = audioEl.play(); if (p && p.catch) p.catch(function (e) { if (e && e.name !== "AbortError") fallback(); });
+        master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.8, ctx.currentTime, 0.2); // for the seal and chime sounds
         return true;
       }
-      try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
       if (!timer) { nextT = ctx.currentTime + 0.08; step = 0; timer = setInterval(schedule, 25); }
       master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.8, ctx.currentTime, 0.6);
       on = true; return true;
     },
     stop: function () {
       on = false;
-      if (audioEl) { audioEl.pause(); return; }
+      if (audioEl) audioEl.pause();
       if (ctx) master.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
     },
     isOn: function () { return on; },
@@ -117,7 +122,7 @@
       if (!on || !ctx) return; var t = ctx.currentTime;
       [72, 77, 81, 84].forEach(function (m, i) { pluck(m, t + i * 0.08, 0.08, true); bell(t + i * 0.08, true); });
     },
-    pause: function (yes) { if (audioEl) { if (yes) audioEl.pause(); else if (on) audioEl.play(); return; } if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); } }
+    pause: function (yes) { if (audioEl) { if (yes) audioEl.pause(); else if (on) audioEl.play(); } if (ctx) { if (yes) ctx.suspend(); else if (on) ctx.resume(); } }
   };
   document.addEventListener("visibilitychange", function () { window.AriyaScore.pause(document.hidden); });
 })();
