@@ -264,6 +264,10 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .scrollcue i, .marquee div, .sound-on .bars span { animation: none; } }
+/* Embed mode (?embed=hero | hall): the landing page shows the live scene without the film's chrome. */
+html.embed, html.embed body { overflow: hidden; background: #072a1f; }
+.embed .gate, .embed .nav, .embed .menu, .embed .overlay, .embed .foot-ui, .embed .progress, .embed .biz, .embed #confetti, .embed .backdrop { display: none !important; }
+.embed .track { height: 100vh; }
 </style>
 <script type="importmap">
 {
@@ -443,9 +447,23 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   function bump(p, a, b, c, d) { return seg(p, a, b) * (1 - seg(p, c, d)); }
   var PRO = 0.09; // share of the scroll given to the prologue
   var OP = window.OP = { p: 0, raw: 0, pro: 0, seated: 0, loaded: 0, entered: false, covered: false, reduceMotion: reduceMotion, render: null, seg: seg, bump: bump, smooth: smooth, clamp: clamp };
+  // Embed mode: the landing page hosts the live scene. No gate, no sound, no scroll; the host drives it.
+  var EMBED = new URLSearchParams(location.search).get("embed");
+  if (EMBED !== "hero" && EMBED !== "hall") EMBED = null;
+  OP.embed = EMBED; OP.paused = false;
+  var embedP = EMBED === "hall" ? 0.79 : 0, embedT0 = 0, readySent = false, frames = 0;
+  if (EMBED) {
+    document.documentElement.classList.add("embed");
+    OP.entered = true;
+    window.addEventListener("message", function (e) {
+      if (e.origin !== location.origin || !e.data || e.data.type !== "ariya-stage") return;
+      if (typeof e.data.visible === "boolean") OP.paused = !e.data.visible;
+      if (typeof e.data.p === "number") embedP = clamp(e.data.p, 0, 1);
+    });
+  }
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   window.scrollTo(0, 0);
-  document.documentElement.classList.add("locked");
+  if (!EMBED) document.documentElement.classList.add("locked");
 
   /* ---------- Score: a generated highlife-ambient soundtrack that follows the story ---------- */
   var Score = (function () {
@@ -769,7 +787,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
     guestRows.forEach(function (li, i) { li.classList.toggle("in", fill > (i + 0.5) / guestData.length * 0.95); });
 
     var bt = biz.getBoundingClientRect().top;
-    OP.covered = bt <= 0;
+    OP.covered = !EMBED && bt <= 0;
     nav.classList.toggle("solid", bt < window.innerHeight * 0.5);
     footUi.style.opacity = bt < window.innerHeight * 0.8 ? "0" : "1";
     scrollcue.style.opacity = r < 0.02 ? "1" : "0";
@@ -787,13 +805,26 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 
   var t0 = performance.now();
   function tick() {
+    if (EMBED) {
+      // hero: drift in from the wide establishing shot, settle on the box, open it, raise the ring, then hold.
+      // hall: follow the progress the host page sends as the visitor scrolls the hall section.
+      if (EMBED === "hero") {
+        if (OP.loaded >= 1 && !embedT0) embedT0 = performance.now();
+        var k = reduceMotion ? 1 : embedT0 ? smooth((performance.now() - embedT0) / 9000) : 0;
+        target = 0.035 + (PRO + 0.215 * (1 - PRO) - 0.035) * k;
+      } else target = PRO + embedP * (1 - PRO);
+      if (OP.paused) { requestAnimationFrame(tick); return; }
+    }
     prog += (target - prog) * 0.085;
     if (Math.abs(target - prog) < 0.00005) prog = target;
     var r = prog, p = clamp((r - PRO) / (1 - PRO), 0, 1);
     OP.raw = r; OP.pro = clamp(r / PRO, 0, 1); OP.p = p;
     OP.seated = updateDom(r, p);
     if (OP.entered) Score.scene(p, OP.pro);
-    if (OP.render) OP.render(p, (performance.now() - t0) / 1000);
+    if (OP.render) {
+      OP.render(p, (performance.now() - t0) / 1000);
+      if (EMBED && !readySent && OP.loaded >= 1 && ++frames > 4) { readySent = true; parent.postMessage({ type: "ariya-stage-ready", mode: EMBED }, location.origin); }
+    }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -827,6 +858,7 @@ try {
   renderer = null;
   canvas.style.display = "none";
   OP.failed = true;
+  if (OP.embed) parent.postMessage({ type: "ariya-stage-failed", mode: OP.embed }, location.origin);
 }
 if (renderer) await start();
 
@@ -1654,7 +1686,7 @@ async function start() {
   }
 
   /* ---------- Render pipeline: HDR scene, lens blur, bloom, film ---------- */
-  let pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5);
+  let pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5, OP.embed ? 1.25 : 9);
   const sceneRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
   sceneRT.depthTexture = new THREE.DepthTexture(1, 1, THREE.FloatType);
   const dofRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
@@ -1748,6 +1780,11 @@ async function start() {
     finalMat.uniforms.aspect.value = w / h;
     camera.aspect = w / h;
     camera.fov = w < h ? 48 : 34;
+    if (OP.embed === "hero") {
+      if (w > 960) camera.setViewOffset(w, h, -w * 0.2, 0, w, h);
+      else camera.setViewOffset(w, h, 0, h * 0.2, w, h);
+    } else if (OP.embed === "hall" && w > 960) camera.setViewOffset(w, h, -w * 0.12, 0, w, h);
+    else camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
   window.addEventListener("resize", resize);

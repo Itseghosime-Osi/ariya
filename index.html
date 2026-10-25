@@ -64,6 +64,42 @@ section { scroll-margin-top: 72px; }
 .h-place b { font-family: var(--font-hand); font-weight: 400; font-size: clamp(1rem, 2.1vw, 1.45rem); color: #2c2218; line-height: 1.1; }
 .h-place span { font-size: clamp(0.55rem, 1vw, 0.72rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-ink); }
 
+/* ---------- Live 3D stages (the film engine in embed mode) ---------- */
+.hero { min-height: min(92vh, 900px); display: grid; align-items: center; }
+.stage3d { position: absolute; inset: 0; z-index: 0; opacity: 0; transition: opacity 1.4s var(--ease); pointer-events: none; }
+.stage3d iframe { width: 100%; height: 100%; border: 0; display: block; }
+.live .stage3d { opacity: 1; }
+.hero .wrap { position: relative; z-index: 1; }
+.hero-scrim { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--ease);
+  background: linear-gradient(90deg, rgba(7, 42, 31, 0.94) 0%, rgba(7, 42, 31, 0.82) 34%, rgba(7, 42, 31, 0.2) 58%, rgba(7, 42, 31, 0) 72%); }
+.hero.live .hero-scrim { opacity: 1; }
+.still { transition: opacity 1.2s var(--ease), visibility 1.2s; }
+.hero.live .still { opacity: 0; visibility: hidden; }
+.film-pill { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px 0 6px; border-radius: 999px; background: rgba(4, 25, 15, 0.55); border: 1px solid var(--line-dark); color: var(--on-dark); text-decoration: none; font-weight: 600; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.film-pill i { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: var(--emerald-950); display: grid; place-items: center; font-style: normal; font-size: 0.7rem; }
+.film-pill:hover { border-color: var(--gold); }
+.hero .film-pill { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: 28px; z-index: 2; opacity: 0; transition: opacity .8s; }
+.hero.live .film-pill { opacity: 1; }
+/* The hall: a pinned band where the 3D hall fills as you scroll */
+.hallband { position: relative; height: 230vh; }
+.hb-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; align-items: center; }
+.hb-stage { position: absolute; inset: 0; background: radial-gradient(60% 60% at 60% 50%, rgba(227, 194, 127, 0.08), transparent 70%), var(--emerald-900); }
+.hb-stage .stage3d { opacity: 0; }
+.hallband.live .hb-stage .stage3d { opacity: 1; }
+.hb-wait { position: absolute; right: 8%; top: 50%; color: var(--on-dark-soft); font-size: 0.9375rem; transition: opacity .6s; }
+.hallband.live .hb-wait { opacity: 0; }
+.hb-scrim { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(7, 42, 31, 0.95) 0%, rgba(7, 42, 31, 0.84) 30%, rgba(7, 42, 31, 0.15) 56%, rgba(7, 42, 31, 0) 70%); }
+.hb-copy { position: relative; z-index: 1; }
+.hb-copy > * { max-width: 30rem; }
+.hb-copy h2 { font-size: clamp(2.1rem, 4.4vw, 3.4rem); margin-bottom: 14px; }
+.hb-copy h2 em { color: var(--gold); }
+.hb-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 28px 0 0; }
+.hb-counts div { border-top: 1px solid var(--line-dark); padding-top: 10px; }
+.hb-counts dt { font-size: 0.875rem; color: var(--on-dark-soft); }
+.hb-counts dd { margin: 4px 0 0; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.hb-counts div:first-child dd { color: var(--gold); }
+.hallband .film-pill { margin-top: 28px; }
+
 /* ---------- WhatsApp chaos → list ---------- */
 .chaos { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 28px; align-items: stretch; }
 .phone { background: #e9e1d2; border-radius: 22px; padding: 14px; box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: 10px; align-content: start; }
@@ -214,6 +250,14 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
 .js .reveal.in { opacity: 1; transform: none; }
 
 @media (max-width: 960px) {
+  .hero { min-height: 0; }
+  .hero.live .wrap { padding-top: 46vh; }
+  .hero.live .still { display: none; }
+  .hero-scrim { background: linear-gradient(0deg, rgba(7, 42, 31, 0.97) 0%, rgba(7, 42, 31, 0.9) 50%, rgba(7, 42, 31, 0.2) 75%, rgba(7, 42, 31, 0) 90%); }
+  .hero .film-pill { top: calc(env(safe-area-inset-top, 0px) + 84px); bottom: auto; }
+  .hb-scrim { background: linear-gradient(0deg, rgba(7, 42, 31, 0.97) 0%, rgba(7, 42, 31, 0.86) 42%, rgba(7, 42, 31, 0) 72%); }
+  .hb-sticky { align-items: end; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .hb-wait { right: auto; left: 20px; top: 20%; }
   .hero .wrap, .gx, .tools, .vend { grid-template-columns: minmax(0, 1fr); }
   .still { justify-self: center; max-width: 480px; }
   .chaos { grid-template-columns: minmax(0, 1fr); }
@@ -266,7 +310,10 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
 </div>
 
 <main id="main">
-  <section class="hero dark" aria-labelledby="heroTitle">
+  <section class="hero dark" id="hero" aria-labelledby="heroTitle">
+    <div class="stage3d" id="heroStage" aria-hidden="true"></div>
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <a class="film-pill" href="film.html" tabindex="-1" aria-hidden="true"><i>▶</i>Watch the full film</a>
     <div class="wrap">
       <div>
         <span class="kicker">For Nigerian weddings, introductions and owambes</span>
@@ -369,6 +416,24 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
           </div>
           <p class="muted" style="font-size: 0.9375rem"><button class="link-btn" id="resetGx" type="button" style="color: var(--on-dark)">Start again</button></p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hallband dark" id="hall" aria-labelledby="hallTitle" hidden>
+    <div class="hb-sticky">
+      <div class="hb-stage" aria-hidden="true"><div class="stage3d" id="hallStage"></div><p class="hb-wait">Setting the hall…</p></div>
+      <div class="hb-scrim" aria-hidden="true"></div>
+      <div class="wrap hb-copy">
+        <span class="kicker">The hall, live</span>
+        <h2 class="display" id="hallTitle">Every yes takes <em>a seat.</em></h2>
+        <p class="muted">Keep scrolling. As replies arrive, guests appear at their tables in their aso ebi and a candle is lit for each one.</p>
+        <dl class="hb-counts">
+          <div><dt>Confirmed</dt><dd id="hbConfirmed">0</dd></div>
+          <div><dt>Seated</dt><dd id="hbSeated">0</dd></div>
+          <div><dt>Invited</dt><dd>320</dd></div>
+        </dl>
+        <a class="film-pill" href="film.html"><i aria-hidden="true">▶</i>Watch the full film</a>
       </div>
     </div>
   </section>
@@ -479,6 +544,48 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
     reveals.forEach(function (el) { io.observe(el); });
   } else reveals.forEach(function (el) { el.classList.add("in"); });
+
+  /* ---------- Live 3D: the film engine in embed mode, loaded after the page is usable ---------- */
+  var gl2 = (function () { try { return !!document.createElement("canvas").getContext("webgl2"); } catch (e) { return false; } })();
+  var saveData = navigator.connection && navigator.connection.saveData;
+  var stages = {};
+  function mountStage(mode, host, onReady) {
+    if (stages[mode]) return;
+    var f = document.createElement("iframe");
+    f.src = "film.html?embed=" + mode; f.title = mode === "hero" ? "Live 3D scene: the ring box" : "Live 3D scene: the reception hall";
+    f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true"); f.setAttribute("allow", "");
+    host.appendChild(f);
+    var st = stages[mode] = { frame: f, host: host, ready: false, onReady: onReady, visible: true };
+    st.timer = setTimeout(function () { if (!st.ready) failStage(mode); }, 30000);
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) {
+      st.visible = es[0].isIntersecting; post(mode, { visible: st.visible });
+    }).observe(host);
+  }
+  function post(mode, msg) { var st = stages[mode]; if (st && st.frame.contentWindow) { msg.type = "ariya-stage"; st.frame.contentWindow.postMessage(msg, location.origin); } }
+  function failStage(mode) { var st = stages[mode]; if (!st) return; st.frame.remove(); if (mode === "hall") $("hall").hidden = true; }
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin || !e.data) return;
+    var st = stages[e.data.mode]; if (!st) return;
+    if (e.data.type === "ariya-stage-ready") { st.ready = true; clearTimeout(st.timer); st.onReady(); post(e.data.mode, { visible: st.visible }); }
+    if (e.data.type === "ariya-stage-failed") failStage(e.data.mode);
+  });
+  if (gl2 && !saveData) {
+    var startHero = function () { mountStage("hero", $("heroStage"), function () { $("hero").classList.add("live"); }); };
+    if (document.readyState === "complete") setTimeout(startHero, 200); else window.addEventListener("load", function () { setTimeout(startHero, 200); });
+    // The hall loads when the visitor gets close to it, then follows their scroll.
+    var hall = $("hall"); hall.hidden = false;
+    var hallIO = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { hallIO.disconnect(); mountStage("hall", $("hallStage"), function () { hall.classList.add("live"); hallScroll(); }); } }, { rootMargin: "120% 0px" });
+    hallIO.observe(hall);
+    var hallRaf = 0;
+    var hallScroll = function () {
+      hallRaf = 0;
+      var r = hall.getBoundingClientRect(), f = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - innerHeight)));
+      var p = 0.785 + f * 0.095, fill = Math.max(0, Math.min(1, (p - 0.79) / 0.08)); fill = fill * fill * (3 - 2 * fill);
+      $("hbConfirmed").textContent = Math.round(fill * 241); $("hbSeated").textContent = Math.round(fill * 218);
+      post("hall", { p: p });
+    };
+    window.addEventListener("scroll", function () { if (!hallRaf && stages.hall) hallRaf = requestAnimationFrame(hallScroll); }, { passive: true });
+  }
 
   /* ---------- Hero still life: gentle pointer parallax (fine pointers only, never with reduced motion) ---------- */
   var still = document.querySelector(".still");
