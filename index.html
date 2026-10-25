@@ -21,12 +21,11 @@ section { scroll-margin-top: 72px; }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; overflow: hidden; background:
-  radial-gradient(60% 70% at 78% 45%, rgba(227, 194, 127, 0.16), transparent 60%),
-  repeating-linear-gradient(90deg, rgba(227, 194, 127, 0.05) 0 2px, transparent 2px 22px),
-  repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 4px),
+  radial-gradient(55% 65% at 76% 46%, rgba(255, 226, 170, 0.13), transparent 62%),
+  repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 4px),
   var(--emerald-900); }
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-block: clamp(48px, 7vw, 96px) clamp(64px, 8vw, 112px); }
-.hero h1 { font-size: clamp(2.6rem, 6vw, 4.9rem); margin-bottom: 22px; }
+.hero h1 { font-size: clamp(2.4rem, 4.6vw, 4rem); line-height: 1.04; margin-bottom: 22px; max-width: 13em; }
 .hero h1 em { color: var(--gold); }
 .hero .lede { font-size: clamp(1.06rem, 1.6vw, 1.25rem); color: var(--on-dark-soft); max-width: 34rem; }
 .hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
@@ -34,13 +33,18 @@ section { scroll-margin-top: 72px; }
 .hero .fine a { color: var(--on-dark); font-weight: 600; }
 
 /* The hero still life: aso oke weave, envelope, invitation, place card */
-.still { position: relative; aspect-ratio: 1 / 0.92; max-width: 560px; justify-self: end; width: 100%; perspective: 1400px; }
-.weave { position: absolute; inset: 6% -4% 2% 8%; border-radius: 6px; transform: rotate(-4deg); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+.still { position: relative; aspect-ratio: 1 / 0.92; max-width: 560px; justify-self: end; width: 100%; --mx: 0; --my: 0; }
+/* Layers drift by depth with the pointer; the place card breathes slowly. */
+.still > * { translate: calc(var(--mx) * var(--d, 0) * 1px) calc(var(--my) * var(--d, 0) * 1px); }
+.weave { --d: 3; } .h-env { --d: 6; } .h-card { --d: 10; } .h-seal { --d: 8; } .h-place { --d: 14; }
+@media (prefers-reduced-motion: no-preference) { .h-place { animation: breathe 7s ease-in-out infinite; } }
+@keyframes breathe { 50% { margin-bottom: 6px; } }
+.weave { position: absolute; inset: 6% -4% 2% 8%; border-radius: 6px; transform: rotate(-4deg); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 30px 60px rgba(0, 0, 0, 0.3); opacity: 0.85;
   /* Aso oke: narrow strip-woven bands sewn edge to edge, with gold lurex warp threads */
   background:
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.32) 0 1.5px, transparent 1.5px 74px),
-    repeating-linear-gradient(90deg, transparent 0 8px, rgba(227, 194, 127, 0.7) 8px 10px, transparent 10px 14px, rgba(227, 194, 127, 0.35) 14px 15px, transparent 15px 52px, rgba(227, 194, 127, 0.55) 52px 53px, transparent 53px 74px),
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, rgba(255, 255, 255, 0.03) 1px 2px, transparent 2px 3px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 74px),
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(227, 194, 127, 0.26) 8px 10px, transparent 10px 14px, rgba(227, 194, 127, 0.14) 14px 15px, transparent 15px 52px, rgba(227, 194, 127, 0.2) 52px 53px, transparent 53px 74px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 3px),
     linear-gradient(135deg, #0e4d39, #0a3a2b); }
 .weave::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(80% 70% at 30% 20%, rgba(255, 240, 210, 0.12), transparent 60%); }
 .h-env { position: absolute; left: 4%; bottom: 8%; width: 62%; aspect-ratio: 1.5; border-radius: 4px; transform: rotate(-9deg); background: linear-gradient(165deg, #efe5d2, #dccdb0); box-shadow: var(--shadow-paper); overflow: hidden; }
@@ -56,7 +60,7 @@ section { scroll-margin-top: 72px; }
 .h-seal { position: absolute; left: 30%; bottom: 33%; width: 15%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; transform: rotate(-12deg);
   background: radial-gradient(circle at 36% 30%, #2a8a69, #0b4a37 55%, #052a1f); box-shadow: inset 0 -3px 7px rgba(0, 0, 0, 0.45), inset 0 3px 3px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(0, 0, 0, 0.35);
   font-family: var(--font-display); font-style: italic; color: var(--gold); font-size: clamp(1rem, 2.4vw, 1.6rem); }
-.h-place { position: absolute; right: 8%; bottom: 0; width: 34%; aspect-ratio: 1.6; border-radius: 3px; transform: rotate(-3deg); box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; gap: 2px; }
+.h-place { position: absolute; right: 4%; bottom: -7%; width: 34%; aspect-ratio: 1.6; border-radius: 3px; transform: rotate(-3deg); box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; gap: 2px; }
 .h-place b { font-family: var(--font-hand); font-weight: 400; font-size: clamp(1rem, 2.1vw, 1.45rem); color: #2c2218; line-height: 1.1; }
 .h-place span { font-size: clamp(0.55rem, 1vw, 0.72rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-ink); }
 
@@ -80,9 +84,12 @@ section { scroll-margin-top: 72px; }
 .sheet-list .empty { color: var(--ink-soft); padding: 22px 0; font-size: 0.9375rem; }
 
 /* ---------- The guest experience (signature) ---------- */
+.gx-sec { padding-top: clamp(48px, 6vw, 72px); }
+.gx-head { margin-bottom: clamp(20px, 3vw, 32px); }
+.gx-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.5rem); }
 .gx { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(28px, 4vw, 56px); align-items: start; }
 .stage { position: relative; aspect-ratio: 1 / 0.86; border-radius: 16px; overflow: hidden; perspective: 1400px;
-  background: radial-gradient(70% 60% at 50% 40%, rgba(227, 194, 127, 0.14), transparent 70%), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px), var(--emerald-800);
+  background: radial-gradient(65% 55% at 42% 30%, rgba(255, 228, 175, 0.16), transparent 70%), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 3px), var(--emerald-800);
   box-shadow: inset 0 0 0 1px var(--line-dark); }
 .stage > * { transition: opacity .45s var(--ease), transform .7s var(--ease); }
 .s-env { position: absolute; left: 14%; right: 14%; top: 30%; aspect-ratio: 1.5; border-radius: 4px; background: linear-gradient(170deg, #efe5d2, #dbcbae); box-shadow: var(--shadow-paper); }
@@ -101,9 +108,9 @@ section { scroll-margin-top: 72px; }
 .s-card .for { font-family: var(--font-hand); font-size: clamp(1.4rem, 3.4vw, 2.2rem); color: #3a2c1e; line-height: 1.1; }
 .s-card .when { font-size: clamp(0.62rem, 1.2vw, 0.8rem); color: #5c4c3a; }
 .s-card .stamp { position: absolute; right: 8%; bottom: 10%; transform: rotate(-12deg); border: 2px solid var(--no); color: var(--no); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; opacity: 0; transition: opacity .3s; }
-.s-plan { position: absolute; inset: 0; opacity: 0; transform: scale(1.06); display: grid; place-items: center; }
-.s-plan svg { width: 92%; height: 92%; }
-.s-place { position: absolute; left: 50%; bottom: 7%; width: 40%; aspect-ratio: 2.1; margin-left: -20%; border-radius: 3px; box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; opacity: 0; transform: translateY(-140%) scale(1.6) rotate(4deg); }
+.s-plan { position: absolute; left: 0; right: 0; top: 0; bottom: 30%; opacity: 0; transform: scale(1.06); display: grid; place-items: center; }
+.s-plan svg { width: 96%; height: 96%; }
+.s-place { position: absolute; left: 50%; bottom: 6%; width: 38%; aspect-ratio: 2.3; margin-left: -19%; border-radius: 3px; box-shadow: var(--shadow-paper); display: grid; place-content: center; text-align: center; opacity: 0; transform: translateY(-140%) scale(1.6) rotate(4deg); }
 .s-place b { font-family: var(--font-hand); font-weight: 400; font-size: clamp(1.1rem, 2.6vw, 1.6rem); color: #2c2218; line-height: 1.1; }
 .s-place span { font-size: clamp(0.58rem, 1.1vw, 0.72rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-ink); }
 /* states */
@@ -263,13 +270,13 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
     <div class="wrap">
       <div>
         <span class="kicker">For Nigerian weddings, introductions and owambes</span>
-        <h1 class="display" id="heroTitle">Get your guest list out of the <em>WhatsApp group.</em></h1>
-        <p class="lede">Àríyá gives every guest their own RSVP link, keeps a live headcount, seats people at the right tables and keeps vendors on schedule. One calm place for couples and the planners who run their day.</p>
+        <h1 class="display" id="heroTitle">Your guests. Your celebration. <em>Beautifully organised.</em></h1>
+        <p class="lede">Take the guest list out of the WhatsApp group. Every guest gets their own RSVP link, replies arrive as a live headcount, and confirmed guests are seated at the right tables. One calm place for couples and the planners who run their day.</p>
         <div class="actions">
           <a class="btn btn-primary" href="planner.html">Start planning</a>
           <a class="btn btn-ghost" href="#invitation">Try the guest experience</a>
         </div>
-        <p class="fine"><span>Prototype: the planner opens with sample data. Nothing is sent.</span><a href="film.html">Watch the film</a></p>
+        <p class="fine"><a href="film.html">Watch the film, “The Yes”</a></p>
       </div>
       <div class="still" aria-hidden="true">
         <div class="weave"></div>
@@ -310,20 +317,18 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
     </div>
   </section>
 
-  <section class="sec dark" id="invitation" aria-labelledby="iTitle">
+  <section class="sec dark gx-sec" id="invitation" aria-labelledby="iTitle">
     <div class="wrap">
-      <div class="sec-head reveal">
+      <div class="sec-head gx-head">
         <span class="kicker">Try the guest experience</span>
         <h2 class="display" id="iTitle">An invitation becomes a <em>confirmed guest,</em> then a seat.</h2>
-        <p class="muted">This is what one guest sees when they open their personal link. Reply below; the demo shows what happens next. It uses sample data and sends nothing.</p>
       </div>
       <div class="gx">
         <div class="stage" id="stage" aria-hidden="true">
-          <span class="demo-flag stage-note">Sample guest</span>
           <div class="s-env"><div class="s-flap"><i></i><i></i></div><p class="to" id="envTo">Adaeze Okonkwo</p></div>
           <button class="s-seal" id="seal" type="button" tabindex="-1">À</button>
           <div class="s-card paper"><small>Together with their families</small><div class="names">Chidinma &amp; Tunde</div><small>request the pleasure of</small><div class="for" id="cardFor">Adaeze Okonkwo</div><div class="when">Saturday 12 December 2026, 2pm<br>The Grand Pavilion, Victoria Island</div><span class="stamp">Regretfully declines</span></div>
-          <div class="s-plan"><svg id="planSvg" viewBox="0 0 400 340" role="img" aria-label="Seating plan"></svg></div>
+          <div class="s-plan"><svg id="planSvg" viewBox="0 20 400 270" role="img" aria-label="Seating plan"></svg></div>
           <div class="s-place paper"><b id="placeName">Adaeze</b><span id="placeTable">Table 7</span></div>
         </div>
 
@@ -333,7 +338,7 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
           </ol>
           <div class="invite-box">
             <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center">
-              <span class="demo-flag">Demo · sample guest</span>
+              <span class="demo-flag">Demo with a sample guest · nothing is sent</span>
               <button class="link-btn" id="openBtn" type="button">Open the envelope</button>
             </div>
             <h3>Hello, <span id="hello">Adaeze</span>.</h3>
@@ -362,7 +367,7 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
             </form>
             <div class="result" id="result" hidden tabindex="-1" aria-live="polite"></div>
           </div>
-          <p class="muted" style="font-size: 0.9375rem">The same reply shows up in the <a href="planner.html#seating" style="color: var(--gold)">demo planner's seating view</a>. <button class="link-btn" id="resetGx" type="button" style="color: var(--on-dark)">Reset this demo</button></p>
+          <p class="muted" style="font-size: 0.9375rem"><button class="link-btn" id="resetGx" type="button" style="color: var(--on-dark)">Start again</button></p>
         </div>
       </div>
     </div>
@@ -386,7 +391,7 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
         <div class="board">
           <h3>Seating <a href="planner.html#seating">Assign tables</a></h3>
           <div class="tables-mini" id="tmini"></div>
-          <p class="hint">Sample hall with nine tables. In the planner, pick a guest and choose a table, or drag them on a larger screen.</p>
+          <p class="hint">Pick a guest, choose a table. A table never takes more people than it has chairs.</p>
         </div>
       </div>
     </div>
@@ -438,7 +443,7 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
   <section class="sec close dark" aria-labelledby="cTitle">
     <div class="wrap">
       <h2 class="display" id="cTitle">Start with your <em>guest list.</em></h2>
-      <p class="muted" style="max-width: 36rem; margin: 0 auto">Open the planner to see your event, guests, seating and vendors in one place. It runs on sample data while accounts and real sending are being built.</p>
+      <p class="muted" style="max-width: 36rem; margin: 0 auto">Your event, guests, seating and vendors in one place, from the first yes to the last dance.</p>
       <div class="actions">
         <a class="btn btn-primary" href="planner.html">Start planning</a>
         <a class="film-link" href="film.html"><i aria-hidden="true">▶</i>Watch the film, “The Yes”</a>
@@ -451,7 +456,7 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
   <div class="wrap">
     <span><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.3rem; color: var(--on-dark)">Àríyá</b> by OwambePlan</span>
     <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
-    <span>Tech4Youth Edo · Module 06, Project 36 prototype</span>
+    <span>Made in Benin City · Tech4Youth Edo</span>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -474,6 +479,17 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
     reveals.forEach(function (el) { io.observe(el); });
   } else reveals.forEach(function (el) { el.classList.add("in"); });
+
+  /* ---------- Hero still life: gentle pointer parallax (fine pointers only, never with reduced motion) ---------- */
+  var still = document.querySelector(".still");
+  if (still && !reduce && window.matchMedia("(pointer: fine)").matches) {
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    var loop = function () { cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08; still.style.setProperty("--mx", cx.toFixed(3)); still.style.setProperty("--my", cy.toFixed(3)); raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002 ? requestAnimationFrame(loop) : 0; };
+    document.querySelector(".hero").addEventListener("pointermove", function (e) {
+      tx = Math.max(-1, Math.min(1, (e.clientX / innerWidth) * 2 - 1)); ty = Math.max(-1, Math.min(1, (e.clientY / innerHeight) * 2 - 1));
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+  }
 
   /* ---------- Mobile menu: a dialog with focus handling ---------- */
   var sheet = $("menuSheet"), opener = $("menuOpen");
@@ -540,7 +556,6 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
       out += '<circle class="seat' + (isNew ? ' seat-new' : '') + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="14" fill="' + (isNew ? '#e3c27f' : o ? '#f4efe6' : 'transparent') + '" stroke="' + (o ? '#e3c27f' : 'rgba(244,239,230,.45)') + '" stroke-width="2"' + (o ? '' : ' stroke-dasharray="4 4"') + '/>';
       if (o) out += '<text x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle" font-family="Figtree, sans-serif" font-size="11" font-weight="700" fill="#15211c">' + esc(o.g.name.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).map(function (w) { return w[0]; }).slice(0, 2).join("")) + '</text>';
     }
-    out += '<text x="' + cx + '" y="' + (cy + Rs + 46) + '" text-anchor="middle" font-family="Figtree, sans-serif" font-size="13" fill="#b9c7bf">Sample hall · neighbouring tables shown faded</text>';
     svg.innerHTML = out;
   }
 
@@ -569,11 +584,11 @@ legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
         result.className = "result yes";
         result.innerHTML = "<h4>You're confirmed, " + esc(g.name.split(" ")[0]) + ".</h4>" +
           "<p>Party of " + g.party + (plus ? " (with " + esc(plusName) + ")" : "") + ". " + (t ? "Your seat is at <b>" + esc(t.name) + "</b>, now " + used + " of " + t.capacity + " seats filled" + (used === t.capacity ? ", so the table is full." : ".") : "The couple will assign your table soon.") + "</p>" +
-          "<p>In the live product a confirmation email goes to " + esc(g.email || "the guest") + " with the date, venue and table. <b>This demo sends nothing.</b></p>";
+          "<p>A confirmation email with the date, venue and table follows to " + esc(g.email || "the guest") + ".</p>";
       } else {
         stage.classList.remove("placed"); stage.classList.add("declined"); setStep(2);
         result.className = "result no";
-        result.innerHTML = "<h4>Thank you for letting them know.</h4><p>Chidinma and Tunde see your reply straight away, and your seat goes back to the plan. In the live product you'd get a short email confirming your reply. <b>This demo sends nothing.</b></p>";
+        result.innerHTML = "<h4>Thank you for letting them know.</h4><p>Chidinma and Tunde see your reply straight away, and a short email confirms it.</p>";
       }
       result.hidden = false; result.focus({ preventScroll: true });
       renderTools();

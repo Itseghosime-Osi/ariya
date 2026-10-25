@@ -24,7 +24,8 @@
   --no: #93302f;   --no-bg: #f6dedb;
   --focus: #c7962f;
   --radius: 10px;
-  --shadow-paper: 0 1px 1px rgba(40, 28, 10, 0.08), 0 8px 20px rgba(40, 28, 10, 0.1), 0 30px 60px rgba(20, 14, 6, 0.16);
+  /* Paper on a surface: a hairline edge, a tight contact shadow, then soft ambient falloff */
+  --shadow-paper: 0 0 0 0.5px rgba(80, 60, 30, 0.18), 0 1px 1px rgba(10, 6, 2, 0.28), 0 3px 5px -1px rgba(10, 6, 2, 0.22), 0 14px 24px -8px rgba(10, 6, 2, 0.32), 0 40px 70px -24px rgba(10, 6, 2, 0.42);
   --font-display: "Bodoni Moda", "Didot", Georgia, serif;
   --font-ui: "Figtree", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   --font-hand: "Pinyon Script", "Snell Roundhand", cursive;
@@ -116,6 +117,11 @@ p { margin: 0; }
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .34 0 0 0 0 .24 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
   linear-gradient(168deg, #fffdf8, #f2e9da); }
 .paper { color: var(--ink); }
+/* Cotton stock: a slightly lit top-left edge, a shaded bottom-right edge, and light raking across the sheet */
+.paper::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.85), inset -1px -1px 0 rgba(120, 90, 45, 0.18), inset 0 0 22px rgba(120, 90, 45, 0.08);
+  background: linear-gradient(calc(128deg + var(--mx, 0) * 10deg), rgba(255, 252, 240, 0.5) 0%, rgba(255, 252, 240, 0) 38%, rgba(0, 0, 0, 0) 62%, rgba(80, 55, 20, 0.09) 100%); }
+.emboss, .paper .names { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 -0.5px 0 rgba(60, 40, 20, 0.25); }
 .foil { background: linear-gradient(115deg, #b78a3c, #f2dca6 38%, #c69a4c 55%, #f6e3b4 72%, #a97c32); }
 .emboss { color: #3a2f22; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 rgba(60, 40, 20, 0.12); }
 
