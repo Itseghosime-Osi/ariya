@@ -133,8 +133,9 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 
 /* ---------- The invitation: an envelope you open ---------- */
 .envwrap { position: absolute; left: 50%; top: 60%; width: min(460px, calc(100% - 40px)); aspect-ratio: 1.5; transform: translate(-50%, -50%); opacity: 0; perspective: 1600px; }
-.env { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 1.2s cubic-bezier(.3, .7, .2, 1); }
-.env.open { transform: translateY(26%); }
+.env { position: absolute; inset: 0; transition: transform 1.2s cubic-bezier(.3, .7, .2, 1); }
+.env.open { transform: translateY(20%); }
+.env.out { transform: translateY(36%); }
 .env-back { position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(170deg, #ece2cf, #d9c9ad); box-shadow: 0 2px 3px rgba(0,0,0,.3), 0 30px 60px rgba(0,0,0,.45), 0 70px 140px rgba(0,0,0,.5); }
 .env-back::after { content: ""; position: absolute; inset: 6px 6px 40% 6px; border-radius: 3px; background:
   repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px),
@@ -149,7 +150,8 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   color: var(--paper-ink); border-radius: 3px; padding: clamp(20px, 4.5vw, 32px); text-align: center;
   box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 3px rgba(20,8,4,.3), 0 18px 40px rgba(20,8,4,.35);
   transition: transform 1.3s cubic-bezier(.3, .7, .2, 1) .45s; }
-.env.open .card { transform: translateY(-62%); }
+.env.open .card { transform: translateY(-56%); }
+.env.out .card { transform: translateY(-64%); transition-delay: 0s; transition-duration: .9s; }
 .card::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(15, 92, 69, 0.3); pointer-events: none; }
 .card .tag { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0f6b4e; margin: 0; }
 .card h3 { font-size: clamp(1.8rem, 5.5vw, 2.4rem); line-height: 1.1; margin: 6px 0 8px; color: var(--paper-ink); text-shadow: 0 1px 0 rgba(255,255,255,.75); }
@@ -167,20 +169,20 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
   box-shadow: inset 0 -20px 40px rgba(120, 90, 50, 0.12); }
 .env-front::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent 49.6%, rgba(90, 60, 30, 0.14) 50%, transparent 50.6%), linear-gradient(to top left, transparent 49.6%, rgba(90, 60, 30, 0.14) 50%, transparent 50.6%); }
-.env-front .to { position: absolute; left: 0; right: 0; bottom: 14%; text-align: center; font-family: var(--font-hand); font-size: clamp(1.6rem, 5vw, 2.3rem); color: #3a2c1e; }
+.env-front .to { position: absolute; left: 0; right: 0; bottom: 5%; text-align: center; font-family: var(--font-hand); font-size: clamp(1.6rem, 5vw, 2.3rem); color: #3a2c1e; }
 .env-front .to small { display: block; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8b7a6e; }
-.env-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; z-index: 5; transform-origin: top; transform-style: preserve-3d; transition: transform 0.9s cubic-bezier(.5, 0, .2, 1), z-index 0s .45s; }
+.env-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; z-index: 5; transform-origin: top; transform-style: preserve-3d; transform: perspective(1200px) rotateX(0deg); transition: transform 0.9s cubic-bezier(.5, 0, .2, 1), z-index 0s .45s; }
 .env-flap > div { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); backface-visibility: hidden; }
 .env-flap .outside { background: linear-gradient(180deg, #e8dcc6, #d8c7a8); filter: drop-shadow(0 4px 4px rgba(0,0,0,.2)); }
-.env-flap .inside { transform: rotateX(180deg); background: repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--wax); }
-.env.open .env-flap { transform: rotateX(178deg); z-index: 1; }
-.seal { position: absolute; left: 50%; top: 58%; z-index: 7; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; border: 0; cursor: pointer;
+.env-flap .inside { transform: rotateX(180deg); clip-path: polygon(50% 0, 100% 100%, 0 100%); background: repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--wax); }
+.env.open .env-flap { transform: perspective(1200px) rotateX(178deg); z-index: 1; }
+.seal { position: absolute; left: 50%; top: 52%; z-index: 7; width: 74px; height: 74px; margin: -37px 0 0 -37px; border-radius: 50%; border: 0; cursor: pointer;
   background: radial-gradient(circle at 38% 32%, #1f7a5c, #0b4a37 55%, #062a20); color: var(--gold);
   box-shadow: inset 0 -3px 8px rgba(0,0,0,.45), inset 0 3px 4px rgba(255,255,255,.2), 0 4px 10px rgba(0,0,0,.45);
   font-family: var(--font-display); font-style: italic; font-size: 1.8rem; transition: transform .4s, opacity .5s; pointer-events: auto; }
 .seal::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1px dashed rgba(233, 201, 138, 0.45); }
 .seal:hover { transform: scale(1.06); }
-.seal-hint { position: absolute; left: 0; right: 0; top: calc(58% + 46px); z-index: 7; text-align: center; color: #5a4a3c; transition: opacity .4s; }
+.seal-hint { position: absolute; left: 0; right: 0; top: calc(100% + 18px); z-index: 7; text-align: center; color: var(--gold); transition: opacity .4s; }
 .env.open .seal, .env.open .seal-hint { opacity: 0; pointer-events: none; transform: scale(.6); }
 
 /* ---------- The count: a panel with real contrast ---------- */
@@ -250,13 +252,13 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
   .rows article, .plan { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .steps { grid-template-columns: minmax(0, 1fr); }
   .menu { grid-template-columns: minmax(0, 1fr); }
-  .scrim { background: linear-gradient(0deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.8) 45%, rgba(5, 13, 10, 0) 80%); }
 }
 @media (max-width: 700px) {
   .nav { grid-template-columns: 1fr auto; }
   .nav .where { display: none; }
   .finder { display: none; }
   .count-beat { text-align: center; margin: 0 auto; }
+  .scrim { background: linear-gradient(0deg, rgba(5, 13, 10, 0.94) 0%, rgba(5, 13, 10, 0.8) 45%, rgba(5, 13, 10, 0) 80%); }
   .beat.side { top: auto; bottom: max(8vh, calc(env(safe-area-inset-bottom, 0px) + 40px)); transform: none; }
   .icon-btn .lbl { display: none; }
 }
@@ -801,7 +803,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
     // Envelope: rises in, opens on tap (or on its own if the reader keeps scrolling), leaves with the chapter.
     var eo = bump(p, 0.675, 0.7, 0.765, 0.785);
     tiltX += (tiltTX - tiltX) * 0.08; tiltY += (tiltTY - tiltY) * 0.08;
-    var fit = Math.min(1, (window.innerHeight - 140) / 600);
+    var fit = Math.min(1, (window.innerHeight - 110) / 640);
     envwrap.style.opacity = eo.toFixed(3);
     envwrap.style.transform = "translate(-50%, -50%) translateY(" + ((1 - eo) * 60).toFixed(1) + "px) scale(" + (fit * (0.92 + eo * 0.08)).toFixed(3) + ") rotateX(" + (-tiltY * 4 + (1 - eo) * 18).toFixed(2) + "deg) rotateY(" + (tiltX * 5).toFixed(2) + "deg)";
     envwrap.style.visibility = eo < 0.01 ? "hidden" : "visible";
@@ -1975,7 +1977,8 @@ async function start() {
     bloom.render(renderer, null, dofRT, 0, false);
     renderer.setRenderTarget(null);
     finalMat.uniforms.time.value = motion ? t : 0;
-    finalMat.uniforms.exposure.value = (inA ? 0.9 : 1.15) * lerp(0.15, 1, intro);
+    // The hall is pulled down while the invitation is on screen so the paper reads.
+    finalMat.uniforms.exposure.value = (inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
     finalMat.uniforms.warmth.value = inA ? 0 : 1;
     finalQuad.render(renderer);
 
