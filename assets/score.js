@@ -1,5 +1,6 @@
-/* Àríyá's owambe groove, generated live with the Web Audio API (no audio files, nothing to license).
-   A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
+/* Àríyá's home page music. For the class demo it loops assets/music.mp3 ("Yori Yori" by Abefe), which is
+   copyrighted: fine for a private demo, not for a public site without a licence.
+   Fallback: an original owambe groove generated live with the Web Audio API (no audio files). A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
    calls, conga and kick, a two-guitar highlife figure, walking bass, warm pads and a short horn hook.
 
    To play a recording instead, put the file at assets/music.mp3 (or change MUSIC_URL below). It loops in place
