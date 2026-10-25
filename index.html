@@ -14,13 +14,15 @@
    layered over it. A 900vh scroll track drives seven chapters: box, yes, noise, calm, link, count, dance.
    One committed dark look, cocoa and platinum. Type pulls focus the same way the lens does. */
 :root {
-  --ink: #120806;
-  --cocoa: #2e170f;
-  --glow: #d58a5c;
-  --gold: #f1d3a0;
-  --platinum: #ece8e3;
-  --muted: #b9a496;
-  --line: rgba(236, 232, 227, 0.2);
+  --ink: #06100c;
+  --cocoa: #0c2219;
+  --emerald: #0f5c45;
+  --jade: #3fc59a;
+  --glow: #e7b56a;
+  --gold: #f2d08f;
+  --platinum: #f3efe8;
+  --muted: #a7b8ae;
+  --line: rgba(243, 239, 232, 0.18);
   --bubble: #f6efe8;
   --bubble-ink: #2a1a12;
   --paper: #f7f0e5;
@@ -41,7 +43,7 @@ body {
 .backdrop {
   position: fixed; inset: 0; z-index: 0;
   background:
-    radial-gradient(60% 55% at 50% 42%, rgba(213, 138, 92, 0.32), transparent 70%),
+    radial-gradient(60% 55% at 50% 42%, rgba(15, 92, 69, 0.45), transparent 70%),
     linear-gradient(180deg, var(--cocoa), var(--ink) 75%);
 }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
@@ -57,7 +59,7 @@ body {
   position: absolute; left: 0; right: 0; opacity: 0;
   padding-left: max(20px, env(safe-area-inset-left, 0px));
   padding-right: max(20px, env(safe-area-inset-right, 0px));
-  text-shadow: 0 2px 30px rgba(18, 8, 6, 0.9), 0 0 2px rgba(18, 8, 6, 0.4);
+  text-shadow: 0 2px 30px rgba(3, 10, 7, 0.95), 0 0 3px rgba(3, 10, 7, 0.6);
   will-change: opacity, transform, filter;
 }
 .beat.center { top: 50%; text-align: center; transform: translateY(-50%); }
@@ -67,7 +69,7 @@ h1, h2 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wra
 h1 { font-size: clamp(2.6rem, 7vw, 5.6rem); line-height: 1.02; }
 h2 { font-size: clamp(2rem, 5vw, 3.9rem); line-height: 1.06; }
 h1 em, h2 em { font-style: italic; color: var(--gold); }
-.eyebrow { font-size: 0.74rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--glow); margin: 0 0 18px; }
+.eyebrow { font-size: 0.74rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--jade); margin: 0 0 18px; }
 .sub { color: var(--muted); max-width: 30em; margin: 18px auto 0; font-size: 1.05rem; }
 .cue { margin-top: 36px; font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
 .cue span { display: block; width: 1px; height: 44px; margin: 12px auto 0; background: linear-gradient(var(--gold), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; }
@@ -146,6 +148,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 
 /* Chapter rail */
 .rail {
+  transition: opacity .4s;
   position: fixed; z-index: 3; top: 50%; transform: translateY(-50%);
   right: max(14px, env(safe-area-inset-right, 0px));
   list-style: none; margin: 0; padding: 0; display: grid; gap: 14px;
@@ -179,13 +182,93 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .finder b { color: var(--gold); font-weight: 400; }
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
 
+/* Top navigation: the business is always one tap away */
+.nav {
+  position: fixed; z-index: 7; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(180deg, rgba(6, 16, 12, 0.75), rgba(6, 16, 12, 0));
+}
+.nav .brand { position: static; font-size: 1.3rem; letter-spacing: 0; text-transform: none; }
+.nav ul { display: flex; align-items: center; gap: 26px; list-style: none; margin: 0; padding: 0; }
+.nav a { color: var(--platinum); text-decoration: none; font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.nav a:hover { color: var(--gold); }
+.nav a:focus-visible { outline: 1px solid var(--gold); outline-offset: 4px; }
+.nav .btn.gold { padding: 0.7rem 1.1rem; }
+.btn.gold { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.btn.gold:hover { background: #ffe2a8; }
+
+/* Live guest list inside the count chapter: the product, inside the picture */
+.guests {
+  position: absolute; right: max(64px, calc(env(safe-area-inset-right, 0px) + 56px)); top: 50%; transform: translateY(-50%);
+  width: min(340px, 34vw); opacity: 0; pointer-events: none;
+  background: rgba(8, 22, 16, 0.62); border: 1px solid rgba(242, 208, 143, 0.25); border-radius: 14px;
+  -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  padding: 16px 16px 10px; font-size: 0.82rem;
+}
+.guests header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.guests header b { font-weight: 500; letter-spacing: 0.04em; }
+.guests header span { color: var(--jade); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.guests header span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--jade); margin-right: 6px; vertical-align: middle; box-shadow: 0 0 8px var(--jade); }
+.guests ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.guests li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 7px 4px; border-top: 1px solid var(--line); opacity: 0.25; transition: opacity .4s; font-variant-numeric: tabular-nums; }
+.guests li.in { opacity: 1; }
+.guests li em { font-style: normal; color: var(--muted); font-size: 0.74rem; }
+.guests li i { font-style: normal; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: var(--jade); border-radius: 999px; padding: 2px 8px; }
+.guests li:not(.in) i { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+/* The business, after the film */
+.biz { position: relative; z-index: 5; background: var(--ink); color: var(--platinum); }
+.biz .wrap { max-width: 1120px; margin: 0 auto; padding-block: clamp(72px, 12vw, 140px); padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.biz h2 { font-size: clamp(2rem, 4.6vw, 3.4rem); }
+.biz .lede { color: var(--muted); max-width: 36em; font-size: 1.1rem; margin: 18px 0 0; }
+.biz .intro { background: radial-gradient(80% 120% at 85% 0%, rgba(15, 92, 69, 0.55), transparent 60%), var(--ink); border-top: 1px solid rgba(242, 208, 143, 0.25); }
+.feat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 56px; background: var(--line); border: 1px solid var(--line); }
+.feat article { background: var(--ink); padding: 28px 26px 30px; min-width: 0; }
+.feat h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; margin: 14px 0 8px; color: var(--platinum); }
+.feat p { color: var(--muted); margin: 0; font-size: 0.95rem; }
+.feat .k { font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.steps { background: var(--emerald); }
+.steps .eyebrow { color: var(--gold); }
+.steps ol { list-style: none; padding: 0; margin: 48px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; counter-reset: s; }
+.steps li { counter-increment: s; border-top: 1px solid rgba(242, 208, 143, 0.45); padding-top: 20px; min-width: 0; }
+.steps li::before { content: counter(s); display: block; font-family: var(--font-display); font-style: italic; font-size: 3rem; line-height: 1; color: var(--gold); margin-bottom: 14px; }
+.steps h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; margin: 0 0 8px; }
+.steps p { margin: 0; color: #d5e6dc; }
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 52px; align-items: stretch; }
+.plan { border: 1px solid var(--line); border-radius: 4px; padding: 30px 26px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.plan.best { border-color: var(--gold); background: linear-gradient(180deg, rgba(15, 92, 69, 0.45), rgba(15, 92, 69, 0.1)); }
+.plan h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; margin: 0; }
+.plan .price { font-family: var(--font-display); font-size: 2.6rem; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+.plan .price small { font-family: var(--font-body); font-size: 0.8rem; color: var(--muted); }
+.plan ul { margin: 0; padding: 0 0 0 18px; color: var(--muted); display: grid; gap: 6px; font-size: 0.94rem; flex: 1; }
+.plan .tag { align-self: flex-start; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); background: var(--gold); padding: 3px 9px; border-radius: 999px; }
+.plan .btn { text-align: center; }
+.note { color: var(--muted); font-size: 0.8rem; margin-top: 18px; }
+.cta { text-align: center; background: radial-gradient(70% 90% at 50% 100%, rgba(15, 92, 69, 0.7), transparent 70%), var(--ink); }
+.cta .lede { margin-left: auto; margin-right: auto; }
+.signup { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+.signup input { font: inherit; min-width: 0; width: min(340px, 100%); padding: 0.85rem 1rem; border-radius: 2px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.04); color: var(--platinum); }
+.signup input:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+.signup-msg { min-height: 1.5em; color: var(--jade); margin-top: 14px; }
+.foot { border-top: 1px solid var(--line); }
+.foot .wrap { padding-block: 32px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 0.82rem; }
+.foot .brand { position: static; }
+@media (max-width: 900px) {
+  .feat, .plans, .steps ol { grid-template-columns: minmax(0, 1fr); }
+  .guests { display: none; }
+}
+
 @media (max-width: 700px) {
   .rail button span { display: none; }
   .beat.side { text-align: center; }
   .count { margin-left: auto; margin-right: auto; }
   .side .sub { margin-left: auto; }
   .finder { display: none; }
+  .nav ul li:not(:last-child) { display: none; }
 }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .cue span { animation: none; transform: none; } }
 </style>
 <script type="importmap">
@@ -201,7 +284,15 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 <div class="backdrop" aria-hidden="true"></div>
 <canvas id="gl" aria-hidden="true"></canvas>
 <div class="bar" id="bar" aria-hidden="true"></div>
-<div class="brand">OwambePlan</div>
+<nav class="nav" aria-label="Main">
+  <a class="brand" href="#top" id="home">OwambePlan</a>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a class="btn gold" href="#start">Start planning</a></li>
+  </ul>
+</nav>
 <div class="finder" id="finder" aria-hidden="true">● Rec · <b id="fStop">f/1.4</b> · <span id="fFocus">0.20 m</span> · ISO 800</div>
 
 <div class="overlay" id="overlay">
@@ -255,12 +346,16 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
       <div><dt>Seated</dt><dd id="cSeated">0</dd></div>
     </dl>
   </section>
+  <aside class="guests" id="guests" aria-hidden="true">
+    <header><b>Chidinma &amp; Tunde · Guest list</b><span>Live</span></header>
+    <ol id="guestRows"></ol>
+  </aside>
 
   <section class="beat center finale" data-in="0.92" data-out="1.01" aria-label="The dance">
     <p class="eyebrow">The list is done. The tables are full.</p>
     <h1>Now go and <em>dance.</em></h1>
     <div class="row">
-      <a class="btn light" href="#top" id="plan">Plan an event</a>
+      <a class="btn gold" href="#start" id="plan">Plan your event</a>
       <button class="btn" id="replay" type="button">Watch again</button>
     </div>
   </section>
@@ -269,6 +364,67 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 <ul class="rail" id="rail" aria-label="Chapters"></ul>
 <div class="track" id="track"><a id="top"></a></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
+
+<main class="biz" id="biz">
+  <section class="intro" id="features" aria-labelledby="fTitle">
+    <div class="wrap">
+      <p class="eyebrow">What OwambePlan does</p>
+      <h2 id="fTitle">From the first yes<br>to the <em>last dance.</em></h2>
+      <p class="lede">One place for the guest list, the RSVPs, the seating, the aso ebi and the vendors. Your guests get a link with their name on it. You get the numbers, live.</p>
+      <div class="feat">
+        <article><span class="k">Invitations</span><h3>A personal link for every guest</h3><p>Each guest opens an invitation addressed to them and replies in one tap. No more "RSVP to who exactly?"</p></article>
+        <article><span class="k">Headcount</span><h3>Live numbers, not guesses</h3><p>See who has confirmed, who is bringing a plus one and who hasn't opened their link yet, as it happens.</p></article>
+        <article><span class="k">Seating</span><h3>Drag guests to tables</h3><p>Build the seating chart on a floor plan of your hall. Guests see their table number before they arrive.</p></article>
+        <article><span class="k">Aso ebi</span><h3>Orders and payments in one list</h3><p>Collect fabric orders, sizes and payments without one more spreadsheet or bank alert screenshot.</p></article>
+        <article><span class="k">Reminders</span><h3>WhatsApp and SMS nudges</h3><p>Automatic reminders to guests who haven't replied, and directions on the morning of the event.</p></article>
+        <article><span class="k">On the day</span><h3>QR check-in at the gate</h3><p>Ushers scan each guest's code, see their table, and the couple's list updates as people walk in.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps" id="how" aria-labelledby="hTitle">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 id="hTitle">Three steps. One calm planner.</h2>
+      <ol>
+        <li><h3>Create your event</h3><p>Add the date, the venue and your guest list. Import contacts from your phone or a spreadsheet.</p></li>
+        <li><h3>Send personal links</h3><p>Share each guest's link on WhatsApp, SMS or email. They reply in seconds, no app to install.</p></li>
+        <li><h3>Watch the hall fill</h3><p>Confirmations flow into your seating chart. On the day, check guests in at the gate.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pTitle">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 id="pTitle">Pay per event. <em>No surprises.</em></h2>
+      <div class="plans">
+        <article class="plan"><h3>Intimate</h3><div class="price">Free</div><ul><li>Up to 80 guests</li><li>Personal RSVP links</li><li>Live headcount</li></ul><a class="btn" href="#start">Start free</a></article>
+        <article class="plan best"><span class="tag">Most chosen</span><h3>Owambe</h3><div class="price">₦45,000 <small>per event</small></div><ul><li>Up to 600 guests</li><li>Seating chart and table cards</li><li>Aso ebi orders and payments</li><li>WhatsApp and SMS reminders</li><li>QR check-in on the day</li></ul><a class="btn gold" href="#start">Plan an owambe</a></article>
+        <article class="plan"><h3>Planner</h3><div class="price">₦150,000 <small>per month</small></div><ul><li>Unlimited events and guests</li><li>Your logo on every invitation</li><li>Team access for ushers and vendors</li></ul><a class="btn" href="#start">Talk to us</a></article>
+      </div>
+      <p class="note">Prices are placeholders for this prototype.</p>
+    </div>
+  </section>
+
+  <section class="cta" id="start" aria-labelledby="sTitle">
+    <div class="wrap">
+      <p class="eyebrow">Start planning</p>
+      <h2 id="sTitle">Your guests are waiting<br>for <em>their link.</em></h2>
+      <p class="lede">Leave your email and we'll set up your first event with you.</p>
+      <form class="signup" id="signup">
+        <label class="sr" for="email" style="position:absolute;left:-9999px">Email address</label>
+        <input id="email" type="email" required placeholder="you@example.com" autocomplete="email">
+        <button class="btn gold" type="submit">Get early access</button>
+      </form>
+      <p class="signup-msg" id="signupMsg" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap"><span class="brand">OwambePlan</span><span>Made in Benin City for weddings everywhere · Tech4Youth Edo</span></div>
+  </footer>
+</main>
 
 <script>
 /* Story and DOM. Runs on its own so the page still tells the story if WebGL or the CDN is unavailable.
@@ -365,7 +521,22 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
     reply.textContent = "Thank you, " + guest() + ". The couple will see your reply straight away.";
   });
   document.getElementById("replay").addEventListener("click", function () { scrollToProgress(0); });
-  document.getElementById("plan").addEventListener("click", function (e) { e.preventDefault(); scrollToProgress(0); });
+  document.getElementById("home").addEventListener("click", function (e) { e.preventDefault(); scrollToProgress(0); });
+  document.getElementById("signup").addEventListener("submit", function (e) {
+    e.preventDefault();
+    document.getElementById("signupMsg").textContent = "Thank you. We'll email " + document.getElementById("email").value + " within a day to set up your first event.";
+  });
+
+  // Live guest list shown during the count
+  var guestData = [["Aunty Bisi + 4", "Table 3"], ["Mr & Mrs Okafor", "Table 5"], ["Femi Adeyemi", "Table 12"], ["Ngozi Eze + 1", "Table 7"], ["Uncle Dayo", "Table 1"], ["Kemi (planner)", "Head table"], ["Tolu Bankole", "Table 9"], ["Seun & Ronke", "Table 14"]];
+  var guestsEl = document.getElementById("guests");
+  var guestRows = guestData.map(function (g) {
+    var li = document.createElement("li");
+    li.innerHTML = "<span>" + g[0] + "</span><em>" + g[1] + "</em><i>Coming</i>";
+    document.getElementById("guestRows").appendChild(li);
+    return li;
+  });
+  var biz = document.getElementById("biz");
 
   // The card is a physical object: it tilts toward the pointer and catches the light.
   var tiltX = 0, tiltY = 0, tiltTX = 0, tiltTY = 0;
@@ -450,6 +621,14 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
     cConfirmed.textContent = String(Math.round(fill * 241));
     var seated = Math.round(fill * 218);
     cSeated.textContent = String(seated);
+    var go = bump(p, 0.785, 0.81, 0.875, 0.895);
+    guestsEl.style.opacity = go.toFixed(3);
+    guestsEl.style.transform = "translateY(-50%) translateX(" + ((1 - go) * 30).toFixed(1) + "px)";
+    guestRows.forEach(function (li, i) { li.classList.toggle("in", fill > (i + 0.5) / guestData.length * 0.95); });
+    // Once the business sections cover the screen, the film can stop rendering.
+    var bt = biz.getBoundingClientRect().top;
+    OP.covered = bt <= 0;
+    rail.style.opacity = bt < window.innerHeight * 0.6 ? "0" : "1";
 
     var active = 0;
     chapters.forEach(function (c, i) { if (p >= (i === 0 ? 0 : c[1] - 0.06)) active = i; });
@@ -588,10 +767,10 @@ async function start() {
   key.shadow.camera.near = 2; key.shadow.camera.far = 16;
   key.shadow.radius = 7; key.shadow.blurSamples = 16; key.shadow.bias = -0.0004;
   key.target.position.set(0, 0, 0);
-  setA.add(key, key.target);
+  scene.add(key, key.target);
   const rim = new THREE.DirectionalLight(0xcfdcff, 0.9);
   rim.position.set(-3, 3, -5);
-  setA.add(rim);
+  scene.add(rim);
 
   const hallKey = new THREE.DirectionalLight(0xffd3a1, 0);
   hallKey.position.set(7, 20, 9);
@@ -600,61 +779,134 @@ async function start() {
   const sc = hallKey.shadow.camera; sc.left = -17; sc.right = 17; sc.top = 17; sc.bottom = -17; sc.near = 4; sc.far = 45;
   hallKey.shadow.radius = 3; hallKey.shadow.blurSamples = 12; hallKey.shadow.bias = -0.0006;
   hallKey.shadow.autoUpdate = false;
-  setB.add(hallKey);
+  scene.add(hallKey);
 
   /* ---------- Set A: the table, the box, the ring ---------- */
   const TABLE_Y = -0.8;
-  const linen = new THREE.MeshPhysicalMaterial({
-    color: 0x7a6656, roughness: 0.92, sheen: 1, sheenRoughness: 0.55, sheenColor: 0xfff1e0,
-    normalMap: linenNormal, normalScale: new THREE.Vector2(0.45, 0.45)
-  });
-  const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), linen);
+  // Polished walnut: dark, glossy, reflects the box and the candles.
+  const walnutMap = canvasTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = "#2a160d"; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 900; i++) {
+      const y = rand() * h, l = 8 + rand() * 16, a = 0.15 + rand() * 0.35;
+      g.strokeStyle = `hsla(${20 + rand() * 10},${45 + rand() * 15}%,${l}%,${a})`; g.lineWidth = 0.5 + rand() * 2.5;
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= w; x += 64) g.lineTo(x, y + Math.sin(x * 0.004 + i) * 6 + Math.sin(x * 0.013 + i * 0.3) * 2);
+      g.stroke();
+    }
+    for (let i = 0; i < 6; i++) { // a few darker figure bands
+      const y = rand() * h; const gr = g.createLinearGradient(0, y - 40, 0, y + 40);
+      gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(0.5, "rgba(10,4,2,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = gr; g.fillRect(0, y - 40, w, 80);
+    }
+  }, { repeat: [3, 3] });
+  const walnut = new THREE.MeshPhysicalMaterial({ map: walnutMap, roughness: 0.38, clearcoat: 0.85, clearcoatRoughness: 0.14, envMapIntensity: 0.5 });
+  const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), walnut);
   tableTop.rotation.x = -Math.PI / 2; tableTop.position.y = TABLE_Y; tableTop.receiveShadow = true;
   setA.add(tableTop);
 
+  // Emerald velvet, deep pile with a cool sheen at grazing angles.
   const velvet = new THREE.MeshPhysicalMaterial({
-    color: 0x4a0c14, roughness: 0.82, sheen: 1, sheenRoughness: 0.32, sheenColor: 0xff9a9a,
+    color: 0x073226, roughness: 0.84, sheen: 1, sheenRoughness: 0.33, sheenColor: 0x86f0c6,
     normalMap: velvetNormal, normalScale: new THREE.Vector2(0.25, 0.25)
   });
-  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x23060a, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xc85a5a });
-  const brass = new THREE.MeshStandardMaterial({ color: 0xd9ad6a, metalness: 1, roughness: 0.28 });
+  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x05241a, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0x4fbf92 });
+  const brass = new THREE.MeshPhysicalMaterial({ color: 0xebc27c, metalness: 1, roughness: 0.2, clearcoat: 0.3 });
 
-  const BW = 1.6, BD = 1.45, BH = 0.78, LH = 0.56;
+  function rrPath(w, d, r, path) {
+    const x = -w / 2, y = -d / 2;
+    path.moveTo(x + r, y); path.lineTo(x + w - r, y); path.quadraticCurveTo(x + w, y, x + w, y + r);
+    path.lineTo(x + w, y + d - r); path.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+    path.lineTo(x + r, y + d); path.quadraticCurveTo(x, y + d, x, y + d - r);
+    path.lineTo(x, y + r); path.quadraticCurveTo(x, y, x + r, y);
+    return path;
+  }
+  // A flat rounded-rectangle frame of height h, lying in the xz plane from y = 0 to y = h.
+  function frameGeo(ow, od, or, iw, id, ir, h, bevel) {
+    const sh = rrPath(ow, od, or, new THREE.Shape());
+    sh.holes.push(rrPath(iw, id, ir, new THREE.Path()));
+    const g = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: bevel > 0, bevelSize: bevel, bevelThickness: bevel, bevelSegments: 3, curveSegments: 14 });
+    g.rotateX(-Math.PI / 2);
+    return g;
+  }
+  function edgePiping(w, d, r, y, radius) {
+    const pts = rrPath(w, d, r, new THREE.Path()).getSpacedPoints(160).map((q) => new THREE.Vector3(q.x, y, -q.y));
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 320, radius, 10, true);
+  }
+
+  const BW = 1.6, BD = 1.45, BH = 0.78, LH = 0.56, BR = 0.1;
   const baseTop = TABLE_Y + BH;
   const box = new THREE.Group(); setA.add(box);
-  const base = new THREE.Mesh(new RoundedBoxGeometry(BW, BH, BD, 5, 0.1), velvet);
-  base.position.y = TABLE_Y + BH / 2; base.castShadow = base.receiveShadow = true; box.add(base);
-  const cushGeo = new THREE.CapsuleGeometry(0.155, BW - 0.5, 8, 24); cushGeo.rotateZ(Math.PI / 2);
-  [-0.17, 0.17].forEach((z) => {
-    const c = new THREE.Mesh(cushGeo, velvetDeep);
-    c.position.set(0, baseTop + 0.02, z); c.castShadow = c.receiveShadow = true; box.add(c);
+  const shadowAll = (o) => o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+  const base = new THREE.Mesh(new RoundedBoxGeometry(BW, BH, BD, 6, BR), velvet);
+  base.position.y = TABLE_Y + BH / 2; box.add(base);
+  // Gold band around the seam, an inner gold lip the lid closes over, and a dark velvet tray.
+  const seam = frameGeo(BW + 0.018, BD + 0.018, BR + 0.009, BW - 0.05, BD - 0.05, BR - 0.02, 0.032, 0.004);
+  const baseSeam = new THREE.Mesh(seam, brass); baseSeam.position.y = baseTop - 0.034; box.add(baseSeam);
+  const lip = new THREE.Mesh(frameGeo(BW - 0.11, BD - 0.11, 0.06, BW - 0.17, BD - 0.17, 0.035, 0.075, 0.004), brass);
+  lip.position.y = baseTop; box.add(lip);
+  const trayShape = rrPath(BW - 0.17, BD - 0.17, 0.035, new THREE.Shape());
+  const tray = new THREE.Mesh(new THREE.ShapeGeometry(trayShape, 12).rotateX(-Math.PI / 2), velvetDeep);
+  tray.position.y = baseTop + 0.003; box.add(tray);
+  const cushGeo = new THREE.CapsuleGeometry(0.15, BW - 0.52, 10, 28); cushGeo.rotateZ(Math.PI / 2);
+  [-0.152, 0.152].forEach((z) => { const c = new THREE.Mesh(cushGeo, velvetDeep); c.position.set(0, baseTop + 0.03, z); c.scale.set(1, 0.92, 1); box.add(c); });
+  // Front clasp with a push button, and a three-knuckle hinge at the back.
+  const clasp = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.1, 0.05, 3, 0.016), brass);
+  clasp.position.set(0, baseTop - 0.012, BD / 2 + 0.012); box.add(clasp);
+  const button = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.032, 0.02, 24), brass);
+  button.rotation.x = Math.PI / 2; button.position.set(0, baseTop - 0.012, BD / 2 + 0.045); box.add(button);
+  [-0.28, 0, 0.28].forEach((x, i) => {
+    const k = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.17, 20), brass);
+    k.rotation.z = Math.PI / 2; k.position.set(x, baseTop + 0.002, -BD / 2 - 0.018); box.add(k);
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.12, 0.012), brass);
+    leaf.position.set(x, baseTop + (i === 1 ? 0.06 : -0.058), -BD / 2 - 0.006); box.add(leaf);
   });
+
   const lidPivot = new THREE.Group(); lidPivot.position.set(0, baseTop, -BD / 2); box.add(lidPivot);
-  const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, LH, BD, 5, 0.1), velvet);
-  lid.position.set(0, LH / 2 + 0.004, BD / 2); lid.castShadow = lid.receiveShadow = true; lidPivot.add(lid);
-  // Satin lining in the lid, foil-stamped with the brand: design printed onto a real surface.
+  const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, LH, BD, 6, BR), velvet);
+  lid.position.set(0, LH / 2 + 0.004, BD / 2); lidPivot.add(lid);
+  const lidSeam = new THREE.Mesh(seam, brass); lidSeam.position.set(0, 0.004, BD / 2); lidPivot.add(lidSeam);
+  const piping = new THREE.Mesh(edgePiping(BW - 0.05, BD - 0.05, BR - 0.02, LH - 0.022, 0.017), velvetDeep);
+  piping.position.z = BD / 2; lidPivot.add(piping);
+  // Gold foil monogram on the lid.
+  const monoAlpha = canvasTex(512, 512, (g, w, h) => {
+    g.fillStyle = "#000"; g.fillRect(0, 0, w, h); g.strokeStyle = g.fillStyle = "#fff";
+    g.lineWidth = 9; g.beginPath(); g.arc(w / 2, h / 2, 228, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 3; g.beginPath(); g.arc(w / 2, h / 2, 206, 0, Math.PI * 2); g.stroke();
+    g.textAlign = "center"; g.textBaseline = "middle"; g.font = 'italic 400 230px "Bodoni Moda", Georgia, serif'; g.fillText("O", w / 2 - 34, h / 2 + 6);
+    g.font = 'italic 400 150px "Bodoni Moda", Georgia, serif'; g.fillText("P", w / 2 + 62, h / 2 + 40);
+  }, { srgb: false });
+  const mono = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), new THREE.MeshPhysicalMaterial({ color: 0xf0c983, metalness: 1, roughness: 0.24, alphaMap: monoAlpha, alphaTest: 0.5 }));
+  mono.rotation.x = -Math.PI / 2; mono.position.set(0, LH + 0.0055, BD / 2); lidPivot.add(mono);
+  // Satin pillow in the lid, foil-stamped with the brand: design printed onto a real surface.
   const liningMap = canvasTex(1024, 920, (g, w, h) => {
     const gr = g.createLinearGradient(0, 0, w, h);
-    gr.addColorStop(0, "#efe4d4"); gr.addColorStop(0.35, "#fbf5ec"); gr.addColorStop(0.55, "#e6d8c4"); gr.addColorStop(0.8, "#f6eee2"); gr.addColorStop(1, "#e3d3be");
+    gr.addColorStop(0, "#efe6d6"); gr.addColorStop(0.35, "#fdf8ef"); gr.addColorStop(0.55, "#e7dac6"); gr.addColorStop(0.8, "#f8f0e4"); gr.addColorStop(1, "#e4d5c0");
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
     g.fillStyle = "#b8894a"; g.textAlign = "center"; g.textBaseline = "middle";
     g.font = 'italic 400 132px "Bodoni Moda", Georgia, serif'; g.fillText("OwambePlan", w / 2, h / 2 - 10);
-    g.font = '400 30px "Jost", Arial, sans-serif'; g.letterSpacing = "12px"; g.fillText("LAGOS · LONDON", w / 2, h / 2 + 100);
+    g.font = '400 26px "Jost", Arial, sans-serif'; g.letterSpacing = "10px"; g.fillText("WEDDINGS · PLANNED PROPERLY", w / 2, h / 2 + 100);
     g.fillRect(w / 2 - 180, h / 2 - 120, 360, 3); g.fillRect(w / 2 - 180, h / 2 + 150, 360, 3);
   });
   const liningRM = canvasTex(1024, 920, (g, w, h) => {
-    g.fillStyle = "rgb(0,105,0)"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "rgb(0,100,0)"; g.fillRect(0, 0, w, h);
     g.fillStyle = "rgb(0,55,255)"; g.textAlign = "center"; g.textBaseline = "middle";
     g.font = 'italic 400 132px "Bodoni Moda", Georgia, serif'; g.fillText("OwambePlan", w / 2, h / 2 - 10);
-    g.font = '400 30px "Jost", Arial, sans-serif'; g.letterSpacing = "12px"; g.fillText("LAGOS · LONDON", w / 2, h / 2 + 100);
+    g.font = '400 26px "Jost", Arial, sans-serif'; g.letterSpacing = "10px"; g.fillText("WEDDINGS · PLANNED PROPERLY", w / 2, h / 2 + 100);
     g.fillRect(w / 2 - 180, h / 2 - 120, 360, 3); g.fillRect(w / 2 - 180, h / 2 + 150, 360, 3);
   }, { srgb: false });
-  const lining = new THREE.Mesh(new THREE.PlaneGeometry(BW - 0.16, BD - 0.16), new THREE.MeshPhysicalMaterial({
-    map: liningMap, roughnessMap: liningRM, metalnessMap: liningRM, roughness: 1, metalness: 1, sheen: 0.6, sheenRoughness: 0.3, sheenColor: 0xffffff
+  const pillowGeo = (() => {
+    const g = new THREE.PlaneGeometry(BW - 0.19, BD - 0.19, 48, 48), p = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) p.setZ(i, 0.055 * Math.pow(Math.sin(Math.PI * uv.getX(i)) * Math.sin(Math.PI * uv.getY(i)), 0.35));
+    g.computeVertexNormals();
+    return g;
+  })();
+  const lining = new THREE.Mesh(pillowGeo, new THREE.MeshPhysicalMaterial({
+    map: liningMap, roughnessMap: liningRM, metalnessMap: liningRM, roughness: 1, metalness: 1, sheen: 0.7, sheenRoughness: 0.28, sheenColor: 0xffffff
   }));
-  lining.rotation.x = Math.PI / 2; lining.position.set(0, 0.002, BD / 2); lining.receiveShadow = true; lidPivot.add(lining);
-  const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 20), brass);
-  hinge.rotation.z = Math.PI / 2; hinge.position.set(0, baseTop, -BD / 2 - 0.02); box.add(hinge);
+  lining.rotation.x = Math.PI / 2; lining.position.set(0, 0.0, BD / 2); lidPivot.add(lining);
+  const liningFrame = new THREE.Mesh(frameGeo(BW - 0.12, BD - 0.12, 0.06, BW - 0.19, BD - 0.19, 0.035, 0.014, 0.003), brass);
+  liningFrame.position.set(0, -0.012, BD / 2); lidPivot.add(liningFrame);
+  shadowAll(box);
 
   // Ring: platinum band, six-claw setting, brilliant-cut diamond.
   const R = 0.42;
@@ -773,7 +1025,7 @@ async function start() {
     g.rotateX(-Math.PI / 2); g.computeVertexNormals();
     return g;
   })();
-  const petalMat = new THREE.MeshPhysicalMaterial({ color: 0x6e0f1c, roughness: 0.55, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xff7d8a, side: THREE.DoubleSide });
+  const petalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xffffff, side: THREE.DoubleSide });
   const petals = new THREE.InstancedMesh(petalGeo, petalMat, 14);
   {
     const d = new THREE.Object3D();
@@ -783,7 +1035,7 @@ async function start() {
       d.position.set(x, TABLE_Y + 0.02, z);
       d.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, (rand() - 0.5) * 0.25);
       d.scale.setScalar(0.45 + rand() * 0.3); d.updateMatrix(); petals.setMatrixAt(i, d.matrix);
-      petals.setColorAt(i, new THREE.Color().setHSL(0.985 + rand() * 0.02, 0.6, 0.55 + rand() * 0.25));
+      petals.setColorAt(i, new THREE.Color().setHSL(0.99 + rand() * 0.02, 0.55, 0.72 + rand() * 0.2));
     }
   }
   petals.castShadow = petals.receiveShadow = true; setA.add(petals);
@@ -797,7 +1049,7 @@ async function start() {
     body.position.set(x, TABLE_Y + hgt / 2, z); body.castShadow = true; setA.add(body);
     const fl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), flameMat);
     fl.scale.set(1, 2.6, 1); fl.position.set(x, TABLE_Y + hgt + 0.32, z); setA.add(fl);
-    const pl = new THREE.PointLight(0xff9448, 14, 0, 2); pl.position.copy(fl.position); setA.add(pl);
+    const pl = new THREE.PointLight(0xff9448, 14, 0, 2); pl.position.copy(fl.position); scene.add(pl);
     candles.push({ fl, pl, base: fl.position.clone(), seed: rand() * 10 });
   });
 
@@ -955,13 +1207,15 @@ async function start() {
         seatFlames.setColorAt(i, on ? flameCol : off);
         d.position.y = CLOTH_Y + 0.004; d.scale.setScalar(1); d.updateMatrix(); seatGlows.setMatrixAt(i, d.matrix);
         seatGlows.setColorAt(i, on ? glowCol : off);
+        placeGuest(i, on);
       }
     });
     seatFlames.instanceMatrix.needsUpdate = true; seatFlames.instanceColor.needsUpdate = true;
     seatGlows.instanceMatrix.needsUpdate = true; seatGlows.instanceColor.needsUpdate = true;
+    [seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+    hallKey.shadow.needsUpdate = true;
     seatsLit = n;
   }
-  lightSeats(0);
 
   // Head table and a curtain of fairy lights behind it.
   const headCloth = new THREE.Mesh(new RoundedBoxGeometry(6, 0.76, 0.9, 3, 0.03), clothMat);
@@ -1016,6 +1270,191 @@ async function start() {
     conf.setColorAt(i, confCols[i % 4]);
   }
   conf.visible = false; conf.frustumCulled = false; setB.add(conf);
+
+  /* ---------- Hall life: aso ebi colours, light, people, celebration ---------- */
+  const mergeAll = (list) => mergeGeometries(list.map((g) => (g.index ? g.toNonIndexed() : g)));
+  // Emerald table linens, the couple's colour.
+  const emeraldCloth = new THREE.Color(0x0d5a42), wineCloth = new THREE.Color(0x5a1630);
+  tables.forEach((_, ti) => cloths.setColorAt(ti, ti % 5 === 2 ? wineCloth : emeraldCloth));
+  cloths.instanceColor.needsUpdate = true;
+
+  // Draped walls washed by coloured uplights.
+  const uplightTex = canvasTex(1024, 256, (g, w, h) => {
+    g.fillStyle = "#000"; g.fillRect(0, 0, w, h);
+    const cols = ["255,150,60", "40,220,150", "255,60,150", "255,190,90"];
+    for (let i = 0; i < 8; i++) {
+      const x = (i + 0.5) * w / 8, c = cols[i % cols.length];
+      const gr = g.createRadialGradient(x, h, 0, x, h, h * 1.1);
+      gr.addColorStop(0, `rgba(${c},1)`); gr.addColorStop(0.45, `rgba(${c},.35)`); gr.addColorStop(1, `rgba(${c},0)`);
+      g.fillStyle = gr; g.fillRect(x - w / 8, 0, w / 4, h);
+    }
+  });
+  const wallMat = new THREE.MeshPhysicalMaterial({ color: 0x3a3026, roughness: 0.75, sheen: 1, sheenColor: 0xffe6c4, sheenRoughness: 0.4, emissive: 0xffffff, emissiveMap: uplightTex, emissiveIntensity: 1.6 });
+  [[-15, 0, Math.PI / 2, 30], [15, 0, -Math.PI / 2, 30], [0, 15, Math.PI, 30]].forEach(([x, z, ry, wd]) => {
+    const g = new THREE.PlaneGeometry(wd, 8.5, 300, 2), p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) { const u = p.getX(i); p.setZ(i, Math.sin(u * 2.7) * 0.14 + Math.sin(u * 6.1 + 2) * 0.05); }
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, wallMat); m.position.set(x, 4.25, z); m.rotation.y = ry; m.receiveShadow = true; setB.add(m);
+  });
+
+  // Moving-head lights sweeping the room, with visible beams through the haze.
+  const beamTex = canvasTex(4, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.25, "rgba(255,255,255,.35)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+  const beamGeo = new THREE.CylinderGeometry(0.05, 1.5, 10, 40, 1, true); beamGeo.translate(0, -5, 0);
+  const movers = [[-10, -7, 0xff2a8a], [10, -7, 0x2ae6a0], [-10, 7, 0xffa040], [10, 7, 0x9a5cff]].map(([x, z, hex], i) => {
+    const col = new THREE.Color(hex);
+    const head = new THREE.Group(); head.position.set(x, 8.2, z); setB.add(head);
+    const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ map: beamTex, color: col.clone().multiplyScalar(0.22), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    head.add(beam);
+    const spot = new THREE.SpotLight(col, 0, 0, 0.16, 0.6, 1.2);
+    spot.position.set(x, 8.2, z); scene.add(spot, spot.target);
+    return { head, spot, beam, seed: i * 1.7, x, z };
+  });
+
+  // Guests: seated guests appear as they RSVP. Aso ebi in emerald and gold, gele and fila.
+  function limb(a, b, r) {
+    const d = new THREE.Vector3().subVectors(b, a), len = d.length();
+    const g = new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 4, 10);
+    g.applyMatrix4(new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()), new THREE.Vector3(1, 1, 1)));
+    return g;
+  }
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const seatedBodyGeo = mergeAll([
+    new THREE.CapsuleGeometry(0.16, 0.3, 6, 14).scale(1, 1, 0.68).translate(0, 0.86, 0.04),
+    new RoundedBoxGeometry(0.34, 0.14, 0.4, 2, 0.06).translate(0, 0.56, -0.12),
+    limb(V(-0.2, 1.0, 0.04), V(-0.17, 0.8, -0.28), 0.055), limb(V(0.2, 1.0, 0.04), V(0.17, 0.8, -0.28), 0.055)
+  ]);
+  const headGeo = new THREE.SphereGeometry(0.095, 18, 14).scale(1, 1.15, 1);
+  const geleGeo = mergeAll([
+    new THREE.SphereGeometry(0.15, 20, 10).scale(1.35, 0.6, 1.1),
+    new THREE.TorusGeometry(0.13, 0.045, 10, 28, Math.PI * 1.3).rotateX(-0.5).translate(0, 0.07, 0.03)
+  ]);
+  const filaGeo = new THREE.CylinderGeometry(0.088, 0.1, 0.11, 20).rotateZ(0.25);
+  const fabric = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.55, sheen: 1, sheenRoughness: 0.3, sheenColor: 0xffffff });
+  const geleMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.35, sheen: 1, sheenColor: 0xfff0c8 });
+  const skin = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.48, sheen: 0.4, sheenColor: 0xffc8a0 });
+  const asoEbi = [0x0f6b4e, 0x0f6b4e, 0xd9a441, 0x0b4f3a, 0xe6b85c, 0x7a1c3c, 0x1f7f60].map((c) => new THREE.Color(c));
+  const skins = [0x4a2a1a, 0x5c3420, 0x3a2014, 0x6b3d24, 0x2f1a10].map((c) => new THREE.Color(c));
+  const seatedBodies = new THREE.InstancedMesh(seatedBodyGeo, fabric, NS);
+  const seatedHeads = new THREE.InstancedMesh(headGeo, skin, NS);
+  const seatedGele = new THREE.InstancedMesh(geleGeo, geleMat, NS);
+  const seatedFila = new THREE.InstancedMesh(filaGeo, geleMat, NS);
+  const gd = new THREE.Object3D();
+  const guestSeat = [];
+  tables.forEach(([tx, tz], ti) => {
+    for (let s = 0; s < 10; s++) {
+      const sa = (s / 10) * Math.PI * 2 + ti * 0.37;
+      guestSeat.push({ x: tx + Math.cos(sa) * 1.17, z: tz + Math.sin(sa) * 1.17, ry: Math.PI / 2 - sa, woman: rand() < 0.55, lean: (rand() - 0.5) * 0.25, cloth: asoEbi[Math.floor(rand() * asoEbi.length)], skin: skins[Math.floor(rand() * skins.length)] });
+    }
+  });
+  guestSeat.forEach((g, i) => {
+    seatedBodies.setColorAt(i, g.cloth); seatedHeads.setColorAt(i, g.skin); seatedGele.setColorAt(i, g.cloth); seatedFila.setColorAt(i, g.cloth);
+  });
+  [seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.castShadow = true; m.receiveShadow = true; setB.add(m); });
+  function placeGuest(i, on) {
+    const g = guestSeat[i], d = gd;
+    d.position.set(g.x, 0, g.z); d.rotation.set(0, g.ry + g.lean, 0); d.scale.setScalar(on ? 1 : 0.0001); d.updateMatrix();
+    seatedBodies.setMatrixAt(i, d.matrix);
+    d.position.y = 0; d.updateMatrix();
+    const hm = new THREE.Matrix4().makeTranslation(0, 1.24, 0.0);
+    seatedHeads.setMatrixAt(i, new THREE.Matrix4().multiplyMatrices(d.matrix, hm));
+    const cap = new THREE.Matrix4().makeTranslation(0, 1.36, 0.02);
+    const capM = new THREE.Matrix4().multiplyMatrices(d.matrix, cap);
+    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+    seatedGele.setMatrixAt(i, g.woman ? capM : hidden);
+    seatedFila.setMatrixAt(i, g.woman ? hidden : capM);
+  }
+
+  // The dance floor: the couple at the centre, family and friends around them.
+  const robeGeo = mergeAll([
+    new THREE.CylinderGeometry(0.17, 0.36, 1.12, 20, 1).translate(0, 0.56, 0),
+    new THREE.CapsuleGeometry(0.16, 0.28, 6, 14).scale(1, 1, 0.7).translate(0, 1.3, 0),
+    new THREE.SphereGeometry(0.2, 14, 8).scale(1.25, 0.45, 0.8).translate(0, 1.47, 0)
+  ]);
+  const armsDownGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.3, 0.98, 0.05), 0.052), limb(V(0.22, 1.45, 0), V(0.3, 0.98, 0.05), 0.052)]);
+  const armsUpGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.36, 2.0, 0.08), 0.052), limb(V(0.22, 1.45, 0), V(0.34, 1.98, 0.1), 0.052)]);
+  const ND = 36;
+  const dancers = [];
+  for (let i = 0; i < ND; i++) {
+    const a = rand() * Math.PI * 2, r = i < 2 ? 0.35 : 0.9 + rand() * 2.1;
+    const bride = i === 0, groom = i === 1;
+    dancers.push({
+      x: i < 2 ? (i ? 0.33 : -0.33) : Math.cos(a) * r, z: i < 2 ? 0 : Math.sin(a) * r, ry: i < 2 ? (i ? -Math.PI / 2 : Math.PI / 2) : rand() * Math.PI * 2,
+      up: bride || groom ? false : rand() < 0.45, woman: bride ? true : groom ? false : rand() < 0.55,
+      cloth: bride ? new THREE.Color(0xf7f1e6) : groom ? new THREE.Color(0x0b5a42) : asoEbi[Math.floor(rand() * asoEbi.length)],
+      skin: skins[Math.floor(rand() * skins.length)], ph: rand() * 6, sp: 3.2 + rand() * 1.6, h: 0.92 + rand() * 0.14
+    });
+  }
+  const dBodies = new THREE.InstancedMesh(robeGeo, fabric, ND);
+  const dArmsDown = new THREE.InstancedMesh(armsDownGeo, fabric, ND);
+  const dArmsUp = new THREE.InstancedMesh(armsUpGeo, fabric, ND);
+  const dHands = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045, 8, 6), skin, ND * 2);
+  const dHeads = new THREE.InstancedMesh(headGeo, skin, ND);
+  const dGele = new THREE.InstancedMesh(geleGeo, geleMat, ND);
+  const dFila = new THREE.InstancedMesh(filaGeo, geleMat, ND);
+  dancers.forEach((g, i) => {
+    dBodies.setColorAt(i, g.cloth); dArmsDown.setColorAt(i, g.cloth); dArmsUp.setColorAt(i, g.cloth);
+    dHeads.setColorAt(i, g.skin); dGele.setColorAt(i, g.cloth); dFila.setColorAt(i, g.cloth);
+    dHands.setColorAt(i * 2, g.skin); dHands.setColorAt(i * 2 + 1, g.skin);
+  });
+  const danceMeshes = [dBodies, dArmsDown, dArmsUp, dHands, dHeads, dGele, dFila];
+  danceMeshes.forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; setB.add(m); });
+  const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), hand = new THREE.Vector3();
+  function animateDancers(t) {
+    dancers.forEach((g, i) => {
+      const beat = Math.sin(t * g.sp + g.ph), bob = Math.abs(beat) * 0.06 * motion;
+      gd.position.set(g.x + Math.sin(t * 0.7 + g.ph) * 0.08 * motion, bob, g.z);
+      gd.rotation.set(0, g.ry + Math.sin(t * 1.3 + g.ph) * 0.35 * motion, Math.sin(t * g.sp * 0.5 + g.ph) * 0.06 * motion);
+      gd.scale.set(1, g.h, 1); gd.updateMatrix();
+      dBodies.setMatrixAt(i, gd.matrix);
+      dArmsDown.setMatrixAt(i, g.up ? zeroM : gd.matrix);
+      dArmsUp.setMatrixAt(i, g.up ? gd.matrix : zeroM);
+      mA.makeTranslation(0, 1.72, 0); dHeads.setMatrixAt(i, mB.multiplyMatrices(gd.matrix, mA));
+      mA.makeTranslation(0, 1.84, 0.02); mB.multiplyMatrices(gd.matrix, mA);
+      dGele.setMatrixAt(i, g.woman ? mB : zeroM); dFila.setMatrixAt(i, g.woman ? zeroM : mB);
+      [-1, 1].forEach((side, k) => {
+        hand.set(side * (g.up ? 0.35 : 0.3), g.up ? 2.0 : 0.98, g.up ? 0.09 : 0.05).applyMatrix4(gd.matrix);
+        mA.makeTranslation(hand.x, hand.y, hand.z); dHands.setMatrixAt(i * 2 + k, mA);
+      });
+    });
+    danceMeshes.forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+  }
+  animateDancers(0);
+  lightSeats(0);
+
+  // Photographers' flashes popping around the room.
+  const flashes = Array.from({ length: 3 }, () => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+    sp.scale.setScalar(0.9); sp.visible = false; setB.add(sp);
+    return { sp, t0: -10 };
+  });
+
+  // The cake, beside the head table.
+  const cake = new THREE.Group(); cake.position.set(4.3, 0, -11.2); setB.add(cake);
+  const cakeTable = new THREE.Mesh(clothGeo, new THREE.MeshPhysicalMaterial({ color: 0xf2ebe0, roughness: 0.8, sheen: 0.7, sheenColor: 0xffffff }));
+  cakeTable.scale.set(0.6, 1, 0.6); cake.add(cakeTable);
+  const fondant = new THREE.MeshPhysicalMaterial({ color: 0xfbf6ee, roughness: 0.45, sheen: 0.8, sheenColor: 0xffffff, clearcoat: 0.3 });
+  let cy = CLOTH_Y;
+  [[0.34, 0.26], [0.27, 0.24], [0.2, 0.22], [0.14, 0.2]].forEach(([r, h]) => {
+    const tier = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 48), fondant); tier.position.y = cy + h / 2; cake.add(tier);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(r + 0.004, 0.012, 8, 64), brass); band.rotation.x = Math.PI / 2; band.position.y = cy + 0.02; cake.add(band);
+    cy += h;
+  });
+  const topper = new THREE.Mesh(flowerGeo, flowers.material); topper.scale.setScalar(0.45); topper.position.y = cy - 0.45 * (CLOTH_Y + 1.01) + 0.08; cake.add(topper);
+  shadowAll(cake);
+
+  // Naira notes sprayed on the dancers in the finale.
+  const noteTex = canvasTex(256, 128, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, "#6b4a7a"); gr.addColorStop(0.5, "#8a6a5a"); gr.addColorStop(1, "#4f6a8a");
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 2; g.strokeRect(6, 6, w - 12, h - 12);
+    for (let i = 0; i < 40; i++) { g.strokeStyle = `rgba(255,255,255,${0.05 + rand() * 0.1})`; g.beginPath(); g.arc(70, 64, 10 + i * 1.5, 0, Math.PI * 2); g.stroke(); }
+    g.fillStyle = "rgba(40,25,40,.55)"; g.beginPath(); g.ellipse(190, 64, 34, 44, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#f5ecd8"; g.font = '600 34px "Jost", Arial, sans-serif'; g.fillText("₦1000", 18, 40); g.font = '600 18px "Jost", Arial, sans-serif'; g.fillText("ONE THOUSAND NAIRA", 18, 112);
+  });
+  const NN = mobile ? 90 : 170;
+  const notes = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.072), new THREE.MeshStandardMaterial({ map: noteTex, roughness: 0.65, side: THREE.DoubleSide }), NN);
+  const noteData = Array.from({ length: NN }, () => ({ a: rand() * Math.PI * 2, r: rand() * 2.6, y0: rand() * 3, sp: 0.18 + rand() * 0.22, sw: rand() * 6, rs: 0.6 + rand() * 1.6 }));
+  notes.visible = false; notes.frustumCulled = false; setB.add(notes);
 
   /* ---------- Camera path ---------- */
   // [progress, position, look target, aperture (blur in px at 1080p for objects far from focus)]
@@ -1128,9 +1567,13 @@ async function start() {
         col = aces(col);
         // Grade: warm, slightly matte blacks, gentle split tone.
         float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-        col = mix(col, col * vec3(1.05, 0.99, 0.9), 0.6 + 0.4 * warmth);
-        col = mix(vec3(l), col, 0.94);
-        col = col * 0.965 + vec3(0.03, 0.018, 0.012) * (1.0 - l);
+        // Grade: contrast S-curve, emerald-teal shadows, warm gold highlights, richer colour.
+        col = col * col * (3.0 - 2.0 * col) * 0.55 + col * 0.45;
+        l = dot(col, vec3(0.2126, 0.7152, 0.0722));
+        vec3 shadowTint = vec3(0.86, 1.04, 0.98), highTint = vec3(1.06, 1.0, 0.88);
+        col *= mix(shadowTint, highTint, smoothstep(0.08, 0.7, l));
+        col = mix(vec3(l), col, 1.12 + 0.06 * warmth);
+        col = max(col, 0.0) + vec3(0.004, 0.012, 0.009) * (1.0 - l);
         col *= 1.0 - vignette * smoothstep(0.15, 1.15, r2);
         col = srgb(col);
         float g = (hash(gl_FragCoord.xy + fract(time * 13.7) * 197.0) + hash(gl_FragCoord.xy * 1.37 + fract(time * 7.3) * 91.0) - 1.0);
@@ -1158,10 +1601,10 @@ async function start() {
   resize();
 
   // Compile everything up front so the cut into the hall does not stutter.
-  setA.visible = setB.visible = true; conf.visible = true;
+  setA.visible = setB.visible = true; conf.visible = true; notes.visible = true;
   scene.background = envTex;
   renderer.compile(scene, camera);
-  conf.visible = false;
+  conf.visible = false; notes.visible = false;
 
   let px = 0, pxT = 0, pyT = 0, py = 0;
   window.addEventListener("pointermove", (e) => {
@@ -1178,6 +1621,8 @@ async function start() {
 
   OP.render = function (p, t) {
     if (tStart < 0) { tStart = t; canvas.classList.add("live"); finder.classList.add("live"); }
+    finder.style.opacity = OP.covered ? "0" : "";
+    if (OP.covered) return;
     const intro = motion ? smooth((t - tStart) / 2.6) : 1;
     px += (pxT - px) * 0.04; py += (pyT - py) * 0.04;
 
@@ -1187,7 +1632,7 @@ async function start() {
     if (setName !== lastSet) {
       lastSet = setName;
       if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.3; scene.fog.density = 0; }
-      else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.032; hallKey.shadow.needsUpdate = true; }
+      else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
     }
 
     if (inA) {
@@ -1234,8 +1679,30 @@ async function start() {
       dp.needsUpdate = true;
       dustMat.opacity = 0.55 * dim;
       key.shadow.autoUpdate = true;
+      hallKey.intensity = 0;
+      movers.forEach((m) => { m.spot.intensity = 0; });
     } else {
       key.shadow.autoUpdate = false;
+      key.intensity = 0; rim.intensity = 0;
+      candles.forEach((c) => { c.pl.intensity = 0; });
+      const hv0 = seg(p, 0.675, 0.72);
+      movers.forEach((m) => {
+        const sx = m.x < 0 ? 1 : -1, sz = m.z < 0 ? -1 : 1;
+        m.head.rotation.set(sz * (0.42 + 0.28 * Math.sin(t * 0.37 * motion + m.seed)), 0, sx * (0.5 + 0.3 * Math.sin(t * 0.5 * motion + m.seed * 2)));
+        m.head.updateMatrixWorld();
+        m.spot.target.position.copy(m.head.localToWorld(tmpV.set(0, -10, 0)));
+        m.spot.intensity = 70 * hv0;
+        m.beam.material.opacity = hv0;
+      });
+      animateDancers(motion ? t : 0);
+      flashes.forEach((fl) => {
+        if (motion && t - fl.t0 > 0.9 && Math.random() < 0.015 && OP.seated > 10) {
+          const pick = Math.random() < 0.5 ? guestSeat[seatOrder[Math.floor(Math.random() * OP.seated)]] : dancers[Math.floor(Math.random() * ND)];
+          fl.sp.position.set(pick.x, 1.5, pick.z); fl.t0 = t;
+        }
+        const k = t - fl.t0; fl.sp.visible = k < 0.2;
+        if (fl.sp.visible) { const e = Math.exp(-k * 26); fl.sp.material.color.setScalar(60 * e); fl.sp.scale.setScalar(0.5 + 0.9 * e); }
+      });
       const hv = seg(p, 0.675, 0.72);
       hallKey.intensity = 1.35 * hv;
       lightSeats(OP.seated);
@@ -1252,6 +1719,18 @@ async function start() {
           conf.setMatrixAt(i, dummy.matrix);
         }
         conf.instanceMatrix.needsUpdate = true;
+      }
+      notes.visible = cf > 0.001;
+      if (notes.visible) {
+        for (let i = 0; i < NN; i++) {
+          const n = noteData[i];
+          const y = Math.max(0.012, 3.4 - ((n.y0 + t * n.sp * (motion ? 1 : 0.1)) % 3.6)) - (1 - cf) * 3;
+          dummy.position.set(Math.cos(n.a) * n.r + Math.sin(t * 0.9 + n.sw) * 0.25, y, Math.sin(n.a) * n.r);
+          if (y <= 0.012) dummy.rotation.set(-Math.PI / 2, 0, n.sw);
+          else dummy.rotation.set(Math.sin(t * n.rs + n.sw) * 1.2, t * n.rs * 0.5 + n.sw, Math.cos(t * n.rs * 0.8) * 0.8);
+          dummy.updateMatrix(); notes.setMatrixAt(i, dummy.matrix);
+        }
+        notes.instanceMatrix.needsUpdate = true;
       }
     }
 
