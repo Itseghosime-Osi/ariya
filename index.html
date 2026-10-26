@@ -78,10 +78,10 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .gate h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(3.4rem, 11vw, 8rem); line-height: 0.95; margin: 0; letter-spacing: -0.02em; }
 .gate h1 em { font-style: italic; color: var(--gold); }
 .gate p { margin: 0; color: var(--mist); max-width: 32em; }
-.gate { background-image: linear-gradient(180deg, rgba(12, 4, 6, 0.5), rgba(12, 4, 6, 0.72) 55%, rgba(12, 4, 6, 0.94)), url("assets/poster.jpg"); background-size: cover; background-position: center 30%; }
-@media (max-aspect-ratio: 4/5) { .gate { background-image: linear-gradient(180deg, rgba(12, 4, 6, 0.45), rgba(12, 4, 6, 0.75) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster-tall.jpg"); } }
+.gate { background-image: radial-gradient(48% 42% at 50% 52%, rgba(12, 4, 6, 0.72), rgba(12, 4, 6, 0) 100%), linear-gradient(180deg, rgba(12, 4, 6, 0.55), rgba(12, 4, 6, 0.74) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster.jpg"); background-size: cover; background-position: center 30%; }
+@media (max-aspect-ratio: 4/5) { .gate { background-image: radial-gradient(70% 34% at 50% 48%, rgba(12, 4, 6, 0.7), rgba(12, 4, 6, 0) 100%), linear-gradient(180deg, rgba(12, 4, 6, 0.5), rgba(12, 4, 6, 0.76) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster-tall.jpg"); } }
 .gate .value { font-family: var(--font-display); font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 1.3; color: var(--ivory); max-width: 22em; text-wrap: balance; }
-.gate .story { color: var(--mist); }
+.gate .story { color: var(--mist); max-width: none; }
 .gate-links { display: flex; gap: 14px; align-items: center; color: var(--mist); }
 .gate .actions { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .gate .quiet { background: none; border: 0; color: var(--mist); font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; text-decoration: underline; text-underline-offset: 5px; }
@@ -1065,6 +1065,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     if (active !== lastChapter) {
       lastChapter = active;
       whereNo.textContent = active < 0 ? "" : (active < 10 ? "00" : "0") + active;
+      whereNo.previousElementSibling.hidden = active < 0;
       whereName.textContent = active < 0 ? "Àríyá" : chapters[active][0];
       railBtns.forEach(function (b, i) { if (i === active) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
     }
