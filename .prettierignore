@@ -1,0 +1,6 @@
+public/site/
+private-media/
+.next/
+dist/
+coverage/
+node_modules/
