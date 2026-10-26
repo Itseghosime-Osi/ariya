@@ -1228,7 +1228,7 @@ async function start() {
   key.shadow.radius = 7; key.shadow.blurSamples = 16; key.shadow.bias = -0.0004;
   key.target.position.set(0, 0, 0);
   scene.add(key, key.target);
-  const rim = new THREE.DirectionalLight(0xcfdcff, 0.9);
+  const rim = new THREE.DirectionalLight(0xe8dcd0, 0.6);
   rim.position.set(-3, 3, -5);
   scene.add(rim);
 
@@ -1260,7 +1260,9 @@ async function start() {
     }
   }, { repeat: [3, 3] });
   const walnut = new THREE.MeshPhysicalMaterial({ map: walnutMap, roughness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.16, envMapIntensity: 0.32, sheen: 0.15, sheenColor: 0xffc8a0 });
-  const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), walnut);
+  // The big table top seen at a grazing angle: a softer coat, so the room does not wash it out grey.
+  const walnutTop = walnut.clone(); walnutTop.clearcoat = 0.35; walnutTop.clearcoatRoughness = 0.32; walnutTop.envMapIntensity = 0.14;
+  const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), walnutTop);
   tableTop.rotation.x = -Math.PI / 2; tableTop.position.y = TABLE_Y; tableTop.receiveShadow = true;
   setA.add(tableTop);
 
@@ -2437,7 +2439,7 @@ async function start() {
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 8), brass); knob.position.set(0, 0, 0.05); drawer.add(knob);
   const drawerBox = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.05, 0.36), new THREE.MeshStandardMaterial({ color: 0x3a2416, roughness: 0.8, side: THREE.BackSide })); drawerBox.position.set(0, 0, -0.16); drawer.add(drawerBox);
   const doily = new THREE.Mesh(new THREE.CircleGeometry(0.2, 48), new THREE.MeshStandardMaterial({ map: canvasTex(256, 256, (g, w, h) => {
-    g.clearRect(0, 0, w, h); g.strokeStyle = "#f3ece0"; g.lineWidth = 3;
+    g.clearRect(0, 0, w, h); g.strokeStyle = "#9c907b"; g.lineWidth = 3;
     for (let r = 20; r < 126; r += 14) { g.beginPath(); for (let a = 0; a <= 64; a++) { const th = a / 64 * Math.PI * 2, rr = r + Math.sin(th * 16) * 4; g.lineTo(w / 2 + Math.cos(th) * rr, h / 2 + Math.sin(th) * rr); } g.stroke(); }
     for (let a = 0; a < 32; a++) { const th = a / 32 * Math.PI * 2; g.beginPath(); g.moveTo(w / 2, h / 2); g.lineTo(w / 2 + Math.cos(th) * 126, h / 2 + Math.sin(th) * 126); g.stroke(); }
   }), transparent: true, roughness: 0.9 }));
@@ -2448,12 +2450,12 @@ async function start() {
   const shadeMat = new THREE.MeshPhysicalMaterial({ color: 0xf1dcb8, roughness: 0.9, side: THREE.DoubleSide, emissive: 0xffb15a, emissiveIntensity: 0.9, transmission: 0 });
   const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.16, 40, 1, true), shadeMat); shade.position.y = 0.36; lamp.add(shade);
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 6, 3) })); bulb.position.y = 0.33; lamp.add(bulb);
-  const lampLight = new THREE.SpotLight(0xffb066, 0, 6, 1.15, 0.85, 1.6);
+  const lampLight = new THREE.SpotLight(0xffc489, 0, 6, 1.15, 0.85, 1.6);
   lampLight.position.set(0.42, TOP + 0.31, -0.18); lampLight.target.position.set(0.3, 0, 0.1);
   lampLight.castShadow = true; lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.0008; lampLight.shadow.radius = 6; lampLight.shadow.blurSamples = 12;
   lampLight.shadow.camera.near = 0.05; lampLight.shadow.camera.far = 6;
   scene.add(lampLight, lampLight.target);
-  const lampFill = new THREE.PointLight(0xff9a50, 0, 5, 1.8); lampFill.position.set(0.42, TOP + 0.5, -0.18); scene.add(lampFill);
+  const lampFill = new THREE.PointLight(0xffb070, 0, 5, 1.8); lampFill.position.set(0.42, TOP + 0.5, -0.18); scene.add(lampFill);
   const windowLight = new THREE.DirectionalLight(0x8aa4ff, 0); windowLight.position.set(-1.1, 1.7, -2.6); windowLight.target.position.set(0, 0.6, 0.4); scene.add(windowLight, windowLight.target);
   // The ceiling fan, turning slowly.
   const fan = new THREE.Group(); fan.position.set(0, 3.0, 0); setE.add(fan);
@@ -2612,7 +2614,7 @@ async function start() {
     drawPhone(u < 0.36 ? "lock" : u < 0.9 ? "voice" : "voiceSent");
     rainTex.offset.y = -t * 0.02 * motion;
     fan.rotation.y = t * 1.6 * motion;
-    lampLight.intensity = 9; lampFill.intensity = 0.9; windowLight.intensity = 0.4;
+    lampLight.intensity = 2.4; lampFill.intensity = 0.3; windowLight.intensity = 0.4;
   }
   const fFill = new THREE.DirectionalLight(0x8a9cff, 0); fFill.position.set(1.5, 3, -4); scene.add(fFill); lightsF.push(fFill);
   function updateF(u, t) { screenGlow.intensity = 7; fFill.intensity = 0.5; }
@@ -2814,10 +2816,10 @@ async function start() {
       lastSet = setName;
       scene.environment = mode === "D" ? envNight : envTex;
       if (mode === "C") { scene.background = silkBg; scene.environmentIntensity = 0.2; scene.fog.density = 0; }
-      else if (mode === "E") { scene.background = roomBg; scene.environment = envRoom; scene.environmentIntensity = 0.12; scene.fog.density = 0; }
+      else if (mode === "E") { scene.background = roomBg; scene.environment = envRoom; scene.environmentIntensity = 0.06; scene.fog.density = 0; }
       else if (mode === "F") { scene.background = fBg; scene.environment = envRoom; scene.environmentIntensity = 0.06; scene.fog.density = 0; }
       else if (mode === "D") { scene.background = nightBg; scene.environmentIntensity = 0; scene.fog.density = 0; }
-      else if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.3; scene.fog.density = 0; }
+      else if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.17; scene.fog.density = 0; }
       else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
     }
     if (mode !== "C" && mode !== "D") { xKey.intensity = 0; xRim.intensity = 0; xGlow.intensity = 0; }
@@ -2850,8 +2852,8 @@ async function start() {
       const dim = 1 - 0.72 * bump(p, 0.29, 0.34, 0.45, 0.48);
       const flare = 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.35 * bump(p, 0.6, 0.64, 0.66, 0.7);
       key.intensity = 140 * dim * Math.min(flare, 1.5);
-      rim.intensity = 0.9 * dim;
-      scene.environmentIntensity = 0.3 * dim;
+      rim.intensity = 0.6 * dim;
+      scene.environmentIntensity = 0.17 * dim;
       scene.backgroundIntensity = 0.08 * (0.5 + 0.5 * dim);
       gemMat.uniforms.envIntensity.value = 0.9 * dim * flare;
       gemMat.uniforms.sparkle.value = dim * flare;
