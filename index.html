@@ -1110,6 +1110,7 @@ import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
@@ -1151,6 +1152,9 @@ async function start() {
   OP.loaded = 0.35;
   const envEuler = new THREE.Euler(0, 2.2, 0);
   scene.environment = envTex;
+  // Each place gets light from a real place: a lived-in apartment for the two rooms, a night sky for the lagoon (Poly Haven, CC0).
+  const [envRoom, envNight] = await Promise.all(["assets/apartment.exr", "assets/night.exr"].map((u) => new EXRLoader().loadAsync(u).catch(() => envTex)));
+  envRoom.mapping = envNight.mapping = THREE.EquirectangularReflectionMapping;
   scene.environmentRotation.copy(envEuler);
   scene.backgroundRotation.copy(envEuler);
   scene.backgroundBlurriness = 0.32;
@@ -1255,17 +1259,17 @@ async function start() {
       g.fillStyle = gr; g.fillRect(0, y - 40, w, 80);
     }
   }, { repeat: [3, 3] });
-  const walnut = new THREE.MeshPhysicalMaterial({ map: walnutMap, roughness: 0.38, clearcoat: 0.85, clearcoatRoughness: 0.14, envMapIntensity: 0.5 });
+  const walnut = new THREE.MeshPhysicalMaterial({ map: walnutMap, roughness: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.16, envMapIntensity: 0.32, sheen: 0.15, sheenColor: 0xffc8a0 });
   const tableTop = new THREE.Mesh(new THREE.CircleGeometry(30, 96), walnut);
   tableTop.rotation.x = -Math.PI / 2; tableTop.position.y = TABLE_Y; tableTop.receiveShadow = true;
   setA.add(tableTop);
 
   // Burgundy velvet, deep pile with a warm sheen at grazing angles.
   const velvet = new THREE.MeshPhysicalMaterial({
-    color: 0x3d0715, roughness: 0.84, sheen: 1, sheenRoughness: 0.33, sheenColor: 0xff9cb0,
-    normalMap: velvetNormal, normalScale: new THREE.Vector2(0.25, 0.25)
+    color: 0x3d0715, roughness: 0.95, sheen: 1, sheenRoughness: 0.45, sheenColor: 0xff9cb0,
+    normalMap: velvetNormal, normalScale: new THREE.Vector2(0.4, 0.4)
   });
-  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x24030b, roughness: 0.9, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xc75a72 });
+  const velvetDeep = new THREE.MeshPhysicalMaterial({ color: 0x24030b, roughness: 0.95, sheen: 1, sheenRoughness: 0.5, sheenColor: 0xd8627c, normalMap: velvetNormal, normalScale: new THREE.Vector2(0.35, 0.35) });
   // Colour of the day: the box can be re-covered in burgundy, ruby or coral velvet.
   const VELVETS = {
     burgundy: [0x3d0715, 0xff9cb0, 0x24030b, 0xc75a72],
@@ -1508,12 +1512,19 @@ async function start() {
   petals.castShadow = petals.receiveShadow = true; setA.add(petals);
 
   // Candles behind the box: real light sources that the lens turns into bokeh.
-  const wax = new THREE.MeshPhysicalMaterial({ color: 0xf2e6d4, roughness: 0.5, sheen: 0.5, sheenColor: 0xffe2b8, emissive: 0x3a1a06, emissiveIntensity: 0.6 });
+  // Wax is translucent near the flame: an emissive gradient up the side stands in for light scattering through it.
+  const waxGlow = canvasTex(8, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#ffb46a"); gr.addColorStop(0.12, "#a5521c"); gr.addColorStop(0.35, "#2a1206"); gr.addColorStop(1, "#0a0502"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+  const wax = new THREE.MeshPhysicalMaterial({ color: 0xf2e6d4, roughness: 0.55, sheen: 0.6, sheenColor: 0xffe2b8, emissive: 0xffffff, emissiveMap: waxGlow, emissiveIntensity: 0.9 });
+  const waxTop = new THREE.MeshPhysicalMaterial({ color: 0xf5ead8, roughness: 0.35, emissive: 0xff9a4a, emissiveIntensity: 0.55, clearcoat: 0.6 });
   const flameMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 4.2, 1.3) });
   const candles = [];
   [[-5.2, -8.5, 3.0, 0.75], [6.0, -11, 2.2, 0.7], [-10.5, -14, 3.6, 0.8]].forEach(([x, z, hgt, r]) => {
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r, hgt, 48), wax);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r, hgt, 48, 1, true), wax);
     body.position.set(x, TABLE_Y + hgt / 2, z); body.castShadow = true; setA.add(body);
+    // The top: a pool of melted wax inside a soft, uneven lip, and a dark wick.
+    const lip = new THREE.Mesh(new THREE.TorusGeometry(r * 0.94, r * 0.07, 10, 48), waxTop); lip.rotation.x = Math.PI / 2; lip.position.set(x, TABLE_Y + hgt - r * 0.02, z); lip.scale.set(1, 1, 1.6); setA.add(lip);
+    const pool = new THREE.Mesh(new THREE.CircleGeometry(r * 0.92, 48), waxTop); pool.rotation.x = -Math.PI / 2; pool.position.set(x, TABLE_Y + hgt - r * 0.09, z); setA.add(pool);
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 0.22, 8), new THREE.MeshBasicMaterial({ color: 0x120a06 })); wick.position.set(x, TABLE_Y + hgt + 0.03, z); wick.rotation.z = 0.12; setA.add(wick);
     const fl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), flameMat);
     fl.scale.set(1, 2.6, 1); fl.position.set(x, TABLE_Y + hgt + 0.32, z); setA.add(fl);
     const pl = new THREE.PointLight(0xff9448, 14, 0, 2); pl.position.copy(fl.position); scene.add(pl);
@@ -1609,6 +1620,8 @@ async function start() {
   const seatFlameGeo = new THREE.SphereGeometry(0.011, 10, 8); seatFlameGeo.scale(1, 2.3, 1);
   const seatFlames = new THREE.InstancedMesh(seatFlameGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }), NS);
   const glowTex = canvasTex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.25, "rgba(255,255,255,.35)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
+  // A soft halo around each candle flame, the way a lens sees it.
+  candles.forEach((c) => { const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: new THREE.Color(1.3, 0.62, 0.2), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })); h.position.copy(c.base); h.scale.setScalar(1.7); setA.add(h); c.halo = h; });
   const glowGeo = new THREE.PlaneGeometry(0.75, 0.75); glowGeo.rotateX(-Math.PI / 2);
   const seatGlows = new THREE.InstancedMesh(glowGeo, new THREE.MeshBasicMaterial({ map: glowTex, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }), NS);
   // Centrepieces: gold stands with blush and ivory flower balls.
@@ -2661,10 +2674,45 @@ async function start() {
       }`
   });
   const dofQuad = new FullScreenQuad(dofMat);
+  // Ambient occlusion from the depth buffer alone: where surfaces meet (a box on a table, a card on a cloth), light is
+  // blocked and the crease darkens. This grounds objects the way a real lens and real light do.
+  const aoRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
+  const aoMat = new THREE.ShaderMaterial({
+    defines: { AO_SAMPLES: mobile ? 8 : 14 },
+    uniforms: { tColor: { value: sceneRT.texture }, tDepth: { value: sceneRT.depthTexture }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() }, radius: { value: 0.5 }, strength: { value: 0 }, time: { value: 0 } },
+    vertexShader: quadVS,
+    fragmentShader: /* glsl */`
+      uniform sampler2D tColor; uniform sampler2D tDepth; uniform mat4 proj, projInv; uniform float radius, strength, time;
+      varying vec2 vUv;
+      vec3 viewPos(vec2 uv) { float d = texture2D(tDepth, uv).x; vec4 v = projInv * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); return v.xyz / v.w; }
+      float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
+      void main() {
+        vec3 col = texture2D(tColor, vUv).rgb;
+        float d = texture2D(tDepth, vUv).x;
+        if (strength <= 0.0 || d >= 0.9999) { gl_FragColor = vec4(col, 1.0); return; }
+        vec3 P = viewPos(vUv);
+        vec3 N = normalize(cross(dFdx(P), dFdy(P)));
+        float rot = ign(gl_FragCoord.xy + fract(time) * 31.0) * 6.2831853, occ = 0.0;
+        for (int i = 0; i < AO_SAMPLES; i++) {
+          float fi = float(i) + 0.5, a = fi * 2.39996323 + rot, r = sqrt(fi / float(AO_SAMPLES)) * radius;
+          vec3 S = P + vec3(cos(a), sin(a), 0.0) * r + N * r * 0.35;
+          vec4 sp = proj * vec4(S, 1.0); vec2 suv = sp.xy / sp.w * 0.5 + 0.5;
+          vec3 V = viewPos(suv) - P; float dist = length(V) + 1e-4;
+          occ += max(dot(N, V / dist) - 0.08, 0.0) * (1.0 - smoothstep(radius * 0.6, radius * 1.6, dist));
+        }
+        float ao = clamp(1.0 - strength * occ / float(AO_SAMPLES) * 1.6, 0.0, 1.0);
+        gl_FragColor = vec4(col * ao, 1.0);
+      }`
+  });
+  const aoQuad = new FullScreenQuad(aoMat);
+  dofMat.uniforms.tColor.value = aoRT.texture;
+  // Clean edges on gold rims, glass and lettering: SMAA after the grade.
+  const ldrRT = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false });
+  const smaa = new SMAAPass(1, 1); smaa.renderToScreen = true;
   const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.5, 1.8);
   const finalMat = new THREE.ShaderMaterial({
     uniforms: {
-      tColor: { value: dofRT.texture }, time: { value: 0 }, exposure: { value: 1 }, grain: { value: 0.06 }, ca: { value: 0.0035 },
+      tColor: { value: dofRT.texture }, time: { value: 0 }, exposure: { value: 1 }, grain: { value: 0.045 }, ca: { value: 0.0024 },
       vignette: { value: 0.55 }, fade: { value: 0 }, aspect: { value: 1 }, warmth: { value: 0 }
     },
     vertexShader: quadVS,
@@ -2711,7 +2759,7 @@ async function start() {
     renderer.setPixelRatio(pr);
     renderer.setSize(w, h, false);
     const W = Math.floor(w * pr), H = Math.floor(h * pr);
-    sceneRT.setSize(W, H); dofRT.setSize(W, H); bloom.setSize(W, H);
+    sceneRT.setSize(W, H); dofRT.setSize(W, H); bloom.setSize(W, H); aoRT.setSize(W, H); ldrRT.setSize(W, H); smaa.setSize(W, H);
     dofMat.uniforms.texel.value.set(1 / W, 1 / H);
     dofMat.uniforms.maxBlur.value = Math.round(H * 0.024);
     finalMat.uniforms.aspect.value = w / h;
@@ -2764,9 +2812,10 @@ async function start() {
     const setName = isNew ? mode : inA ? "A" : "B";
     if (setName !== lastSet) {
       lastSet = setName;
+      scene.environment = mode === "D" ? envNight : envTex;
       if (mode === "C") { scene.background = silkBg; scene.environmentIntensity = 0.2; scene.fog.density = 0; }
-      else if (mode === "E") { scene.background = roomBg; scene.environmentIntensity = 0.05; scene.fog.density = 0; }
-      else if (mode === "F") { scene.background = fBg; scene.environmentIntensity = 0.03; scene.fog.density = 0; }
+      else if (mode === "E") { scene.background = roomBg; scene.environment = envRoom; scene.environmentIntensity = 0.12; scene.fog.density = 0; }
+      else if (mode === "F") { scene.background = fBg; scene.environment = envRoom; scene.environmentIntensity = 0.06; scene.fog.density = 0; }
       else if (mode === "D") { scene.background = nightBg; scene.environmentIntensity = 0; scene.fog.density = 0; }
       else if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.3; scene.fog.density = 0; }
       else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
@@ -2917,6 +2966,13 @@ async function start() {
     renderer.setRenderTarget(sceneRT);
     renderer.render(scene, camera);
     OP.frameInfo = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, pixelRatio: pr };
+    // Contact shadows, scaled to each set (the box table is in centimetres, the hall and rooms in metres).
+    aoMat.uniforms.proj.value.copy(camera.projectionMatrix); aoMat.uniforms.projInv.value.copy(camera.projectionMatrixInverse);
+    aoMat.uniforms.radius.value = inA ? 0.9 : mode === "C" ? 0.22 : mode === "E" || mode === "F" ? 0.07 : 0.35;
+    aoMat.uniforms.strength.value = mode === "D" ? 0 : 0.85;
+    aoMat.uniforms.time.value = motion ? t : 0;
+    renderer.setRenderTarget(aoRT);
+    aoQuad.render(renderer);
     renderer.setRenderTarget(dofRT);
     dofQuad.render(renderer);
     bloom.render(renderer, null, dofRT, 0, false);
@@ -2927,7 +2983,9 @@ async function start() {
     finalMat.uniforms.warmth.value = inA ? 0 : 1;
     // A dip to near black at every cut between chapters that change set.
     finalMat.uniforms.fade.value = SC.fade || 0;
+    renderer.setRenderTarget(ldrRT);
     finalQuad.render(renderer);
+    smaa.render(renderer, null, ldrRT);
 
 
     // Keep the frame rate up: lower the render resolution if frames run long.
