@@ -168,6 +168,11 @@ html.locked .rail, .rail.off { opacity: 0; pointer-events: none; }
 .beat { position: absolute; left: 0; right: 0; opacity: 0; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); text-shadow: 0 2px 30px rgba(10, 3, 5, 0.95), 0 0 3px rgba(10, 3, 5, 0.6); will-change: opacity, transform, filter; }
 .beat.center { top: 50%; text-align: center; transform: translateY(-50%); }
 .beat.low { bottom: max(13vh, calc(env(safe-area-inset-bottom, 0px) + 84px)); text-align: center; }
+/* Mama's phone fills the frame: her words sit in the clear corner beside it, or under it on a tall screen. */
+.beat.phonecap { top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px)); bottom: auto; right: auto; max-width: min(30vw, 420px); text-align: left; }
+.beat.phonecap h2 { font-size: clamp(1.6rem, 3vw, 2.6rem); }
+.beat.phonecap .prose { margin: 0; font-size: clamp(1.2rem, 2vw, 1.6rem); }
+@media (max-aspect-ratio: 1/1) { .beat.phonecap { top: auto; bottom: max(5vh, calc(env(safe-area-inset-bottom, 0px) + 72px)); right: 0; max-width: none; text-align: center; padding-top: 18px; padding-bottom: 12px; background: linear-gradient(transparent, rgba(10, 3, 5, 0.72) 30%); } .beat.phonecap .prose { margin: 0 auto; } }
 .beat.side { top: 50%; transform: translateY(-50%); max-width: 1240px; margin: 0 auto; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
 .beat h1 { font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1.02; }
@@ -557,11 +562,11 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <span class="no">No. 006 · Mama · Benin City</span>
     <h2>Her outfit is ready.<br><em>No invitation has come.</em></h2>
   </section>
-  <section class="beat low" data-scene="E" data-in="0.38" data-out="0.7" aria-label="Mama's voice message" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
+  <section class="beat low phonecap" data-scene="E" data-in="0.38" data-out="0.7" aria-label="Mama's voice message">
     <span class="no">Mama Ijeoma · voice message to Tunde</span>
     <p class="prose">“Tunde, my son. What time should I be ready? … I don’t want to disturb you.”</p>
   </section>
-  <section class="beat low" data-scene="E" data-in="0.76" data-out="0.99" aria-label="Forgotten" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
+  <section class="beat low phonecap" data-scene="E" data-in="0.76" data-out="0.99" aria-label="Forgotten">
     <h2>In a crowd of names, someone can still <em>feel forgotten.</em></h2>
   </section>
   <section class="beat low" data-scene="F" data-in="0.03" data-out="0.3" aria-label="Her name">
@@ -3640,7 +3645,7 @@ async function start() {
   const j_lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.28, 48, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xf3e3c8, roughness: 0.9, side: THREE.DoubleSide, emissive: 0xffb873, emissiveIntensity: 0.9 })); j_lampShade.position.y = 1.72; j_lamp.add(j_lampShade);
   const j_hook = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 1.2, 0), V3(0.08, 1.2, 0.06), V3(0.13, 1.19, 0.1), V3(0.14, 1.23, 0.11)]), 24, 0.005, 8), goldPolish); j_lamp.add(j_hook);
   // Her shoes: pointed rose-gold pumps with a line of crystals round the topline and a crystal slingback.
-  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xe8ab8c, metalness: 1, roughness: 0.09, clearcoat: 0.6, side: THREE.DoubleSide });
+  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xf4bca0, metalness: 0.6, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.08, sheen: 0.4, sheenColor: 0xffd8c4, emissive: 0x4a2216, emissiveIntensity: 0.6, side: THREE.DoubleSide }); // lifted a little: the shade's glow falls on them
   const j_soleMat = new THREE.MeshPhysicalMaterial({ color: 0x2a1a14, roughness: 0.5 });
   const j_innerMat = new THREE.MeshStandardMaterial({ color: 0xf0c9b4, roughness: 0.6, side: THREE.DoubleSide });
   function j_makeShoe() {
