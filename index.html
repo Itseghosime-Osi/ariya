@@ -52,7 +52,7 @@ body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size:
 .backdrop { position: fixed; inset: 0; z-index: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(110, 20, 38, 0.4), transparent 70%), linear-gradient(180deg, var(--night), var(--ink) 75%); }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
 #gl.live { opacity: 1; }
-.track { position: relative; z-index: 0; height: 2650vh; }
+.track { position: relative; z-index: 0; height: 3650vh; }
 .mono { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
 .btn { font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.9rem 1.3rem; border-radius: 999px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: background .3s, color .3s, transform .3s; }
 @media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-1px); } }
@@ -68,6 +68,27 @@ body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size:
 .gate { overflow-y: auto; }
 html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .overlay { transition: opacity 1.2s ease; }
+/* ---------- The opening: captions, slates, on-screen words, the gold thread, and its controls ---------- */
+.opening { position: absolute; inset: 0; pointer-events: none; }
+.slate { position: absolute; left: max(22px, env(safe-area-inset-left, 0px)); top: max(92px, calc(env(safe-area-inset-top, 0px) + 84px)); margin: 0; color: var(--gold); opacity: 0; transition: opacity .5s; text-shadow: 0 1px 10px rgba(10, 3, 5, 0.9); }
+.words { position: absolute; left: 0; right: 0; top: max(13%, calc(env(safe-area-inset-top, 0px) + 84px)); margin: 0 auto; max-width: 18em; padding: 0 20px; text-align: center; font-family: var(--font-display); font-size: clamp(1.9rem, 5.4vw, 3.6rem); line-height: 1.1; color: var(--ivory); opacity: 0; text-shadow: 0 2px 30px rgba(10, 3, 5, 0.85); }
+.words em { color: var(--gold); }
+.thread { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.thread path { fill: none; stroke: #e2b96e; stroke-width: 2.2; vector-effect: non-scaling-stroke; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(233, 201, 138, 0.8)); }
+.cc { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 86px); z-index: 14; transform: translateX(-50%); max-width: min(92vw, 640px); padding: 10px 18px 12px; border-radius: 14px; background: rgba(12, 5, 7, 0.76); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); text-align: center; color: var(--ivory); font-size: clamp(1.02rem, 3.6vw, 1.22rem); line-height: 1.35; opacity: 0; transition: opacity .25s; pointer-events: none; }
+.cc .who { display: block; font: 600 0.7rem/1.2 var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.cc .who:empty { display: none; }
+.cc.sfx .line { font-style: italic; color: #d9c9b6; }
+html.cc-off .cc { display: none; }
+.obar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); z-index: 15; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(12, 5, 7, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 1px solid rgba(233, 201, 138, 0.22); opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+.obar.on { opacity: 1; visibility: visible; pointer-events: auto; }
+.obar button { min-height: 40px; min-width: 44px; padding: 0 14px; border-radius: 999px; border: 0; background: none; color: var(--ivory); font: 600 0.7rem/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.obar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.obar button[aria-pressed="true"]#obCC { color: var(--gold); }
+.obar #obPlay .ico { width: 10px; height: 12px; background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.obar #obPlay[aria-pressed="true"] .ico { clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0); }
+@media (hover: hover) and (pointer: fine) { .obar button:hover { background: rgba(244, 239, 230, 0.08); } }
+@media (max-width: 520px) { .obar button { padding: 0 10px; font-size: 0.64rem; } .cc { bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); } }
 .overlay .layer { position: absolute; inset: 0; }
 /* A soft shade under the words in the new chapters, so they read over silk and fireworks. */
 #oldLayer::before, #newLayer::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 60%; background: linear-gradient(0deg, rgba(10, 3, 5, 0.78), rgba(10, 3, 5, 0.35) 55%, transparent); opacity: var(--scrim, 0); }
@@ -415,7 +436,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
 <header class="nav" id="nav">
   <a class="wordmark" href="#top" id="home" aria-label="Àríyá, back to the start">Àríyá</a>
-  <div class="where mono" aria-live="off"><span>Chapter</span><b id="whereNo">000</b><span id="whereName">Prologue</span></div>
+  <div class="where mono" aria-live="off"><span>Chapter</span><b id="whereNo">000</b><span id="whereName">The words</span></div>
   <div class="right">
     <a class="btn gold small" href="planner.html">Start planning</a>
     <button class="icon-btn" id="soundBtn" type="button" aria-pressed="false"><span class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="lbl">Sound</span></button>
@@ -425,27 +446,20 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
 
 <div class="overlay" id="overlay">
+<!-- The opening: the proposal. Captions for the dialogue, small slates for time and place, and the few on-screen words. -->
+<div class="opening" id="opening" aria-hidden="true">
+  <p class="slate mono" id="slate"></p>
+  <p class="words" id="words"></p>
+  <svg class="thread" id="thread" viewBox="0 0 1000 600" preserveAspectRatio="none"><path id="threadPath" d="M520 330 C 600 300, 700 250, 760 260 S 900 330, 1040 300"/></svg>
+</div>
+<div class="cc" id="cc" aria-live="polite"><span class="who" id="ccWho"></span><span class="line" id="ccLine"></span></div>
+<div class="obar" id="obar" role="group" aria-label="Opening controls">
+  <button type="button" id="obPlay" aria-pressed="false"><span class="ico" aria-hidden="true"></span><span class="lbl">Play</span></button>
+  <button type="button" id="obCC" aria-pressed="true" aria-label="Captions">CC</button>
+  <button type="button" id="obReplay">Replay</button>
+  <button type="button" id="obSkip">Skip the opening</button>
+</div>
 <div class="layer" id="oldLayer">
-  <section class="beat low" data-raw-in="0" data-raw-out="0.0233" aria-label="Prologue">
-    <span class="no">No. 000 · Prologue</span>
-    <p class="prose">Lagos, December 2021. Two strangers at someone else’s owambe, table 14, arguing about whose jollof is better.</p>
-  </section>
-  <section class="beat low" data-raw-in="0.026" data-raw-out="0.0496" aria-label="Prologue, continued">
-    <span class="no">No. 000 · Prologue</span>
-    <p class="prose">Five years, one argument settled. Then a small velvet box on a dinner table.</p>
-  </section>
-
-  <section class="beat low" data-in="0.005" data-out="0.1" aria-label="The box">
-    <span class="no">No. 001 · The box</span>
-    <h1>It starts with<br>a <em>yes.</em></h1>
-  </section>
-
-  <section class="beat low" data-in="0.15" data-out="0.305" aria-label="The yes">
-    <span class="no">No. 002 · The yes</span>
-    <h2>Four seconds.<br><em>One question.</em></h2>
-    <p class="sub">Then four hundred people need to know.</p>
-  </section>
-
   <div class="storm" id="storm" aria-hidden="true"></div>
   <div class="groupbar" id="groupbar" aria-hidden="true">Chidinma &amp; Tunde 2026 · <strong id="unread">0</strong> unread</div>
   <section class="beat low" data-in="0.34" data-out="0.47" aria-label="The noise">
@@ -543,11 +557,11 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <span class="no">No. 006 · Mama · Benin City</span>
     <h2>Her outfit is ready.<br><em>No invitation has come.</em></h2>
   </section>
-  <section class="beat low" data-scene="E" data-in="0.38" data-out="0.74" aria-label="Mama's voice message">
+  <section class="beat low" data-scene="E" data-in="0.38" data-out="0.7" aria-label="Mama's voice message" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
     <span class="no">Mama Ijeoma · voice message to Tunde</span>
     <p class="prose">“Tunde, my son. What time should I be ready? … I don’t want to disturb you.”</p>
   </section>
-  <section class="beat low" data-scene="E" data-in="0.78" data-out="0.99" aria-label="Forgotten">
+  <section class="beat low" data-scene="E" data-in="0.76" data-out="0.99" aria-label="Forgotten" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
     <h2>In a crowd of names, someone can still <em>feel forgotten.</em></h2>
   </section>
   <section class="beat low" data-scene="F" data-in="0.03" data-out="0.3" aria-label="Her name">
@@ -676,14 +690,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
   function seg(p, a, b) { return smooth((p - a) / (b - a)); }
   function bump(p, a, b, c, d) { return seg(p, a, b) * (1 - seg(p, c, d)); }
-  var PRO = 0.034; // share of the scroll given to the prologue
+  var PRO = 0.004; // the gate leads straight into the opening // share of the scroll given to the prologue
   // The story map. The original eight chapters run on "p" (0 to 1, the box to the dance); two newer chapters are cut in
   // between them, each with its own 0 to 1 progress: C, the colour (after the yes) and D, the send-off (after the dance).
   // s is the reader's progress through the whole story after the prologue.
   // Newer chapters, cut in the same way: E, Mama's room (after the noise); F, her name on Tunde's laptop (after the
   // calm); T, the place kept at Table 1 (after the count). G, the weave: aso-oke rolls tagged with names (after the
   // colour); H, the morning: a place setting close up, before the doors open (before the place kept).
-  var SEGS = [["old", 0, 0.285], ["C", 0.13], ["G", 0.11], ["old", 0.285, 0.475], ["E", 0.12], ["old", 0.475, 0.62], ["F", 0.12], ["old", 0.62, 0.675], ["W", 0.1], ["old", 0.675, 0.885], ["J", 0.11], ["H", 0.1], ["T", 0.09], ["old", 0.885, 1], ["D", 0.19]];
+  var SEGS = [["R", 0.2], ["M", 0.12], ["N", 0.68], ["C", 0.13], ["G", 0.11], ["old", 0.285, 0.475], ["E", 0.24], ["old", 0.475, 0.62], ["F", 0.12], ["old", 0.62, 0.675], ["W", 0.1], ["old", 0.675, 0.885], ["J", 0.11], ["H", 0.1], ["T", 0.09], ["old", 0.885, 1], ["D", 0.19]];
   var CUTS = [], acc = 0, lastP = 0;
   SEGS.forEach(function (g) {
     var old = g[0] === "old", w = old ? 0.68 * (g[2] - g[1]) : g[1];
@@ -702,7 +716,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     return { mode: c.mode, p: c.p0 + (c.p1 - c.p0) * k, local: k, fade: 0.94 * dip, vis: 1 - dip };
   }
   function sFromOld(p) {
-    for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (c.mode === "old" && p <= c.p1) return c.a + (c.b - c.a) * (p - c.p0) / (c.p1 - c.p0); }
+    for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (c.mode === "old" && p <= c.p1) return c.a + (c.b - c.a) * Math.max(0, (p - c.p0) / (c.p1 - c.p0)); }
     return CUTS[CUTS.length - 2].b;
   }
   function sFromScene(mode, k) { for (var i = 0; i < CUTS.length; i++) if (CUTS[i].mode === mode) return CUTS[i].a + (CUTS[i].b - CUTS[i].a) * k; return 0; }
@@ -759,8 +773,44 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       var fallback = function () { if (songFailed) return; songFailed = true; song = null; if (on) { on = false; Score.start(); } };
       if (!song) { song = new Audio(SONG); song.loop = true; song.preload = "auto"; song.addEventListener("error", fallback); }
       song.volume = 0; var v0 = performance.now();
-      (function fade() { if (!song || !on) return; var k = Math.min(1, (performance.now() - v0) / 1800); song.volume = 0.55 * k; if (k < 1) requestAnimationFrame(fade); })();
+      (function fade() { if (!song || !on) return; var k = Math.min(1, (performance.now() - v0) / 1800); song.volume = 0.55 * k * levelNow; if (k < 1) requestAnimationFrame(fade); })();
       var pr = song.play(); if (pr && pr.catch) pr.catch(function (e) { if (e && e.name !== "AbortError") fallback(); });
+    }
+    // Sound design for the opening, all synthesised: no recorded dialogue is used anywhere in the film.
+    var levelNow = 1, levelTarget = 1, sfxBus = null, amb = null;
+    function sfxOut() { if (!sfxBus) { sfxBus = ctx.createGain(); sfxBus.gain.value = 0.9; sfxBus.connect(ctx.destination); } return sfxBus; }
+    function noise(t, dur, type, f, q, peak, a) {
+      var src = ctx.createBufferSource(); src.buffer = noiseBuf; var fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+      var g = ctx.createGain(); src.connect(fl); fl.connect(g); g.connect(sfxOut());
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + (a || 0.01)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.start(t, Math.random() * 0.3, dur + 0.05);
+    }
+    var SFX = {
+      paper: function (t) { for (var i = 0; i < 5; i++) noise(t + i * 0.07 + Math.random() * 0.04, 0.09 + Math.random() * 0.06, "bandpass", 2600 + Math.random() * 1800, 0.9, 0.05, 0.005); },
+      breath: function (t) { noise(t, 0.9, "bandpass", 620, 0.7, 0.025, 0.35); },
+      chair: function (t) { noise(t, 0.45, "lowpass", 380, 0.6, 0.06, 0.05); noise(t + 0.32, 0.12, "lowpass", 160, 0.8, 0.07, 0.005); },
+      fabric: function (t) { noise(t, 0.5, "bandpass", 1500, 0.4, 0.03, 0.12); },
+      set: function (t) { var g = ctx.createGain(); g.connect(sfxOut()); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16); var o = ctx.createOscillator(); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.12); o.connect(g); o.start(t); o.stop(t + 0.2); noise(t, 0.03, "highpass", 2400, 0.7, 0.03, 0.002); },
+      hinge: function (t) { for (var i = 0; i < 7; i++) noise(t + i * 0.035, 0.03, "bandpass", 3200 - i * 140, 6, 0.02, 0.003); var g = ctx.createGain(); g.connect(sfxOut()); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3); var o = ctx.createOscillator(); o.type = "triangle"; o.frequency.setValueAtTime(820, t); o.frequency.linearRampToValueAtTime(690, t + 0.28); o.connect(g); o.start(t); o.stop(t + 0.32); },
+      clink: function (t) { [2350, 3120, 4180].forEach(function (f, k) { var g = ctx.createGain(); g.connect(sfxOut()); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03 / (k + 1), t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9); var o = ctx.createOscillator(); o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + 1); }); },
+      tick: function (t) { noise(t, 0.02, "highpass", 3800, 0.7, 0.018, 0.001); }
+    };
+    // Room tone, a clock for Tunde's room, the murmur of a party for the memory.
+    function ambience(kind) {
+      if (!ctx || !on) kind = "";
+      if (!amb && kind) {
+        amb = { src: ctx.createBufferSource(), f: ctx.createBiquadFilter(), g: ctx.createGain(), kind: "", nextTick: 0 };
+        var buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        amb.src.buffer = buf; amb.src.loop = true; amb.src.connect(amb.f); amb.f.connect(amb.g); amb.g.connect(sfxOut()); amb.g.gain.value = 0; amb.src.start();
+      }
+      if (!amb) return;
+      if (kind !== amb.kind) {
+        amb.kind = kind; var t = ctx.currentTime;
+        amb.f.type = kind === "M" ? "bandpass" : "lowpass"; amb.f.frequency.setTargetAtTime(kind === "M" ? 520 : 240, t, 0.2); amb.f.Q.value = kind === "M" ? 0.6 : 0.5;
+        amb.g.gain.setTargetAtTime(kind === "M" ? 0.05 : kind ? 0.012 : 0, t, 0.4);
+      }
+      if (kind === "R" && ctx.currentTime > amb.nextTick) { amb.nextTick = Math.ceil(ctx.currentTime) + 1; SFX.tick(amb.nextTick); }
+      if (kind === "M") amb.g.gain.setTargetAtTime(0.045 + 0.02 * Math.sin(ctx.currentTime * 1.7) * Math.sin(ctx.currentTime * 0.6), ctx.currentTime, 0.3);
     }
     var lv = { pad: 0.7, gtr: 0, bass: 0, perc: 0, drum: 0, bell: 0.3, kick: 0, ping: 0, open: 1 };
     var tg = Object.assign({}, lv);
@@ -841,6 +891,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       stop: function () { on = false; if (song) song.pause(); if (!ctx) return; master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); },
       isOn: function () { return on; },
       time: function () { return song ? song.currentTime : 0; },
+      sfx: function (name) { if (!on || !ctx || !SFX[name]) return; try { SFX[name](ctx.currentTime + 0.01); } catch (e) { /* a missed sound is fine */ } },
+      ambience: function (kind) { try { ambience(kind); } catch (e) { /* fine */ } },
+      // The score sits under the dialogue until the yes, then rises.
+      level: function (l) {
+        levelTarget = l; levelNow += (levelTarget - levelNow) * (levelTarget > levelNow ? 0.015 : 0.08);
+        if (song && on && !song.paused) song.volume = Math.max(0, Math.min(1, 0.55 * levelNow));
+        else if (ctx && on && timer) master.gain.setTargetAtTime(0.85 * levelNow, ctx.currentTime, 0.2);
+      },
       chime: function () { if (!on) return; var t = ctx.currentTime; [72, 76, 79, 84].forEach(function (m, i) { pluck(m, t + i * 0.09, 0.09); }); },
       scene: function (p, pro) {
         var T = { pad: 0.7, gtr: 0, bass: 0, perc: 0, drum: 0, bell: 0.25, kick: 0, ping: 0, open: 1 };
@@ -889,6 +947,8 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     document.documentElement.classList.remove("locked");
     setSound(withSound);
     setTimeout(function () { gate.hidden = true; }, 1500);
+    setTimeout(function () { setPlaying(true); }, reduceMotion ? 300 : 1200); // Watch: the opening plays itself; scroll to explore
+
   }
   enterSound.addEventListener("click", function () { enter(true); });
   document.getElementById("enterQuiet").addEventListener("click", function () { enter(false); });
@@ -915,6 +975,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   window.addEventListener("scroll", function () { target = nativeProgress(); }, { passive: true });
   window.addEventListener("resize", function () { target = nativeProgress(); });
   target = prog = nativeProgress();
+  OP.snap = function () { target = prog = nativeProgress(); }; // for tests: jump the story straight to the scroll position
   function scrollToRaw(r) {
     var total = track.offsetHeight - window.innerHeight;
     if (window.AriyaScroll && AriyaScroll.enabled) AriyaScroll.to(r * total);
@@ -923,7 +984,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
   /* ---------- Chapters: the nav label and the menu's chapter index ---------- */
   // [name, story position s] ; the prologue is -1 (the very top).
-  var chapters = [["Prologue", -1], ["The box", sFromOld(0)], ["The yes", sFromOld(0.17)], ["The colour", sFromScene("C", 0)], ["The weave", sFromScene("G", 0.02)], ["The noise", sFromOld(0.37)],
+  var chapters = [["The words", -1], ["Where it began", sFromScene("M", 0)], ["The question", sFromScene("N", 0)], ["The colour", sFromScene("C", 0)], ["The weave", sFromScene("G", 0.02)], ["The noise", sFromOld(0.37)],
     ["Mama", sFromScene("E", 0.02)], ["The calm", sFromOld(0.53)], ["Her name", sFromScene("F", 0.02)], ["The doors", sFromScene("W", 0.0)], ["The invitation", sFromOld(0.72)], ["The count", sFromOld(0.83)],
     ["Getting ready", sFromScene("J", 0.02)], ["The morning", sFromScene("H", 0.02)], ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
   var whereNo = document.getElementById("whereNo"), whereName = document.getElementById("whereName");
@@ -1065,7 +1126,101 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     pPill.textContent = pSent ? "Invitation sent" : "Invitation not sent"; pPill.className = "pill " + (pSent ? "sent" : "wait");
     pNote.textContent = pSent ? "Sent by text message, with her own link." : u > 0.45 ? "Tap to send her own invitation." : "";
   }
+  /* ---------- The opening: one set of scene definitions drives the captions, the words on screen, the sounds, the
+     blackout and the autoplay, whether the visitor watches it play or scrolls through it. ---------- */
+  // [scene, from, to, speaker, line, kind]  kind: "sfx" for described sounds (there is no recorded dialogue).
+  var OPEN_LINES = [
+    ["R", 0.06, 0.29, "Tunde, quietly", "Chidinma… these past five years…"],
+    ["R", 0.31, 0.43, "", "[paper rustles]", "sfx"],
+    ["R", 0.45, 0.64, "Tunde", "Why does that sound like a graduation speech?"],
+    ["R", 0.65, 0.74, "", "[a small, nervous laugh]", "sfx"],
+    ["R", 0.76, 0.99, "Tunde", "Since that night at table fourteen…"],
+    ["M", 0.1, 0.46, "Chidinma", "That’s enough rice for three people."],
+    ["M", 0.48, 0.76, "Tunde", "I’m planning ahead."],
+    ["M", 0.77, 0.97, "", "[her laugh]", "sfx"],
+    ["N", 0.1, 0.165, "Chidinma", "You kept this?"],
+    ["N", 0.17, 0.24, "Tunde", "Of course."],
+    ["N", 0.27, 0.315, "Tunde", "Close your eyes."],
+    ["N", 0.32, 0.37, "Chidinma, amused", "Tunde… what are you doing?"],
+    ["N", 0.375, 0.41, "Tunde, gently", "Please."],
+    ["N", 0.445, 0.475, "", "[a chair moves]", "sfx"],
+    ["N", 0.478, 0.505, "", "[fabric, a quiet breath]", "sfx"],
+    ["N", 0.508, 0.53, "", "[something small set down on the table]", "sfx"],
+    ["N", 0.535, 0.575, "Tunde", "Okay. Open."],
+    ["N", 0.69, 0.705, "", "[a soft hinge]", "sfx"],
+    ["N", 0.71, 0.75, "Tunde", "I had a whole speech."],
+    ["N", 0.755, 0.785, "Chidinma", "I know."],
+    ["N", 0.8, 0.84, "Tunde", "Will you marry me?"],
+    ["N", 0.86, 0.9, "Chidinma, with a small laugh", "Yes."]
+  ];
+  var OPEN_SLATES = [["R", 0.0, 0.3, "Tunde’s room · Lagos · late 2026"], ["M", 0.0, 0.95, "Lagos · December 2021"], ["N", 0.0, 0.16, "Five years later · dinner for two"]];
+  var OPEN_WORDS = [["N", 0.89, 0.955, "It starts with <em>one yes.</em>"], ["N", 0.955, 1.01, "Now tell everyone who <em>helped you get here.</em>"]];
+  // Sounds, by the same clock. They only play once the visitor has turned sound on.
+  var OPEN_SFX = [["R", 0.31, "paper"], ["R", 0.66, "breath"], ["R", 0.74, "paper"], ["M", 0.52, "clink"], ["N", 0.445, "chair"], ["N", 0.478, "fabric"], ["N", 0.49, "breath"], ["N", 0.508, "set"], ["N", 0.69, "hinge"], ["N", 0.79, "breath"]];
+  var openEl = document.getElementById("opening"), slateEl = document.getElementById("slate"), wordsEl = document.getElementById("words"), threadEl = document.getElementById("thread"), threadPath = document.getElementById("threadPath");
+  var ccEl = document.getElementById("cc"), ccWho = document.getElementById("ccWho"), ccLine = document.getElementById("ccLine");
+  var threadLen = threadPath.getTotalLength ? threadPath.getTotalLength() : 600; threadPath.style.strokeDasharray = threadLen; threadPath.style.strokeDashoffset = threadLen;
+  var lastCC = -1, lastWords = -1, lastSlate = -1, sfxMode = "", sfxLocal = 0;
+  function inOpening(mode) { return mode === "R" || mode === "M" || mode === "N"; }
+  function pick(list, mode, u) { for (var i = 0; i < list.length; i++) if (list[i][0] === mode && u >= list[i][1] && u < list[i][2]) return i; return -1; }
+  OP.ccdbg = function () { return { lastCC: lastCC, inline: ccEl.style.opacity, text: ccLine.textContent }; };
+  function updateOpening(sc) {
+    var m = sc.mode, u = sc.local, open = inOpening(m) && OP.entered;
+    var ci = open && sc.vis > 0.5 ? pick(OPEN_LINES, m, u) : -1;
+    if (ci !== lastCC) {
+      lastCC = ci;
+      if (ci >= 0) { var L = OPEN_LINES[ci]; ccWho.textContent = L[3]; ccLine.textContent = L[4]; ccEl.classList.toggle("sfx", L[5] === "sfx"); }
+      ccEl.style.opacity = ci >= 0 ? "1" : "0";
+    }
+    var wi = open ? pick(OPEN_WORDS, m, u) : -1;
+    if (wi !== lastWords) { lastWords = wi; if (wi >= 0) wordsEl.innerHTML = OPEN_WORDS[wi][3]; }
+    wordsEl.style.opacity = wi >= 0 ? String(Math.min(seg(u, OPEN_WORDS[wi][1], OPEN_WORDS[wi][1] + 0.012), 1 - seg(u, OPEN_WORDS[wi][2] - 0.012, OPEN_WORDS[wi][2]))) : "0";
+    var si = open ? pick(OPEN_SLATES, m, u) : -1;
+    if (si !== lastSlate) { lastSlate = si; if (si >= 0) slateEl.textContent = OPEN_SLATES[si][3]; }
+    slateEl.style.opacity = si >= 0 ? "1" : "0";
+    // Close your eyes: the picture fades to black and holds while we only hear, then opens on the same table.
+    OP.blackout = m === "N" ? Math.min(seg(u, 0.4, 0.44), 1 - seg(u, 0.555, 0.6)) : 0;
+    // The gold of the ring becomes the film's gold thread, drawn across the frame into the next chapter.
+    var th = m === "N" ? seg(u, 0.93, 0.995) : m === "C" ? 1 - seg(u, 0, 0.06) : 0;
+    threadEl.style.opacity = (m === "N" ? Math.min(1, th * 3) : th).toFixed(3);
+    threadPath.style.strokeDashoffset = (threadLen * (1 - (m === "N" ? th : 1))).toFixed(1);
+    openEl.style.visibility = open || th > 0 ? "visible" : "hidden";
+    // Sounds: fire each cue once as the story passes it going forward.
+    if (open && m === sfxMode) OPEN_SFX.forEach(function (c) { if (c[0] === m && sfxLocal < c[1] && u >= c[1] && u - c[1] < 0.06) Score.sfx(c[2]); });
+    sfxMode = m; sfxLocal = u;
+    Score.ambience(open ? m : "");
+    // The score stays under the voices until she says yes; then it rises.
+    Score.level(open && !(m === "N" && u > 0.88) ? 0.28 : 1);
+  }
+
+  /* ---------- Watch the opening: it plays itself at reading pace; any scroll takes over and pauses it ---------- */
+  var obar = document.getElementById("obar"), obPlay = document.getElementById("obPlay"), obCC = document.getElementById("obCC");
+  var OPEN_SECONDS = 50, playing = false, playLast = 0, autoScrolling = false, playY = -1;
+  function openRange() { var total = track.offsetHeight - window.innerHeight; return { a: rawFromS(sFromScene("R", 0)) * total, b: rawFromS(sFromScene("N", 1)) * total, total: total }; }
+  OP.watch = { set: function (on) { setPlaying(on); }, get playing() { return playing; }, range: function () { return openRange(); } };
+  function setPlaying(on) { playing = on; playY = on ? window.scrollY : -1; obPlay.setAttribute("aria-pressed", on ? "true" : "false"); obPlay.querySelector(".lbl").textContent = on ? "Pause" : "Play"; playLast = performance.now(); if (on) requestAnimationFrame(playStep); }
+  function playStep(now) {
+    if (!playing) return;
+    var R = openRange(), dt = Math.min(0.1, (now - playLast) / 1000); playLast = now;
+    // Anything else moving the page (a chapter jump, the scrollbar, Home) ends Watch where it is.
+    if (Math.abs(window.scrollY - playY) > 3 || window.scrollY > R.b + 6) { setPlaying(false); return; }
+    var y = Math.min(R.b + 4, Math.max(window.scrollY, R.a) + (R.b - R.a) * Math.max(0, dt) / OPEN_SECONDS);
+    autoScrolling = true; window.scrollTo({ top: y, behavior: "instant" }); autoScrolling = false; playY = window.scrollY;
+    if (y >= R.b) { setPlaying(false); return; }
+    requestAnimationFrame(playStep);
+  }
+  obPlay.addEventListener("click", function () { if (!playing && window.scrollY >= openRange().b - 2) window.scrollTo({ top: openRange().a, behavior: "instant" }); setPlaying(!playing); });
+  document.getElementById("obReplay").addEventListener("click", function () { window.scrollTo({ top: openRange().a, behavior: "instant" }); setPlaying(true); });
+  document.getElementById("obSkip").addEventListener("click", function () { setPlaying(false); var total = track.offsetHeight - window.innerHeight; scrollToRaw(rawFromS(sFromScene("C", 0.01))); });
+  obCC.addEventListener("click", function () { var on = obCC.getAttribute("aria-pressed") !== "true"; obCC.setAttribute("aria-pressed", on ? "true" : "false"); document.documentElement.classList.toggle("cc-off", !on); });
+  // Scrolling by hand is Explore: it takes over from Watch.
+  ["wheel", "touchstart", "keydown"].forEach(function (ev) { window.addEventListener(ev, function (e) { if (!playing) return; if (ev === "keydown" && !/^(Arrow|Page|Home|End| )/.test(e.key)) return; if (e.target && e.target.closest && e.target.closest(".obar")) return; setPlaying(false); }, { passive: true }); });
+  function updateObar(sc, sv) {
+    var R = sFromScene("N", 1), show = OP.entered && sv <= R + 0.002 && !OP.covered;
+    obar.classList.toggle("on", show);
+  }
   function updateDom(r, p, sv, sc) {
+    updateOpening(sc); updateObar(sc, sv);
     bar.style.transform = "scaleX(" + r.toFixed(4) + ")";
     oldLayer.style.opacity = sc.mode === "old" ? sc.vis.toFixed(3) : "0";
     oldLayer.style.visibility = sc.mode === "old" ? "visible" : "hidden";
@@ -1675,7 +1830,7 @@ async function start() {
     const fl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), flameMat);
     fl.scale.set(1, 2.6, 1); fl.position.set(x, TABLE_Y + hgt + 0.32, z); setA.add(fl);
     const pl = new THREE.PointLight(0xff9448, 14, 0, 2); pl.position.copy(fl.position); scene.add(pl);
-    candles.push({ fl, pl, base: fl.position.clone(), seed: rand() * 10 });
+    candles.push({ fl, pl, base: fl.position.clone(), seed: rand() * 10, meshes: [body, lip, pool, wick, fl] });
   });
 
   // Dust in the key light
@@ -1825,11 +1980,12 @@ async function start() {
   const TABLE1 = 6, MAMA_SEAT = TABLE1 * 10 + 9;
   seatOrder.splice(seatOrder.indexOf(MAMA_SEAT), 1); seatOrder.unshift(MAMA_SEAT);
   const flameCol = new THREE.Color(10, 4.6, 1.4), glowCol = new THREE.Color(0.55, 0.3, 0.12), off = new THREE.Color(0, 0, 0);
-  let seatsLit = -1, hideTable = -1;
+  let seatsLit = -1, hideTable = -1, fullHouse = false;
   function lightSeats(n) {
     if (n === seatsLit) return;
     const d = new THREE.Object3D();
-    const litSet = new Set(seatOrder.slice(0, n));
+    fullHouse = n >= 999; // the dance: every seat taken
+    const litSet = fullHouse ? new Set(guestSeat.map((_, i) => i)) : new Set(seatOrder.slice(0, n));
     tables.forEach(([tx, tz], ti) => {
       for (let s = 0; s < 10; s++) {
         const i = ti * 10 + s, on = litSet.has(i), va = (s / 10) * Math.PI * 2 + ti * 0.37 + 0.3;
@@ -2069,16 +2225,34 @@ async function start() {
     return g;
   }
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  // The tied gele: a wide halo of concentric pleats standing round the head, open at the nape, and a wrapped crown.
+  // Origin at the centre of the head (radius about 0.1 m).
+  function haloGele(s) {
+    const halo = new THREE.RingGeometry(0.085, 0.25, 200, 30, -Math.PI * 0.22, Math.PI * 1.44), pa = halo.attributes.position;
+    for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), y = pa.getY(i), r = Math.hypot(x, y), a = Math.atan2(y, x); pa.setZ(i, -(r - 0.085) * 0.5 + 0.0075 * Math.sin((r - 0.085) * 190) + 0.004 * Math.sin(a * 7)); }
+    halo.computeVertexNormals(); halo.rotateX(-0.28); halo.translate(0, 0.025, -0.03);
+    const parts = [halo,
+      new THREE.TorusGeometry(0.1, 0.024, 10, 48).rotateX(Math.PI / 2 - 0.45).translate(0, 0.04, 0.005),
+      new THREE.TorusGeometry(0.088, 0.022, 10, 48).rotateX(Math.PI / 2 - 0.3).translate(0, 0.072, -0.01),
+      new THREE.TorusGeometry(0.068, 0.02, 10, 40).rotateX(Math.PI / 2 - 0.15).translate(0, 0.1, -0.02),
+      new THREE.RingGeometry(0.02, 0.07, 40, 4, 0, Math.PI).rotateY(Math.PI / 2 - 0.5).translate(0.095, 0.05, 0.03)];
+    const g = mergeAll(parts); g.scale(s, s, s); g.computeVertexNormals(); return g;
+  }
+  // A seated guest at the table: buba or agbada to the waist, the lap toward the table, forearms resting on its edge.
   const seatedBodyGeo = mergeAll([
-    new THREE.CapsuleGeometry(0.16, 0.3, 6, 14).scale(1, 1, 0.68).translate(0, 0.86, 0.04),
-    new RoundedBoxGeometry(0.34, 0.14, 0.4, 2, 0.06).translate(0, 0.56, -0.12),
-    limb(V(-0.2, 1.0, 0.04), V(-0.17, 0.8, -0.28), 0.055), limb(V(0.2, 1.0, 0.04), V(0.17, 0.8, -0.28), 0.055)
+    new THREE.LatheGeometry([[0.0001, 0.5], [0.16, 0.5], [0.18, 0.6], [0.19, 0.78], [0.19, 0.86], [0.12, 0.93], [0.05, 0.95], [0.0001, 0.95]].map(([r, y]) => new THREE.Vector2(r, y)), 24).scale(1, 1, 0.66),
+    new RoundedBoxGeometry(0.34, 0.13, 0.4, 2, 0.05).translate(0, 0.5, -0.14),
+    new THREE.CylinderGeometry(0.055, 0.05, 0.45, 10).translate(-0.09, 0.225, -0.34), new THREE.CylinderGeometry(0.055, 0.05, 0.45, 10).translate(0.09, 0.225, -0.34),
+    new THREE.CylinderGeometry(0.042, 0.048, 0.1, 12).translate(0, 0.99, 0),
+    limb(V(-0.19, 0.88, 0), V(-0.22, 0.66, -0.1), 0.055), limb(V(0.19, 0.88, 0), V(0.22, 0.66, -0.1), 0.055),
+    limb(V(-0.22, 0.66, -0.1), V(-0.13, 0.78, -0.36), 0.045), limb(V(0.22, 0.66, -0.1), V(0.13, 0.78, -0.36), 0.045)
   ]);
   const headGeo = new THREE.SphereGeometry(0.095, 18, 14).scale(1, 1.15, 1);
-  const geleGeo = mergeAll([
+  const geleGeoOld = mergeAll([
     new THREE.SphereGeometry(0.15, 20, 10).scale(1.35, 0.6, 1.1),
     new THREE.TorusGeometry(0.13, 0.045, 10, 28, Math.PI * 1.3).rotateX(-0.5).translate(0, 0.07, 0.03)
   ]);
+  const geleGeo = haloGele(0.85);
   const filaGeo = new THREE.CylinderGeometry(0.088, 0.1, 0.11, 20).rotateZ(0.25);
   const fabric = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.7, sheen: 0.6, sheenRoughness: 0.45, sheenColor: 0xd8d0c0 });
   const geleMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.35, sheen: 1, sheenColor: 0xfff0c8 });
@@ -2103,17 +2277,17 @@ async function start() {
   });
   [seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.castShadow = true; m.receiveShadow = true; setB.add(m); });
   function placeGuest(i, on) {
-    if (i === MAMA_SEAT || Math.floor(i / 10) === hideTable) on = false; // her place is kept for her; we never show a figure in it
+    if (!fullHouse && (i === MAMA_SEAT || Math.floor(i / 10) === hideTable)) on = false; // her place is kept for her until the dance, when she is there
     const g = guestSeat[i], d = gd;
     d.position.set(g.x, 0, g.z); d.rotation.set(0, g.ry + g.lean, 0); d.scale.setScalar(on ? 1 : 0.0001); d.updateMatrix();
     seatedBodies.setMatrixAt(i, d.matrix);
     d.position.y = 0; d.updateMatrix();
-    const hm = new THREE.Matrix4().makeTranslation(0, 1.24, 0.0);
+    const hm = new THREE.Matrix4().makeTranslation(0, 1.13, 0.0);
     seatedHeads.setMatrixAt(i, new THREE.Matrix4().multiplyMatrices(d.matrix, hm));
-    const cap = new THREE.Matrix4().makeTranslation(0, 1.36, 0.02);
-    const capM = new THREE.Matrix4().multiplyMatrices(d.matrix, cap);
+    const cap = new THREE.Matrix4().makeTranslation(0, 1.24, 0.02), geleAt = new THREE.Matrix4().makeTranslation(0, 1.13, 0);
+    const capM = new THREE.Matrix4().multiplyMatrices(d.matrix, cap), geleM = new THREE.Matrix4().multiplyMatrices(d.matrix, geleAt);
     const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
-    seatedGele.setMatrixAt(i, g.woman ? capM : hidden);
+    seatedGele.setMatrixAt(i, g.woman ? geleM : hidden);
     seatedFila.setMatrixAt(i, g.woman ? hidden : capM);
   }
 
@@ -2135,7 +2309,7 @@ async function start() {
   const headGeoD = new THREE.SphereGeometry(0.1, 20, 16).scale(0.86, 1.12, 0.98);
   // Gele: a stiff band round the head and a pleated fan rising behind.
   const geleFanGeo = (() => { const g = new THREE.CylinderGeometry(0.23, 0.12, 0.2, 64, 3, true, -Math.PI * 0.62, Math.PI * 1.24), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), th = Math.atan2(z, x), k = 1 + 0.07 * Math.sin(th * 26) * (0.4 + (pa.getY(i) + 0.1) * 3); pa.setX(i, x * k); pa.setZ(i, z * k); } g.computeVertexNormals(); g.rotateX(-0.35); g.translate(0, 0.07, -0.02); return g; })();
-  const geleGeoD = mergeAll([new THREE.TorusGeometry(0.1, 0.035, 10, 32).rotateX(Math.PI / 2 - 0.25).translate(0, 0.0, 0.0), geleFanGeo]);
+  const geleGeoD = haloGele(0.95);
   const filaGeoD = mergeAll([new THREE.CylinderGeometry(0.095, 0.1, 0.1, 24).translate(0, 0.04, 0), new THREE.SphereGeometry(0.08, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2).scale(1.1, 0.6, 1).rotateZ(0.6).translate(0.07, 0.1, 0)]);
   const sleeveGeo = new THREE.CapsuleGeometry(0.058, 0.17, 4, 12); // upper arm, in the sleeve
   const foreGeo = new THREE.CapsuleGeometry(0.04, 0.18, 4, 10);
@@ -2176,8 +2350,8 @@ async function start() {
       gd.scale.set(1, g.h, 1); gd.updateMatrix();
       dWomen.setMatrixAt(i, g.woman ? gd.matrix : zeroM); dMen.setMatrixAt(i, g.woman ? zeroM : gd.matrix);
       mA.makeTranslation(0, 1.64, 0.0); dHeads.setMatrixAt(i, mB.multiplyMatrices(gd.matrix, mA));
-      mA.makeTranslation(0, 1.72, -0.01); mB.multiplyMatrices(gd.matrix, mA);
-      dGele.setMatrixAt(i, g.woman ? mB : zeroM); dFila.setMatrixAt(i, g.woman ? zeroM : mB);
+      mA.makeTranslation(0, 1.64, 0); mB.multiplyMatrices(gd.matrix, mA); dGele.setMatrixAt(i, g.woman ? mB : zeroM);
+      mA.makeTranslation(0, 1.72, -0.01); mB.multiplyMatrices(gd.matrix, mA); dFila.setMatrixAt(i, g.woman ? zeroM : mB);
       // Arms: shoulder, elbow, wrist, in the dancer's own space.
       [-1, 1].forEach((side, k) => {
         const w = Math.sin(t * g.sp * 0.5 + g.ph + k) * motion;
@@ -2237,14 +2411,14 @@ async function start() {
 
   /* ---------- Camera path ---------- */
   // [progress, position, look target, aperture (blur in px at 1080p for objects far from focus)]
-  const gemWorldY = RING_UP + gemC;
+  const gemWorldY = RING_REST + gemC; // the ring stays seated in the box
   const keysA = [
     [0.00, [0, 1.45, 5.6], [0, 0.55, 0], 24],
     [0.12, [0.45, 1.25, 4.0], [0, 0.3, 0], 20],
-    [0.25, [1.6, 1.95, 3.3], [0, RING_UP + 0.05, 0], 24],
-    [0.35, [-1.9, 2.0, 5.2], [0, RING_UP + 0.1, 0], 18],
-    [0.45, [0, 1.75, 7.0], [0, RING_UP + 0.1, 0], 12],
-    [0.54, [0, 1.65, 3.2], [0, RING_UP + 0.15, 0], 22],
+    [0.25, [1.6, 1.6, 3.6], [0, gemWorldY - 0.15, 0], 22],
+    [0.35, [-1.9, 1.8, 5.0], [0, gemWorldY - 0.1, 0], 18],
+    [0.45, [0, 1.6, 6.6], [0, gemWorldY - 0.1, 0], 12],
+    [0.54, [0, 1.3, 3.2], [0, gemWorldY - 0.05, 0], 22],
     [0.62, [0, gemWorldY + 0.62, 1.0], [0, gemWorldY + 0.02, 0], 28],
     [0.675, [0, gemWorldY + 0.32, 0.36], [0, gemWorldY + 0.03, 0], 36]
   ];
@@ -2898,27 +3072,27 @@ async function start() {
       const av = g.createLinearGradient(52, 92, 104, 144); av.addColorStop(0, "#c9a256"); av.addColorStop(1, "#6e1426");
       g.fillStyle = av; g.beginPath(); g.arc(78, 118, 26, 0, Math.PI * 2); g.fill();
       g.fillStyle = "rgba(255,255,255,.75)"; g.beginPath(); g.arc(78, 111, 9, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(78, 134, 15, 9, 0, Math.PI, 0); g.fill();
-      g.textAlign = "left"; g.fillStyle = "#e9edef"; g.font = '600 27px "Figtree", Arial'; g.fillText("Tunde", 118, 114);
+      g.textAlign = "left"; g.fillStyle = "#e9edef"; g.font = '600 31px "Figtree", Arial'; g.fillText("Tunde", 118, 114);
       g.fillStyle = "#8696a0"; g.font = '400 19px "Figtree", Arial'; g.fillText(state === "voice" ? "last seen today at 20:12" : "last seen today at 20:12", 118, 140);
       g.strokeStyle = "#aebac1"; g.lineWidth = 3; g.beginPath(); g.roundRect(392, 106, 30, 22, 5); g.stroke(); g.beginPath(); g.moveTo(422, 114); g.lineTo(434, 107); g.lineTo(434, 127); g.lineTo(422, 120); g.stroke();
       g.beginPath(); g.arc(478, 117, 13, Math.PI * 0.6, Math.PI * 1.6); g.stroke();
       const chip = (t, y) => { g.font = '500 17px "Figtree", Arial'; const tw = g.measureText(t).width + 30; g.fillStyle = "#182229"; g.beginPath(); g.roundRect(w / 2 - tw / 2, y, tw, 34, 9); g.fill(); g.fillStyle = "#8696a0"; g.textAlign = "center"; g.fillText(t, w / 2, y + 23); };
       const ticks = (x, y, read) => { g.strokeStyle = read ? "#53bdeb" : "#8696a0"; g.lineWidth = 2; [0, 6].forEach((o) => { g.beginPath(); g.moveTo(x + o, y - 5); g.lineTo(x + o + 4, y); g.lineTo(x + o + 12, y - 10); g.stroke(); }); };
       const bubble = (out, lines, time, y, read) => {
-        g.font = '400 23px "Figtree", Arial'; const tw = Math.max(...lines.map((l) => g.measureText(l).width)) + 110, bh = 22 + lines.length * 31;
+        g.font = '400 27px "Figtree", Arial'; const tw = Math.min(w - 60, Math.max(...lines.map((l) => g.measureText(l).width)) + 104), bh = 24 + lines.length * 36;
         const x = out ? w - 18 - tw : 18;
         g.fillStyle = out ? "#005c4b" : "#202c33"; g.beginPath(); g.roundRect(x, y, tw, bh, 12); g.fill();
         g.beginPath(); if (out) { g.moveTo(x + tw - 4, y); g.lineTo(x + tw + 12, y); g.lineTo(x + tw - 4, y + 16); } else { g.moveTo(x + 4, y); g.lineTo(x - 12, y); g.lineTo(x + 4, y + 16); } g.fill();
-        g.fillStyle = "#e9edef"; g.textAlign = "left"; lines.forEach((l, k) => g.fillText(l, x + 16, y + 36 + k * 31));
-        g.fillStyle = out ? "rgba(233,237,239,.6)" : "#8696a0"; g.font = '400 15px "Figtree", Arial'; g.textAlign = "right"; g.fillText(time, x + tw - (out ? 34 : 12), y + bh - 10);
+        g.fillStyle = "#e9edef"; g.textAlign = "left"; lines.forEach((l, k) => g.fillText(l, x + 16, y + 40 + k * 36));
+        g.fillStyle = out ? "rgba(233,237,239,.6)" : "#8696a0"; g.font = '400 18px "Figtree", Arial'; g.textAlign = "right"; g.fillText(time, x + tw - (out ? 34 : 12), y + bh - 10);
         if (out) ticks(x + tw - 30, y + bh - 14, read);
         return y + bh + 12;
       };
       chip("YESTERDAY", 192);
-      let y = bubble(false, ["Mama, the planners are sorting", "everything. I will call you."], "18:02", 244, false);
+      let y = bubble(false, ["Mama, the planners are", "sorting everything.", "I will call you."], "18:02", 244, false);
       y = bubble(true, ["Ok my son. God bless you."], "18:05", y, true);
       chip("TODAY", y + 6); y += 56;
-      y = bubble(true, ["Tunde, have they sent the card?"], "21:12", y, false);
+      y = bubble(true, ["Tunde, have they sent", "the card?"], "21:12", y, false);
       if (state === "voiceSent") {
         // Her voice note, sent: play, the waveform, her photo with a small mic, the length, one grey tick.
         const bx = 120, bw = w - 18 - bx, bh = 92; g.fillStyle = "#005c4b"; g.beginPath(); g.roundRect(bx, y, bw, bh, 12); g.fill();
@@ -3067,7 +3241,7 @@ async function start() {
     bagE.visible = true; bagE.position.set(1.25, 0, -0.55); bagE.rotation.y = -0.5; photoBag.visible = true;
     photoNight.visible = cardNight.visible = false;
     phone.visible = true; phone.position.set(0.12, TOP + 0.0045, -0.02); phone.rotation.set(0, 0.3, 0);
-    drawPhone(u < 0.36 ? "lock" : u < 0.9 ? "voice" : "voiceSent");
+    drawPhone(u < 0.34 ? "lock" : u < 0.72 ? "voice" : "voiceSent"); // long enough on each screen to read it
     rainTex.offset.y = -t * 0.02 * motion;
     fan.rotation.y = t * 1.6 * motion;
     lampLight.intensity = 2.4; lampFill.intensity = 0.3; windowLight.intensity = 0.4;
@@ -3076,9 +3250,9 @@ async function start() {
   function updateF(u, t) { screenGlow.intensity = 7; fFill.intensity = 0.5; }
   const keysE = [
     [0.00, V3(-0.9, 1.45, 1.9), V3(0.5, 0.7, -0.5), 18],
-    [0.30, V3(-0.6, 1.3, 1.6), V3(0.3, 0.72, -0.2), 20],
-    [0.62, V3(0.22, TOP + 0.36, 0.32), V3(0.12, TOP, -0.02), 20],
-    [1.00, V3(0.19, TOP + 0.3, 0.27), V3(0.12, TOP, -0.02), 18]
+    [0.24, V3(-0.6, 1.3, 1.6), V3(0.3, 0.72, -0.2), 20],
+    [0.42, V3(0.15, TOP + 0.27, 0.17), V3(0.12, TOP, -0.03), 12],
+    [1.00, V3(0.14, TOP + 0.25, 0.15), V3(0.12, TOP, -0.03), 10]
   ];
   const keysF = [
     [0.00, V3(-0.9, 0.95, 1.3), V3(0.1, 0.6, 0.1), 30],
@@ -3152,18 +3326,59 @@ async function start() {
     g.fillStyle = C.wine; g.font = 'italic 400 21px "Bodoni Moda", Georgia, serif'; press(g, C, role, w / 2, 190 + parts.length * 56 + 40);
     g.fillStyle = C.muted; g.font = '500 13px "Figtree", Arial'; g.letterSpacing = "3px"; g.fillText("C & T · 12.12.26", w / 2 + 2, h - 40); g.letterSpacing = "0px";
   });
+  // Lace for the aso ebi: heavy beaded lace. Burgundy chiffon with big beaded flowers for her family; brown with sequinned
+  // leaves for his. Drawn twice from one layout so the beads and sequins catch the light and the chiffon does not.
+  function laceTex(kind, rm) {
+    return canvasTex(1024, 1024, (g, w, h) => {
+      const P = kind === "wine" ? { base: "#4c0a18", fold: "rgba(0,0,0,.18)", line: "#e2a7b4", bead: "#7c1a2c", sheen: "#f2c9d2" } : { base: "#3a2012", fold: "rgba(0,0,0,.22)", line: "#c98a5a", bead: "#140c08", sheen: "#e8c09a" };
+      g.fillStyle = rm ? "rgb(0,180,0)" : P.base; g.fillRect(0, 0, w, h);
+      if (!rm) for (let y = 0; y < h; y += 5) { g.fillStyle = y % 10 ? P.fold : "rgba(255,255,255,.04)"; g.fillRect(0, y, w, 2); } // chiffon pleats
+      const ink = rm ? "rgb(0,60,255)" : P.line, bead = rm ? "rgb(0,90,200)" : P.bead;
+      const outline = (cx, cy, R, n, rot) => {
+        // A flower drawn as beads along its petal outlines: bugle beads on the outer edge, pearls inside.
+        for (let ring = 0; ring < 2; ring++) {
+          const rr = R * (1 - ring * 0.35);
+          for (let k = 0; k <= 360; k += 2.2) {
+            const a = (k / 180) * Math.PI + rot, r = rr * (0.62 + 0.38 * Math.abs(Math.sin(n * a / 2)));
+            const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+            if (ring === 0) { g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = ink; g.fillRect(-1.2, -4, 2.4, 8); g.restore(); }
+            else if (k % 9 < 2.2) { g.fillStyle = bead; g.beginPath(); g.arc(x, y, 4.2, 0, Math.PI * 2); g.fill(); if (!rm) { g.fillStyle = P.sheen; g.beginPath(); g.arc(x - 1.3, y - 1.3, 1.3, 0, Math.PI * 2); g.fill(); } }
+          }
+        }
+      };
+      if (kind === "wine") { outline(330, 420, 250, 5, 0.3); outline(820, 820, 220, 5, 1.1); outline(860, 180, 160, 5, 2.0); outline(140, 900, 140, 5, 0.6); }
+      else for (let i = 0; i < 26; i++) { const x = rand() * w, y = rand() * h, a = rand() * 6.28; g.save(); g.translate(x, y); g.rotate(a); g.strokeStyle = ink; g.lineWidth = 5; g.setLineDash([3, 4]); g.beginPath(); g.ellipse(0, 0, 70, 30, 0, 0, Math.PI * 2); g.stroke(); g.restore(); }
+      g.setLineDash([]);
+      // Scattered sequins.
+      for (let i = 0; i < 700; i++) { g.fillStyle = rm ? "rgb(0,40,255)" : (kind === "wine" ? "rgba(240,190,205,.8)" : "rgba(30,30,40,.9)"); g.beginPath(); g.arc(rand() * w, rand() * h, 1.6 + rand() * 1.8, 0, Math.PI * 2); g.fill(); }
+    }, { srgb: !rm });
+  }
+  const laceMatFor = (kind) => new THREE.MeshPhysicalMaterial({ map: laceTex(kind, false), roughnessMap: laceTex(kind, true), metalnessMap: laceTex(kind, true), roughness: 1, metalness: 1, sheen: 0.8, sheenColor: kind === "wine" ? 0xffb0c0 : 0xffd0a8, sheenRoughness: 0.4 });
+  const LACE = { wine: laceMatFor("wine"), indigo: laceMatFor("brown") };
+  const damaskTex = canvasTex(512, 256, (g, w, h) => { g.fillStyle = "#1a0f0c"; g.fillRect(0, 0, w, h); for (let i = 0; i < 14; i++) { g.strokeStyle = i % 2 ? "#c2603a" : "#e38a52"; g.lineWidth = 10 + rand() * 12; g.beginPath(); const x = rand() * w; g.moveTo(x, 0); g.bezierCurveTo(x + 80, h * 0.3, x - 90, h * 0.6, x + 40, h); g.stroke(); } }, { repeat: [1, 1] });
+  // Folded the way it comes from the weaver: the length folded into a flat stack, each fold rounding over at the front.
+  function foldedStack(mat, w, d, layers) {
+    const grp = new THREE.Group(), th = 0.019;
+    for (let k = 0; k < layers; k++) {
+      const m = new THREE.Mesh(new RoundedBoxGeometry(w - k * 0.004, th, d - k * 0.006, 3, 0.0092), mat);
+      m.position.set((k % 2 ? 0.003 : -0.002) + k * 0.001, th / 2 + k * (th - 0.001), -k * 0.004); m.rotation.y = (k % 2 ? 1 : -1) * 0.006; grp.add(m);
+    }
+    grp.userData.top = layers * (th - 0.001) + 0.001;
+    return grp;
+  }
   function makeAso(cw, name, role) {
     const grp = new THREE.Group();
-    const sq = new THREE.Mesh(squareGeo, MAT[cw].flat); sq.position.y = 0.006; sq.rotation.y = Math.PI / 4; grp.add(sq);
-    const roll = new THREE.Group(); roll.position.set(0, 0.012 + 0.052, 0); roll.rotation.y = 0.05; grp.add(roll); // along the square's diagonal
-    roll.add(new THREE.Mesh(rollGeo, MAT[cw].roll));
-    [-1, 1].forEach((k) => { const c = new THREE.Mesh(capGeo, MAT[cw].end); c.rotation.y = k * Math.PI / 2; c.position.x = k * 0.19; roll.add(c); });
+    const stack = foldedStack(MAT[cw].flat, 0.4, 0.28, 4); grp.add(stack);
+    const lace = foldedStack(LACE[cw], 0.36, 0.24, 3); lace.position.set(0.36, 0, -0.1); lace.rotation.y = 0.12; grp.add(lace);
+    if (cw === "indigo") { const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.3, 32).rotateZ(Math.PI / 2), new THREE.MeshPhysicalMaterial({ map: damaskTex, metalness: 0.6, roughness: 0.35 })); roll.position.set(0.36, 0.032, 0.11); roll.rotation.y = 0.12; grp.add(roll); }
     if (name) {
-      // A gold cord round the roll, and the tag lying on the cloth beside it.
-      const cord = new THREE.Mesh(new THREE.TorusGeometry(0.0535, 0.0018, 8, 64), cordMat); cord.rotation.y = Math.PI / 2; cord.position.x = 0.11; roll.add(cord);
-      const tail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0.11, -0.046, 0.025), V3(0.12, -0.05, 0.065), V3(0.128, -0.0508, 0.1)]), 20, 0.0016, 6), cordMat); roll.add(tail);
+      // A gold cord tied round the stack, and the tag lying on top.
+      const top = stack.userData.top;
+      const loop = []; for (let k = 0; k <= 64; k++) { const a = k / 64 * Math.PI * 2; loop.push(V3(0.1, top / 2 + Math.sin(a) * (top / 2 + 0.003), -0.004 + Math.cos(a) * 0.143)); }
+      const cord = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(loop, true), 96, 0.0016, 6, true), cordMat); grp.add(cord);
       const t = tagFor(name, role), tag = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.0006, 0.072), [cordMat, cordMat, new THREE.MeshPhysicalMaterial({ map: t.map, roughnessMap: t.rm, metalnessMap: t.rm, roughness: 1, metalness: 1 }), cordMat, cordMat, cordMat]);
-      tag.position.set(0.13, -0.0512, 0.135); tag.rotation.y = 0.15; roll.add(tag);
+      tag.position.set(0.04, top + 0.0012, 0.04); tag.rotation.y = -0.2; grp.add(tag);
+      const tail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0.1, top + 0.001, -0.02), V3(0.08, top + 0.002, 0.0), V3(0.05, top + 0.0015, 0.012)]), 16, 0.0014, 6), cordMat); grp.add(tail);
     }
     grp.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
     return grp;
@@ -3204,8 +3419,8 @@ async function start() {
   const keysG = [
     [0.00, V3(0.15, 1.05, 0.62), V3(0.0, 0.02, -0.02), 22],
     [0.40, V3(0.62, 0.42, 0.55), V3(0.02, 0.04, -0.06), 28],
-    [0.72, V3(0.3, 0.26, 0.4), V3(0.12, 0.02, 0.12), 34],
-    [1.00, V3(0.19, 0.2, 0.27), V3(0.135, 0.012, 0.125), 38]
+    [0.72, V3(0.3, 0.36, 0.45), V3(0.1, 0.06, 0.04), 30],
+    [1.00, V3(0.14, 0.3, 0.3), V3(0.05, 0.075, 0.04), 34]
   ];
   /* ---------- Set H, "The morning": Table 1 set before the doors open. Gold, glass, roses, the menu, the cards ---------- */
   const tmpV0 = new THREE.Vector3();
@@ -3365,36 +3580,43 @@ async function start() {
   j_block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.15, 16).translate(0, 0.1, 0), goldPolish));
   j_block.add(new THREE.Mesh(new THREE.LatheGeometry([[0.0001, 0.17], [0.05, 0.17], [0.04, 0.2], [0.036, 0.25], [0.045, 0.28], [0.075, 0.31], [0.09, 0.35], [0.088, 0.39], [0.075, 0.42], [0.05, 0.44], [0.0001, 0.452]].map(([r, y]) => new THREE.Vector2(r, y)), 64).scale(0.92, 1, 1.04), j_blockMat));
   const geleCloth = new THREE.MeshPhysicalMaterial({ color: 0x6a1428, roughness: 0.34, metalness: 0.35, sheen: 1, sheenColor: 0xf0c878, sheenRoughness: 0.35, normalMap: ribNormal, normalScale: new THREE.Vector2(0.3, 0.3), side: THREE.DoubleSide });
-  j_block.add(new THREE.Mesh(new THREE.TorusGeometry(0.094, 0.026, 14, 64).rotateX(Math.PI / 2 - 0.3).scale(0.95, 0.8, 1.06).translate(0, 0.37, 0), geleCloth));
-  const j_gFan = new THREE.Mesh((() => { const g = new THREE.CylinderGeometry(0.24, 0.115, 0.2, 260, 8, true, -Math.PI * 0.66, Math.PI * 1.32), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), y = pa.getY(i), th = Math.atan2(z, x), sn = Math.sin(th * 22), k = 1 + 0.045 * Math.sign(sn) * Math.pow(Math.abs(sn), 0.6) * (0.25 + (y + 0.1) * 3.6); pa.setX(i, x * k); pa.setZ(i, z * k); pa.setY(i, y + 0.025 * Math.cos(th * 2)); } g.computeVertexNormals(); g.translate(0, 0.1, 0); return g; })(), geleCloth);
-  j_gFan.position.set(0, 0.385, -0.03); j_gFan.rotation.set(-0.58, 0, 0.08); j_block.add(j_gFan);
-  const j_gKnot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.03, 0.012, 64, 8, 2, 3), geleCloth); j_gKnot.position.set(0.07, 0.4, 0.06); j_block.add(j_gKnot);
+  const j_gele = new THREE.Mesh(haloGele(0.98), geleCloth); j_gele.position.y = 0.365; j_block.add(j_gele);
   // Her wrapper, folded: the same aso-oke as the family's rolls.
   const j_wrapper = new THREE.Group(); j_wrapper.position.set(-0.12, VT, -0.24); j_wrapper.rotation.y = -0.15; setJ.add(j_wrapper);
   [[0.28, 0.022, 0.2, 0.011], [0.25, 0.02, 0.18, 0.032]].forEach(([w, h, d, y], k) => { const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, 0.008), MAT.wine.flat); m.position.set(k * 0.012, y, k * -0.008); m.rotation.y = k * 0.04; j_wrapper.add(m); });
-  // The clutch: gold beadwork, a frame clasp.
-  const j_beadTex = canvasTex(256, 128, (g, w, h) => { g.fillStyle = "#6a4a1a"; g.fillRect(0, 0, w, h); for (let y = 3; y < h; y += 6) for (let x = (y / 6) % 2 ? 3 : 6; x < w; x += 6) { g.fillStyle = `hsl(${40 + rand() * 6},${60 + rand() * 20}%,${55 + rand() * 25}%)`; g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill(); } });
-  const j_clutchMat = new THREE.MeshPhysicalMaterial({ map: j_beadTex, metalness: 0.85, roughness: 0.32, color: 0xffffff, clearcoat: 0.4 });
+  const j_crystal = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.3, roughness: 0.02, iridescence: 0.6, iridescenceIOR: 1.9, envMapIntensity: 3, emissive: 0x30302c });
+  // The clutch: a champagne glitter box, the front half set with crystals, a jewelled clasp on top.
+  const j_glitter = canvasTex(512, 256, (g, w, h) => { g.fillStyle = "#b9a184"; g.fillRect(0, 0, w, h); for (let i = 0; i < 9000; i++) { const l = 55 + rand() * 45; g.fillStyle = `hsla(${32 + rand() * 12},${30 + rand() * 30}%,${l}%,.9)`; g.fillRect(rand() * w, rand() * h, 1.6, 1.6); } });
+  const j_clutchMat = new THREE.MeshPhysicalMaterial({ map: j_glitter, metalness: 0.9, roughness: 0.38, clearcoat: 0.3 });
   const j_clutch = new THREE.Group(); j_clutch.position.set(0.1, VT, -0.3); j_clutch.rotation.y = 0.25; setJ.add(j_clutch);
-  const j_clutchBody = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.045, 0.1, 4, 0.02), j_clutchMat); j_clutchBody.position.y = 0.0225; j_clutch.add(j_clutchBody);
-  const j_clasp = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.008, 0.012), goldPolish); j_clasp.position.set(0, 0.047, -0.044); j_clutch.add(j_clasp);
-  [-1, 1].forEach((k) => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.008, 12, 8), goldPolish); b.position.set(k * 0.012, 0.053, -0.044); j_clutch.add(b); });
-  // Edo coral: three strands of small polished beads laid in loops, gold spacers, and a matching bracelet.
-  const j_coralTone = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.06 });
-  const j_NCB = mobile ? 180 : 260, j_jBeads = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 14, 10), j_coralTone, j_NCB);
+  const j_clutchBody = new THREE.Mesh(new RoundedBoxGeometry(0.19, 0.11, 0.06, 4, 0.022), j_clutchMat); j_clutchBody.position.y = 0.055; j_clutch.add(j_clutchBody);
+  { const NS2 = 160, cr = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0045, 10, 8), j_crystal, NS2), dd = new THREE.Object3D(); let n = 0;
+    for (let row = 0; row < 10 && n < NS2; row++) for (let col = 0; col < 16 && n < NS2; col++) { const x = 0.005 + col * 0.0058, y = 0.012 + row * 0.0092; if (x > 0.09) continue; dd.position.set(x + (row % 2) * 0.0029, y, 0.0305); dd.scale.setScalar(0.8 + rand() * 0.5); dd.updateMatrix(); cr.setMatrixAt(n++, dd.matrix); }
+    cr.count = n; j_clutch.add(cr); }
+  const j_clasp = new THREE.Mesh(new THREE.OctahedronGeometry(0.012, 0).scale(1, 1.3, 0.7), j_crystal); j_clasp.position.set(0, 0.122, 0); j_clutch.add(j_clasp);
+  const j_claspBase = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.009, 0.01, 16), goldPolish); j_claspBase.position.set(0, 0.113, 0); j_clutch.add(j_claspBase);
+  // Edo coral on a burgundy velvet bust: three layered strands of chunky coral with gold filigree beads, earrings beside.
+  const j_bust = new THREE.Mesh(new THREE.LatheGeometry([[0.0001, 0], [0.09, 0], [0.095, 0.02], [0.1, 0.1], [0.13, 0.17], [0.135, 0.2], [0.07, 0.23], [0.035, 0.25], [0.035, 0.31], [0.0001, 0.315]].map(([r, y]) => new THREE.Vector2(r, y)), 48).scale(1, 1, 0.55), velvetDeep);
+  j_bust.position.set(0.3, VT, -0.36); setJ.add(j_bust);
+  const j_coralTone = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.2 });
+  const j_NCB = mobile ? 120 : 170, j_jBeads = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), j_coralTone, j_NCB);
+  const j_filigree = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 2), goldPolish, 40);
   {
-    const d = new THREE.Object3D(), c = new THREE.Color(), cx = 0.28, cz = -0.24; let i = 0;
-    [[0.05, 0.0042], [0.066, 0.0046], [0.082, 0.005]].forEach(([r, br]) => {
-      const n = Math.floor(j_NCB * 0.28);
-      for (let k = 0; k < n && i < j_NCB; k++, i++) {
-        const t = k / (n - 1), a = Math.PI * 0.08 + t * Math.PI * 1.84; // a loop open at the back, as a necklace lies
-        d.position.set(cx + Math.cos(a) * r * 1.15, VT + br, cz + Math.sin(a) * r * 0.85); const gold = k % 12 === 6;
-        d.scale.setScalar(gold ? br * 0.8 : br * (0.92 + rand() * 0.16)); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix);
-        j_jBeads.setColorAt(i, gold ? c.set(0xd9b06a) : c.setHSL(0.015 + rand() * 0.018, 0.78, 0.36 + rand() * 0.08));
+    const d = new THREE.Object3D(), c = new THREE.Color(); let i = 0, f = 0;
+    [[0.03, 0.2, 0.0075], [0.075, 0.17, 0.0085], [0.12, 0.14, 0.0095]].forEach(([drop, yTop, br], sI) => {
+      const n = 44 - sI * 4;
+      for (let k = 0; k < n && i < j_NCB; k++) {
+        const t = k / (n - 1), a = Math.PI * (0.08 + 0.84 * t), x = Math.cos(a) * (0.07 + sI * 0.02), y = yTop - Math.sin(a) * drop, z = 0.05 + Math.sin(a) * (0.022 + sI * 0.006);
+        if (k % 6 === 3 && f < 40) { d.position.set(0.3 + x, VT + y, -0.36 + z); d.scale.setScalar(br * 0.95); d.rotation.set(0, 0, 0); d.updateMatrix(); j_filigree.setMatrixAt(f++, d.matrix); continue; }
+        d.position.set(0.3 + x, VT + y, -0.36 + z); d.rotation.set(rand() * 6, rand() * 6, rand() * 6); d.scale.set(br * (0.8 + rand() * 0.5), br * (0.9 + rand() * 0.6), br * (0.8 + rand() * 0.4)); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix);
+        j_jBeads.setColorAt(i++, c.setHSL(0.03 + rand() * 0.015, 0.78, 0.5 + rand() * 0.08));
       }
     });
-    for (; i < j_NCB; i++) { const a = (i / 20) * Math.PI * 2; d.position.set(0.44 + Math.cos(a) * 0.028, VT + 0.0045, -0.38 + Math.sin(a) * 0.028); d.scale.setScalar(0.0045); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix); j_jBeads.setColorAt(i, c.setHSL(0.02, 0.76, 0.4)); }
+    // A matching bracelet on the vanity.
+    for (let k = 0; k < 16 && i < j_NCB; k++) { const a = k / 16 * Math.PI * 2; d.position.set(0.47 + Math.cos(a) * 0.032, VT + 0.0065, -0.2 + Math.sin(a) * 0.032); d.rotation.set(rand() * 6, rand() * 6, 0); d.scale.setScalar(0.0068); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix); j_jBeads.setColorAt(i++, c.setHSL(0.035, 0.76, 0.52)); }
+    j_jBeads.count = i; j_filigree.count = f;
   }
+  setJ.add(j_filigree);
   setJ.add(j_jBeads);
   [[0.2, -0.12], [0.235, -0.11]].forEach(([x, z], k) => { const e = new THREE.Group(); e.position.set(x, VT + 0.003, z); e.rotation.y = k * 0.6; e.add(new THREE.Mesh(new THREE.TorusGeometry(0.011, 0.0018, 8, 24).rotateX(Math.PI / 2), goldPolish)); const drop = new THREE.Mesh(new THREE.SphereGeometry(0.0062, 12, 8).scale(1, 1.4, 1), new THREE.MeshPhysicalMaterial({ color: 0xc23a28, roughness: 0.25, clearcoat: 1 })); drop.position.set(0, 0.002, 0.016); e.add(drop); setJ.add(e); });
   const j_perfume = new THREE.Group(); j_perfume.position.set(-0.08, VT, -0.46); setJ.add(j_perfume);
@@ -3417,25 +3639,49 @@ async function start() {
   j_lamp.add(new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.013, 1.56, 16).translate(0, 0.8, 0), goldPolish));
   const j_lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.28, 48, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xf3e3c8, roughness: 0.9, side: THREE.DoubleSide, emissive: 0xffb873, emissiveIntensity: 0.9 })); j_lampShade.position.y = 1.72; j_lamp.add(j_lampShade);
   const j_hook = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 1.2, 0), V3(0.08, 1.2, 0.06), V3(0.13, 1.19, 0.1), V3(0.14, 1.23, 0.11)]), 24, 0.005, 8), goldPolish); j_lamp.add(j_hook);
-  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xe6c98e, metalness: 0.75, roughness: 0.28, clearcoat: 0.5, side: THREE.DoubleSide });
-  const j_soleMat = new THREE.MeshPhysicalMaterial({ color: 0xb89058, metalness: 0.5, roughness: 0.4 });
+  // Her shoes: pointed rose-gold pumps with a line of crystals round the topline and a crystal slingback.
+  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xe8ab8c, metalness: 1, roughness: 0.09, clearcoat: 0.6, side: THREE.DoubleSide });
+  const j_soleMat = new THREE.MeshPhysicalMaterial({ color: 0x2a1a14, roughness: 0.5 });
+  const j_innerMat = new THREE.MeshStandardMaterial({ color: 0xf0c9b4, roughness: 0.6, side: THREE.DoubleSide });
   function j_makeShoe() {
-    // A stiletto sandal: the sole curving up from the toe to the heel seat, the heel, a strap over the toes, the ankle strap.
     const grp = new THREE.Group();
-    const path = [[0.115, 0.0], [0.07, 0.0], [0.02, 0.012], [-0.03, 0.045], [-0.075, 0.075], [-0.105, 0.085]];
-    const sh = new THREE.Shape(); path.forEach(([x, y], k) => (k ? sh.lineTo(x, y) : sh.moveTo(x, y))); path.slice().reverse().forEach(([x, y]) => sh.lineTo(x, y - 0.007));
-    const sole = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.06, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 2, curveSegments: 6 }).translate(0, 0, -0.03), j_soleMat); grp.add(sole);
-    const insole = new THREE.Mesh(new THREE.ExtrudeGeometry((() => { const s2 = new THREE.Shape(); path.forEach(([x, y], k) => (k ? s2.lineTo(x, y + 0.002) : s2.moveTo(x, y + 0.002))); path.slice().reverse().forEach(([x, y]) => s2.lineTo(x, y)); return s2; })(), { depth: 0.056, bevelEnabled: false }).translate(0, 0, -0.028), j_shoeMat); grp.add(insole);
-    const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.004, 0.09, 16), j_shoeMat); heel.position.set(-0.098, 0.04, 0); heel.rotation.z = -0.08; grp.add(heel);
-    const toeStrap = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.007, 8, 24, Math.PI), j_shoeMat); toeStrap.rotation.y = Math.PI / 2; toeStrap.position.set(0.075, 0.004, 0); toeStrap.scale.set(1, 0.7, 1); grp.add(toeStrap);
-    const ankle = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.0035, 8, 32), j_shoeMat); ankle.rotation.y = Math.PI / 2; ankle.position.set(-0.085, 0.13, 0); grp.add(ankle);
-    // A satin toe box and a heel cup make it read as a shoe from any side.
-    const toeBox = new THREE.Mesh(new THREE.SphereGeometry(0.045, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2).scale(1.35, 0.6, 0.72), j_shoeMat); toeBox.position.set(0.068, 0.002, 0); grp.add(toeBox);
-    const heelCup = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.045, 24, 1, true, Math.PI * 0.5, Math.PI), j_shoeMat); heelCup.position.set(-0.085, 0.105, 0); grp.add(heelCup);
+    // The sole line, toe (x = 0.13) to heel seat (x = -0.105), and the half-width of the shoe along it (pointed at the toe).
+    const soleY = (x) => x > 0.06 ? 0 : x > -0.03 ? 0.012 * (0.06 - x) / 0.09 + 0.03 * Math.pow((0.06 - x) / 0.09, 2) : 0.042 + (-0.03 - x) * 0.58;
+    const halfW = (x) => x > 0.03 ? 0.034 * Math.pow(Math.max(0, 1 - (x - 0.03) / 0.1), 0.75) : 0.034 - Math.max(0, -0.06 - x) * 0.12;
+    const X0 = -0.105, X1 = 0.13, NX = 48, NT = 20;
+    // The upper: a toe box closed over the front, open from the throat back, and a low heel counter.
+    const pos = [], idx = [];
+    for (let i = 0; i <= NX; i++) { const x = X0 + (X1 - X0) * i / NX, w = halfW(x), y0 = soleY(x), top = x > 0.0 ? 0.032 * Math.sqrt(Math.max(0, 1 - (x - 0.0) / 0.13)) + 0.004 : x < -0.07 ? 0.045 : 0.006;
+      for (let j = 0; j <= NT; j++) { const a = Math.PI * j / NT; pos.push(x, y0 + 0.004 + Math.sin(a) * (x > 0 ? top : 0.0) + (x <= 0 ? (1 - Math.abs(Math.cos(a))) * 0 : 0), Math.cos(a) * w); } }
+    // Two walls along the sides for the open part, rising into the heel counter.
+    for (let i = 0; i < NX; i++) for (let j = 0; j < NT; j++) { const a = i * (NT + 1) + j, b = a + NT + 1; const x = X0 + (X1 - X0) * i / NX; if (x <= 0.0) continue; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+    const upper = new THREE.BufferGeometry(); upper.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); upper.setIndex(idx); upper.computeVertexNormals();
+    grp.add(new THREE.Mesh(upper, j_shoeMat));
+    const wallPts = (side) => { const pts = []; for (let i = 0; i <= 30; i++) { const x = X0 + (0.0 - X0) * i / 30; pts.push(new THREE.Vector2(x, soleY(x))); } return pts; };
+    [-1, 1].forEach((sd) => {
+      const pts = wallPts(sd), wp = [], wi = [];
+      pts.forEach((q, i) => { const h = q.x < -0.07 ? 0.05 : 0.016 + 0.01 * Math.sin(Math.PI * (q.x + 0.105) / 0.105); wp.push(q.x, q.y + 0.003, sd * halfW(q.x), q.x, q.y + 0.003 + h, sd * halfW(q.x) * 0.96); if (i) { const a = (i - 1) * 2; wi.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } });
+      const wg = new THREE.BufferGeometry(); wg.setAttribute("position", new THREE.Float32BufferAttribute(wp, 3)); wg.setIndex(wi); wg.computeVertexNormals(); grp.add(new THREE.Mesh(wg, j_shoeMat));
+    });
+    // The insole, pale leather, and the sole beneath.
+    const outline = new THREE.Shape(); for (let i = 0; i <= 40; i++) { const x = X0 + (X1 - X0) * i / 40; i ? outline.lineTo(x, halfW(x)) : outline.moveTo(x, halfW(x)); } for (let i = 40; i >= 0; i--) { const x = X0 + (X1 - X0) * i / 40; outline.lineTo(x, -halfW(x)); }
+    const bent = (geo, dy) => { geo.rotateX(Math.PI / 2); const pa = geo.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, pa.getY(i) + soleY(pa.getX(i)) + dy); geo.computeVertexNormals(); return geo; };
+    grp.add(new THREE.Mesh(bent(new THREE.ShapeGeometry(outline, 4), 0.004), j_innerMat));
+    grp.add(new THREE.Mesh(bent(new THREE.ExtrudeGeometry(outline, { depth: 0.004, bevelEnabled: false, curveSegments: 4 }), -0.001), j_soleMat));
+    const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.003, 0.088, 16), j_shoeMat); heel.position.set(-0.096, 0.0, 0); heel.rotation.z = -0.06; grp.add(heel);
+    const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.006, 10), j_soleMat); tip.position.set(-0.093, -0.045, 0); grp.add(tip);
+    heel.position.y = 0.0; heel.translateY(-0.0); // the stiletto runs from the heel seat to the floor
+    heel.position.set(-0.097, soleY(-0.097) - 0.044, 0); tip.position.set(-0.094, soleY(-0.097) - 0.09, 0);
+    // Crystals along the throat of the toe box, and a crystal slingback round the heel.
+    const NCr = 34, crystals = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.0032, 0), j_crystal, NCr * 2);
+    { const dd = new THREE.Object3D(); for (let k = 0; k < NCr; k++) { const a = Math.PI * k / (NCr - 1), x = 0.0015; dd.position.set(x, soleY(x) + 0.006 + Math.sin(a) * 0.036, Math.cos(a) * halfW(x)); dd.updateMatrix(); crystals.setMatrixAt(k, dd.matrix);
+        const b = Math.PI * 0.15 + Math.PI * 0.7 * k / (NCr - 1); dd.position.set(-0.105 - Math.sin(b) * 0.012, soleY(-0.105) + 0.055, Math.cos(b) * 0.036); dd.updateMatrix(); crystals.setMatrixAt(NCr + k, dd.matrix); } }
+    grp.add(crystals);
+    grp.userData.strap = V3(-0.112, soleY(-0.105) + 0.055, 0); // where it hangs from
     return grp;
   }
   // Hung by the ankle strap, each shoe swings toe down.
-  [-0.045, 0.05].forEach((dz, k) => { const pivot = new THREE.Group(); pivot.position.set(0.14, 1.21, 0.11 + dz); pivot.rotation.set(0.12 * k, -0.35 + k * 0.45, -1.45); j_lamp.add(pivot); const s = j_makeShoe(); s.position.set(0.085, -0.13, 0); pivot.add(s); });
+  [-0.04, 0.045].forEach((dz, k) => { const pivot = new THREE.Group(); pivot.position.set(0.14, 1.215, 0.11 + dz); pivot.rotation.set(0.1 * k, -0.4 + k * 0.5, -1.35); j_lamp.add(pivot); const sh = j_makeShoe(); sh.position.copy(sh.userData.strap).multiplyScalar(-1); pivot.add(sh); });
   // The room behind the camera, seen only in the mirror: the bride in her robe at the makeup chair, the artist leaning
   // in with a brush, and the photographer who walks across with his camera up.
   const jPeople = new THREE.Group(); setJ.add(jPeople);
@@ -3482,6 +3728,162 @@ async function start() {
     [0.85, V3(0.05, 1.36, 1.3), V3(0.05, 1.08, -0.32), 16],
     [1.00, V3(0.08, 1.4, 1.45), V3(0.05, 1.1, -0.32), 15]
   ];
+  /* ---------- The opening, on the box set (set A, 1 unit = 3 cm). Three groups of props, one per scene:
+     R, Tunde's dresser before dinner; M, Table 14 at a wedding in December 2021; N, their dinner for two tonight. ---------- */
+  const U = 1 / 0.03, TY = TABLE_Y;
+  const propsR = new THREE.Group(), propsM = new THREE.Group(), propsN = new THREE.Group();
+  [propsR, propsM, propsN].forEach((g) => { g.visible = false; setA.add(g); });
+  const o_shadowed = (o) => { o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; };
+  // Handwriting: ink that pools a little at the start of strokes, on lined writing paper.
+  function o_handwriting(w, h, lines, opts) {
+    return canvasTex(w, h, (g) => {
+      g.fillStyle = opts.paper || "#f6f0e2"; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < w * h / 300; i++) { g.fillStyle = `rgba(120,95,60,${0.03 + rand() * 0.04})`; g.fillRect(rand() * w, rand() * h, 1 + rand() * 2, 1); }
+      if (opts.ruled) { g.strokeStyle = "rgba(90,120,170,.22)"; g.lineWidth = 2; for (let y = opts.top; y < h - 40; y += opts.lh) { g.beginPath(); g.moveTo(40, y + 12); g.lineTo(w - 40, y + 12); g.stroke(); } }
+      g.textBaseline = "alphabetic"; g.fillStyle = opts.ink || "#1f2638";
+      lines.forEach(([txt, struck, size], k) => {
+        const y = opts.top + k * opts.lh, x = opts.left + (k % 2 ? 6 : 0);
+        g.save(); g.translate(x, y); g.rotate((rand() - 0.5) * 0.012);
+        g.font = `${size || opts.size}px "Pinyon Script", cursive`; g.fillText(txt, 0, 0);
+        if (struck) { const tw = g.measureText(txt).width; g.strokeStyle = opts.ink || "#1f2638"; g.lineWidth = 3.4; g.beginPath(); g.moveTo(-6, -opts.size * 0.28); for (let xx = 0; xx <= tw + 12; xx += 24) g.lineTo(xx, -opts.size * 0.28 + Math.sin(xx * 0.08) * 2.5); g.stroke(); }
+        g.restore();
+      });
+    });
+  }
+  // R. The speech: a sheet folded once, written and rewritten.
+  const o_speechTex = o_handwriting(1024, 1400, [["Chidinma,"], ["these past five years…", true], ["I have rehearsed this too many times", true], ["Since that night at table fourteen,"], ["you made a crowded room feel quiet."], ["Every table after that one,"], ["I have wanted you beside me."], ["So —", true], ["Will you…"]], { ruled: true, top: 190, lh: 100, left: 110, size: 46 });
+  const o_speech = new THREE.Group(); o_speech.position.set(-1.5, TY + 0.02, 1.15); o_speech.rotation.y = 0.18; propsR.add(o_speech);
+  { const W = 21 / 3, H = 29.7 / 3 / 2, paper = new THREE.MeshStandardMaterial({ map: o_speechTex, roughness: 0.85, side: THREE.DoubleSide });
+    // Two halves of an A4 sheet, the crease still lifting the paper a little.
+    const lower = new THREE.Mesh(new THREE.PlaneGeometry(W, H), paper); lower.rotation.x = -Math.PI / 2 + 0.03; lower.position.set(0, 0.06, H / 2 - 0.02);
+    const geoU = new THREE.PlaneGeometry(W, H); const uv = geoU.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setY(i, 0.5 + uv.getY(i) * 0.5);
+    const geoL = lower.geometry, uvl = geoL.attributes.uv; for (let i = 0; i < uvl.count; i++) uvl.setY(i, uvl.getY(i) * 0.5);
+    const upper = new THREE.Mesh(geoU, paper); upper.rotation.x = -Math.PI / 2 - 0.035; upper.position.set(0, 0.09, -H / 2 + 0.02);
+    o_speech.add(lower, upper); o_shadowed(o_speech); }
+  // R. His watch: a gold case, an ivory dial at twenty to eight, a burgundy leather strap.
+  const o_watch = new THREE.Group(); o_watch.position.set(2.3, TY, 2.0); o_watch.rotation.y = -0.6; propsR.add(o_watch);
+  { const dial = canvasTex(512, 512, (g, w, h) => { g.fillStyle = "#f3ead8"; g.fillRect(0, 0, w, h); g.translate(w / 2, h / 2); g.fillStyle = "#b38a43";
+      for (let k = 0; k < 12; k++) { g.save(); g.rotate(k * Math.PI / 6); g.fillRect(-5, -230, 10, k % 3 ? 26 : 44); g.restore(); }
+      g.fillStyle = "#3a2a1c"; g.font = 'italic 34px "Bodoni Moda", Georgia, serif'; g.textAlign = "center"; g.fillText("Àríyá", 0, -90);
+      const hand = (a, len, wd, c) => { g.save(); g.rotate(a); g.fillStyle = c; g.beginPath(); g.moveTo(-wd, 20); g.lineTo(0, -len); g.lineTo(wd, 20); g.fill(); g.restore(); };
+      hand((7 + 40 / 60) / 12 * Math.PI * 2, 130, 9, "#2a1f16"); hand(40 / 60 * Math.PI * 2, 200, 7, "#2a1f16"); hand(0.3, 210, 2, "#8a1730");
+      g.fillStyle = "#b38a43"; g.beginPath(); g.arc(0, 0, 12, 0, Math.PI * 2); g.fill(); });
+    const caseM = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.68, 0.3, 48), goldPolish); caseM.position.y = 0.15; o_watch.add(caseM);
+    const face = new THREE.Mesh(new THREE.CircleGeometry(0.58, 48), new THREE.MeshPhysicalMaterial({ map: dial, roughness: 0.4, clearcoat: 1, clearcoatRoughness: 0.02 })); face.rotation.x = -Math.PI / 2; face.position.y = 0.305; o_watch.add(face);
+    const bez = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.05, 12, 64), goldPolish); bez.rotation.x = Math.PI / 2; bez.position.y = 0.3; o_watch.add(bez);
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.14, 16), goldPolish); crown.rotation.z = Math.PI / 2; crown.position.set(0.74, 0.15, 0); o_watch.add(crown);
+    const leather = new THREE.MeshPhysicalMaterial({ color: 0x4a1220, roughness: 0.55, clearcoat: 0.3, sheen: 0.4, sheenColor: 0xffc0b0 });
+    [-1, 1].forEach((k) => { const strap = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 0.12, k * 0.6), V3(0, 0.05, k * 1.4), V3(0.1, 0.03, k * 2.4), V3(0.3, 0.03, k * 3.1)]), 24, 1, 2), leather); strap.scale.set(0.46, 0.09, 1); o_watch.add(strap); });
+    o_shadowed(o_watch); }
+  // R. The Table 14 photograph, mostly hidden under the speech at first.
+  const photoRT = new THREE.WebGLRenderTarget(900, 600, { type: THREE.HalfFloatType });
+  function o_makePrint() {
+    const g = new THREE.Group(), W = 15 / 3, H = 10 / 3, b = 0.22;
+    const border = new THREE.Mesh(new THREE.BoxGeometry(W, 0.03, H), new THREE.MeshStandardMaterial({ color: 0xf4eee2, roughness: 0.7 })); border.position.y = 0.015; g.add(border);
+    const img = new THREE.Mesh(new THREE.PlaneGeometry(W - b * 2, H - b * 2), new THREE.MeshPhysicalMaterial({ map: photoRT.texture, roughness: 0.32, clearcoat: 0.5, clearcoatRoughness: 0.2, color: new THREE.Color(1.06, 1.0, 0.92) }));
+    img.rotation.x = -Math.PI / 2; img.position.y = 0.032; g.add(img);
+    return o_shadowed(g);
+  }
+  const o_printR = o_makePrint(); o_printR.position.set(-3.6, TY + 0.005, -0.4); o_printR.rotation.y = 0.5; propsR.add(o_printR);
+  // M. Table 14, December 2021: the card, two places side by side, a dish of jollof with its serving spoon, glasses,
+  // and a runner of the hosts' burgundy and gold aso-oke.
+  const o_card14 = paperPair(1024, 606, (g, w, h, C) => {
+    foilFrame(g, w, h, C, 26); g.textAlign = "center";
+    g.fillStyle = C.foil; g.font = '600 30px "Figtree", Arial'; g.letterSpacing = "14px"; g.fillText("TABLE", w / 2 + 7, 190); g.letterSpacing = "0px";
+    g.fillStyle = C.ink; g.font = '400 230px "Bodoni Moda", Georgia, serif'; press(g, C, "14", w / 2, 430);
+    g.fillStyle = C.muted; g.font = '500 20px "Figtree", Arial'; g.letterSpacing = "6px"; g.fillText("ADAEZE & FEMI · 18 · 12 · 2021", w / 2 + 3, 520); g.letterSpacing = "0px";
+  });
+  const o_tent14 = makeTent(o_card14, U * 1.1); o_tent14.position.set(0, TY, 0.4); propsM.add(o_tent14);
+  // A folded napkin of the hosts' aso-oke, burgundy and gold, beside the card.
+  const o_napkin14 = foldedStack(MAT.wine.flat, 0.4, 0.28, 3); o_napkin14.scale.setScalar(U * 0.45); o_napkin14.position.set(4.4, TY, 1.4); o_napkin14.rotation.y = -0.35; propsM.add(o_napkin14);
+  const o_setting = (x, z, ry, parent) => {
+    const st = new THREE.Group(); st.position.set(x, TY + 0.02, z); st.rotation.y = ry; st.scale.setScalar(U); parent.add(st);
+    st.add(new THREE.Mesh(chargerGeoH, goldSatin));
+    const pl = new THREE.Mesh(plateGeoH, porcelain); pl.position.y = 0.006; st.add(pl);
+    const rim = new THREE.Mesh(plateRim, goldPolish); rim.position.y = 0.006; st.add(rim);
+    [[-0.19, forkGeo], [0.19, knifeGeo]].forEach(([fx, geo]) => { const m = new THREE.Mesh(geo, goldPolish); m.position.set(fx, 0.0012, 0); st.add(m); });
+    return o_shadowed(st);
+  };
+  o_setting(-6.2, -8.6, 0.1, propsM); o_setting(6.2, -8.6, -0.1, propsM); // their two places, side by side, behind the card
+  // The jollof: a gold-rimmed dish, rice glossy with tomato and pepper, a few slices of fried plantain, the spoon.
+  const o_riceTex = canvasTex(512, 512, (g, w, h) => {
+    g.fillStyle = "#b8461c"; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { const x = rand() * w, y = rand() * h, a = rand() * Math.PI; g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = `hsl(${12 + rand() * 14},${62 + rand() * 20}%,${36 + rand() * 22}%)`; g.beginPath(); g.ellipse(0, 0, 5.5, 2.2, 0, 0, Math.PI * 2); g.fill(); g.restore(); }
+    for (let i = 0; i < 60; i++) { g.fillStyle = rand() < 0.5 ? "#d62a1a" : "#e9d7b0"; g.fillRect(rand() * w, rand() * h, 6 + rand() * 6, 4); }
+  });
+  const o_jollof = new THREE.Group(); o_jollof.position.set(-10.5, TY, -1.5); propsM.add(o_jollof);
+  { const dish = new THREE.Mesh(shell([[0.0001, 0], [0.1, 0], [0.13, 0.02], [0.16, 0.05], [0.165, 0.055]], 0.004, 64), porcelain); dish.scale.setScalar(U); o_jollof.add(dish);
+    const drim = new THREE.Mesh(new THREE.TorusGeometry(0.163, 0.0016, 6, 96).rotateX(Math.PI / 2).translate(0, 0.055, 0), goldPolish); drim.scale.setScalar(U); o_jollof.add(drim);
+    const mound = new THREE.Mesh((() => { const g = new THREE.SphereGeometry(0.15, 64, 24, 0, Math.PI * 2, 0, Math.PI / 2), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const v = V3(pa.getX(i), pa.getY(i), pa.getZ(i)); pa.setY(i, v.y * 0.45 + Math.sin(v.x * 90) * Math.cos(v.z * 80) * 0.002); } g.computeVertexNormals(); return g; })(), new THREE.MeshPhysicalMaterial({ map: o_riceTex, roughness: 0.45, clearcoat: 0.35, clearcoatRoughness: 0.3 }));
+    mound.scale.setScalar(U); mound.position.y = 0.02 * U; o_jollof.add(mound);
+    const plantain = new THREE.MeshPhysicalMaterial({ color: 0xc8771e, roughness: 0.4, clearcoat: 0.4 });
+    for (let k = 0; k < 6; k++) { const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.008, 20).scale(1.6, 1, 1), plantain); const a = k * 0.55 + 2.2; sl.position.set(Math.cos(a) * 0.1 * U, (0.055 + 0.008 * (k % 2)) * U, Math.sin(a) * 0.1 * U); sl.rotation.set(0.25, a, 0.2); sl.scale.multiplyScalar(U); o_jollof.add(sl); }
+    const spoon = new THREE.Mesh(spoonGeo, new THREE.MeshPhysicalMaterial({ color: 0xe8e4dc, metalness: 1, roughness: 0.14 })); spoon.scale.setScalar(U * 1.7); spoon.position.set(4.6, 0.08, 1.4); spoon.rotation.y = 0.5; o_jollof.add(spoon);
+    o_shadowed(o_jollof); }
+  [[-2.8, -4.4, gobletGeo], [3.2, -4.0, fluteGeo], [9.4, -4.8, gobletGeo]].forEach(([x, z, geo]) => { const gl = new THREE.Mesh(geo, crystalGlass); gl.scale.setScalar(U); gl.position.set(x, TY, z); propsM.add(gl); });
+  // The party behind them, out of focus: warm lights, a few in the hosts' colours.
+  const o_NPB = mobile ? 160 : 300, o_pbPos = [], o_pbCol = [];
+  for (let i = 0; i < o_NPB; i++) { o_pbPos.push((rand() - 0.5) * 140, TY + 2 + rand() * 40, -28 - rand() * 70); const k = rand(), c = k < 0.6 ? [2.6, 1.6, 0.7] : k < 0.85 ? [2.4, 0.9, 1.0] : [2.6, 2.2, 1.8]; const b = 0.6 + rand() * 0.8; o_pbCol.push(c[0] * b, c[1] * b, c[2] * b); }
+  const o_pbGeo = new THREE.BufferGeometry(); o_pbGeo.setAttribute("position", new THREE.Float32BufferAttribute(o_pbPos, 3)); o_pbGeo.setAttribute("color", new THREE.Float32BufferAttribute(o_pbCol, 3));
+  propsM.add(new THREE.Points(o_pbGeo, new THREE.PointsMaterial({ size: 2.2, map: dotTex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })));
+  // N. Their dinner: the same print, now on the table, his note beside it, two glasses, two places, the candles.
+  const o_printN = o_makePrint(); o_printN.position.set(-3.7, TY + 0.005, 0.9); o_printN.rotation.y = 0.22; propsN.add(o_printN);
+  const o_noteTex = o_handwriting(1100, 760, [["My favourite seat", false, 120], ["was the one", false, 120], ["beside you.", false, 120], ["— T.", false, 84]], { top: 190, lh: 160, left: 110, size: 120, paper: "#f8f1e3", ink: "#262033" });
+  const o_note = new THREE.Mesh(new THREE.BoxGeometry(12 / 3, 0.03, 8.3 / 3), [paperEdge, paperEdge, new THREE.MeshStandardMaterial({ map: o_noteTex, roughness: 0.8 }), paperEdge, paperEdge, paperEdge]);
+  o_note.position.set(-1.5, TY + 0.02, 3.0); o_note.rotation.y = -0.12; propsN.add(o_shadowed(o_note));
+  [[2.6, -2.8, fluteGeo], [-1.0, -4.2, fluteGeo]].forEach(([x, z, geo]) => { const gl = new THREE.Mesh(geo, crystalGlass); gl.scale.setScalar(U); gl.position.set(x, TY, z); propsN.add(gl); const fz = new THREE.Mesh(fizzGeo, champagne); fz.scale.setScalar(U); fz.position.set(x, TY, z); propsN.add(fz); });
+  o_setting(12.5, 4.5, -0.6, propsN); o_setting(-11.5, -9.5, 2.6, propsN); // their places, out of the close-ups
+  // Cameras for the opening. Short dollies and deliberate focus; cuts where the story cuts.
+  const keysR = [
+    [0.00, V3(-1.2, 3.2, 5.2), V3(-1.55, TY, 0.8), 22],
+    [0.30, V3(-0.8, 3.4, 5.8), V3(-1.1, TY, 0.7), 20],
+    [0.56, V3(0.9, 2.8, 6.4), V3(1.6, TY + 0.2, 0.9), 18],
+    [0.78, V3(2.6, 2.6, 5.6), V3(3.4, TY + 0.5, -0.8), 18],
+    [0.88, V3(-1.6, 2.5, 3.6), V3(-1.8, TY, 0.75), 22],
+    [1.00, V3(-1.7, 2.3, 3.3), V3(-1.85, TY, 0.75), 24]
+  ];
+  const keysM = [
+    [0.00, V3(0, 1.6, 6.4), V3(0, 0.35, 0.4), 22],
+    [0.45, V3(1.6, 2.6, 8.8), V3(0, 0.0, -0.6), 16],
+    [1.00, V3(0.6, 8.5, 19.0), V3(-0.6, -0.8, -3.2), 10]
+  ];
+  const photoCam = new THREE.PerspectiveCamera(30, 1.5, 0.05, 200); photoCam.position.copy(keysM[2][1]); photoCam.lookAt(keysM[2][2]);
+  const keysN1 = [
+    [0.00, V3(-3.2, 3.8, 5.0), V3(-3.7, TY, 0.9), 20],
+    [0.12, V3(-3.0, 3.6, 5.2), V3(-3.4, TY, 1.3), 20],
+    [0.18, V3(-1.45, 4.0, 7.0), V3(-1.5, TY, 2.75), 20],
+    [0.27, V3(-1.4, 3.9, 6.9), V3(-1.5, TY, 2.75), 20],
+    [0.40, V3(-0.6, 4.8, 10.5), V3(-1.6, TY + 0.3, 1.4), 13],
+    [0.60, V3(-0.4, 4.6, 10.2), V3(-1.4, TY + 0.3, 1.3), 13],
+    [0.66, V3(-0.3, 4.55, 10.0), V3(-1.3, TY + 0.3, 1.2), 13]
+  ];
+  const keysN2 = [[0.66, V3(1.9, 1.2, 4.2), V3(0, -0.1, 0), 22], [0.70, V3(1.8, 1.15, 4.05), V3(0, -0.1, 0), 22]];
+  const gemSeatY = RING_REST + gemC;
+  const keysN3 = [[0.70, V3(0.9, gemSeatY + 0.75, 2.9), V3(0, gemSeatY - 0.15, 0), 26], [0.86, V3(0.75, gemSeatY + 0.66, 2.65), V3(0, gemSeatY - 0.12, 0), 28], [1.00, V3(0.6, gemSeatY + 0.6, 2.45), V3(0, gemSeatY - 0.1, 0), 30]];
+  function camOpening(mode, u) {
+    const ks = mode === "R" ? keysR : mode === "M" ? keysM : u < 0.66 ? keysN1 : u < 0.7 ? keysN2 : keysN3;
+    if (OP.reduceMotion) { // composed stills instead of travelling moves
+      let best = ks[0]; ks.forEach((k) => { if (k[0] <= u + 1e-6) best = k; });
+      camPos.copy(best[1]); camLook.copy(best[2]); camAperture = best[3]; return;
+    }
+    camNew(ks, clamp(u, ks[0][0], ks[ks.length - 1][0]));
+  }
+  let photoDone = false;
+  // The dance: dinner has been served. Jollof, a piece of chicken and fried plantain on most plates in the hall.
+  const foodRice = new THREE.InstancedMesh(new THREE.SphereGeometry(0.068, 24, 8, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.4, 1), new THREE.MeshPhysicalMaterial({ map: o_riceTex, roughness: 0.45, clearcoat: 0.3 }), NS);
+  const foodSide = new THREE.InstancedMesh(mergeGeometries([
+    new THREE.CapsuleGeometry(0.017, 0.05, 4, 10).rotateZ(Math.PI / 2).scale(1, 0.8, 1.15).translate(0.03, 0.014, 0.045).toNonIndexed(),
+    ...[0, 1, 2].map((k) => new THREE.CylinderGeometry(0.02, 0.02, 0.008, 16).scale(1.6, 1, 1).rotateY(k * 0.5).translate(-0.045 + k * 0.012, 0.006 + k * 0.004, -0.04 - k * 0.006).toNonIndexed())
+  ]), new THREE.MeshPhysicalMaterial({ color: 0xa8521c, roughness: 0.4, clearcoat: 0.5 }), NS);
+  {
+    const d = new THREE.Object3D(), zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    tables.forEach(([tx, tz], ti) => { for (let s2 = 0; s2 < 10; s2++) {
+      const i = ti * 10 + s2, sa = (s2 / 10) * Math.PI * 2 + ti * 0.37, served = rand() < 0.78;
+      d.position.set(tx + Math.cos(sa) * 0.66, CLOTH_Y + 0.024, tz + Math.sin(sa) * 0.66); d.rotation.set(0, rand() * 6.28, 0); d.updateMatrix();
+      foodRice.setMatrixAt(i, served ? d.matrix : zero); foodSide.setMatrixAt(i, served ? d.matrix : zero);
+    } });
+  }
+  foodRice.visible = foodSide.visible = false; foodRice.castShadow = foodSide.castShadow = true; setB.add(foodRice, foodSide);
   // W, the way in: through the arch, down the aisle, rising over the dance floor into the overhead shot of the hall.
   const keysW = [
     [0.00, V3(0, 1.62, 15.2), V3(0, 1.45, 6), 14],
@@ -3662,10 +4064,26 @@ async function start() {
     // Which set is on screen: the original chapters (A, the box; B, the hall) or the new ones (C, the colour; D, the send-off).
     const SC = OP.scene || { mode: "old", local: 0, fade: 0 };
     // T, the place kept, is the hall (set B) with its own camera.
-    const mode = SC.mode === "T" || SC.mode === "W" ? "old" : SC.mode, isNew = mode !== "old", atTable = SC.mode === "T", atWalk = SC.mode === "W";
+    // The opening (R, M, N) is played on the box set (A) with its own props and cameras.
+    const OPEN = SC.mode === "R" || SC.mode === "M" || SC.mode === "N";
+    const mode = SC.mode === "T" || SC.mode === "W" || OPEN ? "old" : SC.mode, isNew = mode !== "old", atTable = SC.mode === "T", atWalk = SC.mode === "W";
+    // The Table 14 photograph is that table, photographed: render the memory's last frame once into the print.
+    if (!photoDone && OP.loaded >= 1) {
+      photoDone = true;
+      const vis = [setA, setB, setC, setD, setE, setF, setG, setH, setJ].map((g) => g.visible);
+      [setB, setC, setD, setE, setF, setG, setH, setJ].forEach((g) => { g.visible = false; });
+      setA.visible = true; propsR.visible = propsN.visible = false; propsM.visible = true; box.visible = ring.visible = false; satinCloth.visible = petals.visible = false;
+      scene.background = envTex; scene.backgroundIntensity = 0.1; scene.environment = envTex; scene.environmentIntensity = 0.22;
+      key.position.set(2.8, 6.2, 3.6); key.target.position.set(0, 0, 0); key.intensity = 150; key.color.set(0xffd2a4); key.shadow.needsUpdate = true;
+      candles.forEach((c) => { c.pl.intensity = 12; });
+      photoCam.updateMatrixWorld();
+      renderer.setRenderTarget(photoRT); renderer.render(scene, photoCam); renderer.setRenderTarget(null);
+      [setA, setB, setC, setD, setE, setF, setG, setH, setJ].forEach((g, i) => { g.visible = vis[i]; });
+      lastSet = "";
+    }
     const inA = !isNew && p < 0.675;
     setA.visible = inA; setB.visible = !isNew && !inA; setC.visible = mode === "C"; setD.visible = mode === "D"; setE.visible = mode === "E"; setF.visible = mode === "F"; setG.visible = mode === "G"; setH.visible = mode === "H"; setJ.visible = mode === "J";
-    const setName = isNew ? mode : inA ? "A" : "B";
+    const setName = isNew ? mode : inA ? "A" + (OPEN ? SC.mode : "") : "B";
     if (setName !== lastSet) {
       lastSet = setName;
       scene.environment = mode === "D" ? envNight : envTex;
@@ -3676,6 +4094,7 @@ async function start() {
       else if (mode === "G") { scene.background = gBg; scene.environment = envRoom; scene.environmentIntensity = 0.12; scene.fog.density = 0; }
       else if (mode === "J") { scene.background = jBg; scene.environment = envRoom; scene.environmentIntensity = 0.25; scene.fog.density = 0; }
       else if (mode === "H") { scene.background = hallColor; scene.environmentIntensity = 0.45; scene.fog.density = 0; }
+      else if (inA && SC.mode === "R") { scene.background = roomBg; scene.environment = envRoom; scene.environmentIntensity = 0.1; scene.fog.density = 0; }
       else if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.17; scene.fog.density = 0; }
       else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
     }
@@ -3698,28 +4117,36 @@ async function start() {
       // The key and the candle lights are lent to the newer close-ups; put them back where the box needs them.
       key.position.set(2.8, 6.2, 3.6); key.target.position.set(0, 0, 0); key.angle = 0.42; key.penumbra = 0.85; key.color.set(0xffdcb8);
       candles.forEach((c) => { c.pl.position.copy(c.fl.position); });
-      // Box: the lid opens on a sprung hinge.
-      const open = seg(p, 0.03, 0.13);
+      // Which props are on the table. The ring box first appears on Tunde's dresser, closed; at dinner it is only there
+      // after the blackout, set down while her eyes were closed; the lid is open from the cut after the hinge.
+      const sm = SC.mode, u = SC.local;
+      propsR.visible = sm === "R"; propsM.visible = sm === "M"; propsN.visible = sm === "N";
+      satinCloth.visible = petals.visible = !OPEN;
+      candles.forEach((c) => { const on = sm !== "R"; c.meshes.forEach((m) => { m.visible = on; }); c.halo.visible = on; });
+      box.visible = !OPEN || sm === "R" || (sm === "N" && u >= 0.5);
+      ring.visible = !OPEN || (sm === "N" && u >= 0.5);
+      if (sm === "R") { box.position.set(3.6, 0, -1.0); box.rotation.y = 0.55; } else { box.position.set(0, 0, 0); }
+      // Box: open from the hinge cut in the opening, and open for the rest of the film.
+      const open = OPEN ? (sm === "N" && u >= 0.7 ? 1 : 0) : 1;
       lidPivot.rotation.x = -(1.86 * open + 0.09 * Math.sin(open * Math.PI));
-      box.rotation.y = -0.22 + open * 0.22;
-      // Ring: lifts out, dims in the noise, spins through the calm.
-      const lift = seg(p, 0.12, 0.25);
-      ring.position.y = lerp(RING_REST, RING_UP, lift) + Math.sin(t * 0.9) * 0.025 * lift * motion;
-      const spin = seg(p, 0.45, 0.54) * Math.PI * 2 + seg(p, 0.13, 0.3) * Math.PI * 0.55;
-      ring.rotation.y = -0.35 + spin + Math.sin(t * 0.35) * 0.1 * motion * lift + px * 0.2 * lift;
-      ring.rotation.x = py * 0.08 * lift;
-      ring.rotation.z = Math.sin(t * 0.5) * 0.05 * lift * motion;
-      const dim = 1 - 0.72 * bump(p, 0.29, 0.34, 0.45, 0.48);
-      const flare = 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.35 * bump(p, 0.6, 0.64, 0.66, 0.7);
-      key.intensity = 140 * dim * Math.min(flare, 1.5);
-      rim.intensity = 0.6 * dim;
-      scene.environmentIntensity = 0.17 * dim;
-      scene.backgroundIntensity = 0.08 * (0.5 + 0.5 * dim);
-      gemMat.uniforms.envIntensity.value = 0.9 * dim * flare;
-      gemMat.uniforms.sparkle.value = dim * flare;
+      if (sm !== "R") box.rotation.y = OPEN ? -0.18 : 0;
+      // The ring stays seated in its slot, always. Light does the work.
+      ring.position.set(box.position.x, RING_REST, box.position.z); ring.rotation.set(0, -0.35 + box.rotation.y, 0);
+      const dim = OPEN ? 1 : 1 - 0.72 * bump(p, 0.29, 0.34, 0.45, 0.48);
+      const flare = OPEN ? 1 : 1 + 1.2 * bump(p, 0.47, 0.5, 0.52, 0.57) + 0.35 * bump(p, 0.6, 0.64, 0.66, 0.7);
+      // Each scene has its own light: a single warm lamp on his dresser; the party's warmth for the memory; candles at dinner.
+      if (sm === "R") { key.position.set(-4.5, 6.5, 2.0); key.color.set(0xffc283); key.intensity = 120; key.angle = 0.5; key.penumbra = 1; }
+      else if (sm === "M") { key.color.set(0xffd2a4); key.intensity = 150; }
+      else if (sm === "N") { key.color.set(0xffcf9c); key.intensity = 95; }
+      else key.intensity = 140 * dim * Math.min(flare, 1.5);
+      rim.intensity = (sm === "R" ? 0.15 : sm === "N" ? 0.4 : 0.6) * dim;
+      scene.environmentIntensity = (sm === "R" ? 0.1 : sm === "M" ? 0.22 : 0.17) * dim;
+      scene.backgroundIntensity = (sm === "M" ? 0.1 : 0.08) * (0.5 + 0.5 * dim);
+      gemMat.uniforms.envIntensity.value = (sm === "N" ? 0.75 : 0.9 * dim * flare);
+      gemMat.uniforms.sparkle.value = sm === "N" ? 0.35 : dim * flare; // one soft candle reflection, nothing more
       candles.forEach((c) => {
         const f = motion ? 0.82 + 0.1 * Math.sin(t * 9 + c.seed) + 0.08 * Math.sin(t * 23.7 + c.seed * 3) : 0.9;
-        c.pl.intensity = 14 * f * (0.6 + 0.4 * dim);
+        c.pl.intensity = sm === "R" ? 0 : 14 * f * (0.6 + 0.4 * dim) * (sm === "N" ? 0.7 : 1);
         c.fl.scale.set(1, 2.6 * (0.9 + 0.1 * f), 1);
         c.fl.position.x = c.base.x + (motion ? Math.sin(t * 3 + c.seed) * 0.02 : 0);
       });
@@ -3760,6 +4187,7 @@ async function start() {
       // The dance: the floor fills with family and friends for the last chapter of the night.
       const dancing = !atTable && !atWalk && p >= 0.885;
       danceMeshes.forEach((m) => { m.visible = dancing; });
+      [seatedBodies, seatedHeads, seatedGele, seatedFila, foodRice, foodSide].forEach((m) => { m.visible = dancing; }); napkins.visible = !dancing;
       if (dancing) animateDancers(t);
       flashes.forEach((fl) => {
         if (motion && t - fl.t0 > 0.9 && Math.random() < 0.015 && OP.seated > 10) {
@@ -3771,7 +4199,7 @@ async function start() {
       });
       const hv = atWalk ? 0.85 : seg(p, 0.675, 0.72);
       hallKey.intensity = 1.35 * hv * (1 - 0.75 * seg(p, 0.89, 0.95));
-      lightSeats(OP.seated);
+      lightSeats(!atTable && !atWalk && p >= 0.885 ? 999 : OP.seated);
       goboMat.opacity = 0.32 + 0.4 * seg(p, 0.84, 0.95);
       const cf = seg(p, 0.89, 0.95);
       conf.visible = cf > 0.001;
@@ -3801,10 +4229,11 @@ async function start() {
     }
 
     // Camera: keyframed path, a little handheld breath, and the pointer as a slight parallax.
-    if (atTable) camNew(keysT, SC.local);
+    if (OPEN) camOpening(SC.mode, SC.local);
+    else if (atTable) camNew(keysT, SC.local);
     else if (atWalk) camNew(keysW, SC.local);
     else if (isNew) camNew(mode === "C" ? keysC : mode === "D" ? keysD : mode === "E" ? keysE : mode === "G" ? keysG : mode === "H" ? keysH : mode === "J" ? keysJ : keysF, SC.local); else cameraAt(p);
-    if (!isNew && OP.pro < 1) {
+    if (!isNew && !OPEN && OP.pro < 1) {
       // Prologue: a wide, drifting establishing shot of the table that settles onto the box.
       const k = smooth(OP.pro);
       camPos.lerpVectors(estPos.set(3.4 + Math.sin(t * 0.1) * 0.4 * motion, 4.4, 13.5), camPos, k);
@@ -3852,7 +4281,8 @@ async function start() {
     finalMat.uniforms.exposure.value = (mode === "C" ? 0.95 : mode === "D" ? 1.05 : mode === "E" ? 1.0 : mode === "F" ? 0.95 : mode === "G" || mode === "H" || mode === "J" ? 1.0 : inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
     finalMat.uniforms.warmth.value = inA ? 0 : 1;
     // A dip to near black at every cut between chapters that change set.
-    finalMat.uniforms.fade.value = SC.fade || 0;
+    finalMat.uniforms.fade.value = Math.max(SC.fade || 0, OP.blackout || 0);
+    OP.state = { cam: camera.position.toArray().map((v) => +v.toFixed(2)), setA: setA.visible, propsR: propsR.visible, set: lastSet, box: box.visible && setA.visible, ring: ring.visible && setA.visible, lid: -lidPivot.rotation.x, ringY: ring.position.y, ringRest: RING_REST, fade: finalMat.uniforms.fade.value };
     renderer.setRenderTarget(ldrRT);
     finalQuad.render(renderer);
     smaa.render(renderer, null, ldrRT);
