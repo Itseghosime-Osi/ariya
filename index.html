@@ -2114,7 +2114,7 @@ async function start() {
       g.save(); g.translate(cx, cy);
       g.strokeStyle = C.foil; g.lineWidth = 4; g.strokeRect(12, 12, cw - 24, chh - 24); g.lineWidth = 1.4; g.strokeRect(22, 22, cw - 44, chh - 44);
       g.textAlign = "center"; g.fillStyle = C.foil; g.font = '600 17px "Figtree", Arial'; g.letterSpacing = "7px"; g.fillText("TABLE", cw / 2 + 4, 82); g.letterSpacing = "0px";
-      g.fillStyle = C.ink; g.font = '400 150px "Bodoni Moda", Georgia, serif'; press(g, C, String(tableNo(ti)), cw / 2, 240);
+      g.fillStyle = C.ink; g.font = '300 140px "Figtree", Arial, sans-serif'; press(g, C, String(tableNo(ti)), cw / 2, 238);
       g.fillStyle = C.wine; g.font = '30px "Pinyon Script", cursive'; g.fillText("C & T", cw / 2, 300);
       g.restore();
     }
@@ -3515,7 +3515,7 @@ async function start() {
   const numTex = paperPair(400, 560, (g, w, h, C) => {
     foilFrame(g, w, h, C, 18); g.textAlign = "center";
     g.fillStyle = C.foil; g.font = '600 22px "Figtree", Arial'; g.letterSpacing = "10px"; g.fillText("TABLE", w / 2 + 5, 130); g.letterSpacing = "0px";
-    g.fillStyle = C.ink; g.font = '400 250px "Bodoni Moda", Georgia, serif'; press(g, C, "1", w / 2, 380);
+    g.fillStyle = C.ink; g.font = '300 230px "Figtree", Arial, sans-serif'; press(g, C, "1", w / 2, 375);
     foilRule(g, C, w / 2, 420, 70);
     g.fillStyle = C.wine; g.font = '44px "Pinyon Script", cursive'; press(g, C, "Chidinma & Tunde", w / 2, 488);
   });
@@ -3790,7 +3790,7 @@ async function start() {
   const o_card14 = paperPair(1024, 606, (g, w, h, C) => {
     foilFrame(g, w, h, C, 26); g.textAlign = "center";
     g.fillStyle = C.foil; g.font = '600 30px "Figtree", Arial'; g.letterSpacing = "14px"; g.fillText("TABLE", w / 2 + 7, 190); g.letterSpacing = "0px";
-    g.fillStyle = C.ink; g.font = '400 230px "Bodoni Moda", Georgia, serif'; press(g, C, "14", w / 2, 430);
+    g.fillStyle = C.ink; g.font = '300 210px "Figtree", Arial, sans-serif'; press(g, C, "14", w / 2, 425);
     g.fillStyle = C.muted; g.font = '500 20px "Figtree", Arial'; g.letterSpacing = "6px"; g.fillText("ADAEZE & FEMI · 18 · 12 · 2021", w / 2 + 3, 520); g.letterSpacing = "0px";
   });
   const o_tent14 = makeTent(o_card14, U * 1.1); o_tent14.position.set(0, TY, 0.4); propsM.add(o_tent14);
