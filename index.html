@@ -5,15 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Àríyá · The Yes</title>
 <meta name="description" content="Àríyá plans Nigerian weddings and parties with one personal RSVP link per guest. The Yes is a wedding film in thirteen chapters.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#16040a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Àríyá by OwambePlan">
+<meta property="og:title" content="The Yes · Àríyá">
+<meta property="og:description" content="One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in thirteen chapters, from Àríyá by OwambePlan.">
+<meta property="og:url" content="https://owambeplan.vercel.app/">
+<meta property="og:image" content="https://owambeplan.vercel.app/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="assets/nav.css">
 <script>try{if(sessionStorage.getItem("ariya-curtain")&&!/embed=/.test(location.search))document.documentElement.classList.add("cur-in")}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Jost:wght@300;400;500&family=DM+Mono:wght@400&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
 <style>
-/* Àríyá, "The Yes": a wedding archive. A fixed WebGL stage rendered like a camera, with type layered over it.
-   A 1000vh track drives eight archive chapters, then the page becomes the company's site.
+/* Àríyá, "The Yes": a wedding film you scroll. A fixed WebGL stage rendered like a camera, with type layered over it.
+   A long track drives thirteen chapters, then the page becomes the company's site.
    One committed night look: burgundy black, ivory, champagne gold. Type pulls focus the way the lens does. */
 :root {
   --ink: #0c0406;
@@ -27,8 +39,8 @@
   --paper: #f3ebdc;
   --paper-ink: #2a2118;
   --font-display: "Bodoni Moda", "Didot", Georgia, serif;
-  --font-body: "Jost", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, Menlo, monospace;
+  --font-body: "Figtree", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Figtree", "Helvetica Neue", Arial, sans-serif; /* small caps labels, the same family as the site */
   --font-hand: "Pinyon Script", "Snell Roundhand", cursive;
   color-scheme: dark;
 }
@@ -41,12 +53,14 @@ body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size:
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
 #gl.live { opacity: 1; }
 .track { position: relative; z-index: 0; height: 1930vh; }
-.mono { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.mono { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
 .btn { font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.9rem 1.3rem; border-radius: 999px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: background .3s, color .3s, transform .3s; }
 @media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-1px); } }
 .btn:active { transform: scale(0.97); }
 .btn.gold { background: var(--gold); color: var(--ink); border-color: var(--gold); }
 .btn.gold:hover { background: #f6dca8; }
+.btn.small { padding: 0 16px; min-height: 40px; font-size: 0.68rem; letter-spacing: 0.14em; }
+@media (max-width: 420px) { .nav .btn.small { padding: 0 12px; letter-spacing: 0.1em; } }
 .btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 /* ---------- Gate: the archive's front door ---------- */
@@ -56,7 +70,7 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .overlay { transition: opacity 1.2s ease; }
 .overlay .layer { position: absolute; inset: 0; }
 /* A soft shade under the words in the new chapters, so they read over silk and fireworks. */
-#newLayer::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 60%; background: linear-gradient(0deg, rgba(10, 3, 5, 0.78), rgba(10, 3, 5, 0.35) 55%, transparent); opacity: var(--scrim, 0); }
+#oldLayer::before, #newLayer::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 60%; background: linear-gradient(0deg, rgba(10, 3, 5, 0.78), rgba(10, 3, 5, 0.35) 55%, transparent); opacity: var(--scrim, 0); }
 @media (max-height: 600px) { .gate .inner { gap: 12px; } .gate h1 { font-size: clamp(2.6rem, 9vh, 4rem); } .gate p { font-size: 0.9rem; } }
 .gate.gone { opacity: 0; visibility: hidden; pointer-events: none; }
 .gate .inner { display: grid; gap: 22px; justify-items: center; max-width: 640px; }
@@ -64,6 +78,11 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .gate h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(3.4rem, 11vw, 8rem); line-height: 0.95; margin: 0; letter-spacing: -0.02em; }
 .gate h1 em { font-style: italic; color: var(--gold); }
 .gate p { margin: 0; color: var(--mist); max-width: 32em; }
+.gate { background-image: linear-gradient(180deg, rgba(12, 4, 6, 0.5), rgba(12, 4, 6, 0.72) 55%, rgba(12, 4, 6, 0.94)), url("assets/poster.jpg"); background-size: cover; background-position: center 30%; }
+@media (max-aspect-ratio: 4/5) { .gate { background-image: linear-gradient(180deg, rgba(12, 4, 6, 0.45), rgba(12, 4, 6, 0.75) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster-tall.jpg"); } }
+.gate .value { font-family: var(--font-display); font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 1.3; color: var(--ivory); max-width: 22em; text-wrap: balance; }
+.gate .story { color: var(--mist); }
+.gate-links { display: flex; gap: 14px; align-items: center; color: var(--mist); }
 .gate .actions { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .gate .quiet { background: none; border: 0; color: var(--mist); font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; text-decoration: underline; text-underline-offset: 5px; }
 .gate .load { display: flex; gap: 14px; align-items: center; color: var(--mist); }
@@ -90,7 +109,18 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 @keyframes eq { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
 
 
-/* Bottom: archive progress */
+/* The chapter rail: where you are, and a way to jump */
+.rail { position: fixed; z-index: 12; right: max(14px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%); transition: opacity .3s; }
+html.locked .rail, .rail.off { opacity: 0; pointer-events: none; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.rail button { display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 160px; height: 18px; padding: 0; background: none; border: 0; cursor: pointer; color: var(--mist); font: 600 0.66rem/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; }
+.rail button i { display: block; width: 10px; height: 1.5px; background: rgba(244, 239, 230, 0.4); transform-origin: right; transition: transform .2s cubic-bezier(0.23, 1, 0.32, 1), background .2s; }
+.rail button span { opacity: 0; transform: translateX(4px); transition: opacity .2s cubic-bezier(0.23, 1, 0.32, 1), transform .2s cubic-bezier(0.23, 1, 0.32, 1); white-space: nowrap; text-shadow: 0 1px 8px rgba(10, 3, 5, 0.9); }
+.rail button[aria-current="step"] i { background: var(--gold); transform: scaleX(2.4); }
+.rail button:focus-visible span { opacity: 1; transform: none; }
+@media (hover: hover) and (pointer: fine) { .rail:hover button span { opacity: 1; transform: none; } .rail button:hover i { background: var(--ivory); } }
+@media (max-width: 700px) { .rail button { width: 24px; } .rail button span { display: none; } }
+/* Bottom: progress */
 .foot-ui { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; padding: 0 max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(20px, env(safe-area-inset-left, 0px)); display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; pointer-events: none; transition: opacity .5s; }
 .progress { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; height: 2px; background: var(--line); }
 .progress b { position: absolute; inset: 0; background: var(--gold); transform-origin: left; transform: scaleX(0); }
@@ -107,10 +137,10 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .beat.low { bottom: max(13vh, calc(env(safe-area-inset-bottom, 0px) + 84px)); text-align: center; }
 .beat.side { top: 50%; transform: translateY(-50%); max-width: 1240px; margin: 0 auto; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
-.beat h1 { font-size: clamp(2.8rem, 7.5vw, 6.2rem); line-height: 1; }
+.beat h1 { font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1.02; }
 .beat h2 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.04; }
 h1 em, h2 em { font-style: italic; color: var(--gold); }
-.no { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose); margin-bottom: 18px; }
+.no { display: inline-block; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #f6b3bf; text-shadow: 0 1px 10px rgba(10, 3, 5, 0.9); margin-bottom: 18px; }
 .sub { color: #dccbc6; max-width: 30em; margin: 18px auto 0; font-size: 1.08rem; }
 .prose { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.35; color: #e9e2d4; max-width: 24em; margin: 0 auto; }
 
@@ -266,6 +296,37 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .plan .price { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--gold); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .plan.best h3 { color: var(--gold); }
 .note { color: var(--mist); font-size: 0.8rem; margin-top: 20px; }
+/* The close: what Àríyá does, a look at the planner, and one clear next step. */
+.close .label { display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline; }
+.close .label span { color: var(--mist); }
+.close .statement { max-width: 20em; }
+.close-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 6vw, 96px); align-items: center; margin-top: clamp(40px, 6vw, 80px); }
+.proofs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: p; border-top: 1px solid var(--line); }
+.proofs li { counter-increment: p; padding: 22px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 3em minmax(0, 1fr); column-gap: 8px; }
+.proofs li::before { content: "0" counter(p); grid-row: span 2; color: var(--gold); font: 600 0.74rem/1.9 var(--font-body); letter-spacing: 0.14em; }
+.proofs b { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.35rem, 2.2vw, 1.75rem); line-height: 1.15; }
+.proofs p { margin: 6px 0 0; color: var(--mist); max-width: 30em; }
+.peek { margin: 0; background: #fbf7f0; color: #23141a; border-radius: 18px; padding: 20px; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(233, 201, 138, 0.35); transform: rotate(-1.2deg); }
+.peek-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(35, 20, 26, 0.12); }
+.peek-head b { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.35rem; }
+.peek-head span { font-size: 0.8rem; color: #5c4b51; }
+.peek-count { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+.peek-count div { background: #f3ebe0; border-radius: 10px; padding: 10px 12px; }
+.peek-count dt { font: 600 0.66rem/1 var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; color: #7d5c1d; }
+.peek-count dd { margin: 6px 0 0; font-family: var(--font-display); font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.peek-rows { list-style: none; margin: 0; padding: 0; }
+.peek-rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 2px; border-top: 1px solid rgba(35, 20, 26, 0.1); font-size: 0.95rem; }
+.peek-rows em { font-style: normal; color: #5c4b51; font-size: 0.85rem; }
+.peek-rows i { font-style: normal; font-size: 0.76rem; font-weight: 600; border-radius: 999px; padding: 3px 9px; }
+.peek-rows i.yes { background: #f6e1e6; color: #8a1730; } .peek-rows i.wait { background: #f6e8c9; color: #7a5310; } .peek-rows i.no { background: #ebe5e6; color: #55484c; }
+.peek figcaption { margin-top: 10px; font-size: 0.78rem; color: #6d5a60; text-align: right; }
+.close-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: clamp(40px, 6vw, 72px); }
+.quiet-link { color: var(--ivory); text-decoration: underline; text-decoration-color: rgba(233, 201, 138, 0.5); text-underline-offset: 5px; margin-left: 8px; }
+.quiet-link small { color: var(--mist); }
+.foot nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.foot nav a { color: var(--ivory); text-decoration: none; }
+@media (hover: hover) and (pointer: fine) { .foot nav a:hover, .quiet-link:hover { color: var(--gold); } }
+@media (max-width: 900px) { .close-grid { grid-template-columns: minmax(0, 1fr); } .peek { transform: none; } }
 .cta { text-align: center; }
 .cta .statement { margin: 0 auto; }
 .signup { display: flex; gap: 16px; justify-content: center; align-items: flex-end; flex-wrap: wrap; margin-top: 48px; }
@@ -299,7 +360,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 }
 /* Embed mode (?embed=hero | hall): the landing page shows the live scene without the film's chrome. */
 html.embed, html.embed body { overflow: hidden; background: #1c070d; }
-.embed .gate, .embed .nav, .embed .overlay, .embed .foot-ui, .embed .progress, .embed .biz, .embed #confetti, .embed .backdrop { display: none !important; }
+.embed .gate, .embed .nav, .embed .rail, .embed .overlay, .embed .foot-ui, .embed .progress, .embed .biz, .embed #confetti, .embed .backdrop { display: none !important; }
 .embed .track { height: 100vh; }
 </style>
 <script type="importmap">
@@ -318,22 +379,23 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
   <div class="inner">
     <span class="mark">Àríyá presents</span>
-    <span class="mono" style="color: var(--mist)">A wedding film in thirteen chapters</span>
     <h1 id="gateTitle">The <em>Yes</em></h1>
-    <p>Chidinma and Tunde. Victoria Island, Lagos. Saturday 12 December 2026. Best with sound, scrolled slowly.</p>
+    <p class="value">One personal invitation for every guest, and a guest list that keeps itself.</p>
+    <p class="story mono">A Lagos wedding in thirteen chapters · best with sound</p>
     <div class="load mono" aria-live="polite"><i><b id="loadBar"></b></i><span id="loadTxt">Setting the hall 0%</span></div>
     <div class="actions">
       <button class="btn gold enter" id="enterSound" type="button" disabled><span class="ring" aria-hidden="true"></span>Enter the wedding</button>
       <button class="quiet" id="enterQuiet" type="button">Enter in silence</button>
-      <a class="quiet" href="about.html">About Àríyá</a>
     </div>
+    <p class="gate-links"><a class="quiet" href="planner.html">Start planning</a><span aria-hidden="true">·</span><a class="quiet" href="about.html">About Àríyá</a></p>
   </div>
 </div>
 
 <header class="nav" id="nav">
   <a class="wordmark" href="#top" id="home" aria-label="Àríyá, back to the start">Àríyá</a>
-  <div class="where mono" aria-live="off"><span>Archive</span><b id="whereNo">No. 000</b><span id="whereName">Prologue</span></div>
+  <div class="where mono" aria-live="off"><span>Chapter</span><b id="whereNo">000</b><span id="whereName">Prologue</span></div>
   <div class="right">
+    <a class="btn gold small" href="planner.html">Start planning</a>
     <button class="icon-btn" id="soundBtn" type="button" aria-pressed="false"><span class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="lbl">Sound</span></button>
     <button class="icon-btn" id="menuBtn" type="button" data-cm-open data-cm-label>Menu</button>
   </div>
@@ -342,16 +404,16 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
 <div class="overlay" id="overlay">
 <div class="layer" id="oldLayer">
-  <section class="beat center" data-raw-in="0" data-raw-out="0.0233" aria-label="Prologue">
+  <section class="beat low" data-raw-in="0" data-raw-out="0.0233" aria-label="Prologue">
     <span class="no">No. 000 · Prologue</span>
-    <p class="prose">Lagos, December 2021. Two strangers at someone else's owambe, table 14, arguing about whose jollof is better.</p>
+    <p class="prose">Lagos, December 2021. Two strangers at someone else’s owambe, table 14, arguing about whose jollof is better.</p>
   </section>
-  <section class="beat center" data-raw-in="0.026" data-raw-out="0.0496" aria-label="Prologue, continued">
+  <section class="beat low" data-raw-in="0.026" data-raw-out="0.0496" aria-label="Prologue, continued">
     <span class="no">No. 000 · Prologue</span>
     <p class="prose">Five years, one argument settled. Then a small velvet box on a dinner table.</p>
   </section>
 
-  <section class="beat center" data-in="0.005" data-out="0.1" aria-label="The box">
+  <section class="beat low" data-in="0.005" data-out="0.1" aria-label="The box">
     <span class="no">No. 001 · The box</span>
     <h1>It starts with<br>a <em>yes.</em></h1>
   </section>
@@ -369,7 +431,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <h2>This is how most<br>weddings get planned.</h2>
   </section>
 
-  <section class="beat center" data-in="0.5" data-out="0.6" aria-label="The calm">
+  <section class="beat low" data-in="0.5" data-out="0.6" aria-label="The calm">
     <span class="no">No. 006 · The calm</span>
     <h2>There is a <em>calmer</em> way.</h2>
   </section>
@@ -392,7 +454,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
           <input id="guestName" type="text" value="Mama Ijeoma" maxlength="24" autocomplete="off">
           <div class="row">
             <button class="btn solid" id="yes" type="button">Yes, I will be there</button>
-            <button class="btn" id="no" type="button">I can't make it</button>
+            <button class="btn" id="no" type="button">I can’t make it</button>
           </div>
           <p class="reply" id="reply" aria-live="polite"></p>
           <p class="link">ariya.ng/r/k7Q2x9mA</p>
@@ -409,7 +471,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <section class="beat side" data-in="0.78" data-out="0.89" aria-label="The count">
     <div class="count-beat">
       <span class="no">No. 009 · The count</span>
-      <h2>Know who's coming.<br><em>And where they sit.</em></h2>
+      <h2>Know who’s coming.<br><em>And where they sit.</em></h2>
       <p class="sub">Every guest who says yes takes a seat and lights a candle.</p>
       <dl class="count">
         <div><dt>Invited</dt><dd>320</dd></div>
@@ -423,7 +485,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <ol id="guestRows"></ol>
   </aside>
 
-  <section class="beat center finale" data-in="0.92" data-out="1.01" aria-label="The dance">
+  <section class="beat low finale" data-in="0.92" data-out="1.01" aria-label="The dance">
     <span class="no">No. 011 · The dance</span>
     <h1>Now go and <em>dance.</em></h1>
   </section>
@@ -497,26 +559,51 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 </div>
 
 <div class="foot-ui" id="footUi" aria-hidden="true">
-  <span class="scrollcue mono" id="scrollcue"><i></i>Scroll slowly</span>
+  <span class="scrollcue mono" id="scrollcue"><i></i>Scroll</span>
   <a class="finder mono" href="about.html" style="pointer-events: auto; color: var(--mist)">About Àríyá</a>
 </div>
 <div class="progress" aria-hidden="true"><b id="bar"></b></div>
+<nav class="rail" id="rail" aria-label="Chapters"><ol id="railList"></ol></nav>
 <div class="track" id="track"><a id="top"></a></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
 <main class="biz" id="biz">
-  <section class="sec cta" id="start" aria-labelledby="sTitle">
+  <section class="sec close" id="start" aria-labelledby="sTitle">
     <div class="wrap">
-      <p class="label mono" style="justify-content: center"><b>Àríyá by OwambePlan</b></p>
-      <h2 class="statement" id="sTitle">That was the story. <em>Here is the planner.</em></h2>
-      <div class="signup">
+      <p class="label mono"><b>Àríyá by OwambePlan</b><span>For Nigerian weddings, introductions and owambes</span></p>
+      <h2 class="statement" id="sTitle">That was one wedding. <em>Here is how Àríyá runs yours.</em></h2>
+      <div class="close-grid">
+        <ol class="proofs">
+          <li><b>One link per guest</b><p>Every guest gets their own invitation by text message or email, with their name on it. No group chat.</p></li>
+          <li><b>Replies arrive by themselves</b><p>Yes, no and plus-ones land in one list, with a live headcount for the couple, the planner and the caterer.</p></li>
+          <li><b>Seat with care</b><p>You choose the tables. Guests see their seat on the day, and Mama gets Table 1.</p></li>
+        </ol>
+        <figure class="peek" aria-label="A preview of the planner, on sample data">
+          <div class="peek-head"><b>Àríyá</b><span>Chidinma &amp; Tunde · Sat 12 Dec 2026</span></div>
+          <dl class="peek-count"><div><dt>Invited</dt><dd>320</dd></div><div><dt>Confirmed</dt><dd>241</dd></div><div><dt>Seated</dt><dd>218</dd></div></dl>
+          <ul class="peek-rows">
+            <li><span>Mama Ijeoma</span><em>Table 1</em><i class="yes">Confirmed</i></li>
+            <li><span>Aunty Bisi + 4</span><em>Table 3</em><i class="yes">Confirmed</i></li>
+            <li><span>Mr &amp; Mrs Okafor</span><em>Table 5</em><i class="yes">Confirmed</i></li>
+            <li><span>Femi Adeyemi</span><em>—</em><i class="wait">Waiting</i></li>
+            <li><span>Tolu Bankole</span><em>—</em><i class="no">Can’t come</i></li>
+          </ul>
+          <figcaption>Sample wedding · demo data</figcaption>
+        </figure>
+      </div>
+      <div class="close-cta">
         <a class="btn gold" href="planner.html">Start planning</a>
-        <a class="btn" href="about.html#invitation">Try the guest experience</a>
+        <a class="btn" href="rsvp.html?g=k701Qx">Try a personal invitation</a>
+        <a class="quiet-link" href="pricing.html">Pricing: free for small events, ₦45,000 per celebration <small>(placeholder prices)</small></a>
       </div>
     </div>
   </section>
   <footer class="foot">
-    <div class="wrap"><a class="wordmark" href="about.html">Àríyá</a><span>Àríyá (ah-ree-YAH): merriment, in Yoruba.</span><span>Tech4Youth Edo · Project 36 prototype</span></div>
+    <div class="wrap">
+      <a class="wordmark" href="about.html">Àríyá</a>
+      <nav aria-label="Footer"><a href="about.html">About</a><a href="product.html">What we do</a><a href="pricing.html">Pricing</a><a href="planner.html">Demo planner</a></nav>
+      <span>Àríyá (ah-ree-YAH): merriment, in Yoruba · Tech4Youth Edo · Project 36 prototype</span>
+    </div>
   </footer>
 </main>
 
@@ -769,6 +856,13 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     ["Mama", sFromScene("E", 0.02)], ["The calm", sFromOld(0.53)], ["Her name", sFromScene("F", 0.02)], ["The invitation", sFromOld(0.72)], ["The count", sFromOld(0.83)],
     ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
   var whereNo = document.getElementById("whereNo"), whereName = document.getElementById("whereName");
+  // The rail: one mark per chapter, the current one in gold; each mark jumps to its chapter.
+  var railBtns = chapters.map(function (c, i) {
+    var li = document.createElement("li"), b = document.createElement("button");
+    b.type = "button"; b.innerHTML = "<span>" + c[0] + "</span><i></i>"; b.setAttribute("aria-label", "Chapter " + i + ": " + c[0]);
+    b.addEventListener("click", function () { if (!OP.entered) enter(false); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); });
+    li.appendChild(b); document.getElementById("railList").appendChild(li); return b;
+  });
   if (!EMBED && window.AriyaNav) AriyaNav.init({ chapters: chapters.map(function (c) {
     return [c[0], function () { if (!OP.entered) enter(false); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); }];
   }) });
@@ -824,7 +918,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   function guest() { return (nameEl.value || "").trim() || "Guest"; }
   nameEl.addEventListener("input", function () { who.textContent = guest(); toName.textContent = guest(); });
   document.getElementById("yes").addEventListener("click", function (e) {
-    reply.textContent = "You're on the list, " + guest() + ". The couple will keep your place. A confirmation is on its way.";
+    reply.textContent = "You’re on the list, " + guest() + ". The couple will keep your place. A confirmation is on its way.";
     var r = e.currentTarget.getBoundingClientRect();
     burst(r.left + r.width / 2, r.top); Score.chime();
   });
@@ -853,7 +947,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
   var flash = document.getElementById("flash"), bar = document.getElementById("bar"), scrim = document.getElementById("scrim");
   var cConfirmed = document.getElementById("cConfirmed"), cSeated = document.getElementById("cSeated");
-  var biz = document.getElementById("biz"), nav = document.getElementById("nav"), footUi = document.getElementById("footUi"), scrollcue = document.getElementById("scrollcue");
+  var railEl = document.getElementById("rail"), biz = document.getElementById("biz"), nav = document.getElementById("nav"), footUi = document.getElementById("footUi"), scrollcue = document.getElementById("scrollcue");
 
   /* ---------- 2D confetti for the RSVP tap ---------- */
   var cv = document.getElementById("confetti"), cx = cv.getContext("2d"), bits = [], bitsOn = false;
@@ -904,19 +998,20 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     bar.style.transform = "scaleX(" + r.toFixed(4) + ")";
     oldLayer.style.opacity = sc.mode === "old" ? sc.vis.toFixed(3) : "0";
     oldLayer.style.visibility = sc.mode === "old" ? "visible" : "hidden";
-    var shade = 0;
+    var shade = 0, oldShade = 0;
     beats.forEach(function (bt) {
       var q = bt.raw ? r : bt.scene ? sc.local : p, w = bt.raw ? 0.006 : bt.scene ? 0.06 : 0.025;
       var o = (bt.a <= 0 ? 1 : seg(q, bt.a, bt.a + w)) * (bt.b >= 1 ? 1 : 1 - seg(q, bt.b - w, bt.b));
       if (!bt.raw && r < PRO) o = 0;
       if (bt.scene && bt.scene !== sc.mode) o = 0;
-      if (bt.scene) shade = Math.max(shade, o);
+      if (bt.scene) shade = Math.max(shade, o); else if (bt.el.classList.contains("low")) oldShade = Math.max(oldShade, o);
       bt.el.style.opacity = o.toFixed(3);
       bt.el.style.transform = bt.base + "translateY(" + ((1 - o) * 18).toFixed(1) + "px) scale(" + (1 + (1 - o) * 0.04).toFixed(4) + ")";
       bt.el.style.visibility = o < 0.01 ? "hidden" : "visible";
       setBlur(bt.el, reduceMotion ? 0 : (1 - o) * 12);
     });
     newLayer.style.setProperty("--scrim", shade.toFixed(3));
+    oldLayer.style.setProperty("--scrim", (oldShade * 0.85).toFixed(3));
     updatePanel(sc);
     var shatter = seg(p, 0.46, 0.53), W = window.innerWidth;
     var focusZ = 0.15 + 0.7 * seg(p, 0.31, 0.45);
@@ -960,16 +1055,18 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     var bt = biz.getBoundingClientRect().top;
     OP.covered = !EMBED && bt <= 0;
     nav.classList.toggle("solid", bt < window.innerHeight * 0.5);
+    railEl.classList.toggle("off", bt < window.innerHeight * 0.6);
     footUi.style.opacity = bt < window.innerHeight * 0.8 ? "0" : "1";
     scrollcue.style.opacity = r < 0.02 ? "1" : "0";
 
     var active = 0;
-    chapters.forEach(function (c, i) { if (i === 0 || sv >= c[1] - 0.02 && r >= PRO) active = i; });
+    chapters.forEach(function (c, i) { if (i === 0 || sv >= c[1] - 0.003 && r >= PRO) active = i; });
     if (bt < window.innerHeight * 0.5) active = -1;
     if (active !== lastChapter) {
       lastChapter = active;
-      whereNo.textContent = active < 0 ? "" : "No. " + (active < 10 ? "00" : "0") + active;
+      whereNo.textContent = active < 0 ? "" : (active < 10 ? "00" : "0") + active;
       whereName.textContent = active < 0 ? "Àríyá" : chapters[active][0];
+      railBtns.forEach(function (b, i) { if (i === active) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
     }
     return seated;
   }
@@ -1035,6 +1132,7 @@ try {
 if (renderer) await start();
 
 async function start() {
+  try { await Promise.race([Promise.all([document.fonts.load('400 20px "Figtree"'), document.fonts.load('64px "Pinyon Script"'), document.fonts.load('italic 92px "Bodoni Moda"')]), new Promise((r) => setTimeout(r, 2500))]); } catch (e) { /* draw with fallbacks */ }
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.VSMShadowMap;
   renderer.toneMapping = THREE.NoToneMapping;
@@ -1109,7 +1207,7 @@ async function start() {
   async function fontsReady() {
     try {
       await Promise.race([
-        Promise.all([document.fonts.load('italic 400 120px "Bodoni Moda"'), document.fonts.load('400 40px "Jost"')]),
+        Promise.all([document.fonts.load('italic 400 120px "Bodoni Moda"'), document.fonts.load('400 40px "Figtree"')]),
         new Promise((r) => setTimeout(r, 1500))
       ]);
     } catch (e) { /* fall back to Georgia */ }
@@ -1247,7 +1345,7 @@ async function start() {
   // Satin pillow in the lid, foil-stamped with the brand in the centre: design printed onto a real surface.
   const liningStamp = (g, w, h) => {
     g.font = 'italic 400 92px "Bodoni Moda", Georgia, serif'; g.fillText("Àríyá", w / 2, h * 0.465);
-    g.font = '400 20px "Jost", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.565);
+    g.font = '400 20px "Figtree", Arial, sans-serif'; g.letterSpacing = "9px"; g.fillText("LAGOS · BENIN · ABUJA", w / 2, h * 0.565);
     g.fillRect(w / 2 - 110, h * 0.385, 220, 2); g.fillRect(w / 2 - 110, h * 0.615, 220, 2);
   };
   const liningMap = canvasTex(1024, 920, (g, w, h) => {
@@ -1461,7 +1559,7 @@ async function start() {
     g.lineWidth = 2; g.beginPath(); g.arc(w / 2, h / 2, 418, 0, Math.PI * 2); g.stroke();
     g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
     g.font = 'italic 400 300px "Bodoni Moda", Georgia, serif'; g.fillText("C & T", w / 2, h / 2 - 20);
-    g.font = '400 40px "Jost", Arial, sans-serif'; g.letterSpacing = "18px"; g.fillText("12 · 12 · 2026", w / 2, h / 2 + 190);
+    g.font = '400 40px "Figtree", Arial, sans-serif'; g.letterSpacing = "18px"; g.fillText("12 · 12 · 2026", w / 2, h / 2 + 190);
   });
   const goboMat = new THREE.MeshBasicMaterial({ map: gobo, color: new THREE.Color(1.3, 0.95, 0.6), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
   const goboMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 5.4), goboMat);
@@ -1770,6 +1868,9 @@ async function start() {
     dHands.setColorAt(i * 2, g.skin); dHands.setColorAt(i * 2 + 1, g.skin);
   });
   const danceMeshes = [dBodies, dArmsDown, dArmsUp, dHands, dHeads, dGele, dFila];
+  // People are never shown as figures: up close they read as toys. Guests are their lit votives; the party is its
+  // light, its fabric, its confetti and its notes.
+  [...danceMeshes, seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.visible = false; });
   danceMeshes.forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; setB.add(m); });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), hand = new THREE.Vector3();
   function animateDancers(t) {
@@ -1822,7 +1923,7 @@ async function start() {
     g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 2; g.strokeRect(6, 6, w - 12, h - 12);
     for (let i = 0; i < 40; i++) { g.strokeStyle = `rgba(255,255,255,${0.05 + rand() * 0.1})`; g.beginPath(); g.arc(70, 64, 10 + i * 1.5, 0, Math.PI * 2); g.stroke(); }
     g.fillStyle = "rgba(40,25,40,.55)"; g.beginPath(); g.ellipse(190, 64, 34, 44, 0, 0, Math.PI * 2); g.fill();
-    g.fillStyle = "#f5ecd8"; g.font = '600 34px "Jost", Arial, sans-serif'; g.fillText("₦1000", 18, 40); g.font = '600 18px "Jost", Arial, sans-serif'; g.fillText("ONE THOUSAND NAIRA", 18, 112);
+    g.fillStyle = "#f5ecd8"; g.font = '600 34px "Figtree", Arial, sans-serif'; g.fillText("₦1000", 18, 40); g.font = '600 18px "Figtree", Arial, sans-serif'; g.fillText("ONE THOUSAND NAIRA", 18, 112);
   });
   const NN = mobile ? 90 : 170;
   const notes = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.072), new THREE.MeshStandardMaterial({ map: noteTex, roughness: 0.65, side: THREE.DoubleSide }), NN);
@@ -2244,7 +2345,7 @@ async function start() {
     return canvasTex(512, 300, (g, w, h) => {
       g.fillStyle = "#fbf6ec"; g.fillRect(0, 0, w, h);
       g.strokeStyle = "#c9a256"; g.lineWidth = 6; g.strokeRect(14, 14, w - 28, h - 28); g.lineWidth = 1.5; g.strokeRect(26, 26, w - 52, h - 52);
-      g.fillStyle = "#7d5c1d"; g.textAlign = "center"; g.font = '500 24px "Jost", Arial'; g.letterSpacing = "6px"; g.fillText(top, w / 2, 72);
+      g.fillStyle = "#7d5c1d"; g.textAlign = "center"; g.font = '500 24px "Figtree", Arial'; g.letterSpacing = "6px"; g.fillText(top, w / 2, 72);
       g.letterSpacing = "0px"; g.fillStyle = "#2a1a12"; g.font = '64px "Pinyon Script", cursive'; g.fillText(name, w / 2, 165);
       g.fillStyle = "#6e1426"; g.font = '500 28px "Bodoni Moda", Georgia, serif'; g.fillText(sub, w / 2, 236);
     });
@@ -2389,7 +2490,7 @@ async function start() {
     if (state === "off") { phoneTex.needsUpdate = true; return; }
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#2a0d16"); bg.addColorStop(1, "#0d0507"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
     g.textAlign = "center"; g.fillStyle = "#f4efe6";
-    const big = (t, y, size, font) => { g.font = (font || '300 ') + size + 'px "Jost", Arial'; g.fillText(t, w / 2, y); };
+    const big = (t, y, size, font) => { g.font = (font || '300 ') + size + 'px "Figtree", Arial'; g.fillText(t, w / 2, y); };
     if (state === "call" || state === "incall") {
       big(state === "call" ? "Tunde" : "Tunde", 260, 64, "400 "); g.fillStyle = "#bda5aa"; big(state === "call" ? "calling…" : "00:12", 330, 34);
       if (state === "call") { [[150, "#c0392b"], [390, "#2e8b57"]].forEach(([x, c]) => { g.fillStyle = c; g.beginPath(); g.arc(x, 880, 62, 0, Math.PI * 2); g.fill(); }); }
@@ -2402,15 +2503,15 @@ async function start() {
       big(state === "lockNight" ? "23:10" : "21:40", 300, 150, "200 "); g.fillStyle = "#bda5aa"; big("Thursday 26 November", 370, 30);
       if (state === "sms") {
         g.fillStyle = "rgba(244,239,230,.94)"; g.beginPath(); g.roundRect(40, 470, 460, 250, 30); g.fill();
-        g.textAlign = "left"; g.fillStyle = "#6e1426"; g.font = '600 26px "Jost", Arial'; g.fillText("MESSAGES · now", 72, 520);
-        g.fillStyle = "#23141a"; g.font = '500 30px "Jost", Arial';
+        g.textAlign = "left"; g.fillStyle = "#6e1426"; g.font = '600 26px "Figtree", Arial'; g.fillText("MESSAGES · now", 72, 520);
+        g.fillStyle = "#23141a"; g.font = '500 30px "Figtree", Arial';
         ["Mama Ijeoma, Chidinma and", "Tunde have saved you a place.", "Open your invitation:", "ariya.ng/r/ijeoma"].forEach((l, k) => g.fillText(l, 72, 575 + k * 40));
       }
     } else if (state === "voice" || state === "voiceSent") {
       g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(0, 0, w, 160); g.fillStyle = "#f4efe6"; big("Tunde", 110, 40, "500 ");
       g.fillStyle = "#4a1420"; g.beginPath(); g.roundRect(150, 640, 350, 120, 30); g.fill();
       g.fillStyle = "#e9c98a"; for (let k = 0; k < 22; k++) { const hh = 10 + Math.abs(Math.sin(k * 1.7) * 30 + Math.sin(k * 0.6) * 10); g.fillRect(200 + k * 12, 700 - hh / 2, 6, hh); }
-      g.fillStyle = "#bda5aa"; g.textAlign = "right"; g.font = '300 26px "Jost", Arial'; g.fillText(state === "voiceSent" ? "0:07  ✓" : "0:07", 490, 800);
+      g.fillStyle = "#bda5aa"; g.textAlign = "right"; g.font = '300 26px "Figtree", Arial'; g.fillText(state === "voiceSent" ? "0:07  ✓" : "0:07", 490, 800);
       if (state === "voice") { g.textAlign = "center"; g.fillStyle = "#c0392b"; g.beginPath(); g.arc(270, 960, 50, 0, Math.PI * 2); g.fill(); g.fillStyle = "#f4efe6"; big("Recording", 1050, 28); }
     }
     phoneTex.needsUpdate = true;
@@ -2619,6 +2720,7 @@ async function start() {
       if (w > 960) camera.setViewOffset(w, h, -w * 0.2, 0, w, h);
       else camera.setViewOffset(w, h, 0, h * 0.2, w, h);
     } else if (OP.embed === "hall" && w > 960) camera.setViewOffset(w, h, -w * 0.12, 0, w, h);
+    else if (!OP.embed) camera.setViewOffset(w, h, 0, h * (w < h ? 0.16 : 0.12), w, h); // subject above the words
     else camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
@@ -2742,7 +2844,7 @@ async function start() {
         m.spot.intensity = 45 * hv0;
         m.beam.material.opacity = hv0;
       });
-      animateDancers(motion ? t : 0);
+      // (the dancers are not drawn; see above)
       flashes.forEach((fl) => {
         if (motion && t - fl.t0 > 0.9 && Math.random() < 0.015 && OP.seated > 10) {
           const pick = Math.random() < 0.5 ? guestSeat[seatOrder[Math.floor(Math.random() * OP.seated)]] : dancers[Math.floor(Math.random() * ND)];
