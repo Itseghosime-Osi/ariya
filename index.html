@@ -558,13 +558,13 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <section class="beat low" data-scene="F" data-in="0.8" data-out="0.99" aria-label="Her own invitation">
     <h2>Something with <em>her name</em> on it.</h2>
   </section>
-  <section class="beat low" data-scene="J" data-in="0.05" data-out="0.45" aria-label="The gele">
-    <span class="no">No. 012 · The gele</span>
-    <h2>Tied, untied, <em>tied again.</em></h2>
-    <p class="sub">Her sister pleats it on the block until it stands like a crown.</p>
+  <section class="beat low" data-scene="J" data-in="0.04" data-out="0.24" aria-label="Getting ready">
+    <span class="no">No. 012 · Getting ready</span>
+    <h2>Shoes on the lamp. <em>Gele already tied.</em></h2>
+    <p class="sub">Everything she will wear, laid out in the order she will need it.</p>
   </section>
-  <section class="beat low" data-scene="J" data-in="0.55" data-out="0.96" aria-label="Ready">
-    <span class="no">No. 012 · The gele</span>
+  <section class="beat low" data-scene="J" data-in="0.66" data-out="0.97" aria-label="Ready">
+    <span class="no">No. 012 · Getting ready</span>
     <h2>Ready by <em>noon.</em></h2>
     <p class="sub">Her phone has not stopped buzzing since six.</p>
   </section>
@@ -925,7 +925,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   // [name, story position s] ; the prologue is -1 (the very top).
   var chapters = [["Prologue", -1], ["The box", sFromOld(0)], ["The yes", sFromOld(0.17)], ["The colour", sFromScene("C", 0)], ["The weave", sFromScene("G", 0.02)], ["The noise", sFromOld(0.37)],
     ["Mama", sFromScene("E", 0.02)], ["The calm", sFromOld(0.53)], ["Her name", sFromScene("F", 0.02)], ["The doors", sFromScene("W", 0.0)], ["The invitation", sFromOld(0.72)], ["The count", sFromOld(0.83)],
-    ["The gele", sFromScene("J", 0.02)], ["The morning", sFromScene("H", 0.02)], ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
+    ["Getting ready", sFromScene("J", 0.02)], ["The morning", sFromScene("H", 0.02)], ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
   var whereNo = document.getElementById("whereNo"), whereName = document.getElementById("whereName");
   // The rail: one mark per chapter, the current one in gold; each mark jumps to its chapter.
   var railBtns = chapters.map(function (c, i) {
@@ -1184,6 +1184,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { Reflector } from "three/addons/objects/Reflector.js";
 
 const OP = window.OP;
 const { seg, bump, smooth, clamp } = OP;
@@ -3335,91 +3336,151 @@ async function start() {
     [0.70, V3(-0.5, 1.0, 1.08), V3(0.0, 0.82, 0.34), 32],
     [1.00, V3(-0.1, 0.9, 0.6), V3(0.09, 0.85, 0.21), 36]
   ];
-  /* ---------- Set J, "The gele": the bride's room, the morning of. A head block on the vanity where her gele is pleated
-     into a crown, her coral beads, her phone, her outfit hanging by the window. No faces: the block is a milliner's form. ---------- */
+  /* ---------- Set J, "Getting ready": the bride's room, the morning of. Her shoes hang from the floor lamp; on the vanity,
+     everything laid out in order: the tied gele, the wrapper, the clutch, her coral beads, her phone. The wall mirror
+     shows the room behind the camera: the bride at her makeup, the artist, and the photographer passing. ---------- */
   const setJ = new THREE.Group(); setJ.visible = false; scene.add(setJ);
   const jBg = new THREE.Color(0x120c09);
   const jFloor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), floor.material); jFloor.rotation.x = -Math.PI / 2; jFloor.receiveShadow = true; setJ.add(jFloor);
   const jPlaster = new THREE.MeshStandardMaterial({ color: 0xcdb9a0, roughness: 0.95 });
-  const jWall = new THREE.Mesh(new THREE.PlaneGeometry(8, 3.2), jPlaster); jWall.position.set(0, 1.6, -0.62); jWall.receiveShadow = true; setJ.add(jWall);
+  [[0, 1.6, -0.62, 0], [0, 1.6, 3.4, Math.PI], [-2.2, 1.6, 1.4, Math.PI / 2], [2.4, 1.6, 1.4, -Math.PI / 2]].forEach(([x, y, z, ry]) => { const w = new THREE.Mesh(new THREE.PlaneGeometry(8, 3.2), jPlaster); w.position.set(x, y, z); w.rotation.y = ry; w.receiveShadow = true; setJ.add(w); });
   // The window to the left, its sheer curtains glowing with morning light.
-  const sheerTex = canvasTex(256, 512, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, 0); for (let k = 0; k <= 16; k++) gr.addColorStop(k / 16, k % 2 ? "rgba(255,246,228,.92)" : "rgba(235,220,196,.7)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
-  const sheerGeo = (() => { const g = new THREE.PlaneGeometry(1.3, 2.4, 80, 4), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) pa.setZ(i, Math.sin(pa.getX(i) * 38) * 0.025 + Math.sin(pa.getX(i) * 9) * 0.03); g.computeVertexNormals(); return g; })();
-  const sheer = new THREE.Mesh(sheerGeo, new THREE.MeshBasicMaterial({ map: sheerTex, color: new THREE.Color(2.4, 2.2, 1.95), transparent: true, opacity: 0.95, side: THREE.DoubleSide }));
-  sheer.position.set(-1.55, 1.55, -0.6); setJ.add(sheer);
-  // The vanity: ivory lacquer, an oval mirror in a gold frame.
-  const lacquer = new THREE.MeshPhysicalMaterial({ color: 0xf1e8da, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+  const j_sheerTex = canvasTex(256, 512, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, 0); for (let k = 0; k <= 16; k++) gr.addColorStop(k / 16, k % 2 ? "rgba(255,246,228,.92)" : "rgba(235,220,196,.7)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+  const j_sheerGeo = (() => { const g = new THREE.PlaneGeometry(1.3, 2.4, 80, 4), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) pa.setZ(i, Math.sin(pa.getX(i) * 38) * 0.025 + Math.sin(pa.getX(i) * 9) * 0.03); g.computeVertexNormals(); return g; })();
+  const j_sheer = new THREE.Mesh(j_sheerGeo, new THREE.MeshBasicMaterial({ map: j_sheerTex, color: new THREE.Color(2.4, 2.2, 1.95), transparent: true, opacity: 0.95, side: THREE.DoubleSide }));
+  j_sheer.position.set(-1.55, 1.55, -0.6); setJ.add(j_sheer);
+  // The vanity: ivory lacquer.
+  const j_lacquer = new THREE.MeshPhysicalMaterial({ color: 0xf1e8da, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15 });
   const VT = 0.76;
-  const vTop = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.04, 0.5, 3, 0.01), lacquer); vTop.position.set(0, VT - 0.02, -0.3); setJ.add(vTop);
-  [[-0.56, -0.08], [0.56, -0.08], [-0.56, -0.52], [0.56, -0.52]].forEach(([x, z]) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, VT - 0.04, 12), lacquer); l.position.set(x, (VT - 0.04) / 2, z); setJ.add(l); });
-  const mirror = new THREE.Mesh(new THREE.CircleGeometry(0.34, 64).scale(0.78, 1, 1), new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: 0.03, envMapIntensity: 1.1 }));
-  mirror.position.set(0, VT + 0.46, -0.5); setJ.add(mirror);
-  const mFrame = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.016, 12, 96).scale(0.78, 1, 1), goldPolish); mFrame.position.copy(mirror.position); mFrame.position.z += 0.004; setJ.add(mFrame);
-  // The head block: a plain milliner's form on a turned stand.
-  const blockMat = new THREE.MeshPhysicalMaterial({ color: 0xd8c3a2, roughness: 0.75, sheen: 0.3, sheenColor: 0xfff0d8 });
-  const block = new THREE.Group(); block.position.set(0.02, VT, -0.24); setJ.add(block);
-  block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.025, 32).translate(0, 0.0125, 0), goldPolish));
-  block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.15, 16).translate(0, 0.1, 0), goldPolish));
-  // Neck and head turned as one smooth form, the way a milliner's block is.
-  const blockHead = new THREE.Mesh(new THREE.LatheGeometry([[0.0001, 0.17], [0.05, 0.17], [0.04, 0.2], [0.036, 0.25], [0.045, 0.28], [0.075, 0.31], [0.09, 0.35], [0.088, 0.39], [0.075, 0.42], [0.05, 0.44], [0.0001, 0.452]].map(([r, y]) => new THREE.Vector2(r, y)), 64).scale(0.92, 1, 1.04), blockMat); block.add(blockHead);
-  // The gele: stiff, pleated, gold-shot cloth in the colour of the day. It wraps the block, then rises into a fan.
+  const j_vTop = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.04, 0.5, 3, 0.01), j_lacquer); j_vTop.position.set(0, VT - 0.02, -0.3); setJ.add(j_vTop);
+  [[-0.56, -0.08], [0.56, -0.08], [-0.56, -0.52], [0.56, -0.52]].forEach(([x, z]) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, VT - 0.04, 12), j_lacquer); l.position.set(x, (VT - 0.04) / 2, z); setJ.add(l); });
+  // The wall mirror above the vanity: a real reflection of the room.
+  const jMirror = new Reflector(new THREE.PlaneGeometry(0.78, 1.0), { textureWidth: 300, textureHeight: 384, color: 0xb3aca2, clipBias: 0.003 }); // a soft, low-detail reflection, the way a mirror across the room reads
+  jMirror.position.set(0, 1.5, -0.6); setJ.add(jMirror);
+  const jFrame = new THREE.Mesh(frameGeo(0.86, 1.08, 0.02, 0.78, 1.0, 0.004, 0.025, 0.004).rotateX(Math.PI / 2), goldPolish); jFrame.position.set(0, 1.5, -0.615); setJ.add(jFrame);
+  // The gele, already tied, waiting on its block at the left of the vanity.
+  const j_blockMat = new THREE.MeshPhysicalMaterial({ color: 0xd8c3a2, roughness: 0.75, sheen: 0.3, sheenColor: 0xfff0d8 });
+  const j_block = new THREE.Group(); j_block.position.set(-0.38, VT, -0.34); j_block.rotation.y = 0.35; setJ.add(j_block);
+  j_block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.025, 32).translate(0, 0.0125, 0), goldPolish));
+  j_block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.15, 16).translate(0, 0.1, 0), goldPolish));
+  j_block.add(new THREE.Mesh(new THREE.LatheGeometry([[0.0001, 0.17], [0.05, 0.17], [0.04, 0.2], [0.036, 0.25], [0.045, 0.28], [0.075, 0.31], [0.09, 0.35], [0.088, 0.39], [0.075, 0.42], [0.05, 0.44], [0.0001, 0.452]].map(([r, y]) => new THREE.Vector2(r, y)), 64).scale(0.92, 1, 1.04), j_blockMat));
   const geleCloth = new THREE.MeshPhysicalMaterial({ color: 0x6a1428, roughness: 0.34, metalness: 0.35, sheen: 1, sheenColor: 0xf0c878, sheenRoughness: 0.35, normalMap: ribNormal, normalScale: new THREE.Vector2(0.3, 0.3), side: THREE.DoubleSide });
-  const gBand = new THREE.Mesh(new THREE.TorusGeometry(0.094, 0.026, 14, 64).rotateX(Math.PI / 2 - 0.3).scale(0.95, 0.8, 1.06), geleCloth); gBand.position.y = 0.37; block.add(gBand);
-  const gFan = new THREE.Mesh((() => { const g = new THREE.CylinderGeometry(0.24, 0.115, 0.2, 260, 8, true, -Math.PI * 0.66, Math.PI * 1.32), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), y = pa.getY(i), th = Math.atan2(z, x), sn = Math.sin(th * 22), k = 1 + 0.045 * Math.sign(sn) * Math.pow(Math.abs(sn), 0.6) * (0.25 + (y + 0.1) * 3.6); pa.setX(i, x * k); pa.setZ(i, z * k); pa.setY(i, y + 0.025 * Math.cos(th * 2)); } g.computeVertexNormals(); g.translate(0, 0.1, 0); return g; })(), geleCloth);
-  gFan.position.set(0, 0.385, -0.03); gFan.rotation.x = -0.58; gFan.rotation.z = 0.08; block.add(gFan);
-  const gKnot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.03, 0.012, 64, 8, 2, 3), geleCloth); gKnot.position.set(0.07, 0.4, 0.06); block.add(gKnot);
-  // The length of gele cloth still waiting on the vanity, pleated in a fan.
-  const gTail = new THREE.Mesh((() => { const g = new THREE.PlaneGeometry(0.62, 0.22, 90, 6), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i); pa.setZ(i, Math.abs(Math.sin(x * 60)) * 0.018 + 0.004); } g.computeVertexNormals(); g.rotateX(-Math.PI / 2); return g; })(), geleCloth);
-  gTail.position.set(-0.3, VT + 0.001, -0.18); gTail.rotation.y = 0.25; setJ.add(gTail);
-  // Coral beads in a coil, gold drop earrings, perfume, her phone.
-  const NCB = 90, jBeads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0085, 12, 8), coralMat, NCB);
-  { const d = new THREE.Object3D(), c = new THREE.Color(); for (let i = 0; i < NCB; i++) { const a = i * 0.36, r = 0.025 + i * 0.0009; d.position.set(0.32 + Math.cos(a) * r, VT + 0.0085 + (i > 70 ? 0.012 : 0), -0.14 + Math.sin(a) * r); d.updateMatrix(); jBeads.setMatrixAt(i, d.matrix); jBeads.setColorAt(i, c.setHSL(0.02 + rand() * 0.02, 0.72, 0.42 + rand() * 0.06)); } }
-  setJ.add(jBeads);
-  [[0.22, -0.08], [0.25, -0.07]].forEach(([x, z], k) => { const e = new THREE.Group(); e.position.set(x, VT + 0.004, z); e.rotation.y = k * 0.6; const hoop = new THREE.Mesh(new THREE.TorusGeometry(0.012, 0.0022, 8, 24).rotateX(Math.PI / 2), goldPolish); e.add(hoop); const drop = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 12, 8).scale(1, 1.4, 1), new THREE.MeshPhysicalMaterial({ color: 0xc23a28, roughness: 0.3, clearcoat: 1 })); drop.position.set(0, 0.002, 0.018); e.add(drop); setJ.add(e); });
-  const perfume = new THREE.Group(); perfume.position.set(-0.4, VT, -0.4); setJ.add(perfume);
-  perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.07, 0.1, 0.045, 3, 0.008).translate(0, 0.05, 0), crystalGlass));
-  perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.07, 0.035, 3, 0.006).translate(0, 0.045, 0), new THREE.MeshPhysicalMaterial({ color: 0xf2c48a, transmission: 0.8, roughness: 0.05, thickness: 0.03 })));
-  perfume.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.035, 24).translate(0, 0.118, 0), goldPolish));
+  j_block.add(new THREE.Mesh(new THREE.TorusGeometry(0.094, 0.026, 14, 64).rotateX(Math.PI / 2 - 0.3).scale(0.95, 0.8, 1.06).translate(0, 0.37, 0), geleCloth));
+  const j_gFan = new THREE.Mesh((() => { const g = new THREE.CylinderGeometry(0.24, 0.115, 0.2, 260, 8, true, -Math.PI * 0.66, Math.PI * 1.32), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), y = pa.getY(i), th = Math.atan2(z, x), sn = Math.sin(th * 22), k = 1 + 0.045 * Math.sign(sn) * Math.pow(Math.abs(sn), 0.6) * (0.25 + (y + 0.1) * 3.6); pa.setX(i, x * k); pa.setZ(i, z * k); pa.setY(i, y + 0.025 * Math.cos(th * 2)); } g.computeVertexNormals(); g.translate(0, 0.1, 0); return g; })(), geleCloth);
+  j_gFan.position.set(0, 0.385, -0.03); j_gFan.rotation.set(-0.58, 0, 0.08); j_block.add(j_gFan);
+  const j_gKnot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.03, 0.012, 64, 8, 2, 3), geleCloth); j_gKnot.position.set(0.07, 0.4, 0.06); j_block.add(j_gKnot);
+  // Her wrapper, folded: the same aso-oke as the family's rolls.
+  const j_wrapper = new THREE.Group(); j_wrapper.position.set(-0.12, VT, -0.24); j_wrapper.rotation.y = -0.15; setJ.add(j_wrapper);
+  [[0.28, 0.022, 0.2, 0.011], [0.25, 0.02, 0.18, 0.032]].forEach(([w, h, d, y], k) => { const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, 0.008), MAT.wine.flat); m.position.set(k * 0.012, y, k * -0.008); m.rotation.y = k * 0.04; j_wrapper.add(m); });
+  // The clutch: gold beadwork, a frame clasp.
+  const j_beadTex = canvasTex(256, 128, (g, w, h) => { g.fillStyle = "#6a4a1a"; g.fillRect(0, 0, w, h); for (let y = 3; y < h; y += 6) for (let x = (y / 6) % 2 ? 3 : 6; x < w; x += 6) { g.fillStyle = `hsl(${40 + rand() * 6},${60 + rand() * 20}%,${55 + rand() * 25}%)`; g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill(); } });
+  const j_clutchMat = new THREE.MeshPhysicalMaterial({ map: j_beadTex, metalness: 0.85, roughness: 0.32, color: 0xffffff, clearcoat: 0.4 });
+  const j_clutch = new THREE.Group(); j_clutch.position.set(0.1, VT, -0.3); j_clutch.rotation.y = 0.25; setJ.add(j_clutch);
+  const j_clutchBody = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.045, 0.1, 4, 0.02), j_clutchMat); j_clutchBody.position.y = 0.0225; j_clutch.add(j_clutchBody);
+  const j_clasp = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.008, 0.012), goldPolish); j_clasp.position.set(0, 0.047, -0.044); j_clutch.add(j_clasp);
+  [-1, 1].forEach((k) => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.008, 12, 8), goldPolish); b.position.set(k * 0.012, 0.053, -0.044); j_clutch.add(b); });
+  // Edo coral: three strands of small polished beads laid in loops, gold spacers, and a matching bracelet.
+  const j_coralTone = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.06 });
+  const j_NCB = mobile ? 180 : 260, j_jBeads = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 14, 10), j_coralTone, j_NCB);
+  {
+    const d = new THREE.Object3D(), c = new THREE.Color(), cx = 0.28, cz = -0.24; let i = 0;
+    [[0.05, 0.0042], [0.066, 0.0046], [0.082, 0.005]].forEach(([r, br]) => {
+      const n = Math.floor(j_NCB * 0.28);
+      for (let k = 0; k < n && i < j_NCB; k++, i++) {
+        const t = k / (n - 1), a = Math.PI * 0.08 + t * Math.PI * 1.84; // a loop open at the back, as a necklace lies
+        d.position.set(cx + Math.cos(a) * r * 1.15, VT + br, cz + Math.sin(a) * r * 0.85); const gold = k % 12 === 6;
+        d.scale.setScalar(gold ? br * 0.8 : br * (0.92 + rand() * 0.16)); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix);
+        j_jBeads.setColorAt(i, gold ? c.set(0xd9b06a) : c.setHSL(0.015 + rand() * 0.018, 0.78, 0.36 + rand() * 0.08));
+      }
+    });
+    for (; i < j_NCB; i++) { const a = (i / 20) * Math.PI * 2; d.position.set(0.44 + Math.cos(a) * 0.028, VT + 0.0045, -0.38 + Math.sin(a) * 0.028); d.scale.setScalar(0.0045); d.updateMatrix(); j_jBeads.setMatrixAt(i, d.matrix); j_jBeads.setColorAt(i, c.setHSL(0.02, 0.76, 0.4)); }
+  }
+  setJ.add(j_jBeads);
+  [[0.2, -0.12], [0.235, -0.11]].forEach(([x, z], k) => { const e = new THREE.Group(); e.position.set(x, VT + 0.003, z); e.rotation.y = k * 0.6; e.add(new THREE.Mesh(new THREE.TorusGeometry(0.011, 0.0018, 8, 24).rotateX(Math.PI / 2), goldPolish)); const drop = new THREE.Mesh(new THREE.SphereGeometry(0.0062, 12, 8).scale(1, 1.4, 1), new THREE.MeshPhysicalMaterial({ color: 0xc23a28, roughness: 0.25, clearcoat: 1 })); drop.position.set(0, 0.002, 0.016); e.add(drop); setJ.add(e); });
+  const j_perfume = new THREE.Group(); j_perfume.position.set(-0.08, VT, -0.46); setJ.add(j_perfume);
+  j_perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.07, 0.1, 0.045, 3, 0.008).translate(0, 0.05, 0), crystalGlass));
+  j_perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.07, 0.035, 3, 0.006).translate(0, 0.045, 0), new THREE.MeshPhysicalMaterial({ color: 0xf2c48a, transmission: 0.8, roughness: 0.05, thickness: 0.03 })));
+  j_perfume.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.035, 24).translate(0, 0.118, 0), goldPolish));
+  // Her phone, lit with messages, on the table.
   const brideCanvas = document.createElement("canvas"); brideCanvas.width = 540; brideCanvas.height = 1100;
   { const g = brideCanvas.getContext("2d"), w = 540, h = 1100, bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#3a2418"); bg.addColorStop(1, "#120a07"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
     g.fillStyle = "#000"; g.beginPath(); g.roundRect(w / 2 - 74, 22, 148, 42, 21); g.fill();
     g.textAlign = "center"; g.fillStyle = "#f4efe6"; g.font = '200 150px "Figtree", Arial'; g.fillText("11:48", w / 2, 290); g.font = '400 30px "Figtree", Arial'; g.fillStyle = "#d8c8b8"; g.fillText("Saturday 12 December", w / 2, 350);
     [["Tunde", "See you at the altar."], ["Mama", "I am here, my daughter. Don't rush."], ["Aunty Bisi", "We are on our way!"], ["Sade (planner)", "Car at 12:30. Photographer at 12."]].forEach(([n, m], k) => { const y = 470 + k * 140; g.fillStyle = "rgba(255,248,240,.16)"; g.beginPath(); g.roundRect(30, y, w - 60, 120, 26); g.fill(); g.textAlign = "left"; g.fillStyle = "#f4efe6"; g.font = '600 28px "Figtree", Arial'; g.fillText(n, 60, y + 48); g.fillStyle = "rgba(244,239,230,.8)"; g.font = '400 26px "Figtree", Arial'; g.fillText(m, 60, y + 88); g.textAlign = "right"; g.fillStyle = "rgba(244,239,230,.55)"; g.font = '400 22px "Figtree", Arial'; g.fillText(k ? k * 4 + "m ago" : "now", w - 56, y + 48); }); }
   const brideTex = new THREE.CanvasTexture(brideCanvas); brideTex.colorSpace = THREE.SRGBColorSpace; brideTex.anisotropy = maxAniso;
-  const bridePhone = new THREE.Group(); bridePhone.position.set(0.28, VT + 0.0045, 0.02); bridePhone.rotation.y = -0.4; setJ.add(bridePhone);
+  const bridePhone = new THREE.Group(); bridePhone.position.set(0.44, VT + 0.0045, -0.2); bridePhone.rotation.y = -0.45; setJ.add(bridePhone);
   bridePhone.add(makePhone(0xd9a48c));
   const brideScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.0685, 0.1465), new THREE.MeshBasicMaterial({ map: brideTex, color: new THREE.Color(1.1, 1.1, 1.1) })); brideScreen.rotation.x = -Math.PI / 2; brideScreen.position.y = 0.0049; bridePhone.add(brideScreen);
-  // Her outfit on a gold stand by the window: ivory lace buba and a gold-shot iro.
-  const outfitStand = new THREE.Group(); outfitStand.position.set(-1.0, 0, -0.35); outfitStand.rotation.y = 0.35; setJ.add(outfitStand);
-  outfitStand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.75, 12).translate(0, 0.875, 0), goldPolish));
-  outfitStand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.02, 32).translate(0, 0.01, 0), goldPolish));
-  const ivoryLace = canvasTex(1024, 1024, (g, w, h) => drawLace(g, w, h, { bg: "#efe4d2", net: "rgba(190,160,110,.35)", gold: "#fbf5ea", hole: "#d9cbb4" }), { repeat: [3, 3] });
-  const lace = new THREE.MeshPhysicalMaterial({ map: ivoryLace, color: 0xffffff, roughness: 0.6, sheen: 1, sheenColor: 0xfff2d8, side: THREE.DoubleSide });
-  const dressGeo = new THREE.LatheGeometry([[0.0001, 1.62], [0.06, 1.6], [0.19, 1.52], [0.2, 1.36], [0.17, 1.18], [0.2, 1.0], [0.26, 0.55], [0.3, 0.2]].map(([r, y]) => new THREE.Vector2(r, y)), 48); dressGeo.scale(1, 1, 0.55);
-  const dressM = new THREE.Mesh(dressGeo, lace); outfitStand.add(dressM);
-  const wrap = new THREE.Mesh(new THREE.LatheGeometry([[0.205, 1.02], [0.24, 0.8], [0.29, 0.45], [0.32, 0.18]].map(([r, y]) => new THREE.Vector2(r, y)), 48, -0.3, Math.PI * 1.4).scale(1.04, 1, 0.6), geleCloth); outfitStand.add(wrap);
-  const hanger = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.006, 8, 48, Math.PI), goldPolish); hanger.position.y = 1.55; outfitStand.add(hanger);
-  setJ.traverse((m) => { if (m.isMesh && m !== sheer && m.material !== crystalGlass) { m.castShadow = true; m.receiveShadow = true; } });
-  function updateJ(u, t) {
-    // The gele goes on in stages: the band, then the fan rising pleat by pleat, then the knot. The cloth on the table runs out.
-    const band = seg(u, 0.02, 0.22), fan = seg(u, 0.15, 0.7), knot = seg(u, 0.6, 0.78);
-    gBand.scale.setScalar(0.6 + 0.4 * band); gBand.visible = band > 0.01;
-    gFan.scale.set(0.55 + 0.45 * fan, 0.05 + 0.95 * fan, 0.55 + 0.45 * fan); gFan.visible = fan > 0.01; gFan.rotation.y = (1 - fan) * 0.6;
-    gKnot.scale.setScalar(knot); gKnot.visible = knot > 0.01;
-    gTail.scale.set(Math.max(0.05, 1 - fan * 0.9), 1, 1);
-    // Her phone buzzes on the table.
-    const buzz = motion && Math.sin(t * 2.2) > 0.6 ? Math.sin(t * 90) * 0.012 : 0; bridePhone.rotation.y = -0.4 + buzz;
-    key.position.set(-1.7, 2.2, 0.9); key.target.position.set(0, VT + 0.2, -0.25); key.angle = 0.6; key.penumbra = 1; key.distance = 0; key.decay = 2;
-    key.intensity = 30; key.shadow.autoUpdate = true; key.color.set(0xfff1de);
-    xKey.color.set(0xffe6c8); xKey.intensity = 0.35; xKey.position.set(2, 2.5, 2);
-    xRim.color.set(0xffd2a8); xRim.intensity = 0.5; xRim.position.set(-2, 1.5, -1);
-    xGlow.color.set(0xfff0d8); xGlow.intensity = 1.6; xGlow.distance = 4; xGlow.position.set(-1.5, 1.5, -0.3);
+  // The floor lamp beside the vanity, its shade lit, and her shoes hung from its hook by their ankle straps.
+  const j_lamp = new THREE.Group(); j_lamp.position.set(0.86, 0, -0.36); setJ.add(j_lamp);
+  j_lamp.add(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 0.03, 40).translate(0, 0.015, 0), goldPolish));
+  j_lamp.add(new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.013, 1.56, 16).translate(0, 0.8, 0), goldPolish));
+  const j_lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.28, 48, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xf3e3c8, roughness: 0.9, side: THREE.DoubleSide, emissive: 0xffb873, emissiveIntensity: 0.9 })); j_lampShade.position.y = 1.72; j_lamp.add(j_lampShade);
+  const j_hook = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 1.2, 0), V3(0.08, 1.2, 0.06), V3(0.13, 1.19, 0.1), V3(0.14, 1.23, 0.11)]), 24, 0.005, 8), goldPolish); j_lamp.add(j_hook);
+  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xe6c98e, metalness: 0.75, roughness: 0.28, clearcoat: 0.5, side: THREE.DoubleSide });
+  const j_soleMat = new THREE.MeshPhysicalMaterial({ color: 0xb89058, metalness: 0.5, roughness: 0.4 });
+  function j_makeShoe() {
+    // A stiletto sandal: the sole curving up from the toe to the heel seat, the heel, a strap over the toes, the ankle strap.
+    const grp = new THREE.Group();
+    const path = [[0.115, 0.0], [0.07, 0.0], [0.02, 0.012], [-0.03, 0.045], [-0.075, 0.075], [-0.105, 0.085]];
+    const sh = new THREE.Shape(); path.forEach(([x, y], k) => (k ? sh.lineTo(x, y) : sh.moveTo(x, y))); path.slice().reverse().forEach(([x, y]) => sh.lineTo(x, y - 0.007));
+    const sole = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.06, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 2, curveSegments: 6 }).translate(0, 0, -0.03), j_soleMat); grp.add(sole);
+    const insole = new THREE.Mesh(new THREE.ExtrudeGeometry((() => { const s2 = new THREE.Shape(); path.forEach(([x, y], k) => (k ? s2.lineTo(x, y + 0.002) : s2.moveTo(x, y + 0.002))); path.slice().reverse().forEach(([x, y]) => s2.lineTo(x, y)); return s2; })(), { depth: 0.056, bevelEnabled: false }).translate(0, 0, -0.028), j_shoeMat); grp.add(insole);
+    const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.004, 0.09, 16), j_shoeMat); heel.position.set(-0.098, 0.04, 0); heel.rotation.z = -0.08; grp.add(heel);
+    const toeStrap = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.007, 8, 24, Math.PI), j_shoeMat); toeStrap.rotation.y = Math.PI / 2; toeStrap.position.set(0.075, 0.004, 0); toeStrap.scale.set(1, 0.7, 1); grp.add(toeStrap);
+    const ankle = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.0035, 8, 32), j_shoeMat); ankle.rotation.y = Math.PI / 2; ankle.position.set(-0.085, 0.13, 0); grp.add(ankle);
+    // A satin toe box and a heel cup make it read as a shoe from any side.
+    const toeBox = new THREE.Mesh(new THREE.SphereGeometry(0.045, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2).scale(1.35, 0.6, 0.72), j_shoeMat); toeBox.position.set(0.068, 0.002, 0); grp.add(toeBox);
+    const heelCup = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.045, 24, 1, true, Math.PI * 0.5, Math.PI), j_shoeMat); heelCup.position.set(-0.085, 0.105, 0); grp.add(heelCup);
+    return grp;
   }
+  // Hung by the ankle strap, each shoe swings toe down.
+  [-0.045, 0.05].forEach((dz, k) => { const pivot = new THREE.Group(); pivot.position.set(0.14, 1.21, 0.11 + dz); pivot.rotation.set(0.12 * k, -0.35 + k * 0.45, -1.45); j_lamp.add(pivot); const s = j_makeShoe(); s.position.set(0.085, -0.13, 0); pivot.add(s); });
+  // The room behind the camera, seen only in the mirror: the bride in her robe at the makeup chair, the artist leaning
+  // in with a brush, and the photographer who walks across with his camera up.
+  const jPeople = new THREE.Group(); setJ.add(jPeople);
+  const j_robe = new THREE.MeshPhysicalMaterial({ color: 0xf6efe4, roughness: 0.55, sheen: 1, sheenColor: 0xffffff });
+  const j_black = new THREE.MeshPhysicalMaterial({ color: 0x18151a, roughness: 0.7, sheen: 0.5, sheenColor: 0x6a6070 });
+  const skinJ = new THREE.MeshPhysicalMaterial({ color: 0x5c3420, roughness: 0.5, sheen: 0.4, sheenColor: 0xffc8a0 });
+  function j_person(bodyGeo, mat, x, z, ry, sy, arms) {
+    const p = new THREE.Group(); p.position.set(x, 0, z); p.rotation.y = ry; p.scale.set(1, sy, 1);
+    p.add(new THREE.Mesh(bodyGeo, mat));
+    const head = new THREE.Mesh(headGeoD, skinJ); head.position.y = 1.64; p.add(head);
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.104, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55).scale(0.9, 1.05, 1.02), j_black); hair.position.y = 1.655; p.add(hair);
+    (arms || []).forEach(([a, b, c]) => { const m1 = new THREE.Mesh(sleeveGeo, mat); segM(a, b, m1.matrix); m1.matrixAutoUpdate = false; p.add(m1); const m2 = new THREE.Mesh(foreGeo, skinJ); segM(b, c, m2.matrix); m2.matrixAutoUpdate = false; p.add(m2); });
+    jPeople.add(p); return p;
+  }
+  const j_bride = j_person(womanGeo, j_robe, -0.35, 2.3, Math.PI / 2 + 0.3, 0.74, [[V3(-0.19, 1.4, 0), V3(-0.22, 1.15, 0.12), V3(-0.12, 1.05, 0.3)], [V3(0.19, 1.4, 0), V3(0.22, 1.15, 0.12), V3(0.12, 1.05, 0.3)]]);
+  const j_brideWrap = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.04, 12, 28).rotateX(Math.PI / 2 - 0.4).scale(1, 1, 1.15), j_robe); j_brideWrap.position.y = 1.7; j_bride.add(j_brideWrap); // a towel round her hair
+  const j_chairJ = new THREE.Mesh(new RoundedBoxGeometry(0.46, 0.5, 0.46, 3, 0.04), j_black); j_chairJ.position.set(-0.4, 0.25, 2.32); jPeople.add(j_chairJ);
+  j_person(womanGeo, j_black, 0.25, 2.0, -Math.PI / 2 - 0.35, 1.0, [[V3(0.19, 1.4, 0), V3(0.26, 1.22, 0.2), V3(0.12, 1.32, 0.42)], [V3(-0.19, 1.4, 0), V3(-0.24, 1.15, 0.1), V3(-0.2, 1.05, 0.3)]]);
+  const j_photographer = j_person(manGeo, j_black, -1.6, 1.75, Math.PI / 2, 1.0, [[V3(0.25, 1.4, 0), V3(0.22, 1.32, 0.24), V3(0.06, 1.6, 0.3)], [V3(-0.25, 1.4, 0), V3(-0.2, 1.32, 0.24), V3(-0.06, 1.6, 0.3)]]);
+  const j_camBody = new THREE.Mesh(new RoundedBoxGeometry(0.14, 0.1, 0.08, 2, 0.015), j_black); j_camBody.position.set(0, 1.62, 0.2); j_photographer.add(j_camBody);
+  const j_camLens = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.1, 20).rotateX(Math.PI / 2), j_black); j_camLens.position.set(0, 1.62, 0.29); j_photographer.add(j_camLens);
+  const j_camFlash = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })); j_camFlash.position.set(0, 1.72, 0.25); j_camFlash.scale.setScalar(0.5); j_camFlash.visible = false; j_photographer.add(j_camFlash);
+  setJ.traverse((m) => { if (m.isMesh && m !== j_sheer && m !== jMirror && m.material !== crystalGlass) { m.castShadow = true; m.receiveShadow = true; } });
+  function updateJ(u, t) {
+    // The photographer crosses the room behind the camera while it pulls back; his flash pops once.
+    const walk = seg(u, 0.72, 0.98);
+    j_photographer.position.x = lerp(-1.7, 1.9, walk) + Math.sin(t * 6) * 0.01 * motion; j_photographer.position.y = Math.abs(Math.sin(walk * 30)) * 0.02;
+    const fk = u - 0.86; j_camFlash.visible = fk > 0 && fk < 0.02; j_camFlash.material.color.setScalar(j_camFlash.visible ? 40 * (1 - fk / 0.02) : 0);
+    const buzz = motion && Math.sin(t * 2.2) > 0.6 ? Math.sin(t * 90) * 0.012 : 0; bridePhone.rotation.y = -0.45 + buzz;
+    key.position.set(-1.7, 2.2, 1.4); key.target.position.set(0, VT + 0.2, -0.25); key.angle = 0.75; key.penumbra = 1; key.distance = 0; key.decay = 2;
+    key.intensity = 30; key.shadow.autoUpdate = true; key.color.set(0xfff1de);
+    xKey.color.set(0xffe6c8); xKey.intensity = 0.45; xKey.position.set(1, 2.5, 4);
+    xRim.color.set(0xffd2a8); xRim.intensity = 0.5; xRim.position.set(-2, 1.5, -1);
+    xGlow.color.set(0xffb873); xGlow.intensity = 3.2; xGlow.distance = 3; xGlow.position.set(0.9, 1.5, -0.1);
+  }
+  // The lamp and the shoes, then each thing on the vanity in turn, then all of it, with the mirror above.
   const keysJ = [
-    [0.00, V3(-0.35, 1.32, 1.55), V3(-0.55, 1.05, -0.4), 16],
-    [0.35, V3(0.62, 1.26, 0.86), V3(0.02, VT + 0.34, -0.24), 22],
-    [0.70, V3(0.36, 1.2, 0.7), V3(0.02, VT + 0.36, -0.24), 26],
-    [1.00, V3(0.52, 1.02, 0.42), V3(0.27, VT + 0.01, -0.02), 30]
+    [0.00, V3(1.08, 1.34, 0.5), V3(0.98, 1.1, -0.25), 24],
+    [0.14, V3(1.4, 1.25, 0.75), V3(0.95, 1.05, -0.25), 22],
+    [0.27, V3(0.62, 0.96, 0.06), V3(0.44, VT, -0.2), 30],
+    [0.39, V3(0.42, 0.94, 0.0), V3(0.28, VT, -0.24), 32],
+    [0.51, V3(0.18, 0.95, 0.02), V3(0.03, VT + 0.02, -0.28), 30],
+    [0.63, V3(-0.16, 1.08, 0.12), V3(-0.36, VT + 0.32, -0.34), 28],
+    [0.85, V3(0.05, 1.36, 1.3), V3(0.05, 1.08, -0.32), 16],
+    [1.00, V3(0.08, 1.4, 1.45), V3(0.05, 1.1, -0.32), 15]
   ];
   // W, the way in: through the arch, down the aisle, rising over the dance floor into the overhead shot of the hall.
   const keysW = [
