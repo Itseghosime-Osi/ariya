@@ -10,7 +10,7 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var root = document.documentElement;
   var PAGES = [
-    ["./", "The film", "Ten chapters of a Lagos wedding. Best with sound."],
+    ["./", "The film", "Fifteen chapters of a Lagos wedding. Best with sound."],
     ["about.html", "About Àríyá", "Invitations, RSVPs and seating, told on one page."],
     ["product.html", "What we do", "Guest lists, personal links, seating and vendors."],
     ["pricing.html", "Pricing", "Pay per event. Placeholder prices for the prototype."],
@@ -62,7 +62,7 @@
         '<span class="n">0' + (i + 1) + '</span><span class="t"><span>' + esc(pg[1]) + '</span></span><span class="d">' + esc(pg[2]) + "</span></a></li>";
     }).join("");
     var chap = chapters && chapters.length ? '<div class="cm-chapters"><h2 class="cm-cap">The film, chapter by chapter</h2><ol>' + chapters.map(function (c, i) {
-      return '<li style="--i:' + (i + 3) + '"><button type="button" data-ch="' + i + '"><span>No. 00' + i + "</span>" + esc(c[0]) + "</button></li>";
+      return '<li style="--i:' + (i + 3) + '"><button type="button" data-ch="' + i + '"><span>No. ' + (i < 10 ? "00" : "0") + i + "</span>" + esc(c[0]) + "</button></li>";
     }).join("") + "</ol></div>" : "";
     cm.innerHTML = '<div class="cm-velvet" aria-hidden="true"><i></i><i></i></div><div class="cm-ghost" aria-hidden="true"></div>' +
       '<div class="cm-inner"><div class="cm-top"><span class="cm-mark">Àríyá</span><button type="button" class="cm-close">Close</button></div>' +
