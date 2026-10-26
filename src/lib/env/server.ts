@@ -11,8 +11,8 @@ const serverEnvSchema = z.object({
 
 const isSkip = process.env.SKIP_ENV_VALIDATION === "1";
 
-const parsed = isSkip
-  ? serverEnvSchema.safeParse({
+const rawServerData = isSkip
+  ? {
       SUPABASE_SERVICE_ROLE_KEY:
         process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
       PAYSTACK_SECRET_KEY:
@@ -21,21 +21,13 @@ const parsed = isSkip
       RESEND_FROM_EMAIL:
         process.env.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
       CRON_SECRET: process.env.CRON_SECRET || "cron_placeholder",
-    })
-  : serverEnvSchema.safeParse({
+    }
+  : {
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
       CRON_SECRET: process.env.CRON_SECRET,
-    });
+    };
 
-if (!parsed.success) {
-  console.error(
-    "❌ Invalid server environment variables:",
-    parsed.error.flatten().fieldErrors
-  );
-  throw new Error("Invalid server environment variables");
-}
-
-export const serverEnv = parsed.data;
+export const serverEnv = serverEnvSchema.parse(rawServerData);

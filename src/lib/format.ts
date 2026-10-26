@@ -58,6 +58,16 @@ export function formatLagosTime(
 }
 
 /**
+ * Calculate days remaining until target date (0 if today or in the past).
+ */
+export function daysUntil(dateInput: string | Date | number): number {
+  const target = new Date(dateInput).getTime();
+  const now = Date.now();
+  const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+/**
  * Normalize Nigerian phone numbers to E.164 (+234...)
  */
 export function normalizePhone(rawPhone: string): string | null {
