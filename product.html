@@ -67,7 +67,7 @@ section { scroll-margin-top: 72px; }
 .tasks li.done .t-name { text-decoration: line-through; color: var(--ink-soft); }
 .tasks .due { font-size: 0.875rem; font-variant-numeric: tabular-nums; text-align: right; grid-row: 1 / span 2; grid-column: 3; }
 .progressbar { height: 8px; border-radius: 999px; background: var(--linen-deep); overflow: hidden; margin-top: 18px; }
-.progressbar b { display: block; height: 100%; background: var(--wine); transition: width .25s var(--ease); }
+.progressbar b { display: block; height: 100%; width: 100%; background: var(--wine); transform-origin: left; transition: transform .25s var(--ease); }
 
 /* ---------- Steps ---------- */
 .how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 48px); counter-reset: n; }
@@ -160,7 +160,7 @@ section { scroll-margin-top: 72px; }
       <div>
         <div class="sec-head" style="margin-bottom: 0"><span class="caps">Vendor checklist</span><h2 id="vTitle">Caterer, gele, DJ, cake. <em>Nothing forgotten.</em></h2></div>
         <p class="muted" style="margin-top: 14px">Every vendor gets tasks with due dates counted back from the day. Overdue ones rise to the top.</p>
-        <div class="progressbar" aria-hidden="true"><b id="vBar" style="width: 0"></b></div>
+        <div class="progressbar" aria-hidden="true"><b id="vBar" style="transform: scaleX(0)"></b></div>
         <p style="margin-top: 10px; font-weight: 600" id="vCount" aria-live="polite"></p>
         <p style="margin-top: 18px"><a class="btn btn-ghost btn-small" href="planner.html#vendors">Edit the checklist</a></p>
       </div>
@@ -230,7 +230,7 @@ section { scroll-margin-top: 72px; }
       return '<li class="' + (t.done ? 'done' : '') + '"><input type="checkbox" id="vt_' + t.id + '" data-id="' + t.id + '"' + (t.done ? ' checked' : '') + '><label class="t-name" for="vt_' + t.id + '">' + esc(t.task) + '</label><span class="t-meta">' + esc(t.name) + ' · ' + esc(t.category) + '</span><span class="due">' + D.fmtDate(t.due, { day: "numeric", month: "short" }) + '<br><span class="pill ' + (t.done ? 'yes' : 'wait') + '">' + (t.done ? 'Done' : 'To do') + '</span></span></li>';
     }).join("");
     var done = D.state.vendors.filter(function (t) { return t.done; }).length, all = D.state.vendors.length;
-    $("vBar").style.width = (done / all * 100).toFixed(1) + "%";
+    $("vBar").style.transform = "scaleX(" + (done / all).toFixed(3) + ")";
     $("vCount").textContent = done + " of " + all + " vendor tasks done";
   }
   $("tasks").addEventListener("change", function (e) {

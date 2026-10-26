@@ -28,7 +28,7 @@
     if (!root.classList.contains("cur-in")) return;
     requestAnimationFrame(function () { requestAnimationFrame(function () {
       root.classList.add("cur-opening");
-      setTimeout(function () { root.classList.remove("cur-in", "cur-opening"); }, reduce ? 250 : 1100);
+      setTimeout(function () { root.classList.remove("cur-in", "cur-opening"); }, reduce ? 150 : 700);
     }); });
   }
   function go(href) {
@@ -36,7 +36,7 @@
     try { sessionStorage.setItem("ariya-curtain", "1"); } catch (e) { /* the next page just opens plainly */ }
     if (window.AriyaScore && AriyaScore.handoff) AriyaScore.handoff();
     root.classList.add("cur-out");
-    setTimeout(function () { location.href = href; }, reduce ? 200 : 760);
+    setTimeout(function () { location.href = href; }, reduce ? 120 : 420);
   }
   try { sessionStorage.removeItem("ariya-curtain"); } catch (e) { /* fine */ }
   window.addEventListener("pageshow", function (e) { if (e.persisted) { leaving = false; root.classList.remove("cur-out", "cur-in", "cur-opening"); } });
@@ -73,8 +73,10 @@
     cm.querySelector(".cm-close").addEventListener("click", function () { closeMenu(); });
     Array.prototype.forEach.call(cm.querySelectorAll(".cm-list a"), function (a) {
       var show = function () { ghost.textContent = a.getAttribute("data-word"); ghost.classList.add("on"); };
-      a.addEventListener("pointerenter", show); a.addEventListener("focus", show);
-      a.addEventListener("pointerleave", function () { ghost.classList.remove("on"); });
+      // Hover motion only for a real mouse: touch fires a false hover on tap.
+      a.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") { a.classList.add("hov"); show(); } });
+      a.addEventListener("focus", show);
+      a.addEventListener("pointerleave", function () { a.classList.remove("hov"); ghost.classList.remove("on"); });
     });
     if (chapters) Array.prototype.forEach.call(cm.querySelectorAll("[data-ch]"), function (b) {
       b.addEventListener("click", function () { closeMenu(true); chapters[+b.getAttribute("data-ch")][1](); });

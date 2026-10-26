@@ -36,10 +36,10 @@ body { background: var(--wine-950); color: var(--on-dark); }
 .music { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(233, 201, 138, 0.4); background: rgba(22, 4, 10, 0.4); color: var(--on-dark); font: 600 0.9rem var(--font-ui); cursor: pointer; }
 .music:hover { border-color: var(--gold); }
 .music .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
-.music .eq i { width: 3px; height: 4px; border-radius: 1px; background: var(--gold); }
+.music .eq i { width: 3px; height: 14px; border-radius: 1px; background: var(--gold); transform: scaleY(0.3); transform-origin: bottom; }
 .music[aria-pressed="true"] .eq i { animation: eq .9s ease-in-out infinite; }
 .music[aria-pressed="true"] .eq i:nth-child(2) { animation-delay: .2s; } .music[aria-pressed="true"] .eq i:nth-child(3) { animation-delay: .45s; } .music[aria-pressed="true"] .eq i:nth-child(4) { animation-delay: .1s; }
-@keyframes eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+@keyframes eq { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
 .head-music { margin-left: 8px; }
 @media (max-width: 880px) { .head-music { margin-left: auto; } .head-music + .menu-toggle { margin-left: 8px; } .head-music .lbl { display: none; } }
 
@@ -65,7 +65,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
 .cotd .sw { display: flex; gap: 10px; }
 .cotd button { width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: var(--c); box-shadow: 0 0 0 2px rgba(233, 201, 138, 0.35), 0 4px 10px rgba(0, 0, 0, 0.4); transition: transform .2s var(--ease), box-shadow .2s; }
 .cotd button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--wine-950), 0 0 0 4px var(--gold), 0 4px 12px rgba(0, 0, 0, 0.5); transform: scale(1.08); }
-.cotd button:hover { transform: scale(1.08); }
+@media (hover: hover) and (pointer: fine) { .cotd button:hover { transform: scale(1.08); } }
 .scroll-hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2; display: grid; justify-items: center; gap: 8px; color: var(--on-dark-soft); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; }
 .scroll-hint i { width: 1px; height: 30px; background: linear-gradient(var(--gold), transparent); animation: drip 2.2s ease-in-out infinite; transform-origin: top; }
 @keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
@@ -110,7 +110,8 @@ body { background: var(--wine-950); color: var(--on-dark); }
 @keyframes ring { 0% { transform: scale(.82); opacity: .9; } 100% { transform: scale(1.25); opacity: 0; } }
 @keyframes nudge { 0%, 70%, 100% { transform: rotate(-8deg); } 78% { transform: rotate(-3deg) scale(1.05); } 86% { transform: rotate(-11deg) scale(1.02); } }
 .inv-stage:not(.cracking) .seal { animation: nudge 3.2s ease-in-out infinite; }
-.seal:hover .wax, .seal:focus-visible .wax { transform: scale(1.05); transition: transform .25s var(--ease); }
+.seal:focus-visible .wax { transform: scale(1.05); transition: transform .2s var(--ease); }
+@media (hover: hover) and (pointer: fine) { .seal:hover .wax { transform: scale(1.05); transition: transform .2s var(--ease); } }
 .cracking .seal { animation: shake .26s ease-in-out; }
 @keyframes shake { 25% { transform: rotate(-12deg) translateX(-2px); } 75% { transform: rotate(-4deg) translateX(2px); } }
 .cracking .seal::after, .open .seal::after { display: none; }
@@ -181,9 +182,14 @@ body { background: var(--wine-950); color: var(--on-dark); }
 .fan .fc:nth-child(2) { transform: translateY(0); z-index: 2; }
 .fan .fc:nth-child(3) { transform: translateX(78%) rotate(9deg) translateY(30px); }
 .fan .fc:hover, .fan .fc:focus-visible, .fan .fc.lift { z-index: 3; }
-.fan .fc:nth-child(1):hover, .fan .fc:nth-child(1).lift { transform: translateX(-84%) rotate(-5deg) translateY(-10px) scale(1.03); }
-.fan .fc:nth-child(2):hover, .fan .fc:nth-child(2).lift { transform: translateY(-16px) scale(1.03); }
-.fan .fc:nth-child(3):hover, .fan .fc:nth-child(3).lift { transform: translateX(84%) rotate(5deg) translateY(-10px) scale(1.03); }
+.fan .fc:nth-child(1).lift { transform: translateX(-84%) rotate(-5deg) translateY(-10px) scale(1.03); }
+.fan .fc:nth-child(2).lift { transform: translateY(-16px) scale(1.03); }
+.fan .fc:nth-child(3).lift { transform: translateX(84%) rotate(5deg) translateY(-10px) scale(1.03); }
+@media (hover: hover) and (pointer: fine) {
+  .fan .fc:nth-child(1):hover { transform: translateX(-84%) rotate(-5deg) translateY(-10px) scale(1.03); }
+  .fan .fc:nth-child(2):hover { transform: translateY(-16px) scale(1.03); }
+  .fan .fc:nth-child(3):hover { transform: translateX(84%) rotate(5deg) translateY(-10px) scale(1.03); }
+}
 .fan-foot { text-align: center; margin-top: 30px; }
 .fan-foot a { color: var(--gold); font-weight: 600; }
 
@@ -435,7 +441,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
   AriyaNav.init();
 
   /* ---------- Paced scrolling: every scene plays in order, however fast the flick ---------- */
-  window.AriyaScroll.init({ slow: [$("noise"), $("hall")] });
+  window.AriyaScroll.init({ speed: 0.9 }); // screens per second, whatever the scroll input
 
   /* ---------- Music: off until the visitor asks for it ---------- */
   var Score = window.AriyaScore;

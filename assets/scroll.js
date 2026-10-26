@@ -1,41 +1,49 @@
-/* Scroll pacing for the cinematic pages.
-   However hard the visitor flicks (wheel, trackpad, touch, keys or an in-page link), the page travels at a
-   capped speed, slower still inside the scroll-driven scenes, so every frame plays in order and nothing is
-   skipped. The scrollbar and find-in-page still work; the pacer simply follows them.
+/* Scroll at one speed.
+   However the visitor scrolls (a flick, a slow trackpad drag, a mouse wheel, a swipe, the keys), the page travels at
+   the same predefined speed, easing in and out, so every scene plays at the pace it was designed for. Scrolling only
+   says which way to go and for how long. The scrollbar and find-in-page still work; the engine follows them.
    Turned off for prefers-reduced-motion, where normal scrolling is kept.
 
-   Use: AriyaScroll.init({ slow: [element, ...] })  // sections that should play more slowly
-        AriyaScroll.to(y)                             // paced programmatic scroll */
+   Use: AriyaScroll.init({ speed: 0.8 })   // screens per second
+        AriyaScroll.to(y)                  // glide to a position (chapter links, Home/End) */
 (function () {
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var cur = 0, tgt = 0, running = false, last = 0, slowEls = [], enabled = false, ignoreUntil = 0;
-  var FAST = 34, SLOW = 20; // px per 60 fps frame
+  var enabled = false, running = false, last = 0, ignoreUntil = 0;
+  var cur = 0, vel = 0, dir = 0, holdUntil = 0, speed = 0.8;
+  var glide = null; // { from, to, t0, dur } for programmatic moves
+  var HOLD_WHEEL = 180, HOLD_KEY = 260, HOLD_PAGE = 900, HOLD_TOUCH = 140, TAIL_TOUCH = 420;
+  var TAU_UP = 0.14, TAU_DOWN = 0.26; // seconds: how quickly it reaches speed, and how softly it stops
   function maxY() { return Math.max(0, document.documentElement.scrollHeight - innerHeight); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function inSlow() {
-    var c = innerHeight / 2;
-    for (var i = 0; i < slowEls.length; i++) { var r = slowEls[i].getBoundingClientRect(); if (r.top < c && r.bottom > c) return true; }
-    return false;
-  }
   function blocked() { return document.documentElement.classList.contains("locked") || !!document.querySelector(".sheet:not([hidden]), .cm:not([hidden])"); }
-  function push(d) {
-    if (blocked()) return;
-    if (!running) cur = tgt = scrollY;
-    // Never let a burst of input run more than a screen ahead of what has been shown.
-    tgt = clamp(tgt + d, Math.max(0, cur - innerHeight), Math.min(maxY(), cur + innerHeight));
+  function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+  function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
+  // Scrolling input: a direction, held for a moment. Repeated input simply keeps it going.
+  function hold(d, ms) {
+    if (blocked() || !d) return;
+    if (!running) { cur = scrollY; vel = 0; }
+    glide = null;
+    if (d !== dir) { dir = d; }
+    holdUntil = Math.max(holdUntil, performance.now() + ms);
     start();
   }
-  function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
   function step(now) {
-    var dt = Math.min(48, now - last) / 16.67; last = now;
-    var diff = tgt - cur;
-    if (Math.abs(diff) < 0.5) { cur = tgt; window.scrollTo({ top: cur, behavior: "instant" }); running = false; return; }
-    var cap = (inSlow() ? SLOW : FAST) * dt, mv = diff * 0.14 * dt;
-    if (Math.abs(mv) > cap) mv = mv > 0 ? cap : -cap;
-    if (Math.abs(mv) < 0.6) mv = diff > 0 ? Math.min(0.6, diff) : Math.max(-0.6, diff);
-    cur += mv; ignoreUntil = now + 80;
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (glide) {
+      var k = clamp((now - glide.t0) / glide.dur, 0, 1);
+      cur = glide.from + (glide.to - glide.from) * easeInOut(k);
+      if (k >= 1) { glide = null; vel = 0; }
+    } else {
+      var target = now < holdUntil ? dir * speed * innerHeight : 0;
+      var tau = Math.abs(target) > Math.abs(vel) ? TAU_UP : TAU_DOWN;
+      vel += (target - vel) * (1 - Math.exp(-dt / tau));
+      cur += vel * dt;
+      if (cur <= 0 || cur >= maxY()) { cur = clamp(cur, 0, maxY()); vel = 0; if (now >= holdUntil) dir = 0; }
+    }
+    ignoreUntil = now + 100;
     window.scrollTo({ top: cur, behavior: "instant" });
-    requestAnimationFrame(step);
+    if (glide || now < holdUntil || Math.abs(vel) > 2) requestAnimationFrame(step);
+    else { running = false; vel = 0; dir = 0; }
   }
   function editable(el) { return el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(el.tagName)); }
   function scrollsSideways(el, dx, dy) {
@@ -48,49 +56,43 @@
   window.AriyaScroll = {
     init: function (o) {
       if (reduce || enabled) return; enabled = true;
-      slowEls = (o && o.slow) || [];
-      cur = tgt = scrollY;
+      speed = (o && o.speed) || 0.8;
+      cur = scrollY;
       window.addEventListener("wheel", function (e) {
         if (e.ctrlKey || blocked() || scrollsSideways(e.target, e.deltaX, e.deltaY)) return;
         e.preventDefault();
-        var d = e.deltaY * (e.deltaMode === 1 ? 36 : e.deltaMode === 2 ? innerHeight : 1);
-        push(clamp(d, -140, 140));
+        if (Math.abs(e.deltaY) < 0.5) return;
+        hold(e.deltaY > 0 ? 1 : -1, HOLD_WHEEL);
       }, { passive: false });
       window.addEventListener("keydown", function (e) {
         if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || editable(document.activeElement)) return;
-        var k = e.key, d = null;
-        if (k === "ArrowDown") d = 90; else if (k === "ArrowUp") d = -90;
-        else if (k === "PageDown" || (k === " " && !e.shiftKey)) d = innerHeight * 0.85;
-        else if (k === "PageUp" || (k === " " && e.shiftKey)) d = -innerHeight * 0.85;
-        else if (k === "Home") { e.preventDefault(); AriyaScroll.to(0); return; }
-        else if (k === "End") { e.preventDefault(); AriyaScroll.to(maxY()); return; }
-        if (d !== null) { e.preventDefault(); push(d); }
+        var k = e.key;
+        if (k === "ArrowDown") { e.preventDefault(); hold(1, HOLD_KEY); }
+        else if (k === "ArrowUp") { e.preventDefault(); hold(-1, HOLD_KEY); }
+        else if (k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); hold(1, HOLD_PAGE); }
+        else if (k === "PageUp" || (k === " " && e.shiftKey)) { e.preventDefault(); hold(-1, HOLD_PAGE); }
+        else if (k === "Home") { e.preventDefault(); AriyaScroll.to(0); }
+        else if (k === "End") { e.preventDefault(); AriyaScroll.to(maxY()); }
       });
-      // Touch: the finger moves the page directly (capped), and a flick carries on with paced momentum.
-      var ty = 0, tx = 0, startScroll = 0, lastY = 0, lastT = 0, vel = 0, mode = null;
+      // Touch: the finger sets the direction; the page moves at the same speed, and carries on briefly after release.
+      var lastY = 0, lastX = 0, mode = null;
       window.addEventListener("touchstart", function (e) {
         if (e.touches.length !== 1 || blocked()) { mode = "skip"; return; }
-        ty = lastY = e.touches[0].clientY; tx = e.touches[0].clientX; lastT = performance.now(); vel = 0; mode = null;
-        startScroll = running ? cur : scrollY; if (!running) cur = tgt = scrollY;
+        lastY = e.touches[0].clientY; lastX = e.touches[0].clientX; mode = null;
       }, { passive: true });
       window.addEventListener("touchmove", function (e) {
         if (mode === "skip" || e.touches.length !== 1) return;
-        var y = e.touches[0].clientY, x = e.touches[0].clientX;
+        var y = e.touches[0].clientY, x = e.touches[0].clientX, dy = lastY - y, dx = lastX - x;
         if (mode === null) {
-          if (Math.abs(y - ty) < 6 && Math.abs(x - tx) < 6) return;
-          mode = scrollsSideways(e.target, x - tx, y - ty) ? "skip" : "pace";
+          if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+          mode = scrollsSideways(e.target, dx, dy) ? "skip" : "pace";
           if (mode === "skip") return;
         }
         e.preventDefault();
-        var now = performance.now(); vel = 0.8 * vel + 0.2 * ((lastY - y) / Math.max(1, now - lastT)); lastY = y; lastT = now;
-        tgt = clamp(startScroll + (ty - y), 0, maxY()); start();
+        if (Math.abs(dy) >= 2) { hold(dy > 0 ? 1 : -1, HOLD_TOUCH); lastY = y; lastX = x; }
       }, { passive: false });
-      window.addEventListener("touchend", function () {
-        if (mode !== "pace") return;
-        push(clamp(vel * 260, -innerHeight * 0.9, innerHeight * 0.9));
-        mode = null;
-      }, { passive: true });
-      // In-page links travel through the pacer too.
+      window.addEventListener("touchend", function () { if (mode === "pace" && dir) hold(dir, TAIL_TOUCH); mode = null; }, { passive: true });
+      // In-page links glide there.
       document.addEventListener("click", function (e) {
         var a = e.target.closest && e.target.closest('a[href^="#"]');
         if (!a || e.defaultPrevented) return;
@@ -100,12 +102,16 @@
         AriyaScroll.to(el.getBoundingClientRect().top + scrollY - 70);
       });
       // Scrollbar drags, find-in-page and focus moves: follow them instead of fighting them.
-      window.addEventListener("scroll", function () { if (!running && performance.now() > ignoreUntil) cur = tgt = scrollY; }, { passive: true });
+      window.addEventListener("scroll", function () { if (!running && performance.now() > ignoreUntil) cur = scrollY; }, { passive: true });
     },
+    // A programmatic move (a chapter in the menu, Home, End): a quick, eased glide, not the reading speed.
     to: function (y) {
+      y = clamp(y, 0, maxY());
       if (!enabled) { window.scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" }); return; }
       if (!running) cur = scrollY;
-      tgt = clamp(y, 0, maxY()); start();
+      var dist = Math.abs(y - cur);
+      glide = { from: cur, to: y, t0: performance.now(), dur: clamp(dist / (4 * innerHeight), 0.6, 3.2) * 1000 };
+      holdUntil = 0; dir = 0; vel = 0; start();
     },
     get enabled() { return enabled; }
   };
