@@ -10,7 +10,7 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var root = document.documentElement;
   var PAGES = [
-    ["./", "The film", "Fifteen chapters of a Lagos wedding. Best with sound."],
+    ["./", "The film", "Seventeen chapters of a Lagos wedding. Best with sound."],
     ["about.html", "About Àríyá", "Invitations, RSVPs and seating, told on one page."],
     ["product.html", "What we do", "Guest lists, personal links, seating and vendors."],
     ["pricing.html", "Pricing", "Pay per event. Placeholder prices for the prototype."],

@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Àríyá · The Yes</title>
-<meta name="description" content="Àríyá plans Nigerian weddings and parties with one personal RSVP link per guest. The Yes is a wedding film in fifteen chapters.">
+<meta name="description" content="Àríyá plans Nigerian weddings and parties with one personal RSVP link per guest. The Yes is a wedding film in seventeen chapters.">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#16040a">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Àríyá by OwambePlan">
 <meta property="og:title" content="The Yes · Àríyá">
-<meta property="og:description" content="One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in fifteen chapters, from Àríyá by OwambePlan.">
+<meta property="og:description" content="One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in seventeen chapters, from Àríyá by OwambePlan.">
 <meta property="og:url" content="https://owambeplan.vercel.app/">
 <meta property="og:image" content="https://owambeplan.vercel.app/assets/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
 <style>
 /* Àríyá, "The Yes": a wedding film you scroll. A fixed WebGL stage rendered like a camera, with type layered over it.
-   A long track drives fifteen chapters, then the page becomes the company's site.
+   A long track drives seventeen chapters, then the page becomes the company's site.
    One committed night look: burgundy black, ivory, champagne gold. Type pulls focus the way the lens does. */
 :root {
   --ink: #0c0406;
@@ -52,7 +52,7 @@ body { margin: 0; color: var(--ivory); font-family: var(--font-body); font-size:
 .backdrop { position: fixed; inset: 0; z-index: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(110, 20, 38, 0.4), transparent 70%), linear-gradient(180deg, var(--night), var(--ink) 75%); }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block; opacity: 0; transition: opacity 1.6s ease; }
 #gl.live { opacity: 1; }
-.track { position: relative; z-index: 0; height: 2220vh; }
+.track { position: relative; z-index: 0; height: 2650vh; }
 .mono { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
 .btn { font: inherit; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.9rem 1.3rem; border-radius: 999px; cursor: pointer; border: 1px solid currentColor; background: transparent; color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: background .3s, color .3s, transform .3s; }
 @media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-1px); } }
@@ -89,6 +89,18 @@ html.locked .overlay, html.locked .foot-ui { opacity: 0; }
 .gate .load i { display: block; width: 140px; height: 1px; background: var(--line); position: relative; overflow: hidden; }
 .gate .load i b { position: absolute; inset: 0; background: var(--gold); transform-origin: left; transform: scaleX(0); transition: transform .4s; }
 .gate .enter[disabled] { opacity: 0.4; cursor: wait; }
+/* The colour of the day: three velvet swatches with a gold ring on the chosen one. */
+.hue { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; justify-content: center; }
+.hue legend { width: 100%; text-align: center; color: var(--gold); margin-bottom: 12px; padding: 0; }
+.hue label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; color: var(--mist); font-size: 0.86rem; letter-spacing: 0.04em; }
+.hue input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.hue .sw { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(60% 60% at 35% 30%, var(--c1), var(--c2)); box-shadow: inset 0 -3px 6px rgba(0,0,0,.45), 0 0 0 1px rgba(233, 201, 138, 0.25); transition: box-shadow .25s, transform .25s; }
+.hue input:checked + .sw { box-shadow: inset 0 -3px 6px rgba(0,0,0,.45), 0 0 0 2px var(--bg, #0c0406), 0 0 0 3.5px var(--gold); transform: scale(1.08); }
+.hue input:checked ~ * , .hue label:has(input:checked) { color: var(--ivory); }
+.hue input:focus-visible + .sw { outline: 2px solid var(--gold); outline-offset: 4px; }
+:root { --liner: #6e1426; }
+:root[data-velvet="blue"] { --liner: #16306e; }
+:root[data-velvet="green"] { --liner: #1f4a36; }
 .gate .enter .ring { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid currentColor; }
 
 /* ---------- Navigation ---------- */
@@ -173,7 +185,7 @@ h1 em, h2 em { font-style: italic; color: var(--gold); }
 .env-back { position: absolute; inset: 0; border-radius: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .05 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(170deg, #5e2d1c, #3d1a10); box-shadow: 0 2px 3px rgba(0,0,0,.3), 0 30px 60px rgba(0,0,0,.45), 0 70px 140px rgba(0,0,0,.5); }
 .env-back::after { content: ""; position: absolute; inset: 6px 6px 40% 6px; border-radius: 3px; background:
   repeating-linear-gradient(45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px),
-  repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), #6e1426; }
+  repeating-linear-gradient(-45deg, rgba(233, 201, 138, 0.35) 0 1px, transparent 1px 12px), var(--liner); }
 .slot { position: absolute; left: 6%; right: 6%; bottom: 4%; top: -260%; overflow: hidden; z-index: 2; pointer-events: none; }
 .env.out .slot { overflow: visible; z-index: 6; pointer-events: auto; }
 .card { position: absolute; left: 0; right: 0; bottom: 0; transform: translateY(105%);
@@ -385,7 +397,13 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <span class="mark">Àríyá presents</span>
     <h1 id="gateTitle">The <em>Yes</em></h1>
     <p class="value">One personal invitation for every guest, and a guest list that keeps itself.</p>
-    <p class="story mono">A Lagos wedding in fifteen chapters · best with sound</p>
+    <p class="story mono">A Lagos wedding in seventeen chapters · best with sound</p>
+    <fieldset class="hue" id="hue">
+      <legend class="mono">Choose the colour of the day</legend>
+      <label><input type="radio" name="hue" value="burgundy" checked><span class="sw" style="--c1:#7a1730;--c2:#2a0610" aria-hidden="true"></span>Burgundy</label>
+      <label><input type="radio" name="hue" value="blue"><span class="sw" style="--c1:#2a4aa8;--c2:#081638" aria-hidden="true"></span>Sapphire blue</label>
+      <label><input type="radio" name="hue" value="green"><span class="sw" style="--c1:#4a8a68;--c2:#0e2a1c" aria-hidden="true"></span>Champagne green</label>
+    </fieldset>
     <div class="load mono" aria-live="polite"><i><b id="loadBar"></b></i><span id="loadTxt">Setting the hall 0%</span></div>
     <div class="actions">
       <button class="btn gold enter" id="enterSound" type="button" disabled><span class="ring" aria-hidden="true"></span>Enter the wedding</button>
@@ -443,7 +461,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <div class="flash" id="flash" aria-hidden="true"><div class="core"></div><div class="fire"></div><i class="glint" style="left: 38%; top: 34%; --gs: .8"></i><i class="glint" style="left: 64%; top: 56%"></i><i class="glint" style="left: 55%; top: 28%; --gs: .55"></i></div>
 
   <section class="beat low" data-in="0.68" data-out="0.775" aria-label="The invitation" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
-    <span class="no">No. 009 · The invitation</span>
+    <span class="no">No. 010 · The invitation</span>
     <h2>Every guest gets <em>their own.</em></h2>
   </section>
   <div class="envwrap" id="envwrap">
@@ -474,7 +492,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <div class="scrim" id="scrim" aria-hidden="true"></div>
   <section class="beat side" data-in="0.78" data-out="0.89" aria-label="The count">
     <div class="count-beat">
-      <span class="no">No. 010 · The count</span>
+      <span class="no">No. 011 · The count</span>
       <h2>Know who’s coming.<br><em>And where they sit.</em></h2>
       <p class="sub">Every guest who says yes takes a seat and lights a candle.</p>
       <dl class="count">
@@ -490,7 +508,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   </aside>
 
   <section class="beat low finale" data-in="0.92" data-out="1.01" aria-label="The dance">
-    <span class="no">No. 013 · The dance</span>
+    <span class="no">No. 015 · The dance</span>
     <h1>Now go and <em>dance.</em></h1>
   </section>
 </div>
@@ -498,7 +516,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 <div class="layer" id="newLayer">
   <section class="beat low" data-scene="C" data-in="0.06" data-out="0.46" aria-label="The colour">
     <span class="no">No. 003 · The colour</span>
-    <h2>Burgundy and <em>gold.</em></h2>
+    <h2><span id="hueA">Burgundy</span> and <em id="hueB">gold.</em></h2>
     <p class="sub">The family chooses the aso ebi. Four hundred people will wear it.</p>
   </section>
   <section class="beat low" data-scene="C" data-in="0.54" data-out="0.96" aria-label="The colour, continued">
@@ -509,12 +527,17 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <section class="beat low" data-scene="G" data-in="0.06" data-out="0.46" aria-label="The weave">
     <span class="no">No. 004 · The weave</span>
     <h2>Aso-oke, woven <em>by hand.</em></h2>
-    <p class="sub">Burgundy and gold for her family, indigo for his.</p>
+    <p class="sub">Her family’s colour, shot with gold. Indigo and white for his.</p>
   </section>
   <section class="beat low" data-scene="G" data-in="0.54" data-out="0.96" aria-label="One roll, one name">
     <span class="no">No. 004 · The weave</span>
     <h2>One roll, <em>one name.</em></h2>
     <p class="sub">Each roll is tagged for a guest on the list. Mama Ijeoma’s is tied first.</p>
+  </section>
+  <section class="beat low" data-scene="W" data-in="0.06" data-out="0.62" aria-label="The doors">
+    <span class="no">No. 009 · The doors · Victoria Island</span>
+    <h2>Four hundred places. <em>One way in.</em></h2>
+    <p class="sub">The hall is dressed by four. The guests are still deciding.</p>
   </section>
   <section class="beat low" data-scene="E" data-in="0.04" data-out="0.32" aria-label="Mama">
     <span class="no">No. 006 · Mama · Benin City</span>
@@ -535,18 +558,28 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <section class="beat low" data-scene="F" data-in="0.8" data-out="0.99" aria-label="Her own invitation">
     <h2>Something with <em>her name</em> on it.</h2>
   </section>
+  <section class="beat low" data-scene="J" data-in="0.05" data-out="0.45" aria-label="The gele">
+    <span class="no">No. 012 · The gele</span>
+    <h2>Tied, untied, <em>tied again.</em></h2>
+    <p class="sub">Her sister pleats it on the block until it stands like a crown.</p>
+  </section>
+  <section class="beat low" data-scene="J" data-in="0.55" data-out="0.96" aria-label="Ready">
+    <span class="no">No. 012 · The gele</span>
+    <h2>Ready by <em>noon.</em></h2>
+    <p class="sub">Her phone has not stopped buzzing since six.</p>
+  </section>
   <section class="beat low" data-scene="H" data-in="0.05" data-out="0.45" aria-label="The morning">
-    <span class="no">No. 011 · The morning</span>
+    <span class="no">No. 013 · The morning</span>
     <h2>Four hundred places, <em>set by name.</em></h2>
     <p class="sub">Gold, glass and candlelight. Every card written from the same list.</p>
   </section>
   <section class="beat low" data-scene="H" data-in="0.55" data-out="0.96" aria-label="Where to sit">
-    <span class="no">No. 011 · The morning</span>
+    <span class="no">No. 013 · The morning</span>
     <h2>Nobody has to wonder <em>where to sit.</em></h2>
     <p class="sub">Seating is planned before the doors open.</p>
   </section>
   <section class="beat low" data-scene="T" data-in="0.04" data-out="0.44" aria-label="The place kept" style="bottom: auto; top: max(13vh, calc(env(safe-area-inset-top, 0px) + 84px));">
-    <span class="no">No. 012 · The place kept</span>
+    <span class="no">No. 014 · The place kept</span>
     <h2>Mama Ijeoma. <em>Table 1.</em></h2>
     <p class="sub">Guests say yes. The couple choose where they sit.</p>
   </section>
@@ -564,11 +597,11 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     <p class="p-note" id="pNote"></p>
   </div>
   <section class="beat low" data-scene="D" data-in="0.04" data-out="0.3" aria-label="The send-off">
-    <span class="no">No. 014 · The send-off</span>
+    <span class="no">No. 016 · The send-off</span>
     <h2>When the hall goes quiet,<br><em>the sky stays lit.</em></h2>
   </section>
   <section class="beat low" data-scene="D" data-in="0.33" data-out="0.6" aria-label="The send-off, continued">
-    <span class="no">No. 014 · The send-off</span>
+    <span class="no">No. 016 · The send-off</span>
     <p class="prose">A lantern for every yes. Four hundred of them, rising over the lagoon.</p>
   </section>
   <section class="beat low finale" data-scene="D" data-in="0.8" data-out="1.01" aria-label="The end">
@@ -643,14 +676,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
   function seg(p, a, b) { return smooth((p - a) / (b - a)); }
   function bump(p, a, b, c, d) { return seg(p, a, b) * (1 - seg(p, c, d)); }
-  var PRO = 0.0405; // share of the scroll given to the prologue
+  var PRO = 0.034; // share of the scroll given to the prologue
   // The story map. The original eight chapters run on "p" (0 to 1, the box to the dance); two newer chapters are cut in
   // between them, each with its own 0 to 1 progress: C, the colour (after the yes) and D, the send-off (after the dance).
   // s is the reader's progress through the whole story after the prologue.
   // Newer chapters, cut in the same way: E, Mama's room (after the noise); F, her name on Tunde's laptop (after the
   // calm); T, the place kept at Table 1 (after the count). G, the weave: aso-oke rolls tagged with names (after the
   // colour); H, the morning: a place setting close up, before the doors open (before the place kept).
-  var SEGS = [["old", 0, 0.285], ["C", 0.13], ["G", 0.11], ["old", 0.285, 0.475], ["E", 0.12], ["old", 0.475, 0.62], ["F", 0.12], ["old", 0.62, 0.885], ["H", 0.1], ["T", 0.09], ["old", 0.885, 1], ["D", 0.19]];
+  var SEGS = [["old", 0, 0.285], ["C", 0.13], ["G", 0.11], ["old", 0.285, 0.475], ["E", 0.12], ["old", 0.475, 0.62], ["F", 0.12], ["old", 0.62, 0.675], ["W", 0.1], ["old", 0.675, 0.885], ["J", 0.11], ["H", 0.1], ["T", 0.09], ["old", 0.885, 1], ["D", 0.19]];
   var CUTS = [], acc = 0, lastP = 0;
   SEGS.forEach(function (g) {
     var old = g[0] === "old", w = old ? 0.68 * (g[2] - g[1]) : g[1];
@@ -680,8 +713,21 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   var EMBED = new URLSearchParams(location.search).get("embed");
   if (EMBED !== "hero" && EMBED !== "hall") EMBED = null;
   OP.embed = EMBED; OP.paused = false;
-  OP.velvet = new URLSearchParams(location.search).get("velvet") || "burgundy";
-  document.documentElement.setAttribute("data-velvet", OP.velvet);
+  // The colour of the day: from the link, or the visitor's last choice, or burgundy. Chosen on the gate.
+  var HUES = { burgundy: ["Burgundy", "gold."], blue: ["Sapphire", "gold."], green: ["Green", "champagne."], ruby: ["Ruby", "gold."], coral: ["Coral", "gold."] };
+  var savedHue = null; try { savedHue = localStorage.getItem("ariya-colour"); } catch (e) { /* private mode */ }
+  OP.velvet = new URLSearchParams(location.search).get("velvet") || (HUES[savedHue] ? savedHue : "burgundy");
+  function setHue(name) {
+    OP.velvet = name; document.documentElement.setAttribute("data-velvet", name);
+    var w = HUES[name] || HUES.burgundy; document.getElementById("hueA").textContent = w[0]; document.getElementById("hueB").textContent = w[1];
+    var r = document.querySelector('#hue input[value="' + name + '"]'); if (r) r.checked = true;
+  }
+  setHue(OP.velvet);
+  document.getElementById("hue").addEventListener("change", function (e) {
+    if (!e.target || e.target.name !== "hue") return;
+    setHue(e.target.value);
+    try { localStorage.setItem("ariya-colour", e.target.value); } catch (err) { /* fine */ }
+  });
   if (window.FineCard) document.getElementById("seal").innerHTML = FineCard.seal({ initials: "C T" });
   var embedP = EMBED === "hall" ? 0.79 : 0, embedT0 = 0, readySent = false, frames = 0;
   if (EMBED) {
@@ -878,8 +924,8 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   /* ---------- Chapters: the nav label and the menu's chapter index ---------- */
   // [name, story position s] ; the prologue is -1 (the very top).
   var chapters = [["Prologue", -1], ["The box", sFromOld(0)], ["The yes", sFromOld(0.17)], ["The colour", sFromScene("C", 0)], ["The weave", sFromScene("G", 0.02)], ["The noise", sFromOld(0.37)],
-    ["Mama", sFromScene("E", 0.02)], ["The calm", sFromOld(0.53)], ["Her name", sFromScene("F", 0.02)], ["The invitation", sFromOld(0.72)], ["The count", sFromOld(0.83)],
-    ["The morning", sFromScene("H", 0.02)], ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
+    ["Mama", sFromScene("E", 0.02)], ["The calm", sFromOld(0.53)], ["Her name", sFromScene("F", 0.02)], ["The doors", sFromScene("W", 0.0)], ["The invitation", sFromOld(0.72)], ["The count", sFromOld(0.83)],
+    ["The gele", sFromScene("J", 0.02)], ["The morning", sFromScene("H", 0.02)], ["The place kept", sFromScene("T", 0.02)], ["The dance", sFromOld(0.97)], ["The send-off", sFromScene("D", 0.02)]];
   var whereNo = document.getElementById("whereNo"), whereName = document.getElementById("whereName");
   // The rail: one mark per chapter, the current one in gold; each mark jumps to its chapter.
   var railBtns = chapters.map(function (c, i) {
@@ -1325,12 +1371,29 @@ async function start() {
   const VELVETS = {
     burgundy: [0x3d0715, 0xff9cb0, 0x24030b, 0xc75a72],
     ruby: [0x6a0716, 0xff8fa0, 0x3a030b, 0xe0465e],
-    coral: [0x7a2414, 0xffc0a6, 0x431208, 0xe2775a]
+    coral: [0x7a2414, 0xffc0a6, 0x431208, 0xe2775a],
+    blue: [0x0b1d5c, 0xa8c0ff, 0x050f33, 0x6a8ae6],
+    green: [0x1b3b2a, 0xd6efc6, 0x0d2117, 0x86b896]
+  };
+  // The rest of the design follows the colour too: the aso-oke, the gele, the napkins.
+  const PAL = {
+    burgundy: { aso: "#5a0a1e", napkin: 0xc98d8a, napSheen: 0xffd6d2, gele: 0x6a1428 },
+    blue: { aso: "#14296e", napkin: 0x9fb0d4, napSheen: 0xe2eaff, gele: 0x1c2f78 },
+    green: { aso: "#1d4a35", napkin: 0xc2cdae, napSheen: 0xf2f8e2, gele: 0x24533c }
   };
   let velvetNow = "";
   function applyVelvet(name) {
     const v = VELVETS[name] || VELVETS.burgundy; velvetNow = name;
     velvet.color.setHex(v[0]); velvet.sheenColor.setHex(v[1]); velvetDeep.color.setHex(v[2]); velvetDeep.sheenColor.setHex(v[3]);
+    const P = PAL[name] || PAL.burgundy;
+    napkins.material.color.setHex(P.napkin); napkins.material.sheenColor.setHex(P.napSheen);
+    blushVelvet.color.setHex(P.napkin); blushVelvet.sheenColor.setHex(P.napSheen);
+    geleCloth.color.setHex(P.gele);
+    if (ASO.wine.base !== P.aso) {
+      ASO.wine = wineway(P.aso);
+      [["flat", true], ["roll", false]].forEach(([k, along]) => { const old = MAT.wine[k].map; MAT.wine[k].map = asoTex(ASO.wine, along); old.dispose(); });
+      const oe = MAT.wine.end.map; MAT.wine.end.map = spiralTex(ASO.wine); oe.dispose();
+    }
   }
   const brass = new THREE.MeshPhysicalMaterial({ color: 0xebc27c, metalness: 1, roughness: 0.2, clearcoat: 0.3 });
 
@@ -1431,7 +1494,7 @@ async function start() {
 
   // Ring: platinum band, six-claw setting, brilliant-cut diamond.
   const R = 0.42;
-  const platinum = new THREE.MeshPhysicalMaterial({ color: 0xe8e5e0, metalness: 1, roughness: 0.09, clearcoat: 0.4, clearcoatRoughness: 0.05 });
+  const platinum = new THREE.MeshPhysicalMaterial({ color: 0xeeebe6, metalness: 1, roughness: 0.08, clearcoat: 0.4, clearcoatRoughness: 0.05, envMapIntensity: 3.4 });
   const ring = new THREE.Group(); setA.add(ring);
   const bandGeo = new THREE.TorusGeometry(R, 0.048, 40, 200); bandGeo.scale(1, 1, 1.75);
   const band = new THREE.Mesh(bandGeo, platinum); band.castShadow = true; ring.add(band);
@@ -1540,11 +1603,28 @@ async function start() {
     rect(L * 0.84, 0.6, -0.022); rect(L * 0.6, 0.14, -0.04);
     return new ConvexGeometry(pts);
   })();
-  const bagMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: 0.04, envMapIntensity: 3, emissive: 0x7a7e88, flatShading: true, iridescence: 0.3, iridescenceIOR: 1.8 });
+  // Each baguette is traced through its own facets, exactly like the centre stone, so it flashes the same way.
+  function planesOf(geo) {
+    const out = [], pos = geo.attributes.position, a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i += 3) {
+      a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
+      const n = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize(), d = n.dot(a);
+      if (!out.some((q) => q.x * n.x + q.y * n.y + q.z * n.z > 0.99995 && Math.abs(q.w - d) < 1e-5)) out.push(new THREE.Vector4(n.x, n.y, n.z, d));
+    }
+    return out;
+  }
+  const bagPlanes = planesOf(bagGeo);
+  const bagStones = [];
+  const bagMat = () => new THREE.ShaderMaterial({
+    defines: { NP: bagPlanes.length, BOUNCES: mobile ? 3 : 5 },
+    uniforms: { envMap: gemMat.uniforms.envMap, envRot: gemMat.uniforms.envRot, envIntensity: gemMat.uniforms.envIntensity, camObj: { value: new THREE.Vector3() }, model3: { value: new THREE.Matrix3() },
+      planes: { value: bagPlanes }, sparkDirs: gemMat.uniforms.sparkDirs, sparkle: gemMat.uniforms.sparkle, iors: gemMat.uniforms.iors },
+    vertexShader: gemMat.vertexShader, fragmentShader: gemMat.fragmentShader
+  });
   [-1, 1].forEach((sd) => {
     const th = 0.5, rr = R + 0.082, b = new THREE.Group();
     b.position.set(sd * Math.sin(th) * rr, Math.cos(th) * rr, 0); b.rotation.z = -sd * th; ring.add(b);
-    const st = new THREE.Mesh(bagGeo, bagMat); st.rotation.y = sd > 0 ? 0 : Math.PI; st.castShadow = true; b.add(st);
+    const st = new THREE.Mesh(bagGeo, bagMat()); st.rotation.y = sd > 0 ? 0 : Math.PI; st.castShadow = true; b.add(st); bagStones.push(st);
     [-1, 1].forEach((k) => { const rail = new THREE.Mesh(new THREE.BoxGeometry(0.118, 0.034, 0.008), platinum); rail.position.set(0, -0.006, k * 0.036); b.add(rail); });
   });
   const RING_REST = baseTop - 0.13, RING_UP = 1.25;
@@ -1644,12 +1724,13 @@ async function start() {
   goboMesh.rotation.x = -Math.PI / 2; goboMesh.position.y = 0.012; setB.add(goboMesh);
 
   const tables = [];
-  for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2; tables.push([Math.cos(a) * 5.4, Math.sin(a) * 5.4]); }
-  for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2 + 0.1; tables.push([Math.cos(a) * 8.8, Math.sin(a) * 8.8]); }
+  // Two rings of tables around the dance floor, both opened at the front (+z) for the aisle from the entrance.
+  const tableRing = (n, r, gap) => { const step = (Math.PI * 2 - gap) / n; for (let i = 0; i < n; i++) { const a = Math.PI / 2 + gap / 2 + (i + 0.5) * step; tables.push([Math.cos(a) * r, Math.sin(a) * r]); } };
+  tableRing(8, 5.4, 0.36); tableRing(16, 8.8, 0.42);
   const NT = tables.length, NS = NT * 10, CLOTH_Y = 0.765;
 
   const clothGeo = (() => {
-    const prof = [[0, CLOTH_Y], [0.86, CLOTH_Y], [0.9, CLOTH_Y - 0.008], [0.93, CLOTH_Y - 0.04], [0.94, 0.62], [0.97, 0.35], [1.0, 0.1], [1.02, 0.0]].map((q) => new THREE.Vector2(q[0], q[1]));
+    const prof = [[0, CLOTH_Y], [0.86, CLOTH_Y], [0.9, CLOTH_Y - 0.008], [0.93, CLOTH_Y - 0.04], [0.94, 0.62], [0.97, 0.35], [1.0, 0.1], [1.03, 0.0]].reverse().map((q) => new THREE.Vector2(q[0], q[1])); // floor to centre, so the faces point outward
     const g = new THREE.LatheGeometry(prof, 128), p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i), r = Math.hypot(x, z);
@@ -1908,6 +1989,38 @@ async function start() {
   napkins.castShadow = napkins.receiveShadow = true; flatware.receiveShadow = true; numFrames.castShadow = true;
   setB.add(napkins, glasses, flatware);
 
+  /* ---------- The way in: the entrance, an ivory runner down the aisle to the dance floor, lanterns and flowers ---------- */
+  const AISLE_Z0 = 14.3, AISLE_Z1 = 3.45, AISLE_W = 1.5;
+  const runner = new THREE.Mesh(new THREE.PlaneGeometry(AISLE_W, AISLE_Z0 - AISLE_Z1, 4, 40), new THREE.MeshPhysicalMaterial({ color: 0xf2eadc, roughness: 0.82, sheen: 0.8, sheenColor: 0xffffff, sheenRoughness: 0.5, normalMap: linenNormal, normalScale: new THREE.Vector2(0.2, 0.2) }));
+  runner.rotation.x = -Math.PI / 2; runner.position.set(0, 0.006, (AISLE_Z0 + AISLE_Z1) / 2); runner.receiveShadow = true; setB.add(runner);
+  const runnerEdge = new THREE.InstancedMesh(new THREE.BoxGeometry(0.03, 0.004, AISLE_Z0 - AISLE_Z1), goldMat, 2);
+  { const d = new THREE.Object3D(); [-1, 1].forEach((k, i) => { d.position.set(k * (AISLE_W / 2 - 0.06), 0.009, (AISLE_Z0 + AISLE_Z1) / 2); d.updateMatrix(); runnerEdge.setMatrixAt(i, d.matrix); }); } setB.add(runnerEdge);
+  // Petals scattered along both edges of the runner.
+  const NPA = mobile ? 160 : 300, aislePetals = new THREE.InstancedMesh(petalGeo, petalMat, NPA);
+  { const d = new THREE.Object3D(), c = new THREE.Color();
+    for (let i = 0; i < NPA; i++) { const side = i % 2 ? 1 : -1, x = side * (AISLE_W / 2 - 0.05 - Math.pow(rand(), 2) * 0.4) + (rand() < 0.2 ? (rand() - 0.5) * 1.2 : 0); d.position.set(x, 0.012, AISLE_Z1 + rand() * (AISLE_Z0 - AISLE_Z1)); d.rotation.set((rand() - 0.5) * 0.3, rand() * 6.28, (rand() - 0.5) * 0.3); d.scale.setScalar(0.03 + rand() * 0.015); d.updateMatrix(); aislePetals.setMatrixAt(i, d.matrix); aislePetals.setColorAt(i, c.setHSL(0.98 + rand() * 0.03, 0.45, 0.8 + rand() * 0.15)); } }
+  aislePetals.receiveShadow = true; setB.add(aislePetals);
+  // Hurricane lanterns on the floor either side, each with a pillar candle.
+  const NLA = 16, aisleLanternGlass = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.11, 0.11, 0.42, 24, 1, true).translate(0, 0.23, 0), hallGlassMat, NLA);
+  const aisleLanternBase = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.125, 0.135, 0.03, 24).translate(0, 0.015, 0), goldMat, NLA);
+  const aisleLanternCandle = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.045, 0.045, 0.16, 20).translate(0, 0.11, 0), wax, NLA);
+  const aisleLanternFlame = new THREE.InstancedMesh(new THREE.SphereGeometry(0.011, 10, 8).scale(1, 2.4, 1).translate(0, 0.215, 0), flameMat, NLA);
+  const aisleLanternGlow = new THREE.InstancedMesh(glowGeo, new THREE.MeshBasicMaterial({ map: glowTex, color: new THREE.Color(0.7, 0.36, 0.14), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }), NLA);
+  { const d = new THREE.Object3D();
+    for (let i = 0; i < NLA; i++) { const side = i % 2 ? 1 : -1, z = AISLE_Z0 - 0.5 - Math.floor(i / 2) * 1.32; d.position.set(side * (AISLE_W / 2 + 0.22), 0, z); d.updateMatrix(); [aisleLanternGlass, aisleLanternBase, aisleLanternCandle, aisleLanternFlame].forEach((m) => m.setMatrixAt(i, d.matrix)); d.position.y = 0.01; d.scale.setScalar(1.6); d.updateMatrix(); aisleLanternGlow.setMatrixAt(i, d.matrix); d.scale.setScalar(1); } }
+  setB.add(aisleLanternGlass, aisleLanternBase, aisleLanternCandle, aisleLanternFlame, aisleLanternGlow);
+  // Tall gold pedestals of white flowers, alternating along the aisle, and an arch of flowers at the door.
+  const pedestalGeo = mergeGeometries([new THREE.CylinderGeometry(0.16, 0.2, 0.04, 32).translate(0, 0.02, 0), new THREE.CylinderGeometry(0.03, 0.05, 1.1, 20).translate(0, 0.59, 0), new THREE.CylinderGeometry(0.17, 0.035, 0.18, 32).translate(0, 1.2, 0)]);
+  const NPD = 8, pedestals = new THREE.InstancedMesh(pedestalGeo, goldMat, NPD), pedFlowers = new THREE.InstancedMesh(flowerGeo, flowers.material, NPD + 22);
+  { const d = new THREE.Object3D();
+    for (let i = 0; i < NPD; i++) { const side = i % 2 ? 1 : -1, z = AISLE_Z0 - 1.6 - i * 1.3; d.position.set(side * (AISLE_W / 2 + 0.62), 0, z); d.rotation.set(0, i, 0); d.scale.setScalar(1); d.updateMatrix(); pedestals.setMatrixAt(i, d.matrix);
+      d.position.y = 1.33 - (CLOTH_Y + 1.01) * 1.25; d.scale.setScalar(1.25); d.updateMatrix(); pedFlowers.setMatrixAt(i, d.matrix); }
+    for (let k = 0; k < 22; k++) { const a = Math.PI * (k / 21), r = 1.65; d.position.set(Math.cos(a) * r, Math.sin(a) * r * 1.35 + 0.15 - (CLOTH_Y + 1.01) * 0.95, AISLE_Z0 - 0.15); d.rotation.set(0, k * 1.3, 0); d.scale.setScalar(0.95); d.updateMatrix(); pedFlowers.setMatrixAt(NPD + k, d.matrix); } }
+  pedestals.castShadow = pedFlowers.castShadow = true; setB.add(pedestals, pedFlowers);
+  const archLights = new THREE.InstancedMesh(new THREE.SphereGeometry(0.02, 6, 4), fairy.material, 90);
+  { const d = new THREE.Object3D(); for (let k = 0; k < 90; k++) { const a = Math.PI * (k / 89), r = 1.65 + (rand() - 0.5) * 0.3; d.position.set(Math.cos(a) * r, Math.sin(a) * r * 1.35 + 0.15 + (rand() - 0.5) * 0.25, AISLE_Z0 - 0.15 + (rand() - 0.5) * 0.3); d.updateMatrix(); archLights.setMatrixAt(k, d.matrix); } }
+  setB.add(archLights);
+
   /* ---------- Hall life: aso ebi colours, light, people, celebration ---------- */
   const mergeAll = (list) => mergeGeometries(list.map((g) => (g.index ? g.toNonIndexed() : g)));
   // Ivory table linens.
@@ -2003,59 +2116,82 @@ async function start() {
     seatedFila.setMatrixAt(i, g.woman ? hidden : capM);
   }
 
-  // The dance floor: the couple at the centre, family and friends around them.
-  const robeGeo = mergeAll([
-    new THREE.CylinderGeometry(0.17, 0.36, 1.12, 20, 1).translate(0, 0.56, 0),
-    new THREE.CapsuleGeometry(0.16, 0.28, 6, 14).scale(1, 1, 0.7).translate(0, 1.3, 0),
-    new THREE.SphereGeometry(0.2, 14, 8).scale(1.25, 0.45, 0.8).translate(0, 1.47, 0)
+  // The dance floor: the couple at the centre, family and friends around them, in aso ebi.
+  // Women in iro and buba with a pleated gele; men in a flowing agbada and fila. Arms are jointed and dance.
+  const lathe = (pts, seg) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg || 28);
+  const womanGeo = mergeAll([
+    lathe([[0.0001, 0.0], [0.22, 0.0], [0.215, 0.12], [0.2, 0.4], [0.175, 0.7], [0.155, 0.93], [0.15, 0.99], [0.0001, 0.99]]).scale(1, 1, 0.82), // the iro
+    lathe([[0.0001, 0.93], [0.17, 0.93], [0.2, 1.02], [0.19, 1.16], [0.205, 1.3], [0.2, 1.38], [0.12, 1.45], [0.05, 1.47], [0.0001, 1.47]]).scale(1, 1, 0.66), // the buba
+    new THREE.TorusGeometry(0.165, 0.035, 8, 28).rotateX(Math.PI / 2).scale(1, 1, 0.8).translate(0, 0.97, 0), // the knot of the wrap
+    new THREE.CylinderGeometry(0.042, 0.048, 0.1, 14).translate(0, 1.5, 0)
   ]);
-  const armsDownGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.3, 0.98, 0.05), 0.052), limb(V(0.22, 1.45, 0), V(0.3, 0.98, 0.05), 0.052)]);
-  const armsUpGeo = mergeAll([limb(V(-0.22, 1.45, 0), V(-0.36, 2.0, 0.08), 0.052), limb(V(0.22, 1.45, 0), V(0.34, 1.98, 0.1), 0.052)]);
-  const ND = 24;
+  const manGeo = mergeAll([
+    lathe([[0.0001, 0.12], [0.3, 0.12], [0.33, 0.4], [0.36, 0.8], [0.37, 1.12], [0.33, 1.32], [0.16, 1.44], [0.06, 1.47], [0.0001, 1.47]]).scale(1.35, 1, 0.72), // the agbada
+    new THREE.CylinderGeometry(0.06, 0.055, 0.14, 12).translate(-0.09, 0.07, 0.02), new THREE.CylinderGeometry(0.06, 0.055, 0.14, 12).translate(0.09, 0.07, 0.02),
+    new THREE.BoxGeometry(0.09, 0.05, 0.22).translate(-0.09, 0.025, 0.06), new THREE.BoxGeometry(0.09, 0.05, 0.22).translate(0.09, 0.025, 0.06),
+    new THREE.CylinderGeometry(0.044, 0.05, 0.1, 14).translate(0, 1.5, 0)
+  ]);
+  const headGeoD = new THREE.SphereGeometry(0.1, 20, 16).scale(0.86, 1.12, 0.98);
+  // Gele: a stiff band round the head and a pleated fan rising behind.
+  const geleFanGeo = (() => { const g = new THREE.CylinderGeometry(0.23, 0.12, 0.2, 64, 3, true, -Math.PI * 0.62, Math.PI * 1.24), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), th = Math.atan2(z, x), k = 1 + 0.07 * Math.sin(th * 26) * (0.4 + (pa.getY(i) + 0.1) * 3); pa.setX(i, x * k); pa.setZ(i, z * k); } g.computeVertexNormals(); g.rotateX(-0.35); g.translate(0, 0.07, -0.02); return g; })();
+  const geleGeoD = mergeAll([new THREE.TorusGeometry(0.1, 0.035, 10, 32).rotateX(Math.PI / 2 - 0.25).translate(0, 0.0, 0.0), geleFanGeo]);
+  const filaGeoD = mergeAll([new THREE.CylinderGeometry(0.095, 0.1, 0.1, 24).translate(0, 0.04, 0), new THREE.SphereGeometry(0.08, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2).scale(1.1, 0.6, 1).rotateZ(0.6).translate(0.07, 0.1, 0)]);
+  const sleeveGeo = new THREE.CapsuleGeometry(0.058, 0.17, 4, 12); // upper arm, in the sleeve
+  const foreGeo = new THREE.CapsuleGeometry(0.04, 0.18, 4, 10);
+  const ND = mobile ? 34 : 56;
   const dancers = [];
   for (let i = 0; i < ND; i++) {
-    const a = rand() * Math.PI * 2, r = i < 2 ? 0.35 : 0.9 + rand() * 2.1;
-    const bride = i === 0, groom = i === 1;
+    const couple = i < 2, a = rand() * Math.PI * 2, r = couple ? 0.32 : 0.95 + Math.sqrt(rand()) * 2.15;
+    const woman = i === 0 ? true : i === 1 ? false : rand() < 0.58;
     dancers.push({
-      x: i < 2 ? (i ? 0.33 : -0.33) : Math.cos(a) * r, z: i < 2 ? 0 : Math.sin(a) * r, ry: i < 2 ? (i ? -Math.PI / 2 : Math.PI / 2) : rand() * Math.PI * 2,
-      up: bride || groom ? false : rand() < 0.45, woman: bride ? true : groom ? false : rand() < 0.55,
-      cloth: bride ? new THREE.Color(0xf7f1e6) : groom ? new THREE.Color(0x5a0c1c) : asoEbi[Math.floor(rand() * asoEbi.length)],
-      skin: skins[Math.floor(rand() * skins.length)], ph: rand() * 6, sp: 3.2 + rand() * 1.6, h: 0.92 + rand() * 0.14
+      x: couple ? (i ? 0.32 : -0.32) : Math.cos(a) * r, z: couple ? 0 : Math.sin(a) * r, ry: couple ? (i ? -Math.PI / 2 : Math.PI / 2) : rand() * Math.PI * 2,
+      woman, pose: couple ? 1 : Math.floor(rand() * 4), // 0 arms up waving, 1 one hand up, 2 arms low swinging, 3 spraying notes
+      cloth: i === 0 ? new THREE.Color(0xf4ead8) : asoEbi[Math.floor(rand() * asoEbi.length)], skin: skins[Math.floor(rand() * skins.length)],
+      ph: rand() * 6, sp: 2.6 + rand() * 1.4, h: (woman ? 0.96 : 1.02) + rand() * 0.08
     });
   }
-  const dBodies = new THREE.InstancedMesh(robeGeo, fabric, ND);
-  const dArmsDown = new THREE.InstancedMesh(armsDownGeo, fabric, ND);
-  const dArmsUp = new THREE.InstancedMesh(armsUpGeo, fabric, ND);
-  const dHands = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045, 8, 6), skin, ND * 2);
-  const dHeads = new THREE.InstancedMesh(headGeo, skin, ND);
-  const dGele = new THREE.InstancedMesh(geleGeo, geleMat, ND);
-  const dFila = new THREE.InstancedMesh(filaGeo, geleMat, ND);
+  const nW = dancers.filter((d) => d.woman).length;
+  const dWomen = new THREE.InstancedMesh(womanGeo, fabric, ND), dMen = new THREE.InstancedMesh(manGeo, fabric, ND);
+  const dHeads = new THREE.InstancedMesh(headGeoD, skin, ND), dGele = new THREE.InstancedMesh(geleGeoD, geleMat, ND), dFila = new THREE.InstancedMesh(filaGeoD, geleMat, ND);
+  const dSleeves = new THREE.InstancedMesh(sleeveGeo, fabric, ND * 2), dFore = new THREE.InstancedMesh(foreGeo, skin, ND * 2), dHands = new THREE.InstancedMesh(new THREE.SphereGeometry(0.042, 10, 8).scale(1, 1.25, 0.6), skin, ND * 2);
   dancers.forEach((g, i) => {
-    dBodies.setColorAt(i, g.cloth); dArmsDown.setColorAt(i, g.cloth); dArmsUp.setColorAt(i, g.cloth);
-    dHeads.setColorAt(i, g.skin); dGele.setColorAt(i, i === 0 ? g.cloth : geleGold); dFila.setColorAt(i, geleGold);
-    dHands.setColorAt(i * 2, g.skin); dHands.setColorAt(i * 2 + 1, g.skin);
+    dWomen.setColorAt(i, g.cloth); dMen.setColorAt(i, g.cloth); dHeads.setColorAt(i, g.skin);
+    dGele.setColorAt(i, i === 0 ? new THREE.Color(0xd9b46a) : rand() < 0.6 ? geleGold : g.cloth); dFila.setColorAt(i, rand() < 0.5 ? geleGold : g.cloth);
+    [0, 1].forEach((k) => { dSleeves.setColorAt(i * 2 + k, g.cloth); dFore.setColorAt(i * 2 + k, g.skin); dHands.setColorAt(i * 2 + k, g.skin); });
   });
-  const danceMeshes = [dBodies, dArmsDown, dArmsUp, dHands, dHeads, dGele, dFila];
-  // People are never shown as figures: up close they read as toys. Guests are their lit votives; the party is its
-  // light, its fabric, its confetti and its notes.
+  const danceMeshes = [dWomen, dMen, dHeads, dGele, dFila, dSleeves, dFore, dHands];
+  // People are only shown on the dance floor at the end, in the party's own light. Seated guests stay as their lit votives.
   [...danceMeshes, seatedBodies, seatedHeads, seatedGele, seatedFila].forEach((m) => { m.visible = false; });
   danceMeshes.forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; setB.add(m); });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), hand = new THREE.Vector3();
+  const qA = new THREE.Quaternion(), upY = new THREE.Vector3(0, 1, 0), segDir = new THREE.Vector3(), segMid = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1);
+  const sh = new THREE.Vector3(), el = new THREE.Vector3(), wr = new THREE.Vector3();
+  function segM(a, b, out) { segDir.subVectors(b, a); const len = segDir.length(); segDir.divideScalar(len); qA.setFromUnitVectors(upY, segDir); segMid.addVectors(a, b).multiplyScalar(0.5); return out.compose(segMid, qA, one); }
   function animateDancers(t) {
     dancers.forEach((g, i) => {
-      const beat = Math.sin(t * g.sp + g.ph), bob = Math.abs(beat) * 0.06 * motion;
-      gd.position.set(g.x + Math.sin(t * 0.7 + g.ph) * 0.08 * motion, bob, g.z);
-      gd.rotation.set(0, g.ry + Math.sin(t * 1.3 + g.ph) * 0.35 * motion, Math.sin(t * g.sp * 0.5 + g.ph) * 0.06 * motion);
+      const beat = Math.sin(t * g.sp + g.ph), bob = Math.abs(beat) * 0.045 * motion;
+      gd.position.set(g.x + Math.sin(t * 0.6 + g.ph) * 0.06 * motion, bob, g.z);
+      gd.rotation.set(0, g.ry + Math.sin(t * 0.9 + g.ph) * 0.45 * motion, Math.sin(t * g.sp * 0.5 + g.ph) * 0.05 * motion);
       gd.scale.set(1, g.h, 1); gd.updateMatrix();
-      dBodies.setMatrixAt(i, gd.matrix);
-      dArmsDown.setMatrixAt(i, g.up ? zeroM : gd.matrix);
-      dArmsUp.setMatrixAt(i, g.up ? gd.matrix : zeroM);
-      mA.makeTranslation(0, 1.72, 0); dHeads.setMatrixAt(i, mB.multiplyMatrices(gd.matrix, mA));
-      mA.makeTranslation(0, 1.84, 0.02); mB.multiplyMatrices(gd.matrix, mA);
+      dWomen.setMatrixAt(i, g.woman ? gd.matrix : zeroM); dMen.setMatrixAt(i, g.woman ? zeroM : gd.matrix);
+      mA.makeTranslation(0, 1.64, 0.0); dHeads.setMatrixAt(i, mB.multiplyMatrices(gd.matrix, mA));
+      mA.makeTranslation(0, 1.72, -0.01); mB.multiplyMatrices(gd.matrix, mA);
       dGele.setMatrixAt(i, g.woman ? mB : zeroM); dFila.setMatrixAt(i, g.woman ? zeroM : mB);
+      // Arms: shoulder, elbow, wrist, in the dancer's own space.
       [-1, 1].forEach((side, k) => {
-        hand.set(side * (g.up ? 0.35 : 0.3), g.up ? 2.0 : 0.98, g.up ? 0.09 : 0.05).applyMatrix4(gd.matrix);
-        mA.makeTranslation(hand.x, hand.y, hand.z); dHands.setMatrixAt(i * 2 + k, mA);
+        const w = Math.sin(t * g.sp * 0.5 + g.ph + k) * motion;
+        let lift, bend;
+        if (g.pose === 0) { lift = 2.5 + 0.15 * w; bend = 0.35 + 0.25 * Math.sin(t * g.sp + k * 2) * motion; }
+        else if (g.pose === 1) { lift = k ? 2.6 + 0.2 * w : 0.55 + 0.2 * w; bend = k ? 0.3 + 0.3 * Math.sin(t * g.sp * 1.2) * motion : 1.1; }
+        else if (g.pose === 2) { lift = 0.7 + 0.35 * w; bend = 1.2 + 0.3 * w; }
+        else { lift = k ? 1.9 + 0.3 * Math.sin(t * g.sp) * motion : 0.6; bend = k ? 0.5 : 1.3; }
+        sh.set(side * (g.woman ? 0.19 : 0.25), 1.4, 0);
+        el.set(side * Math.sin(lift) * 0.27, -Math.cos(lift) * 0.27, 0.06 + 0.08 * Math.sin(lift)).add(sh);
+        const fl = lift + bend * (lift > 1.6 ? -1 : 1) * 0.6;
+        wr.set(side * Math.sin(fl) * 0.25, -Math.cos(fl) * 0.25, 0.1 + 0.12 * Math.sin(fl * 0.8)).add(el);
+        dSleeves.setMatrixAt(i * 2 + k, mB.multiplyMatrices(gd.matrix, segM(sh, el, mA)));
+        dFore.setMatrixAt(i * 2 + k, mB.multiplyMatrices(gd.matrix, segM(el, wr, mA)));
+        hand.copy(wr).addScaledVector(segDir, 0.05); mA.makeTranslation(hand.x, hand.y, hand.z); dHands.setMatrixAt(i * 2 + k, mB.multiplyMatrices(gd.matrix, mA));
       });
     });
     danceMeshes.forEach((m) => { m.instanceMatrix.needsUpdate = true; });
@@ -2187,7 +2323,7 @@ async function start() {
       }
     }
   }
-  const SILK = { burgundy: "#4a0918", ruby: "#7a0f24", coral: "#86321f" };
+  const SILK = { burgundy: "#4a0918", ruby: "#7a0f24", coral: "#86321f", blue: "#102a6c", green: "#1d4a35" };
   const laceCanvas = document.createElement("canvas"); laceCanvas.width = laceCanvas.height = 1024;
   const laceMap = new THREE.CanvasTexture(laceCanvas);
   laceMap.colorSpace = THREE.SRGBColorSpace; laceMap.wrapS = laceMap.wrapT = THREE.RepeatWrapping; laceMap.repeat.set(4.2, 2.8); laceMap.anisotropy = maxAniso;
@@ -2692,7 +2828,7 @@ async function start() {
   const threadE = new THREE.Mesh(new THREE.TubeGeometry(threadCurveE, 120, 0.0011, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.7, 0.7) })); sewing.add(threadE);
   const spool = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.04, 24), goldThreadMat); spool.position.set(0.37, 0.016, -0.13); spool.rotation.z = Math.PI / 2; sewing.add(spool);
   // The phone: dark glass, and a screen we can change.
-  const phoneCanvas = document.createElement("canvas"); phoneCanvas.width = 540; phoneCanvas.height = 1100;
+  const phoneCanvas = document.createElement("canvas"); phoneCanvas.width = 810; phoneCanvas.height = 1650; // drawn in 540 x 1100 units at 1.5x
   const phoneTex = new THREE.CanvasTexture(phoneCanvas); phoneTex.colorSpace = THREE.SRGBColorSpace; phoneTex.anisotropy = maxAniso;
   // A current phone: an anodised aluminium unibody, a full-width camera plateau on the back, glass edge to edge on the front.
   function makePhone(color) {
@@ -2728,6 +2864,7 @@ async function start() {
   function drawPhone(state) {
     if (state === phoneState) return; phoneState = state;
     const g = phoneCanvas.getContext("2d"), w = 540, h = 1100;
+    g.setTransform(1.5, 0, 0, 1.5, 0, 0);
     g.fillStyle = "#000"; g.fillRect(0, 0, w, h);
     if (state === "off") { phoneTex.needsUpdate = true; return; }
     const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#2a0d16"); bg.addColorStop(1, "#0d0507"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
@@ -2750,11 +2887,62 @@ async function start() {
         ["Mama Ijeoma, Chidinma and", "Tunde have saved you a place.", "Open your invitation:", "ariya.ng/r/ijeoma"].forEach((l, k) => g.fillText(l, 72, 575 + k * 40));
       }
     } else if (state === "voice" || state === "voiceSent") {
-      g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(0, 0, w, 160); g.fillStyle = "#f4efe6"; big("Tunde", 110, 40, "500 ");
-      g.fillStyle = "#4a1420"; g.beginPath(); g.roundRect(150, 640, 350, 120, 30); g.fill();
-      g.fillStyle = "#e9c98a"; for (let k = 0; k < 22; k++) { const hh = 10 + Math.abs(Math.sin(k * 1.7) * 30 + Math.sin(k * 0.6) * 10); g.fillRect(200 + k * 12, 700 - hh / 2, 6, hh); }
-      g.fillStyle = "#bda5aa"; g.textAlign = "right"; g.font = '300 26px "Figtree", Arial'; g.fillText(state === "voiceSent" ? "0:07  ✓" : "0:07", 490, 800);
-      if (state === "voice") { g.textAlign = "center"; g.fillStyle = "#c0392b"; g.beginPath(); g.arc(270, 960, 50, 0, Math.PI * 2); g.fill(); g.fillStyle = "#f4efe6"; big("Recording", 1050, 28); }
+      // A chat app in dark mode, the way it looks on her phone: Tunde's chat, her earlier messages, then the voice note.
+      g.fillStyle = "#0b141a"; g.fillRect(0, 0, w, h);
+      g.save(); g.globalAlpha = 0.05; g.strokeStyle = "#e9edef"; g.lineWidth = 1.4; // the doodle wallpaper
+      for (let y = 190; y < h - 90; y += 46) for (let x = (y / 46) % 2 ? 10 : 34; x < w; x += 48) { const k = (x * 7 + y * 3) % 4; g.beginPath(); if (k === 0) g.arc(x, y, 7, 0, Math.PI * 2); else if (k === 1) { g.moveTo(x - 7, y + 5); g.lineTo(x, y - 7); g.lineTo(x + 7, y + 5); g.closePath(); } else if (k === 2) g.rect(x - 6, y - 6, 12, 12); else { g.moveTo(x - 8, y); g.quadraticCurveTo(x, y - 10, x + 8, y); } g.stroke(); }
+      g.restore();
+      g.fillStyle = "#1f2c34"; g.fillRect(0, 0, w, 168);
+      g.strokeStyle = "#aebac1"; g.lineWidth = 4; g.lineCap = "round"; g.beginPath(); g.moveTo(34, 104); g.lineTo(22, 118); g.lineTo(34, 132); g.stroke();
+      const av = g.createLinearGradient(52, 92, 104, 144); av.addColorStop(0, "#c9a256"); av.addColorStop(1, "#6e1426");
+      g.fillStyle = av; g.beginPath(); g.arc(78, 118, 26, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "rgba(255,255,255,.75)"; g.beginPath(); g.arc(78, 111, 9, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(78, 134, 15, 9, 0, Math.PI, 0); g.fill();
+      g.textAlign = "left"; g.fillStyle = "#e9edef"; g.font = '600 27px "Figtree", Arial'; g.fillText("Tunde", 118, 114);
+      g.fillStyle = "#8696a0"; g.font = '400 19px "Figtree", Arial'; g.fillText(state === "voice" ? "last seen today at 20:12" : "last seen today at 20:12", 118, 140);
+      g.strokeStyle = "#aebac1"; g.lineWidth = 3; g.beginPath(); g.roundRect(392, 106, 30, 22, 5); g.stroke(); g.beginPath(); g.moveTo(422, 114); g.lineTo(434, 107); g.lineTo(434, 127); g.lineTo(422, 120); g.stroke();
+      g.beginPath(); g.arc(478, 117, 13, Math.PI * 0.6, Math.PI * 1.6); g.stroke();
+      const chip = (t, y) => { g.font = '500 17px "Figtree", Arial'; const tw = g.measureText(t).width + 30; g.fillStyle = "#182229"; g.beginPath(); g.roundRect(w / 2 - tw / 2, y, tw, 34, 9); g.fill(); g.fillStyle = "#8696a0"; g.textAlign = "center"; g.fillText(t, w / 2, y + 23); };
+      const ticks = (x, y, read) => { g.strokeStyle = read ? "#53bdeb" : "#8696a0"; g.lineWidth = 2; [0, 6].forEach((o) => { g.beginPath(); g.moveTo(x + o, y - 5); g.lineTo(x + o + 4, y); g.lineTo(x + o + 12, y - 10); g.stroke(); }); };
+      const bubble = (out, lines, time, y, read) => {
+        g.font = '400 23px "Figtree", Arial'; const tw = Math.max(...lines.map((l) => g.measureText(l).width)) + 110, bh = 22 + lines.length * 31;
+        const x = out ? w - 18 - tw : 18;
+        g.fillStyle = out ? "#005c4b" : "#202c33"; g.beginPath(); g.roundRect(x, y, tw, bh, 12); g.fill();
+        g.beginPath(); if (out) { g.moveTo(x + tw - 4, y); g.lineTo(x + tw + 12, y); g.lineTo(x + tw - 4, y + 16); } else { g.moveTo(x + 4, y); g.lineTo(x - 12, y); g.lineTo(x + 4, y + 16); } g.fill();
+        g.fillStyle = "#e9edef"; g.textAlign = "left"; lines.forEach((l, k) => g.fillText(l, x + 16, y + 36 + k * 31));
+        g.fillStyle = out ? "rgba(233,237,239,.6)" : "#8696a0"; g.font = '400 15px "Figtree", Arial'; g.textAlign = "right"; g.fillText(time, x + tw - (out ? 34 : 12), y + bh - 10);
+        if (out) ticks(x + tw - 30, y + bh - 14, read);
+        return y + bh + 12;
+      };
+      chip("YESTERDAY", 192);
+      let y = bubble(false, ["Mama, the planners are sorting", "everything. I will call you."], "18:02", 244, false);
+      y = bubble(true, ["Ok my son. God bless you."], "18:05", y, true);
+      chip("TODAY", y + 6); y += 56;
+      y = bubble(true, ["Tunde, have they sent the card?"], "21:12", y, false);
+      if (state === "voiceSent") {
+        // Her voice note, sent: play, the waveform, her photo with a small mic, the length, one grey tick.
+        const bx = 120, bw = w - 18 - bx, bh = 92; g.fillStyle = "#005c4b"; g.beginPath(); g.roundRect(bx, y, bw, bh, 12); g.fill();
+        g.beginPath(); g.moveTo(bx + bw - 4, y); g.lineTo(bx + bw + 12, y); g.lineTo(bx + bw - 4, y + 16); g.fill();
+        const ag = g.createLinearGradient(bx + 14, y + 14, bx + 76, y + 76); ag.addColorStop(0, "#d9b98a"); ag.addColorStop(1, "#7a3a2a"); g.fillStyle = ag; g.beginPath(); g.arc(bx + 46, y + 44, 30, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "#53bdeb"; g.beginPath(); g.arc(bx + 70, y + 68, 10, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.fillRect(bx + 67, y + 61, 6, 10);
+        g.fillStyle = "#d1d7db"; g.beginPath(); g.moveTo(bx + 94, y + 30); g.lineTo(bx + 116, y + 44); g.lineTo(bx + 94, y + 58); g.fill();
+        for (let k = 0; k < 34; k++) { const hh = 6 + Math.abs(Math.sin(k * 1.7) * 18 + Math.sin(k * 0.5) * 8); g.fillStyle = k < 2 ? "#53bdeb" : "rgba(233,237,239,.55)"; g.beginPath(); g.roundRect(bx + 130 + k * 7.6, y + 44 - hh / 2, 4, hh, 2); g.fill(); }
+        g.fillStyle = "#53bdeb"; g.beginPath(); g.arc(bx + 132, y + 44, 7, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "rgba(233,237,239,.6)"; g.font = '400 15px "Figtree", Arial'; g.textAlign = "left"; g.fillText("0:07", bx + 130, y + bh - 10);
+        g.textAlign = "right"; g.fillText("21:40", bx + bw - 34, y + bh - 10);
+        g.strokeStyle = "#8696a0"; g.lineWidth = 2; g.beginPath(); g.moveTo(bx + bw - 26, y + bh - 19); g.lineTo(bx + bw - 22, y + bh - 14); g.lineTo(bx + bw - 14, y + bh - 24); g.stroke();
+        // The input bar, idle again.
+        g.fillStyle = "#1f2c34"; g.beginPath(); g.roundRect(14, h - 96, w - 110, 68, 34); g.fill();
+        g.fillStyle = "#8696a0"; g.font = '400 23px "Figtree", Arial'; g.textAlign = "left"; g.fillText("Message", 70, h - 54);
+        g.strokeStyle = "#8696a0"; g.lineWidth = 2.5; g.beginPath(); g.arc(40, h - 62, 12, 0, Math.PI * 2); g.stroke();
+      } else {
+        // Recording: the red dot, the timer, "slide to cancel", the big mic button held down.
+        g.fillStyle = "#1f2c34"; g.beginPath(); g.roundRect(14, h - 96, w - 110, 68, 34); g.fill();
+        g.fillStyle = "#f15c6d"; g.beginPath(); g.arc(48, h - 62, 10, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "#e9edef"; g.font = '400 24px "Figtree", Arial'; g.textAlign = "left"; g.fillText("0:07", 70, h - 53);
+        g.fillStyle = "#8696a0"; g.font = '400 21px "Figtree", Arial'; g.fillText("‹  Slide to cancel", 200, h - 54);
+      }
+      g.fillStyle = "#00a884"; g.beginPath(); g.arc(w - 50, h - 62, state === "voice" ? 44 : 34, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#fff"; g.beginPath(); g.roundRect(w - 58, h - 82, 16, 28, 8); g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 3; g.beginPath(); g.arc(w - 50, h - 66, 13, 0.1 * Math.PI, 0.9 * Math.PI); g.stroke(); g.fillRect(w - 51.5, h - 53, 3, 9);
     }
     // The status bar and the island at the top of the glass.
     g.fillStyle = "#000"; g.beginPath(); g.roundRect(w / 2 - 74, 22, 148, 42, 21); g.fill();
@@ -2909,8 +3097,13 @@ async function start() {
   const gBg = new THREE.Color(0x0a0605);
   // Aso-oke is woven in narrow strips with the stripes running along the cloth; rolled up, they wrap round the roll.
   // A colourway is a list of [width, colour] from the selvedge to the centre, mirrored to make the full width.
+  // The family colourway: the colour of the day with gold bands and ivory pinstripes at the selvedge.
+  function wineway(base) {
+    const dark = "#" + new THREE.Color(base).multiplyScalar(0.45).getHexString(), lift = "#" + new THREE.Color(base).multiplyScalar(1.35).getHexString();
+    return { base, half: [[0.018, dark], [0.006, "#efe4d6"], [0.008, dark], [0.006, "#efe4d6"], [0.008, dark], [0.006, "#efe4d6"], [0.014, lift], [0.05, "#c59a5e"], [0.012, base], [0.006, "#efe4d6"], [0.03, base], [0.02, "#c59a5e"]] };
+  }
   const ASO = {
-    wine: { base: "#5a0a1e", half: [[0.018, "#2a0610"], [0.006, "#efe4d6"], [0.008, "#2a0610"], [0.006, "#efe4d6"], [0.008, "#2a0610"], [0.006, "#efe4d6"], [0.014, "#7c1530"], [0.05, "#c59a5e"], [0.012, "#5a0a1e"], [0.006, "#efe4d6"], [0.03, "#5a0a1e"], [0.02, "#c59a5e"]] },
+    wine: wineway("#5a0a1e"),
     indigo: { base: "#0f0f17", half: [[0.03, "#0f0f17"], [0.007, "#e9e9f0"], [0.007, "#0f0f17"], [0.007, "#e9e9f0"], [0.007, "#0f0f17"], [0.012, "#e9e9f0"], [0.13, "#1e2a86"], [0.012, "#e9e9f0"], [0.006, "#0f0f17"], [0.006, "#e9e9f0"]] }
   };
   function asoTex(cw, along) {
@@ -3142,7 +3335,100 @@ async function start() {
     [0.70, V3(-0.5, 1.0, 1.08), V3(0.0, 0.82, 0.34), 32],
     [1.00, V3(-0.1, 0.9, 0.6), V3(0.09, 0.85, 0.21), 36]
   ];
-  [keysG, keysH].forEach((ks) => ks.forEach((k) => { k[1] = k[1].clone(); k[2] = k[2].clone(); }));
+  /* ---------- Set J, "The gele": the bride's room, the morning of. A head block on the vanity where her gele is pleated
+     into a crown, her coral beads, her phone, her outfit hanging by the window. No faces: the block is a milliner's form. ---------- */
+  const setJ = new THREE.Group(); setJ.visible = false; scene.add(setJ);
+  const jBg = new THREE.Color(0x120c09);
+  const jFloor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), floor.material); jFloor.rotation.x = -Math.PI / 2; jFloor.receiveShadow = true; setJ.add(jFloor);
+  const jPlaster = new THREE.MeshStandardMaterial({ color: 0xcdb9a0, roughness: 0.95 });
+  const jWall = new THREE.Mesh(new THREE.PlaneGeometry(8, 3.2), jPlaster); jWall.position.set(0, 1.6, -0.62); jWall.receiveShadow = true; setJ.add(jWall);
+  // The window to the left, its sheer curtains glowing with morning light.
+  const sheerTex = canvasTex(256, 512, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, 0); for (let k = 0; k <= 16; k++) gr.addColorStop(k / 16, k % 2 ? "rgba(255,246,228,.92)" : "rgba(235,220,196,.7)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+  const sheerGeo = (() => { const g = new THREE.PlaneGeometry(1.3, 2.4, 80, 4), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) pa.setZ(i, Math.sin(pa.getX(i) * 38) * 0.025 + Math.sin(pa.getX(i) * 9) * 0.03); g.computeVertexNormals(); return g; })();
+  const sheer = new THREE.Mesh(sheerGeo, new THREE.MeshBasicMaterial({ map: sheerTex, color: new THREE.Color(2.4, 2.2, 1.95), transparent: true, opacity: 0.95, side: THREE.DoubleSide }));
+  sheer.position.set(-1.55, 1.55, -0.6); setJ.add(sheer);
+  // The vanity: ivory lacquer, an oval mirror in a gold frame.
+  const lacquer = new THREE.MeshPhysicalMaterial({ color: 0xf1e8da, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+  const VT = 0.76;
+  const vTop = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.04, 0.5, 3, 0.01), lacquer); vTop.position.set(0, VT - 0.02, -0.3); setJ.add(vTop);
+  [[-0.56, -0.08], [0.56, -0.08], [-0.56, -0.52], [0.56, -0.52]].forEach(([x, z]) => { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, VT - 0.04, 12), lacquer); l.position.set(x, (VT - 0.04) / 2, z); setJ.add(l); });
+  const mirror = new THREE.Mesh(new THREE.CircleGeometry(0.34, 64).scale(0.78, 1, 1), new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: 0.03, envMapIntensity: 1.1 }));
+  mirror.position.set(0, VT + 0.46, -0.5); setJ.add(mirror);
+  const mFrame = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.016, 12, 96).scale(0.78, 1, 1), goldPolish); mFrame.position.copy(mirror.position); mFrame.position.z += 0.004; setJ.add(mFrame);
+  // The head block: a plain milliner's form on a turned stand.
+  const blockMat = new THREE.MeshPhysicalMaterial({ color: 0xd8c3a2, roughness: 0.75, sheen: 0.3, sheenColor: 0xfff0d8 });
+  const block = new THREE.Group(); block.position.set(0.02, VT, -0.24); setJ.add(block);
+  block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.025, 32).translate(0, 0.0125, 0), goldPolish));
+  block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.15, 16).translate(0, 0.1, 0), goldPolish));
+  block.add(new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 0.09, 24).translate(0, 0.21, 0), blockMat));
+  const blockHead = new THREE.Mesh(new THREE.SphereGeometry(0.1, 32, 24).scale(0.86, 1.12, 0.98), blockMat); blockHead.position.y = 0.33; block.add(blockHead);
+  // The gele: stiff, pleated, gold-shot cloth in the colour of the day. It wraps the block, then rises into a fan.
+  const geleCloth = new THREE.MeshPhysicalMaterial({ color: 0x6a1428, roughness: 0.34, metalness: 0.35, sheen: 1, sheenColor: 0xf0c878, sheenRoughness: 0.35, normalMap: ribNormal, normalScale: new THREE.Vector2(0.3, 0.3), side: THREE.DoubleSide });
+  const gBand = new THREE.Mesh(new THREE.TorusGeometry(0.098, 0.04, 14, 48).rotateX(Math.PI / 2 - 0.3).scale(0.95, 1, 1.05), geleCloth); gBand.position.y = 0.36; block.add(gBand);
+  const gFan = new THREE.Mesh((() => { const g = new THREE.CylinderGeometry(0.3, 0.12, 0.27, 96, 6, true, -Math.PI * 0.68, Math.PI * 1.36), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), z = pa.getZ(i), y = pa.getY(i), th = Math.atan2(z, x), k = 1 + 0.08 * Math.sin(th * 30) * (0.3 + (y + 0.135) * 3.2); pa.setX(i, x * k); pa.setZ(i, z * k); pa.setY(i, y + 0.03 * Math.cos(th * 2)); } g.computeVertexNormals(); g.translate(0, 0.135, 0); return g; })(), geleCloth);
+  gFan.position.set(0, 0.38, -0.02); gFan.rotation.x = -0.42; block.add(gFan);
+  const gKnot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.03, 0.012, 64, 8, 2, 3), geleCloth); gKnot.position.set(0.07, 0.4, 0.06); block.add(gKnot);
+  // The length of gele cloth still waiting on the vanity, pleated in a fan.
+  const gTail = new THREE.Mesh((() => { const g = new THREE.PlaneGeometry(0.62, 0.22, 90, 6), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i); pa.setZ(i, Math.abs(Math.sin(x * 60)) * 0.018 + 0.004); } g.computeVertexNormals(); g.rotateX(-Math.PI / 2); return g; })(), geleCloth);
+  gTail.position.set(-0.3, VT + 0.001, -0.18); gTail.rotation.y = 0.25; setJ.add(gTail);
+  // Coral beads in a coil, gold drop earrings, perfume, her phone.
+  const NCB = 90, jBeads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0085, 12, 8), coralMat, NCB);
+  { const d = new THREE.Object3D(), c = new THREE.Color(); for (let i = 0; i < NCB; i++) { const a = i * 0.36, r = 0.025 + i * 0.0009; d.position.set(0.32 + Math.cos(a) * r, VT + 0.0085 + (i > 70 ? 0.012 : 0), -0.14 + Math.sin(a) * r); d.updateMatrix(); jBeads.setMatrixAt(i, d.matrix); jBeads.setColorAt(i, c.setHSL(0.02 + rand() * 0.02, 0.72, 0.42 + rand() * 0.06)); } }
+  setJ.add(jBeads);
+  [[0.22, -0.08], [0.25, -0.07]].forEach(([x, z], k) => { const e = new THREE.Group(); e.position.set(x, VT + 0.004, z); e.rotation.y = k * 0.6; const hoop = new THREE.Mesh(new THREE.TorusGeometry(0.012, 0.0022, 8, 24).rotateX(Math.PI / 2), goldPolish); e.add(hoop); const drop = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 12, 8).scale(1, 1.4, 1), new THREE.MeshPhysicalMaterial({ color: 0xc23a28, roughness: 0.3, clearcoat: 1 })); drop.position.set(0, 0.002, 0.018); e.add(drop); setJ.add(e); });
+  const perfume = new THREE.Group(); perfume.position.set(-0.4, VT, -0.4); setJ.add(perfume);
+  perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.07, 0.1, 0.045, 3, 0.008).translate(0, 0.05, 0), crystalGlass));
+  perfume.add(new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.07, 0.035, 3, 0.006).translate(0, 0.045, 0), new THREE.MeshPhysicalMaterial({ color: 0xf2c48a, transmission: 0.8, roughness: 0.05, thickness: 0.03 })));
+  perfume.add(new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.035, 24).translate(0, 0.118, 0), goldPolish));
+  const brideCanvas = document.createElement("canvas"); brideCanvas.width = 540; brideCanvas.height = 1100;
+  { const g = brideCanvas.getContext("2d"), w = 540, h = 1100, bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#3a2418"); bg.addColorStop(1, "#120a07"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    g.fillStyle = "#000"; g.beginPath(); g.roundRect(w / 2 - 74, 22, 148, 42, 21); g.fill();
+    g.textAlign = "center"; g.fillStyle = "#f4efe6"; g.font = '200 150px "Figtree", Arial'; g.fillText("11:48", w / 2, 290); g.font = '400 30px "Figtree", Arial'; g.fillStyle = "#d8c8b8"; g.fillText("Saturday 12 December", w / 2, 350);
+    [["Tunde", "See you at the altar."], ["Mama", "I am here, my daughter. Don't rush."], ["Aunty Bisi", "We are on our way!"], ["Sade (planner)", "Car at 12:30. Photographer at 12."]].forEach(([n, m], k) => { const y = 470 + k * 140; g.fillStyle = "rgba(255,248,240,.16)"; g.beginPath(); g.roundRect(30, y, w - 60, 120, 26); g.fill(); g.textAlign = "left"; g.fillStyle = "#f4efe6"; g.font = '600 28px "Figtree", Arial'; g.fillText(n, 60, y + 48); g.fillStyle = "rgba(244,239,230,.8)"; g.font = '400 26px "Figtree", Arial'; g.fillText(m, 60, y + 88); g.textAlign = "right"; g.fillStyle = "rgba(244,239,230,.55)"; g.font = '400 22px "Figtree", Arial'; g.fillText(k ? k * 4 + "m ago" : "now", w - 56, y + 48); }); }
+  const brideTex = new THREE.CanvasTexture(brideCanvas); brideTex.colorSpace = THREE.SRGBColorSpace; brideTex.anisotropy = maxAniso;
+  const bridePhone = new THREE.Group(); bridePhone.position.set(0.28, VT + 0.0045, 0.02); bridePhone.rotation.y = -0.4; setJ.add(bridePhone);
+  bridePhone.add(makePhone(0xd9a48c));
+  const brideScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.0685, 0.1465), new THREE.MeshBasicMaterial({ map: brideTex, color: new THREE.Color(1.1, 1.1, 1.1) })); brideScreen.rotation.x = -Math.PI / 2; brideScreen.position.y = 0.0049; bridePhone.add(brideScreen);
+  // Her outfit on a gold stand by the window: ivory lace buba and a gold-shot iro.
+  const outfitStand = new THREE.Group(); outfitStand.position.set(-1.0, 0, -0.35); outfitStand.rotation.y = 0.35; setJ.add(outfitStand);
+  outfitStand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.75, 12).translate(0, 0.875, 0), goldPolish));
+  outfitStand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.02, 32).translate(0, 0.01, 0), goldPolish));
+  const ivoryLace = canvasTex(1024, 1024, (g, w, h) => drawLace(g, w, h, { bg: "#efe4d2", net: "rgba(190,160,110,.35)", gold: "#fbf5ea", hole: "#d9cbb4" }), { repeat: [3, 3] });
+  const lace = new THREE.MeshPhysicalMaterial({ map: ivoryLace, color: 0xffffff, roughness: 0.6, sheen: 1, sheenColor: 0xfff2d8, side: THREE.DoubleSide });
+  const dressGeo = new THREE.LatheGeometry([[0.0001, 1.62], [0.06, 1.6], [0.19, 1.52], [0.2, 1.36], [0.17, 1.18], [0.2, 1.0], [0.26, 0.55], [0.3, 0.2]].map(([r, y]) => new THREE.Vector2(r, y)), 48); dressGeo.scale(1, 1, 0.55);
+  const dressM = new THREE.Mesh(dressGeo, lace); outfitStand.add(dressM);
+  const wrap = new THREE.Mesh(new THREE.LatheGeometry([[0.205, 1.02], [0.24, 0.8], [0.29, 0.45], [0.32, 0.18]].map(([r, y]) => new THREE.Vector2(r, y)), 48, -0.3, Math.PI * 1.4).scale(1.04, 1, 0.6), geleCloth); outfitStand.add(wrap);
+  const hanger = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.006, 8, 48, Math.PI), goldPolish); hanger.position.y = 1.55; outfitStand.add(hanger);
+  setJ.traverse((m) => { if (m.isMesh && m !== sheer && m.material !== crystalGlass) { m.castShadow = true; m.receiveShadow = true; } });
+  function updateJ(u, t) {
+    // The gele goes on in stages: the band, then the fan rising pleat by pleat, then the knot. The cloth on the table runs out.
+    const band = seg(u, 0.02, 0.22), fan = seg(u, 0.15, 0.7), knot = seg(u, 0.6, 0.78);
+    gBand.scale.setScalar(0.6 + 0.4 * band); gBand.visible = band > 0.01;
+    gFan.scale.set(0.55 + 0.45 * fan, 0.05 + 0.95 * fan, 0.55 + 0.45 * fan); gFan.visible = fan > 0.01; gFan.rotation.y = (1 - fan) * 0.6;
+    gKnot.scale.setScalar(knot); gKnot.visible = knot > 0.01;
+    gTail.scale.set(Math.max(0.05, 1 - fan * 0.9), 1, 1);
+    // Her phone buzzes on the table.
+    const buzz = motion && Math.sin(t * 2.2) > 0.6 ? Math.sin(t * 90) * 0.012 : 0; bridePhone.rotation.y = -0.4 + buzz;
+    key.position.set(-1.7, 2.2, 0.9); key.target.position.set(0, VT + 0.2, -0.25); key.angle = 0.6; key.penumbra = 1; key.distance = 0; key.decay = 2;
+    key.intensity = 30; key.shadow.autoUpdate = true; key.color.set(0xfff1de);
+    xKey.color.set(0xffe6c8); xKey.intensity = 0.35; xKey.position.set(2, 2.5, 2);
+    xRim.color.set(0xffd2a8); xRim.intensity = 0.5; xRim.position.set(-2, 1.5, -1);
+    xGlow.color.set(0xfff0d8); xGlow.intensity = 1.6; xGlow.distance = 4; xGlow.position.set(-1.5, 1.5, -0.3);
+  }
+  const keysJ = [
+    [0.00, V3(-0.35, 1.32, 1.55), V3(-0.55, 1.05, -0.4), 16],
+    [0.35, V3(0.45, 1.2, 0.62), V3(0.02, VT + 0.36, -0.24), 26],
+    [0.70, V3(0.22, 1.12, 0.45), V3(0.02, VT + 0.38, -0.24), 30],
+    [1.00, V3(0.42, 0.98, 0.28), V3(0.25, VT + 0.03, -0.05), 32]
+  ];
+  // W, the way in: through the arch, down the aisle, rising over the dance floor into the overhead shot of the hall.
+  const keysW = [
+    [0.00, V3(0, 1.62, 15.2), V3(0, 1.45, 6), 14],
+    [0.45, V3(0, 1.6, 10.6), V3(0, 1.25, 0), 16],
+    [0.80, V3(0, 3.4, 6.0), V3(0, 0.6, -1.2), 20],
+    [1.00, V3(0.3, 8.5, 3.6), V3(0, 0, -0.2), 26]
+  ];
+  [keysG, keysH, keysW, keysJ].forEach((ks) => ks.forEach((k) => { k[1] = k[1].clone(); k[2] = k[2].clone(); }));
 
   /* ---------- Render pipeline: HDR scene, lens blur, bloom, film ---------- */
   let pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5, OP.embed ? 1.25 : 9);
@@ -3315,9 +3601,9 @@ async function start() {
     // Which set is on screen: the original chapters (A, the box; B, the hall) or the new ones (C, the colour; D, the send-off).
     const SC = OP.scene || { mode: "old", local: 0, fade: 0 };
     // T, the place kept, is the hall (set B) with its own camera.
-    const mode = SC.mode === "T" ? "old" : SC.mode, isNew = mode !== "old", atTable = SC.mode === "T";
+    const mode = SC.mode === "T" || SC.mode === "W" ? "old" : SC.mode, isNew = mode !== "old", atTable = SC.mode === "T", atWalk = SC.mode === "W";
     const inA = !isNew && p < 0.675;
-    setA.visible = inA; setB.visible = !isNew && !inA; setC.visible = mode === "C"; setD.visible = mode === "D"; setE.visible = mode === "E"; setF.visible = mode === "F"; setG.visible = mode === "G"; setH.visible = mode === "H";
+    setA.visible = inA; setB.visible = !isNew && !inA; setC.visible = mode === "C"; setD.visible = mode === "D"; setE.visible = mode === "E"; setF.visible = mode === "F"; setG.visible = mode === "G"; setH.visible = mode === "H"; setJ.visible = mode === "J";
     const setName = isNew ? mode : inA ? "A" : "B";
     if (setName !== lastSet) {
       lastSet = setName;
@@ -3327,11 +3613,12 @@ async function start() {
       else if (mode === "F") { scene.background = fBg; scene.environment = envRoom; scene.environmentIntensity = 0.06; scene.fog.density = 0; }
       else if (mode === "D") { scene.background = nightBg; scene.environmentIntensity = 0; scene.fog.density = 0; }
       else if (mode === "G") { scene.background = gBg; scene.environment = envRoom; scene.environmentIntensity = 0.12; scene.fog.density = 0; }
+      else if (mode === "J") { scene.background = jBg; scene.environment = envRoom; scene.environmentIntensity = 0.25; scene.fog.density = 0; }
       else if (mode === "H") { scene.background = hallColor; scene.environmentIntensity = 0.45; scene.fog.density = 0; }
       else if (inA) { scene.background = envTex; scene.backgroundIntensity = 0.08; scene.environmentIntensity = 0.17; scene.fog.density = 0; }
       else { scene.background = hallColor; scene.environmentIntensity = 0.38; scene.fog.density = 0.022; hallKey.shadow.needsUpdate = true; }
     }
-    if (mode !== "C" && mode !== "D" && mode !== "G" && mode !== "H") { xKey.intensity = 0; xRim.intensity = 0; xGlow.intensity = 0; }
+    if (mode !== "C" && mode !== "D" && mode !== "G" && mode !== "H" && mode !== "J") { xKey.intensity = 0; xRim.intensity = 0; xGlow.intensity = 0; }
     if (mode !== "E") lightsE.forEach((l) => { l.intensity = 0; });
     if (mode !== "F") lightsF.forEach((l) => { l.intensity = 0; });
     // At Table 1: her chair pulled out, her bag beside it; the rest of that table stays out of the picture.
@@ -3345,7 +3632,7 @@ async function start() {
       key.shadow.autoUpdate = false; key.intensity = 0; rim.intensity = 0; hallKey.intensity = 0;
       candles.forEach((c) => { c.pl.intensity = 0; });
       movers.forEach((m) => { m.spot.intensity = 0; });
-      if (mode === "C") updateC(SC.local, t); else if (mode === "D") updateD(SC.local, t); else if (mode === "E") updateE(SC.local, t); else if (mode === "G") updateG(SC.local, t); else if (mode === "H") updateH(SC.local, t); else updateF(SC.local, t);
+      if (mode === "C") updateC(SC.local, t); else if (mode === "D") updateD(SC.local, t); else if (mode === "E") updateE(SC.local, t); else if (mode === "G") updateG(SC.local, t); else if (mode === "H") updateH(SC.local, t); else if (mode === "J") updateJ(SC.local, t); else updateF(SC.local, t);
     } else if (inA) {
       // The key and the candle lights are lent to the newer close-ups; put them back where the box needs them.
       key.position.set(2.8, 6.2, 3.6); key.target.position.set(0, 0, 0); key.angle = 0.42; key.penumbra = 0.85; key.color.set(0xffdcb8);
@@ -3383,6 +3670,7 @@ async function start() {
       sparkDirs[0].copy(key.position).sub(tmpV).normalize();
       sparkDirs[1].copy(candles[0].base).sub(tmpV).normalize();
       sparkDirs[2].copy(candles[1].base).sub(tmpV).normalize();
+      bagStones.forEach((m) => { m.updateWorldMatrix(true, false); m.material.uniforms.camObj.value.copy(camera.position).applyMatrix4(tmpM.copy(m.matrixWorld).invert()); m.material.uniforms.model3.value.setFromMatrix4(m.matrixWorld); });
       const dp = dustGeo.attributes.position;
       for (let i = 0; i < DUST; i++) {
         let y = dp.array[i * 3 + 1] + (0.0012 + 0.0008 * Math.sin(dustSeed[i])) * motion;
@@ -3399,7 +3687,7 @@ async function start() {
       key.shadow.autoUpdate = false;
       key.intensity = 0; rim.intensity = 0;
       candles.forEach((c) => { c.pl.intensity = 0; });
-      const hv0 = seg(p, 0.675, 0.72);
+      const hv0 = atWalk ? 0.8 : seg(p, 0.675, 0.72);
       movers.forEach((m) => {
         const sx = m.x < 0 ? 1 : -1, sz = m.z < 0 ? -1 : 1;
         m.head.rotation.set(sz * (0.42 + 0.28 * Math.sin(t * 0.37 * motion + m.seed)), 0, sx * (0.5 + 0.3 * Math.sin(t * 0.5 * motion + m.seed * 2)));
@@ -3408,7 +3696,10 @@ async function start() {
         m.spot.intensity = 45 * hv0;
         m.beam.material.opacity = hv0;
       });
-      // (the dancers are not drawn; see above)
+      // The dance: the floor fills with family and friends for the last chapter of the night.
+      const dancing = !atTable && !atWalk && p >= 0.885;
+      danceMeshes.forEach((m) => { m.visible = dancing; });
+      if (dancing) animateDancers(t);
       flashes.forEach((fl) => {
         if (motion && t - fl.t0 > 0.9 && Math.random() < 0.015 && OP.seated > 10) {
           const pick = Math.random() < 0.5 ? guestSeat[seatOrder[Math.floor(Math.random() * OP.seated)]] : dancers[Math.floor(Math.random() * ND)];
@@ -3417,7 +3708,7 @@ async function start() {
         const k = t - fl.t0; fl.sp.visible = k < 0.2;
         if (fl.sp.visible) { const e = Math.exp(-k * 26); fl.sp.material.color.setScalar(60 * e); fl.sp.scale.setScalar(0.5 + 0.9 * e); }
       });
-      const hv = seg(p, 0.675, 0.72);
+      const hv = atWalk ? 0.85 : seg(p, 0.675, 0.72);
       hallKey.intensity = 1.35 * hv * (1 - 0.75 * seg(p, 0.89, 0.95));
       lightSeats(OP.seated);
       goboMat.opacity = 0.32 + 0.4 * seg(p, 0.84, 0.95);
@@ -3450,7 +3741,8 @@ async function start() {
 
     // Camera: keyframed path, a little handheld breath, and the pointer as a slight parallax.
     if (atTable) camNew(keysT, SC.local);
-    else if (isNew) camNew(mode === "C" ? keysC : mode === "D" ? keysD : mode === "E" ? keysE : mode === "G" ? keysG : mode === "H" ? keysH : keysF, SC.local); else cameraAt(p);
+    else if (atWalk) camNew(keysW, SC.local);
+    else if (isNew) camNew(mode === "C" ? keysC : mode === "D" ? keysD : mode === "E" ? keysE : mode === "G" ? keysG : mode === "H" ? keysH : mode === "J" ? keysJ : keysF, SC.local); else cameraAt(p);
     if (!isNew && OP.pro < 1) {
       // Prologue: a wide, drifting establishing shot of the table that settles onto the box.
       const k = smooth(OP.pro);
@@ -3469,7 +3761,7 @@ async function start() {
       camera.rotateZ(Math.sin(t * 0.37) * 0.0015);
     }
     const focusDist = camPos.distanceTo(camLook);
-    const close = mode === "E" || mode === "F" || mode === "G" || mode === "H";
+    const close = mode === "E" || mode === "F" || mode === "G" || mode === "H" || mode === "J";
     camera.near = mode === "D" ? 0.3 : close ? 0.01 : inA || mode === "C" ? 0.05 : 0.2; camera.far = mode === "D" ? 1300 : close ? 30 : inA || mode === "C" ? 60 : 90;
     camera.updateProjectionMatrix();
 
@@ -3485,7 +3777,7 @@ async function start() {
     OP.frameInfo = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, pixelRatio: pr };
     // Contact shadows, scaled to each set (the box table is in centimetres, the hall and rooms in metres).
     aoMat.uniforms.proj.value.copy(camera.projectionMatrix); aoMat.uniforms.projInv.value.copy(camera.projectionMatrixInverse);
-    aoMat.uniforms.radius.value = inA ? 0.9 : mode === "C" ? 0.22 : mode === "G" || mode === "H" ? 0.03 : close ? 0.07 : 0.35;
+    aoMat.uniforms.radius.value = inA ? 0.9 : mode === "C" ? 0.22 : mode === "G" || mode === "H" || mode === "J" ? 0.03 : close ? 0.07 : 0.35;
     aoMat.uniforms.strength.value = mode === "D" ? 0 : 0.85;
     aoMat.uniforms.time.value = motion ? t : 0;
     renderer.setRenderTarget(aoRT);
@@ -3496,7 +3788,7 @@ async function start() {
     renderer.setRenderTarget(null);
     finalMat.uniforms.time.value = motion ? t : 0;
     // The hall is pulled down while the invitation is on screen so the paper reads.
-    finalMat.uniforms.exposure.value = (mode === "C" ? 0.95 : mode === "D" ? 1.05 : mode === "E" ? 1.0 : mode === "F" ? 0.95 : mode === "G" || mode === "H" ? 1.0 : inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
+    finalMat.uniforms.exposure.value = (mode === "C" ? 0.95 : mode === "D" ? 1.05 : mode === "E" ? 1.0 : mode === "F" ? 0.95 : mode === "G" || mode === "H" || mode === "J" ? 1.0 : inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
     finalMat.uniforms.warmth.value = inA ? 0 : 1;
     // A dip to near black at every cut between chapters that change set.
     finalMat.uniforms.fade.value = SC.fade || 0;
