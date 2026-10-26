@@ -23,7 +23,28 @@ The repository is partitioned into two distinct domains:
    - Contains `private-media/music.mp3`, a commercial audio track used exclusively for private offline class demonstration.
    - It is kept completely outside `public/` so it is never bundled, served, or deployed publicly.
 
-## 3. Technology Stack & Decision Records
+## 3. Legacy URL Resolution Matrix
+
+To ensure that existing links within static marketing pages resolve seamlessly without altering legacy markup:
+
+| Request URL      | Routing Type   | Target Destination    | Status / Behavior                                    |
+| ---------------- | -------------- | --------------------- | ---------------------------------------------------- |
+| `/`              | Rewrite        | `/site/index.html`    | "The Yes" wedding film                               |
+| `/about`         | Rewrite        | `/site/about.html`    | About Àríyá                                          |
+| `/about.html`    | Rewrite        | `/site/about.html`    | Resolves relative links inside legacy pages          |
+| `/product`       | Rewrite        | `/site/product.html`  | Product details                                      |
+| `/product.html`  | Rewrite        | `/site/product.html`  | Resolves relative links inside legacy pages          |
+| `/pricing`       | Rewrite        | `/site/pricing.html`  | Pricing overview                                     |
+| `/pricing.html`  | Rewrite        | `/site/pricing.html`  | Resolves relative links inside legacy pages          |
+| `/story`         | Rewrite        | `/site/story.html`    | Wedding story                                        |
+| `/story.html`    | Rewrite        | `/site/story.html`    | Resolves relative links inside legacy pages          |
+| `/film`          | Rewrite        | `/site/film.html`     | Film redirector                                      |
+| `/film.html`     | Rewrite        | `/site/film.html`     | Resolves legacy film page requests                   |
+| `/assets/:path*` | Rewrite        | `/site/assets/:path*` | Legacy textures, scripts, posters                    |
+| `/planner.html`  | Redirect (307) | `/events`             | Replaced by real authenticated celebrations hub      |
+| `/rsvp.html`     | Redirect (307) | `/sign-in`            | Temporary in Phase 2; Phase 4 points to `/i/[token]` |
+
+## 4. Technology Stack & Decision Records
 
 - **Framework**: Next.js 16 (App Router, Turbopack)
 - **Runtime**: React 19, TypeScript (strict mode)
