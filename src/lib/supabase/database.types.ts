@@ -37,6 +37,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       events: {
         Row: {
@@ -87,6 +88,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       event_members: {
         Row: {
@@ -113,6 +115,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       tables: {
         Row: {
@@ -148,6 +151,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       guests: {
         Row: {
@@ -222,6 +226,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       rsvps: {
         Row: {
@@ -263,6 +268,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       seat_assignments: {
         Row: {
@@ -289,6 +295,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       vendors: {
         Row: {
@@ -333,6 +340,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       vendor_tasks: {
         Row: {
@@ -365,6 +373,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       email_log: {
         Row: {
@@ -403,6 +412,7 @@ export interface Database {
           sent_at?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       payments: {
         Row: {
@@ -444,6 +454,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       invoices: {
         Row: {
@@ -479,6 +490,7 @@ export interface Database {
           status?: "draft" | "issued" | "paid" | "void";
           created_at?: string;
         };
+        Relationships: [];
       };
       check_ins: {
         Row: {
@@ -511,7 +523,11 @@ export interface Database {
           notes?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
+    };
+    Views: {
+      [_ in never]: never;
     };
     Functions: {
       get_invitation: {
@@ -529,6 +545,12 @@ export interface Database {
         };
         Returns: Json;
       };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 }
