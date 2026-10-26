@@ -88,6 +88,10 @@ html.cc-off .cc { display: none; }
 .obar #obPlay .ico { width: 10px; height: 12px; background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
 .obar #obPlay[aria-pressed="true"] .ico { clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0); }
 @media (hover: hover) and (pointer: fine) { .obar button:hover { background: rgba(244, 239, 230, 0.08); } }
+.obar button[hidden] { display: none; }
+.ohint { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); z-index: 15; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 999px; background: rgba(12, 5, 7, 0.82); color: var(--ivory); font-size: 0.8rem; white-space: nowrap; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.ohint.on { opacity: 1; }
+@media (max-width: 520px) { .obar .long { display: none; } .ohint { white-space: normal; width: max-content; max-width: 88vw; text-align: center; } }
 @media (max-width: 520px) { .obar button { padding: 0 10px; font-size: 0.64rem; } .cc { bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); } }
 .overlay .layer { position: absolute; inset: 0; }
 /* A soft shade under the words in the new chapters, so they read over silk and fireworks. */
@@ -110,6 +114,13 @@ html.cc-off .cc { display: none; }
 .gate .load i { display: block; width: 140px; height: 1px; background: var(--line); position: relative; overflow: hidden; }
 .gate .load i b { position: absolute; inset: 0; background: var(--gold); transform-origin: left; transform: scaleX(0); transition: transform .4s; }
 .gate .enter[disabled] { opacity: 0.4; cursor: wait; }
+/* After the door: watch it play, or scroll through it. */
+.gate.choose .inner > :not(.how):not(.mark):not(h1) { display: none; }
+.gate .how { display: grid; gap: 18px; justify-items: center; }
+.gate .how[hidden] { display: none; }
+.gate .how-opts { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.gate .how-note { font-size: 0.95rem; max-width: 30em; }
+.gate .play-ico { width: 9px; height: 11px; background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
 /* The colour of the day: three velvet swatches with a gold ring on the chosen one. */
 .hue { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; justify-content: center; }
 .hue legend { width: 100%; text-align: center; color: var(--gold); margin-bottom: 12px; padding: 0; }
@@ -435,6 +446,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       <button class="btn gold enter" id="enterSound" type="button" disabled><span class="ring" aria-hidden="true"></span>Enter the wedding</button>
       <button class="quiet" id="enterQuiet" type="button">Enter in silence</button>
     </div>
+    <div class="how" id="how" hidden>
+      <p class="mono how-q" id="howQ">How would you like to see it?</p>
+      <div class="how-opts" role="group" aria-labelledby="howQ">
+        <button class="btn gold" id="howScroll" type="button">Scroll at your own pace</button>
+        <button class="btn" id="howWatch" type="button"><span class="play-ico" aria-hidden="true"></span>Watch the proposal</button>
+      </div>
+      <p class="how-note">Scrolling moves the film at its own steady pace, so nothing rushes past. Watch plays all seventeen chapters by itself, <span id="howMins">about 3½ minutes</span>, and you can pause or replay it at any time.</p>
+    </div>
     <p class="gate-links"><a class="quiet" href="planner.html">Start planning</a><span aria-hidden="true">·</span><a class="quiet" href="about.html">About Àríyá</a></p>
   </div>
 </div>
@@ -458,12 +477,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <svg class="thread" id="thread" viewBox="0 0 1000 600" preserveAspectRatio="none"><path id="threadPath" d="M520 330 C 600 300, 700 250, 760 260 S 900 330, 1040 300"/></svg>
 </div>
 <div class="cc" id="cc" aria-live="polite"><span class="who" id="ccWho"></span><span class="line" id="ccLine"></span></div>
-<div class="obar" id="obar" role="group" aria-label="Opening controls">
-  <button type="button" id="obPlay" aria-pressed="false"><span class="ico" aria-hidden="true"></span><span class="lbl">Play</span></button>
+<div class="obar" id="obar" role="group" aria-label="Film controls">
+  <button type="button" id="obPlay" aria-pressed="false" hidden><span class="ico" aria-hidden="true"></span><span class="lbl">Play</span></button>
   <button type="button" id="obCC" aria-pressed="true" aria-label="Captions">CC</button>
   <button type="button" id="obReplay">Replay</button>
-  <button type="button" id="obSkip">Skip the opening</button>
+  <button type="button" id="obSkip">Skip<span class="long"> the opening</span></button>
+  <button type="button" id="obMode"><span class="lbl">Watch</span></button>
 </div>
+<p class="ohint" id="ohint" aria-live="polite"></p>
 <div class="layer" id="oldLayer">
   <div class="storm" id="storm" aria-hidden="true"></div>
   <div class="groupbar" id="groupbar" aria-hidden="true">Chidinma &amp; Tunde 2026 · <strong id="unread">0</strong> unread</div>
@@ -711,6 +732,12 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   });
   CUTS.forEach(function (c) { c.a /= acc; c.b /= acc; });
   var CUT_W = 0.011; // half-width of the dip to black at a cut, in s
+  // The designed pace: the seconds each cut takes when the film plays itself (Watch runs at exactly this). Scrolling
+  // runs at SCROLL_PACE times it, however fast or slow the visitor moves, so every caption and detail has its time.
+  var SEG_SECONDS = [12, 9, 42, 10, 10, 12, 14, 10, 9, 5, 8, 18, 12, 8, 8, 12, 14], SCROLL_PACE = 1.5, TT = 0;
+  CUTS.forEach(function (c, i) { c.t0 = TT; TT += SEG_SECONDS[i] || 8; c.t1 = TT; });
+  function tFromS(sv) { for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (sv <= c.b) return c.t0 + (c.t1 - c.t0) * Math.max(0, Math.min(1, (sv - c.a) / (c.b - c.a))); } return TT; }
+  function sFromT(t) { for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (t <= c.t1) return c.a + (c.b - c.a) * Math.max(0, Math.min(1, (t - c.t0) / (c.t1 - c.t0))); } return 1; }
   function mapStory(sv) {
     var c = CUTS[CUTS.length - 1];
     for (var i = 0; i < CUTS.length; i++) if (sv <= CUTS[i].b) { c = CUTS[i]; break; }
@@ -726,7 +753,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   }
   function sFromScene(mode, k) { for (var i = 0; i < CUTS.length; i++) if (CUTS[i].mode === mode) return CUTS[i].a + (CUTS[i].b - CUTS[i].a) * k; return 0; }
   function rawFromS(sv) { return PRO + sv * (1 - PRO); }
-  window.OPmap = { sFromScene: sFromScene, sFromOld: sFromOld, rawFromS: rawFromS };
+  window.OPmap = { sFromScene: sFromScene, sFromOld: sFromOld, rawFromS: rawFromS, tFromS: tFromS, seconds: TT };
   var OP = window.OP = { scene: { mode: "old", local: 0, fade: 0, vis: 1 }, p: 0, raw: 0, pro: 0, seated: 0, loaded: 0, entered: false, covered: false, reduceMotion: reduceMotion, render: null, seg: seg, bump: bump, smooth: smooth, clamp: clamp };
   // Embed mode: the landing page hosts the live scene. No gate, no sound, no scroll; the host drives it.
   var EMBED = new URLSearchParams(location.search).get("embed");
@@ -767,7 +794,17 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   window.addEventListener("pageshow", function (e) { if (e.persisted) location.reload(); });
   if (!EMBED) document.documentElement.classList.add("locked");
   // The whole film is scroll-driven, so all of it plays at the slower pace.
-  if (!EMBED && window.AriyaScroll) AriyaScroll.init({ speed: 0.7 }); // screens per second, however fast or slow the reader scrolls
+  // Scrolling follows the designed pace of whichever part of the film is on screen; below the film, the planning
+  // pages read at an ordinary pace. While Watch is on, scrolling input is held and a hint says how to take over.
+  function paceAt(y) {
+    var total = track.offsetHeight - window.innerHeight, r = total > 0 ? y / total : 1;
+    if (r >= 1) return 0.9 * window.innerHeight;
+    if (r < PRO) return 0.5 * window.innerHeight;
+    var sv = (r - PRO) / (1 - PRO), c = CUTS[CUTS.length - 1];
+    for (var i = 0; i < CUTS.length; i++) if (sv <= CUTS[i].b) { c = CUTS[i]; break; }
+    return Math.max(40, (c.b - c.a) * (1 - PRO) * total / (c.t1 - c.t0) * SCROLL_PACE);
+  }
+  if (!EMBED && window.AriyaScroll) AriyaScroll.init({ speedAt: paceAt, lock: watchLock, onLocked: lockHint });
 
   /* ---------- Score: the song (assets/music.mp3, "Yori Yori" by Abefe, class demo only), with a generated
      highlife-ambient soundtrack that follows the story as the fallback if the song is missing or won't play ---------- */
@@ -896,6 +933,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       stop: function () { on = false; if (song) song.pause(); if (!ctx) return; master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); },
       isOn: function () { return on; },
       time: function () { return song ? song.currentTime : 0; },
+      restart: function () { if (song) { try { song.currentTime = 0; } catch (e) { /* not loaded yet */ } } step = 0; },
       sfx: function (name) { if (!on || !ctx || !SFX[name]) return; try { SFX[name](ctx.currentTime + 0.01); } catch (e) { /* a missed sound is fine */ } },
       ambience: function (kind) { try { ambience(kind); } catch (e) { /* fine */ } },
       // The score sits under the dialogue until the yes, then rises.
@@ -924,7 +962,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       }
     };
   })();
-  document.addEventListener("visibilitychange", function () { Score.suspend(document.hidden); });
+  document.addEventListener("visibilitychange", function () { Score.suspend(document.hidden || songHeld()); });
   // Music carries across pages: the shared navigation hands the song's position to the next page.
   window.AriyaScore = { handoff: function () { try { sessionStorage.setItem("ariya-music", JSON.stringify({ on: Score.isOn(), t: Score.time() })); } catch (e) { /* none */ } } };
   var musicFrom = null;
@@ -944,19 +982,23 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   var gate = document.getElementById("gate"), enterSound = document.getElementById("enterSound");
   var loadBar = document.getElementById("loadBar"), loadTxt = document.getElementById("loadTxt");
   var gateStart = performance.now();
-  function enter(withSound) {
+  var howEl = document.getElementById("how"), choosing = false;
+  // The door sets the sound (it needs this click); then the visitor chooses to scroll (the default) or to watch.
+  function enter(withSound, choice) {
     if (OP.entered) return;
+    if (!choosing) setSound(withSound);
+    if (!choice) { choosing = true; gate.classList.add("choose"); howEl.hidden = false; document.getElementById("howScroll").focus(); return; }
     toTop(); target = prog = 0;
     OP.entered = true;
     gate.classList.add("gone");
     document.documentElement.classList.remove("locked");
-    setSound(withSound);
     setTimeout(function () { gate.hidden = true; }, 1500);
-    setTimeout(function () { setPlaying(true); }, reduceMotion ? 300 : 1200); // Watch: the opening plays itself; scroll to explore
-
+    setHow(choice === "watch" ? "watch" : "scroll", reduceMotion ? 300 : 1200);
   }
   enterSound.addEventListener("click", function () { enter(true); });
   document.getElementById("enterQuiet").addEventListener("click", function () { enter(false); });
+  document.getElementById("howScroll").addEventListener("click", function () { enter(false, "scroll"); });
+  document.getElementById("howWatch").addEventListener("click", function () { enter(false, "watch"); });
   function gateTick() {
     if (OP.entered) return;
     // Let people in once the hall is built, or after a while without WebGL.
@@ -997,16 +1039,16 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   var railBtns = chapters.map(function (c, i) {
     var li = document.createElement("li"), b = document.createElement("button");
     b.type = "button"; b.innerHTML = "<span>" + c[0] + "</span><i></i>"; b.setAttribute("aria-label", "Chapter " + i + ": " + c[0]);
-    b.addEventListener("click", function () { if (!OP.entered) enter(false); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); });
+    b.addEventListener("click", function () { if (!OP.entered) enter(false, "scroll"); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); });
     li.appendChild(b); document.getElementById("railList").appendChild(li); return b;
   });
   if (!EMBED && window.AriyaNav) AriyaNav.init({ chapters: chapters.map(function (c) {
-    return [c[0], function () { if (!OP.entered) enter(false); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); }];
+    return [c[0], function () { if (!OP.entered) enter(false, "scroll"); scrollToRaw(c[1] < 0 ? 0 : rawFromS(c[1])); }];
   }) });
   document.getElementById("home").addEventListener("click", function (e) { e.preventDefault(); scrollToRaw(0); });
-  document.getElementById("replay").addEventListener("click", function () { scrollToRaw(0); });
+  document.getElementById("replay").addEventListener("click", function () { replayFilm(); });
   Array.prototype.forEach.call(document.querySelectorAll('a[href="#start"]'), function (a) {
-    a.addEventListener("click", function () { if (!OP.entered) enter(false); });
+    a.addEventListener("click", function () { if (!OP.entered) enter(false, "scroll"); });
   });
 
 
@@ -1198,31 +1240,69 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     Score.level(open && !(m === "N" && u > 0.88) ? 0.28 : 1);
   }
 
-  /* ---------- Watch the opening: it plays itself at reading pace; any scroll takes over and pauses it ---------- */
+  /* ---------- Watch or scroll. Watch plays the whole film by itself at its designed pace, and the song follows it:
+     Pause pauses the song, Play carries on, Replay starts both again. Scrolling is the visitor's own, at the designed
+     pace, and the song simply plays. While Watch is on, scrolling input is held; "Scroll instead" hands over. ---------- */
   var obar = document.getElementById("obar"), obPlay = document.getElementById("obPlay"), obCC = document.getElementById("obCC");
-  var OPEN_SECONDS = 50, playing = false, playLast = 0, autoScrolling = false, playY = -1;
-  function openRange() { var total = track.offsetHeight - window.innerHeight; return { a: rawFromS(sFromScene("R", 0)) * total, b: rawFromS(sFromScene("N", 1)) * total, total: total }; }
-  OP.watch = { set: function (on) { setPlaying(on); }, get playing() { return playing; }, range: function () { return openRange(); } };
-  function setPlaying(on) { playing = on; playY = on ? window.scrollY : -1; obPlay.setAttribute("aria-pressed", on ? "true" : "false"); obPlay.querySelector(".lbl").textContent = on ? "Pause" : "Play"; playLast = performance.now(); if (on) requestAnimationFrame(playStep); }
+  var obMode = document.getElementById("obMode"), obSkip = document.getElementById("obSkip"), ohint = document.getElementById("ohint");
+  var how = "scroll", playing = false, playLast = 0, playY = -1, wt = 0, startTimer = 0, hintTimer = 0;
+  document.getElementById("howMins").textContent = "about " + (Math.round(TT / 30) / 2).toString().replace(".5", "½") + " minutes";
+  function yFromS(sv) { return rawFromS(sv) * (track.offsetHeight - window.innerHeight); }
+  function sFromY(y) { var total = track.offsetHeight - window.innerHeight; return total > 0 ? clamp((y / total - PRO) / (1 - PRO), 0, 1) : 0; }
+  function watchLock() { return how === "watch" && OP.entered; }
+  function songHeld() { return how === "watch" && !playing && OP.entered && !startTimer; }
+  function lockHint() {
+    ohint.textContent = playing ? "Playing by itself. Pause, or choose Scroll to move at your own pace." : "Paused. Press Play, or choose Scroll to move at your own pace.";
+    ohint.classList.add("on"); clearTimeout(hintTimer); hintTimer = setTimeout(function () { ohint.classList.remove("on"); }, 2600);
+  }
+  OP.watch = { set: function (on) { setHow(on ? "watch" : "scroll"); }, get playing() { return playing; }, get how() { return how; }, get songHeld() { return songHeld(); } };
+  function setHow(m, startIn) {
+    how = m; clearTimeout(startTimer); startTimer = 0;
+    document.documentElement.classList.toggle("watching", m === "watch");
+    obPlay.hidden = m !== "watch";
+    obMode.querySelector(".lbl").textContent = m === "watch" ? "Scroll" : "Watch";
+    obMode.setAttribute("aria-label", m === "watch" ? "Scroll instead, at your own pace" : "Watch: the film plays itself");
+    if (m === "watch" && startIn) { setPlaying(false, true); startTimer = setTimeout(function () { startTimer = 0; if (how === "watch") setPlaying(true); }, startIn); }
+    else setPlaying(m === "watch");
+  }
+  function setPlaying(on, keepSong) {
+    playing = on; playY = window.scrollY; wt = tFromS(sFromY(window.scrollY)); playLast = performance.now();
+    if (on && wt >= TT - 0.05) { jumpTo(0); target = prog = 0; Score.restart(); playY = window.scrollY; wt = 0; } // at the end, Watch starts the film again
+    obPlay.setAttribute("aria-pressed", on ? "true" : "false"); obPlay.querySelector(".lbl").textContent = on ? "Pause" : "Play";
+    if (!keepSong) Score.suspend(songHeld()); // the song is tied to Play and Pause; in scroll mode it simply plays
+    if (on) requestAnimationFrame(playStep);
+  }
   function playStep(now) {
     if (!playing) return;
-    var R = openRange(), dt = Math.min(0.1, (now - playLast) / 1000); playLast = now;
-    // Anything else moving the page (a chapter jump, the scrollbar, Home) ends Watch where it is.
-    if (Math.abs(window.scrollY - playY) > 3 || window.scrollY > R.b + 6) { setPlaying(false); return; }
-    var y = Math.min(R.b + 4, Math.max(window.scrollY, R.a) + (R.b - R.a) * Math.max(0, dt) / OPEN_SECONDS);
-    autoScrolling = true; window.scrollTo({ top: y, behavior: "instant" }); autoScrolling = false; playY = window.scrollY;
-    if (y >= R.b) { setPlaying(false); return; }
+    var dt = Math.min(0.1, (now - playLast) / 1000); playLast = now;
+    // A chapter jump, Skip, Home or the scrollbar moved the film: Watch carries on from wherever it landed.
+    if (Math.abs(window.scrollY - playY) > 3 || (window.AriyaScroll && AriyaScroll.busy)) { playY = window.scrollY; wt = tFromS(sFromY(playY)); requestAnimationFrame(playStep); return; }
+    wt = Math.min(TT, wt + dt);
+    window.scrollTo({ top: yFromS(sFromT(wt)), behavior: "instant" }); playY = window.scrollY;
+    if (wt >= TT) { setHow("scroll"); return; } // the end of the film: the page is the visitor's again, the song plays on
     requestAnimationFrame(playStep);
   }
-  obPlay.addEventListener("click", function () { if (!playing && window.scrollY >= openRange().b - 2) window.scrollTo({ top: openRange().a, behavior: "instant" }); setPlaying(!playing); });
-  document.getElementById("obReplay").addEventListener("click", function () { window.scrollTo({ top: openRange().a, behavior: "instant" }); setPlaying(true); });
-  document.getElementById("obSkip").addEventListener("click", function () { setPlaying(false); var total = track.offsetHeight - window.innerHeight; scrollToRaw(rawFromS(sFromScene("C", 0.01))); });
+  function jumpTo(y) { if (window.AriyaScroll && AriyaScroll.enabled) AriyaScroll.jump(y); else window.scrollTo({ top: y, behavior: "instant" }); }
+  function replayFilm() { jumpTo(0); target = prog = 0; Score.restart(); setPlaying(how === "watch"); }
+  obPlay.addEventListener("click", function () { if (startTimer) { clearTimeout(startTimer); startTimer = 0; setPlaying(false); return; } setPlaying(!playing); });
+  document.getElementById("obReplay").addEventListener("click", replayFilm);
+  obSkip.addEventListener("click", function () { scrollToRaw(rawFromS(sFromScene("C", 0.01))); });
+  obMode.addEventListener("click", function () { setHow(how === "watch" ? "scroll" : "watch"); });
   obCC.addEventListener("click", function () { var on = obCC.getAttribute("aria-pressed") !== "true"; obCC.setAttribute("aria-pressed", on ? "true" : "false"); document.documentElement.classList.toggle("cc-off", !on); });
-  // Scrolling by hand is Explore: it takes over from Watch.
-  ["wheel", "touchstart", "keydown"].forEach(function (ev) { window.addEventListener(ev, function (e) { if (!playing) return; if (ev === "keydown" && !/^(Arrow|Page|Home|End| )/.test(e.key)) return; if (e.target && e.target.closest && e.target.closest(".obar")) return; setPlaying(false); }, { passive: true }); });
+  // With reduced motion the scroll engine is off, so hold native scrolling here while Watch is on.
+  ["wheel", "touchmove", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, function (e) {
+      if (!watchLock() || (window.AriyaScroll && AriyaScroll.enabled)) return;
+      if (ev === "keydown" && !/^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(e.key)) return;
+      if (e.target && e.target.closest && e.target.closest(".sheet, .cm, input, textarea, select")) return;
+      e.preventDefault(); lockHint();
+    }, { passive: false });
+  });
+  var skipShown = true;
   function updateObar(sc, sv) {
-    var R = sFromScene("N", 1), show = OP.entered && sv <= R + 0.002 && !OP.covered;
-    obar.classList.toggle("on", show);
+    obar.classList.toggle("on", OP.entered && !OP.covered);
+    var skip = sv <= sFromScene("N", 1) - 0.004;
+    if (skip !== skipShown) { skipShown = skip; obSkip.hidden = !skip; }
   }
   function updateDom(r, p, sv, sc) {
     updateOpening(sc); updateObar(sc, sv);
