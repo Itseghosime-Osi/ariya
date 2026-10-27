@@ -28,14 +28,10 @@ export async function dispatchRsvpEmail({
 }: DispatchEmailParams): Promise<EmailDispatchResult> {
   let providerId: string | undefined;
   let status: "sent" | "failed" = "sent";
-
-  const isRealApiKey =
-    serverEnv.RESEND_API_KEY &&
-    !serverEnv.RESEND_API_KEY.startsWith("re_sample") &&
-    !serverEnv.RESEND_API_KEY.startsWith("re_placeholder");
+  let errorClass: string | undefined;
 
   try {
-    if (isRealApiKey) {
+    if (serverEnv.EMAIL_TRANSPORT === "resend") {
       const resend = new Resend(serverEnv.RESEND_API_KEY);
       const res = await resend.emails.send({
         from: `Àríyá Celebrations <${serverEnv.RESEND_FROM_EMAIL}>`,
@@ -46,19 +42,20 @@ export async function dispatchRsvpEmail({
 
       if (res.error) {
         status = "failed";
+        errorClass = res.error.name || "ResendApiError";
       } else {
         providerId = res.data?.id;
       }
     } else {
-      // Local dev & test fallback: Dispatch directly to Mailpit HTTP API
-      const mailpitUrl = "http://127.0.0.1:57324/api/v1/send";
+      // Mailpit transport configured via validated environment variable
+      const mailpitUrl = `${serverEnv.MAILPIT_URL.replace(/\/$/, "")}/api/v1/send`;
       const mailpitRes = await fetch(mailpitUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           From: {
             Name: "Àríyá Celebrations",
-            Address: serverEnv.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
+            Address: serverEnv.RESEND_FROM_EMAIL,
           },
           To: [{ Address: recipientEmail }],
           Subject: subject,
@@ -66,15 +63,17 @@ export async function dispatchRsvpEmail({
         }),
       });
 
-      if (mailpitRes.ok) {
-        const body = (await mailpitRes.json()) as { ID?: string };
-        providerId = body.ID ?? "mailpit-local-id";
+      if (!mailpitRes.ok) {
+        status = "failed";
+        errorClass = `MailpitHttpError_${mailpitRes.status}`;
       } else {
-        providerId = "local-dev-mock-id";
+        const body = (await mailpitRes.json()) as { ID?: string };
+        providerId = body.ID;
       }
     }
-  } catch {
+  } catch (err) {
     status = "failed";
+    errorClass = err instanceof Error ? err.constructor.name : "UnknownError";
   }
 
   // Always log the email into public.email_log using the service role admin client
@@ -87,7 +86,8 @@ export async function dispatchRsvpEmail({
       subject,
       template_type: templateType,
       status,
-      provider_id: providerId ?? null,
+      provider_id: status === "sent" ? (providerId ?? null) : null,
+      error_class: status === "failed" ? (errorClass ?? "UnknownError") : null,
       sent_at: new Date().toISOString(),
     });
   } catch {
@@ -96,6 +96,7 @@ export async function dispatchRsvpEmail({
 
   return {
     success: status === "sent",
-    providerId,
+    providerId: status === "sent" ? providerId : undefined,
+    error: status === "failed" ? errorClass : undefined,
   };
 }
