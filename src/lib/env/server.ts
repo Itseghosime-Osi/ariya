@@ -12,6 +12,10 @@ const serverEnvSchema = z
     MAILPIT_URL: z.string().url().default("http://127.0.0.1:57324"),
     RESEND_API_KEY: z.string().min(1),
     RESEND_FROM_EMAIL: z.string().email(),
+    RATE_LIMIT_SECRET: z
+      .string()
+      .min(16)
+      .default("super-secret-rate-limit-salt-key-minimum-16"),
     CRON_SECRET: z.string().min(1),
   })
   .superRefine((data, ctx) => {
@@ -52,6 +56,9 @@ const rawServerData = isSkip
       RESEND_API_KEY: process.env.RESEND_API_KEY || "re_placeholder",
       RESEND_FROM_EMAIL:
         process.env.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
+      RATE_LIMIT_SECRET:
+        process.env.RATE_LIMIT_SECRET ||
+        "super-secret-rate-limit-salt-key-minimum-16",
       CRON_SECRET: process.env.CRON_SECRET || "cron_placeholder",
     }
   : {
@@ -62,6 +69,7 @@ const rawServerData = isSkip
       MAILPIT_URL: process.env.MAILPIT_URL,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+      RATE_LIMIT_SECRET: process.env.RATE_LIMIT_SECRET,
       CRON_SECRET: process.env.CRON_SECRET,
     };
 
