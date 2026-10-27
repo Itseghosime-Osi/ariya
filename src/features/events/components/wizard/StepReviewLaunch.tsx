@@ -54,8 +54,7 @@ export function StepReviewLaunch({
             Stage 3: Review &amp; Launch Summary
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Perform final solemnization checks before provisioning the
-            collaborative workspace.
+            Review your details, then create the event.
           </p>
         </div>
       </div>
@@ -65,7 +64,7 @@ export function StepReviewLaunch({
         <div className="divide-y divide-surface-container-high/60 space-y-6">
           <ReviewSection
             icon="favorite"
-            heading="Parties of Honour"
+            heading="Couple"
             onEdit={onEditDetails}
           >
             <div>

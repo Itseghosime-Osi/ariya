@@ -80,6 +80,9 @@ export async function createEventAction(
       if (error.code === "23505") {
         continue;
       }
+      console.error(
+        `[createEventAction] Failed to create event: code=${error.code} message=${error.message}`
+      );
       return {
         ok: false,
         error: mapError(error, "Failed to create celebration"),

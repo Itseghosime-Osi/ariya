@@ -34,13 +34,10 @@ export function EventWizardStepper({
         </div>
         <div className="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-paper-ink">
-            <span className="w-2 h-2 rounded-full bg-success" />
-            <span>Autosave Ready</span>
+            <span>Step {currentStep} of 3</span>
           </span>
           <span className="text-mist">•</span>
-          <span className="text-secondary font-semibold">
-            Workspace Pipeline
-          </span>
+          <span className="text-secondary font-semibold">Event Setup</span>
         </div>
       </div>
 
