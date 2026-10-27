@@ -36,15 +36,15 @@ on conflict (id) do nothing;
 insert into public.guests (
   id, event_id, name, phone, email, side, group_name, is_vip, party_size, plus_ones_allowed, rsvp_token, notes, invited_at
 ) values
-  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Mama Ijeoma', '+2348031234500', 'ijeoma@family.ng', 'Family', 'Grandmother', true, 1, false, 'k7MamaIjeomaQx', 'Groom''s Grandmother • Front row seating', now()),
-  ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Dr. Folake Adeleke', '+2348031234501', 'folake@adeleke.org', 'Bride', 'Bride''s Cohort', true, 1, false, 'k7FolakeAdelekeQx', 'Chief Medical Director', now()),
-  ('20000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Farouk Al-Hassan', '+2348031234502', 'farouk@alhassan.com', 'VIP', 'Honorary', true, 4, true, 'k7FaroukAlHassanQx', 'Party of 4 dignitaries', now()),
-  ('20000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Adaeze Okonkwo', '+2348031234503', 'adaeze@example.com', 'Bride', 'Friends', false, 1, true, 'k7AdaezeOkonkwoQx', 'Plus one requested', now()),
-  ('20000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'Bisi Adebayo', '+2348031234504', 'bisi@example.com', 'Bride', 'Family', false, 5, false, 'k7BisiAdebayoQx', 'Aunty Bisi and children', now()),
-  ('20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'Emeka & Ifeoma Okafor', '+2348031234505', 'okafor@example.com', 'Groom', 'Friends', false, 2, false, 'k7EmekaOkaforQx', 'Couple attendance', now()),
-  ('20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Femi Adeyemi', '+2348031234506', 'femi@example.com', 'Groom', 'Friends', false, 2, true, 'k7FemiAdeyemiQx', 'Bringing partner', now()),
-  ('20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Ngozi Eze', '+2348031234507', 'ngozi@example.com', 'Bride', 'Colleagues', false, 2, false, 'k7NgoziEzeQx', null, now()),
-  ('20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Pastor & Mrs Adeola', '+2348031234508', 'pastor@church.ng', 'VIP', 'Ministers', true, 2, false, 'k7PastorAdeolaQx', 'Officiating minister', now())
+  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Mama Ijeoma', '+2348031234500', 'ijeoma@family.ng', 'family', 'Grandmother', true, 1, false, 'k7MamaIjeomaQx', 'Groom''s Grandmother • Front row seating', now()),
+  ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Dr. Folake Adeleke', '+2348031234501', 'folake@adeleke.org', 'bride', 'Bride''s Cohort', true, 1, false, 'k7FolakeAdelekeQx', 'Chief Medical Director', now()),
+  ('20000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Farouk Al-Hassan', '+2348031234502', 'farouk@alhassan.com', 'vip', 'Honorary', true, 4, true, 'k7FaroukAlHassanQx', 'Party of 4 dignitaries', now()),
+  ('20000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Adaeze Okonkwo', '+2348031234503', 'adaeze@example.com', 'bride', 'Friends', false, 1, true, 'k7AdaezeOkonkwoQx', 'Plus one requested', now()),
+  ('20000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'Bisi Adebayo', '+2348031234504', 'bisi@example.com', 'bride', 'Family', false, 5, false, 'k7BisiAdebayoQx', 'Aunty Bisi and children', now()),
+  ('20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'Emeka & Ifeoma Okafor', '+2348031234505', 'okafor@example.com', 'groom', 'Friends', false, 2, false, 'k7EmekaOkaforQx', 'Couple attendance', now()),
+  ('20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Femi Adeyemi', '+2348031234506', 'femi@example.com', 'groom', 'Friends', false, 2, true, 'k7FemiAdeyemiQx', 'Bringing partner', now()),
+  ('20000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Ngozi Eze', '+2348031234507', 'ngozi@example.com', 'bride', 'Colleagues', false, 2, false, 'k7NgoziEzeQx', null, now()),
+  ('20000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', 'Pastor & Mrs Adeola', '+2348031234508', 'pastor@church.ng', 'vip', 'Ministers', true, 2, false, 'k7PastorAdeolaQx', 'Officiating minister', now())
 on conflict (id) do nothing;
 
 -- 4. Insert RSVPs

@@ -21,8 +21,26 @@ $$;
 
 revoke execute on function public.generate_invitation_token() from public, anon, authenticated;
 
--- Set default on guests.rsvp_token
-alter table public.guests alter column rsvp_token set default public.generate_invitation_token();
+-- Trigger to safely auto-generate token on insert when not provided
+create or replace function public.tr_guests_generate_token()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.rsvp_token is null or trim(new.rsvp_token) = '' then
+    new.rsvp_token := public.generate_invitation_token();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists tr_guests_before_insert on public.guests;
+create trigger tr_guests_before_insert
+before insert on public.guests
+for each row
+execute function public.tr_guests_generate_token();
 
 -- 2. Drop old regenerate_guest_token signatures and create single-parameter version
 drop function if exists public.regenerate_guest_token(uuid, text);
@@ -188,6 +206,7 @@ grant execute on function public.import_guests(uuid, jsonb) to authenticated;
 
 -- 4. Normalize side to lowercase and restore strict lowercase CHECK constraint
 update public.guests set side = lower(trim(side));
+alter table public.guests alter column side set default 'mutual';
 alter table public.guests drop constraint if exists guests_side_check;
 alter table public.guests add constraint guests_side_check check (side in ('bride', 'groom', 'family', 'vip', 'planner', 'imported', 'mutual'));
 
