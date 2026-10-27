@@ -93,6 +93,7 @@ export type Database = {
       email_log: {
         Row: {
           created_at: string;
+          error_class: string | null;
           event_id: string;
           guest_id: string | null;
           id: string;
@@ -106,6 +107,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           created_at?: string;
+          error_class?: string | null;
           event_id: string;
           guest_id?: string | null;
           id?: string;
@@ -118,6 +120,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          error_class?: string | null;
           event_id?: string;
           guest_id?: string | null;
           id?: string;
@@ -196,6 +199,7 @@ export type Database = {
           date: string;
           dress_code: string | null;
           id: string;
+          is_public: boolean;
           paid_at: string | null;
           registry_code: string | null;
           rsvp_by: string | null;
@@ -213,6 +217,7 @@ export type Database = {
           date: string;
           dress_code?: string | null;
           id?: string;
+          is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
@@ -229,6 +234,7 @@ export type Database = {
           date?: string;
           dress_code?: string | null;
           id?: string;
+          is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
@@ -244,6 +250,7 @@ export type Database = {
         Row: {
           created_at: string;
           email: string | null;
+          email_collected_via_rsvp: boolean;
           event_id: string;
           group_name: string | null;
           id: string;
@@ -262,6 +269,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           email?: string | null;
+          email_collected_via_rsvp?: boolean;
           event_id: string;
           group_name?: string | null;
           id?: string;
@@ -279,6 +287,7 @@ export type Database = {
         Update: {
           created_at?: string;
           email?: string | null;
+          email_collected_via_rsvp?: boolean;
           event_id?: string;
           group_name?: string | null;
           id?: string;
@@ -441,6 +450,25 @@ export type Database = {
           id?: string;
           phone?: string | null;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      rate_limits: {
+        Row: {
+          count: number;
+          key: string;
+          reset_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          count?: number;
+          key: string;
+          reset_at: string;
+        };
+        Update: {
+          count?: number;
+          key?: string;
+          reset_at?: string;
         };
         Relationships: [];
       };
@@ -718,6 +746,7 @@ export type Database = {
         Returns: string;
       };
       get_invitation: { Args: { p_token: string }; Returns: Json };
+      get_public_event: { Args: { p_slug: string }; Returns: Json };
       get_user_events_with_metrics: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -725,6 +754,10 @@ export type Database = {
       has_event_role: {
         Args: { p_event_id: string; p_roles: string[] };
         Returns: boolean;
+      };
+      hit_rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window: string };
+        Returns: Json;
       };
       import_guests: {
         Args: { p_event_id: string; p_guests: Json };
@@ -777,6 +810,7 @@ export type Database = {
       submit_rsvp: {
         Args: {
           p_attending_count: number;
+          p_contact_email?: string;
           p_dietary?: string;
           p_note?: string;
           p_plus_one_name?: string;
