@@ -44,33 +44,36 @@ const serverEnvSchema = z
 
 const isSkip = process.env.SKIP_ENV_VALIDATION === "1";
 
-const rawServerData = isSkip
-  ? {
-      NODE_ENV: process.env.NODE_ENV || "development",
+const rawServerData = {
+  NODE_ENV: process.env.NODE_ENV,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
+  EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
+  MAILPIT_URL: process.env.MAILPIT_URL,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+  RATE_LIMIT_SECRET: process.env.RATE_LIMIT_SECRET,
+  CRON_SECRET: process.env.CRON_SECRET,
+};
+
+export const serverEnv = isSkip
+  ? ({
+      NODE_ENV:
+        (process.env.NODE_ENV as "development" | "test" | "production") ||
+        "development",
       SUPABASE_SERVICE_ROLE_KEY:
         process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
       PAYSTACK_SECRET_KEY:
         process.env.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
-      EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT || "mailpit",
+      EMAIL_TRANSPORT:
+        (process.env.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
       MAILPIT_URL: process.env.MAILPIT_URL || "http://127.0.0.1:57324",
-      RESEND_API_KEY: process.env.RESEND_API_KEY || "re_placeholder",
+      RESEND_API_KEY: process.env.RESEND_API_KEY || "re_mocked_for_build",
       RESEND_FROM_EMAIL:
         process.env.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
       RATE_LIMIT_SECRET:
         process.env.RATE_LIMIT_SECRET ||
         "super-secret-rate-limit-salt-key-minimum-16",
       CRON_SECRET: process.env.CRON_SECRET || "cron_placeholder",
-    }
-  : {
-      NODE_ENV: process.env.NODE_ENV,
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-      PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
-      EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
-      MAILPIT_URL: process.env.MAILPIT_URL,
-      RESEND_API_KEY: process.env.RESEND_API_KEY,
-      RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
-      RATE_LIMIT_SECRET: process.env.RATE_LIMIT_SECRET,
-      CRON_SECRET: process.env.CRON_SECRET,
-    };
-
-export const serverEnv = serverEnvSchema.parse(rawServerData);
+    } as z.infer<typeof serverEnvSchema>)
+  : serverEnvSchema.parse(rawServerData);

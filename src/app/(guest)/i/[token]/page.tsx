@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
-import { getInvitationByToken } from "@/features/rsvp/queries";
+import { getInvitationByToken, getCheckInCode } from "@/features/rsvp/queries";
+import { generateQrDataUrl } from "@/lib/qrcode";
 import { InvalidLinkCard } from "@/features/rsvp/components/InvalidLinkCard";
 import { ClosedEventCard } from "@/features/rsvp/components/ClosedEventCard";
 import { DeadlinePassedCard } from "@/features/rsvp/components/DeadlinePassedCard";
@@ -38,6 +39,16 @@ export default async function GuestInvitationPage({
 
   const { data, state } = await getInvitationByToken(token, isRevise);
 
+  let checkInCode: string | null = null;
+  let qrCodeUrl: string | null = null;
+
+  if (state === "already_replied" && data?.rsvp?.status === "accepted") {
+    checkInCode = await getCheckInCode(token);
+    if (checkInCode) {
+      qrCodeUrl = await generateQrDataUrl(checkInCode);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f5ee] flex flex-col justify-between py-10 px-4 sm:px-6">
       <main className="max-w-xl mx-auto w-full space-y-6">
@@ -63,7 +74,12 @@ export default async function GuestInvitationPage({
         )}
 
         {state === "already_replied" && data && (
-          <RsvpSummaryCard data={data} token={token} />
+          <RsvpSummaryCard
+            data={data}
+            token={token}
+            checkInCode={checkInCode}
+            qrCodeUrl={qrCodeUrl}
+          />
         )}
 
         {(state === "active" || state === "revise") && data && (

@@ -68,3 +68,19 @@ export async function getInvitationByToken(
 
   return { data: inv, state: "active" };
 }
+
+export async function getCheckInCode(token: string): Promise<string | null> {
+  const cleanToken = token.trim();
+  if (!cleanToken) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_check_in_code", {
+    p_token: cleanToken,
+  });
+
+  if (error || !data) {
+    return null;
+  }
+
+  return typeof data === "string" ? data : null;
+}

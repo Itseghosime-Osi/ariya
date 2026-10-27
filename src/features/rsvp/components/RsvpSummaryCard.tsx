@@ -7,9 +7,16 @@ import type { InvitationData } from "../types";
 interface RsvpSummaryCardProps {
   data: InvitationData;
   token: string;
+  checkInCode?: string | null;
+  qrCodeUrl?: string | null;
 }
 
-export function RsvpSummaryCard({ data, token }: RsvpSummaryCardProps) {
+export function RsvpSummaryCard({
+  data,
+  token,
+  checkInCode,
+  qrCodeUrl,
+}: RsvpSummaryCardProps) {
   const { guest, rsvp, event, table_name } = data;
   const isAccepted = rsvp?.status === "accepted";
   const formattedDate = formatLagosDate(event.date);
@@ -108,6 +115,40 @@ export function RsvpSummaryCard({ data, token }: RsvpSummaryCardProps) {
             Dress Code & Aso-Ebi Traditions
           </span>
           <p className="text-night">{event.dress_code}</p>
+        </section>
+      )}
+
+      {/* Royal Check-In Pass */}
+      {isAccepted && checkInCode && qrCodeUrl && (
+        <section className="bg-white rounded-xl p-5 border border-wine/20 text-center space-y-3 shadow-xs">
+          <div className="flex items-center justify-center gap-1.5 text-wine">
+            <Icon name="qr_code_scanner" className="text-sm" />
+            <span className="text-[11px] font-bold uppercase tracking-widest">
+              Reception Entry Pass
+            </span>
+          </div>
+          <div className="inline-block p-2 bg-[#FCFAF7] rounded-xl border border-wine/10 shadow-inner">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={qrCodeUrl}
+              alt={`QR Pass for ${guest.display_name}`}
+              width={160}
+              height={160}
+              className="rounded-lg mx-auto"
+            />
+          </div>
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">
+              Personal Entry Code
+            </span>
+            <span className="font-mono text-base font-bold text-wine tracking-wider bg-wine/5 px-3 py-1 rounded-md border border-wine/20 inline-block">
+              {checkInCode}
+            </span>
+          </div>
+          <p className="text-[11px] text-wine/70 max-w-xs mx-auto">
+            Present this digital QR pass or mention your personal code to the
+            concierge at the reception desk.
+          </p>
         </section>
       )}
 
