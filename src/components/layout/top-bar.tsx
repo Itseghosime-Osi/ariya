@@ -53,12 +53,21 @@ export function TopBar({
             <button
               onClick={onOpenSearch}
               className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl bg-surface-container text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-wine"
-              title="Search (Cmd + K)"
-              aria-label="Search celebration (Cmd + K)"
+              title="Search celebration (Cmd + K)"
             >
-              <Icon name="search" size={16} className="text-wine" />
-              <span className="hidden sm:inline">Search celebration...</span>
-              <kbd className="hidden sm:inline-block rounded bg-surface-container-highest px-1.5 py-0.5 text-[10px] text-on-surface-variant">
+              <Icon
+                name="search"
+                size={16}
+                className="text-wine"
+                aria-hidden="true"
+              />
+              <span className="sr-only sm:not-sr-only sm:inline">
+                Search celebration...
+              </span>
+              <kbd
+                aria-hidden="true"
+                className="hidden sm:inline-block rounded bg-surface-container-highest px-1.5 py-0.5 text-[10px] text-on-surface-variant"
+              >
                 ⌘K
               </kbd>
             </button>
