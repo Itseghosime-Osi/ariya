@@ -4,10 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env/server";
-import {
-  verifyPaystackTransaction,
-  CELEBRATION_PASS_CURRENCY,
-} from "@/lib/paystack";
+import { safeRedirectPath } from "@/lib/safe-redirect";
+import { verifyPaystackTransaction } from "@/lib/paystack";
+import { confirmPayment } from "@/features/billing/confirm-payment";
 import { Icon } from "@/components/ui/icon";
 
 interface BillingCallbackPageProps {
@@ -29,7 +28,8 @@ export default async function BillingCallbackPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/sign-in?redirectTo=/events/${eventId}/billing`);
+    const nextUrl = safeRedirectPath(`/events/${eventId}/billing`);
+    redirect(`/sign-in?next=${encodeURIComponent(nextUrl)}`);
   }
 
   // Verify membership
@@ -67,18 +67,8 @@ export default async function BillingCallbackPage({
             serverEnv.PAYSTACK_API_BASE
           );
 
-          if (
-            verifyResult.status &&
-            verifyResult.data &&
-            verifyResult.data.status === "success" &&
-            verifyResult.data.reference === reference &&
-            verifyResult.data.currency === CELEBRATION_PASS_CURRENCY &&
-            verifyResult.data.amount === payment.amount_kobo
-          ) {
-            await adminClient.rpc("record_successful_payment", {
-              p_payment_reference: reference,
-              p_paystack_data: verifyResult.data,
-            });
+          const confirmation = await confirmPayment(reference, verifyResult);
+          if (confirmation.success) {
             paymentStatus = "success";
           }
         } catch (err) {
