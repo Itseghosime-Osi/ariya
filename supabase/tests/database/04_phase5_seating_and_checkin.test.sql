@@ -1,5 +1,5 @@
 begin;
-select plan(14);
+select plan(16);
 
 -- 1. Test hit_rate_limit execution is revoked from anon
 set local role anon;
@@ -138,18 +138,30 @@ select is(
   'passing null to assign_seat unseats guest 1'
 );
 
--- 10. Re-check capacity on submit_rsvp:
--- Guest 2 is seated at table (remaining capacity = 4 - 2 = 2).
--- Guest 2 now attempts to revise RSVP to 5 attendees (exceeding capacity).
+-- 10. Re-check capacity on submit_rsvp (Rule 5):
+-- Guest 2 is seated at table.
+-- Guest 2 attempts to revise RSVP to 5 attendees (exceeding table capacity).
+-- The RSVP is accepted, guest is unseated, and seating_conflict_at is flagged.
 reset role;
 update public.guests
 set plus_ones_allowed = true, party_size = 5
 where id = (select guest_2_id from _test_data);
 
-select throws_ok(
+select lives_ok(
   format('select public.submit_rsvp(%L, %L, %s)', (select rsvp_token from public.guests where id = (select guest_2_id from _test_data)), 'accepted', 5),
-  'Your updated party size (5 guests) exceeds the available seats at your assigned table (High Table VIP). Please contact the hosts to adjust seating.',
-  'submit_rsvp rejects RSVP revision if updated party size exceeds assigned table capacity'
+  'submit_rsvp accepts RSVP revision when updated party size exceeds table capacity'
+);
+
+select is(
+  (select count(*) from public.seat_assignments where guest_id = (select guest_2_id from _test_data))::int,
+  0,
+  'Guest 2 is unseated due to capacity conflict'
+);
+
+select is(
+  (select count(*) from public.guests where id = (select guest_2_id from _test_data) and seating_conflict_at is not null)::int,
+  1,
+  'seating_conflict_at is recorded on guest 2'
 );
 
 -- 11. Test check_in RPC: staff CAN check in confirmed guest
@@ -165,15 +177,15 @@ select is(
   'staff can check in 1 attendee for guest 2'
 );
 
--- 12. Test check_in RPC partial check-in and full check-in
+-- 12. Test check_in RPC partial check-in and full check-in (remaining 4 attendees)
 select is(
   (select (public.check_in(
     (select event_id from _test_data),
     (select check_in_code from public.guests where id = (select guest_2_id from _test_data)),
-    1
+    4
   )->>'status')),
   'checked_in',
-  'staff can check in remaining attendee for guest 2'
+  'staff can check in remaining attendees for guest 2'
 );
 
 -- 13. Test check_in RPC already_checked_in state
