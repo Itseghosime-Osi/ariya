@@ -18,8 +18,11 @@ import {
   type FieldMapping,
   type CsvParseResult,
 } from "../../csv-parser";
-import { importGuestsAction } from "../../actions";
-import type { ExistingGuestIdentifier } from "../../schemas";
+import {
+  importGuestsAction,
+  getExistingGuestIdentifiersAction,
+} from "../../actions";
+import type { ExistingGuestIdentifier, ValidatedGuestRow } from "../../schemas";
 
 interface CsvImportModalProps {
   eventId: string;
@@ -41,6 +44,8 @@ export function CsvImportModal({
   const [step, setStep] = React.useState<ImportStep>("upload");
   const [csvText, setCsvText] = React.useState<string>("");
   const [csvHeaders, setCsvHeaders] = React.useState<string[]>([]);
+  const [allExistingGuests, setAllExistingGuests] =
+    React.useState<ExistingGuestIdentifier[]>(existingGuests);
   const [mapping, setMapping] = React.useState<FieldMapping>({
     name: null,
     phone: null,
@@ -55,18 +60,26 @@ export function CsvImportModal({
   const [validation, setValidation] = React.useState<CsvParseResult | null>(
     null
   );
-  const [skipDuplicates, setSkipDuplicates] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [importedCount, setImportedCount] = React.useState(0);
   const [skippedCount, setSkippedCount] = React.useState(0);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      getExistingGuestIdentifiersAction(eventId).then((res) => {
+        if (res.ok && res.data) {
+          setAllExistingGuests(res.data);
+        }
+      });
+    }
+  }, [isOpen, eventId]);
 
   const resetState = () => {
     setStep("upload");
     setCsvText("");
     setCsvHeaders([]);
     setValidation(null);
-    setSkipDuplicates(true);
     setIsSubmitting(false);
     setErrorMsg(null);
   };
@@ -92,22 +105,15 @@ export function CsvImportModal({
   };
 
   const handleProceedToValidation = () => {
-    const valResult = parseGuestCsvContent(csvText, mapping, existingGuests);
+    const valResult = parseGuestCsvContent(csvText, mapping, allExistingGuests);
     setValidation(valResult);
     setStep("validation");
   };
 
-  const handleCommitImport = async () => {
+  const handleCommitImport = async (candidates: ValidatedGuestRow[]) => {
     if (!validation) return;
     setIsSubmitting(true);
     setErrorMsg(null);
-
-    const candidates = skipDuplicates
-      ? validation.validRows
-      : [
-          ...validation.validRows,
-          ...validation.duplicateRows.map((d) => d.guest),
-        ];
 
     const skipped = validation.totalRows - candidates.length;
 
@@ -170,9 +176,7 @@ export function CsvImportModal({
         {step === "validation" && validation && (
           <CsvValidationPreview
             validation={validation}
-            skipDuplicates={skipDuplicates}
             isSubmitting={isSubmitting}
-            onToggleSkipDuplicates={setSkipDuplicates}
             onBack={() => setStep("mapping")}
             onCommitImport={handleCommitImport}
           />

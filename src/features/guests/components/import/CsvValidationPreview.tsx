@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,29 +13,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { CsvParseResult } from "../../csv-parser";
+import type { ValidatedGuestRow } from "../../schemas";
+import { CsvDuplicateRow } from "./CsvDuplicateRow";
 import { CheckCircle2, AlertCircle, AlertTriangle, Users } from "lucide-react";
 
 interface CsvValidationPreviewProps {
   validation: CsvParseResult;
-  skipDuplicates: boolean;
   isSubmitting: boolean;
-  onToggleSkipDuplicates: (skip: boolean) => void;
   onBack: () => void;
-  onCommitImport: () => void;
+  onCommitImport: (candidates: ValidatedGuestRow[]) => void;
 }
 
 export function CsvValidationPreview({
   validation,
-  skipDuplicates,
   isSubmitting,
-  onToggleSkipDuplicates,
   onBack,
   onCommitImport,
 }: CsvValidationPreviewProps) {
   const { validRows, errorRows, duplicateRows } = validation;
-  const countToImport = skipDuplicates
-    ? validRows.length
-    : validRows.length + duplicateRows.length;
+
+  const [skippedDuplicates, setSkippedDuplicates] = React.useState<Set<number>>(
+    () => new Set(duplicateRows.map((d) => d.rowIndex))
+  );
+
+  const toggleRowSkip = (rowIndex: number) => {
+    setSkippedDuplicates((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowIndex)) next.delete(rowIndex);
+      else next.add(rowIndex);
+      return next;
+    });
+  };
+
+  const toggleAllDuplicates = (skipAll: boolean) => {
+    setSkippedDuplicates(
+      skipAll ? new Set(duplicateRows.map((d) => d.rowIndex)) : new Set()
+    );
+  };
+
+  const allDuplicatesSkipped =
+    duplicateRows.length > 0 &&
+    duplicateRows.every((d) => skippedDuplicates.has(d.rowIndex));
+
+  const keptDuplicates = duplicateRows
+    .filter((d) => !skippedDuplicates.has(d.rowIndex))
+    .map((d) => d.guest);
+
+  const totalToImport = validRows.length + keptDuplicates.length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,19 +105,21 @@ export function CsvValidationPreview({
         <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container/50 border border-outline-variant/40">
           <div className="flex items-center gap-2">
             <Checkbox
-              id="skip-dupes"
-              checked={skipDuplicates}
-              onCheckedChange={(val) => onToggleSkipDuplicates(!!val)}
+              id="skip-all-dupes"
+              checked={allDuplicatesSkipped}
+              onCheckedChange={(val) => toggleAllDuplicates(!!val)}
             />
             <label
-              htmlFor="skip-dupes"
+              htmlFor="skip-all-dupes"
               className="text-xs cursor-pointer text-on-surface"
             >
-              Skip duplicates automatically (matches phone, email, or name)
+              Skip all duplicate entries (default)
             </label>
           </div>
           <span className="text-[11px] text-mist">
-            {skipDuplicates ? "Skipping" : "Importing anyway"}
+            {allDuplicatesSkipped
+              ? "All duplicates skipped"
+              : `${keptDuplicates.length} kept`}
           </span>
         </div>
       )}
@@ -106,7 +133,9 @@ export function CsvValidationPreview({
               <TableHead className="text-xs font-semibold">
                 Phone / Email
               </TableHead>
-              <TableHead className="text-xs font-semibold">Status</TableHead>
+              <TableHead className="text-xs font-semibold">
+                Status / Action
+              </TableHead>
               <TableHead className="text-xs font-semibold">Details</TableHead>
             </TableRow>
           </TableHeader>
@@ -133,26 +162,16 @@ export function CsvValidationPreview({
               </TableRow>
             ))}
 
-            {duplicateRows.slice(0, 10).map((row) => (
-              <TableRow key={`dup-${row.rowIndex}`} className="bg-amber-50/30">
-                <TableCell className="text-xs text-mist font-mono">
-                  {row.rowIndex}
-                </TableCell>
-                <TableCell className="text-xs font-medium text-on-surface">
-                  {row.guest.name}
-                </TableCell>
-                <TableCell className="text-xs text-mist">
-                  {row.guest.phone || row.guest.email || "-"}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="awaiting" className="text-[10px]">
-                    Duplicate
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-xs text-amber-700">
-                  Matches {row.matchType} ({row.duplicateWith})
-                </TableCell>
-              </TableRow>
+            {duplicateRows.slice(0, 15).map((row) => (
+              <CsvDuplicateRow
+                key={`dup-${row.rowIndex}`}
+                rowIndex={row.rowIndex}
+                guest={row.guest}
+                matchType={row.matchType}
+                duplicateWith={row.duplicateWith}
+                isSkipped={skippedDuplicates.has(row.rowIndex)}
+                onToggleSkip={() => toggleRowSkip(row.rowIndex)}
+              />
             ))}
 
             {errorRows.slice(0, 10).map((row) => (
@@ -189,15 +208,15 @@ export function CsvValidationPreview({
         </Button>
         <Button
           size="sm"
-          onClick={onCommitImport}
-          disabled={countToImport === 0 || isSubmitting}
+          onClick={() => onCommitImport([...validRows, ...keptDuplicates])}
+          disabled={totalToImport === 0 || isSubmitting}
         >
           {isSubmitting ? (
             "Importing..."
           ) : (
             <>
               <Users className="h-4 w-4 mr-1.5" />
-              Import {countToImport} {countToImport === 1 ? "Guest" : "Guests"}
+              Import {totalToImport} {totalToImport === 1 ? "Guest" : "Guests"}
             </>
           )}
         </Button>
