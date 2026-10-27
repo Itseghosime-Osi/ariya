@@ -248,6 +248,7 @@ export type Database = {
       };
       guests: {
         Row: {
+          check_in_code: string;
           created_at: string;
           email: string | null;
           email_collected_via_rsvp: boolean;
@@ -267,6 +268,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          check_in_code?: string;
           created_at?: string;
           email?: string | null;
           email_collected_via_rsvp?: boolean;
@@ -285,6 +287,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          check_in_code?: string;
           created_at?: string;
           email?: string | null;
           email_collected_via_rsvp?: boolean;
@@ -719,6 +722,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      assign_seat: {
+        Args: { p_guest_id: string; p_table_id?: string };
+        Returns: Json;
+      };
+      check_in: {
+        Args: { p_code: string; p_count?: number; p_event_id: string };
+        Returns: Json;
+      };
       create_event: {
         Args: {
           p_area?: string;
@@ -741,10 +752,15 @@ export type Database = {
           row_index: number;
         }[];
       };
+      generate_check_in_code: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       generate_invitation_token: {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      get_check_in_code: { Args: { p_token: string }; Returns: string };
       get_invitation: { Args: { p_token: string }; Returns: Json };
       get_public_event: { Args: { p_slug: string }; Returns: Json };
       get_user_events_with_metrics: {
@@ -756,7 +772,7 @@ export type Database = {
         Returns: boolean;
       };
       hit_rate_limit: {
-        Args: { p_key: string; p_limit: number; p_window: string };
+        Args: { p_key: string; p_limit: number; p_window?: string };
         Returns: Json;
       };
       import_guests: {
