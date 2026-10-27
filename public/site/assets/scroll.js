@@ -5,12 +5,14 @@
    Turned off for prefers-reduced-motion, where normal scrolling is kept.
 
    Use: AriyaScroll.init({ speed: 0.8 })   // screens per second
+        AriyaScroll.init({ speedAt: fn })  // or a pace that varies along the page: fn(y) gives pixels per second
+        AriyaScroll.init({ lock: fn, onLocked: fn }) // while lock() is true, scrolling input is held (the film is playing itself)
         AriyaScroll.to(y)                  // glide to a position (chapter links, Home/End) */
 (function () {
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var enabled = false, running = false, last = 0, ignoreUntil = 0;
   var cur = 0, vel = 0, dir = 0, holdUntil = 0, speed = 0.8;
-  var glide = null; // { from, to, t0, dur } for programmatic moves
+  var glide = null, speedAt = null, lock = null, onLocked = null; // { from, to, t0, dur } for programmatic moves
   var HOLD_WHEEL = 180, HOLD_KEY = 260, HOLD_PAGE = 900, HOLD_TOUCH = 140, TAIL_TOUCH = 420;
   var TAU_UP = 0.14, TAU_DOWN = 0.26; // seconds: how quickly it reaches speed, and how softly it stops
   function maxY() { return Math.max(0, document.documentElement.scrollHeight - innerHeight); }
@@ -34,7 +36,7 @@
       cur = glide.from + (glide.to - glide.from) * easeInOut(k);
       if (k >= 1) { glide = null; vel = 0; }
     } else {
-      var target = now < holdUntil ? dir * speed * innerHeight : 0;
+      var target = now < holdUntil ? dir * (speedAt ? speedAt(cur) : speed * innerHeight) : 0;
       var tau = Math.abs(target) > Math.abs(vel) ? TAU_UP : TAU_DOWN;
       vel += (target - vel) * (1 - Math.exp(-dt / tau));
       cur += vel * dt;
@@ -56,10 +58,11 @@
   window.AriyaScroll = {
     init: function (o) {
       if (reduce || enabled) return; enabled = true;
-      speed = (o && o.speed) || 0.8;
+      speed = (o && o.speed) || 0.8; speedAt = (o && o.speedAt) || null; lock = (o && o.lock) || null; onLocked = (o && o.onLocked) || null;
       cur = scrollY;
+      var held = function (e) { if (!lock || !lock()) return false; if (e && e.cancelable) e.preventDefault(); if (onLocked) onLocked(); return true; };
       window.addEventListener("wheel", function (e) {
-        if (e.ctrlKey || blocked() || scrollsSideways(e.target, e.deltaX, e.deltaY)) return;
+        if (e.ctrlKey || blocked() || held(e) || scrollsSideways(e.target, e.deltaX, e.deltaY)) return;
         e.preventDefault();
         if (Math.abs(e.deltaY) < 0.5) return;
         hold(e.deltaY > 0 ? 1 : -1, HOLD_WHEEL);
@@ -67,6 +70,7 @@
       window.addEventListener("keydown", function (e) {
         if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || editable(document.activeElement)) return;
         var k = e.key;
+        if (/^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(k) && !blocked() && held(e)) return;
         if (k === "ArrowDown") { e.preventDefault(); hold(1, HOLD_KEY); }
         else if (k === "ArrowUp") { e.preventDefault(); hold(-1, HOLD_KEY); }
         else if (k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); hold(1, HOLD_PAGE); }
@@ -82,6 +86,7 @@
       }, { passive: true });
       window.addEventListener("touchmove", function (e) {
         if (mode === "skip" || e.touches.length !== 1) return;
+        if (held(e)) return;
         var y = e.touches[0].clientY, x = e.touches[0].clientX, dy = lastY - y, dx = lastX - x;
         if (mode === null) {
           if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
@@ -113,6 +118,12 @@
       glide = { from: cur, to: y, t0: performance.now(), dur: clamp(dist / (4 * innerHeight), 0.6, 3.2) * 1000 };
       holdUntil = 0; dir = 0; vel = 0; start();
     },
-    get enabled() { return enabled; }
+    // Straight there, no glide (Replay).
+    jump: function (y) {
+      y = clamp(y, 0, maxY()); glide = null; holdUntil = 0; dir = 0; vel = 0; cur = y; ignoreUntil = performance.now() + 100;
+      window.scrollTo({ top: y, behavior: "instant" });
+    },
+    get enabled() { return enabled; },
+    get busy() { return running; }
   };
 })();
