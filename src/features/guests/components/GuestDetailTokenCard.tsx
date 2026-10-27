@@ -29,7 +29,7 @@ export function GuestDetailTokenCard({
   const [regenError, setRegenError] = React.useState<string | null>(null);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const inviteUrl = `${origin}/rsvp/${rsvpToken}`;
+  const inviteUrl = `${origin}/i/${rsvpToken}`;
   const whatsappText = encodeURIComponent(
     `Hello ${guestName}! You are cordially invited to celebrate with us at ${eventName}. Please RSVP here: ${inviteUrl}`
   );

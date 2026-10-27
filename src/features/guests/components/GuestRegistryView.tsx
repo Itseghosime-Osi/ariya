@@ -88,12 +88,12 @@ export function GuestRegistryView({
 
   const handleCopyLink = async (guest: GuestWithDetails) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    await navigator.clipboard.writeText(`${origin}/rsvp/${guest.rsvp_token}`);
+    await navigator.clipboard.writeText(`${origin}/i/${guest.rsvp_token}`);
   };
 
   const handleShareWhatsApp = (guest: GuestWithDetails) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const inviteUrl = `${origin}/rsvp/${guest.rsvp_token}`;
+    const inviteUrl = `${origin}/i/${guest.rsvp_token}`;
     const text = encodeURIComponent(
       `Hello ${guest.name}! You are cordially invited to celebrate with us at ${eventName}. Please RSVP here: ${inviteUrl}`
     );

@@ -83,6 +83,7 @@ test.describe("Celebration Suite Smoke Flow", () => {
       .first()
       .click();
     await page.waitForURL(/\/events\/[0-9a-f-]+/, { timeout: 10000 });
+    const eventId = page.url().split("/events/")[1].split("/")[0].split("?")[0];
 
     // 10. Assert Overview Desk content loads
     await expect(page.getByText("Celebration Desk").first()).toBeVisible();
@@ -148,5 +149,52 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
       .first()
       .click();
     await expect(page.getByText(/Copied Link/i)).toBeVisible();
+
+    // 21. Retrieve copied invitation URL from clipboard
+    const inviteUrl = await page.evaluate(() => navigator.clipboard.readText());
+    expect(inviteUrl).toContain("/i/");
+
+    // 22. Open the guest invitation link
+    await page.goto(inviteUrl);
+    await expect(page.getByText(/Personal Celebration Pass/i)).toBeVisible();
+    await expect(page.getByText("Babatunde Adeleke").first()).toBeVisible();
+
+    // 23. Submit RSVP: Joyfully Accept with dietary preference and note
+    await page.getByLabel(/Joyfully Accept/i).check();
+    await page
+      .locator('input[name="dietary"]')
+      .fill("Jollof rice and plantain");
+    await page.locator('input[name="email"]').fill("babatunde@lagos.ng");
+    await page
+      .locator('textarea[name="note"]')
+      .fill("May your union be blessed beyond measure!");
+    await page.getByRole("button", { name: /submit rsvp response/i }).click();
+
+    // 24. Verify Confirmed Pass Screen
+    await expect(page.getByText(/RSVP Confirmed & Honoured/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(
+      page.getByText(/We Look Forward to Celebrating with You/i)
+    ).toBeVisible();
+
+    // 25. Verify confirmation email arrived in Mailpit
+    const mailpitRes = await page.request.get(
+      "http://127.0.0.1:57324/api/v1/messages"
+    );
+    expect(mailpitRes.ok()).toBe(true);
+    const mailpitData = (await mailpitRes.json()) as {
+      messages: { Subject: string; To: { Address: string }[] }[];
+    };
+    const rsvpMail = mailpitData.messages.find((m) =>
+      m.To.some((recipient) => recipient.Address === "babatunde@lagos.ng")
+    );
+    expect(rsvpMail).toBeDefined();
+    expect(rsvpMail?.Subject).toContain("Seat is Reserved");
+
+    // 26. Return to Celebration Overview Desk and assert accepted guests count updated
+    await page.goto(`/events/${eventId}`);
+    await expect(page.getByText(/guests confirmed/i)).toBeVisible();
+    await expect(page.getByText("1 of 2 people").first()).toBeVisible();
   });
 });

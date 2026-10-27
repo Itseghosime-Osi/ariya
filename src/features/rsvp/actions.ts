@@ -91,8 +91,23 @@ export async function submitRsvpAction(
   }
 
   // Send confirmation email via Resend / Mailpit
-  const targetEmail =
-    guestEmail || (invitation?.guest as { email?: string })?.email;
+  let targetEmail = guestEmail;
+  if (!targetEmail && invitation?.guest?.id) {
+    try {
+      const adminClient = createAdminClient();
+      const { data: gData } = await adminClient
+        .from("guests")
+        .select("email")
+        .eq("id", invitation.guest.id)
+        .maybeSingle();
+      if (gData?.email) {
+        targetEmail = gData.email;
+      }
+    } catch {
+      // non-fatal
+    }
+  }
+
   if (targetEmail && invitation?.event) {
     try {
       const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -148,8 +163,8 @@ export async function submitRsvpAction(
         templateType: isRevision ? "revised" : status,
         html: emailHtml,
       });
-    } catch {
-      // Email dispatch failure should not block RSVP submission
+    } catch (err) {
+      console.error("Email dispatch error in submitRsvpAction:", err);
     }
   }
 

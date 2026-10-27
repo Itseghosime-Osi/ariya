@@ -51,7 +51,7 @@ export async function dispatchRsvpEmail({
       }
     } else {
       // Local dev & test fallback: Dispatch directly to Mailpit HTTP API
-      const mailpitUrl = "http://localhost:57324/api/v1/send";
+      const mailpitUrl = "http://127.0.0.1:57324/api/v1/send";
       const mailpitRes = await fetch(mailpitUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

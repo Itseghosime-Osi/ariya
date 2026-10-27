@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/rsvp/:token",
+        destination: "/i/:token",
+      },
+      {
         source: "/",
         destination: "/site/index.html",
       },
