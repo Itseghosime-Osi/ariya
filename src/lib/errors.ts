@@ -4,6 +4,13 @@
  * into clear, user-friendly messages without leaking internal schemas or secrets.
  */
 
+export interface ErrorLike {
+  message?: string;
+  code?: string;
+  hint?: string;
+  details?: string;
+}
+
 export function mapError(
   error: unknown,
   fallback = "An unexpected error occurred. Please try again."
@@ -12,86 +19,60 @@ export function mapError(
 
   let message = "";
   let code = "";
+  let hint = "";
 
   if (typeof error === "string") {
     message = error;
+    code = error;
   } else if (typeof error === "object" && error !== null) {
     const errObj = error as Record<string, unknown>;
-    if (typeof errObj.message === "string") {
-      message = errObj.message;
-    }
-    if (typeof errObj.code === "string") {
-      code = errObj.code;
+    if (typeof errObj.message === "string") message = errObj.message;
+    if (typeof errObj.code === "string") code = errObj.code;
+    if (typeof errObj.hint === "string") hint = errObj.hint;
+  }
+
+  // 1. Structured database exceptions carrying stable HINT codes (SQLSTATE P0001 / 42501)
+  if (hint) {
+    const cleanHint = hint.trim().toUpperCase();
+    switch (cleanHint) {
+      case "CAPACITY_EXCEEDED": {
+        // Whitelisted structured detail: available seats
+        const match = message.match(/available:\s*(\d+)/i);
+        if (match) {
+          const avail = match[1];
+          return `Table capacity exceeded. Only ${avail} seat${avail === "1" ? "" : "s"} available.`;
+        }
+        return "Table capacity exceeded for this assignment.";
+      }
+      case "NOT_PERMITTED":
+        return "You do not have permission to perform this action.";
+      case "ROW_INVALID":
+        return "The provided information does not meet the required format or criteria.";
+      case "RSVP_CLOSED":
+        return "This celebration is no longer accepting RSVP responses.";
+      case "RSVP_DEADLINE_PASSED":
+        return "The RSVP deadline for this celebration has passed.";
+      case "ATTENDEE_COUNT_INVALID":
+        return "The requested attendee count is not permitted for this party.";
+      case "GUEST_NOT_FOUND":
+        return "Guest record could not be found.";
+      case "EVENT_NOT_FOUND":
+        return "Celebration could not be found.";
+      case "TABLE_NOT_FOUND":
+        return "Assigned table could not be found.";
+      default:
+        break;
     }
   }
 
-  const lowerMsg = message.toLowerCase();
   const lowerCode = code.toLowerCase();
+  const lowerMsg = message.toLowerCase();
 
-  // Supabase Auth Mappings
-  if (
-    lowerMsg.includes("invalid login credentials") ||
-    lowerMsg.includes("invalid credentials") ||
-    lowerMsg.includes("invalid_credentials") ||
-    lowerMsg.includes("invalid email or password") ||
-    lowerCode === "invalid_credentials"
-  ) {
-    return "Invalid email or password. Please verify your credentials and try again.";
+  // 2. Standard PostgreSQL SQLSTATE Codes
+  if (code === "42501" || lowerCode === "42501") {
+    return "You do not have permission to perform this action.";
   }
-
-  if (
-    lowerMsg.includes("user already registered") ||
-    lowerMsg.includes("email already in use") ||
-    lowerMsg.includes("email address is already registered") ||
-    lowerCode === "user_already_exists"
-  ) {
-    return "An account with this email address already exists. Please sign in instead.";
-  }
-
-  if (
-    lowerMsg.includes("password should be at least") ||
-    lowerMsg.includes("weak password") ||
-    lowerCode === "weak_password"
-  ) {
-    return "Password is too weak. Please use at least 8 characters including numbers and symbols.";
-  }
-
-  if (
-    lowerMsg.includes("rate limit") ||
-    lowerMsg.includes("too many requests") ||
-    lowerMsg.includes("over_email_send_rate_limit") ||
-    lowerCode === "over_email_send_rate_limit" ||
-    lowerCode === "rate_limit_exceeded"
-  ) {
-    return "Too many requests. Please wait a moment before trying again.";
-  }
-
-  if (
-    lowerMsg.includes("email not confirmed") ||
-    lowerCode === "email_not_confirmed"
-  ) {
-    return "Your email address has not been confirmed. Please check your inbox for the confirmation link.";
-  }
-
-  if (
-    lowerMsg.includes("token has expired") ||
-    lowerMsg.includes("session expired") ||
-    lowerCode === "session_expired" ||
-    lowerCode === "invalid_grant"
-  ) {
-    return "Your session or security token has expired. Please sign in again.";
-  }
-
-  if (lowerMsg.includes("user not found")) {
-    return "No account found matching the provided details.";
-  }
-
-  // Database & PostgREST Mappings
-  if (
-    code === "23505" ||
-    lowerMsg.includes("duplicate key") ||
-    lowerMsg.includes("unique constraint")
-  ) {
+  if (code === "23505") {
     if (lowerMsg.includes("slug")) {
       return "An event with a similar title already exists. Please choose a slightly different title.";
     }
@@ -100,40 +81,64 @@ export function mapError(
     }
     return "A record with this information already exists in the system.";
   }
-
-  if (
-    code === "42501" ||
-    lowerMsg.includes("row-level security") ||
-    lowerMsg.includes("permission denied")
-  ) {
-    return "You do not have permission to perform this action.";
-  }
-
-  if (code === "23503" || lowerMsg.includes("foreign key")) {
+  if (code === "23503") {
     return "The referenced item could not be found or has been removed.";
   }
-
-  if (code === "23514" || lowerMsg.includes("check constraint")) {
+  if (code === "23514") {
     if (lowerMsg.includes("guests_side_check")) {
       return "Invalid event side selected. Must be bride, groom, family, vip, planner, or mutual.";
     }
     return "The provided information does not meet the required format or criteria.";
   }
 
-  // Application custom exceptions (from PostgreSQL RAISE EXCEPTION)
-  if (code === "22000" || lowerMsg.includes("payload exceeds")) {
-    return message;
+  // 3. Supabase Auth codes and known messages
+  if (
+    lowerCode === "invalid_credentials" ||
+    lowerMsg.includes("invalid login credentials") ||
+    lowerMsg.includes("invalid credentials") ||
+    lowerMsg.includes("invalid email or password")
+  ) {
+    return "Invalid email or password. Please verify your credentials and try again.";
   }
   if (
-    lowerMsg.includes("you must be an owner or planner") ||
-    lowerMsg.includes("guest name cannot be empty") ||
-    lowerMsg.includes("capacity exceeded") ||
-    lowerMsg.includes("table capacity") ||
-    lowerMsg.includes("available seats") ||
-    lowerMsg.includes("row ")
+    lowerCode === "user_already_exists" ||
+    lowerMsg.includes("user already registered") ||
+    lowerMsg.includes("email already in use") ||
+    lowerMsg.includes("email address is already registered")
   ) {
-    return message;
+    return "An account with this email address already exists. Please sign in instead.";
+  }
+  if (
+    lowerCode === "weak_password" ||
+    lowerMsg.includes("password should be at least") ||
+    lowerMsg.includes("weak password")
+  ) {
+    return "Password is too weak. Please use at least 8 characters including numbers and symbols.";
+  }
+  if (
+    lowerCode === "over_email_send_rate_limit" ||
+    lowerCode === "rate_limit_exceeded" ||
+    lowerMsg.includes("over_email_send_rate_limit") ||
+    lowerMsg.includes("too many requests")
+  ) {
+    return "Too many requests. Please wait a moment before trying again.";
+  }
+  if (
+    lowerCode === "email_not_confirmed" ||
+    lowerMsg.includes("email not confirmed")
+  ) {
+    return "Your email address has not been confirmed. Please check your inbox for the confirmation link.";
+  }
+  if (
+    lowerCode === "session_expired" ||
+    lowerCode === "invalid_grant" ||
+    lowerMsg.includes("session expired") ||
+    lowerMsg.includes("token has expired")
+  ) {
+    return "Your session or security token has expired. Please sign in again.";
   }
 
+  // 4. Anything unknown gets logged server-side and returns the safe generic fallback
+  console.error("[mapError] Unhandled error:", { code, hint, message });
   return fallback;
 }
