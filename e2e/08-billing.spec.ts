@@ -96,9 +96,9 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Celebration Pass unlocked
     await page.goto(`/events/${eventId}/billing`);
-    await expect(
-      page.getByText(/(?:Royal\s+)?Celebration Pass \(Unlocked\)/i)
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Celebration Pass \(Unlocked\)/i)).toBeVisible({
+      timeout: 15000,
+    });
 
     // Quota banner unlocked on Invitations
     await page.goto(`/events/${eventId}/invitations`);
