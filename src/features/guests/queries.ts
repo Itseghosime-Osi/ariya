@@ -58,6 +58,7 @@ export async function getEventGuests(
     name: row.name,
     phone: row.phone,
     email: row.email,
+    email_collected_via_rsvp: false,
     side: row.side,
     group_name: row.group_name,
     party_size: row.party_size,
