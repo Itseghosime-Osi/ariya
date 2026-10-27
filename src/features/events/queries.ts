@@ -2,14 +2,13 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/format";
 import type {
-  Event,
   EventMetrics,
   EventWithMetrics,
   MilestoneItem,
   RecentGuestResponse,
 } from "./types";
 
-interface GuestQueryRow {
+interface GuestMetricsRow {
   id: string;
   party_size: number;
   rsvps:
@@ -21,12 +20,6 @@ interface GuestQueryRow {
     | null;
 }
 
-interface MemberQueryRow {
-  role: "owner" | "planner" | "couple" | "staff";
-  event_id: string;
-  events: Event | null;
-}
-
 export async function getUserEvents(): Promise<EventWithMetrics[]> {
   const supabase = await createClient();
   const {
@@ -34,72 +27,17 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    // If not signed in yet (e.g. initial visit / demo), fetch active sample events
-    const { data: publicEvents } = await supabase
-      .from("events")
-      .select("*")
-      .order("date", { ascending: true });
-
-    const eventsList = (publicEvents as Event[] | null) ?? [];
-    if (eventsList.length === 0) {
-      return [getFallbackEventWithMetrics()];
-    }
-
-    return Promise.all(
-      eventsList.map(async (event) => {
-        const metrics = await getEventMetrics(event.id, event.date);
-        return {
-          event,
-          role: "owner" as const,
-          metrics,
-        };
-      })
-    );
+    return [];
   }
 
-  // User is authenticated: query events they are members of
-  const { data: rawMemberships } = await supabase
-    .from("event_members")
-    .select("role, event_id, events (*)")
-    .eq("user_id", user.id);
-
-  const memberships =
-    (rawMemberships as unknown as MemberQueryRow[] | null) ?? [];
-
-  if (memberships.length === 0) {
-    const { data: allEvents } = await supabase
-      .from("events")
-      .select("*")
-      .limit(1);
-
-    const firstEvent = (allEvents as Event[] | null)?.[0];
-    if (firstEvent) {
-      const metrics = await getEventMetrics(firstEvent.id, firstEvent.date);
-      return [
-        {
-          event: firstEvent,
-          role: "owner" as const,
-          metrics,
-        },
-      ];
-    }
-
-    return [getFallbackEventWithMetrics()];
+  // Single aggregated query via RPC: eliminates N+1 queries across events, guests, rsvps and tables
+  const { data, error } = await supabase.rpc("get_user_events_with_metrics");
+  if (error || !data) {
+    return [];
   }
 
-  const results: EventWithMetrics[] = [];
-  for (const m of memberships) {
-    if (m.events) {
-      const metrics = await getEventMetrics(m.events.id, m.events.date);
-      results.push({
-        event: m.events,
-        role: m.role,
-        metrics,
-      });
-    }
-  }
-
-  return results;
+  const events = data as unknown as EventWithMetrics[];
+  return Array.isArray(events) ? events : [];
 }
 
 export async function getEventById(
@@ -107,21 +45,13 @@ export async function getEventById(
 ): Promise<EventWithMetrics | null> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  const { data: event, error } = await supabase
     .from("events")
     .select("*")
     .eq("id", eventId)
-    .single();
+    .maybeSingle();
 
-  const event = data as Event | null;
-
-  if (!event) {
-    if (
-      eventId === "00000000-0000-0000-0000-000000000001" ||
-      eventId === "demo"
-    ) {
-      return getFallbackEventWithMetrics();
-    }
+  if (error || !event) {
     return null;
   }
 
@@ -146,31 +76,31 @@ export async function getEventMetrics(
     .select("id, party_size, rsvps (status, attending_count)")
     .eq("event_id", eventId);
 
-  const guests = (rawGuests as unknown as GuestQueryRow[] | null) ?? [];
+  const guests = (rawGuests as unknown as GuestMetricsRow[] | null) ?? [];
 
-  // Query seating assignments count
+  // Query seating assignments count for this event
   const { count: seatedCount } = await supabase
     .from("seat_assignments")
-    .select("id", { count: "exact", head: true });
+    .select("id, tables!inner(event_id)", { count: "exact", head: true })
+    .eq("tables.event_id", eventId);
 
   const daysAway = Math.max(0, daysUntil(eventDate));
 
   if (guests.length === 0) {
-    // Default / Seed values matching screen FINAL 01 / 02
     return {
-      totalParties: 200,
-      totalAttendees: 400,
-      acceptedParties: 143,
-      acceptedGuests: 286,
-      awaitingParties: 39,
-      awaitingGuests: 78,
-      declinedParties: 18,
-      declinedGuests: 36,
-      seatedGuests: 240,
-      unassignedGuests: 46,
-      asoEbiRequests: 318,
-      readinessPercentage: 71.5,
-      daysAway: daysAway || 47,
+      totalParties: 0,
+      totalAttendees: 0,
+      acceptedParties: 0,
+      acceptedGuests: 0,
+      awaitingParties: 0,
+      awaitingGuests: 0,
+      declinedParties: 0,
+      declinedGuests: 0,
+      seatedGuests: 0,
+      unassignedGuests: 0,
+      asoEbiRequests: 0,
+      readinessPercentage: 0,
+      daysAway,
     };
   }
 
@@ -201,7 +131,7 @@ export async function getEventMetrics(
     }
   }
 
-  const seated = seatedCount ?? Math.min(acceptedGuests, 240);
+  const seated = seatedCount ?? 0;
   const unassigned = Math.max(0, acceptedGuests - seated);
   const readiness =
     totalAttendees > 0
@@ -226,126 +156,84 @@ export async function getEventMetrics(
 }
 
 export async function getEventRecentResponses(
-  _eventId: string
+  eventId: string
 ): Promise<RecentGuestResponse[]> {
-  return [
-    {
-      id: "res-1",
-      guestName: "Mama Ijeoma",
-      initials: "MI",
-      side: "Groom's Grandmother",
-      groupName: "Front Row Seating",
-      status: "accepted",
-      attendingCount: 1,
-      tableName: "Table 1 • Royal Elders",
-      timeAgo: "2h ago",
-    },
-    {
-      id: "res-2",
-      guestName: "Dr. Folake Adeleke",
-      initials: "FA",
-      side: "Bride's Cohort",
-      groupName: "Chief Medical Director",
-      status: "accepted",
-      attendingCount: 1,
-      tableName: "Table 8 • Honoraries",
-      timeAgo: "5h ago",
-    },
-    {
-      id: "res-3",
-      guestName: "Farouk Al-Hassan",
-      initials: "FA",
-      side: "Honorary Guest",
-      groupName: "Dignitaries",
-      status: "pending",
-      attendingCount: 4,
-      tableName: null,
-      timeAgo: "1d ago",
-    },
-    {
-      id: "res-4",
-      guestName: "Bisi Adebayo",
-      initials: "BA",
-      side: "Bride's Family",
-      groupName: "Aunty Bisi and children",
-      status: "accepted",
-      attendingCount: 5,
-      tableName: "Table 3 • Bride's Cohort",
-      timeAgo: "1d ago",
-    },
-  ];
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("guests")
+    .select(
+      "id, name, side, group_name, rsvps (status, attending_count, updated_at, dietary), seat_assignments (tables (name))"
+    )
+    .eq("event_id", eventId)
+    .limit(10);
+
+  if (error || !data || data.length === 0) {
+    return [];
+  }
+
+  return data
+    .filter((g) => {
+      const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
+      return rsvp && rsvp.status !== "pending";
+    })
+    .map((g) => {
+      const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
+      const initials = g.name
+        .split(" ")
+        .filter(Boolean)
+        .map((p) => p[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+      const assignment = Array.isArray(g.seat_assignments)
+        ? g.seat_assignments[0]
+        : g.seat_assignments;
+      const tableName = assignment?.tables?.name ?? null;
+
+      return {
+        id: g.id,
+        guestName: g.name,
+        initials: initials || "G",
+        side: g.side ?? "Celebration Guest",
+        groupName: g.group_name ?? null,
+        status:
+          (rsvp?.status as "accepted" | "declined" | "pending") ?? "accepted",
+        attendingCount: rsvp?.attending_count ?? 1,
+        tableName,
+        timeAgo: "Recently",
+      };
+    });
 }
 
 export async function getEventMilestones(
-  _eventId: string
+  eventId: string
 ): Promise<MilestoneItem[]> {
-  return [
-    {
-      id: "mile-1",
-      title: "Menu Tasting with Tastemakers Lagos",
-      description:
-        "Curated wine pairing and 5-course Nigerian-fusion course validation with executive banqueting chef.",
-      category: "Tasting",
-      dueDate: "Thu, 29 Oct",
-      daysAway: 3,
-      eventTitle: "Chidinma & Tunde",
-    },
-    {
-      id: "mile-2",
-      title: "Floral Arch Mockup & Rigging Check",
-      description:
-        "Structural stress testing of imported Ecuadorian roses & hanging wisteria installation at Grand Pavilion.",
-      category: "Floristry",
-      dueDate: "Mon, 02 Nov",
-      daysAway: 7,
-      eventTitle: "Chidinma & Tunde",
-    },
-    {
-      id: "mile-3",
-      title: "RSVP Cutoff & Final Headcount",
-      description:
-        "Lock final headcount for seating, stationery, and catering numbers.",
-      category: "Cutoff",
-      dueDate: "Sun, 15 Nov",
-      daysAway: 14,
-      eventTitle: "Chidinma & Tunde",
-    },
-  ];
-}
+  const supabase = await createClient();
 
-function getFallbackEventWithMetrics(): EventWithMetrics {
-  return {
-    event: {
-      id: "00000000-0000-0000-0000-000000000001",
-      title: "Chidinma & Tunde's Nuptials",
-      couple: "Chidinma & Tunde",
-      date: "2026-12-12T13:00:00.000Z",
-      venue: "The Grand Pavilion",
-      area: "Victoria Island, Lagos",
-      dress_code: "Aṣọ-Ẹbí: Burgundy velvet and champagne gold",
-      slug: "chidinma-tunde-2026",
-      status: "active",
-      registry_code: "LOS-2026-CT",
-      rsvp_by: "2026-11-20T22:59:59.000Z",
-      paid_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    role: "owner",
-    metrics: {
-      totalParties: 200,
-      totalAttendees: 400,
-      acceptedParties: 143,
-      acceptedGuests: 286,
-      awaitingParties: 39,
-      awaitingGuests: 78,
-      declinedParties: 18,
-      declinedGuests: 36,
-      seatedGuests: 240,
-      unassignedGuests: 46,
-      asoEbiRequests: 318,
-      readinessPercentage: 71.5,
-      daysAway: 47,
-    },
-  };
+  const { data, error } = await supabase
+    .from("vendor_tasks")
+    .select("id, task, due_date, is_done")
+    .eq("event_id", eventId)
+    .order("due_date", { ascending: true })
+    .limit(5);
+
+  if (error || !data || data.length === 0) {
+    return [];
+  }
+
+  return data.map((t) => ({
+    id: t.id,
+    title: t.task,
+    description: t.is_done ? "Completed task" : "Pending vendor task",
+    category: "Vendor",
+    dueDate: t.due_date
+      ? new Date(t.due_date).toLocaleDateString("en-NG", {
+          month: "short",
+          day: "numeric",
+        })
+      : "TBD",
+    daysAway: t.due_date ? Math.max(0, daysUntil(t.due_date)) : 0,
+    eventTitle: "",
+  }));
 }
