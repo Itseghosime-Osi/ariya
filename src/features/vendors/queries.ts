@@ -8,6 +8,14 @@ export { computeVendorStats };
 export async function getVendorsWithTasks(
   eventId: string
 ): Promise<VendorsData> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return {
+      vendors: [],
+      stats: computeVendorStats([], []),
+    };
+  }
+
   const supabase = await createClient();
 
   const [vendorsRes, tasksRes] = await Promise.all([

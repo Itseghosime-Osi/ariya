@@ -6,6 +6,11 @@ import type { EventRole } from "../team/types";
 export async function getBillingDeskData(
   eventId: string
 ): Promise<BillingDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

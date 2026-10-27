@@ -6,6 +6,11 @@ import type { TeamDeskData, TeamMember, TeamInvite, EventRole } from "./types";
 export async function getTeamDeskData(
   eventId: string
 ): Promise<TeamDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

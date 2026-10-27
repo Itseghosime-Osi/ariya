@@ -116,12 +116,17 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 export async function getEventById(
   eventId: string
 ): Promise<EventWithMetrics | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
 
   const { data: event, error } = await supabase
     .from("events")
     .select("*")
-    .eq("id", eventId)
+    .eq("id", cleanId)
     .maybeSingle();
 
   if (error) {
@@ -326,6 +331,11 @@ export async function getEventRecentResponses(
 export async function getEventMilestones(
   eventId: string
 ): Promise<MilestoneItem[]> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return [];
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase

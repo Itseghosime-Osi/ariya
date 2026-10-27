@@ -5,26 +5,37 @@ import type { CheckInDeskData, RecentCheckIn, CheckInStats } from "./types";
 export async function getCheckInDeskData(
   eventId: string
 ): Promise<CheckInDeskData> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return {
+      stats: {
+        totalExpected: 0,
+        checkedIn: 0,
+        remaining: 0,
+        attendanceRate: 0,
+      },
+      recentCheckIns: [],
+    };
+  }
+
   const supabase = await createClient();
 
   const [expectedRes, checkInsRes, tablesRes] = await Promise.all([
     supabase
       .from("rsvps")
       .select("attending_count, guests!inner(event_id)")
-      .eq("guests.event_id", eventId)
+      .eq("guests.event_id", cleanId)
       .eq("status", "accepted"),
     supabase
       .from("check_ins")
-      .select(
-        "id, guest_id, checked_in_count, checked_in_at, guests(display_name, first_name, name)"
-      )
-      .eq("event_id", eventId)
+      .select("id, guest_id, checked_in_count, checked_in_at, guests(name)")
+      .eq("event_id", cleanId)
       .order("checked_in_at", { ascending: false })
       .limit(20),
     supabase
       .from("seat_assignments")
       .select("guest_id, tables(name)")
-      .eq("tables.event_id", eventId),
+      .eq("tables.event_id", cleanId),
   ]);
 
   if (expectedRes.error) {

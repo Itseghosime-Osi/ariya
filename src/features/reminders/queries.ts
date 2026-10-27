@@ -5,12 +5,17 @@ import type { ReminderDeskData, ReminderRecipient } from "./types";
 export async function getReminderDeskData(
   eventId: string
 ): Promise<ReminderDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
 
   const { data: event, error: eventErr } = await supabase
     .from("events")
     .select("id, title, couple, date, venue, paid_at")
-    .eq("id", eventId)
+    .eq("id", cleanId)
     .maybeSingle();
 
   if (eventErr) {

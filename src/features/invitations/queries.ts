@@ -9,13 +9,18 @@ import type {
 export async function getInvitationDeskData(
   eventId: string
 ): Promise<InvitationDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
 
   // 1. Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
     .select("id, title, couple, date, venue, dress_code, paid_at")
-    .eq("id", eventId)
+    .eq("id", cleanId)
     .maybeSingle();
 
   if (eventErr) {
