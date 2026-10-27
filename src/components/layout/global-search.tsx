@@ -73,7 +73,7 @@ export function GlobalSearch({
       icon: "table_restaurant",
     },
     {
-      label: "Invitation Atelier",
+      label: "Invitations",
       path: eventId ? `/events/${eventId}/invitations` : "/events",
       icon: "styler",
     },

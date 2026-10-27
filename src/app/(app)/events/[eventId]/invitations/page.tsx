@@ -33,11 +33,11 @@ export default async function InvitationsPage({
           <span>Celebration Suite</span>
         </div>
         <h1 className="font-serif text-3xl font-bold text-night">
-          Invitation Studio & Delivery Atelier
+          Invitations & Delivery
         </h1>
         <p className="text-sm text-on-surface-variant max-w-2xl">
-          Craft bespoke royal celebration cards, generate bespoke passes, and
-          monitor invitation delivery across WhatsApp and email.
+          Design celebration cards, generate guest passes, and track invitation
+          delivery across WhatsApp and email.
         </p>
       </div>
 

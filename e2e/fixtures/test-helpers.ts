@@ -79,7 +79,9 @@ export async function createTestEvent(
     .click();
 
   // Step 4: Success confirmation
-  await expect(page.getByText(/Celebration Workspace Ready!/i)).toBeVisible({
+  await expect(
+    page.getByText(/Your Event is Ready!|Celebration Workspace Ready!/i)
+  ).toBeVisible({
     timeout: 15000,
   });
 

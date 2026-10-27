@@ -31,18 +31,17 @@ export function EventProvisionedSuccess({
           </div>
           <div>
             <span className="font-label-sm text-label-sm text-gold uppercase tracking-widest block mb-1 font-bold">
-              PROVISIONING COMPLETED
+              EVENT CREATED
             </span>
             <h2 className="font-headline-md text-headline-md text-wine tracking-tight mb-2">
-              Celebration Workspace Ready!
+              Your Event is Ready!
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-xl">
               Celebration registered for{" "}
               <strong className="text-paper-ink font-semibold">
                 {couple || title}
               </strong>
-              . Collaborative stationery and guest registry workspace
-              provisioned.
+              . Your event is ready.
             </p>
           </div>
         </div>
@@ -76,10 +75,10 @@ export function EventProvisionedSuccess({
         </div>
         <div>
           <span className="block font-label-sm text-label-sm text-on-surface-variant uppercase">
-            Reserved Capacity
+            Estimated Capacity
           </span>
           <span className="font-title-sm text-title-sm text-paper-ink font-semibold">
-            {targetParties * 2} Guests
+            ~{targetParties * 2} Guests (estimate)
           </span>
         </div>
         <div>
