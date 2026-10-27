@@ -55,3 +55,27 @@ To ensure that existing links within static marketing pages resolve seamlessly w
 - **Tables & DND**: TanStack Table for registry, dnd-kit for seating chart
 - **Emails**: Resend + React Email templates
 - **Payments**: Paystack in test mode, with server action initialization and idempotent webhook verification
+
+## 5. Phase 2 Security & Database Architecture
+
+### Row-Level Security (RLS) & Definer Helpers
+
+- **Security-Definer Membership Functions**: All policy checks avoid recursive self-joins by utilizing `public.is_event_member(p_event_id uuid)` and `public.has_event_role(p_event_id uuid, p_roles text[])`. Both helpers are declared with `STABLE`, `SECURITY DEFINER`, and `SET search_path = ''`.
+- **Role Isolation**: Event owners and planners retain write access; staff members are restricted to check-in operations and read-only guest inspection.
+- **Service-Role Only Logging**: The `email_log` table is strictly writable by the service role only; authenticated event members have read-only access for transparency.
+
+### Stored Procedures (RPCs)
+
+1. **`create_event(...)`**: Atomically inserts the celebration and assigns owner membership in a single transaction, returning the event ID and sovereign URL slug.
+2. **`get_invitation(p_token text)`**: Sanitized public invitation projection for anon/authenticated callers. Exposes only guest first name, display name, party size, plus-one allowance, RSVP fields, and event metadata. Explicitly filters out phone, email, private notes, VIP flags, tokens, and payment records.
+3. **`submit_rsvp(...)`**: Validates event active status and `rsvp_by` deadline. Enforces `1 <= count <= party_size (+1 if allowed)` for accepted RSVPs, requires 0 for declined RSVPs, automatically unseats declined parties, and truncates text fields.
+4. **`get_user_events_with_metrics()`**: Single-query aggregation computing portfolio metrics (accepted, awaiting, declined, seated, unassigned) across all user memberships, eliminating N+1 query patterns.
+
+### Concurrency & Capacity Locking
+
+- **`check_table_capacity()`**: Executes `SELECT capacity FROM public.tables WHERE id = NEW.table_id FOR UPDATE` to lock table rows during seating assignments. Dynamically tallies accepted guests by attending count (or party size if pending) to guarantee seating allocations never exceed physical table constraints.
+
+### Route Protection Middleware
+
+- **Unauthenticated Access**: Directs unauthenticated visitors attempting to access `/events/**` to `/sign-in?next=...` while maintaining full query string state.
+- **Authenticated Access**: Bounces logged-in users visiting authentication routes (`/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`) to their destination or `/events`.
