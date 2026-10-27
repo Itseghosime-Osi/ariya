@@ -996,12 +996,12 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   var gate = document.getElementById("gate"), enterSound = document.getElementById("enterSound");
   var loadBar = document.getElementById("loadBar"), loadTxt = document.getElementById("loadTxt");
   var gateStart = performance.now();
-  var howEl = document.getElementById("how"), choosing = false;
-  // The door sets the sound (it needs this click); then the visitor chooses to scroll (the default) or to watch.
+  var howEl = document.getElementById("how"), choosing = false, wantSound = false;
+  // The door asks for sound or silence; the song itself only starts once the visitor chooses to scroll or to watch.
   function enter(withSound, choice) {
     if (OP.entered) return;
-    if (!choosing) setSound(withSound);
-    if (!choice) { choosing = true; gate.classList.add("choose"); howEl.hidden = false; document.getElementById("howScroll").focus(); return; }
+    if (!choice) { wantSound = withSound; choosing = true; gate.classList.add("choose"); howEl.hidden = false; document.getElementById("howScroll").focus(); return; }
+    setSound(choosing ? wantSound : withSound);
     toTop(); target = prog = 0;
     OP.entered = true;
     gate.classList.add("gone");
