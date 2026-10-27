@@ -1,5 +1,5 @@
 import "server-only";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { clientEnv } from "@/lib/env/client";
@@ -16,13 +16,7 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(
-          cookiesToSet: Array<{
-            name: string;
-            value: string;
-            options: CookieOptions;
-          }>
-        ) {
+        setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options);
@@ -33,5 +27,5 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
         },
       },
     }
-  ) as unknown as SupabaseClient<Database>;
+  );
 }

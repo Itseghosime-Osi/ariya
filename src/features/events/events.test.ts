@@ -13,6 +13,14 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+type SupabaseServerClient = Awaited<
+  ReturnType<typeof serverClient.createClient>
+>;
+
+function mockSupabase(partial: object): SupabaseServerClient {
+  return Object.assign({} as SupabaseServerClient, partial);
+}
+
 describe("Events Domain", () => {
   describe("createEventSchema", () => {
     it("accepts valid celebration payload", () => {
@@ -86,14 +94,16 @@ describe("Events Domain", () => {
         error: null,
       });
 
-      vi.mocked(serverClient.createClient).mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
-          }),
-        },
-        rpc: mockRpc,
-      } as unknown as Awaited<ReturnType<typeof serverClient.createClient>>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-123" } },
+            }),
+          },
+          rpc: mockRpc,
+        })
+      );
 
       const res = await createEventAction({
         title: "Chidinma & Tunde's Nuptials",
@@ -135,14 +145,16 @@ describe("Events Domain", () => {
           error: null,
         });
 
-      vi.mocked(serverClient.createClient).mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
-          }),
-        },
-        rpc: mockRpc,
-      } as unknown as Awaited<ReturnType<typeof serverClient.createClient>>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-123" } },
+            }),
+          },
+          rpc: mockRpc,
+        })
+      );
 
       const res = await createEventAction({
         title: "Chidinma & Tunde's Nuptials",
@@ -168,16 +180,18 @@ describe("Events Domain", () => {
         }),
       });
 
-      vi.mocked(serverClient.createClient).mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-123" } },
+            }),
+          },
+          from: vi.fn().mockReturnValue({
+            update: mockUpdate,
           }),
-        },
-        from: vi.fn().mockReturnValue({
-          update: mockUpdate,
-        }),
-      } as unknown as Awaited<ReturnType<typeof serverClient.createClient>>);
+        })
+      );
 
       const res = await updateEventAction("evt-non-existent", {
         title: "Updated Title",
@@ -194,11 +208,13 @@ describe("Events Domain", () => {
 
   describe("getUserEvents", () => {
     it("returns empty array when user is signed out", async () => {
-      vi.mocked(serverClient.createClient).mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-        },
-      } as unknown as Awaited<ReturnType<typeof serverClient.createClient>>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
+          },
+        })
+      );
 
       const events = await getUserEvents();
       expect(events).toEqual([]);
@@ -213,14 +229,16 @@ describe("Events Domain", () => {
         },
       ];
 
-      vi.mocked(serverClient.createClient).mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
-          }),
-        },
-        rpc: vi.fn().mockResolvedValue({ data: mockEvents, error: null }),
-      } as unknown as Awaited<ReturnType<typeof serverClient.createClient>>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-123" } },
+            }),
+          },
+          rpc: vi.fn().mockResolvedValue({ data: mockEvents, error: null }),
+        })
+      );
 
       const events = await getUserEvents();
       expect(events).toEqual(mockEvents);

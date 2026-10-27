@@ -8,18 +8,6 @@ import type {
   RecentGuestResponse,
 } from "./types";
 
-interface GuestMetricsRow {
-  id: string;
-  party_size: number;
-  rsvps:
-    | { status: "pending" | "accepted" | "declined"; attending_count: number }
-    | Array<{
-        status: "pending" | "accepted" | "declined";
-        attending_count: number;
-      }>
-    | null;
-}
-
 export async function getUserEvents(): Promise<EventWithMetrics[]> {
   const supabase = await createClient();
   const {
@@ -32,12 +20,18 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 
   // Single aggregated query via RPC: eliminates N+1 queries across events, guests, rsvps and tables
   const { data, error } = await supabase.rpc("get_user_events_with_metrics");
-  if (error || !data) {
+  if (error || !data || !Array.isArray(data)) {
     return [];
   }
 
-  const events = data as unknown as EventWithMetrics[];
-  return Array.isArray(events) ? events : [];
+  return data.map((item) => {
+    const raw = item as Record<string, unknown>;
+    return {
+      event: raw.event as EventWithMetrics["event"],
+      role: raw.role as EventWithMetrics["role"],
+      metrics: raw.metrics as EventWithMetrics["metrics"],
+    };
+  });
 }
 
 export async function getEventById(
@@ -76,7 +70,7 @@ export async function getEventMetrics(
     .select("id, party_size, rsvps (status, attending_count)")
     .eq("event_id", eventId);
 
-  const guests = (rawGuests as unknown as GuestMetricsRow[] | null) ?? [];
+  const guests = rawGuests ?? [];
 
   // Query seating assignments count for this event
   const { count: seatedCount } = await supabase
