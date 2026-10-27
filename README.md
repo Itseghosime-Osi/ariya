@@ -1,6 +1,8 @@
-# Àríyá by OwambePlan
+# Àríyá
 
 Àríyá is a wedding and event planner for Nigerian couples and planners. It replaces guest lists and RSVPs scattered across WhatsApp groups. Every guest gets a personal, unguessable RSVP link. Planners pay per event.
+
+Live deployment: [https://ariya-two.vercel.app](https://ariya-two.vercel.app)
 
 ## Architecture
 
@@ -12,7 +14,7 @@ The project consists of:
    - **Guest Routes**: Public celebration landing (`/e/[slug]`) and guest invitation & RSVP (`/i/[token]`).
    - **Background & Webhooks**: Paystack webhooks (`/api/webhooks/paystack`) and Vercel Cron reminder triggers (`/api/cron/reminders`).
 
-> **Note on `private-media/music.mp3`**: The file `private-media/music.mp3` is a commercial song used solely for private offline local class demos. It is kept completely outside `public/` so it is never bundled, served, or deployed publicly. The film automatically falls back to its live Web Audio API owambe groove when the file is absent.
+> **Note on `private-media/music.mp3`**: The file `private-media/music.mp3` is a commercial song used solely for private offline local class demos. It is kept completely outside `public/` so it is never bundled, served, or deployed publicly. The film automatically falls back to its live Web Audio API groove when the file is absent.
 
 > [!IMPORTANT]
 > **Email Confirmation in Local Development vs. Hosted Production**:
@@ -54,6 +56,7 @@ The project consists of:
 - `pnpm test`: Run Vitest unit and integration test suite.
 - `pnpm test:db`: Run pgTAP database security, RLS, and privilege audit tests.
 - `pnpm test:e2e`: Run complete Playwright end-to-end suite (including Axe WCAG 2.1 AA audits).
+- `pnpm check:bundle`: Verify zero Three.js or GSAP presence in App Router client chunks.
 - `pnpm db:seed`: Seed a realistic Nigerian wedding celebration with 60 guests, 7 banquet tables, and 6 vendors.
 - `pnpm build`: Create an optimized production build.
 - `pnpm format:check`: Verify formatting across the repository with Prettier.
@@ -72,30 +75,40 @@ pnpm db:seed
 - **Celebration Desk**: `/events`
 - **Public Gazette**: `/e/folake-demola-2026`
 
-## Production Deployment
+## Deploying
 
-### Target Regions
+The application is deployed on Vercel (project `ariya`, live at [https://ariya-two.vercel.app](https://ariya-two.vercel.app)).
 
-- **Vercel**: London, UK (`lhr1`)
-- **Supabase**: London, UK (`eu-west-2` AWS)
-  Matching regions minimizes network latency for database queries and webhook round-trips.
+### Target Infrastructure & Regions
 
-### Required Environment Variables
+- **Hosting (Vercel)**: London, UK (`lhr1`)
+- **Database (Supabase)**: London, UK (`eu-west-2` AWS)
 
-| Variable                        | Description                | Production Requirement                             |
-| :------------------------------ | :------------------------- | :------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL       | Canonical project HTTPS URL                        |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anonymous key       | Hosted project anon key                            |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Backend admin key          | Required for webhooks & rate limiter               |
-| `PAYSTACK_SECRET_KEY`           | Paystack merchant secret   | Must start with `sk_live_` (or `sk_test_` in test) |
-| `PAYSTACK_API_BASE`             | Paystack API endpoint      | Must be `https://api.paystack.co`                  |
-| `EMAIL_TRANSPORT`               | Dispatcher mode            | Must be `resend` in production                     |
-| `RESEND_API_KEY`                | Resend API key             | Valid non-placeholder `re_***` key                 |
-| `RATE_LIMIT_SECRET`             | HMAC secret for IP hashing | 32+ character hex key (`openssl rand -hex 32`)     |
-| `CRON_SECRET`                   | Vercel Cron bearer token   | Required for `/api/cron/reminders`                 |
+Matching regions minimizes round-trip latency for database operations, authentication, and webhook processing.
+
+### Production Environment Variables
+
+All production environment variables are strictly validated at application startup using Zod schemas (`src/lib/env/server.ts` and `src/lib/env/client.ts`). The application will refuse to boot in production if required variables are missing or invalid (for instance, if `EMAIL_TRANSPORT` is set to `mailpit`).
+
+| Variable                          | Description                             | Required?    | Production Rule / Safe Default                                                                                 |
+| :-------------------------------- | :-------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`             | Canonical public application URL        | **Required** | `https://ariya-two.vercel.app` (used for personal RSVP links in emails)                                        |
+| `NEXT_PUBLIC_SUPABASE_URL`        | Hosted Supabase project URL             | **Required** | `https://<project-ref>.supabase.co`                                                                            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase public anonymous API key       | **Required** | Hosted project anon key                                                                                        |
+| `SUPABASE_SERVICE_ROLE_KEY`       | Supabase service-role admin key         | **Required** | Hosted project service-role key (server-only; used for rate limit enforcement, billing triggers, and webhooks) |
+| `PAYSTACK_SECRET_KEY`             | Paystack merchant secret key            | **Required** | Must start with `sk_live_` (or `sk_test_` in test mode)                                                        |
+| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key for client checkout | **Required** | Must start with `pk_live_` (or `pk_test_` in test mode)                                                        |
+| `PAYSTACK_API_BASE`               | Paystack API base URL                   | Optional     | Defaults to `https://api.paystack.co` (strictly required to match `https://api.paystack.co` in production)     |
+| `EMAIL_TRANSPORT`                 | Email dispatcher transport              | **Required** | Must be strictly `resend` in production (setting `mailpit` causes startup boot failure)                        |
+| `RESEND_API_KEY`                  | Resend transactional email API key      | **Required** | Non-placeholder production key (must start with `re_`)                                                         |
+| `RESEND_FROM_EMAIL`               | Sender email address for invitations    | **Required** | Default: `rsvps@ariya-two.vercel.app` (or your verified domain sender)                                         |
+| `RATE_LIMIT_SECRET`               | HMAC salt for IP anonymization          | **Required** | Minimum 32 characters, no default (`openssl rand -hex 32`)                                                     |
+| `CRON_SECRET`                     | Secret bearer token for Vercel Cron     | **Required** | Bearer token authenticating `/api/cron/reminders`                                                              |
+| `MAILPIT_URL`                     | Mailpit HTTP API endpoint               | Local only   | Ignored in production (default: `http://127.0.0.1:57324`)                                                      |
 
 ### Webhook Setup
 
 Configure your Paystack Dashboard webhook URL to:
-`https://your-domain.com/api/webhooks/paystack`
+`https://ariya-two.vercel.app/api/webhooks/paystack`
+
 Ensure event `charge.success` is selected. The application verifies inbound requests via constant-time HMAC-SHA512.

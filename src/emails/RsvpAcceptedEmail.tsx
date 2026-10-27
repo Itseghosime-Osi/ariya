@@ -33,7 +33,7 @@ export function RsvpAcceptedEmail({
   attendingCount = 1,
   dressCode = "Wine Velvet & Champagne Gold",
   tableName,
-  passUrl = "https://owambeplan.com",
+  passUrl = "https://ariya-two.vercel.app",
 }: RsvpAcceptedEmailProps) {
   return (
     <Html>

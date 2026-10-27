@@ -23,7 +23,7 @@ export function RsvpDeclinedEmail({
   guestName = "Honoured Guest",
   couple = "Bride & Groom",
   title = "The Royal Nuptials",
-  passUrl = "https://owambeplan.com",
+  passUrl = "https://ariya-two.vercel.app",
 }: RsvpDeclinedEmailProps) {
   return (
     <Html>

@@ -89,7 +89,8 @@ export function resolveServerEnv(
         (rawEnv.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
       MAILPIT_URL: rawEnv.MAILPIT_URL || "http://127.0.0.1:57324",
       RESEND_API_KEY: rawEnv.RESEND_API_KEY || "re_mocked_for_build",
-      RESEND_FROM_EMAIL: rawEnv.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
+      RESEND_FROM_EMAIL:
+        rawEnv.RESEND_FROM_EMAIL || "rsvps@ariya-two.vercel.app",
       RATE_LIMIT_SECRET:
         rawEnv.RATE_LIMIT_SECRET ||
         "super-secret-rate-limit-salt-key-minimum-32-chars-long",

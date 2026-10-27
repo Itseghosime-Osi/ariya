@@ -29,7 +29,7 @@ export function RsvpRevisedEmail({
   status = "accepted",
   attendingCount = 1,
   dietary,
-  passUrl = "https://owambeplan.com",
+  passUrl = "https://ariya-two.vercel.app",
 }: RsvpRevisedEmailProps) {
   return (
     <Html>
