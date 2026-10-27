@@ -1,6 +1,5 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { daysUntil } from "@/lib/format";
 import type {
   EventMetrics,
@@ -20,36 +19,41 @@ export interface PublicCelebration {
   dressCode: string | null;
   rsvpBy: string | null;
   status: string;
+  isPublic?: boolean;
 }
 
 export async function getPublicEventBySlug(
   slug: string
 ): Promise<PublicCelebration | null> {
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
-    .from("events")
-    .select(
-      "id, slug, title, couple, date, venue, area, dress_code, rsvp_by, status"
-    )
-    .eq("slug", slug)
-    .eq("status", "active")
-    .maybeSingle();
+  const cleanSlug = slug.trim();
+  if (!cleanSlug) return null;
 
-  if (error || !data) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_public_event", {
+    p_slug: cleanSlug,
+  });
+
+  if (error || !data || typeof data !== "object") {
+    return null;
+  }
+
+  const raw = data as Record<string, unknown>;
+  if (!raw.id || !raw.slug) {
     return null;
   }
 
   return {
-    id: data.id,
-    slug: data.slug,
-    title: data.title,
-    couple: data.couple,
-    date: data.date,
-    venue: data.venue,
-    area: data.area,
-    dressCode: data.dress_code,
-    rsvpBy: data.rsvp_by,
-    status: data.status,
+    id: String(raw.id),
+    slug: String(raw.slug),
+    title: String(raw.title),
+    couple: String(raw.couple),
+    date: String(raw.date),
+    venue: String(raw.venue),
+    area: raw.area ? String(raw.area) : null,
+    dressCode: raw.dress_code ? String(raw.dress_code) : null,
+    rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
+    status: String(raw.status),
+    isPublic: Boolean(raw.is_public),
   };
 }
 

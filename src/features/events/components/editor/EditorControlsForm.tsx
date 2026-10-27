@@ -5,7 +5,7 @@ import type { LivePreviewData } from "./LivePagePreview";
 
 interface EditorControlsFormProps {
   data: LivePreviewData;
-  onChange: (field: keyof LivePreviewData, value: string) => void;
+  onChange: (field: keyof LivePreviewData, value: string | boolean) => void;
   disabled?: boolean;
 }
 
@@ -27,6 +27,26 @@ export function EditorControlsForm({
       </div>
 
       <div className="space-y-4">
+        {/* Public Discovery Toggle */}
+        <div className="flex items-center justify-between p-3.5 rounded-xl border border-outline-variant/60 bg-white">
+          <div className="space-y-0.5">
+            <label className="text-xs font-semibold text-wine block">
+              Public Event Portal (/e/{data.slug || "..."})
+            </label>
+            <p className="text-[11px] text-on-surface-variant">
+              When disabled, /e/[slug] returns 404. Direct invitation passes
+              (/i/token) remain active.
+            </p>
+          </div>
+          <input
+            type="checkbox"
+            disabled={disabled}
+            checked={data.isPublic}
+            onChange={(e) => onChange("isPublic", e.target.checked)}
+            className="h-4 w-4 rounded border-outline-variant text-wine focus:ring-wine/40"
+          />
+        </div>
+
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
@@ -125,7 +145,7 @@ export function EditorControlsForm({
             disabled={disabled}
             value={data.dressCode}
             onChange={(e) => onChange("dressCode", e.target.value)}
-            placeholder="e.g. Wine Velvet & Champagne Gold. Traditional agbada and gele requested."
+            placeholder="e.g. Wine Velvet & Champagne Gold."
             className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>

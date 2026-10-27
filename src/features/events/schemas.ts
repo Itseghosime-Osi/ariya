@@ -23,6 +23,7 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 
 export const updateEventSchema = createEventSchema.partial().extend({
   status: z.enum(["draft", "active", "archived"]).optional(),
+  isPublic: z.boolean().optional(),
 });
 
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

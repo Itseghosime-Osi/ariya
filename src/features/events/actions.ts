@@ -124,6 +124,8 @@ export async function updateEventAction(
   if (parsed.data.dressCode !== undefined)
     updateData.dress_code = parsed.data.dressCode;
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
+  if (parsed.data.isPublic !== undefined)
+    updateData.is_public = parsed.data.isPublic;
   if (parsed.data.rsvpBy !== undefined)
     updateData.rsvp_by = parsed.data.rsvpBy
       ? new Date(parsed.data.rsvpBy).toISOString()

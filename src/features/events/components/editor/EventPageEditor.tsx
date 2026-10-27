@@ -24,13 +24,18 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
     dressCode: event.dress_code || "",
     rsvpBy: event.rsvp_by || "",
     status: event.status || "draft",
+    isPublic: Boolean(event.is_public),
+    slug: event.slug,
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleFieldChange = (field: keyof LivePreviewData, value: string) => {
+  const handleFieldChange = (
+    field: keyof LivePreviewData,
+    value: string | boolean
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setSaveSuccess(false);
     setErrorMsg(null);
@@ -50,6 +55,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
       dressCode: formData.dressCode || undefined,
       rsvpBy: formData.rsvpBy || undefined,
       status: formData.status as "draft" | "active" | "archived",
+      isPublic: formData.isPublic,
     });
 
     setIsSaving(false);
@@ -101,23 +107,21 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
       </div>
 
       {saveSuccess && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
-          <Icon name="check_circle" className="text-base text-emerald-600" />
-          <span>
-            Celebration page parameters successfully saved and synchronized.
-          </span>
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+          <Icon name="check_circle" className="text-sm text-emerald-600" />
+          <span>Celebration page updates saved successfully.</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-800 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
-          <Icon name="error" className="text-base text-red-600" />
+        <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2">
+          <Icon name="error" className="text-sm text-red-600" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Editor Split Layout: Controls Left, Live Preview Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Editor Grid: Controls on Left, Live Viewport on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-5">
           <EditorControlsForm
             data={formData}

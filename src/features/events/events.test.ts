@@ -4,14 +4,9 @@ import { daysUntil } from "@/lib/format";
 import { createEventAction, updateEventAction } from "./actions";
 import { getUserEvents, getPublicEventBySlug } from "./queries";
 import * as serverClient from "@/lib/supabase/server";
-import * as adminClient from "@/lib/supabase/admin";
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
-}));
-
-vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -263,46 +258,28 @@ describe("Events Domain", () => {
         dress_code: "Wine Velvet",
         rsvp_by: "2026-11-01T00:00:00Z",
         status: "active",
+        is_public: true,
       };
 
-      const mockFrom = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi
-                .fn()
-                .mockResolvedValue({ data: mockEvent, error: null }),
-            }),
-          }),
-        }),
-      });
-
-      vi.mocked(adminClient.createAdminClient).mockReturnValue({
-        from: mockFrom,
-      } as unknown as ReturnType<typeof adminClient.createAdminClient>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          rpc: vi.fn().mockResolvedValue({ data: mockEvent, error: null }),
+        })
+      );
 
       const res = await getPublicEventBySlug("royal-wedding");
       expect(res).not.toBeNull();
       expect(res?.title).toBe("The Royal Wedding");
       expect(res?.slug).toBe("royal-wedding");
+      expect(res?.isPublic).toBe(true);
     });
 
     it("returns null when event not found or inactive", async () => {
-      const mockFrom = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi
-                .fn()
-                .mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        }),
-      });
-
-      vi.mocked(adminClient.createAdminClient).mockReturnValue({
-        from: mockFrom,
-      } as unknown as ReturnType<typeof adminClient.createAdminClient>);
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+        })
+      );
 
       const res = await getPublicEventBySlug("non-existent");
       expect(res).toBeNull();

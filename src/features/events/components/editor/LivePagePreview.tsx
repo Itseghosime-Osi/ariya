@@ -13,6 +13,8 @@ export interface LivePreviewData {
   dressCode: string;
   rsvpBy: string;
   status: string;
+  isPublic: boolean;
+  slug?: string;
 }
 
 interface LivePagePreviewProps {
@@ -30,9 +32,15 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
       {/* Viewport Toolbar */}
       <div className="flex items-center justify-between bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant/30">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span
+            className={`w-2 h-2 rounded-full ${
+              data.isPublic ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+            }`}
+          />
           <span className="text-xs font-semibold text-wine tracking-wide uppercase">
-            Live Guest View
+            {data.isPublic
+              ? "Public Guest Page Active"
+              : "Public Page Private (404)"}
           </span>
         </div>
         <div className="flex items-center bg-surface-container-high p-1 rounded-lg">
