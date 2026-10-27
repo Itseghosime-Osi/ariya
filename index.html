@@ -747,13 +747,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   function tFromS(sv) { for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (sv <= c.b) return c.t0 + (c.t1 - c.t0) * Math.max(0, Math.min(1, (sv - c.a) / (c.b - c.a))); } return TT; }
   function sFromT(t) { for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (t <= c.t1) return c.a + (c.b - c.a) * Math.max(0, Math.min(1, (t - c.t0) / (c.t1 - c.t0))); } return 1; }
   function mapStory(sv) {
-    var c = CUTS[CUTS.length - 1];
-    for (var i = 0; i < CUTS.length; i++) if (sv <= CUTS[i].b) { c = CUTS[i]; break; }
+    var c = CUTS[CUTS.length - 1], ci = CUTS.length - 1;
+    for (var i = 0; i < CUTS.length; i++) if (sv <= CUTS[i].b) { c = CUTS[i]; ci = i; break; }
     var k = c.b > c.a ? Math.max(0, Math.min(1, (sv - c.a) / (c.b - c.a))) : 0;
     var near = 1;
     for (var j = 1; j < CUTS.length; j++) near = Math.min(near, Math.abs(sv - CUTS[j].a) / CUT_W);
     var dip = near < 1 ? 1 - near * near * (3 - 2 * near) : 0;
-    return { mode: c.mode, p: c.p0 + (c.p1 - c.p0) * k, local: k, fade: 0.94 * dip, vis: 1 - dip };
+    // No dip to black at a cut: the picture dissolves from one shot into the next (see the camera); words still ease out.
+    return { mode: c.mode, p: c.p0 + (c.p1 - c.p0) * k, local: k, fade: 0, vis: 1 - dip, cut: ci };
   }
   function sFromOld(p) {
     for (var i = 0; i < CUTS.length; i++) { var c = CUTS[i]; if (c.mode === "old" && p <= c.p1) return c.a + (c.b - c.a) * Math.max(0, (p - c.p0) / (c.p1 - c.p0)); }
@@ -1251,8 +1252,8 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     if (open && m === sfxMode) OPEN_SFX.forEach(function (c) { if (c[0] === m && sfxLocal < c[1] && u >= c[1] && u - c[1] < 0.06) Score.sfx(c[2]); });
     sfxMode = m; sfxLocal = u;
     Score.ambience(open ? m : "");
-    // The score stays under the voices until she says yes; then it rises.
-    Score.level(open && !(m === "N" && u > 0.88) ? 0.28 : 1);
+    // The score stays under the voices until she says yes; then it rises. Once the film is over it plays on, low.
+    Score.level(open && !(m === "N" && u > 0.88) ? 0.28 : OP.s >= 0.998 || OP.covered ? 0.3 : 1);
   }
 
   /* ---------- Watch or scroll. Watch plays the whole film by itself at its designed pace, and the song follows it:
@@ -1301,7 +1302,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     else if (Math.abs(ck - wt) < 1.5) wt = Math.min(TT, Math.max(wt, ck));
     else { Score.seek(wt); wt = Math.min(TT, wt + dt); }
     window.scrollTo({ top: yFromS(sFromT(wt)), behavior: "instant" }); playY = window.scrollY;
-    if (wt >= TT) { setHow("scroll"); if (Score.isOn()) setSound(false); return; } // the film and the song end together; the page is the visitor's again
+    if (wt >= TT) { setHow("scroll"); return; } // the film and the song end together; the song comes round again, low, under the page
     requestAnimationFrame(playStep);
   }
   function jumpTo(y) { if (window.AriyaScroll && AriyaScroll.enabled) AriyaScroll.jump(y); else window.scrollTo({ top: y, behavior: "instant" }); }
@@ -3903,7 +3904,7 @@ async function start() {
   });
   const o_tent14 = makeTent(o_card14, U * 1.1); o_tent14.position.set(0, TY, 0.4); propsM.add(o_tent14);
   // A folded napkin of the hosts' aso-oke, burgundy and gold, beside the card.
-  const o_napkin14 = foldedStack(MAT.wine.flat, 0.4, 0.28, 3); o_napkin14.scale.setScalar(U * 0.45); o_napkin14.position.set(4.4, TY, 1.4); o_napkin14.rotation.y = -0.35; propsM.add(o_napkin14);
+  const o_napkin14 = foldedStack(MAT.wine.flat, 0.4, 0.28, 3); o_napkin14.scale.setScalar(U * 0.32); o_napkin14.position.set(5.6, TY, -0.8); o_napkin14.rotation.y = -0.55; propsM.add(o_napkin14); // napkin-sized, beside the card, never against it
   const o_setting = (x, z, ry, parent) => {
     const st = new THREE.Group(); st.position.set(x, TY + 0.02, z); st.rotation.y = ry; st.scale.setScalar(U); parent.add(st);
     st.add(new THREE.Mesh(chargerGeoH, goldSatin));
@@ -3938,7 +3939,7 @@ async function start() {
   const o_printN = o_makePrint(); o_printN.position.set(-3.7, TY + 0.005, 0.9); o_printN.rotation.y = 0.22; propsN.add(o_printN);
   const o_noteTex = o_handwriting(1100, 760, [["My favourite seat", false, 120], ["was the one", false, 120], ["beside you.", false, 120], ["— T.", false, 84]], { top: 190, lh: 160, left: 110, size: 120, paper: "#f8f1e3", ink: "#262033" });
   const o_note = new THREE.Mesh(new THREE.BoxGeometry(12 / 3, 0.03, 8.3 / 3), [paperEdge, paperEdge, new THREE.MeshStandardMaterial({ map: o_noteTex, roughness: 0.8 }), paperEdge, paperEdge, paperEdge]);
-  o_note.position.set(-1.5, TY + 0.02, 3.0); o_note.rotation.y = -0.12; propsN.add(o_shadowed(o_note));
+  o_note.position.set(-1.3, TY + 0.056, 3.1); o_note.rotation.y = -0.12; propsN.add(o_shadowed(o_note)); // lying on the corner of the photograph, not through it
   [[2.6, -2.8, fluteGeo], [-1.0, -4.2, fluteGeo]].forEach(([x, z, geo]) => { const gl = new THREE.Mesh(geo, crystalGlass); gl.scale.setScalar(U); gl.position.set(x, TY, z); propsN.add(gl); const fz = new THREE.Mesh(fizzGeo, champagne); fz.scale.setScalar(U); fz.position.set(x, TY, z); propsN.add(fz); });
   o_setting(12.5, 4.5, -0.6, propsN); o_setting(-11.5, -9.5, 2.6, propsN); // their places, out of the close-ups
   // Cameras for the opening. Short dollies and deliberate focus; cuts where the story cuts.
@@ -4079,11 +4080,12 @@ async function start() {
   const finalMat = new THREE.ShaderMaterial({
     uniforms: {
       tColor: { value: dofRT.texture }, time: { value: 0 }, exposure: { value: 1 }, grain: { value: 0.045 }, ca: { value: 0.0024 },
-      vignette: { value: 0.55 }, fade: { value: 0 }, aspect: { value: 1 }, warmth: { value: 0 }
+      vignette: { value: 0.55 }, fade: { value: 0 }, aspect: { value: 1 }, warmth: { value: 0 },
+      tPrev: { value: null }, prevMix: { value: 0 }, prevZoom: { value: 1 }
     },
     vertexShader: quadVS,
     fragmentShader: /* glsl */`
-      uniform sampler2D tColor; uniform float time, exposure, grain, ca, vignette, fade, aspect, warmth;
+      uniform sampler2D tColor, tPrev; uniform float time, exposure, grain, ca, vignette, fade, aspect, warmth, prevMix, prevZoom;
       varying vec2 vUv;
       vec3 aces(vec3 c) {
         const mat3 IM = mat3(0.59719, 0.07600, 0.02840, 0.35458, 0.90834, 0.13383, 0.04823, 0.01566, 0.83777);
@@ -4115,17 +4117,25 @@ async function start() {
         float g = (hash(gl_FragCoord.xy + fract(time * 13.7) * 197.0) + hash(gl_FragCoord.xy * 1.37 + fract(time * 7.3) * 91.0) - 1.0);
         col += g * grain * (0.35 + 1.4 * l * (1.0 - l));
         col *= 1.0 - fade;
+        // A cut: the last frame of the shot before, held and drifting gently closer, dissolves into this one.
+        if (prevMix > 0.001) col = mix(col, texture2D(tPrev, 0.5 + (vUv - 0.5) / prevZoom).rgb, prevMix);
         gl_FragColor = vec4(col, 1.0);
       }`
   });
   const finalQuad = new FullScreenQuad(finalMat);
+  const holdRT = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false });
+  const copyMat = new THREE.ShaderMaterial({ uniforms: { t: { value: null } }, vertexShader: quadVS, fragmentShader: "uniform sampler2D t; varying vec2 vUv; void main() { gl_FragColor = texture2D(t, vUv); }" });
+  const copyQuad = new FullScreenQuad(copyMat); copyMat.uniforms.t.value = ldrRT.texture;
+  finalMat.uniforms.tPrev.value = holdRT.texture;
+  let lastCut = -1, cutT0 = -10, cutsHeld = 0;
+  const DISSOLVE = 1.15; // seconds
 
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
     renderer.setPixelRatio(pr);
     renderer.setSize(w, h, false);
     const W = Math.floor(w * pr), H = Math.floor(h * pr);
-    sceneRT.setSize(W, H); dofRT.setSize(W, H); bloom.setSize(W, H); aoRT.setSize(W, H); ldrRT.setSize(W, H); smaa.setSize(W, H);
+    sceneRT.setSize(W, H); dofRT.setSize(W, H); bloom.setSize(W, H); aoRT.setSize(W, H); ldrRT.setSize(W, H); holdRT.setSize(W, H); smaa.setSize(W, H);
     dofMat.uniforms.texel.value.set(1 / W, 1 / H);
     dofMat.uniforms.maxBlur.value = Math.round(H * 0.024);
     finalMat.uniforms.aspect.value = w / h;
@@ -4142,13 +4152,15 @@ async function start() {
   window.addEventListener("resize", resize);
   resize();
 
-  // Compile everything up front so the cut into the hall does not stutter.
-  setA.visible = setB.visible = setC.visible = setD.visible = setE.visible = setF.visible = true; conf.visible = true; notes.visible = true;
+  // Compile every material in every set up front, hidden props included, so no cut stalls the first time it plays.
+  // Lights keep their own visibility: the light count must stay as it will be when the film runs.
+  const hidden = [];
+  scene.traverse((o) => { if (!o.visible && !o.isLight) { hidden.push(o); o.visible = true; } });
   scene.background = envTex;
   OP.loaded = 0.8;
-  renderer.compile(scene, camera);
+  try { if (renderer.compileAsync) await renderer.compileAsync(scene, camera); else renderer.compile(scene, camera); } catch (e) { renderer.compile(scene, camera); }
+  hidden.forEach((o) => { o.visible = false; });
   OP.loaded = 1;
-  conf.visible = false; notes.visible = false; setC.visible = setD.visible = setE.visible = setF.visible = false;
 
   let px = 0, pxT = 0, pyT = 0, py = 0;
   window.addEventListener("pointermove", (e) => {
@@ -4242,10 +4254,10 @@ async function start() {
       // floats there for the rest of the film: one movement, all in one shot.
       ring.position.set(box.position.x, RING_REST, box.position.z); ring.rotation.set(0, -0.35 + box.rotation.y, 0);
       if (!OPEN) {
-        const lift = seg(p, 0.12, 0.25);
+        const lift = seg(p, 0.12, 0.195); // straight up and clear of the cushion first
         ring.position.y = lerp(RING_REST, RING_UP, lift) + Math.sin(t * 0.9) * 0.025 * lift * motion;
         // One unhurried turn as it rises, so the stone shows itself all the way round, then it settles facing us.
-        const spin = smooth(clamp((p - 0.125) / 0.135, 0, 1)) * Math.PI * 2;
+        const spin = smooth(clamp((p - 0.195) / 0.08, 0, 1)) * Math.PI * 2; // then the turn, in the air
         ring.rotation.y = -0.35 + spin + Math.sin(t * 0.35) * 0.06 * motion * lift + px * 0.12 * lift;
         ring.rotation.x = py * 0.08 * lift;
         ring.rotation.z = Math.sin(t * 0.5) * 0.05 * lift * motion;
@@ -4398,9 +4410,16 @@ async function start() {
     // The hall is pulled down while the invitation is on screen so the paper reads.
     finalMat.uniforms.exposure.value = (mode === "C" ? 0.95 : mode === "D" ? 1.05 : mode === "E" ? 1.0 : mode === "F" ? 0.95 : mode === "G" || mode === "H" || mode === "J" ? 1.0 : inA ? 0.9 : 0.95 * (1 - 0.5 * bump(p, 0.67, 0.69, 0.77, 0.79))) * lerp(0.15, 1, intro);
     finalMat.uniforms.warmth.value = inA ? 0 : 1;
-    // A dip to near black at every cut between chapters that change set.
+    // Blackout only where the story asks for it (she closes her eyes); cuts dissolve instead.
     finalMat.uniforms.fade.value = Math.max(SC.fade || 0, OP.blackout || 0);
-    OP.state = { cam: camera.position.toArray().map((v) => +v.toFixed(2)), setA: setA.visible, propsR: propsR.visible, set: lastSet, box: box.visible && setA.visible, ring: ring.visible && setA.visible, lid: -lidPivot.rotation.x, ringY: ring.position.y, ringRest: RING_REST, fade: finalMat.uniforms.fade.value };
+    if (SC.cut !== undefined && SC.cut !== lastCut) {
+      if (lastCut >= 0 && Math.abs(SC.cut - lastCut) <= 2) { renderer.setRenderTarget(holdRT); copyQuad.render(renderer); cutT0 = t; cutsHeld++; } // hold the outgoing frame
+      lastCut = SC.cut;
+    }
+    const dk = clamp((t - cutT0) / DISSOLVE, 0, 1);
+    finalMat.uniforms.prevMix.value = 1 - smooth(dk);
+    finalMat.uniforms.prevZoom.value = 1 + 0.035 * dk * motion;
+    OP.state = { cam: camera.position.toArray().map((v) => +v.toFixed(2)), setA: setA.visible, propsR: propsR.visible, set: lastSet, box: box.visible && setA.visible, ring: ring.visible && setA.visible, lid: -lidPivot.rotation.x, ringY: ring.position.y, ringRest: RING_REST, fade: finalMat.uniforms.fade.value, dissolve: finalMat.uniforms.prevMix.value, cutsHeld };
     renderer.setRenderTarget(ldrRT);
     finalQuad.render(renderer);
     smaa.render(renderer, null, ldrRT);
