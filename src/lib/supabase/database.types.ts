@@ -263,6 +263,7 @@ export type Database = {
           phone: string | null;
           plus_ones_allowed: boolean;
           rsvp_token: string;
+          seating_conflict_at: string | null;
           side: string | null;
           updated_at: string;
         };
@@ -283,6 +284,7 @@ export type Database = {
           phone?: string | null;
           plus_ones_allowed?: boolean;
           rsvp_token?: string;
+          seating_conflict_at?: string | null;
           side?: string | null;
           updated_at?: string;
         };
@@ -302,6 +304,7 @@ export type Database = {
           phone?: string | null;
           plus_ones_allowed?: boolean;
           rsvp_token?: string;
+          seating_conflict_at?: string | null;
           side?: string | null;
           updated_at?: string;
         };
@@ -834,6 +837,10 @@ export type Database = {
           p_token: string;
         };
         Returns: Json;
+      };
+      table_seats_used: {
+        Args: { p_exclude_guest?: string; p_table_id: string };
+        Returns: number;
       };
     };
     Enums: {
