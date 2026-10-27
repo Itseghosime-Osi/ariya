@@ -20,6 +20,7 @@
     "analyze": "ANALYZE=true next build",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "test:db": "supabase test db",
+    "db:seed": "tsx scripts/seed-demo.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -82,6 +83,7 @@
     "prettier": "^3.4.2",
     "supabase": "^2.122.0",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.72.0",
     "vitest": "^3.0.5"
