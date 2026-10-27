@@ -1,4 +1,119 @@
+import http from "http";
+import crypto from "crypto";
 import { test, expect } from "@playwright/test";
+
+let mockPaystackServer: http.Server;
+let lastReference = "";
+let isPaymentAuthorizedOnGateway = false;
+
+test.beforeAll(async () => {
+  mockPaystackServer = http.createServer((req, res) => {
+    const url = new URL(req.url || "", `http://${req.headers.host}`);
+
+    if (req.method === "POST" && url.pathname === "/transaction/initialize") {
+      let bodyStr = "";
+      req.on("data", (chunk) => {
+        bodyStr += chunk;
+      });
+      req.on("end", () => {
+        const body = JSON.parse(bodyStr);
+        lastReference = body.reference;
+        const callbackUrl = body.callback_url;
+        const authUrl = `http://127.0.0.1:57328/mock-checkout?reference=${body.reference}&callback_url=${encodeURIComponent(callbackUrl)}`;
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            status: true,
+            message: "Authorization URL created",
+            data: {
+              authorization_url: authUrl,
+              access_code: "mock_access_code",
+              reference: body.reference,
+            },
+          })
+        );
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/mock-checkout") {
+      const reference = url.searchParams.get("reference") || "";
+      const callbackUrl = url.searchParams.get("callback_url") || "";
+      const redirectBackUrl = `${callbackUrl}?reference=${encodeURIComponent(reference)}`;
+
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(`<!DOCTYPE html>
+<html>
+<head><title>Mock Paystack Checkout</title></head>
+<body>
+  <h1>Paystack Test Gateway</h1>
+  <p>Amount: &#8358;50,000</p>
+  <a id="paystack-success-btn" href="${redirectBackUrl}">Complete Mock Payment</a>
+</body>
+</html>`);
+      return;
+    }
+
+    if (
+      req.method === "GET" &&
+      url.pathname.startsWith("/transaction/verify/")
+    ) {
+      const reference = decodeURIComponent(
+        url.pathname.replace("/transaction/verify/", "")
+      );
+      if (isPaymentAuthorizedOnGateway) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            status: true,
+            message: "Verification successful",
+            data: {
+              id: 1234567,
+              status: "success",
+              reference,
+              amount: 5000000,
+              currency: "NGN",
+              channel: "card",
+              paid_at: new Date().toISOString(),
+            },
+          })
+        );
+      } else {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            status: true,
+            message: "Transaction pending",
+            data: {
+              id: 1234567,
+              status: "pending",
+              reference,
+              amount: 5000000,
+              currency: "NGN",
+            },
+          })
+        );
+      }
+      return;
+    }
+
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: false, message: "Not found" }));
+  });
+
+  await new Promise<void>((resolve) => {
+    mockPaystackServer.listen(57328, "127.0.0.1", () => resolve());
+  });
+});
+
+test.afterAll(async () => {
+  if (mockPaystackServer) {
+    await new Promise<void>((resolve) => {
+      mockPaystackServer.close(() => resolve());
+    });
+  }
+});
 
 test.describe("Celebration Suite Smoke Flow", () => {
   test("sign up -> create event -> guest registry -> import csv -> copy invite link -> submit rsvp -> publish event -> team invite -> staff blocked from billing -> paystack test flow -> gated action unlocks", async ({
@@ -440,26 +555,73 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No,1`;
     );
     await staffContext.close();
 
-    // 45. Owner context: Paystack test payment flow
+    // 45. Owner context: Paystack real test payment flow via mock gateway
     await page.goto(`/events/${eventId}/billing`);
     await expect(page.getByText(/Free Tier \(Trial\)/i)).toBeVisible();
 
+    // Click checkout which calls initialize on mock server
     await page.getByRole("button", { name: /pay with paystack/i }).click();
-    await expect(page.getByText(/Paystack Test Gateway/i)).toBeVisible({
-      timeout: 5000,
+
+    // Browser redirected to mock Paystack checkout page
+    await page.waitForURL(/57328\/mock-checkout/, { timeout: 15000 });
+    await expect(page.locator("h1")).toContainText(/Paystack Test Gateway/i);
+
+    // Complete mock checkout which redirects back to billing callback
+    await page.locator("#paystack-success-btn").click();
+    await page.waitForURL(new RegExp(`/events/${eventId}/billing/callback`), {
+      timeout: 15000,
     });
 
-    // Authorize test payment at edge
-    await page
-      .getByRole("button", { name: /authorize successful test payment/i })
-      .click();
+    // 46. Webhook verification: Deliver webhook signed with real test PAYSTACK_SECRET_KEY
+    const webhookPayload = JSON.stringify({
+      event: "charge.success",
+      data: {
+        reference: lastReference,
+        amount: 5000000,
+        currency: "NGN",
+        status: "success",
+        channel: "card",
+      },
+    });
 
-    // 46. Verify Celebration Pass unlocked
+    // Negative case: Tampered signature returns 401 and event remains unpaid
+    const tamperedRes = await page.request.post("/api/webhooks/paystack", {
+      headers: {
+        "Content-Type": "application/json",
+        "x-paystack-signature": "tampered_signature_payload_hex_12345",
+      },
+      data: webhookPayload,
+    });
+    expect(tamperedRes.status()).toBe(401);
+
+    // Verify event remains unpaid
+    await page.goto(`/events/${eventId}/billing`);
+    await expect(page.getByText(/Free Tier \(Trial\)/i)).toBeVisible();
+
+    // Positive case: Authorize on provider and deliver valid HMAC-SHA512 webhook
+    isPaymentAuthorizedOnGateway = true;
+    const testSecret = "sk_test_sample";
+    const validSignature = crypto
+      .createHmac("sha512", testSecret)
+      .update(webhookPayload)
+      .digest("hex");
+
+    const webhookRes = await page.request.post("/api/webhooks/paystack", {
+      headers: {
+        "Content-Type": "application/json",
+        "x-paystack-signature": validSignature,
+      },
+      data: webhookPayload,
+    });
+    expect(webhookRes.status()).toBe(200);
+
+    // 47. Verify Celebration Pass unlocked
+    await page.goto(`/events/${eventId}/billing`);
     await expect(
       page.getByText(/Royal Celebration Pass \(Unlocked\)/i)
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
-    // 47. Verify Gated Quota banner disappears on Invitations and Reminders
+    // 48. Verify Gated Quota banner disappears on Invitations and Reminders
     await page.goto(`/events/${eventId}/invitations`);
     await expect(page.getByText(/Free Tier Quota/i)).not.toBeVisible();
 

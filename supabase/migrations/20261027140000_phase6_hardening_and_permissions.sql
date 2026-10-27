@@ -242,3 +242,4 @@ grant execute on function public.check_invitation_quota(uuid, integer) to authen
 -- Grant service_role only functions
 grant execute on function public.record_successful_payment(text, jsonb) to service_role;
 grant execute on function public.hit_rate_limit(text, integer, interval) to service_role;
+
