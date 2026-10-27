@@ -18,6 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "analyze": "ANALYZE=true next build",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "test:db": "supabase test db",
     "prepare": "husky"
   },
   "dependencies": {
@@ -74,6 +76,7 @@
     "lint-staged": "^17.6.0",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
+    "supabase": "^2.122.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.72.0",
