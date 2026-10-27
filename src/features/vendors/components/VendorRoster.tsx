@@ -14,7 +14,7 @@ import {
   updateVendorTaskAction,
   deleteVendorTaskAction,
 } from "../actions";
-import { computeVendorStats } from "../queries";
+import { computeVendorStats } from "../utils";
 import type { Vendor, VendorWithTasks, VendorsData } from "../types";
 import type { CreateVendorInput } from "../schemas";
 
