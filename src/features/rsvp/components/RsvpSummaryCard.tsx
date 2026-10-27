@@ -23,7 +23,7 @@ export function RsvpSummaryCard({
   const formattedTime = formatLagosTime(event.date);
 
   return (
-    <article className="bg-[#fcfaf7] border border-[#e8dfcf] rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
+    <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-wine via-gold to-wine" />
 
       {/* Confirmation Crest */}
@@ -45,7 +45,7 @@ export function RsvpSummaryCard({
       </section>
 
       {/* Guest Pass Ticket Container */}
-      <section className="bg-[#f5ede0] rounded-xl p-6 border border-[#e0d3be] space-y-4">
+      <section className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/30 space-y-4">
         <div className="flex items-center justify-between border-b border-wine/10 pb-3">
           <span className="text-xs uppercase tracking-wider text-wine/70 font-semibold">
             Digital Celebration Pass
@@ -127,7 +127,7 @@ export function RsvpSummaryCard({
               Reception Entry Pass
             </span>
           </div>
-          <div className="inline-block p-2 bg-[#FCFAF7] rounded-xl border border-wine/10 shadow-inner">
+          <div className="inline-block p-2 bg-surface-container-lowest rounded-xl border border-wine/10 shadow-inner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrCodeUrl}

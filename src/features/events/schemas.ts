@@ -24,6 +24,17 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 export const updateEventSchema = createEventSchema.partial().extend({
   status: z.enum(["draft", "active", "archived"]).optional(),
   isPublic: z.boolean().optional(),
+  description: z.string().trim().optional(),
+  coverImageUrl: z.string().trim().optional(),
+  schedule: z
+    .array(
+      z.object({
+        time: z.string(),
+        title: z.string(),
+        location: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

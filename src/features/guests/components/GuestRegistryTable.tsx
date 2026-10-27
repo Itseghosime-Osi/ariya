@@ -96,7 +96,7 @@ export function GuestRegistryTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-mist"
+                  className="h-32 text-center text-on-surface-variant"
                 >
                   Loading guests...
                 </TableCell>
@@ -122,7 +122,7 @@ export function GuestRegistryTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-mist"
+                  className="h-32 text-center text-on-surface-variant"
                 >
                   No guests found matching your criteria.
                 </TableCell>
@@ -139,7 +139,10 @@ export function GuestRegistryTable({
             value={String(pageSize)}
             onValueChange={(val) => onPageSizeChange(Number(val))}
           >
-            <SelectTrigger className="h-8 w-18 text-xs bg-surface-container-lowest">
+            <SelectTrigger
+              aria-label="Rows per page"
+              className="h-8 w-18 text-xs bg-surface-container-lowest"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -149,7 +152,7 @@ export function GuestRegistryTable({
               <SelectItem value="100">100</SelectItem>
             </SelectContent>
           </Select>
-          <span className="ml-2 text-mist">
+          <span className="ml-2 text-on-surface-variant">
             Showing {startRow}-{endRow} of {totalCount} guests
           </span>
         </div>

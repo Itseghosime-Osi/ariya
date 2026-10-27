@@ -50,7 +50,7 @@ export default async function GuestInvitationPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f5ee] flex flex-col justify-between py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-surface flex flex-col justify-between py-10 px-4 sm:px-6">
       <main className="max-w-xl mx-auto w-full space-y-6">
         {/* Monogram Seal Header */}
         <header className="text-center space-y-2">

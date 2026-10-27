@@ -74,6 +74,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: "credit_card",
     activePattern: /\/billing/,
   },
+  {
+    name: "Settings",
+    href: (id) => (id ? `/events/${id}/settings` : "/events"),
+    icon: "settings",
+    activePattern: /\/settings/,
+  },
 ];
 
 interface SidebarProps {

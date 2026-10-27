@@ -30,7 +30,7 @@ export function RsvpInteractiveForm({
   );
 
   return (
-    <article className="bg-[#fcfaf7] border border-[#e8dfcf] rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
+    <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-wine via-gold to-wine" />
 
       {/* Invitation Header */}
@@ -103,7 +103,7 @@ export function RsvpInteractiveForm({
 
         {/* Accepted Conditional Fields */}
         {status === "accepted" && (
-          <div className="space-y-4 pt-2 border-t border-[#e8dfcf]">
+          <div className="space-y-4 pt-2 border-t border-outline-variant/30">
             {/* Party Size Stepper/Select */}
             {maxParty > 1 && (
               <div className="space-y-1.5">

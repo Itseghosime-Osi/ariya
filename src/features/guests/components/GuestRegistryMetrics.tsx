@@ -56,7 +56,7 @@ export function GuestRegistryMetrics({ stats }: GuestRegistryMetricsProps) {
             className="flex flex-col justify-between rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-mist uppercase tracking-wider">
+              <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 {c.label}
               </span>
               <div

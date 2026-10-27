@@ -239,15 +239,18 @@ export type Database = {
       events: {
         Row: {
           area: string | null;
+          cover_image_url?: string | null;
           couple: string;
           created_at: string;
           date: string;
+          description?: string | null;
           dress_code: string | null;
           id: string;
           is_public: boolean;
           paid_at: string | null;
           registry_code: string | null;
           rsvp_by: string | null;
+          schedule?: Json | null;
           slug: string;
           status: string;
           title: string;
@@ -257,15 +260,18 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           area?: string | null;
+          cover_image_url?: string | null;
           couple: string;
           created_at?: string;
           date: string;
+          description?: string | null;
           dress_code?: string | null;
           id?: string;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
+          schedule?: Json | null;
           slug: string;
           status?: string;
           title: string;
@@ -274,15 +280,18 @@ export type Database = {
         };
         Update: {
           area?: string | null;
+          cover_image_url?: string | null;
           couple?: string;
           created_at?: string;
           date?: string;
+          description?: string | null;
           dress_code?: string | null;
           id?: string;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
+          schedule?: Json | null;
           slug?: string;
           status?: string;
           title?: string;

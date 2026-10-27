@@ -126,6 +126,12 @@ export async function updateEventAction(
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
   if (parsed.data.isPublic !== undefined)
     updateData.is_public = parsed.data.isPublic;
+  if (parsed.data.description !== undefined)
+    updateData.description = parsed.data.description;
+  if (parsed.data.coverImageUrl !== undefined)
+    updateData.cover_image_url = parsed.data.coverImageUrl;
+  if (parsed.data.schedule !== undefined)
+    updateData.schedule = parsed.data.schedule;
   if (parsed.data.rsvpBy !== undefined)
     updateData.rsvp_by = parsed.data.rsvpBy
       ? new Date(parsed.data.rsvpBy).toISOString()

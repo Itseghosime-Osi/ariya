@@ -11,6 +11,26 @@ import {
   Button,
   Hr,
 } from "@react-email/components";
+import {
+  mainStyle,
+  containerStyle,
+  headerSection,
+  monogramStyle,
+  subHeaderStyle,
+  cardSection,
+  headingStyle,
+  coupleStyle,
+  greetingStyle,
+  dividerStyle,
+  detailsGrid,
+  labelStyle,
+  valueStyle,
+  buttonContainer,
+  buttonStyle,
+  footerSection,
+  footerText,
+  getDefaultPassUrl,
+} from "./styles";
 
 interface RsvpRevisedEmailProps {
   guestName: string;
@@ -19,37 +39,35 @@ interface RsvpRevisedEmailProps {
   status: "accepted" | "declined";
   attendingCount: number;
   dietary?: string | null;
-  passUrl: string;
+  passUrl?: string;
 }
 
 export function RsvpRevisedEmail({
   guestName = "Honoured Guest",
-  couple = "Bride & Groom",
-  title = "The Royal Nuptials",
+  couple = "Celebrants",
+  title = "Wedding Celebration",
   status = "accepted",
   attendingCount = 1,
   dietary,
-  passUrl = "https://ariya-two.vercel.app",
+  passUrl = getDefaultPassUrl(),
 }: RsvpRevisedEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Reservation Revision Acknowledged • {title}</Preview>
+      <Preview>RSVP Updated • {title}</Preview>
       <Body style={mainStyle}>
         <Container style={containerStyle}>
           <Section style={headerSection}>
             <Text style={monogramStyle}>À</Text>
-            <Text style={subHeaderStyle}>REVISED PROTOCOL CONFIRMATION</Text>
+            <Text style={subHeaderStyle}>RSVP UPDATE ACKNOWLEDGEMENT</Text>
           </Section>
 
           <Section style={cardSection}>
-            <Heading style={headingStyle}>
-              Reservation Revision Acknowledged
-            </Heading>
-            <Text style={coupleStyle}>The Nuptials of {couple}</Text>
+            <Heading style={headingStyle}>RSVP Updated</Heading>
+            <Text style={coupleStyle}>{couple}</Text>
 
             <Text style={greetingStyle}>
-              Dearest {guestName}, your ceremonial RSVP details have been
+              Dear {guestName}, your RSVP for <strong>{title}</strong> has been
               successfully updated.
             </Text>
 
@@ -58,16 +76,14 @@ export function RsvpRevisedEmail({
             <Section style={detailsGrid}>
               <Text style={labelStyle}>UPDATED STATUS</Text>
               <Text style={valueStyle}>
-                {status === "accepted"
-                  ? "Joyfully Attending"
-                  : "Regretfully Declined"}
+                {status === "accepted" ? "Attending" : "Declined"}
               </Text>
 
               {status === "accepted" && (
                 <>
-                  <Text style={labelStyle}>ATTENDING SEATS</Text>
+                  <Text style={labelStyle}>ATTENDING COUNT</Text>
                   <Text style={valueStyle}>
-                    {attendingCount} {attendingCount === 1 ? "seat" : "seats"}
+                    {attendingCount} {attendingCount === 1 ? "guest" : "guests"}
                   </Text>
                 </>
               )}
@@ -88,9 +104,7 @@ export function RsvpRevisedEmail({
           </Section>
 
           <Section style={footerSection}>
-            <Text style={footerText}>
-              Àríyá • Bespoke African Ceremonies &amp; Royal Stationery Suite
-            </Text>
+            <Text style={footerText}>Àríyá • Event Guest &amp; RSVP Suite</Text>
           </Section>
         </Container>
       </Body>
@@ -99,120 +113,3 @@ export function RsvpRevisedEmail({
 }
 
 export default RsvpRevisedEmail;
-
-const mainStyle = {
-  backgroundColor: "#f8f5ee",
-  fontFamily: "Georgia, serif, -apple-system, BlinkMacSystemFont, sans-serif",
-  padding: "40px 0",
-};
-
-const containerStyle = {
-  maxWidth: "560px",
-  margin: "0 auto",
-  backgroundColor: "#fcfaf7",
-  border: "1px solid #e8dfcf",
-  borderRadius: "16px",
-  overflow: "hidden" as const,
-};
-
-const headerSection = {
-  backgroundColor: "#6e1426",
-  padding: "24px 20px",
-  textAlign: "center" as const,
-};
-
-const monogramStyle = {
-  color: "#e9c98a",
-  fontSize: "28px",
-  fontWeight: "bold" as const,
-  margin: "0",
-  lineHeight: "1",
-};
-
-const subHeaderStyle = {
-  color: "#f4efe6",
-  fontSize: "11px",
-  letterSpacing: "0.15em",
-  margin: "8px 0 0 0",
-};
-
-const cardSection = {
-  padding: "36px 32px",
-};
-
-const headingStyle = {
-  color: "#6e1426",
-  fontSize: "24px",
-  fontWeight: "normal" as const,
-  textAlign: "center" as const,
-  margin: "0 0 8px 0",
-};
-
-const coupleStyle = {
-  color: "#564243",
-  fontSize: "16px",
-  fontStyle: "italic" as const,
-  textAlign: "center" as const,
-  margin: "0 0 24px 0",
-};
-
-const greetingStyle = {
-  color: "#1d1c16",
-  fontSize: "14px",
-  lineHeight: "1.6",
-  textAlign: "center" as const,
-  margin: "0 0 20px 0",
-};
-
-const dividerStyle = {
-  borderColor: "#e8dfcf",
-  margin: "24px 0",
-};
-
-const detailsGrid = {
-  backgroundColor: "#f5ede0",
-  padding: "20px",
-  borderRadius: "12px",
-  margin: "0 0 24px 0",
-};
-
-const labelStyle = {
-  color: "#6e1426",
-  fontSize: "11px",
-  fontWeight: "bold" as const,
-  letterSpacing: "0.08em",
-  margin: "8px 0 2px 0",
-};
-
-const valueStyle = {
-  color: "#1d1c16",
-  fontSize: "14px",
-  margin: "0 0 8px 0",
-};
-
-const buttonContainer = {
-  textAlign: "center" as const,
-};
-
-const buttonStyle = {
-  backgroundColor: "#6e1426",
-  color: "#ffffff",
-  padding: "12px 28px",
-  borderRadius: "10px",
-  fontSize: "14px",
-  fontWeight: "bold" as const,
-  textDecoration: "none",
-  display: "inline-block",
-};
-
-const footerSection = {
-  backgroundColor: "#f5ede0",
-  padding: "16px",
-  textAlign: "center" as const,
-};
-
-const footerText = {
-  color: "#564243",
-  fontSize: "11px",
-  margin: "0",
-};

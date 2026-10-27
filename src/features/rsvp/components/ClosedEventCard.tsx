@@ -8,7 +8,7 @@ interface ClosedEventCardProps {
 
 export function ClosedEventCard({ event }: ClosedEventCardProps) {
   return (
-    <article className="bg-[#fcfaf7] border border-[#e8dfcf] rounded-2xl p-8 sm:p-10 shadow-sm text-center space-y-6">
+    <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 sm:p-10 shadow-sm text-center space-y-6">
       <div className="w-14 h-14 rounded-full bg-wine/10 text-wine flex items-center justify-center mx-auto">
         <Icon name="event_busy" className="text-2xl" />
       </div>

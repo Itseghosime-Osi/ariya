@@ -1,5 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // Ignore in CI where env vars are set directly
+}
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,

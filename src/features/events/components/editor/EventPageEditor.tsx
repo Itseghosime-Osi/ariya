@@ -26,6 +26,8 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
     status: event.status || "draft",
     isPublic: Boolean(event.is_public),
     slug: event.slug,
+    description: event.description || "",
+    coverImageUrl: event.cover_image_url || "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -56,6 +58,8 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
       rsvpBy: formData.rsvpBy || undefined,
       status: formData.status as "draft" | "active" | "archived",
       isPublic: formData.isPublic,
+      description: formData.description || undefined,
+      coverImageUrl: formData.coverImageUrl || undefined,
     });
 
     setIsSaving(false);

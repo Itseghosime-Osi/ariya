@@ -135,6 +135,36 @@ export function EditorControlsForm({
           </div>
         </div>
 
+        {/* Story / Invocation */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
+            Couple Story / Warm Invocation
+          </label>
+          <textarea
+            rows={2}
+            disabled={disabled}
+            value={data.description || ""}
+            onChange={(e) => onChange("description", e.target.value)}
+            placeholder="We warmly invite our esteemed elders, cherished family, and dear friends..."
+            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+          />
+        </div>
+
+        {/* Cover Image URL */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
+            Cover Banner Image URL
+          </label>
+          <input
+            type="url"
+            disabled={disabled}
+            value={data.coverImageUrl || ""}
+            onChange={(e) => onChange("coverImageUrl", e.target.value)}
+            placeholder="https://..."
+            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+          />
+        </div>
+
         {/* Dress Code */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">

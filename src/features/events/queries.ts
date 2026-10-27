@@ -8,6 +8,12 @@ import type {
   RecentGuestResponse,
 } from "./types";
 
+export interface ScheduleSlot {
+  time: string;
+  title: string;
+  location?: string;
+}
+
 export interface PublicCelebration {
   id: string;
   slug: string;
@@ -20,6 +26,9 @@ export interface PublicCelebration {
   rsvpBy: string | null;
   status: string;
   isPublic?: boolean;
+  description?: string | null;
+  coverImageUrl?: string | null;
+  schedule?: ScheduleSlot[];
 }
 
 export async function getPublicEventBySlug(
@@ -54,6 +63,11 @@ export async function getPublicEventBySlug(
     rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
     status: String(raw.status),
     isPublic: Boolean(raw.is_public),
+    description: raw.description ? String(raw.description) : null,
+    coverImageUrl: raw.cover_image_url ? String(raw.cover_image_url) : null,
+    schedule: Array.isArray(raw.schedule)
+      ? (raw.schedule as ScheduleSlot[])
+      : [],
   };
 }
 
