@@ -272,7 +272,7 @@ export type Database = {
           party_size?: number;
           phone?: string | null;
           plus_ones_allowed?: boolean;
-          rsvp_token: string;
+          rsvp_token?: string;
           side?: string | null;
           updated_at?: string;
         };
@@ -705,6 +705,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      generate_invitation_token: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       get_invitation: { Args: { p_token: string }; Returns: Json };
       get_user_events_with_metrics: {
         Args: Record<PropertyKey, never>;
@@ -721,9 +725,46 @@ export type Database = {
       is_event_member:
         | { Args: { p_event_id: string }; Returns: boolean }
         | { Args: { p_event_id: string; p_user_id: string }; Returns: boolean };
-      regenerate_guest_token: {
-        Args: { p_guest_id: string; p_new_token: string };
-        Returns: string;
+      regenerate_guest_token: { Args: { p_guest_id: string }; Returns: string };
+      search_guests: {
+        Args: {
+          p_event_id: string;
+          p_group?: string;
+          p_is_vip?: boolean;
+          p_limit?: number;
+          p_offset?: number;
+          p_rsvp_status?: string;
+          p_search?: string;
+          p_seated_status?: string;
+          p_side?: string;
+        };
+        Returns: {
+          created_at: string;
+          email: string;
+          event_id: string;
+          group_name: string;
+          id: string;
+          invited_at: string;
+          is_vip: boolean;
+          name: string;
+          notes: string;
+          party_size: number;
+          phone: string;
+          plus_ones_allowed: boolean;
+          rsvp_attending_count: number;
+          rsvp_dietary: string;
+          rsvp_id: string;
+          rsvp_note: string;
+          rsvp_plus_one_name: string;
+          rsvp_responded_at: string;
+          rsvp_status: string;
+          rsvp_token: string;
+          seat_table_id: string;
+          seat_table_name: string;
+          side: string;
+          total_count: number;
+          updated_at: string;
+        }[];
       };
       submit_rsvp: {
         Args: {
