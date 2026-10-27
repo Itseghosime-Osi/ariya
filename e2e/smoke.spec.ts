@@ -1,9 +1,13 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Celebration Suite Smoke Flow", () => {
-  test("sign up -> create event through wizard -> view in My Events -> open overview", async ({
+  test("sign up -> create event -> guest registry -> import csv -> copy invite link", async ({
     page,
+    context,
   }) => {
+    // Grant clipboard permissions for copy link test
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
     const timestamp = Date.now();
     const testEmail = `playwright_${timestamp}@owambe.ng`;
     const testPassword = "Celebration2026!";
@@ -84,5 +88,65 @@ test.describe("Celebration Suite Smoke Flow", () => {
     await expect(page.getByText("Celebration Desk").first()).toBeVisible();
     await expect(page.getByText(coupleName).first()).toBeVisible();
     await expect(page.getByText("Every yes, together.").first()).toBeVisible();
+
+    // 11. Navigate to Guest Registry via sidebar or direct link
+    await page
+      .getByRole("link", { name: /guest registry/i })
+      .first()
+      .click();
+    await page.waitForURL(/\/events\/[0-9a-f-]+\/guests/, { timeout: 10000 });
+
+    await expect(
+      page.getByRole("heading", { name: "Guest Registry" })
+    ).toBeVisible();
+    await expect(page.getByText(/FINAL 03/i)).toBeVisible();
+
+    // 12. Open CSV Import Modal
+    await page.getByRole("button", { name: /import csv/i }).click();
+    await expect(page.getByText(/Upload Guest CSV Roster/i)).toBeVisible();
+
+    // 13. Upload small sample CSV
+    const sampleCsv = `Full Name,Phone Number,Email,Side,Group,VIP
+Babatunde Adeleke,08031234567,babatunde@lagos.ng,VIP,High Table,Yes
+Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "sample_guests.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(sampleCsv),
+    });
+
+    // 14. Confirm Column Field Mapping step
+    await expect(page.getByText(/Column Field Mapping/i)).toBeVisible();
+    await page.getByRole("button", { name: /continue to validation/i }).click();
+
+    // 15. Validation Preview step
+    await expect(page.getByText(/Valid Rows/i)).toBeVisible();
+    await expect(page.getByText("2").first()).toBeVisible();
+
+    // 16. Commit Import
+    await page.getByRole("button", { name: /import 2 guests/i }).click();
+
+    // 17. Import Summary Screen
+    await expect(page.getByText(/Import Completed!/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await page.getByRole("button", { name: /view guest registry/i }).click();
+
+    // 18. Verify guests appear in the registry table
+    await expect(page.getByText("Babatunde Adeleke").first()).toBeVisible();
+    await expect(page.getByText("Folashade Adeleke").first()).toBeVisible();
+
+    // 19. Open Guest Detail Drawer by clicking guest name
+    await page.getByText("Babatunde Adeleke").first().click();
+    await expect(page.getByText(/Guest Details/i)).toBeVisible();
+    await expect(page.getByText(/RSVP Invitation Link/i)).toBeVisible();
+
+    // 20. Copy RSVP link and verify feedback
+    await page
+      .getByRole("button", { name: /copy link/i })
+      .first()
+      .click();
+    await expect(page.getByText(/Copied Link/i)).toBeVisible();
   });
 });
