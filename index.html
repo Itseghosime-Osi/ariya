@@ -2524,6 +2524,8 @@ async function start() {
   const keysA = [
     [0.00, [0, 1.45, 5.6], [0, 0.55, 0], 24],
     [0.12, [0.45, 1.25, 4.0], [0, 0.3, 0], 20],
+    [0.16, [0.75, 1.45, 3.9], [0, RING_UP * 0.55, 0], 22], // the camera rises with the ring, keeping the stone in frame
+    [0.2, [1.1, 1.75, 3.6], [0, RING_UP, 0], 23],
     [0.25, [1.6, 1.95, 3.3], [0, RING_UP + 0.05, 0], 24],
     [0.35, [-1.9, 2.0, 5.2], [0, RING_UP + 0.1, 0], 18],
     [0.45, [0, 1.75, 7.0], [0, RING_UP + 0.1, 0], 12],
@@ -4252,13 +4254,14 @@ async function start() {
       if (sm !== "R") box.rotation.y = OPEN ? -0.18 : 0;
       // In the opening the ring stays seated in its slot. After the yes it lifts out of the box in one slow turn and
       // floats there for the rest of the film: one movement, all in one shot.
-      ring.position.set(box.position.x, RING_REST, box.position.z); ring.rotation.set(0, -0.35 + box.rotation.y, 0);
+      // Seated, the band lies exactly along the slit between the two cushions (the ring's own plane is the box's x axis).
+      ring.position.set(box.position.x, RING_REST, box.position.z); ring.rotation.set(0, box.rotation.y, 0);
       if (!OPEN) {
         const lift = seg(p, 0.12, 0.195); // straight up and clear of the cushion first
         ring.position.y = lerp(RING_REST, RING_UP, lift) + Math.sin(t * 0.9) * 0.025 * lift * motion;
         // One unhurried turn as it rises, so the stone shows itself all the way round, then it settles facing us.
-        const spin = smooth(clamp((p - 0.195) / 0.08, 0, 1)) * Math.PI * 2; // then the turn, in the air
-        ring.rotation.y = -0.35 + spin + Math.sin(t * 0.35) * 0.06 * motion * lift + px * 0.12 * lift;
+        const spin = smooth(clamp((p - 0.195) / 0.08, 0, 1)) * (Math.PI * 2 - 0.35); // then the turn, in the air, ending three-quarters on
+        ring.rotation.y = box.rotation.y + spin + Math.sin(t * 0.35) * 0.06 * motion * lift + px * 0.12 * lift;
         ring.rotation.x = py * 0.08 * lift;
         ring.rotation.z = Math.sin(t * 0.5) * 0.05 * lift * motion;
       }
