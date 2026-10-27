@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimitByKeyAndIp } from "@/lib/rate-limit";
+import { invitationDataSchema } from "./schemas";
 import type { InvitationData, RsvpViewMode } from "./types";
 
 export interface GetInvitationResult {
@@ -18,42 +19,53 @@ export async function getInvitationByToken(
     return { data: null, state: "invalid_link" };
   }
 
-  // Rate limit token lookups: max 40 lookups per minute per token
-  const rateLimit = checkRateLimit(`invitation_lookup:${cleanToken}`, 40);
+  const supabase = await createClient();
+
+  // Rate limit token lookups keyed by token AND hashed client IP
+  const rateLimit = await checkRateLimitByKeyAndIp({
+    prefix: "lookup",
+    identifier: cleanToken,
+    tokenLimit: 40,
+    ipLimit: 120,
+    client: supabase,
+  });
+
   if (!rateLimit.success) {
     return { data: null, state: "invalid_link", rateLimited: true };
   }
 
   // Call get_invitation RPC strictly (never direct table access)
-  const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_invitation", {
     p_token: cleanToken,
   });
 
-  if (error || !data || typeof data !== "object") {
+  if (error || !data) {
     return { data: null, state: "invalid_link" };
   }
 
-  const raw = data as unknown as InvitationData;
-  if (!raw.guest || !raw.event) {
+  // Validate database payload strictly with Zod
+  const parsed = invitationDataSchema.safeParse(data);
+  if (!parsed.success) {
     return { data: null, state: "invalid_link" };
   }
+
+  const inv = parsed.data;
 
   // Determine ceremonial RSVP state
-  if (raw.event.status !== "active") {
-    return { data: raw, state: "closed" };
+  if (inv.event.status !== "active") {
+    return { data: inv, state: "closed" };
   }
 
-  if (raw.event.rsvp_by && new Date(raw.event.rsvp_by).getTime() < Date.now()) {
-    return { data: raw, state: "deadline_passed" };
+  if (inv.event.rsvp_by && new Date(inv.event.rsvp_by).getTime() < Date.now()) {
+    return { data: inv, state: "deadline_passed" };
   }
 
-  if (raw.rsvp && raw.rsvp.responded_at) {
+  if (inv.rsvp && inv.rsvp.responded_at) {
     if (isReviseRequested) {
-      return { data: raw, state: "revise" };
+      return { data: inv, state: "revise" };
     }
-    return { data: raw, state: "already_replied" };
+    return { data: inv, state: "already_replied" };
   }
 
-  return { data: raw, state: "active" };
+  return { data: inv, state: "active" };
 }

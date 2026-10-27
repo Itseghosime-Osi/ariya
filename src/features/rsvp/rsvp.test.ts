@@ -6,6 +6,12 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue({
+    get: () => "127.0.0.1",
+  }),
+}));
+
 type SupabaseServerClient = Awaited<
   ReturnType<typeof serverClient.createClient>
 >;
@@ -49,10 +55,24 @@ describe("RSVP Domain", () => {
       table_name: null,
     };
 
+    const mockRpc = vi.fn().mockImplementation((fnName: string) => {
+      if (fnName === "hit_rate_limit") {
+        return Promise.resolve({
+          data: [
+            {
+              allowed: true,
+              remaining: 10,
+              reset_at: new Date(Date.now() + 60000).toISOString(),
+            },
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: mockData, error: null });
+    });
+
     vi.mocked(serverClient.createClient).mockResolvedValue(
-      mockSupabase({
-        rpc: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-      })
+      mockSupabase({ rpc: mockRpc })
     );
 
     const res = await getInvitationByToken("valid_token_sample_12345");
@@ -83,15 +103,32 @@ describe("RSVP Domain", () => {
         couple: "Folake & Tunde",
         date: "2026-12-12T14:00:00Z",
         venue: "Grand Ballroom",
+        area: null,
+        dress_code: null,
+        rsvp_by: null,
         status: "active",
       },
       table_name: "Table 1",
     };
 
+    const mockRpc = vi.fn().mockImplementation((fnName: string) => {
+      if (fnName === "hit_rate_limit") {
+        return Promise.resolve({
+          data: [
+            {
+              allowed: true,
+              remaining: 10,
+              reset_at: new Date(Date.now() + 60000).toISOString(),
+            },
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: mockData, error: null });
+    });
+
     vi.mocked(serverClient.createClient).mockResolvedValue(
-      mockSupabase({
-        rpc: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-      })
+      mockSupabase({ rpc: mockRpc })
     );
 
     const res = await getInvitationByToken("valid_token_sample_12345");
@@ -110,6 +147,9 @@ describe("RSVP Domain", () => {
       rsvp: {
         status: "accepted",
         attending_count: 2,
+        plus_one_name: null,
+        dietary: null,
+        note: null,
         responded_at: "2026-10-25T10:00:00Z",
       },
       event: {
@@ -118,15 +158,32 @@ describe("RSVP Domain", () => {
         couple: "Folake & Tunde",
         date: "2026-12-12T14:00:00Z",
         venue: "Grand Ballroom",
+        area: null,
+        dress_code: null,
+        rsvp_by: null,
         status: "active",
       },
       table_name: "Table 1",
     };
 
+    const mockRpc = vi.fn().mockImplementation((fnName: string) => {
+      if (fnName === "hit_rate_limit") {
+        return Promise.resolve({
+          data: [
+            {
+              allowed: true,
+              remaining: 10,
+              reset_at: new Date(Date.now() + 60000).toISOString(),
+            },
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: mockData, error: null });
+    });
+
     vi.mocked(serverClient.createClient).mockResolvedValue(
-      mockSupabase({
-        rpc: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-      })
+      mockSupabase({ rpc: mockRpc })
     );
 
     const res = await getInvitationByToken("valid_token_sample_12345", true);
@@ -149,15 +206,32 @@ describe("RSVP Domain", () => {
         couple: "A & B",
         date: "2026-12-12",
         venue: "V",
+        area: null,
+        dress_code: null,
+        rsvp_by: null,
         status: "archived",
       },
       table_name: null,
     };
 
+    const mockRpc = vi.fn().mockImplementation((fnName: string) => {
+      if (fnName === "hit_rate_limit") {
+        return Promise.resolve({
+          data: [
+            {
+              allowed: true,
+              remaining: 10,
+              reset_at: new Date(Date.now() + 60000).toISOString(),
+            },
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: mockData, error: null });
+    });
+
     vi.mocked(serverClient.createClient).mockResolvedValue(
-      mockSupabase({
-        rpc: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-      })
+      mockSupabase({ rpc: mockRpc })
     );
 
     const res = await getInvitationByToken("valid_token_sample_12345");
