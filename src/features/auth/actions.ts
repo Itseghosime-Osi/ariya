@@ -3,6 +3,7 @@
 import { clientEnv } from "@/lib/env/client";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { mapError } from "@/lib/errors";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -32,7 +33,7 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to sign in") };
   }
 
   const redirectTo = safeRedirectPath(parsed.data.next, "/events");
@@ -63,7 +64,7 @@ export async function signUpAction(
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to create account") };
   }
 
   return { ok: true, data: { hasSession: Boolean(data.session) } };
@@ -88,7 +89,7 @@ export async function forgotPasswordAction(
   );
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to send reset link") };
   }
 
   return { ok: true };
@@ -110,7 +111,7 @@ export async function resetPasswordAction(
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to update password") };
   }
 
   return { ok: true };
@@ -121,7 +122,7 @@ export async function signOutAction(): Promise<ActionResult> {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to sign out") };
   }
 
   return { ok: true };

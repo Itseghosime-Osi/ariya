@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { normalizePhoneNumber } from "@/lib/phone";
 
-export const GUEST_SIDE_ENUM = ["groom", "bride", "mutual"] as const;
+export const GUEST_SIDE_ENUM = [
+  "bride",
+  "groom",
+  "family",
+  "vip",
+  "planner",
+  "imported",
+  "mutual",
+] as const;
 export type GuestSide = (typeof GUEST_SIDE_ENUM)[number];
 
 export const guestRowSchema = z.object({
@@ -32,7 +40,9 @@ export const guestRowSchema = z.object({
     .toLowerCase()
     .optional()
     .transform((val): GuestSide => {
-      if (val === "groom" || val === "bride") return val;
+      if (val && (GUEST_SIDE_ENUM as readonly string[]).includes(val)) {
+        return val as GuestSide;
+      }
       return "mutual";
     }),
   group_name: z

@@ -3,10 +3,14 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { generateToken } from "@/lib/tokens";
+import { mapError } from "@/lib/errors";
 import type { Json } from "@/lib/supabase/database.types";
 import { MAX_IMPORT_ROWS } from "./csv-parser";
-import { guestRowSchema, type ValidatedGuestRow } from "./schemas";
+import {
+  guestRowSchema,
+  type ValidatedGuestRow,
+  type ExistingGuestIdentifier,
+} from "./schemas";
 import type { Guest } from "./types";
 
 export type ActionResult<T = void> =
@@ -22,14 +26,13 @@ export async function createGuestAction(
     return { ok: false, error: firstErr };
   }
 
-  const token = generateToken(22);
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("guests")
     .insert({
       event_id: eventId,
-      name: parsed.data.name,
+      name: parsed.data.name.trim(),
       phone: parsed.data.phone,
       email: parsed.data.email,
       side: parsed.data.side,
@@ -38,13 +41,12 @@ export async function createGuestAction(
       plus_ones_allowed: parsed.data.plus_ones_allowed,
       is_vip: parsed.data.is_vip,
       notes: parsed.data.notes,
-      rsvp_token: token,
     })
     .select()
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message ?? "Failed to create guest" };
+    return { ok: false, error: mapError(error, "Failed to create guest") };
   }
 
   revalidatePath(`/events/${eventId}/guests`);
@@ -68,7 +70,7 @@ export async function updateGuestAction(
   const { data, error } = await supabase
     .from("guests")
     .update({
-      name: parsed.data.name,
+      name: parsed.data.name.trim(),
       phone: parsed.data.phone,
       email: parsed.data.email,
       side: parsed.data.side,
@@ -85,7 +87,7 @@ export async function updateGuestAction(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message ?? "Failed to update guest" };
+    return { ok: false, error: mapError(error, "Failed to update guest") };
   }
 
   revalidatePath(`/events/${eventId}/guests`);
@@ -106,7 +108,7 @@ export async function deleteGuestAction(
     .eq("event_id", eventId);
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false, error: mapError(error, "Failed to remove guest") };
   }
 
   revalidatePath(`/events/${eventId}/guests`);
@@ -118,18 +120,16 @@ export async function regenerateTokenAction(
   guestId: string,
   eventId: string
 ): Promise<ActionResult<{ newToken: string }>> {
-  const newToken = generateToken(22);
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("regenerate_guest_token", {
     p_guest_id: guestId,
-    p_new_token: newToken,
   });
 
   if (error || !data) {
     return {
       ok: false,
-      error: error?.message ?? "Failed to regenerate invitation link",
+      error: mapError(error, "Failed to regenerate invitation link"),
     };
   }
 
@@ -152,7 +152,7 @@ export async function importGuestsAction(
     };
   }
 
-  const validPayload: (ValidatedGuestRow & { rsvp_token: string })[] = [];
+  const validPayload: ValidatedGuestRow[] = [];
 
   for (let i = 0; i < rawRows.length; i++) {
     const validated = guestRowSchema.safeParse(rawRows[i]);
@@ -160,10 +160,10 @@ export async function importGuestsAction(
       const err = validated.error.errors[0]?.message ?? "Invalid row";
       return { ok: false, error: `Row ${i + 1}: ${err}` };
     }
-    const token = generateToken(22);
     validPayload.push({
       ...validated.data,
-      rsvp_token: token,
+      name: validated.data.name.trim(),
+      side: validated.data.side,
     });
   }
 
@@ -174,11 +174,30 @@ export async function importGuestsAction(
   });
 
   if (error || !data) {
-    return { ok: false, error: error?.message ?? "Failed to import guests" };
+    return { ok: false, error: mapError(error, "Failed to import guests") };
   }
 
   const resultObj = data as { ok: boolean; imported_count: number };
   revalidatePath(`/events/${eventId}/guests`);
   revalidatePath(`/events/${eventId}`);
   return { ok: true, data: { count: resultObj.imported_count } };
+}
+
+export async function getExistingGuestIdentifiersAction(
+  eventId: string
+): Promise<ActionResult<ExistingGuestIdentifier[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("name, phone, email")
+    .eq("event_id", eventId);
+
+  if (error || !data) {
+    return {
+      ok: false,
+      error: mapError(error, "Failed to retrieve existing guests"),
+    };
+  }
+
+  return { ok: true, data };
 }

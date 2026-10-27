@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateToken } from "@/lib/tokens";
+import { mapError } from "@/lib/errors";
 import {
   createEventSchema,
   updateEventSchema,
@@ -23,32 +24,6 @@ function slugify(text: string): string {
     .trim();
 }
 
-function mapDatabaseError(
-  errorMessage: string,
-  defaultMessage: string
-): string {
-  if (
-    errorMessage.includes("permission denied") ||
-    errorMessage.includes("violates row-level security") ||
-    errorMessage.includes("P0001")
-  ) {
-    return "You do not have permission to perform this action.";
-  }
-  if (
-    errorMessage.includes("unique constraint") ||
-    errorMessage.includes("23505")
-  ) {
-    return "A celebration with these details already exists.";
-  }
-  if (errorMessage.includes("foreign key") || errorMessage.includes("23503")) {
-    return "The referenced item could not be found.";
-  }
-  if (errorMessage.includes("invalid input syntax")) {
-    return "Invalid input format provided.";
-  }
-  return defaultMessage;
-}
-
 export async function createEventAction(
   input: CreateEventInput
 ): Promise<ActionResult<{ eventId: string; slug: string }>> {
@@ -65,27 +40,25 @@ export async function createEventAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, error: "Authentication required to create an event" };
+    return { ok: false, error: "Authentication required to create event" };
   }
 
-  const baseSlug =
-    slugify(parsed.data.couple || parsed.data.title) || "celebration";
+  const baseSlug = slugify(parsed.data.title);
+  const maxAttempts = 5;
 
-  // Slug collision retry: retry up to 3 times on unique constraint collision
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const fullToken = generateToken();
-    const token = fullToken.slice(0, 8).toLowerCase();
-    const slug = `${baseSlug}-${token}`;
-    const registryCode =
-      parsed.data.registryCode ||
-      `LOS-${new Date().getFullYear()}-${token.toUpperCase()}`;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const slug =
+      attempt === 0
+        ? baseSlug
+        : `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+    const registryCode = generateToken(22);
 
     const { data, error } = await supabase.rpc("create_event", {
       p_title: parsed.data.title,
       p_couple: parsed.data.couple,
       p_date: new Date(parsed.data.date).toISOString(),
       p_venue: parsed.data.venue,
-      p_area: parsed.data.area || "Victoria Island, Lagos",
+      p_area: parsed.data.area,
       p_dress_code:
         parsed.data.dressCode || "Aṣọ-Ẹbí: Burgundy velvet and champagne gold",
       p_slug: slug,
@@ -104,16 +77,12 @@ export async function createEventAction(
     }
 
     if (error) {
-      if (
-        error.code === "23505" ||
-        error.message.includes("unique") ||
-        error.message.includes("duplicate key")
-      ) {
+      if (error.code === "23505") {
         continue;
       }
       return {
         ok: false,
-        error: mapDatabaseError(error.message, "Failed to create celebration"),
+        error: mapError(error, "Failed to create celebration"),
       };
     }
   }
@@ -169,10 +138,7 @@ export async function updateEventAction(
   if (error) {
     return {
       ok: false,
-      error: mapDatabaseError(
-        error.message,
-        "Unable to save celebration updates"
-      ),
+      error: mapError(error, "Unable to save celebration updates"),
     };
   }
 
