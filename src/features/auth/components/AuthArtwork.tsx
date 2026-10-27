@@ -97,7 +97,7 @@ export function AuthArtwork() {
               <span className="w-2 h-2 rounded-full bg-emerald-600" />
               <span>Active synchronization</span>
             </span>
-            <span className="font-label-sm text-label-sm text-mist italic">
+            <span className="font-label-sm text-label-sm text-on-surface-variant italic">
               Example demonstration
             </span>
           </div>
