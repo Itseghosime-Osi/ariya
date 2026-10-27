@@ -45,6 +45,7 @@ select set_eq(
       ('get_invitation'),
       ('get_public_event'),
       ('get_user_events_with_metrics'),
+      ('global_search'),
       ('has_event_role'),
       ('import_guests'),
       ('invite_team_member'),

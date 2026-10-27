@@ -820,6 +820,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      global_search: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: Json;
+      };
       has_event_role: {
         Args: { p_event_id: string; p_roles: string[] };
         Returns: boolean;
