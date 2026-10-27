@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(30);
 
 -- 1. Create test users in auth.users
 insert into auth.users (id, email)
@@ -226,6 +226,44 @@ select lives_ok(
 select lives_ok(
   'select * from public.search_guests(''a0000000-0000-0000-0000-000000000001'', ''(x)'')',
   'search_guests safely handles parenthesis input'
+);
+
+-- TEST 23: Direct INSERT with a chosen token gets an auto-generated one instead
+insert into public.guests (id, event_id, name, rsvp_token)
+values ('c0000000-0000-0000-0000-000000000099', 'a0000000-0000-0000-0000-000000000001', 'Token Tamper Test', 'chosen_by_caller_token_123');
+
+select isnt(
+  (select rsvp_token from public.guests where id = 'c0000000-0000-0000-0000-000000000099'),
+  'chosen_by_caller_token_123',
+  'Trigger replaces caller-chosen token on direct insert'
+);
+select matches(
+  (select rsvp_token from public.guests where id = 'c0000000-0000-0000-0000-000000000099'),
+  '^[0-9A-Za-z_-]{22,}$',
+  'Replaced token matches safe base64url pattern'
+);
+
+-- TEST 24: Direct UPDATE of rsvp_token by owner fails (revoked column privilege)
+select throws_ok(
+  'update public.guests set rsvp_token = ''hacked_new_token'' where id = ''c0000000-0000-0000-0000-000000000001''',
+  '42501',
+  NULL,
+  'Direct UPDATE of rsvp_token is revoked from authenticated users'
+);
+
+-- TEST 25: find_import_duplicates matches by phone, then email, then name
+select results_eq(
+  'select row_index, match_type from public.find_import_duplicates(
+    ''a0000000-0000-0000-0000-000000000001'',
+    ''[
+      {"phone": "08011111111", "email": "other@example.com", "name": "Different Name"},
+      {"phone": "08099999999", "email": "guest1@example.com", "name": "Different Name 2"},
+      {"phone": "08099999999", "email": "nomatch@example.com", "name": "Guest Event 1"},
+      {"phone": "08088888888", "email": "new@example.com", "name": "Completely New Guest"}
+    ]''::jsonb
+  )',
+  'VALUES (1, ''phone''), (2, ''email''), (3, ''name'')',
+  'find_import_duplicates correctly detects phone, email, and name duplicates'
 );
 
 select * from finish();

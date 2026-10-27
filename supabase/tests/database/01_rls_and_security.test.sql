@@ -43,6 +43,9 @@ values
   ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'Guest 2', 2, false, 'token_valid_guest_2')
 on conflict (id) do nothing;
 
+update public.guests set rsvp_token = 'token_valid_guest_1' where id = 'c0000000-0000-0000-0000-000000000001';
+update public.guests set rsvp_token = 'token_valid_guest_2' where id = 'c0000000-0000-0000-0000-000000000002';
+
 -- TEST 1: User 1 (owner) CAN see their event
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111"}';
