@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Celebration Suite Smoke Flow", () => {
-  test("sign up -> create event -> guest registry -> import csv -> copy invite link", async ({
+  test("sign up -> create event -> guest registry -> import csv -> copy invite link -> submit rsvp -> publish event", async ({
     page,
     context,
   }) => {
@@ -196,5 +196,34 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
     await page.goto(`/events/${eventId}`);
     await expect(page.getByText(/guests confirmed/i)).toBeVisible();
     await expect(page.getByText("1 of 2 people").first()).toBeVisible();
+
+    // 27. Navigate to Event Page Editor and verify initial 404 for unshared public page
+    await page.goto(`/events/${eventId}/page-editor`);
+    await expect(page.getByText(/Event Page Editor/i)).toBeVisible();
+
+    const publicPageLink = page.getByRole("link", {
+      name: /view public page/i,
+    });
+    const publicHref = await publicPageLink.getAttribute("href");
+    expect(publicHref).toContain("/e/");
+
+    // Before toggling isPublic, public route returns 404
+    const unpubRes = await page.goto(publicHref!);
+    expect(unpubRes?.status()).toBe(404);
+
+    // 28. Enable public discovery in Page Editor and Save
+    await page.goto(`/events/${eventId}/page-editor`);
+    const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
+    await isPublicCheckbox.check();
+    await page.getByRole("button", { name: /save changes/i }).click();
+    await expect(page.getByText(/updates saved successfully/i)).toBeVisible({
+      timeout: 10000,
+    });
+
+    // 29. Now visit public route and verify it renders celebration details
+    const pubRes = await page.goto(publicHref!);
+    expect(pubRes?.status()).toBe(200);
+    await expect(page.getByText(eventTitle).first()).toBeVisible();
+    await expect(page.getByText(venueName).first()).toBeVisible();
   });
 });
