@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Celebration Suite Smoke Flow", () => {
-  test("sign up -> create event -> guest registry -> import csv -> copy invite link -> submit rsvp -> publish event", async ({
+  test("sign up -> create event -> guest registry -> import csv -> copy invite link -> submit rsvp -> publish event -> team invite -> staff blocked from billing -> paystack test flow -> gated action unlocks", async ({
     page,
     context,
+    browser,
   }) => {
     // Grant clipboard permissions for copy link test
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
@@ -375,5 +376,94 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No,1`;
     // 40. Verify telemetry count updated
     await expect(page.getByText(/Admitted Through Desk/i)).toBeVisible();
     await expect(page.getByText("Guests in celebration").first()).toBeVisible();
+
+    // 41. Team Management: Owner navigates to Team & Roles
+    await page.goto(`/events/${eventId}/team`);
+    await expect(page.getByText(/Team & Collaboration Roles/i)).toBeVisible();
+
+    // 42. Owner invites a new staff team member
+    const staffEmail = `staff_${timestamp}@owambe.ng`;
+    await page.getByRole("button", { name: /invite member/i }).click();
+    await expect(page.getByText(/Collaborator Email/i)).toBeVisible();
+    await page.locator('input[name="email"]').fill(staffEmail);
+    await page.locator('select[name="role"]').selectOption("staff");
+    await page.getByRole("button", { name: /send team invite/i }).click();
+
+    // 43. Verify pending invite displayed and copy link
+    await expect(page.getByText(staffEmail).first()).toBeVisible({
+      timeout: 5000,
+    });
+    await page
+      .getByRole("button", { name: /copy invite link/i })
+      .first()
+      .click();
+    const inviteLink = await page.evaluate(() =>
+      navigator.clipboard.readText()
+    );
+    expect(inviteLink).toContain("/invite/");
+
+    // 44. Staff context: Staff signs up, accepts invite, and attempts to view billing
+    const staffContext = await browser.newContext();
+    const staffPage = await staffContext.newPage();
+
+    await staffPage.goto("/sign-up");
+    await staffPage.locator("#fullName").fill("Staff Concierge");
+    await staffPage.locator("#emailInput").fill(staffEmail);
+    await staffPage.locator("#password").fill(testPassword);
+    await staffPage.locator("#confirmPassword").fill(testPassword);
+    await staffPage
+      .getByRole("button", { name: /create celebration account/i })
+      .click();
+    await staffPage.waitForURL(/\/(events|sign-in)/, { timeout: 15000 });
+
+    if (staffPage.url().includes("/sign-in")) {
+      await staffPage.locator("#email").fill(staffEmail);
+      await staffPage.locator("#password").fill(testPassword);
+      await staffPage.getByRole("button", { name: /sign in/i }).click();
+      await staffPage.waitForURL(/\/events/, { timeout: 15000 });
+    }
+
+    // Accept invite via copied link
+    await staffPage.goto(inviteLink);
+    await expect(staffPage.getByText(eventTitle).first()).toBeVisible();
+    await staffPage
+      .getByRole("button", { name: /accept & join team/i })
+      .click();
+    await staffPage.waitForURL(new RegExp(`/events/${eventId}`), {
+      timeout: 10000,
+    });
+
+    // Verify staff is blocked from billing
+    await staffPage.goto(`/events/${eventId}/billing`);
+    await expect(staffPage.getByText(/Billing Access Restricted/i)).toBeVisible(
+      { timeout: 10000 }
+    );
+    await staffContext.close();
+
+    // 45. Owner context: Paystack test payment flow
+    await page.goto(`/events/${eventId}/billing`);
+    await expect(page.getByText(/Free Tier \(Trial\)/i)).toBeVisible();
+
+    await page.getByRole("button", { name: /pay with paystack/i }).click();
+    await expect(page.getByText(/Paystack Test Gateway/i)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Authorize test payment at edge
+    await page
+      .getByRole("button", { name: /authorize successful test payment/i })
+      .click();
+
+    // 46. Verify Celebration Pass unlocked
+    await expect(
+      page.getByText(/Royal Celebration Pass \(Unlocked\)/i)
+    ).toBeVisible({ timeout: 10000 });
+
+    // 47. Verify Gated Quota banner disappears on Invitations and Reminders
+    await page.goto(`/events/${eventId}/invitations`);
+    await expect(page.getByText(/Free Tier Quota/i)).not.toBeVisible();
+
+    await page.goto(`/events/${eventId}/reminders`);
+    await expect(page.getByText(/Free Tier Quota/i)).not.toBeVisible();
   });
 });
