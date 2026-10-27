@@ -193,11 +193,6 @@ export function GuestRegistryView({
       <CsvImportModal
         eventId={eventId}
         isOpen={isImportOpen}
-        existingGuests={initialGuests.map((g) => ({
-          phone: g.phone,
-          email: g.email,
-          name: g.name,
-        }))}
         onClose={() => setIsImportOpen(false)}
         onImportComplete={() => router.refresh()}
       />

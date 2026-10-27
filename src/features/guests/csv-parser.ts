@@ -173,3 +173,33 @@ export function parseGuestCsvContent(
     duplicateRows,
   };
 }
+
+export function mergeRemoteDuplicates(
+  localResult: CsvParseResult,
+  remoteDuplicates: {
+    rowIndex: number;
+    matchType: "phone" | "email" | "name";
+    duplicateWith: string;
+  }[]
+): CsvParseResult {
+  if (remoteDuplicates.length === 0) return localResult;
+  const dupMap = new Map(remoteDuplicates.map((d) => [d.rowIndex, d]));
+  const validRows: ValidatedGuestRow[] = [];
+  const duplicateRows = [...localResult.duplicateRows];
+
+  localResult.validRows.forEach((row, idx) => {
+    const match = dupMap.get(idx + 1);
+    if (match) {
+      duplicateRows.push({
+        rowIndex: idx + 1,
+        guest: row,
+        matchType: match.matchType,
+        duplicateWith: match.duplicateWith,
+      });
+    } else {
+      validRows.push(row);
+    }
+  });
+
+  return { ...localResult, validRows, duplicateRows };
+}

@@ -6,11 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
 import type { Json } from "@/lib/supabase/database.types";
 import { MAX_IMPORT_ROWS } from "./csv-parser";
-import {
-  guestRowSchema,
-  type ValidatedGuestRow,
-  type ExistingGuestIdentifier,
-} from "./schemas";
+import { guestRowSchema, type ValidatedGuestRow } from "./schemas";
 import type { Guest } from "./types";
 
 export type ActionResult<T = void> =
@@ -183,21 +179,38 @@ export async function importGuestsAction(
   return { ok: true, data: { count: resultObj.imported_count } };
 }
 
-export async function getExistingGuestIdentifiersAction(
-  eventId: string
-): Promise<ActionResult<ExistingGuestIdentifier[]>> {
+export async function findImportDuplicatesAction(
+  eventId: string,
+  rows: { name: string; phone?: string | null; email?: string | null }[]
+): Promise<
+  ActionResult<
+    {
+      rowIndex: number;
+      matchType: "phone" | "email" | "name";
+      duplicateWith: string;
+    }[]
+  >
+> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("guests")
-    .select("name, phone, email")
-    .eq("event_id", eventId);
+  const { data, error } = await supabase.rpc("find_import_duplicates", {
+    p_event_id: eventId,
+    p_rows: rows,
+  });
 
   if (error || !data) {
     return {
       ok: false,
-      error: mapError(error, "Failed to retrieve existing guests"),
+      error: mapError(error, "Failed to check duplicates at scale"),
     };
   }
 
-  return { ok: true, data };
+  const results = (
+    data as { row_index: number; match_type: string; duplicate_with: string }[]
+  ).map((d) => ({
+    rowIndex: d.row_index,
+    matchType: d.match_type as "phone" | "email" | "name",
+    duplicateWith: d.duplicate_with,
+  }));
+
+  return { ok: true, data: results };
 }

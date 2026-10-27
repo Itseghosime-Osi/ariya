@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   autoDetectColumnMapping,
   parseGuestCsvContent,
+  mergeRemoteDuplicates,
   MAX_IMPORT_ROWS,
 } from "./csv-parser";
 import { detectDuplicate } from "./schemas";
@@ -215,5 +216,55 @@ Guest Three,08055556666,one@example.com
 
     const res = parseGuestCsvContent(longCsv, mapping);
     expect(res.totalRows).toBe(MAX_IMPORT_ROWS);
+  });
+});
+
+describe("mergeRemoteDuplicates", () => {
+  it("moves matched rows from validRows to duplicateRows", () => {
+    const localResult = {
+      headers: ["name", "phone"],
+      totalRows: 2,
+      validRows: [
+        {
+          name: "Guest One",
+          phone: null,
+          email: null,
+          party_size: 1,
+          side: "bride" as const,
+          group_name: null,
+          is_vip: false,
+          plus_ones_allowed: false,
+          notes: null,
+        },
+        {
+          name: "Guest Two",
+          phone: null,
+          email: null,
+          party_size: 1,
+          side: "bride" as const,
+          group_name: null,
+          is_vip: false,
+          plus_ones_allowed: false,
+          notes: null,
+        },
+      ],
+      errorRows: [],
+      duplicateRows: [],
+    };
+
+    const remoteDups = [
+      {
+        rowIndex: 1,
+        matchType: "name" as const,
+        duplicateWith: "Existing Guest One",
+      },
+    ];
+
+    const merged = mergeRemoteDuplicates(localResult, remoteDups);
+    expect(merged.validRows).toHaveLength(1);
+    expect(merged.validRows[0].name).toBe("Guest Two");
+    expect(merged.duplicateRows).toHaveLength(1);
+    expect(merged.duplicateRows[0].guest.name).toBe("Guest One");
+    expect(merged.duplicateRows[0].matchType).toBe("name");
   });
 });

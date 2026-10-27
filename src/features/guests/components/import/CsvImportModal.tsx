@@ -15,19 +15,16 @@ import { CsvImportSummary } from "./CsvImportSummary";
 import {
   autoDetectColumnMapping,
   parseGuestCsvContent,
+  mergeRemoteDuplicates,
   type FieldMapping,
   type CsvParseResult,
 } from "../../csv-parser";
-import {
-  importGuestsAction,
-  getExistingGuestIdentifiersAction,
-} from "../../actions";
-import type { ExistingGuestIdentifier, ValidatedGuestRow } from "../../schemas";
+import { importGuestsAction, findImportDuplicatesAction } from "../../actions";
+import type { ValidatedGuestRow } from "../../schemas";
 
 interface CsvImportModalProps {
   eventId: string;
   isOpen: boolean;
-  existingGuests: ExistingGuestIdentifier[];
   onClose: () => void;
   onImportComplete: () => void;
 }
@@ -37,15 +34,12 @@ type ImportStep = "upload" | "mapping" | "validation" | "summary";
 export function CsvImportModal({
   eventId,
   isOpen,
-  existingGuests,
   onClose,
   onImportComplete,
 }: CsvImportModalProps) {
   const [step, setStep] = React.useState<ImportStep>("upload");
   const [csvText, setCsvText] = React.useState<string>("");
   const [csvHeaders, setCsvHeaders] = React.useState<string[]>([]);
-  const [allExistingGuests, setAllExistingGuests] =
-    React.useState<ExistingGuestIdentifier[]>(existingGuests);
   const [mapping, setMapping] = React.useState<FieldMapping>({
     name: null,
     phone: null,
@@ -64,16 +58,6 @@ export function CsvImportModal({
   const [importedCount, setImportedCount] = React.useState(0);
   const [skippedCount, setSkippedCount] = React.useState(0);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      getExistingGuestIdentifiersAction(eventId).then((res) => {
-        if (res.ok && res.data) {
-          setAllExistingGuests(res.data);
-        }
-      });
-    }
-  }, [isOpen, eventId]);
 
   const resetState = () => {
     setStep("upload");
@@ -104,10 +88,32 @@ export function CsvImportModal({
     }
   };
 
-  const handleProceedToValidation = () => {
-    const valResult = parseGuestCsvContent(csvText, mapping, allExistingGuests);
-    setValidation(valResult);
-    setStep("validation");
+  const handleProceedToValidation = async () => {
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      const localResult = parseGuestCsvContent(csvText, mapping, []);
+      if (localResult.validRows.length > 0) {
+        const rowsToCheck = localResult.validRows.map((r) => ({
+          name: r.name,
+          phone: r.phone ?? null,
+          email: r.email ?? null,
+        }));
+        const dupRes = await findImportDuplicatesAction(eventId, rowsToCheck);
+        if (dupRes.ok && dupRes.data && dupRes.data.length > 0) {
+          const merged = mergeRemoteDuplicates(localResult, dupRes.data);
+          setValidation(merged);
+          setStep("validation");
+          return;
+        }
+      }
+      setValidation(localResult);
+      setStep("validation");
+    } catch {
+      setErrorMsg("Failed to check duplicates against event records");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCommitImport = async (candidates: ValidatedGuestRow[]) => {
