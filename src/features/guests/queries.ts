@@ -59,6 +59,7 @@ export async function getEventGuests(
     phone: row.phone,
     email: row.email,
     email_collected_via_rsvp: false,
+    check_in_code: (row as { check_in_code?: string }).check_in_code || "",
     side: row.side,
     group_name: row.group_name,
     party_size: row.party_size,
