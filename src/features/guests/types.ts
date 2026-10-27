@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/database.types";
+import type { FieldMapping, CsvParseResult } from "./csv-parser";
 
 export type Guest = Database["public"]["Tables"]["guests"]["Row"];
 export type GuestInsert = Database["public"]["Tables"]["guests"]["Insert"];
@@ -24,15 +25,25 @@ export interface GuestWithRsvpAndSeat extends Guest {
   seat?: GuestSeatSummary | null;
 }
 
+export type GuestWithDetails = GuestWithRsvpAndSeat;
+
 export interface GuestFilterState {
   search?: string;
-  side?: "all" | "groom" | "bride" | "mutual";
+  side?:
+    | "all"
+    | "groom"
+    | "bride"
+    | "family"
+    | "vip"
+    | "planner"
+    | "mutual"
+    | string;
   group?: "all" | string;
   rsvpStatus?: "all" | "accepted" | "declined" | "pending";
   seatedStatus?: "all" | "seated" | "unseated";
   isVip?: boolean | null;
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface GuestListResponse {
@@ -54,3 +65,7 @@ export interface GuestOverviewStats {
   unassignedCount: number;
   vipCount: number;
 }
+
+export type { FieldMapping, CsvParseResult };
+export type CsvColumnMapping = FieldMapping;
+export type CsvValidationResult = CsvParseResult;
