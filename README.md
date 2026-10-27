@@ -14,6 +14,10 @@ The project consists of:
 
 > **Note on `private-media/music.mp3`**: The file `private-media/music.mp3` is a commercial song used solely for private offline local class demos. It is kept completely outside `public/` so it is never bundled, served, or deployed publicly. The film automatically falls back to its live Web Audio API owambe groove when the file is absent.
 
+> [!IMPORTANT]
+> **Email Confirmation in Local Development vs. Hosted Production**:
+> Email confirmation is disabled in `supabase/config.toml` (`enable_confirmations = false`) strictly for local development convenience to allow automated testing and frictionless iteration. In any hosted staging or production Supabase project, email confirmation must remain enabled (`enable_confirmations = true`). The application sign-up flow in `src/features/auth/` gracefully supports both scenarios: immediate session redirection when confirmations are off, and prompting the user to check their email when confirmation is required.
+
 ## Local Development
 
 ### Prerequisites
