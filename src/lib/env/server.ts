@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 
-const serverEnvSchema = z
+export const serverEnvSchema = z
   .object({
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -13,9 +13,10 @@ const serverEnvSchema = z
     RESEND_API_KEY: z.string().min(1),
     RESEND_FROM_EMAIL: z.string().email(),
     RATE_LIMIT_SECRET: z
-      .string()
-      .min(16)
-      .default("super-secret-rate-limit-salt-key-minimum-16"),
+      .string({
+        required_error: "RATE_LIMIT_SECRET is required",
+      })
+      .min(32, "RATE_LIMIT_SECRET must be at least 32 characters"),
     CRON_SECRET: z.string().min(1),
   })
   .superRefine((data, ctx) => {
@@ -42,38 +43,39 @@ const serverEnvSchema = z
     }
   });
 
-const isSkip = process.env.SKIP_ENV_VALIDATION === "1";
+export function resolveServerEnv(
+  rawEnv: Record<string, string | undefined>,
+  options?: { nextPhase?: string; skipEnvValidation?: string }
+): z.infer<typeof serverEnvSchema> {
+  const nextPhase = options?.nextPhase ?? process.env.NEXT_PHASE;
+  const skipEnvVal =
+    options?.skipEnvValidation ?? process.env.SKIP_ENV_VALIDATION;
 
-const rawServerData = {
-  NODE_ENV: process.env.NODE_ENV,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
-  EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
-  MAILPIT_URL: process.env.MAILPIT_URL,
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
-  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
-  RATE_LIMIT_SECRET: process.env.RATE_LIMIT_SECRET,
-  CRON_SECRET: process.env.CRON_SECRET,
-};
+  // Allow SKIP_ENV_VALIDATION only during the production build phase
+  const isBuildPhase = nextPhase === "phase-production-build";
+  const shouldSkip = isBuildPhase && skipEnvVal === "1";
 
-export const serverEnv = isSkip
-  ? ({
+  if (shouldSkip) {
+    return {
       NODE_ENV:
-        (process.env.NODE_ENV as "development" | "test" | "production") ||
+        (rawEnv.NODE_ENV as "development" | "test" | "production") ||
         "development",
       SUPABASE_SERVICE_ROLE_KEY:
-        process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
-      PAYSTACK_SECRET_KEY:
-        process.env.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
+        rawEnv.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
+      PAYSTACK_SECRET_KEY: rawEnv.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
       EMAIL_TRANSPORT:
-        (process.env.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
-      MAILPIT_URL: process.env.MAILPIT_URL || "http://127.0.0.1:57324",
-      RESEND_API_KEY: process.env.RESEND_API_KEY || "re_mocked_for_build",
-      RESEND_FROM_EMAIL:
-        process.env.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
+        (rawEnv.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
+      MAILPIT_URL: rawEnv.MAILPIT_URL || "http://127.0.0.1:57324",
+      RESEND_API_KEY: rawEnv.RESEND_API_KEY || "re_mocked_for_build",
+      RESEND_FROM_EMAIL: rawEnv.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
       RATE_LIMIT_SECRET:
-        process.env.RATE_LIMIT_SECRET ||
-        "super-secret-rate-limit-salt-key-minimum-16",
-      CRON_SECRET: process.env.CRON_SECRET || "cron_placeholder",
-    } as z.infer<typeof serverEnvSchema>)
-  : serverEnvSchema.parse(rawServerData);
+        rawEnv.RATE_LIMIT_SECRET ||
+        "super-secret-rate-limit-salt-key-minimum-32-chars-long",
+      CRON_SECRET: rawEnv.CRON_SECRET || "cron_placeholder",
+    };
+  }
+
+  return serverEnvSchema.parse(rawEnv);
+}
+
+export const serverEnv = resolveServerEnv(process.env);
