@@ -21,6 +21,7 @@
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "test:db": "supabase test db",
     "db:seed": "tsx scripts/seed-demo.ts",
+    "check:bundle": "tsx scripts/check-bundle.ts",
     "prepare": "husky"
   },
   "dependencies": {
