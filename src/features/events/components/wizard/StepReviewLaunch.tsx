@@ -3,6 +3,7 @@
 import React from "react";
 import { Icon } from "@/components/ui/icon";
 import { ReviewSection } from "./ReviewSection";
+import { formatEventDate, parseWatDateToUtc } from "@/lib/format";
 
 interface StepReviewLaunchProps {
   couple: string;
@@ -37,11 +38,7 @@ export function StepReviewLaunch({
   onEditGuestSetup,
   onLaunch,
 }: StepReviewLaunchProps) {
-  const formattedDate = new Date(date).toLocaleString("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Africa/Lagos",
-  });
+  const formattedDate = formatEventDate(parseWatDateToUtc(date));
 
   return (
     <section className="bg-surface-container-low rounded-xl p-6 sm:p-8 shadow-sm border border-surface-container-high">
@@ -132,7 +129,7 @@ export function StepReviewLaunch({
             >
               <div>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Initial Ingestion
+                  Import
                 </p>
                 <p className="font-title-lg text-title-lg text-paper-ink font-semibold uppercase">
                   {intakeMethod}

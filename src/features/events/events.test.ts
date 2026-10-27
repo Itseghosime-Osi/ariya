@@ -126,6 +126,49 @@ describe("Events Domain", () => {
         expect.objectContaining({
           p_title: "Chidinma & Tunde's Nuptials",
           p_couple: "Chidinma & Tunde",
+          p_date: "2026-12-12T13:00:00.000Z",
+        })
+      );
+    });
+
+    it("stores 14:00 WAT as 13:00 UTC, not 14:00 UTC", async () => {
+      const mockRpc = vi.fn().mockResolvedValue({
+        data: { id: "evt-wat-1", slug: "wat-slug-1" },
+        error: null,
+      });
+
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-wat" } },
+            }),
+          },
+          rpc: mockRpc,
+        })
+      );
+
+      const res = await createEventAction({
+        title: "WAT Nuptials",
+        couple: "Folake & Femi",
+        date: "2026-12-12T14:00",
+        venue: "Eko Hotel, Lagos",
+        area: "Victoria Island",
+        targetParties: 100,
+        intakeMethod: "manual",
+      });
+
+      expect(res.ok).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith(
+        "create_event",
+        expect.objectContaining({
+          p_date: "2026-12-12T13:00:00.000Z",
+        })
+      );
+      expect(mockRpc).not.toHaveBeenCalledWith(
+        "create_event",
+        expect.objectContaining({
+          p_date: "2026-12-12T14:00:00.000Z",
         })
       );
     });

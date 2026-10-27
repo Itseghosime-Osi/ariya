@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import { formatLagosDate } from "@/lib/format";
+import { formatEventDate } from "@/lib/format";
 import type { EventWithMetrics } from "../types";
 import { EventMetricsStrip } from "./EventMetricsStrip";
 
@@ -15,7 +15,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
   const { event, metrics } = item;
   const [copied, setCopied] = useState(false);
 
-  const formattedDate = formatLagosDate(event.date);
+  const formattedDate = formatEventDate(event.date);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/events/${event.id}`;

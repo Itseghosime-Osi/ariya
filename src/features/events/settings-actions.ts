@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { parseWatDateToUtc } from "@/lib/format";
 import { mapError } from "@/lib/errors";
 
 export interface ActionResult<T = void> {
@@ -46,7 +47,7 @@ export async function updateEventSettingsAction(
       slug: cleanSlug,
       venue: input.venue.trim(),
       area: input.area?.trim() || null,
-      date: new Date(input.date).toISOString(),
+      date: parseWatDateToUtc(input.date),
       dress_code: input.dressCode?.trim() || null,
       is_public: input.isPublic,
     })

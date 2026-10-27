@@ -52,10 +52,19 @@ export function CreateEventWizard() {
       if (!result.ok) {
         setErrorMessage(result.error);
       } else if (result.data) {
+        if (typeof window !== "undefined") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
         setCreatedEvent(result.data);
       }
     });
   };
+
+  React.useEffect(() => {
+    if (createdEvent && typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [createdEvent]);
 
   if (createdEvent) {
     return (

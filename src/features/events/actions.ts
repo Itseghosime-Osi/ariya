@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateToken } from "@/lib/tokens";
 import { mapError } from "@/lib/errors";
+import { parseWatDateToUtc } from "@/lib/format";
 import {
   createEventSchema,
   updateEventSchema,
@@ -56,7 +57,7 @@ export async function createEventAction(
     const { data, error } = await supabase.rpc("create_event", {
       p_title: parsed.data.title,
       p_couple: parsed.data.couple,
-      p_date: new Date(parsed.data.date).toISOString(),
+      p_date: parseWatDateToUtc(parsed.data.date),
       p_venue: parsed.data.venue,
       p_area: parsed.data.area,
       p_dress_code:
@@ -64,7 +65,7 @@ export async function createEventAction(
       p_slug: slug,
       p_registry_code: registryCode,
       p_rsvp_by: parsed.data.rsvpBy
-        ? new Date(parsed.data.rsvpBy).toISOString()
+        ? parseWatDateToUtc(parsed.data.rsvpBy)
         : undefined,
     });
 
@@ -121,7 +122,7 @@ export async function updateEventAction(
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.couple !== undefined) updateData.couple = parsed.data.couple;
   if (parsed.data.date !== undefined)
-    updateData.date = new Date(parsed.data.date).toISOString();
+    updateData.date = parseWatDateToUtc(parsed.data.date);
   if (parsed.data.venue !== undefined) updateData.venue = parsed.data.venue;
   if (parsed.data.area !== undefined) updateData.area = parsed.data.area;
   if (parsed.data.dressCode !== undefined)

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { formatEventDate } from "@/lib/format";
 
 interface SecondaryEventCardProps {
   id: string;
@@ -53,7 +54,7 @@ export function SecondaryEventCard({
               {title}
             </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-              {dateStr} • {venueStr}
+              {formatEventDate(dateStr)} • {venueStr}
             </p>
           </div>
         </div>

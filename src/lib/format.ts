@@ -58,6 +58,54 @@ export function formatLagosTime(
 }
 
 /**
+ * Format user-facing event date as "12 Dec 2026, 2:00 PM WAT" in Africa/Lagos timezone.
+ */
+export function formatEventDate(
+  dateInput: string | Date | number | null | undefined
+): string {
+  if (!dateInput) return "";
+  try {
+    const d =
+      typeof dateInput === "string" ? new Date(dateInput) : new Date(dateInput);
+    if (isNaN(d.getTime())) return String(dateInput);
+    const datePart = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Africa/Lagos",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+    const timePart = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Africa/Lagos",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+    return `${datePart}, ${timePart} WAT`;
+  } catch {
+    return String(dateInput);
+  }
+}
+
+/**
+ * Converts a datetime input from the wizard (WAT, Africa/Lagos, UTC+1) into an ISO UTC string.
+ * e.g. "2026-12-12T14:00" in WAT -> "2026-12-12T13:00:00.000Z"
+ */
+export function parseWatDateToUtc(input: string | null | undefined): string {
+  if (!input) return "";
+  const str = input.trim();
+  if (/[zZ]$|[+-]\d{2}(:?\d{2})?$/.test(str)) {
+    return new Date(str).toISOString();
+  }
+  if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}$/.test(str)) {
+    return new Date(str.replace(" ", "T") + ":00+01:00").toISOString();
+  }
+  if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}$/.test(str)) {
+    return new Date(str.replace(" ", "T") + "+01:00").toISOString();
+  }
+  return new Date(str).toISOString();
+}
+
+/**
  * Calculate days remaining until target date (0 if today or in the past).
  */
 export function daysUntil(dateInput: string | Date | number): number {
