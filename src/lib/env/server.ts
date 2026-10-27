@@ -1,30 +1,65 @@
 import "server-only";
 import { z } from "zod";
 
-const serverEnvSchema = z.object({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  PAYSTACK_SECRET_KEY: z.string().min(1),
-  RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: z.string().email(),
-  CRON_SECRET: z.string().min(1),
-});
+const serverEnvSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+    PAYSTACK_SECRET_KEY: z.string().min(1),
+    EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).default("mailpit"),
+    MAILPIT_URL: z.string().url().default("http://127.0.0.1:57324"),
+    RESEND_API_KEY: z.string().min(1),
+    RESEND_FROM_EMAIL: z.string().email(),
+    CRON_SECRET: z.string().min(1),
+  })
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV === "production") {
+      if (data.EMAIL_TRANSPORT !== "resend") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "EMAIL_TRANSPORT must be 'resend' in production",
+          path: ["EMAIL_TRANSPORT"],
+        });
+      }
+      if (
+        !data.RESEND_API_KEY ||
+        data.RESEND_API_KEY === "re_placeholder" ||
+        data.RESEND_API_KEY.startsWith("re_sample")
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "A valid non-placeholder RESEND_API_KEY is required in production",
+          path: ["RESEND_API_KEY"],
+        });
+      }
+    }
+  });
 
 const isSkip = process.env.SKIP_ENV_VALIDATION === "1";
 
 const rawServerData = isSkip
   ? {
+      NODE_ENV: process.env.NODE_ENV || "development",
       SUPABASE_SERVICE_ROLE_KEY:
         process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
       PAYSTACK_SECRET_KEY:
         process.env.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
+      EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT || "mailpit",
+      MAILPIT_URL: process.env.MAILPIT_URL || "http://127.0.0.1:57324",
       RESEND_API_KEY: process.env.RESEND_API_KEY || "re_placeholder",
       RESEND_FROM_EMAIL:
         process.env.RESEND_FROM_EMAIL || "rsvps@owambeplan.com",
       CRON_SECRET: process.env.CRON_SECRET || "cron_placeholder",
     }
   : {
+      NODE_ENV: process.env.NODE_ENV,
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
+      EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
+      MAILPIT_URL: process.env.MAILPIT_URL,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
       CRON_SECRET: process.env.CRON_SECRET,
