@@ -18,7 +18,15 @@ export async function getInvitationDeskData(
     .eq("id", eventId)
     .maybeSingle();
 
-  if (eventErr || !event) return null;
+  if (eventErr) {
+    console.error("[getInvitationDeskData] Database error loading event:", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
+    throw new Error(`Database error loading event: ${eventErr.message}`);
+  }
+
+  if (!event) return null;
 
   // 2. Fetch guests with RSVPs
   const { data: rawGuests, error: guestErr } = await supabase
@@ -41,7 +49,15 @@ export async function getInvitationDeskData(
     .eq("event_id", eventId)
     .order("created_at", { ascending: false });
 
-  if (guestErr || !rawGuests) return null;
+  if (guestErr) {
+    console.error("[getInvitationDeskData] Database error loading guests:", {
+      code: guestErr.code,
+      message: guestErr.message,
+    });
+    throw new Error(`Database error loading guests: ${guestErr.message}`);
+  }
+
+  if (!rawGuests) return null;
 
   const guests: InvitationGuest[] = rawGuests.map((g) => {
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;

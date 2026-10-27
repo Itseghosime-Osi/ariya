@@ -50,7 +50,15 @@ export async function getBillingDeskData(
     .eq("id", eventId)
     .single();
 
-  if (eventErr || !event) return null;
+  if (eventErr) {
+    console.error("[getBillingDeskData] Database error loading event:", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
+    throw new Error(`Database error loading event: ${eventErr.message}`);
+  }
+
+  if (!event) return null;
 
   // 3. Fetch payments and invoices (accessible to owner, planner, couple)
   const { data: rawPayments } = await supabase

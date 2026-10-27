@@ -42,7 +42,15 @@ export async function getPublicEventBySlug(
     p_slug: cleanSlug,
   });
 
-  if (error || !data || typeof data !== "object") {
+  if (error) {
+    console.error("[getPublicEventBySlug] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading public event: ${error.message}`);
+  }
+
+  if (!data || typeof data !== "object") {
     return null;
   }
 
@@ -83,7 +91,15 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 
   // Single aggregated query via RPC: eliminates N+1 queries across events, guests, rsvps and tables
   const { data, error } = await supabase.rpc("get_user_events_with_metrics");
-  if (error || !data || !Array.isArray(data)) {
+  if (error) {
+    console.error("[getUserEvents] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading user events: ${error.message}`);
+  }
+
+  if (!data || !Array.isArray(data)) {
     return [];
   }
 
@@ -108,7 +124,15 @@ export async function getEventById(
     .eq("id", eventId)
     .maybeSingle();
 
-  if (error || !event) {
+  if (error) {
+    console.error("[getEventById] Database error loading event:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading event: ${error.message}`);
+  }
+
+  if (!event) {
     return null;
   }
 
@@ -128,20 +152,41 @@ export async function getEventMetrics(
   const supabase = await createClient();
 
   // Query guests and RSVPs for this event
-  const { data: rawGuests } = await supabase
+  const { data: rawGuests, error: guestsError } = await supabase
     .from("guests")
     .select(
       "id, party_size, seating_conflict_at, rsvps (status, attending_count)"
     )
     .eq("event_id", eventId);
 
+  if (guestsError) {
+    console.error("[getEventMetrics] Database error loading guests:", {
+      code: guestsError.code,
+      message: guestsError.message,
+    });
+    throw new Error(`Database error loading guests: ${guestsError.message}`);
+  }
+
   const guests = rawGuests ?? [];
 
   // Query seating assignments count for this event
-  const { count: seatedCount } = await supabase
+  const { count: seatedCount, error: seatsError } = await supabase
     .from("seat_assignments")
     .select("id, tables!inner(event_id)", { count: "exact", head: true })
     .eq("tables.event_id", eventId);
+
+  if (seatsError) {
+    console.error(
+      "[getEventMetrics] Database error loading seat assignments:",
+      {
+        code: seatsError.code,
+        message: seatsError.message,
+      }
+    );
+    throw new Error(
+      `Database error loading seat assignments: ${seatsError.message}`
+    );
+  }
 
   const daysAway = Math.max(0, daysUntil(eventDate));
 
@@ -230,7 +275,17 @@ export async function getEventRecentResponses(
     .eq("event_id", eventId)
     .limit(10);
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventRecentResponses] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(
+      `Database error loading recent responses: ${error.message}`
+    );
+  }
+
+  if (!data || data.length === 0) {
     return [];
   }
 
@@ -280,7 +335,15 @@ export async function getEventMilestones(
     .order("due_date", { ascending: true })
     .limit(5);
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventMilestones] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading milestones: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
     return [];
   }
 

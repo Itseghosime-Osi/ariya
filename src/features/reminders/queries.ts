@@ -13,7 +13,15 @@ export async function getReminderDeskData(
     .eq("id", eventId)
     .maybeSingle();
 
-  if (eventErr || !event) return null;
+  if (eventErr) {
+    console.error("[getReminderDeskData] Database error loading event:", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
+    throw new Error(`Database error loading event: ${eventErr.message}`);
+  }
+
+  if (!event) return null;
 
   const { data: rawGuests, error: guestErr } = await supabase
     .from("guests")
@@ -31,7 +39,15 @@ export async function getReminderDeskData(
     .eq("event_id", eventId)
     .order("name", { ascending: true });
 
-  if (guestErr || !rawGuests) return null;
+  if (guestErr) {
+    console.error("[getReminderDeskData] Database error loading guests:", {
+      code: guestErr.code,
+      message: guestErr.message,
+    });
+    throw new Error(`Database error loading guests: ${guestErr.message}`);
+  }
+
+  if (!rawGuests) return null;
 
   const recipients: ReminderRecipient[] = rawGuests.map((g) => {
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;

@@ -39,7 +39,15 @@ export async function getEventGuests(
     p_offset: offset,
   });
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventGuests] Database RPC error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Failed to load event guests: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
     return {
       guests: [],
       totalCount: 0,

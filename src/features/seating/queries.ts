@@ -40,6 +40,26 @@ export async function getEventSeatingData(
       .order("name", { ascending: true }),
   ]);
 
+  if (tablesRes.error) {
+    console.error("[getEventSeatingData] Failed to load tables:", {
+      code: tablesRes.error.code,
+      message: tablesRes.error.message,
+    });
+    throw new Error(
+      `Failed to load seating tables: ${tablesRes.error.message}`
+    );
+  }
+
+  if (guestsRes.error) {
+    console.error("[getEventSeatingData] Failed to load guests:", {
+      code: guestsRes.error.code,
+      message: guestsRes.error.message,
+    });
+    throw new Error(
+      `Failed to load seating guests: ${guestsRes.error.message}`
+    );
+  }
+
   const rawTables = tablesRes.data || [];
   const rawGuests = guestsRes.data || [];
 

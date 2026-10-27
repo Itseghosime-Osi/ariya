@@ -23,6 +23,22 @@ export async function getVendorsWithTasks(
       .order("due_date", { ascending: true, nullsFirst: false }),
   ]);
 
+  if (vendorsRes.error) {
+    console.error("[getVendorsWithTasks] Failed to load vendors:", {
+      code: vendorsRes.error.code,
+      message: vendorsRes.error.message,
+    });
+    throw new Error(`Failed to load vendors: ${vendorsRes.error.message}`);
+  }
+
+  if (tasksRes.error) {
+    console.error("[getVendorsWithTasks] Failed to load vendor tasks:", {
+      code: tasksRes.error.code,
+      message: tasksRes.error.message,
+    });
+    throw new Error(`Failed to load vendor tasks: ${tasksRes.error.message}`);
+  }
+
   const rawVendors = (vendorsRes.data || []) as Vendor[];
   const rawTasks = (tasksRes.data || []) as VendorTask[];
 

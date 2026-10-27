@@ -31,7 +31,15 @@ export async function getTeamDeskData(
     )
     .eq("event_id", eventId);
 
-  if (membersError || !rawMembers) return null;
+  if (membersError) {
+    console.error("[getTeamDeskData] Failed to load team members:", {
+      code: membersError.code,
+      message: membersError.message,
+    });
+    throw new Error(`Failed to load team members: ${membersError.message}`);
+  }
+
+  if (!rawMembers) return null;
 
   let currentUserRole: EventRole | null = null;
 

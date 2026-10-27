@@ -27,6 +27,32 @@ export async function getCheckInDeskData(
       .eq("tables.event_id", eventId),
   ]);
 
+  if (expectedRes.error) {
+    console.error("[getCheckInDeskData] Failed to load RSVPs:", {
+      code: expectedRes.error.code,
+      message: expectedRes.error.message,
+    });
+    throw new Error(
+      `Failed to load check-in RSVPs: ${expectedRes.error.message}`
+    );
+  }
+  if (checkInsRes.error) {
+    console.error("[getCheckInDeskData] Failed to load check-ins:", {
+      code: checkInsRes.error.code,
+      message: checkInsRes.error.message,
+    });
+    throw new Error(`Failed to load check-ins: ${checkInsRes.error.message}`);
+  }
+  if (tablesRes.error) {
+    console.error("[getCheckInDeskData] Failed to load seating assignments:", {
+      code: tablesRes.error.code,
+      message: tablesRes.error.message,
+    });
+    throw new Error(
+      `Failed to load check-in tables: ${tablesRes.error.message}`
+    );
+  }
+
   const rawExpected = expectedRes.data || [];
   const totalExpected = rawExpected.reduce(
     (sum, r) => sum + (r.attending_count || 1),
