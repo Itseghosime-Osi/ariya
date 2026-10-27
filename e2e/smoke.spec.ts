@@ -107,9 +107,9 @@ test.describe("Celebration Suite Smoke Flow", () => {
     await expect(page.getByText(/Upload Guest CSV Roster/i)).toBeVisible();
 
     // 13. Upload small sample CSV
-    const sampleCsv = `Full Name,Phone Number,Email,Side,Group,VIP
-Babatunde Adeleke,08031234567,babatunde@lagos.ng,VIP,High Table,Yes
-Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
+    const sampleCsv = `Full Name,Phone Number,Email,Side,Group,VIP,Plus Ones
+Babatunde Adeleke,08031234567,babatunde@lagos.ng,VIP,High Table,Yes,0
+Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No,1`;
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "sample_guests.csv",
@@ -153,6 +153,25 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
     // 21. Retrieve copied invitation URL from clipboard
     const inviteUrl = await page.evaluate(() => navigator.clipboard.readText());
     expect(inviteUrl).toContain("/i/");
+
+    // Close Babatunde's drawer
+    await page.getByRole("button", { name: /close drawer/i }).click();
+
+    // Also grab Folashade Adeleke's RSVP link for seating conflict testing
+    await page.getByText("Folashade Adeleke").first().click();
+    await expect(page.getByText(/Guest Details/i)).toBeVisible();
+    await page
+      .getByRole("button", { name: /copy link/i })
+      .first()
+      .click();
+    await expect(page.getByText(/Copied Link/i)).toBeVisible();
+    const folashadeInviteUrl = await page.evaluate(() =>
+      navigator.clipboard.readText()
+    );
+    expect(folashadeInviteUrl).toContain("/i/");
+
+    // Close Folashade's drawer
+    await page.getByRole("button", { name: /close drawer/i }).click();
 
     // 22. Open the guest invitation link
     await page.goto(inviteUrl);
@@ -233,7 +252,7 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
     await expect(page.getByText(eventTitle).first()).toBeVisible();
     await expect(page.getByText(venueName).first()).toBeVisible();
 
-    // 30. Seating: Navigate to Seating Plan and create 2 tables
+    // 30. Seating: Navigate to Seating Plan and create tables
     await page.goto(`/events/${eventId}/seating`);
     await expect(page.getByText(/Seating & Floor Plan/i)).toBeVisible();
 
@@ -249,7 +268,16 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
       timeout: 5000,
     });
 
-    // Table 2: Family Table with capacity 8
+    // Table 2: Intimate Table with capacity 1 (for RSVP party-size increase conflict test)
+    await page.getByRole("button", { name: /new table/i }).click();
+    await page.locator('input[placeholder*="Table 01"]').fill("Intimate Table");
+    await page.locator('input[type="number"]').fill("1");
+    await page.getByRole("button", { name: /create table/i }).click();
+    await expect(page.getByText("Intimate Table").first()).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Table 3: Family Table with capacity 8
     await page.getByRole("button", { name: /new table/i }).click();
     await page.locator('input[placeholder*="Table 01"]').fill("Family Table");
     await page.locator('input[type="number"]').fill("8");
@@ -279,42 +307,72 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
       timeout: 5000,
     });
 
-    // 33. Seat Folashade Adeleke to Family Table via drag & drop (with keyboard select fallback)
-    const folashadeDragBtn = page.locator(
-      'button[aria-label="Drag Folashade Adeleke to table"]'
-    );
-    const familyTableCard = page.getByText("Family Table").first();
-    await folashadeDragBtn.dragTo(familyTableCard);
-
-    if (await folashadeSelect.isVisible()) {
-      const familyOptionVal = await folashadeSelect
-        .locator("option", { hasText: "Family Table" })
-        .getAttribute("value");
-      await folashadeSelect.selectOption(familyOptionVal!);
-    }
+    // 33. Seat Folashade Adeleke to Intimate Table (capacity 1)
+    const intimateOptionVal = await folashadeSelect
+      .locator("option", { hasText: "Intimate Table" })
+      .getAttribute("value");
+    await folashadeSelect.selectOption(intimateOptionVal!);
     await expect(page.getByText(/Seating chart updated/i)).toBeVisible({
       timeout: 5000,
     });
 
-    // 34. Check-in Desk: Navigate to check-in desk
+    // 34. Test Seating Conflict on RSVP: Folashade opens invite link and increases attending count to 2 (+1 escort)
+    await page.goto(folashadeInviteUrl);
+    await expect(page.getByText(/Personal Celebration Pass/i)).toBeVisible();
+    await expect(page.getByText("Folashade Adeleke").first()).toBeVisible();
+
+    await page.getByLabel(/Joyfully Accept/i).check();
+    const countSelect = page.locator('select[name="attendingCount"]');
+    await expect(countSelect).toBeVisible();
+    await countSelect.selectOption("2");
+    await page.locator('input[name="plusOneName"]').fill("Dr. Kunle Adeleke");
+    await page.getByRole("button", { name: /submit rsvp response/i }).click();
+
+    // Guest sees normal confirmation screen
+    await expect(page.getByText(/RSVP Confirmed & Honoured/i)).toBeVisible({
+      timeout: 10000,
+    });
+
+    // 35. Verify Overview Desk flags seating conflict on Next to Care For Card
+    await page.goto(`/events/${eventId}`);
+    await expect(page.getByText(/1 seating conflict/i)).toBeVisible();
+    await expect(page.getByText(/Party size changed on RSVP/i)).toBeVisible();
+
+    // 36. Verify Seating Desk lists Folashade as unseated with 'party size changed' badge
+    await page.goto(`/events/${eventId}/seating`);
+    await expect(page.getByText(/party size changed/i)).toBeVisible();
+
+    // Resolve conflict by assigning Folashade to Family Table (capacity 8)
+    const conflictedFolashadeSelect = page.locator(
+      'select[aria-label="Assign Folashade Adeleke to a table"]'
+    );
+    const familyOptionVal = await conflictedFolashadeSelect
+      .locator("option", { hasText: "Family Table" })
+      .getAttribute("value");
+    await conflictedFolashadeSelect.selectOption(familyOptionVal!);
+    await expect(page.getByText(/Seating chart updated/i)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 37. Check-in Desk: Navigate to check-in desk
     await page.goto(`/events/${eventId}/check-in`);
     await expect(
       page.getByText(/Check-In Desk & Reception Concierge/i)
     ).toBeVisible();
 
-    // 35. Perform manual check-in using Babatunde's pass code
+    // 38. Perform manual check-in using Babatunde's pass code
     expect(checkInCode).toBeTruthy();
     await page.locator('input[placeholder*="ARY-"]').fill(checkInCode!);
     await page.getByRole("button", { name: /admit guest/i }).click();
 
-    // 36. Verify Admission Approved with table assignment
+    // 39. Verify Admission Approved with table assignment
     await expect(page.getByText(/Admission Approved/i)).toBeVisible({
       timeout: 10000,
     });
     await expect(page.getByText("Babatunde Adeleke").first()).toBeVisible();
     await expect(page.getByText("VIP High Table").first()).toBeVisible();
 
-    // 37. Verify telemetry count updated
+    // 40. Verify telemetry count updated
     await expect(page.getByText(/Admitted Through Desk/i)).toBeVisible();
     await expect(page.getByText("Guests in celebration").first()).toBeVisible();
   });
