@@ -16,9 +16,32 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/rsvp.html",
-        destination: "/sign-in",
+        has: [
+          {
+            type: "query",
+            key: "token",
+            value: "(?<token>.*)",
+          },
+        ],
+        destination: "/i/:token",
         permanent: false,
-        // TODO: In Phase 4, point /rsvp.html to the real guest route (/i/[token])
+      },
+      {
+        source: "/rsvp.html",
+        has: [
+          {
+            type: "query",
+            key: "g",
+            value: "(?<g>.*)",
+          },
+        ],
+        destination: "/i/:g",
+        permanent: false,
+      },
+      {
+        source: "/rsvp.html",
+        destination: "/events",
+        permanent: false,
       },
     ];
   },
