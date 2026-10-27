@@ -33,7 +33,13 @@ export default function SignInPage() {
         </div>
 
         {/* Main Form Component */}
-        <SignInForm />
+        <React.Suspense
+          fallback={
+            <div className="my-10 h-96 animate-pulse bg-surface-container rounded-2xl" />
+          }
+        >
+          <SignInForm />
+        </React.Suspense>
 
         {/* Footer & Legal */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-on-surface-variant">

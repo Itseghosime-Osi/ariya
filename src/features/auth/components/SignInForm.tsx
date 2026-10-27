@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { signInAction } from "../actions";
 import { PasswordField } from "./PasswordField";
@@ -10,6 +10,7 @@ import { AuthFeedbackAlert } from "./AuthFeedbackAlert";
 
 export function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,17 +21,20 @@ export function SignInForm() {
     e.preventDefault();
     setErrorMessage(null);
 
+    const nextParam = searchParams?.get("next") ?? undefined;
+
     startTransition(async () => {
       const result = await signInAction({
         email,
         password,
         rememberMe,
+        next: nextParam,
       });
 
       if (!result.ok) {
         setErrorMessage(result.error);
       } else {
-        router.push("/events");
+        router.push(result.redirectTo ?? "/events");
         router.refresh();
       }
     });

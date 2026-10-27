@@ -4,6 +4,7 @@ export const signInSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(1, "Passcode is required"),
   rememberMe: z.boolean().default(true),
+  next: z.string().optional(),
 });
 
 export type SignInInput = z.infer<typeof signInSchema>;

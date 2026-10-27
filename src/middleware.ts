@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
-const AUTH_PATHS = [
-  "/sign-in",
-  "/sign-up",
-  "/forgot-password",
-  "/reset-password",
-];
+// Note: /reset-password is deliberately excluded from AUTH_PATHS so
+// that users arriving via a password-recovery link (who receive a temporary
+// recovery session from Supabase) can access the reset form rather than being
+// prematurely redirected away.
+const AUTH_PATHS = ["/sign-in", "/sign-up", "/forgot-password"];
 
 export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
@@ -23,19 +23,18 @@ export async function middleware(request: NextRequest) {
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     const redirectResponse = NextResponse.redirect(redirectUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value);
+      redirectResponse.cookies.set(cookie);
     });
     return redirectResponse;
   }
 
   if (user && isAuthPath) {
-    const nextParam = request.nextUrl.searchParams.get("next");
-    const target =
-      nextParam && nextParam.startsWith("/") ? nextParam : "/events";
+    const rawNext = request.nextUrl.searchParams.get("next");
+    const target = safeRedirectPath(rawNext, "/events");
     const redirectUrl = new URL(target, request.url);
     const redirectResponse = NextResponse.redirect(redirectUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value);
+      redirectResponse.cookies.set(cookie);
     });
     return redirectResponse;
   }

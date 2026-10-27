@@ -8,8 +8,22 @@ vi.mock("@/lib/supabase/middleware", () => ({
   updateSession: vi.fn(),
 }));
 
-function mockSession(user: Partial<User> | null) {
+function mockSession(
+  user: Partial<User> | null,
+  cookiesToSet?: Array<{
+    name: string;
+    value: string;
+    path?: string;
+    httpOnly?: boolean;
+    secure?: boolean;
+  }>
+) {
   const dummyResponse = NextResponse.next();
+  if (cookiesToSet) {
+    cookiesToSet.forEach((c) => {
+      dummyResponse.cookies.set(c);
+    });
+  }
   vi.mocked(supabaseMiddleware.updateSession).mockResolvedValue({
     supabaseResponse: dummyResponse,
     user: user as User | null,
@@ -33,6 +47,25 @@ describe("middleware route protection", () => {
     );
   });
 
+  it("copies cookies with options onto redirect responses", async () => {
+    mockSession(null, [
+      {
+        name: "sb-auth-token",
+        value: "xyz123",
+        path: "/",
+        httpOnly: true,
+        secure: true,
+      },
+    ]);
+
+    const req = new NextRequest("http://localhost:3000/events");
+    const res = await middleware(req);
+
+    expect(res.status).toBe(307);
+    const cookie = res.cookies.get("sb-auth-token");
+    expect(cookie?.value).toBe("xyz123");
+  });
+
   it("redirects authenticated user accessing /sign-in to /events", async () => {
     mockSession({ id: "user-123" });
 
@@ -41,6 +74,17 @@ describe("middleware route protection", () => {
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("http://localhost:3000/events");
+  });
+
+  it("allows authenticated user accessing /reset-password without redirecting away", async () => {
+    mockSession({ id: "recovery-user-123" });
+
+    const req = new NextRequest("http://localhost:3000/reset-password");
+    const res = await middleware(req);
+
+    // Should not redirect to /events; let the recovery session reach the reset form
+    expect(res.status).not.toBe(307);
+    expect(res.headers.get("location")).toBeNull();
   });
 
   it("redirects authenticated user to next parameter if valid internal path", async () => {
@@ -55,6 +99,30 @@ describe("middleware route protection", () => {
     expect(res.headers.get("location")).toBe(
       "http://localhost:3000/events/event-abc"
     );
+  });
+
+  it("blocks protocol-relative open redirect and falls back to /events", async () => {
+    mockSession({ id: "user-123" });
+
+    const req = new NextRequest(
+      "http://localhost:3000/sign-in?next=//evil.com"
+    );
+    const res = await middleware(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost:3000/events");
+  });
+
+  it("blocks backslash open redirect and falls back to /events", async () => {
+    mockSession({ id: "user-123" });
+
+    const req = new NextRequest(
+      "http://localhost:3000/sign-in?next=/\\evil.com"
+    );
+    const res = await middleware(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost:3000/events");
   });
 
   it("ignores external next redirect and falls back to /events", async () => {

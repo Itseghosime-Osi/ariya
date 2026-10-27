@@ -2,6 +2,7 @@
 
 import { clientEnv } from "@/lib/env/client";
 import { createClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -14,7 +15,7 @@ import {
 } from "./schemas";
 
 export type ActionResult<T = void> =
-  { ok: true; data?: T } | { ok: false; error: string };
+  { ok: true; data?: T; redirectTo?: string } | { ok: false; error: string };
 
 export async function signInAction(input: SignInInput): Promise<ActionResult> {
   const parsed = signInSchema.safeParse(input);
@@ -34,7 +35,8 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
     return { ok: false, error: error.message };
   }
 
-  return { ok: true };
+  const redirectTo = safeRedirectPath(parsed.data.next, "/events");
+  return { ok: true, redirectTo };
 }
 
 export async function signUpAction(input: SignUpInput): Promise<ActionResult> {
