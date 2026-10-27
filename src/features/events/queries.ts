@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { daysUntil } from "@/lib/format";
 import type {
   EventMetrics,
@@ -7,6 +8,50 @@ import type {
   MilestoneItem,
   RecentGuestResponse,
 } from "./types";
+
+export interface PublicCelebration {
+  id: string;
+  slug: string;
+  title: string;
+  couple: string;
+  date: string;
+  venue: string;
+  area: string | null;
+  dressCode: string | null;
+  rsvpBy: string | null;
+  status: string;
+}
+
+export async function getPublicEventBySlug(
+  slug: string
+): Promise<PublicCelebration | null> {
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
+    .from("events")
+    .select(
+      "id, slug, title, couple, date, venue, area, dress_code, rsvp_by, status"
+    )
+    .eq("slug", slug)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    slug: data.slug,
+    title: data.title,
+    couple: data.couple,
+    date: data.date,
+    venue: data.venue,
+    area: data.area,
+    dressCode: data.dress_code,
+    rsvpBy: data.rsvp_by,
+    status: data.status,
+  };
+}
 
 export async function getUserEvents(): Promise<EventWithMetrics[]> {
   const supabase = await createClient();

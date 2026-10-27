@@ -39,6 +39,12 @@ const NAV_ITEMS: NavItem[] = [
     activePattern: /\/seating/,
   },
   {
+    name: "Event Page & Editor",
+    href: (id) => (id ? `/events/${id}/page-editor` : "/events"),
+    icon: "edit",
+    activePattern: /\/page-editor/,
+  },
+  {
     name: "Invitation Atelier",
     href: (id) => (id ? `/events/${id}/invitations` : "/events"),
     icon: "styler",
