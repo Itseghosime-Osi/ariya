@@ -2,14 +2,17 @@
 
 import React from "react";
 import type { LivePreviewData } from "./LivePagePreview";
+import { CoverImageUpload } from "./CoverImageUpload";
 
 interface EditorControlsFormProps {
+  eventId: string;
   data: LivePreviewData;
   onChange: (field: keyof LivePreviewData, value: string | boolean) => void;
   disabled?: boolean;
 }
 
 export function EditorControlsForm({
+  eventId,
   data,
   onChange,
   disabled = false,
@@ -150,20 +153,13 @@ export function EditorControlsForm({
           />
         </div>
 
-        {/* Cover Image URL */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-            Cover Banner Image URL
-          </label>
-          <input
-            type="url"
-            disabled={disabled}
-            value={data.coverImageUrl || ""}
-            onChange={(e) => onChange("coverImageUrl", e.target.value)}
-            placeholder="https://..."
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-          />
-        </div>
+        {/* Cover Banner Upload */}
+        <CoverImageUpload
+          eventId={eventId}
+          coverImageUrl={data.coverImageUrl}
+          onChange={(url) => onChange("coverImageUrl", url)}
+          disabled={disabled}
+        />
 
         {/* Dress Code */}
         <div className="space-y-1.5">

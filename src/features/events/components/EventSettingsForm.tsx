@@ -89,10 +89,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-title"
+              className="text-xs font-semibold text-wine"
+            >
               Celebration Title
             </label>
             <input
+              id="setting-title"
               type="text"
               required
               value={title}
@@ -102,10 +106,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-couple"
+              className="text-xs font-semibold text-wine"
+            >
               Couple Names
             </label>
             <input
+              id="setting-couple"
               type="text"
               required
               value={couple}
@@ -115,10 +123,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-slug"
+              className="text-xs font-semibold text-wine"
+            >
               URL Slug (/e/slug)
             </label>
             <input
+              id="setting-slug"
               type="text"
               required
               value={slug}
@@ -128,10 +140,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-date"
+              className="text-xs font-semibold text-wine"
+            >
               Celebration Date &amp; Time
             </label>
             <input
+              id="setting-date"
               type="datetime-local"
               required
               value={date}
@@ -141,10 +157,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-venue"
+              className="text-xs font-semibold text-wine"
+            >
               Venue Location
             </label>
             <input
+              id="setting-venue"
               type="text"
               required
               value={venue}
@@ -154,10 +174,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-area"
+              className="text-xs font-semibold text-wine"
+            >
               City / State
             </label>
             <input
+              id="setting-area"
               type="text"
               value={area}
               onChange={(e) => setArea(e.target.value)}
@@ -167,10 +191,14 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-wine">
+          <label
+            htmlFor="setting-dress-code"
+            className="text-xs font-semibold text-wine"
+          >
             Dress Code &amp; Aṣọ-Ẹbí Instructions
           </label>
           <textarea
+            id="setting-dress-code"
             rows={2}
             value={dressCode}
             onChange={(e) => setDressCode(e.target.value)}
@@ -181,7 +209,10 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
         {/* Visibility Toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest">
           <div className="space-y-0.5">
-            <label className="text-xs font-semibold text-wine">
+            <label
+              htmlFor="setting-is-public"
+              className="text-xs font-semibold text-wine"
+            >
               Public Web Portal (/e/{slug})
             </label>
             <p className="text-[11px] text-on-surface-variant">
@@ -190,6 +221,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
             </p>
           </div>
           <input
+            id="setting-is-public"
             type="checkbox"
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}

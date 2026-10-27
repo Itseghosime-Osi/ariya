@@ -6,7 +6,7 @@ import {
   createTestEvent,
 } from "../e2e/fixtures/test-helpers";
 
-const OUT_DIR = path.join(process.cwd(), "public", "screenshots");
+const OUT_DIR = path.join(process.cwd(), "docs", "screenshots");
 if (!fs.existsSync(OUT_DIR)) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 }
@@ -109,7 +109,7 @@ async function main() {
   });
 
   await browser.close();
-  console.log("All screenshots captured in public/screenshots/!");
+  console.log("All screenshots captured in docs/screenshots/!");
 }
 
 main().catch((err) => {

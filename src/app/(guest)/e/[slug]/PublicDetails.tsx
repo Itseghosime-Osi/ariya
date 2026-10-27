@@ -1,11 +1,7 @@
 import React from "react";
-import Image from "next/image";
 import { formatLagosDate, formatLagosTime } from "@/lib/format";
 import { Icon } from "@/components/ui/icon";
 import type { PublicCelebration } from "@/features/events/queries";
-
-const VENUE_SHOWCASE_IMAGE =
-  "https://images.unsplash.com/photo-1545232979-fbf68fe9b10d?auto=format&fit=crop&w=1200&q=80";
 
 const DEFAULT_SCHEDULE = [
   {
@@ -35,9 +31,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
   const calStart = new Date(event.date)
     .toISOString()
     .replace(/-|:|\.\d\d\d/g, "");
-  const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-    event.title
-  )}&dates=${calStart}/${calStart}&location=${mapQuery}`;
+  const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${calStart}/${calStart}&location=${mapQuery}`;
 
   const scheduleSlots =
     event.schedule && event.schedule.length > 0
@@ -118,20 +112,29 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
         </div>
       </div>
 
-      {/* Venue Visual Showcase */}
-      <div className="relative rounded-2xl overflow-hidden shadow-md h-48 sm:h-56 border border-outline-variant/30">
-        <Image
-          src={VENUE_SHOWCASE_IMAGE}
-          alt={event.venue}
-          fill
-          sizes="(max-width: 768px) 100vw, 800px"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-night/80 via-transparent to-transparent flex items-end p-5">
-          <p className="text-ivory text-xs sm:text-sm font-medium">
-            {event.venue} • {event.area || "Lagos, Nigeria"}
+      {/* Venue Ambient Banner */}
+      <div className="relative rounded-2xl overflow-hidden shadow-sm p-6 sm:p-8 bg-gradient-to-r from-wine to-[#581525] border border-outline-variant/30 text-ivory flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-gold text-xs font-semibold uppercase tracking-wider">
+            <Icon name="apartment" className="text-sm" />
+            <span>Celebration Grounds</span>
+          </div>
+          <h4 className="font-serif text-lg sm:text-xl font-medium text-ivory">
+            {event.venue}
+          </h4>
+          <p className="text-xs text-mist font-medium">
+            {event.area || "Lagos, Nigeria"}
           </p>
         </div>
+        <a
+          href={mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 rounded-xl bg-gold text-night text-xs font-semibold hover:bg-gold/90 transition-colors flex items-center gap-1.5 shadow-sm"
+        >
+          <Icon name="map" className="text-sm" />
+          <span>Open Map</span>
+        </a>
       </div>
 
       {/* Order of Events / Schedule */}

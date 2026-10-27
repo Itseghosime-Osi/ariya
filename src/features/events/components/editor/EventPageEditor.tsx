@@ -128,6 +128,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-5">
           <EditorControlsForm
+            eventId={event.id}
             data={formData}
             onChange={handleFieldChange}
             disabled={isSaving}
