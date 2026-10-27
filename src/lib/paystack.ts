@@ -52,9 +52,10 @@ export function verifyPaystackWebhookSignature(
  */
 export async function verifyPaystackTransaction(
   reference: string,
-  secretKey: string
+  secretKey: string,
+  apiBase = "https://api.paystack.co"
 ): Promise<PaystackVerifyResult> {
-  const url = `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`;
+  const url = `${apiBase.replace(/\/$/, "")}/transaction/verify/${encodeURIComponent(reference)}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {

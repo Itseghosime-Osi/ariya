@@ -8,6 +8,7 @@ export const serverEnvSchema = z
       .default("development"),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     PAYSTACK_SECRET_KEY: z.string().min(1),
+    PAYSTACK_API_BASE: z.string().url().default("https://api.paystack.co"),
     EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).default("mailpit"),
     MAILPIT_URL: z.string().url().default("http://127.0.0.1:57324"),
     RESEND_API_KEY: z.string().min(1),
@@ -63,6 +64,7 @@ export function resolveServerEnv(
       SUPABASE_SERVICE_ROLE_KEY:
         rawEnv.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
       PAYSTACK_SECRET_KEY: rawEnv.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
+      PAYSTACK_API_BASE: rawEnv.PAYSTACK_API_BASE || "https://api.paystack.co",
       EMAIL_TRANSPORT:
         (rawEnv.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
       MAILPIT_URL: rawEnv.MAILPIT_URL || "http://127.0.0.1:57324",

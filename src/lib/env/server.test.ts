@@ -6,6 +6,7 @@ describe("Server Env Validation & Schema", () => {
     NODE_ENV: "development",
     SUPABASE_SERVICE_ROLE_KEY: "valid-service-role-key",
     PAYSTACK_SECRET_KEY: "sk_test_1234567890",
+    PAYSTACK_API_BASE: "https://api.paystack.co",
     EMAIL_TRANSPORT: "mailpit",
     MAILPIT_URL: "http://127.0.0.1:57324",
     RESEND_API_KEY: "re_sample_key",
