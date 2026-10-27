@@ -24,7 +24,7 @@ export function SeatingHeader({
             Seating & Floor Plan
           </h1>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-wine/10 text-wine uppercase tracking-wider">
-            V2 23 Protocol
+            Interactive Plan
           </span>
         </div>
         <p className="text-xs text-on-surface-variant mt-0.5">

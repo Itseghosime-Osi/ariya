@@ -60,7 +60,7 @@ export function EditorControlsForm({
             disabled={disabled}
             value={data.title}
             onChange={(e) => onChange("title", e.target.value)}
-            placeholder="e.g. The Royal Wedding of Adebayo & Folashade"
+            placeholder="e.g. Adebayo & Folashade's Wedding"
             className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           />
         </div>
@@ -96,7 +96,7 @@ export function EditorControlsForm({
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-              RSVP Protocol Cutoff
+              RSVP Deadline
             </label>
             <input
               type="date"

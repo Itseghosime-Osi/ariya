@@ -29,7 +29,7 @@ export function EventWizardStepper({
             <span>Back to Portfolio</span>
           </Link>
           <h1 className="font-headline-lg text-headline-lg text-wine tracking-tight">
-            Create &amp; Orchestrate Celebration
+            Create &amp; Set Up Celebration
           </h1>
         </div>
         <div className="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">

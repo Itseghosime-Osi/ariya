@@ -86,7 +86,7 @@ export function StepReviewLaunch({
             </div>
             <div>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Aṣọ-Ẹbí Protocol
+                Aṣọ-Ẹbí &amp; Dress Code
               </p>
               <p className="font-body-md text-body-md text-wine font-medium">
                 {dressCode}
@@ -97,7 +97,7 @@ export function StepReviewLaunch({
           <div className="pt-6">
             <ReviewSection
               icon="schedule"
-              heading="Timeline &amp; Territorial Pavilion"
+              heading="Date, Time &amp; Venue"
               onEdit={onEditSchedule}
             >
               <div>
@@ -113,7 +113,7 @@ export function StepReviewLaunch({
               </div>
               <div className="md:col-span-2">
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Primary Venue Coordinates
+                  Venue Location
                 </p>
                 <p className="font-title-lg text-title-lg text-paper-ink font-semibold">
                   {venue}
@@ -128,7 +128,7 @@ export function StepReviewLaunch({
           <div className="pt-6">
             <ReviewSection
               icon="groups"
-              heading="Registry Intake &amp; Sizing"
+              heading="Guest List Sizing"
               onEdit={onEditGuestSetup}
             >
               <div>
@@ -150,7 +150,7 @@ export function StepReviewLaunch({
               <div className="bg-surface-container p-3 rounded-lg flex items-center gap-3">
                 <Icon name="verified" className="text-xl text-gold" />
                 <span className="font-body-sm text-body-sm text-paper-ink">
-                  Digital Stationery &amp; Sovereign Protocols enabled
+                  Digital Invitations &amp; RSVP Links enabled
                 </span>
               </div>
             </ReviewSection>

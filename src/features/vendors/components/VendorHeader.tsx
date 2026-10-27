@@ -37,8 +37,8 @@ export function VendorHeader({
             Vendor Management &amp; Contracts
           </h1>
           <p className="text-xs text-on-surface-variant mt-0.5">
-            Orchestrate ceremonial artisans, track contracts in integer kobo,
-            and monitor deliverables.
+            Coordinate event vendors, track contracts and budgets, and monitor
+            deliverables.
           </p>
         </div>
 

@@ -100,7 +100,7 @@ export function StepCelebrationDetails({
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="eventDate"
           >
-            Ceremonial Date &amp; Time (WAT) *
+            Date &amp; Time (WAT) *
           </label>
           <input
             id="eventDate"
@@ -158,7 +158,7 @@ export function StepCelebrationDetails({
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="dressCode"
           >
-            Aṣọ-Ẹbí Protocol &amp; Dress Code
+            Aṣọ-Ẹbí &amp; Dress Code
           </label>
           <input
             id="dressCode"

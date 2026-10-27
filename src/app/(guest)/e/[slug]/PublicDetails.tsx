@@ -6,18 +6,18 @@ import type { PublicCelebration } from "@/features/events/queries";
 const DEFAULT_SCHEDULE = [
   {
     time: "13:15 WAT",
-    title: "Welcoming Arrival Reception",
-    location: "Courtyard & Terrace",
+    title: "Guest Arrival",
+    location: "Courtyard & Foyer",
   },
   {
     time: "14:00 WAT",
-    title: "Solemnization Ceremony",
-    location: "Ceremonial Sanctuary",
+    title: "Wedding Ceremony",
+    location: "Main Hall",
   },
   {
     time: "15:30 WAT",
-    title: "Celebration Banquet & Toast",
-    location: "Grand Ballroom",
+    title: "Reception & Dinner",
+    location: "Reception Hall",
   },
 ];
 
@@ -176,13 +176,13 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
         </div>
         <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
           {event.dressCode ||
-            "In accordance with celebratory tradition, our families invite guests to share in our ceremonial colors: Royal Wine velvet and Champagne Gold accents."}
+            "Our families invite guests to celebrate with us in our wedding colors: Burgundy and Champagne Gold."}
         </p>
         <div className="flex flex-wrap items-center gap-4 pt-1">
           <div className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-wine shadow-sm" />
             <span className="text-xs font-semibold text-paper-ink">
-              Royal Wine
+              Burgundy
             </span>
           </div>
           <div className="flex items-center gap-2">

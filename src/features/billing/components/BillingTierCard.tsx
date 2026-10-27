@@ -38,12 +38,12 @@ export function BillingTierCard({
             Celebration Tier
           </span>
           <h3 className="font-serif text-2xl font-bold text-night">
-            {isPaid ? "Royal Celebration Pass (Unlocked)" : "Free Tier (Trial)"}
+            {isPaid ? "Celebration Pass (Unlocked)" : "Free Tier (Trial)"}
           </h3>
           <p className="text-xs text-on-surface-variant mt-1">
             {isPaid
               ? `Fully unlocked on ${new Date(paidAt!).toLocaleDateString()}. Unlimited invitations, reminders, and seating arrangements.`
-              : "Limited to 20 guest invitations and reminders. Upgrade for comprehensive full-suite orchestration."}
+              : "Limited to 20 guest invitations and reminders. Upgrade for unlimited guest invitations, reminders, and full seating."}
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export function BillingTierCard({
         </div>
         <div className="flex items-center gap-2 text-stone-700">
           <Icon name="check_circle" className="text-emerald-600 text-sm" />
-          <span>Team Collaboration & Reception Concierge</span>
+          <span>Team Collaboration & Reception Check-in</span>
         </div>
       </div>
 

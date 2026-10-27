@@ -19,8 +19,7 @@ export async function generateMetadata({ params }: EventPageProps) {
   const data = await getEventById(eventId);
   return {
     title: `${data?.event.title || "Event Overview"} • Celebration Desk • Àríyá`,
-    description:
-      "Orchestrate your wedding banquets, seating, and guest rosters",
+    description: "Manage your celebrations, seating, and guest lists",
   };
 }
 

@@ -24,13 +24,13 @@ export function DeadlinePassedCard({ event, guest }: DeadlinePassedCardProps) {
           RSVP Window Concluded
         </span>
         <h1 className="font-serif text-2xl sm:text-3xl text-wine font-medium">
-          Official Protocol Deadline Reached
+          RSVP Deadline Has Passed
         </h1>
         <p className="font-serif text-lg italic text-wine/80">
           Dearest {guest.display_name}
         </p>
         <p className="text-sm text-wine/80 max-w-md mx-auto pt-2 leading-relaxed">
-          The ceremonial RSVP confirmation deadline for {event.title} was{" "}
+          The RSVP confirmation deadline for {event.title} was{" "}
           <strong>{formattedDeadline}</strong>. Catering rosters and seating
           charts have been finalized. If you require urgent assistance, please
           contact the couple directly.

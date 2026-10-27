@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Icon } from "@/components/ui/icon";
 import { VendorHeader } from "./VendorHeader";
 import { VendorCard } from "./VendorCard";
+import { VendorEmptyState } from "./VendorEmptyState";
 import { VendorModal } from "./VendorModal";
 import { VendorTaskModal } from "./VendorTaskModal";
 import {
@@ -145,29 +145,12 @@ export function VendorRoster({ eventId, initialData }: VendorRosterProps) {
       )}
 
       {vendors.length === 0 ? (
-        <div className="bg-surface-container-low p-12 text-center rounded-2xl border border-outline-variant/30 space-y-3">
-          <Icon
-            name="storefront"
-            className="text-4xl text-wine/40 block mx-auto"
-          />
-          <h3 className="font-serif text-lg text-wine font-medium">
-            No Vendors Registered
-          </h3>
-          <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-            Bring ceremonial coordinators, caterers, decorators, and
-            photographers into your planning registry.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setEditingVendor(null);
-              setIsVendorModalOpen(true);
-            }}
-            className="px-4 py-2 rounded-xl bg-wine text-ivory text-xs font-semibold"
-          >
-            Register First Vendor
-          </button>
-        </div>
+        <VendorEmptyState
+          onAddVendor={() => {
+            setEditingVendor(null);
+            setIsVendorModalOpen(true);
+          }}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
           {vendors.map((vendor) => (

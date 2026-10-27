@@ -13,9 +13,9 @@ interface TopBarProps {
 }
 
 export function TopBar({
-  title = "Chidinma & Tunde",
-  dateStr = "12 Dec 2026",
-  daysAway = 47,
+  title = "Àríyá Celebration",
+  dateStr = "",
+  daysAway = null,
   onOpenSearch,
 }: TopBarProps) {
   return (

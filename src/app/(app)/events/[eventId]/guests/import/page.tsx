@@ -18,8 +18,7 @@ export async function generateMetadata({
   const data = await getEventById(eventId);
   return {
     title: `${data?.event.title || "Import"} • Import Guests • Àríyá`,
-    description:
-      "Upload and map ceremonial guest rosters from CSV spreadsheets.",
+    description: "Upload and map guest lists from CSV spreadsheets.",
   };
 }
 
@@ -47,7 +46,7 @@ export default async function ImportGuestsPage({
       <div className="space-y-6">
         <PageHeader
           title="Import Guest Registry"
-          description="Upload CSV spreadsheets, map columns, detect duplicates, and bulk-provision ceremonial invitations."
+          description="Upload CSV spreadsheets, map columns, detect duplicates, and import guests."
         />
         <CsvImportPageFlow eventId={data.event.id} />
       </div>

@@ -26,7 +26,7 @@ export function ResetPasswordForm() {
     setErrorMessage(null);
 
     if (password !== confirmPassword) {
-      setErrorMessage("Passcodes do not match.");
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
@@ -54,7 +54,7 @@ export function ResetPasswordForm() {
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-surface-container text-wine font-semibold">
-            State 03: Establish Passcode
+            Step 2: Set New Password
           </span>
           <span className="font-label-sm text-label-sm text-on-surface-variant">
             Step 2 of 2
@@ -63,14 +63,14 @@ export function ResetPasswordForm() {
 
         <div className="mb-6">
           <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block mb-1 font-bold">
-            SECURITY KEY GENERATION
+            PASSWORD RESET
           </span>
           <h1 className="font-display text-display text-wine tracking-tight">
-            Set New Passcode
+            Set New Password
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-            Establish a sovereign passcode to protect your bridal registries and
-            banquet seating coordinates.
+            Choose a new password to protect your events, guest lists, and
+            seating plans.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ export function ResetPasswordForm() {
           <div className="space-y-4">
             <PasswordField
               id="new-password"
-              label="New Passcode"
+              label="New Password"
               value={password}
               onChange={setPassword}
               disabled={isPending}
@@ -89,7 +89,7 @@ export function ResetPasswordForm() {
             />
             <PasswordField
               id="confirm-password"
-              label="Confirm Passcode"
+              label="Confirm Password"
               value={confirmPassword}
               onChange={setConfirmPassword}
               disabled={isPending}
@@ -101,7 +101,7 @@ export function ResetPasswordForm() {
           {/* Validation Checklist */}
           <div className="bg-surface-container-low p-4 rounded-xl space-y-2 border border-surface-container-high/60">
             <span className="font-label-sm text-label-sm uppercase text-secondary font-bold block mb-1">
-              Passcode Integrity Requirements:
+              Password Requirements:
             </span>
             <div className="grid grid-cols-2 gap-2 font-body-sm text-body-sm">
               <span
@@ -147,7 +147,7 @@ export function ResetPasswordForm() {
             </div>
             {isMismatch && (
               <p className="font-body-sm text-body-sm text-error mt-2 flex items-center gap-1">
-                <Icon name="error" className="text-sm" /> Passcodes do not match
+                <Icon name="error" className="text-sm" /> Passwords do not match
                 yet.
               </p>
             )}
@@ -160,10 +160,10 @@ export function ResetPasswordForm() {
               disabled={isPending || !hasMinLength}
             >
               {isPending ? (
-                <span>Updating Passcode...</span>
+                <span>Updating Password...</span>
               ) : (
                 <>
-                  <span>Save New Passcode</span>
+                  <span>Save New Password</span>
                   <Icon name="arrow_forward" className="text-xl text-gold" />
                 </>
               )}

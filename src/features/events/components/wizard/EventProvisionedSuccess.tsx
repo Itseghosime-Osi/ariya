@@ -68,7 +68,7 @@ export function EventProvisionedSuccess({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8 border-t border-surface-container-high/60">
         <div>
           <span className="block font-label-sm text-label-sm text-on-surface-variant uppercase">
-            Sovereign URL
+            Event URL
           </span>
           <span className="font-title-sm text-title-sm text-wine font-semibold truncate block">
             /{slug}
@@ -84,7 +84,7 @@ export function EventProvisionedSuccess({
         </div>
         <div>
           <span className="block font-label-sm text-label-sm text-on-surface-variant uppercase">
-            Aṣọ-Ẹbí Protocol
+            Aṣọ-Ẹbí Details
           </span>
           <span className="font-title-sm text-title-sm text-paper-ink font-semibold">
             Active
@@ -92,7 +92,7 @@ export function EventProvisionedSuccess({
         </div>
         <div>
           <span className="block font-label-sm text-label-sm text-on-surface-variant uppercase">
-            Liaison Staff
+            Event Role
           </span>
           <span className="font-title-sm text-title-sm text-paper-ink font-semibold">
             Owner (You)

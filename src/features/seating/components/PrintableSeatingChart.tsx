@@ -35,7 +35,7 @@ export function PrintableSeatingChart({
             <span>Return to Seating Desk</span>
           </Link>
           <h1 className="font-serif text-xl text-wine font-medium">
-            Ceremonial Seating Dossier & Place Cards
+            Seating Chart & Place Cards
           </h1>
         </div>
 
@@ -81,7 +81,7 @@ export function PrintableSeatingChart({
         {/* Ceremonial Header */}
         <div className="text-center pb-6 border-b border-wine/20 space-y-1.5">
           <span className="text-[10px] font-bold tracking-widest text-wine/80 uppercase">
-            Àríyá Ceremonial Seating Register
+            Àríyá Seating Chart
           </span>
           <h2 className="font-serif text-3xl text-wine font-medium">
             {eventTitle}

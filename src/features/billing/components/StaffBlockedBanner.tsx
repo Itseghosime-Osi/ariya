@@ -18,9 +18,9 @@ export function StaffBlockedBanner({ eventId }: StaffBlockedBannerProps) {
           Billing Access Restricted
         </h3>
         <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-          Event staff accounts are assigned operational concierge and check-in
-          roles only. Financial records and subscription billing are restricted
-          to the host couple and planners.
+          Event staff accounts are assigned operational check-in roles only.
+          Financial records and subscription billing are restricted to the host
+          couple and planners.
         </p>
       </div>
 

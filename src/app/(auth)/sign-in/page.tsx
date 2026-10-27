@@ -26,7 +26,7 @@ export default function SignInPage() {
                 Àríyá
               </span>
               <span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">
-                Celebration Management &amp; Registry Suite
+                Celebration Management &amp; Guest Suite
               </span>
             </div>
           </div>

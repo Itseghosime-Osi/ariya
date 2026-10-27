@@ -54,7 +54,7 @@ export default async function PublicCelebrationPage({
             <span className="font-serif text-2xl font-bold">À</span>
           </div>
           <p className="text-[11px] font-semibold tracking-widest uppercase text-wine">
-            Àríyá Ceremonial Registry
+            Àríyá Celebration Portal
           </p>
         </header>
 

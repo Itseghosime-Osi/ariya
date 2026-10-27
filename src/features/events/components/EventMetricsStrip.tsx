@@ -12,13 +12,13 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm bg-surface-container rounded-2xl p-space-md">
       <div className="space-y-0.5">
         <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-          Party Roster
+          Invited Parties
         </div>
         <div className="font-headline-sm text-headline-sm text-night">
           {metrics.totalParties}
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          {metrics.totalAttendees} verified attendees
+          {metrics.totalAttendees} total guests
         </div>
       </div>
 

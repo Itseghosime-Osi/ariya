@@ -25,15 +25,15 @@ const INTAKE_OPTIONS = [
     key: "manual" as const,
     icon: "person_add",
     title: "Add Guests Manually",
-    desc: "Direct bespoke entry for VIP tables, elders, and monarchs.",
+    desc: "Enter guest details individually.",
     footer: "Direct portal input",
   },
   {
     key: "skip" as const,
     icon: "fast_forward",
     title: "Skip for Now",
-    desc: "Preserve ballroom dimensions and estimate attendance.",
-    footer: "Start with blank roster",
+    desc: "Set target capacity and add guests later.",
+    footer: "Start with blank list",
   },
 ];
 

@@ -50,7 +50,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   </span>
                 </div>
                 <span className="font-label-sm text-label-sm uppercase tracking-widest text-gold/80 mt-2 font-bold">
-                  Sovereign Seal
+                  Àríyá Emblem
                 </span>
               </div>
 
@@ -113,7 +113,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
             {/* Progress Bar Line */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant">
-                <span>Ceremonial Attendance Readiness</span>
+                <span>Attendance Readiness</span>
                 <span className="font-semibold text-wine">
                   {metrics.readinessPercentage}% Confirmed
                 </span>

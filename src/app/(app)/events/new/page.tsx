@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/features/auth/queries";
 
 export const metadata = {
   title: "New Celebration • Àríyá",
-  description: "Create and orchestrate a new celebration in the Àríyá suite",
+  description: "Create and plan a new celebration in Àríyá",
 };
 
 export default async function NewEventPage() {

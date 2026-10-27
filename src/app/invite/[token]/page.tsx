@@ -51,7 +51,7 @@ export default async function InviteAcceptPage({
             {invite.eventTitle}
           </h1>
           <p className="text-sm text-on-surface-variant">
-            You have been invited to orchestrate this celebration with the
+            You have been invited to collaborate on this celebration with the
             celebrant team.
           </p>
         </div>

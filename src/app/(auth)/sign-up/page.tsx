@@ -25,13 +25,13 @@ export default function SignUpPage() {
                   Àríyá
                 </span>
                 <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest mt-1 font-bold">
-                  Event Inception &amp; Registry
+                  Event Planning &amp; Guest Management
                 </span>
               </div>
             </div>
             <div className="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full bg-surface-container text-wine font-label-md text-label-md">
               <Icon name="verified" className="text-gold text-base" />
-              <span>Invitation Ledger 2026</span>
+              <span>Host Account</span>
             </div>
           </div>
 

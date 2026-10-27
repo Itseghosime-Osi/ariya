@@ -60,7 +60,7 @@ export function RsvpSummaryCard({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">
-              Ceremonial Date
+              Event Date
             </span>
             <p className="font-medium text-night text-sm">{formattedDate}</p>
             <p className="text-wine/80">{formattedTime}</p>
@@ -147,7 +147,7 @@ export function RsvpSummaryCard({
           </div>
           <p className="text-[11px] text-wine/70 max-w-xs mx-auto">
             Present this digital QR pass or mention your personal code to the
-            concierge at the reception desk.
+            usher or check-in team at the reception desk.
           </p>
         </section>
       )}

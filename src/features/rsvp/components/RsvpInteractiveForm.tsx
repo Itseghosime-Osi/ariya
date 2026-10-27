@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { submitRsvpAction } from "../actions";
 import type { InvitationData } from "../types";
+import { AcceptedGuestFields } from "./AcceptedGuestFields";
 
 interface RsvpInteractiveFormProps {
   data: InvitationData;
@@ -103,64 +104,13 @@ export function RsvpInteractiveForm({
 
         {/* Accepted Conditional Fields */}
         {status === "accepted" && (
-          <div className="space-y-4 pt-2 border-t border-outline-variant/30">
-            {/* Party Size Stepper/Select */}
-            {maxParty > 1 && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
-                  Number of Attending Guests (Up to {maxParty})
-                </label>
-                <select
-                  name="attendingCount"
-                  value={attendingCount}
-                  onChange={(e) => setAttendingCount(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-                >
-                  {Array.from({ length: maxParty }, (_, i) => i + 1).map(
-                    (n) => (
-                      <option key={n} value={n}>
-                        {n} {n === 1 ? "Guest" : "Guests"}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-            )}
-
-            {status === "accepted" && maxParty <= 1 && (
-              <input type="hidden" name="attendingCount" value={1} />
-            )}
-
-            {/* Plus-One Name if allowed */}
-            {guest.plus_ones_allowed && attendingCount > 1 && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
-                  Accompanied Guest / Escort Name
-                </label>
-                <input
-                  type="text"
-                  name="plusOneName"
-                  defaultValue={rsvp?.plus_one_name || ""}
-                  placeholder="e.g. Mrs. Folashade Adeleke"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-                />
-              </div>
-            )}
-
-            {/* Dietary */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
-                Dietary & Wellness Preferences
-              </label>
-              <input
-                type="text"
-                name="dietary"
-                defaultValue={rsvp?.dietary || ""}
-                placeholder="e.g. Halal, pescatarian, no peanuts"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-              />
-            </div>
-          </div>
+          <AcceptedGuestFields
+            guest={guest}
+            rsvp={rsvp}
+            maxParty={maxParty}
+            attendingCount={attendingCount}
+            onAttendingCountChange={setAttendingCount}
+          />
         )}
 
         {/* Email Address for Digital Pass Delivery */}

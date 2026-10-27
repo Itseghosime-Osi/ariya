@@ -13,7 +13,7 @@ export function ResetPasswordSuccess() {
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-success-surface text-success font-bold">
-            State 04: Passcode Updated
+            Password Updated
           </span>
           <span className="font-label-md text-label-md text-success font-semibold">
             Complete
@@ -25,15 +25,14 @@ export function ResetPasswordSuccess() {
             <Icon name="check_circle" className="text-4xl" />
           </div>
           <span className="font-label-md text-label-md uppercase tracking-widest text-success mb-1 font-bold">
-            Identity Authenticated
+            Password Changed
           </span>
           <h2 className="font-headline-md text-headline-md text-night mb-2">
-            Passcode Reset Successfully
+            Password Reset Successfully
           </h2>
           <p className="font-body-md text-body-md text-paper-ink max-w-md">
-            Your passcode has been updated. Your Àríyá celebration workspace is
-            now ready for high-table seating, Aṣọ-Ẹbí tracking, and banquet
-            coordination.
+            Your password has been updated. You can now sign in to manage your
+            events, guest lists, and seating plans.
           </p>
         </div>
 

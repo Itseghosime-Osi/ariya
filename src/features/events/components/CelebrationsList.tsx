@@ -65,8 +65,8 @@ export function CelebrationsList({
               Your Celebrations
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant">
-              Curate your portfolio of weddings and milestone gatherings across
-              Lagos, Ikoyi, and the diaspora.
+              Manage your weddings and milestone celebrations from invitation to
+              reception.
             </p>
           </div>
 
@@ -116,8 +116,8 @@ export function CelebrationsList({
               No celebrations yet
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-6">
-              Create your first wedding or celebration to begin orchestrating
-              guest rosters, Aṣọ-Ẹbí, and royal seating plans.
+              Create your first wedding or celebration to begin managing guests,
+              RSVPs, and seating arrangements.
             </p>
             <Link
               href="/events/new"
@@ -151,7 +151,7 @@ export function CelebrationsList({
                     totalInvited={sec.metrics.totalAttendees}
                     confirmed={sec.metrics.acceptedGuests}
                     rsvpRate={sec.metrics.readinessPercentage}
-                    description={sec.event.dress_code || "Ceremonial attire"}
+                    description={sec.event.dress_code || "Formal attire"}
                     statusBadge={sec.event.status}
                     iconName="workspace_premium"
                   />

@@ -96,8 +96,7 @@ export default async function BillingCallbackPage({
               </h1>
               <p className="text-sm text-on-surface-variant max-w-md mx-auto">
                 Your celebration pass is now active. You have unlocked unlimited
-                guest invitations, automated reminders, and complete seating
-                orchestration.
+                guest invitations, automated reminders, and full table seating.
               </p>
             </div>
             <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">

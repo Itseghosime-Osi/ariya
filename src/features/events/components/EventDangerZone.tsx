@@ -88,8 +88,8 @@ export function EventDangerZone({
                 Permanently Delete Celebration
               </h3>
               <p className="text-[11px] text-on-surface-variant">
-                Irrevocably deletes this celebration, along with guest rosters
-                and table layouts.
+                Irrevocably deletes this celebration, along with guest lists and
+                table layouts.
               </p>
             </div>
             <button
