@@ -89,8 +89,11 @@ html.cc-off .cc { display: none; }
 .obar #obPlay[aria-pressed="true"] .ico { clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0); }
 @media (hover: hover) and (pointer: fine) { .obar button:hover { background: rgba(244, 239, 230, 0.08); } }
 .obar button[hidden] { display: none; }
-.ohint { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); z-index: 15; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 999px; background: rgba(12, 5, 7, 0.82); color: var(--ivory); font-size: 0.8rem; white-space: nowrap; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.ohint { position: fixed; left: 50%; top: 46%; z-index: 15; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 999px; background: rgba(12, 5, 7, 0.82); color: var(--ivory); font-size: 0.8rem; white-space: nowrap; opacity: 0; transition: opacity .3s; pointer-events: none; }
 .ohint.on { opacity: 1; }
+/* The film controls take the bottom of the screen: the scroll cue goes while watching, and on a phone the footer links wait until the film ends. */
+html.watching .scrollcue { visibility: hidden; }
+@media (max-width: 620px) { html.obar-on .foot-ui { visibility: hidden; } }
 @media (max-width: 520px) { .obar .long { display: none; } .ohint { white-space: normal; width: max-content; max-width: 88vw; text-align: center; } }
 @media (max-width: 520px) { .obar button { padding: 0 10px; font-size: 0.64rem; } .cc { bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); } }
 .overlay .layer { position: absolute; inset: 0; }
@@ -1274,7 +1277,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   }
   function playStep(now) {
     if (!playing) return;
-    var dt = Math.min(0.1, (now - playLast) / 1000); playLast = now;
+    var dt = Math.min(0.25, (now - playLast) / 1000); playLast = now; // keeps its pace on a slow phone, without leaping after a stall
     // A chapter jump, Skip, Home or the scrollbar moved the film: Watch carries on from wherever it landed.
     if (Math.abs(window.scrollY - playY) > 3 || (window.AriyaScroll && AriyaScroll.busy)) { playY = window.scrollY; wt = tFromS(sFromY(playY)); requestAnimationFrame(playStep); return; }
     wt = Math.min(TT, wt + dt);
@@ -1300,7 +1303,8 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   });
   var skipShown = true;
   function updateObar(sc, sv) {
-    obar.classList.toggle("on", OP.entered && !OP.covered);
+    var barOn = OP.entered && !OP.covered;
+    if (barOn !== obar.classList.contains("on")) { obar.classList.toggle("on", barOn); document.documentElement.classList.toggle("obar-on", barOn); }
     var skip = sv <= sFromScene("N", 1) - 0.004;
     if (skip !== skipShown) { skipShown = skip; obSkip.hidden = !skip; }
   }
