@@ -1,86 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Icon, IconName } from "@/components/ui/icon";
+import { usePathname, useRouter } from "next/navigation";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  name: string;
-  href: (eventId?: string) => string;
-  icon: IconName;
-  activePattern: RegExp;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    name: "Desk & Overview",
-    href: (id) => (id ? `/events/${id}` : "/events"),
-    icon: "space_dashboard",
-    activePattern: /^\/events\/[^/]+$/,
-  },
-  {
-    name: "Celebrations",
-    href: () => "/events",
-    icon: "celebration",
-    activePattern: /^\/events$/,
-  },
-  {
-    name: "Guest Registry",
-    href: (id) => (id ? `/events/${id}/guests` : "/events"),
-    icon: "menu_book",
-    activePattern: /\/guests/,
-  },
-  {
-    name: "Seating Plan",
-    href: (id) => (id ? `/events/${id}/seating` : "/events"),
-    icon: "table_restaurant",
-    activePattern: /\/seating/,
-  },
-  {
-    name: "Event Page & Editor",
-    href: (id) => (id ? `/events/${id}/page-editor` : "/events"),
-    icon: "edit",
-    activePattern: /\/page-editor/,
-  },
-  {
-    name: "Invitation Atelier",
-    href: (id) => (id ? `/events/${id}/invitations` : "/events"),
-    icon: "styler",
-    activePattern: /\/invitations/,
-  },
-  {
-    name: "Check-in Desk",
-    href: (id) => (id ? `/events/${id}/check-in` : "/events"),
-    icon: "qr_code_scanner",
-    activePattern: /\/check-in/,
-  },
-  {
-    name: "Vendors",
-    href: (id) => (id ? `/events/${id}/vendors` : "/events"),
-    icon: "restaurant_menu",
-    activePattern: /\/vendors/,
-  },
-  {
-    name: "Team & Roles",
-    href: (id) => (id ? `/events/${id}/team` : "/events"),
-    icon: "diversity_3",
-    activePattern: /\/team/,
-  },
-  {
-    name: "Billing & Invoicing",
-    href: (id) => (id ? `/events/${id}/billing` : "/events"),
-    icon: "credit_card",
-    activePattern: /\/billing/,
-  },
-  {
-    name: "Settings",
-    href: (id) => (id ? `/events/${id}/settings` : "/events"),
-    icon: "settings",
-    activePattern: /\/settings/,
-  },
-];
+import { signOutAction } from "@/features/auth/actions";
+import { NAV_ITEMS } from "./nav-items";
 
 interface SidebarProps {
   eventId?: string;
@@ -89,6 +15,17 @@ interface SidebarProps {
 
 export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOutAction();
+    } finally {
+      router.push("/sign-in");
+      router.refresh();
+    }
+  };
 
   return (
     <>
@@ -98,7 +35,6 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
         aria-label="Desktop Navigation"
       >
         <div className="flex flex-col items-center gap-6">
-          {/* Brand Monogram */}
           <Link
             href="/events"
             className="group relative flex items-center justify-center w-12 h-12 rounded-xl bg-night/40 hover:bg-night/60 transition-all focus:outline-none focus:ring-2 focus:ring-gold"
@@ -113,16 +49,13 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
             </span>
           </Link>
 
-          {/* Navigation items */}
           <nav className="flex flex-col items-center gap-2 w-full px-2">
             {NAV_ITEMS.map((item) => {
               const isActive = item.activePattern.test(pathname);
-              const targetHref = item.href(eventId);
-
               return (
                 <Link
                   key={item.name}
-                  href={targetHref}
+                  href={item.href(eventId)}
                   aria-current={isActive ? "page" : undefined}
                   aria-label={item.name}
                   className={cn(
@@ -142,13 +75,14 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
           </nav>
         </div>
 
-        {/* Bottom Profile / Settings */}
-        <div className="flex flex-col items-center gap-3">
-          <Link
-            href={eventId ? `/events/${eventId}/billing` : "/events"}
+        {/* Bottom Profile / Account & Sign Out */}
+        <div className="flex flex-col items-center gap-2 relative">
+          <button
+            type="button"
+            onClick={() => setAccountMenuOpen((prev) => !prev)}
             className="group relative flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-gold rounded-full min-w-[44px] min-h-[44px]"
-            title="Billing & Settings"
-            aria-label="Billing & Settings"
+            title="Account & Sign out"
+            aria-label="Account Menu"
           >
             <div className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center ring-1 ring-gold/40 hover:ring-gold transition-all">
               <Icon name="person" size={20} className="text-gold" />
@@ -156,7 +90,36 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
             <span className="absolute left-[92px] px-3 py-1.5 rounded-lg bg-night text-ivory text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_2px_8px_rgba(28,7,13,0.3)] z-50">
               {userEmail}
             </span>
-          </Link>
+          </button>
+
+          {accountMenuOpen && (
+            <div className="absolute left-[92px] bottom-0 p-3 rounded-xl bg-night border border-gold/40 shadow-2xl z-50 w-52 flex flex-col gap-2">
+              <div className="text-xs text-ivory/80 truncate font-medium">
+                {userEmail}
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-wine text-ivory hover:bg-wine/80 text-xs font-semibold tracking-wide transition-colors"
+              >
+                <Icon name="logout" size={16} />
+                <span>Sign out</span>
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="group relative flex items-center justify-center w-10 h-10 rounded-xl text-ivory/70 hover:bg-night/40 hover:text-gold transition-all focus:outline-none focus:ring-2 focus:ring-gold min-w-[44px] min-h-[44px]"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <Icon name="logout" size={20} />
+            <span className="absolute left-[92px] px-3 py-1.5 rounded-lg bg-night text-ivory text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_2px_8px_rgba(28,7,13,0.3)] z-50">
+              Sign out
+            </span>
+          </button>
         </div>
       </aside>
 
@@ -166,19 +129,17 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
         aria-label="Mobile Navigation"
       >
         {[
-          NAV_ITEMS[0], // Desk
-          NAV_ITEMS[2], // Guests
-          NAV_ITEMS[3], // Seating
-          NAV_ITEMS[5], // Invitations
-          NAV_ITEMS[6], // Check-in
+          NAV_ITEMS[0],
+          NAV_ITEMS[2],
+          NAV_ITEMS[3],
+          NAV_ITEMS[5],
+          NAV_ITEMS[6],
         ].map((item) => {
           const isActive = item.activePattern.test(pathname);
-          const targetHref = item.href(eventId);
-
           return (
             <Link
               key={item.name}
-              href={targetHref}
+              href={item.href(eventId)}
               aria-current={isActive ? "page" : undefined}
               aria-label={item.name}
               className={cn(
@@ -195,6 +156,17 @@ export function Sidebar({ eventId, userEmail = "Host" }: SidebarProps) {
             </Link>
           );
         })}
+        <button
+          type="button"
+          onClick={handleSignOut}
+          aria-label="Sign out"
+          className="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center rounded-xl p-1 text-ivory/70 hover:text-gold transition-all focus:outline-none focus:ring-2 focus:ring-gold"
+        >
+          <Icon name="logout" size={20} />
+          <span className="text-[9px] tracking-tight truncate max-w-[56px] text-center mt-0.5">
+            Sign out
+          </span>
+        </button>
       </nav>
     </>
   );

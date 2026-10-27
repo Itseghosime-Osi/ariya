@@ -32,6 +32,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/login",
+        destination: "/sign-in",
+        permanent: false,
+      },
+      {
+        source: "/signup",
+        destination: "/sign-up",
+        permanent: false,
+      },
+      {
         source: "/planner.html",
         destination: "/events",
         permanent: false,
