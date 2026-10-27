@@ -27,7 +27,6 @@ export async function getInvitationByToken(
     identifier: cleanToken,
     tokenLimit: 40,
     ipLimit: 120,
-    client: supabase,
   });
 
   if (!rateLimit.success) {

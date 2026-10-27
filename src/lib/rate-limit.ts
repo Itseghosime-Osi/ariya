@@ -2,7 +2,8 @@ import "server-only";
 import crypto from "crypto";
 import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { serverEnv } from "@/lib/env/server";
 import type { Database } from "@/lib/supabase/database.types";
 
 export interface RateLimitResult {
@@ -12,7 +13,7 @@ export interface RateLimitResult {
   retryAfter?: number;
 }
 
-export async function getClientIpHash(): Promise<string> {
+export async function getClientIpHmac(): Promise<string> {
   let ip = "127.0.0.1";
   try {
     const headersList = await headers();
@@ -26,8 +27,15 @@ export async function getClientIpHash(): Promise<string> {
   } catch {
     // Falls back to default outside Next.js request context
   }
-  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
+  return crypto
+    .createHmac("sha256", serverEnv.RATE_LIMIT_SECRET)
+    .update(ip)
+    .digest("hex")
+    .slice(0, 32);
 }
+
+// Backward-compatible alias for existing callers
+export const getClientIpHash = getClientIpHmac;
 
 export async function checkRateLimit(
   key: string,
@@ -35,7 +43,8 @@ export async function checkRateLimit(
   windowInterval: string = "1 minute",
   client?: SupabaseClient<Database>
 ): Promise<RateLimitResult> {
-  const supabase = client ?? (await createClient());
+  // Service-role admin client required: execute on hit_rate_limit is revoked from anon & authenticated
+  const supabase = client ?? createAdminClient();
   const { data, error } = await supabase.rpc("hit_rate_limit", {
     p_key: key,
     p_limit: limit,
@@ -44,6 +53,7 @@ export async function checkRateLimit(
 
   if (error || !data) {
     console.error("Database rate limit RPC error:", error);
+    // Strict fail-closed policy
     return { success: false, remaining: 0 };
   }
 
@@ -86,7 +96,7 @@ export async function checkRateLimitByKeyAndIp({
   windowInterval?: string;
   client?: SupabaseClient<Database>;
 }): Promise<RateLimitResult> {
-  const ipHash = await getClientIpHash();
+  const ipHash = await getClientIpHmac();
   const tokenKey = `${prefix}:token:${identifier}`;
   const ipKey = `${prefix}:ip:${ipHash}`;
 

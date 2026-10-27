@@ -1,9 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { getInvitationByToken } from "./queries";
 import * as serverClient from "@/lib/supabase/server";
+import * as adminClient from "@/lib/supabase/admin";
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -23,6 +28,18 @@ function mockSupabase(partial: object): SupabaseServerClient {
 describe("RSVP Domain", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(adminClient.createAdminClient).mockReturnValue({
+      rpc: vi.fn().mockResolvedValue({
+        data: [
+          {
+            allowed: true,
+            remaining: 10,
+            reset_at: new Date(Date.now() + 60000).toISOString(),
+          },
+        ],
+        error: null,
+      }),
+    } as unknown as ReturnType<typeof adminClient.createAdminClient>);
   });
 
   it("returns invalid_link for short or invalid tokens", async () => {

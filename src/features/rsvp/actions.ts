@@ -64,7 +64,6 @@ export async function submitRsvpAction(
     identifier: token,
     tokenLimit: 10,
     ipLimit: 30,
-    client: supabase,
   });
 
   if (!rateLimit.success) {
