@@ -60,7 +60,7 @@ export function SecondaryEventCard({
 
         <div className="my-space-md p-space-sm bg-surface-container rounded-xl grid grid-cols-3 gap-2 text-center">
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
               Total Invited
             </div>
             <div className="font-headline-sm text-headline-sm text-night mt-0.5">
@@ -68,7 +68,7 @@ export function SecondaryEventCard({
             </div>
           </div>
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
               Confirmed
             </div>
             <div className="font-headline-sm text-headline-sm text-success mt-0.5">
@@ -76,7 +76,7 @@ export function SecondaryEventCard({
             </div>
           </div>
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
               RSVP Rate
             </div>
             <div className="font-headline-sm text-headline-sm text-secondary mt-0.5">
@@ -91,7 +91,7 @@ export function SecondaryEventCard({
       </div>
 
       <div className="pt-space-md mt-space-md flex items-center justify-between border-t border-surface-container-high">
-        <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-mist">
+        <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-on-surface-variant">
           <Icon name="verified_user" className="text-success text-base" />
           <span>{statusBadge}</span>
         </div>

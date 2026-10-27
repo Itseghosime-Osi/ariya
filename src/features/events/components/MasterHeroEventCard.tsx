@@ -97,7 +97,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   <Icon name="calendar_month" className="text-lg" />
                   <span className="font-semibold">{formattedDate}</span>
                 </div>
-                <span className="text-mist">•</span>
+                <span className="text-on-surface-variant">•</span>
                 <div className="flex items-center gap-1 text-on-surface-variant">
                   <Icon name="location_on" className="text-lg text-wine" />
                   <span>
@@ -150,22 +150,6 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   <Icon name={copied ? "check" : "share"} className="text-lg" />
                   <span>{copied ? "Link Copied!" : "Share Overview"}</span>
                 </button>
-              </div>
-
-              {/* Planners pill */}
-              <div className="flex items-center -space-x-2 overflow-hidden py-1">
-                <div className="w-8 h-8 rounded-full bg-gold/40 flex items-center justify-center text-night font-label-sm text-[10px] font-bold shadow-sm">
-                  CT
-                </div>
-                <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-[10px] font-bold shadow-sm">
-                  AO
-                </div>
-                <div className="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-[10px] font-bold shadow-sm">
-                  FB
-                </div>
-                <span className="pl-3 font-label-sm text-label-sm text-mist font-medium">
-                  +6 planners
-                </span>
               </div>
             </div>
           </div>

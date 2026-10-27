@@ -29,7 +29,7 @@ export function NextToCareForCard({
         <h2 className="font-headline-md text-headline-md text-ivory">
           Next to care for
         </h2>
-        <p className="font-body-sm text-mist">
+        <p className="font-body-sm text-ivory/80">
           A few things to take care of this week
         </p>
       </div>

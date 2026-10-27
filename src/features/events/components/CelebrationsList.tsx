@@ -166,13 +166,10 @@ export function CelebrationsList({
         )}
 
         {/* Bottom Curatorial Note */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-mist font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-on-surface-variant font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4 mt-8">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gold inline-block" />
             <span>Àríyá • Celebration Workspace</span>
-          </div>
-          <div>
-            <span>Synchronized with Lagos Ceremonial Servers</span>
           </div>
         </div>
       </div>

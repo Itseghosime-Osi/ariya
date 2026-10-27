@@ -17,7 +17,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
         <div className="font-headline-sm text-headline-sm text-night">
           {metrics.totalParties}
         </div>
-        <div className="font-body-sm text-body-sm text-mist">
+        <div className="font-body-sm text-body-sm text-on-surface-variant">
           {metrics.totalAttendees} verified attendees
         </div>
       </div>
@@ -32,7 +32,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
             ({metrics.readinessPercentage}%)
           </span>
         </div>
-        <div className="font-body-sm text-body-sm text-mist">
+        <div className="font-body-sm text-body-sm text-on-surface-variant">
           {metrics.acceptedGuests} guests attending
         </div>
       </div>
@@ -44,7 +44,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
         <div className="font-headline-sm text-headline-sm text-night">
           {metrics.seatedGuests}
         </div>
-        <div className="font-body-sm text-body-sm text-mist">
+        <div className="font-body-sm text-body-sm text-on-surface-variant">
           of {metrics.acceptedGuests} confirmed people
         </div>
       </div>
@@ -56,7 +56,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
         <div className="font-headline-sm text-headline-sm text-secondary">
           {metrics.unassignedGuests}
         </div>
-        <div className="font-body-sm text-body-sm text-mist">
+        <div className="font-body-sm text-body-sm text-on-surface-variant">
           awaiting table
         </div>
       </div>

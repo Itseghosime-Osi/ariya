@@ -78,7 +78,7 @@ export function RecentResponsesFeed({
                     {item.status === "accepted" ? "Confirmed" : "Awaiting"}
                   </span>
                 </span>
-                <span className="font-body-sm text-mist text-[11px]">
+                <span className="font-body-sm text-on-surface-variant text-[11px]">
                   {item.timeAgo}
                 </span>
               </div>

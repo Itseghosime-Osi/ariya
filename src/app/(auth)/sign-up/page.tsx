@@ -38,12 +38,9 @@ export default function SignUpPage() {
           {/* Form */}
           <SignUpForm />
 
-          {/* Ceremonial Assurance Footer */}
-          <div className="mt-8 pt-6 border-t border-outline-variant/30 flex items-center justify-between text-mist font-body-sm text-body-sm">
-            <span>Encrypted with Ceremonial Ledger Standards</span>
-            <span className="font-label-sm uppercase tracking-widest text-secondary font-bold">
-              Eko / London / Atlanta
-            </span>
+          {/* Assurance Footer */}
+          <div className="mt-8 pt-6 border-t border-outline-variant/30 flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+            <span>Secure celebration workspace</span>
           </div>
         </div>
       </div>

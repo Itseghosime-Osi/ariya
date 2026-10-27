@@ -120,7 +120,7 @@ export function EventOverviewDesk({
               </span>
             </div>
 
-            <div className="relative z-10 flex items-center justify-between text-mist text-[12px]">
+            <div className="relative z-10 flex items-center justify-between text-on-surface-variant text-[12px]">
               <span>Solemnization &amp; Reception</span>
               <span className="text-gold font-semibold">Wax Seal Verified</span>
             </div>
