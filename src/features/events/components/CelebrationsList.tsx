@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { MasterHeroEventCard } from "./MasterHeroEventCard";
 import { SecondaryEventCard } from "./SecondaryEventCard";
 import { MilestonesTimeline } from "./MilestonesTimeline";
+import { CelebrationFilterPills } from "./CelebrationFilterPills";
 import type { EventWithMetrics, MilestoneItem } from "../types";
 
 interface CelebrationsListProps {
@@ -39,11 +40,11 @@ export function CelebrationsList({
   const draftCount = events.filter((e) => e.event.status === "draft").length;
   const pastCount = events.filter((e) => e.event.status === "archived").length;
 
-  const primaryEvent = filteredEvents[0] || events[0];
+  const primaryEvent = filteredEvents[0];
+  const secondaryEvents = filteredEvents.slice(1);
 
   return (
     <div className="flex flex-col w-full">
-      {/* Subtle Ambient Glow */}
       <div className="relative w-full overflow-hidden">
         <div className="absolute -top-32 right-12 w-96 h-96 rounded-full bg-secondary-fixed/20 blur-3xl pointer-events-none" />
         <div className="absolute top-96 -left-20 w-80 h-80 rounded-full bg-primary-container/10 blur-3xl pointer-events-none" />
@@ -69,7 +70,6 @@ export function CelebrationsList({
             </p>
           </div>
 
-          {/* Action Controls & Filters */}
           <div className="flex flex-wrap items-center gap-space-sm">
             <div className="relative flex-grow sm:flex-grow-0">
               <Icon
@@ -98,100 +98,75 @@ export function CelebrationsList({
           </div>
         </header>
 
-        {/* Filter Pills Strip */}
-        <div className="flex items-center justify-between flex-wrap gap-space-md mb-space-lg pb-space-sm">
-          <div className="flex items-center gap-space-xs">
-            <button
-              type="button"
-              onClick={() => setFilter("active")}
-              className={`px-space-md py-1.5 rounded-full font-label-sm text-label-sm shadow-sm flex items-center gap-1.5 transition-all min-h-[36px] ${
-                filter === "active"
-                  ? "bg-primary text-on-primary font-bold"
-                  : "bg-paper hover:bg-surface-container-high text-paper-ink"
-              }`}
+        <CelebrationFilterPills
+          filter={filter}
+          setFilter={setFilter}
+          activeCount={activeCount}
+          draftCount={draftCount}
+          pastCount={pastCount}
+        />
+
+        {/* Empty State */}
+        {events.length === 0 ? (
+          <div className="bg-surface-container-lowest rounded-2xl p-12 text-center border border-surface-container-high/60 my-6 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <Icon name="celebration" className="text-3xl text-wine" />
+            </div>
+            <h3 className="font-headline-md text-headline-md text-night mb-2">
+              No celebrations yet
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-6">
+              Create your first wedding or celebration to begin orchestrating
+              guest rosters, Aṣọ-Ẹbí, and royal seating plans.
+            </p>
+            <Link
+              href="/events/new"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-wine hover:bg-night text-ivory font-label-md font-semibold shadow-md transition-all min-h-[44px]"
             >
-              <span>Active</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-gold text-night font-bold text-[10px]">
-                {activeCount}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter("draft")}
-              className={`px-space-md py-1.5 rounded-full font-label-sm text-label-sm shadow-sm flex items-center gap-1.5 transition-all min-h-[36px] ${
-                filter === "draft"
-                  ? "bg-primary text-on-primary font-bold"
-                  : "bg-paper hover:bg-surface-container-high text-paper-ink"
-              }`}
-            >
-              <span>Drafts</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-mist/30 text-paper-ink text-[10px]">
-                {draftCount}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter("past")}
-              className={`px-space-md py-1.5 rounded-full font-label-sm text-label-sm shadow-sm flex items-center gap-1.5 transition-all min-h-[36px] ${
-                filter === "past"
-                  ? "bg-primary text-on-primary font-bold"
-                  : "bg-paper hover:bg-surface-container-high text-paper-ink"
-              }`}
-            >
-              <span>Past Gatherings</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-mist/30 text-paper-ink text-[10px]">
-                {pastCount}
-              </span>
-            </button>
+              <Icon name="add" className="text-lg text-gold" />
+              <span>Create Your First Celebration</span>
+            </Link>
           </div>
-
-          <div className="hidden sm:flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
-            <Icon name="auto_awesome" className="text-base text-gold" />
-            <span>Organized by celebration date</span>
+        ) : !primaryEvent ? (
+          <div className="bg-surface-container-lowest rounded-2xl p-12 text-center border border-surface-container-high/60 my-6">
+            <p className="font-body-md text-on-surface-variant">
+              No celebrations found matching &ldquo;{searchQuery}&rdquo;.
+            </p>
           </div>
-        </div>
+        ) : (
+          <>
+            <MasterHeroEventCard item={primaryEvent} />
 
-        {/* Master Hero Event Card */}
-        {primaryEvent && <MasterHeroEventCard item={primaryEvent} />}
+            {secondaryEvents.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg mb-space-xl">
+                {secondaryEvents.map((sec) => (
+                  <SecondaryEventCard
+                    key={sec.event.id}
+                    id={sec.event.id}
+                    title={sec.event.title}
+                    category={sec.event.area || "Celebration"}
+                    dateStr={sec.event.date}
+                    venueStr={sec.event.venue}
+                    daysAway={sec.metrics.daysAway}
+                    totalInvited={sec.metrics.totalAttendees}
+                    confirmed={sec.metrics.acceptedGuests}
+                    rsvpRate={sec.metrics.readinessPercentage}
+                    description={sec.event.dress_code || "Ceremonial attire"}
+                    statusBadge={sec.event.status}
+                    iconName="workspace_premium"
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Companion Cards: Secondary Celebrations Mosaic */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg mb-space-xl">
-          <SecondaryEventCard
-            id="sec-1"
-            title="Otunba Segun Davies 60th Jubilee"
-            category="Milestone Banquet"
-            dateStr="30 January 2027"
-            venueStr="Grand Ballroom, Eko Hotels & Suites, VI"
-            daysAway={96}
-            totalInvited={250}
-            confirmed={142}
-            rsvpRate={56.8}
-            description="High-society royal banquet celebrating six decades of service. Gold & Midnight Blue ceremonial attire strictly observed for all high dignitaries."
-            statusBadge="In planning"
-            iconName="workspace_premium"
-          />
-
-          <SecondaryEventCard
-            id="sec-2"
-            title="Adeyemi & Balogun Introduction"
-            category="Family Introduction"
-            dateStr="20 February 2027"
-            venueStr="Private Estate Grounds, Alexander Ave, Ikoyi"
-            daysAway={117}
-            totalInvited={100}
-            confirmed={68}
-            rsvpRate={68.0}
-            description="Traditional Yoruba introduction ceremony gathering elder council, bridal negotiations, and private ancestral blessings in lush garden layout."
-            statusBadge="Aṣọ-Ẹbí tracking active"
-            iconName="favorite"
-          />
-        </div>
-
-        {/* Milestones Timeline */}
-        <MilestonesTimeline milestones={milestones} />
+            {milestones.length > 0 && (
+              <MilestonesTimeline milestones={milestones} />
+            )}
+          </>
+        )}
 
         {/* Bottom Curatorial Note */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-mist font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-mist font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4 mt-8">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gold inline-block" />
             <span>Àríyá • Celebration Workspace</span>
