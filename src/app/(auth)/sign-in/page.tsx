@@ -53,12 +53,9 @@ export default function SignInPage() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link
-              className="hover:text-night transition-colors"
-              href="/site/product.html"
-            >
+            <a className="hover:text-night transition-colors" href="/product">
               About Àríyá
-            </Link>
+            </a>
             <span className="text-outline-variant">•</span>
             <span>© 2026 Àríyá</span>
           </div>
