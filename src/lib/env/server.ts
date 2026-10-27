@@ -41,6 +41,26 @@ export const serverEnvSchema = z
           path: ["RESEND_API_KEY"],
         });
       }
+      if (data.PAYSTACK_API_BASE !== "https://api.paystack.co") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "PAYSTACK_API_BASE must be 'https://api.paystack.co' in production",
+          path: ["PAYSTACK_API_BASE"],
+        });
+      }
+      if (
+        !data.PAYSTACK_SECRET_KEY ||
+        (!data.PAYSTACK_SECRET_KEY.startsWith("sk_test_") &&
+          !data.PAYSTACK_SECRET_KEY.startsWith("sk_live_"))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "PAYSTACK_SECRET_KEY must start with 'sk_test_' or 'sk_live_' in production",
+          path: ["PAYSTACK_SECRET_KEY"],
+        });
+      }
     }
   });
 

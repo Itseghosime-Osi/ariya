@@ -60,12 +60,55 @@ describe("Server Env Validation & Schema", () => {
     });
     expect(prodPlaceholder.success).toBe(false);
 
+    // Invalid PAYSTACK_API_BASE rejected in production
+    const prodBadPaystackBase = serverEnvSchema.safeParse({
+      ...validBaseEnv,
+      NODE_ENV: "production",
+      EMAIL_TRANSPORT: "resend",
+      RESEND_API_KEY: "re_live_production_secret_key",
+      PAYSTACK_API_BASE: "http://localhost:57328",
+    });
+    expect(prodBadPaystackBase.success).toBe(false);
+    if (!prodBadPaystackBase.success) {
+      expect(prodBadPaystackBase.error.issues[0].message).toContain(
+        "PAYSTACK_API_BASE must be 'https://api.paystack.co'"
+      );
+    }
+
+    // Invalid PAYSTACK_SECRET_KEY rejected in production (not sk_test_ or sk_live_)
+    const prodBadPaystackKey = serverEnvSchema.safeParse({
+      ...validBaseEnv,
+      NODE_ENV: "production",
+      EMAIL_TRANSPORT: "resend",
+      RESEND_API_KEY: "re_live_production_secret_key",
+      PAYSTACK_SECRET_KEY: "invalid_secret_key",
+    });
+    expect(prodBadPaystackKey.success).toBe(false);
+    if (!prodBadPaystackKey.success) {
+      expect(prodBadPaystackKey.error.issues[0].message).toContain(
+        "PAYSTACK_SECRET_KEY must start with 'sk_test_' or 'sk_live_'"
+      );
+    }
+
+    // Valid production config accepted with sk_live_
+    const prodValidLive = serverEnvSchema.safeParse({
+      ...validBaseEnv,
+      NODE_ENV: "production",
+      EMAIL_TRANSPORT: "resend",
+      RESEND_API_KEY: "re_live_production_secret_key",
+      PAYSTACK_SECRET_KEY: "sk_live_production_paystack_secret",
+      PAYSTACK_API_BASE: "https://api.paystack.co",
+    });
+    expect(prodValidLive.success).toBe(true);
+
     // Valid production config accepted
     const prodValid = serverEnvSchema.safeParse({
       ...validBaseEnv,
       NODE_ENV: "production",
       EMAIL_TRANSPORT: "resend",
       RESEND_API_KEY: "re_live_production_secret_key",
+      PAYSTACK_SECRET_KEY: "sk_test_1234567890",
+      PAYSTACK_API_BASE: "https://api.paystack.co",
     });
     expect(prodValid.success).toBe(true);
   });
