@@ -3,16 +3,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { GuestWithDetails } from "../types";
-import { Star, MoreHorizontal, MessageCircle, Copy } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Star } from "lucide-react";
+import { GuestRowActions } from "./GuestRowActions";
 
 interface ColumnOptions {
   onSelectGuest: (guest: GuestWithDetails) => void;
@@ -167,39 +160,14 @@ export function getGuestColumns({
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        const guest = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onSelectGuest(guest)}>
-                View Details & Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onCopyLink(guest)}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy RSVP Link
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onShareWhatsApp(guest)}>
-                <MessageCircle className="h-4 w-4 mr-2 text-emerald-600" />
-                Share on WhatsApp
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 focus:text-red-600"
-                onClick={() => onSelectGuest(guest)}
-              >
-                Delete Guest
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
+      cell: ({ row }) => (
+        <GuestRowActions
+          guest={row.original}
+          onSelect={onSelectGuest}
+          onCopyLink={onCopyLink}
+          onShareWhatsApp={onShareWhatsApp}
+        />
+      ),
     },
   ];
 }
