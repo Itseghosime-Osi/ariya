@@ -9,7 +9,6 @@ interface BillingTierCardProps {
   isPaid: boolean;
   paidAt: string | null;
   canManageBilling: boolean;
-  onPaymentInitiated?: (reference: string) => void;
 }
 
 export function BillingTierCard({
@@ -17,7 +16,6 @@ export function BillingTierCard({
   isPaid,
   paidAt,
   canManageBilling,
-  onPaymentInitiated,
 }: BillingTierCardProps) {
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -26,12 +24,8 @@ export function BillingTierCard({
     setErrorMsg(null);
     startTransition(async () => {
       const res = await initializePaymentAction(eventId);
-      if (res.error) {
+      if (res?.error) {
         setErrorMsg(res.error);
-      } else if (res.reference) {
-        if (onPaymentInitiated) {
-          onPaymentInitiated(res.reference);
-        }
       }
     });
   };

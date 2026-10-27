@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   verifyPaystackWebhookSignature,
   verifyPaystackTransaction,
-  CELEBRATION_PASS_AMOUNT_KOBO,
   CELEBRATION_PASS_CURRENCY,
 } from "@/lib/paystack";
 
@@ -12,18 +11,12 @@ export async function POST(request: Request) {
   const signature = request.headers.get("x-paystack-signature");
   const rawBody = await request.text();
 
-  // 1. Verify webhook signature
-  const isTestBypass =
-    process.env.NODE_ENV !== "production" &&
-    signature === "simulated_test_signature";
-
-  const isValid =
-    isTestBypass ||
-    verifyPaystackWebhookSignature(
-      rawBody,
-      signature,
-      serverEnv.PAYSTACK_SECRET_KEY
-    );
+  // 1. Verify webhook signature with constant-time HMAC-SHA512
+  const isValid = verifyPaystackWebhookSignature(
+    rawBody,
+    signature,
+    serverEnv.PAYSTACK_SECRET_KEY
+  );
 
   if (!isValid) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -47,7 +40,10 @@ export async function POST(request: Request) {
   }
 
   if (eventPayload.event !== "charge.success") {
-    return NextResponse.json({ received: true, ignored: true });
+    return NextResponse.json(
+      { received: true, ignored: true },
+      { status: 200 }
+    );
   }
 
   const reference = eventPayload.data?.reference;
@@ -55,28 +51,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing reference" }, { status: 400 });
   }
 
-  // 2. Re-verify transaction with Paystack verify endpoint
-  let verifyResult;
-  if (isTestBypass) {
-    verifyResult = {
-      status: true,
-      message: "Test simulation approved",
-      data: {
-        id: 123456,
-        status: "success",
-        reference,
-        amount: eventPayload.data?.amount || CELEBRATION_PASS_AMOUNT_KOBO,
-        currency: eventPayload.data?.currency || CELEBRATION_PASS_CURRENCY,
-        channel: eventPayload.data?.channel || "card",
-        paid_at: new Date().toISOString(),
-      },
-    };
-  } else {
-    verifyResult = await verifyPaystackTransaction(
-      reference,
-      serverEnv.PAYSTACK_SECRET_KEY
+  // 2. Fetch our payments row for this reference
+  const supabase = createAdminClient();
+  const { data: payment, error: fetchErr } = await supabase
+    .from("payments")
+    .select("id, event_id, amount_kobo, status")
+    .eq("paystack_reference", reference)
+    .maybeSingle();
+
+  if (fetchErr) {
+    console.error("[Paystack Webhook] DB error querying payment:", fetchErr);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
     );
   }
+
+  if (!payment) {
+    console.warn(`[Paystack Webhook] Ignored unknown reference: ${reference}`);
+    return NextResponse.json(
+      { received: true, ignored: true },
+      { status: 200 }
+    );
+  }
+
+  // 3. Re-verify transaction with Paystack verify endpoint
+  const verifyResult = await verifyPaystackTransaction(
+    reference,
+    serverEnv.PAYSTACK_SECRET_KEY,
+    serverEnv.PAYSTACK_API_BASE
+  );
 
   if (
     !verifyResult.status ||
@@ -89,19 +93,19 @@ export async function POST(request: Request) {
     );
   }
 
-  // 3. Verify currency and expected amount
+  // 4. Exact match checks on provider verification data
   if (
+    verifyResult.data.reference !== reference ||
     verifyResult.data.currency !== CELEBRATION_PASS_CURRENCY ||
-    verifyResult.data.amount < CELEBRATION_PASS_AMOUNT_KOBO
+    verifyResult.data.amount !== payment.amount_kobo
   ) {
     return NextResponse.json(
-      { error: "Currency or amount mismatch" },
+      { error: "Payment verification attributes mismatch" },
       { status: 422 }
     );
   }
 
-  // 4. Update payments and events via service-role admin client (idempotent RPC)
-  const supabase = createAdminClient();
+  // 5. Update payments and events via service-role admin client
   const { data: rpcResult, error: rpcError } = await supabase.rpc(
     "record_successful_payment",
     {
@@ -111,7 +115,11 @@ export async function POST(request: Request) {
   );
 
   if (rpcError) {
-    return NextResponse.json({ error: rpcError.message }, { status: 500 });
+    console.error("[Paystack Webhook] DB error recording payment:", rpcError);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({
