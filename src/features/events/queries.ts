@@ -92,7 +92,6 @@ export async function getEventMetrics(
       declinedGuests: 0,
       seatedGuests: 0,
       unassignedGuests: 0,
-      asoEbiRequests: 0,
       readinessPercentage: 0,
       daysAway,
     };
@@ -143,7 +142,6 @@ export async function getEventMetrics(
     declinedGuests,
     seatedGuests: seated,
     unassignedGuests: unassigned,
-    asoEbiRequests: Math.round(acceptedGuests * 1.1),
     readinessPercentage: readiness,
     daysAway,
   };

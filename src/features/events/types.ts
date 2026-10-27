@@ -16,7 +16,6 @@ export interface EventMetrics {
   declinedGuests: number;
   seatedGuests: number;
   unassignedGuests: number;
-  asoEbiRequests: number;
   readinessPercentage: number;
   daysAway: number;
 }

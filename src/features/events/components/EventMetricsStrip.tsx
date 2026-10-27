@@ -51,13 +51,13 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
 
       <div className="space-y-0.5">
         <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-          Aṣọ-Ẹbí
+          Unassigned
         </div>
         <div className="font-headline-sm text-headline-sm text-secondary">
-          {metrics.asoEbiRequests}
+          {metrics.unassignedGuests}
         </div>
         <div className="font-body-sm text-body-sm text-mist">
-          Packets requested
+          awaiting table
         </div>
       </div>
     </div>
