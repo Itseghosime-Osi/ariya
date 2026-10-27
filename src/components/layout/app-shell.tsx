@@ -25,16 +25,16 @@ export function AppShell({
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-ivory">
+    <div className="min-h-screen bg-ivory overflow-x-hidden">
       <Sidebar eventId={eventId} userEmail={userEmail} />
-      <div className="pl-[84px]">
+      <div className="pl-0 md:pl-[84px] pb-20 md:pb-0">
         <TopBar
           title={eventTitle}
           dateStr={eventDate}
           daysAway={daysAway}
           onOpenSearch={() => setSearchOpen(true)}
         />
-        <main className="w-full pt-16 min-h-screen px-4 md:px-8 py-8">
+        <main className="w-full pt-16 min-h-screen px-4 md:px-8 py-8 overflow-x-hidden">
           <div className="max-w-[1440px] w-full mx-auto">{children}</div>
         </main>
       </div>

@@ -19,7 +19,7 @@ export function TopBar({
   onOpenSearch,
 }: TopBarProps) {
   return (
-    <header className="fixed top-0 left-[84px] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
+    <header className="fixed top-0 left-0 md:left-[84px] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
       <div className="h-16 w-full px-6 md:px-8 flex items-center justify-between">
         {/* Left: Event Quick Context */}
         <div className="flex items-center gap-3 text-sm flex-wrap">
@@ -52,10 +52,11 @@ export function TopBar({
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-wine"
+              className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl bg-surface-container text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-wine"
               title="Search (Cmd + K)"
+              aria-label="Search celebration suite"
             >
-              <Icon name="search" size={14} className="text-wine" />
+              <Icon name="search" size={16} className="text-wine" />
               <span className="hidden sm:inline">Search celebration...</span>
               <kbd className="hidden sm:inline-block rounded bg-surface-container-highest px-1.5 py-0.5 text-[10px] text-on-surface-variant">
                 ⌘K
@@ -70,10 +71,11 @@ export function TopBar({
 
           <Link
             href="/events"
-            className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-ivory hover:opacity-90 transition-opacity"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-primary flex items-center justify-center text-ivory hover:opacity-90 transition-opacity"
             title="Celebrations overview"
+            aria-label="Celebrations overview"
           >
-            <Icon name="celebration" size={18} />
+            <Icon name="celebration" size={20} />
           </Link>
         </div>
       </div>
