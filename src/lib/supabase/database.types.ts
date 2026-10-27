@@ -714,9 +714,17 @@ export type Database = {
         Args: { p_event_id: string; p_roles: string[] };
         Returns: boolean;
       };
+      import_guests: {
+        Args: { p_event_id: string; p_guests: Json };
+        Returns: Json;
+      };
       is_event_member:
         | { Args: { p_event_id: string }; Returns: boolean }
         | { Args: { p_event_id: string; p_user_id: string }; Returns: boolean };
+      regenerate_guest_token: {
+        Args: { p_guest_id: string; p_new_token: string };
+        Returns: string;
+      };
       submit_rsvp: {
         Args: {
           p_attending_count: number;
