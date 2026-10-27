@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatLagosDate } from "@/lib/format";
 import type { EventWithMetrics } from "../types";
+import { EventMetricsStrip } from "./EventMetricsStrip";
 
 interface MasterHeroEventCardProps {
   item: EventWithMetrics;
@@ -28,24 +29,20 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
   return (
     <section className="mb-space-xl">
       <div className="relative bg-paper rounded-[24px] p-space-lg lg:p-margin shadow-md overflow-hidden">
-        {/* Top Metallic Accent Foil Border simulation */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold via-secondary-fixed to-gold" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center">
-          {/* Tactile Visual Column (Velvet Envelope Stationery Presentation) */}
+          {/* Tactile Visual Column */}
           <div className="lg:col-span-4 relative group">
             <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] bg-night flex flex-col justify-between p-6">
-              {/* Velvet Texture and Monogram Glow */}
               <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-wine/60 blur-2xl pointer-events-none" />
               <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-gold/15 blur-2xl pointer-events-none" />
 
-              {/* Subtle Badge Overlay */}
               <div className="relative z-10 self-start px-3 py-1 rounded-full bg-night/85 backdrop-blur-md text-gold font-label-sm text-label-sm shadow-md flex items-center gap-1.5">
                 <Icon name="local_florist" className="text-sm" />
                 <span>Grand Nuptials &amp; Reception</span>
               </div>
 
-              {/* Center Monogram Wax Seal Graphic */}
               <div className="relative z-10 my-auto flex flex-col items-center justify-center">
                 <div className="w-16 h-16 rounded-full bg-wine border-2 border-gold/60 flex items-center justify-center shadow-xl">
                   <span className="font-display text-2xl text-gold font-bold select-none">
@@ -111,59 +108,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
               </div>
             </div>
 
-            {/* Metric Strip Panel */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm bg-surface-container rounded-2xl p-space-md">
-              <div className="space-y-0.5">
-                <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                  Party Roster
-                </div>
-                <div className="font-headline-sm text-headline-sm text-night">
-                  {metrics.totalParties}
-                </div>
-                <div className="font-body-sm text-body-sm text-mist">
-                  {metrics.totalAttendees} verified attendees
-                </div>
-              </div>
-
-              <div className="space-y-0.5">
-                <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                  Confirmed RSVPs
-                </div>
-                <div className="font-headline-sm text-headline-sm text-success">
-                  {metrics.acceptedParties}{" "}
-                  <span className="font-label-sm text-label-sm font-normal text-on-surface-variant">
-                    ({metrics.readinessPercentage}%)
-                  </span>
-                </div>
-                <div className="font-body-sm text-body-sm text-mist">
-                  {metrics.acceptedGuests} guests attending
-                </div>
-              </div>
-
-              <div className="space-y-0.5">
-                <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                  Seated
-                </div>
-                <div className="font-headline-sm text-headline-sm text-night">
-                  {metrics.seatedGuests}
-                </div>
-                <div className="font-body-sm text-body-sm text-mist">
-                  of {metrics.acceptedGuests} confirmed people
-                </div>
-              </div>
-
-              <div className="space-y-0.5">
-                <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                  Aṣọ-Ẹbí
-                </div>
-                <div className="font-headline-sm text-headline-sm text-secondary">
-                  {metrics.asoEbiRequests}
-                </div>
-                <div className="font-body-sm text-body-sm text-mist">
-                  Packets requested
-                </div>
-              </div>
-            </div>
+            <EventMetricsStrip metrics={metrics} />
 
             {/* Progress Bar Line */}
             <div className="space-y-1.5">
