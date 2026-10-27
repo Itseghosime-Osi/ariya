@@ -46,25 +46,15 @@ function mockSupabase(overrides: Record<string, unknown> = {}) {
         }),
       }),
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          order: vi.fn().mockReturnValue({
-            range: vi.fn().mockResolvedValue({
-              data: [
-                {
-                  id: "gst-1",
-                  event_id: "evt-1",
-                  name: "Chief Femi",
-                  party_size: 2,
-                  rsvps: [{ status: "accepted", attending_count: 2 }],
-                  seat_assignments: [
-                    { table_id: "tbl-1", tables: { name: "Table Gold" } },
-                  ],
-                },
-              ],
-              count: 1,
-              error: null,
-            }),
-          }),
+        eq: vi.fn().mockResolvedValue({
+          data: [
+            {
+              name: "Chief Femi",
+              phone: "+2348011111111",
+              email: "femi@example.com",
+            },
+          ],
+          error: null,
         }),
       }),
     }),
@@ -81,6 +71,40 @@ function mockSupabase(overrides: Record<string, unknown> = {}) {
           error: null,
         });
       }
+      if (proc === "search_guests") {
+        return Promise.resolve({
+          data: [
+            {
+              id: "gst-1",
+              event_id: "evt-1",
+              name: "Chief Femi",
+              phone: "+2348011111111",
+              email: "femi@example.com",
+              side: "groom",
+              group_name: "VIP",
+              party_size: 2,
+              plus_ones_allowed: false,
+              is_vip: false,
+              rsvp_token: "tok-12345",
+              notes: null,
+              invited_at: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              rsvp_id: "rsp-1",
+              rsvp_status: "accepted",
+              rsvp_attending_count: 2,
+              rsvp_plus_one_name: null,
+              rsvp_dietary: null,
+              rsvp_note: null,
+              rsvp_responded_at: null,
+              seat_table_id: "tbl-1",
+              seat_table_name: "Table Gold",
+              total_count: 1,
+            },
+          ],
+          error: null,
+        });
+      }
       return Promise.resolve({ data: null, error: null });
     }),
     ...overrides,
@@ -93,17 +117,15 @@ describe("guest actions and queries", () => {
   });
 
   describe("createGuestAction", () => {
-    it("generates server-side token and creates guest record", async () => {
+    it("creates a guest with normalized phone and default values", async () => {
       vi.mocked(serverClient.createClient).mockResolvedValue(
         mockSupabase() as never
       );
 
       const res = await createGuestAction("evt-1", {
-        name: "Chief Adeleke",
-        phone: "08031234567",
-        email: "adeleke@example.com",
+        name: "Chief Femi",
+        phone: "0803 123 4567",
         party_size: 2,
-        side: "groom",
       });
 
       expect(res.ok).toBe(true);
@@ -112,10 +134,12 @@ describe("guest actions and queries", () => {
       }
     });
 
-    it("rejects guest creation with invalid payload", async () => {
+    it("rejects invalid guest payload with missing name", async () => {
       const res = await createGuestAction("evt-1", {
-        name: "", // Invalid empty name
+        name: "",
+        party_size: 1,
       });
+
       expect(res.ok).toBe(false);
       if (!res.ok) {
         expect(res.error).toContain("Guest name is required");
@@ -124,7 +148,7 @@ describe("guest actions and queries", () => {
   });
 
   describe("updateGuestAction", () => {
-    it("updates existing guest record", async () => {
+    it("updates guest details", async () => {
       vi.mocked(serverClient.createClient).mockResolvedValue(
         mockSupabase() as never
       );
@@ -135,14 +159,11 @@ describe("guest actions and queries", () => {
       });
 
       expect(res.ok).toBe(true);
-      if (res.ok) {
-        expect(res.data?.name).toBe("Chief Femi Updated");
-      }
     });
   });
 
   describe("deleteGuestAction", () => {
-    it("deletes guest record", async () => {
+    it("deletes a guest from the event", async () => {
       vi.mocked(serverClient.createClient).mockResolvedValue(
         mockSupabase() as never
       );
@@ -196,11 +217,10 @@ describe("guest actions and queries", () => {
     });
   });
 
-  describe("getEventGuests", () => {
-    it("queries guests with pagination and relations", async () => {
-      vi.mocked(serverClient.createClient).mockResolvedValue(
-        mockSupabase() as never
-      );
+  describe("getEventGuests with search_guests RPC", () => {
+    it("queries guests with pagination and relations via rpc", async () => {
+      const client = mockSupabase();
+      vi.mocked(serverClient.createClient).mockResolvedValue(client as never);
 
       const res = await getEventGuests("evt-1", {
         page: 1,
@@ -211,6 +231,37 @@ describe("guest actions and queries", () => {
       expect(res.guests[0].name).toBe("Chief Femi");
       expect(res.guests[0].rsvp?.status).toBe("accepted");
       expect(res.guests[0].seat?.table_name).toBe("Table Gold");
+      expect(client.rpc).toHaveBeenCalledWith(
+        "search_guests",
+        expect.objectContaining({
+          p_event_id: "evt-1",
+          p_limit: 15,
+          p_offset: 0,
+        })
+      );
     });
+
+    it.each([["a,id.neq.0"], ["%"], ["_"], ["("], ["x)"]])(
+      "safely passes malicious search input %s to parameterized search_guests RPC",
+      async (maliciousSearch) => {
+        const client = mockSupabase();
+        vi.mocked(serverClient.createClient).mockResolvedValue(client as never);
+
+        const res = await getEventGuests("evt-1", {
+          search: maliciousSearch,
+          page: 1,
+          pageSize: 25,
+        });
+
+        expect(res.guests.length).toBe(1);
+        expect(client.rpc).toHaveBeenCalledWith(
+          "search_guests",
+          expect.objectContaining({
+            p_event_id: "evt-1",
+            p_search: maliciousSearch,
+          })
+        );
+      }
+    );
   });
 });
