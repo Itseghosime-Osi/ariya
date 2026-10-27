@@ -79,3 +79,31 @@ To ensure that existing links within static marketing pages resolve seamlessly w
 
 - **Unauthenticated Access**: Directs unauthenticated visitors attempting to access `/events/**` to `/sign-in?next=...` while maintaining full query string state.
 - **Authenticated Access**: Bounces logged-in users visiting authentication routes (`/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`) to their destination or `/events`.
+
+## 6. Performance Baselines & Client Bundle Budgets
+
+To protect guest experiences on low-bandwidth and mobile connections common across celebratory contexts, bundle sizes are tracked against strict budgets.
+
+### Total First-Load JS Baseline (Next.js 16 Production Build)
+
+The framework baseline (shared React 19 framework, Turbopack runtime, and root layout) is **489.7 KB uncompressed (147.7 KB gzipped)**.
+
+| Route                      | Page Type            | Total First-Load JS (Uncompressed) | Total First-Load JS (Gzipped) | Page-Specific Delta (Gzipped) |
+| -------------------------- | -------------------- | ---------------------------------- | ----------------------------- | ----------------------------- |
+| `/i/[token]`               | Guest Pass & RSVP    | 523.2 KB                           | 159.8 KB                      | +12.0 KB                      |
+| `/e/[slug]`                | Public Event Gazette | 492.2 KB                           | 148.9 KB                      | +1.2 KB                       |
+| `/events`                  | Celebrations Hub     | 585.6 KB                           | 177.8 KB                      | +30.1 KB                      |
+| `/events/[eventId]/guests` | Guest Registry       | 818.2 KB                           | 245.7 KB                      | +98.0 KB                      |
+
+### Bundle Budget Rule
+
+- **Guest Routes Budget**: Guest-facing routes (`/i/[token]`, `/e/[slug]`) must add **no more than 20 KB of page-specific JS (gzipped)** on top of the shared framework baseline.
+- Heavy client libraries (TanStack Table, QR scanners, charting) are dynamically imported or strictly isolated to authenticated planner routes.
+
+## 7. Rate Limiter Security & Fail-Closed Policy
+
+- **Atomic Database Counter**: Rate limiting is tracked via the `public.rate_limits` table and the `public.hit_rate_limit(p_key text, p_limit int, p_window interval)` security-definer function.
+- **Service-Role Execution Only**: Direct `EXECUTE` privileges on `hit_rate_limit` are revoked from both `anon` and `authenticated` roles. Rate limit checks must be performed exclusively from trusted server code using the Supabase service-role admin client.
+- **HMAC IP Anonymization**: Client IP addresses are never stored in plain text or raw form. In-flight client IPs are hashed with HMAC-SHA256 keyed by `RATE_LIMIT_SECRET`.
+- **Fail-Closed Security**: In the event of a database connectivity issue, RPC error, or unexpected exception during a rate limit evaluation, the limiter strictly **fails closed** (`success: false`, `remaining: 0`), preventing brute-force attacks or resource exhaustion during degraded service states.
+- **Bounded Table Growth**: Old and expired rate-limit records are pruned automatically inside `hit_rate_limit` transactions (`reset_at < clock_timestamp() - interval '1 hour'`), ensuring storage bounds remain constant.
