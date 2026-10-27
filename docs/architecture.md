@@ -107,3 +107,34 @@ The framework baseline (shared React 19 framework, Turbopack runtime, and root l
 - **HMAC IP Anonymization**: Client IP addresses are never stored in plain text or raw form. In-flight client IPs are hashed with HMAC-SHA256 keyed by `RATE_LIMIT_SECRET`.
 - **Fail-Closed Security**: In the event of a database connectivity issue, RPC error, or unexpected exception during a rate limit evaluation, the limiter strictly **fails closed** (`success: false`, `remaining: 0`), preventing brute-force attacks or resource exhaustion during degraded service states.
 - **Bounded Table Growth**: Old and expired rate-limit records are pruned automatically inside `hit_rate_limit` transactions (`reset_at < clock_timestamp() - interval '1 hour'`), ensuring storage bounds remain constant.
+
+## 8. Role Hierarchy & Team Access Matrix
+
+Àríyá enforces Nigerian celebration operational hierarchies using database triggers (`tr_event_member_security`), row-level security policies, and server action guards across four distinct roles:
+
+| Role        | Description                    |    Manage Roles     | Manage Guests / Seating |   Check-in Desk    | View Billing & Payments |
+| :---------- | :----------------------------- | :-----------------: | :---------------------: | :----------------: | :---------------------: |
+| **Owner**   | Celebration host / creator     |  Full (All roles)   |           Yes           |        Yes         |           Yes           |
+| **Planner** | Hired lead wedding coordinator | Couple & Staff only |           Yes           |        Yes         |           Yes           |
+| **Couple**  | Celebrants (Bride & Groom)     |      Read-only      |     View / Overview     |        View        |           Yes           |
+| **Staff**   | On-the-day reception concierge |        None         |   Read-only registry    | Yes (Scan & admit) | **Blocked (403 / RLS)** |
+
+### Security Guarantees
+
+- **No Self-Demotion / Mutation**: No team member may alter their own role (`old.user_id = auth.uid()`).
+- **Last Owner Protection**: A database trigger strictly prevents removing or demoting the final remaining owner of any celebration workspace.
+- **Invitation Token Expiration**: Team invitations generate cryptographically random 22+ character Base62 tokens expiring after 7 days, accepted strictly after sign-in.
+- **Billing Shielding**: Staff members are blocked from viewing invoices or transaction records at both the UI and database row-level security (`public.has_event_role(event_id, array['owner', 'planner', 'couple'])`).
+
+## 9. Billing, Paystack Webhooks & Unpaid Restrictions
+
+### Free Tier Limits vs. Celebration Pass
+
+- **Unpaid Tier Restriction**: Free celebration workspaces may invite and dispatch reminders to a maximum of **20 guests**. Attempting to invite or send communications beyond 20 guests raises an explicit database exception with HINT `PAYMENT_REQUIRED`.
+- **Celebration Pass (₦50,000 / 5,000,000 kobo)**: Unlocks unlimited guest invitations, batch delivery, automated reminder crons, and seating allocations.
+
+### Paystack Webhook Security & Idempotency
+
+- **Cryptographic Signature**: Inbound webhooks to `/api/webhooks/paystack` verify the `x-paystack-signature` header using constant-time comparison (`crypto.timingSafeEqual`) of HMAC-SHA512 computed over the raw request payload with `PAYSTACK_SECRET_KEY`.
+- **Provider Re-Verification**: Upon receiving `charge.success`, the server re-queries Paystack's official transaction verification API (`/transaction/verify/${reference}`) to confirm currency (`NGN`), exact amount, and real-time provider settlement.
+- **Idempotency & Service-Role Updates**: Payment records are finalized via the security-definer RPC `record_successful_payment`. If a webhook retry arrives for an already processed reference, the function returns early without duplicating invoices or side effects. The event's `paid_at` timestamp is updated strictly by the service-role admin client, satisfying the `tr_event_protection` trigger.
