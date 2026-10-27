@@ -18,6 +18,7 @@ export interface SeatingGuest {
   plus_one_name: string | null;
   dietary: string | null;
   table_id: string | null;
+  seating_conflict_at?: string | null;
 }
 
 export interface TableWithGuests extends Table {

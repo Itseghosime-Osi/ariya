@@ -61,6 +61,12 @@ export function UnseatedGuestCard({
                   VIP
                 </span>
               )}
+              {guest.seating_conflict_at && (
+                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-0.5">
+                  <Icon name="warning" className="text-[10px]" />
+                  <span>party size changed</span>
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-on-surface-variant truncate">
               {guest.side} {guest.group_name ? `• ${guest.group_name}` : ""}

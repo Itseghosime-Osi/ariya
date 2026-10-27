@@ -22,6 +22,7 @@ export async function getEventSeatingData(
         side,
         group_name,
         is_vip,
+        seating_conflict_at,
         party_size,
         plus_ones_allowed,
         rsvps (
@@ -73,6 +74,9 @@ export async function getEventSeatingData(
       plus_one_name: rsvp?.plus_one_name || null,
       dietary: rsvp?.dietary || null,
       table_id: seat?.table_id || null,
+      seating_conflict_at: (g as Record<string, unknown>).seating_conflict_at
+        ? String((g as Record<string, unknown>).seating_conflict_at)
+        : null,
     });
   }
 
@@ -100,6 +104,19 @@ export async function getEventSeatingData(
       unseatedAttendees += guest.attending_count;
     }
   }
+
+  // Prioritize guests with seating conflicts (e.g. party size changed on RSVP) at the top
+  unseatedGuests.sort((a, b) => {
+    if (a.seating_conflict_at && !b.seating_conflict_at) return -1;
+    if (!a.seating_conflict_at && b.seating_conflict_at) return 1;
+    if (a.seating_conflict_at && b.seating_conflict_at) {
+      return (
+        new Date(b.seating_conflict_at).getTime() -
+        new Date(a.seating_conflict_at).getTime()
+      );
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   const tables = Array.from(tableMap.values());
   const totalCapacity = tables.reduce((acc, t) => acc + t.capacity, 0);
