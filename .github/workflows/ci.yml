@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "feat/**"]
+    branches: [main]
   pull_request:
 
 concurrency:
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.122.0
 
       - name: Start Supabase
         run: supabase start
@@ -119,7 +119,7 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.122.0
 
       - name: Start Supabase
         run: supabase start
@@ -137,22 +137,27 @@ jobs:
           ANON_KEY=$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')
           SERVICE_KEY=$(echo "$STATUS_JSON" | jq -r '.SERVICE_ROLE_KEY')
           API_URL=$(echo "$STATUS_JSON" | jq -r '.API_URL')
+          PAYSTACK_KEY="sk_test_ci_mock_secret"
+
+          echo "PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}" >> "$GITHUB_ENV"
 
           cat <<EOF > .env.local
           NEXT_PUBLIC_APP_URL=http://localhost:3000
           NEXT_PUBLIC_SUPABASE_URL=${API_URL}
           NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}
           SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}
-          PAYSTACK_SECRET_KEY=sk_test_ci_mock_secret
+          PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}
           PAYSTACK_API_BASE=http://127.0.0.1:57328
           NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_ci_mock_public
           EMAIL_TRANSPORT=mailpit
           MAILPIT_URL=http://127.0.0.1:8025
           RESEND_API_KEY=re_sample_mock_resend_key
-          RESEND_FROM_EMAIL=rsvps@owambeplan.com
+          RESEND_FROM_EMAIL=rsvps@ariya-two.vercel.app
           RATE_LIMIT_SECRET=$(openssl rand -hex 32)
           CRON_SECRET=$(openssl rand -hex 16)
           EOF
 
       - name: Run Playwright tests
         run: pnpm test:e2e
+        env:
+          PAYSTACK_SECRET_KEY: sk_test_ci_mock_secret
