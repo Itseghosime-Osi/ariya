@@ -46,14 +46,19 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: "/rsvp/:token",
-        destination: "/i/:token",
-      },
+    // The film is the home page. It has to be a beforeFiles rewrite: an
+    // ordinary (afterFiles) rewrite runs only after the app's own routes, so an
+    // app route at "/" would win and visitors would never see the film.
+    const beforeFiles = [
       {
         source: "/",
         destination: "/site/index.html",
+      },
+    ];
+    const afterFiles = [
+      {
+        source: "/rsvp/:token",
+        destination: "/i/:token",
       },
       {
         source: "/about",
@@ -100,6 +105,7 @@ const nextConfig: NextConfig = {
         destination: "/site/assets/:path*",
       },
     ];
+    return { beforeFiles, afterFiles };
   },
 };
 
