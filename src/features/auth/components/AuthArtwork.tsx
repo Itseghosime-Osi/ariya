@@ -16,7 +16,7 @@ export function AuthArtwork() {
             High-Society Wedding Guild
           </span>
         </div>
-        <div className="font-body-sm text-body-sm text-mist/70 tracking-wide">
+        <div className="font-body-sm text-body-sm text-stone-300 tracking-wide">
           Private Client Portal
         </div>
       </div>
@@ -64,7 +64,7 @@ export function AuthArtwork() {
           {/* Micro Registry Details Grid */}
           <div className="grid grid-cols-3 gap-2 mt-6 pt-5 bg-surface-container-high/60 rounded-xl p-3">
             <div className="space-y-0.5">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider block">
+              <span className="font-label-sm text-label-sm text-stone-700 font-semibold uppercase tracking-wider block">
                 Tables
               </span>
               <span className="font-title-md text-title-md text-night font-bold">
@@ -72,7 +72,7 @@ export function AuthArtwork() {
               </span>
             </div>
             <div className="space-y-0.5">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider block">
+              <span className="font-label-sm text-label-sm text-stone-700 font-semibold uppercase tracking-wider block">
                 Aṣọ-Ẹbí
               </span>
               <span className="font-title-md text-title-md text-success font-bold">
@@ -80,7 +80,7 @@ export function AuthArtwork() {
               </span>
             </div>
             <div className="space-y-0.5">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider block">
+              <span className="font-label-sm text-label-sm text-stone-700 font-semibold uppercase tracking-wider block">
                 Guaranteed
               </span>
               <span className="font-title-md text-title-md text-night font-bold">
@@ -104,12 +104,12 @@ export function AuthArtwork() {
       </div>
 
       {/* Bottom Status Pill */}
-      <div className="relative z-10 flex items-center justify-between text-mist/70 pt-6">
+      <div className="relative z-10 flex items-center justify-between text-stone-300 pt-6">
         <div className="flex items-center space-x-2 font-body-sm text-body-sm">
           <Icon name="verified_user" className="text-gold text-base" />
           <span>Encrypted Session • Session-bound Cookies</span>
         </div>
-        <span className="font-label-sm text-label-sm text-gold/80">
+        <span className="font-label-sm text-label-sm text-gold">
           Lagos • London • Atlanta
         </span>
       </div>

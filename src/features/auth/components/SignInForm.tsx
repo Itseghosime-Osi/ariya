@@ -79,7 +79,7 @@ export function SignInForm() {
             >
               Planner Email
             </label>
-            <span className="font-body-sm text-body-sm text-outline">
+            <span className="font-body-sm text-body-sm text-stone-700 font-medium">
               WAT Lagos
             </span>
           </div>

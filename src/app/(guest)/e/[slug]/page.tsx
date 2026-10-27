@@ -147,7 +147,7 @@ export default async function PublicCelebrationPage({
         </article>
       </main>
 
-      <footer className="text-center text-xs text-wine/60 pt-8">
+      <footer className="text-center text-xs text-stone-700 font-medium pt-8">
         <p>Àríyá • Bespoke African Ceremonies & Wedding Suite</p>
       </footer>
     </div>
