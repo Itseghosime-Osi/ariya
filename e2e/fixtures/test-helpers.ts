@@ -57,7 +57,7 @@ export async function createTestEvent(
 
   await page.goto("/events/new");
   await expect(page.locator("h1")).toContainText(
-    /Create & Orchestrate Celebration/i
+    /Create & (?:Set Up|Orchestrate) Celebration/i
   );
 
   // Step 1: Celebration Details
