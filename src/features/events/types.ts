@@ -18,6 +18,7 @@ export interface EventMetrics {
   unassignedGuests: number;
   readinessPercentage: number;
   daysAway: number;
+  conflictedParties?: number;
 }
 
 export interface EventWithMetrics {

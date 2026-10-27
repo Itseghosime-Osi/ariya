@@ -35,6 +35,43 @@ export function NextToCareForCard({
       </div>
 
       <div className="space-y-space-md relative">
+        {/* Seating Conflict Alert */}
+        {metrics.conflictedParties && metrics.conflictedParties > 0 ? (
+          <div className="bg-amber-500/20 border border-amber-400/40 backdrop-blur-sm rounded-2xl p-space-md space-y-space-sm hover:bg-amber-500/30 transition-colors">
+            <div className="flex items-start justify-between gap-space-xs">
+              <div className="flex items-start gap-space-sm">
+                <Icon
+                  name="warning"
+                  className="text-amber-300 mt-0.5 text-xl"
+                />
+                <div>
+                  <h4 className="font-title-md text-ivory font-semibold">
+                    {metrics.conflictedParties} seating conflict
+                    {metrics.conflictedParties === 1 ? "" : "s"}
+                  </h4>
+                  <p className="font-body-sm text-ivory/80">
+                    Party size changed on RSVP • Needs table re-assignment
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="font-label-sm text-amber-300 font-semibold">
+                Priority
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  onActionToast("Opening seating chart to resolve conflict...")
+                }
+                className="px-space-md py-1.5 rounded-xl bg-amber-400 text-night font-label-sm hover:bg-amber-300 transition-all font-semibold shadow-sm min-h-[36px]"
+              >
+                Resolve Seating
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {/* Task 1: Follow-ups */}
         <div className="bg-night/40 backdrop-blur-sm rounded-2xl p-space-md space-y-space-sm hover:bg-night/50 transition-colors">
           <div className="flex items-start justify-between gap-space-xs">

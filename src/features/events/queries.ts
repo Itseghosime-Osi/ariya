@@ -116,7 +116,9 @@ export async function getEventMetrics(
   // Query guests and RSVPs for this event
   const { data: rawGuests } = await supabase
     .from("guests")
-    .select("id, party_size, rsvps (status, attending_count)")
+    .select(
+      "id, party_size, seating_conflict_at, rsvps (status, attending_count)"
+    )
     .eq("event_id", eventId);
 
   const guests = rawGuests ?? [];
@@ -154,8 +156,12 @@ export async function getEventMetrics(
   let awaitingGuests = 0;
   let declinedParties = 0;
   let declinedGuests = 0;
+  let conflictedParties = 0;
 
   for (const g of guests) {
+    if (g.seating_conflict_at) {
+      conflictedParties += 1;
+    }
     totalAttendees += g.party_size;
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
     const status = rsvp?.status ?? "pending";
@@ -193,6 +199,7 @@ export async function getEventMetrics(
     unassignedGuests: unassigned,
     readinessPercentage: readiness,
     daysAway,
+    conflictedParties,
   };
 }
 
