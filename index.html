@@ -2558,7 +2558,7 @@ async function start() {
     let i = 0;
     while (i < ks.length - 2 && p > ks[i + 1][0]) i++;
     const A = ks[i], B = ks[i + 1], P0 = ks[Math.max(0, i - 1)], P3 = ks[Math.min(ks.length - 1, i + 2)];
-    const t = clamp((p - A[0]) / (B[0] - A[0]), 0, 1), te = lerp(t, smooth(t), 0.5);
+    const t = clamp((p - A[0]) / (B[0] - A[0]), 0, 1), te = lerp(t, smooth(t), 0.5); // eased into each mark: the camera rests a beat on what it shows
     catmull(P0[1], A[1], B[1], P3[1], te, camPos);
     catmull(P0[2], A[2], B[2], P3[2], te, camLook);
     camAperture = lerp(A[3], B[3], smooth(t));
@@ -4258,7 +4258,8 @@ async function start() {
       ring.position.set(box.position.x, RING_REST, box.position.z); ring.rotation.set(0, box.rotation.y, 0);
       if (!OPEN) {
         const lift = seg(p, 0.12, 0.195); // straight up and clear of the cushion first
-        ring.position.y = lerp(RING_REST, RING_UP, lift) + Math.sin(t * 0.9) * 0.025 * lift * motion;
+        const settle = clamp((p - 0.195) / 0.035, 0, 1); // at the top it rises a touch past, then settles back
+        ring.position.y = lerp(RING_REST, RING_UP, lift) + 0.045 * Math.sin(settle * Math.PI) * (1 - settle * 0.5) + Math.sin(t * 0.9) * 0.025 * lift * motion;
         // One unhurried turn as it rises, so the stone shows itself all the way round, then it settles facing us.
         const spin = smooth(clamp((p - 0.195) / 0.08, 0, 1)) * (Math.PI * 2 - 0.35); // then the turn, in the air, ending three-quarters on
         ring.rotation.y = box.rotation.y + spin + Math.sin(t * 0.35) * 0.06 * motion * lift + px * 0.12 * lift;
