@@ -54,6 +54,7 @@ export function GuestDetailDrawer({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close drawer"
             className="rounded-lg p-1 text-mist hover:text-on-surface hover:bg-surface-container"
           >
             <X className="h-5 w-5" />
