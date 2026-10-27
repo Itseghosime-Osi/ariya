@@ -170,13 +170,20 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
       .fill("May your union be blessed beyond measure!");
     await page.getByRole("button", { name: /submit rsvp response/i }).click();
 
-    // 24. Verify Confirmed Pass Screen
+    // 24. Verify Confirmed Pass Screen & Check-In Pass
     await expect(page.getByText(/RSVP Confirmed & Honoured/i)).toBeVisible({
       timeout: 10000,
     });
     await expect(
       page.getByText(/We Look Forward to Celebrating with You/i)
     ).toBeVisible();
+
+    const checkInCodeElement = page
+      .locator('span.font-mono:has-text("ARY-")')
+      .first();
+    await expect(checkInCodeElement).toBeVisible();
+    const checkInCode = (await checkInCodeElement.textContent())?.trim();
+    expect(checkInCode).toMatch(/^ARY-[A-Z0-9]+-[A-Z0-9]+$/);
 
     // 25. Verify confirmation email arrived in Mailpit
     const mailpitRes = await page.request.get(
@@ -225,5 +232,90 @@ Folashade Adeleke,08029876543,folashade@lagos.ng,Bride,Bridal Party,No`;
     expect(pubRes?.status()).toBe(200);
     await expect(page.getByText(eventTitle).first()).toBeVisible();
     await expect(page.getByText(venueName).first()).toBeVisible();
+
+    // 30. Seating: Navigate to Seating Plan and create 2 tables
+    await page.goto(`/events/${eventId}/seating`);
+    await expect(page.getByText(/Seating & Floor Plan/i)).toBeVisible();
+
+    // Table 1: VIP Table with capacity 1 (for capacity enforcement testing)
+    await page
+      .getByRole("button", { name: /(create first table|new table)/i })
+      .first()
+      .click();
+    await page.locator('input[placeholder*="Table 01"]').fill("VIP High Table");
+    await page.locator('input[type="number"]').fill("1");
+    await page.getByRole("button", { name: /create table/i }).click();
+    await expect(page.getByText("VIP High Table").first()).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Table 2: Family Table with capacity 8
+    await page.getByRole("button", { name: /new table/i }).click();
+    await page.locator('input[placeholder*="Table 01"]').fill("Family Table");
+    await page.locator('input[type="number"]').fill("8");
+    await page.getByRole("button", { name: /create table/i }).click();
+    await expect(page.getByText("Family Table").first()).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 31. Seat Babatunde Adeleke to VIP High Table via accessible keyboard select
+    const babatundeSelect = page.locator(
+      'select[aria-label="Assign Babatunde Adeleke to a table"]'
+    );
+    const vipOptionVal = await babatundeSelect
+      .locator("option", { hasText: "VIP High Table" })
+      .getAttribute("value");
+    await babatundeSelect.selectOption(vipOptionVal!);
+    await expect(page.getByText(/Seating chart updated/i)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 32. Over-capacity attempt: Try to seat Folashade Adeleke into the full VIP High Table (capacity 1)
+    const folashadeSelect = page.locator(
+      'select[aria-label="Assign Folashade Adeleke to a table"]'
+    );
+    await folashadeSelect.selectOption(vipOptionVal!);
+    await expect(page.getByText(/capacity exceeded/i)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 33. Seat Folashade Adeleke to Family Table via drag & drop (with keyboard select fallback)
+    const folashadeDragBtn = page.locator(
+      'button[aria-label="Drag Folashade Adeleke to table"]'
+    );
+    const familyTableCard = page.getByText("Family Table").first();
+    await folashadeDragBtn.dragTo(familyTableCard);
+
+    if (await folashadeSelect.isVisible()) {
+      const familyOptionVal = await folashadeSelect
+        .locator("option", { hasText: "Family Table" })
+        .getAttribute("value");
+      await folashadeSelect.selectOption(familyOptionVal!);
+    }
+    await expect(page.getByText(/Seating chart updated/i)).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 34. Check-in Desk: Navigate to check-in desk
+    await page.goto(`/events/${eventId}/check-in`);
+    await expect(
+      page.getByText(/Check-In Desk & Reception Concierge/i)
+    ).toBeVisible();
+
+    // 35. Perform manual check-in using Babatunde's pass code
+    expect(checkInCode).toBeTruthy();
+    await page.locator('input[placeholder*="ARY-"]').fill(checkInCode!);
+    await page.getByRole("button", { name: /admit guest/i }).click();
+
+    // 36. Verify Admission Approved with table assignment
+    await expect(page.getByText(/Admission Approved/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText("Babatunde Adeleke").first()).toBeVisible();
+    await expect(page.getByText("VIP High Table").first()).toBeVisible();
+
+    // 37. Verify telemetry count updated
+    await expect(page.getByText(/Admitted Through Desk/i)).toBeVisible();
+    await expect(page.getByText("Guests in celebration").first()).toBeVisible();
   });
 });

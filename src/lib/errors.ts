@@ -127,6 +127,9 @@ export function mapError(
   if (
     lowerMsg.includes("you must be an owner or planner") ||
     lowerMsg.includes("guest name cannot be empty") ||
+    lowerMsg.includes("capacity exceeded") ||
+    lowerMsg.includes("table capacity") ||
+    lowerMsg.includes("available seats") ||
     lowerMsg.includes("row ")
   ) {
     return message;
