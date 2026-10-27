@@ -83,7 +83,7 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Positive case: Authorize on provider and deliver valid HMAC-SHA512 webhook
     setAuthorized(true);
-    const validSignature = signPayload(webhookPayload, "sk_test_sample");
+    const validSignature = signPayload(webhookPayload);
 
     const webhookRes = await page.request.post("/api/webhooks/paystack", {
       headers: {

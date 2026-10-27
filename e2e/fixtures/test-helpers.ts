@@ -207,7 +207,7 @@ export function startMockPaystackServer(port = 57328): {
 
 export function signPayload(
   payload: string,
-  secret = "sk_test_sample"
+  secret = process.env.PAYSTACK_SECRET_KEY || "sk_test_sample"
 ): string {
   return crypto.createHmac("sha512", secret).update(payload).digest("hex");
 }
