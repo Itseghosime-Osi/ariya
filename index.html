@@ -108,6 +108,8 @@ html.watching .scrollcue { visibility: hidden; }
 .gate p { margin: 0; color: var(--mist); max-width: 32em; }
 .gate { background-image: radial-gradient(48% 42% at 50% 52%, rgba(12, 4, 6, 0.72), rgba(12, 4, 6, 0) 100%), linear-gradient(180deg, rgba(12, 4, 6, 0.55), rgba(12, 4, 6, 0.74) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster.jpg"); background-size: cover; background-position: center 30%; }
 @media (max-aspect-ratio: 4/5) { .gate { background-image: radial-gradient(70% 34% at 50% 48%, rgba(12, 4, 6, 0.7), rgba(12, 4, 6, 0) 100%), linear-gradient(180deg, rgba(12, 4, 6, 0.5), rgba(12, 4, 6, 0.76) 55%, rgba(12, 4, 6, 0.95)), url("assets/poster-tall.jpg"); } }
+/* Once the 3D is ready, the poster gives way to the live film behind the door: the ring above its box, the candles moving. */
+.gate.live { background-image: radial-gradient(48% 42% at 50% 52%, rgba(12, 4, 6, 0.62), rgba(12, 4, 6, 0) 100%), linear-gradient(180deg, rgba(12, 4, 6, 0.42), rgba(12, 4, 6, 0.6) 55%, rgba(12, 4, 6, 0.9)); }
 .gate .value { font-family: var(--font-display); font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 1.3; color: var(--ivory); max-width: 22em; text-wrap: balance; }
 .gate .story { color: var(--mist); max-width: none; }
 .gate-links { display: flex; gap: 14px; align-items: center; color: var(--mist); }
@@ -1396,6 +1398,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
 
     var active = 0;
     chapters.forEach(function (c, i) { if (i === 0 || sv >= c[1] - 0.003 && r >= PRO) active = i; });
+    if (!OP.entered) active = 0; // behind the door the film is only a backdrop
     if (bt < window.innerHeight * 0.5) active = -1;
     if (active !== lastChapter) {
       lastChapter = active;
@@ -1419,6 +1422,11 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       } else target = rawFromS(sFromOld(embedP));
       if (OP.paused) { requestAnimationFrame(tick); return; }
     }
+    // Behind the door, before anyone enters: hold on the ring above its box, with the camera drifting round it.
+    if (!EMBED && !OP.entered && OP.loaded >= 1 && !OP.failed) {
+      target = prog = rawFromS(sFromOld(0.27)); OP.gateLoop = true;
+      if (!gate.classList.contains("live")) gate.classList.add("live");
+    } else OP.gateLoop = false;
     prog += (target - prog) * 0.085;
     if (Math.abs(target - prog) < 0.00005) prog = target;
     var r = prog, sv = clamp((r - PRO) / (1 - PRO), 0, 1), sc = mapStory(sv), p = sc.p;
@@ -3751,9 +3759,9 @@ async function start() {
   const j_lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.28, 48, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xf3e3c8, roughness: 0.9, side: THREE.DoubleSide, emissive: 0xffb873, emissiveIntensity: 0.9 })); j_lampShade.position.y = 1.72; j_lamp.add(j_lampShade);
   const j_hook = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 1.2, 0), V3(0.08, 1.2, 0.06), V3(0.13, 1.19, 0.1), V3(0.14, 1.23, 0.11)]), 24, 0.005, 8), goldPolish); j_lamp.add(j_hook);
   // Her shoes: pointed rose-gold pumps with a line of crystals round the topline and a crystal slingback.
-  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xf4bca0, metalness: 0.6, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.08, sheen: 0.4, sheenColor: 0xffd8c4, emissive: 0x4a2216, emissiveIntensity: 0.6, side: THREE.DoubleSide }); // lifted a little: the shade's glow falls on them
+  const j_shoeMat = new THREE.MeshPhysicalMaterial({ color: 0xf6b9a0, metalness: 0.9, roughness: 0.14, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 2.2, emissive: 0x3c1a10, emissiveIntensity: 0.5, side: THREE.DoubleSide }); // mirror rose gold, lifted by the shade's glow // lifted a little: the shade's glow falls on them
   const j_soleMat = new THREE.MeshPhysicalMaterial({ color: 0x2a1a14, roughness: 0.5 });
-  const j_innerMat = new THREE.MeshStandardMaterial({ color: 0xf0c9b4, roughness: 0.6, side: THREE.DoubleSide });
+  const j_innerMat = new THREE.MeshStandardMaterial({ color: 0xc8907a, roughness: 0.55, side: THREE.DoubleSide }); // nude leather lining
   function j_makeShoe() {
     const grp = new THREE.Group();
     // The sole line, toe (x = 0.13) to heel seat (x = -0.105), and the half-width of the shoe along it (pointed at the toe).
@@ -3771,7 +3779,7 @@ async function start() {
     const wallPts = (side) => { const pts = []; for (let i = 0; i <= 30; i++) { const x = X0 + (0.0 - X0) * i / 30; pts.push(new THREE.Vector2(x, soleY(x))); } return pts; };
     [-1, 1].forEach((sd) => {
       const pts = wallPts(sd), wp = [], wi = [];
-      pts.forEach((q, i) => { const h = q.x < -0.07 ? 0.05 : 0.016 + 0.01 * Math.sin(Math.PI * (q.x + 0.105) / 0.105); wp.push(q.x, q.y + 0.003, sd * halfW(q.x), q.x, q.y + 0.003 + h, sd * halfW(q.x) * 0.96); if (i) { const a = (i - 1) * 2; wi.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } });
+      pts.forEach((q, i) => { const h = q.x < -0.07 ? 0.052 : 0.024 + 0.028 * smooth(clamp(-q.x / 0.07, 0, 1)); wp.push(q.x, q.y + 0.003, sd * halfW(q.x), q.x, q.y + 0.003 + h, sd * halfW(q.x) * 0.96); if (i) { const a = (i - 1) * 2; wi.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } });
       const wg = new THREE.BufferGeometry(); wg.setAttribute("position", new THREE.Float32BufferAttribute(wp, 3)); wg.setIndex(wi); wg.computeVertexNormals(); grp.add(new THREE.Mesh(wg, j_shoeMat));
     });
     // The insole, pale leather, and the sole beneath.
@@ -3779,12 +3787,12 @@ async function start() {
     const bent = (geo, dy) => { geo.rotateX(Math.PI / 2); const pa = geo.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, pa.getY(i) + soleY(pa.getX(i)) + dy); geo.computeVertexNormals(); return geo; };
     grp.add(new THREE.Mesh(bent(new THREE.ShapeGeometry(outline, 4), 0.004), j_innerMat));
     grp.add(new THREE.Mesh(bent(new THREE.ExtrudeGeometry(outline, { depth: 0.004, bevelEnabled: false, curveSegments: 4 }), -0.001), j_soleMat));
-    const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.003, 0.088, 16), j_shoeMat); heel.position.set(-0.096, 0.0, 0); heel.rotation.z = -0.06; grp.add(heel);
+    const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0032, 0.088, 20), j_shoeMat); heel.position.set(-0.096, 0.0, 0); heel.rotation.z = -0.06; grp.add(heel);
     const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.006, 10), j_soleMat); tip.position.set(-0.093, -0.045, 0); grp.add(tip);
     heel.position.y = 0.0; heel.translateY(-0.0); // the stiletto runs from the heel seat to the floor
     heel.position.set(-0.097, soleY(-0.097) - 0.044, 0); tip.position.set(-0.094, soleY(-0.097) - 0.09, 0);
     // Crystals along the throat of the toe box, and a crystal slingback round the heel.
-    const NCr = 34, crystals = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.0032, 0), j_crystal, NCr * 2);
+    const NCr = 34, crystals = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.0042, 0), j_crystal, NCr * 2);
     { const dd = new THREE.Object3D(); for (let k = 0; k < NCr; k++) { const a = Math.PI * k / (NCr - 1), x = 0.0015; dd.position.set(x, soleY(x) + 0.006 + Math.sin(a) * 0.036, Math.cos(a) * halfW(x)); dd.updateMatrix(); crystals.setMatrixAt(k, dd.matrix);
         const b = Math.PI * 0.15 + Math.PI * 0.7 * k / (NCr - 1); dd.position.set(-0.105 - Math.sin(b) * 0.012, soleY(-0.105) + 0.055, Math.cos(b) * 0.036); dd.updateMatrix(); crystals.setMatrixAt(NCr + k, dd.matrix); } }
     grp.add(crystals);
@@ -3792,7 +3800,7 @@ async function start() {
     return grp;
   }
   // Hung by the ankle strap, each shoe swings toe down.
-  [-0.04, 0.045].forEach((dz, k) => { const pivot = new THREE.Group(); pivot.position.set(0.14, 1.215, 0.11 + dz); pivot.rotation.set(0.1 * k, -0.4 + k * 0.5, -1.35); j_lamp.add(pivot); const sh = j_makeShoe(); sh.position.copy(sh.userData.strap).multiplyScalar(-1); pivot.add(sh); });
+  [-0.04, 0.045].forEach((dz, k) => { const pivot = new THREE.Group(); pivot.position.set(0.14, 1.215, 0.11 + dz); pivot.rotation.set(0.12 - 0.2 * k, k ? -1.75 : -0.8, -1.3); /* turned to show the insole, heel and crystal lines */ j_lamp.add(pivot); const sh = j_makeShoe(); sh.position.copy(sh.userData.strap).multiplyScalar(-1); pivot.add(sh); });
   // The room behind the camera, seen only in the mirror: the bride in her robe at the makeup chair, the artist leaning
   // in with a brush, and the photographer who walks across with his camera up.
   const jPeople = new THREE.Group(); setJ.add(jPeople);
@@ -4174,10 +4182,12 @@ async function start() {
   const tmpV = new THREE.Vector3(), tmpM = new THREE.Matrix4(), dummy = new THREE.Object3D();
   const envRotM = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(-envEuler.x, -envEuler.y, -envEuler.z)));
   gemMat.uniforms.envRot.value.copy(envRotM);
-  let tStart = -1, lastSet = "", frameAvg = 16, lastT = 0, slowFrames = 0;
+  let tStart = -1, introEntered = false, lastSet = "", frameAvg = 16, lastT = 0, slowFrames = 0;
 
   OP.render = function (p, t) {
-    if (tStart < 0 && OP.entered) tStart = t;
+    // The lens opens once behind the door, and again (from dark, out of focus) as the visitor walks in.
+    if (tStart < 0 && OP.gateLoop) tStart = t;
+    if (OP.entered && !introEntered) { introEntered = true; tStart = t; }
     canvas.classList.add("live");
     if (OP.covered) return;
     const intro = tStart < 0 ? 0 : motion ? smooth((t - tStart) / 3.2) : 1;
@@ -4376,6 +4386,10 @@ async function start() {
     }
     // The canopy is only drawn once the camera is under it: the overhead shots of the hall look straight through the roof.
     canopy.visible = fairy.visible = setB.visible && camPos.y < canopyH(camPos.x, camPos.z) - 0.8;
+    if (OP.gateLoop && motion) { // the slow orbit behind the door
+      const a = Math.sin(t * 0.11) * 0.32, dx = camPos.x - camLook.x, dz = camPos.z - camLook.z;
+      camPos.x = camLook.x + dx * Math.cos(a) - dz * Math.sin(a); camPos.z = camLook.z + dx * Math.sin(a) + dz * Math.cos(a);
+    }
     camera.position.copy(camPos);
     camera.position.x += px * 0.12; camera.position.y -= py * 0.06;
     camera.lookAt(camLook);
