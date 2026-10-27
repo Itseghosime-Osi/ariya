@@ -148,6 +148,51 @@ export type Database = {
           },
         ];
       };
+      event_invites: {
+        Row: {
+          accepted_at: string | null;
+          created_at: string;
+          email: string;
+          event_id: string;
+          expires_at: string;
+          id: string;
+          invited_by: string | null;
+          role: string;
+          token: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email: string;
+          event_id: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          role: string;
+          token?: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email?: string;
+          event_id?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          role?: string;
+          token?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_invites_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       event_members: {
         Row: {
           created_at: string;
@@ -725,6 +770,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      accept_team_invite: { Args: { p_token: string }; Returns: Json };
       assign_seat: {
         Args: { p_guest_id: string; p_table_id?: string };
         Returns: Json;
@@ -732,6 +778,10 @@ export type Database = {
       check_in: {
         Args: { p_code: string; p_count?: number; p_event_id: string };
         Returns: Json;
+      };
+      check_invitation_quota: {
+        Args: { p_event_id: string; p_recipient_count: number };
+        Returns: boolean;
       };
       create_event: {
         Args: {
@@ -782,10 +832,22 @@ export type Database = {
         Args: { p_event_id: string; p_guests: Json };
         Returns: Json;
       };
+      invite_team_member: {
+        Args: { p_email: string; p_event_id: string; p_role: string };
+        Returns: Json;
+      };
       is_event_member:
         | { Args: { p_event_id: string }; Returns: boolean }
         | { Args: { p_event_id: string; p_user_id: string }; Returns: boolean };
+      record_successful_payment: {
+        Args: { p_payment_reference: string; p_paystack_data: Json };
+        Returns: Json;
+      };
       regenerate_guest_token: { Args: { p_guest_id: string }; Returns: string };
+      remove_team_member: {
+        Args: { p_event_id: string; p_target_user_id: string };
+        Returns: boolean;
+      };
       search_guests: {
         Args: {
           p_event_id: string;
@@ -841,6 +903,18 @@ export type Database = {
       table_seats_used: {
         Args: { p_exclude_guest?: string; p_table_id: string };
         Returns: number;
+      };
+      track_invitations_sent: {
+        Args: { p_guest_ids: string[] };
+        Returns: number;
+      };
+      update_team_member_role: {
+        Args: {
+          p_event_id: string;
+          p_new_role: string;
+          p_target_user_id: string;
+        };
+        Returns: boolean;
       };
     };
     Enums: {

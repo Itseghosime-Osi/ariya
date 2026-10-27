@@ -68,6 +68,9 @@ export async function getEventGuests(
     rsvp_token: row.rsvp_token,
     notes: row.notes,
     invited_at: row.invited_at,
+    seating_conflict_at:
+      (row as { seating_conflict_at?: string | null }).seating_conflict_at ??
+      null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     rsvp: row.rsvp_id
