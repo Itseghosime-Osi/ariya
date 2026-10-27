@@ -65,7 +65,6 @@ export function resolveServerEnv(
         rawEnv.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-key",
       PAYSTACK_SECRET_KEY: rawEnv.PAYSTACK_SECRET_KEY || "sk_test_placeholder",
       PAYSTACK_API_BASE: rawEnv.PAYSTACK_API_BASE || "https://api.paystack.co",
-      PAYSTACK_API_BASE: rawEnv.PAYSTACK_API_BASE || "https://api.paystack.co",
       EMAIL_TRANSPORT:
         (rawEnv.EMAIL_TRANSPORT as "resend" | "mailpit") || "mailpit",
       MAILPIT_URL: rawEnv.MAILPIT_URL || "http://127.0.0.1:57324",
