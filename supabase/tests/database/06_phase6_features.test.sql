@@ -28,12 +28,12 @@ begin
   v_staff := gen_random_uuid();
   v_outsider := gen_random_uuid();
 
-  insert into auth.users (id, email, raw_user_meta_data)
+  insert into auth.users (id, email, raw_user_meta_data, email_confirmed_at)
   values
-    (v_owner, 'p6_owner@owambe.ng', '{"full_name": "Event Owner"}'::jsonb),
-    (v_planner, 'p6_planner@owambe.ng', '{"full_name": "Event Planner"}'::jsonb),
-    (v_staff, 'p6_staff@owambe.ng', '{"full_name": "Event Staff"}'::jsonb),
-    (v_outsider, 'p6_outsider@owambe.ng', '{"full_name": "Event Outsider"}'::jsonb);
+    (v_owner, 'p6_owner@owambe.ng', '{"full_name": "Event Owner"}'::jsonb, now()),
+    (v_planner, 'p6_planner@owambe.ng', '{"full_name": "Event Planner"}'::jsonb, now()),
+    (v_staff, 'p6_staff@owambe.ng', '{"full_name": "Event Staff"}'::jsonb, now()),
+    (v_outsider, 'p6_outsider@owambe.ng', '{"full_name": "Event Outsider"}'::jsonb, now());
 
   -- 2. Create event as owner
   perform set_config('request.jwt.claim.sub', v_owner::text, true);
