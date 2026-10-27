@@ -39,7 +39,9 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
   return { ok: true, redirectTo };
 }
 
-export async function signUpAction(input: SignUpInput): Promise<ActionResult> {
+export async function signUpAction(
+  input: SignUpInput
+): Promise<ActionResult<{ hasSession: boolean }>> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
@@ -48,7 +50,7 @@ export async function signUpAction(input: SignUpInput): Promise<ActionResult> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -64,7 +66,7 @@ export async function signUpAction(input: SignUpInput): Promise<ActionResult> {
     return { ok: false, error: error.message };
   }
 
-  return { ok: true };
+  return { ok: true, data: { hasSession: Boolean(data.session) } };
 }
 
 export async function forgotPasswordAction(

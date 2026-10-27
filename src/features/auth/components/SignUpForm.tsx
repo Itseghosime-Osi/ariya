@@ -9,6 +9,7 @@ import { RoleSelector } from "./RoleSelector";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import { PasswordField } from "./PasswordField";
 import { AuthFeedbackAlert } from "./AuthFeedbackAlert";
+import { SignUpTermsCheckbox } from "./SignUpTermsCheckbox";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -49,20 +50,21 @@ export function SignUpForm() {
 
       if (!result.ok) {
         setErrorMessage(result.error);
+      } else if (result.data?.hasSession) {
+        router.push("/events");
+        router.refresh();
       } else {
         setSuccessMessage(
           "Account created! Please check your email to verify your registration, or sign in."
         );
-        setTimeout(() => {
-          router.push("/sign-in");
-        }, 2000);
+        router.push("/sign-in");
+        router.refresh();
       }
     });
   };
 
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col my-8">
-      {/* Header */}
       <div className="mb-8">
         <span className="font-label-md text-label-md text-secondary uppercase tracking-widest block mb-2 font-bold">
           Step 01 / Registration Dossier
@@ -81,7 +83,6 @@ export function SignUpForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <RoleSelector role={role} onChange={setRole} disabled={isPending} />
 
-        {/* Full Legal Name */}
         <div className="flex flex-col gap-1.5">
           <label
             className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold"
@@ -108,7 +109,6 @@ export function SignUpForm() {
           </div>
         </div>
 
-        {/* Primary Contact Email */}
         <div className="flex flex-col gap-1.5">
           <label
             className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold"
@@ -135,7 +135,6 @@ export function SignUpForm() {
           </div>
         </div>
 
-        {/* Passcode Fields */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <PasswordField
             id="password"
@@ -157,23 +156,12 @@ export function SignUpForm() {
 
         <PasswordStrengthMeter password={password} />
 
-        {/* Consent Checkbox */}
-        <label className="flex items-start gap-3 p-3.5 rounded-xl bg-paper cursor-pointer select-none">
-          <input
-            className="mt-1 rounded text-wine accent-wine w-4 h-4 cursor-pointer"
-            type="checkbox"
-            checked={agreeTerms}
-            onChange={(e) => setAgreeTerms(e.target.checked)}
-            disabled={isPending}
-          />
-          <span className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            I agree to the Terms of Service and Privacy Policy governing
-            sensitive matrimonial protocols, family registries, and celebration
-            data handling.
-          </span>
-        </label>
+        <SignUpTermsCheckbox
+          checked={agreeTerms}
+          onChange={setAgreeTerms}
+          disabled={isPending}
+        />
 
-        {/* Submit Button */}
         <div className="pt-2">
           <button
             className="w-full py-4 px-6 rounded-xl bg-wine hover:bg-primary text-ivory font-title-md text-title-md font-semibold tracking-wide flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed min-h-[44px]"
@@ -191,7 +179,6 @@ export function SignUpForm() {
           </button>
         </div>
 
-        {/* Sign In Link */}
         <div className="flex items-center justify-center gap-2 pt-2">
           <span className="font-body-md text-body-md text-on-surface-variant">
             Already possess a registry account?
