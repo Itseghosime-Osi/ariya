@@ -138,3 +138,161 @@ The framework baseline (shared React 19 framework, Turbopack runtime, and root l
 - **Cryptographic Signature**: Inbound webhooks to `/api/webhooks/paystack` verify the `x-paystack-signature` header using constant-time comparison (`crypto.timingSafeEqual`) of HMAC-SHA512 computed over the raw request payload with `PAYSTACK_SECRET_KEY`.
 - **Provider Re-Verification**: Upon receiving `charge.success`, the server re-queries Paystack's official transaction verification API (`/transaction/verify/${reference}`) to confirm currency (`NGN`), exact amount, and real-time provider settlement.
 - **Idempotency & Service-Role Updates**: Payment records are finalized via the security-definer RPC `record_successful_payment`. If a webhook retry arrives for an already processed reference, the function returns early without duplicating invoices or side effects. The event's `paid_at` timestamp is updated strictly by the service-role admin client, satisfying the `tr_event_protection` trigger.
+
+## 10. Design Language & Stitch Screen Mapping
+
+Every application route strictly reflects the design system and editorial conventions established across the design artifacts:
+
+| Route                   | Design Source                                 | Key UI / Layout Characteristics                                                                    |
+| :---------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `/events`               | FINAL 01 Dashboard / Celebrations Hub         | Asymmetric portfolio layout, status filter pills, hero event card, quick creation triggers         |
+| `/events/new`           | FINAL 01 Wizard Flow                          | 3-stage celebration creation wizard, date & zone picker, cultural attire styling, quota allocation |
+| `/events/[id]`          | FINAL 01 Overview Desk                        | RsvpHorizon bar, RSVP trajectory chart, personal stationery specimen, "Next to Care For" card      |
+| `/events/[id]/guests`   | FINAL 03 Guest Registry, V2 22 CSV Intake     | TanStack registry table, side/group filters, drawer details, CSV import modal with column mapping  |
+| `/events/[id]/seating`  | FINAL 02 Seating, V2 23 Protocol              | Banquet floor plan, drag-and-drop seating, keyboard accessible table selector, printable cards     |
+| `/events/[id]/check-in` | FINAL 02 Check-In, V2 21 Reception Concierge  | QR camera scanner, security code admittance (`ARY-***-***`), live check-in telemetry               |
+| `/events/[id]/team`     | FINAL 01 Team & Roles                         | Role hierarchy table (Owner, Planner, Couple, Staff), invitation modal, link generator             |
+| `/events/[id]/billing`  | FINAL 01 Billing Desk                         | Royal Celebration Pass checkout (₦50,000), payment history, staff 403 block                        |
+| `/i/[token]`            | FINAL 01 Guest Pass, V2 20 Digital Stationery | Wax-sealed personal invitation, interactive RSVP accept/decline, dietary & plus-one inputs         |
+| `/e/[slug]`             | V2 20 Public Event Gazette                    | Public ceremonial schedule, district coordinates, aṣọ-ẹbí dress code protocol                      |
+| Mobile Navigation       | MOBILE 01–08 Mobile Viewports                 | 390px responsive bottom navigation bar, 44px minimum tap targets, zero horizontal scroll           |
+
+## 11. Relational Data Model
+
+```mermaid
+erDiagram
+    users ||--o{ event_members : "participates in"
+    events ||--o{ event_members : "has members"
+    events ||--o{ guests : "registers"
+    events ||--o{ tables : "provisions"
+    events ||--o{ vendors : "employs"
+    events ||--o{ payments : "records"
+    events ||--o{ email_log : "logs sends"
+    guests ||--o| rsvps : "submits"
+    guests ||--o| seat_assignments : "assigned to"
+    tables ||--o{ seat_assignments : "seats"
+    vendors ||--o{ vendor_tasks : "tracks"
+
+    events {
+        uuid id PK
+        text title
+        text couple
+        timestamptz date
+        text venue
+        text area
+        text dress_code
+        text slug
+        text status
+        boolean is_public
+        timestamptz paid_at
+        text registry_code
+        timestamptz rsvp_by
+    }
+
+    event_members {
+        uuid id PK
+        uuid event_id FK
+        uuid user_id FK
+        text role
+    }
+
+    guests {
+        uuid id PK
+        uuid event_id FK
+        text name
+        text phone
+        text email
+        text side
+        text group_name
+        int party_size
+        boolean plus_ones_allowed
+        boolean is_vip
+        text rsvp_token
+        text notes
+        timestamptz invited_at
+    }
+
+    rsvps {
+        uuid id PK
+        uuid guest_id FK
+        uuid event_id FK
+        text status
+        int attending_count
+        text dietary_preferences
+        text note
+        text check_in_code
+        text contact_email
+        timestamptz checked_in_at
+    }
+
+    tables {
+        uuid id PK
+        uuid event_id FK
+        text name
+        int capacity
+        text shape
+        int position_x
+        int position_y
+    }
+
+    seat_assignments {
+        uuid id PK
+        uuid guest_id FK
+        uuid table_id FK
+    }
+
+    vendors {
+        uuid id PK
+        uuid event_id FK
+        text name
+        text category
+        text contact_name
+        text phone
+        text email
+        text status
+        text notes
+    }
+
+    vendor_tasks {
+        uuid id PK
+        uuid vendor_id FK
+        text title
+        boolean completed
+        timestamptz due_date
+    }
+
+    payments {
+        uuid id PK
+        uuid event_id FK
+        text paystack_reference
+        int amount
+        text currency
+        text status
+        text channel
+        timestamptz paid_at
+    }
+
+    email_log {
+        uuid id PK
+        uuid event_id FK
+        uuid guest_id FK
+        text recipient_email
+        text template_type
+        text status
+        timestamptz sent_at
+    }
+
+    rate_limits {
+        text key PK
+        int count
+        timestamptz reset_at
+    }
+```
+
+## 12. Global Search Architecture
+
+- **Unified RPC (`global_search`)**:
+  - Powers keyboard shortcut `⌘K` modal across all authenticated screens.
+  - Queries events, guests, and vendors simultaneously within the caller's authorized celebrations.
+  - Strict parameter escaping of special characters (`%`, `_`, `\`) prevents query injection.
+  - Returns categorized results (`event`, `guest`, `vendor`) with instant deep-linking.

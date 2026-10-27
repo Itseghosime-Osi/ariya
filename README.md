@@ -49,9 +49,53 @@ The project consists of:
 
 ## Quality & Testing Commands
 
-- `pnpm lint`: Run ESLint on the `src` codebase.
-- `pnpm typecheck`: Run TypeScript compiler check without emitting files.
-- `pnpm test`: Run Vitest unit and integration tests.
-- `pnpm build`: Create an optimized production build with Next.js Turbopack.
-- `pnpm test:e2e`: Run Playwright end-to-end test suite.
-- `pnpm analyze`: Run Next.js bundle analyzer.
+- `pnpm lint`: Run ESLint across all TypeScript source files.
+- `pnpm typecheck`: Run TypeScript compiler check without emitting files (`tsc --noEmit`).
+- `pnpm test`: Run Vitest unit and integration test suite.
+- `pnpm test:db`: Run pgTAP database security, RLS, and privilege audit tests.
+- `pnpm test:e2e`: Run complete Playwright end-to-end suite (including Axe WCAG 2.1 AA audits).
+- `pnpm db:seed`: Seed a realistic Nigerian wedding celebration with 60 guests, 7 banquet tables, and 6 vendors.
+- `pnpm build`: Create an optimized production build.
+- `pnpm format:check`: Verify formatting across the repository with Prettier.
+- `pnpm analyze`: Inspect client bundle sizes with Next.js bundle analyzer.
+
+## Demo Celebration Workspace
+
+To test the application with realistic celebration data:
+
+```bash
+pnpm db:seed
+```
+
+- **Demo Host**: `demo@owambe.ng`
+- **Password**: `Celebration2026!`
+- **Celebration Desk**: `/events`
+- **Public Gazette**: `/e/folake-demola-2026`
+
+## Production Deployment
+
+### Target Regions
+
+- **Vercel**: London, UK (`lhr1`)
+- **Supabase**: London, UK (`eu-west-2` AWS)
+  Matching regions minimizes network latency for database queries and webhook round-trips.
+
+### Required Environment Variables
+
+| Variable                        | Description                | Production Requirement                             |
+| :------------------------------ | :------------------------- | :------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL       | Canonical project HTTPS URL                        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anonymous key       | Hosted project anon key                            |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Backend admin key          | Required for webhooks & rate limiter               |
+| `PAYSTACK_SECRET_KEY`           | Paystack merchant secret   | Must start with `sk_live_` (or `sk_test_` in test) |
+| `PAYSTACK_API_BASE`             | Paystack API endpoint      | Must be `https://api.paystack.co`                  |
+| `EMAIL_TRANSPORT`               | Dispatcher mode            | Must be `resend` in production                     |
+| `RESEND_API_KEY`                | Resend API key             | Valid non-placeholder `re_***` key                 |
+| `RATE_LIMIT_SECRET`             | HMAC secret for IP hashing | 32+ character hex key (`openssl rand -hex 32`)     |
+| `CRON_SECRET`                   | Vercel Cron bearer token   | Required for `/api/cron/reminders`                 |
+
+### Webhook Setup
+
+Configure your Paystack Dashboard webhook URL to:
+`https://your-domain.com/api/webhooks/paystack`
+Ensure event `charge.success` is selected. The application verifies inbound requests via constant-time HMAC-SHA512.
