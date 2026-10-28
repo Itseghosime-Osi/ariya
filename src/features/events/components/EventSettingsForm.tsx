@@ -213,7 +213,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
               htmlFor="setting-is-public"
               className="text-xs font-semibold text-wine"
             >
-              Public Web Portal (/e/{slug})
+              Public Event Page (/e/{slug})
             </label>
             <p className="text-[11px] text-on-surface-variant">
               Allow unauthenticated guests to discover venue directions and

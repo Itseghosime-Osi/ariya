@@ -176,7 +176,7 @@ export function InvitationDesignControls({
           htmlFor="customMessage"
           className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
         >
-          Reception & Banquet Note
+          Reception note
         </label>
         <textarea
           id="customMessage"

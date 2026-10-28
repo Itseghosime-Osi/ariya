@@ -42,7 +42,7 @@ test.describe("RSVP & Email Dispatch", () => {
 
     // Open invitation link in guest context
     await page.goto(inviteUrl);
-    await expect(page.getByText(/Personal Celebration Pass/i)).toBeVisible();
+    await expect(page.getByText(/Your guest pass/i)).toBeVisible();
     await expect(page.getByText("Chukwudi Obi").first()).toBeVisible();
 
     // Submit RSVP response

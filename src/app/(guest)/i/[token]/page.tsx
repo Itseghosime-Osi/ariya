@@ -67,7 +67,7 @@ export default async function GuestInvitationPage({
           <p
             className={`text-[11px] font-semibold tracking-widest uppercase ${theme.subheadline}`}
           >
-            Personal Celebration Pass
+            Your guest pass
           </p>
         </header>
 

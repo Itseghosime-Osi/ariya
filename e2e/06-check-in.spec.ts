@@ -40,7 +40,7 @@ test.describe("Reception Check-in Desk", () => {
 
     // Guest completes RSVP to get check-in pass code
     await page.goto(rsvpLink);
-    await expect(page.getByText(/Personal Celebration Pass/i)).toBeVisible();
+    await expect(page.getByText(/Your guest pass/i)).toBeVisible();
     await page.getByLabel(/Joyfully Accept/i).check();
     await page.getByRole("button", { name: /submit rsvp response/i }).click();
     await expect(page.getByText(/RSVP Confirmed & Honoured/i)).toBeVisible({

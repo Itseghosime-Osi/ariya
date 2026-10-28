@@ -17,7 +17,7 @@ export function PublicHero({ event }: PublicHeroProps) {
       <div className="w-full bg-wine text-ivory py-2.5 px-6 flex items-center justify-between text-xs tracking-wider uppercase font-semibold">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold" />
-          <span>Ceremonial Invitation</span>
+          <span>Invitation</span>
         </div>
         <span className="text-gold hidden sm:inline">Lagos • 2026</span>
       </div>

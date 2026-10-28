@@ -30,7 +30,7 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
         </h3>
         <p className="text-xs sm:text-sm text-ivory/80 leading-relaxed">
           {rsvpDeadline
-            ? `Please respond by ${rsvpDeadline} to ensure personalized banquet seating.`
+            ? `Please respond by ${rsvpDeadline} to ensure personalized table seating.`
             : "Enter your private invitation passcode sent via WhatsApp or email to access your pass and RSVP."}
         </p>
       </div>

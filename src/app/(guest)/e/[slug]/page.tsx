@@ -22,7 +22,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${event.title} • Celebration Portal • Àríyá`,
+    title: `${event.title} • Àríyá`,
     description: `Join us in celebrating ${event.couple}. Order of events, venue directions, attire, and guest pass access.`,
   };
 }
@@ -54,7 +54,7 @@ export default async function PublicCelebrationPage({
             <span className="font-serif text-2xl font-bold">À</span>
           </div>
           <p className="text-[11px] font-semibold tracking-widest uppercase text-wine">
-            Àríyá Celebration Portal
+            Àríyá
           </p>
         </header>
 

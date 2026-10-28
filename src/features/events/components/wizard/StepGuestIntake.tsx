@@ -26,7 +26,7 @@ const INTAKE_OPTIONS = [
     icon: "person_add",
     title: "Add Guests Manually",
     desc: "Enter guest details individually.",
-    footer: "Direct portal input",
+    footer: "Direct web input",
   },
   {
     key: "skip" as const,

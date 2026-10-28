@@ -41,7 +41,7 @@ export function EditorControlsForm({
         <div className="flex items-center justify-between p-3.5 rounded-xl border border-outline-variant/60 bg-white">
           <div className="space-y-0.5">
             <label className="text-xs font-semibold text-wine block">
-              Public Event Portal (/e/{data.slug || "..."})
+              Public Event Page (/e/{data.slug || "..."})
             </label>
             <p className="text-[11px] text-on-surface-variant">
               When disabled, /e/[slug] returns 404. Direct invitation passes
@@ -155,7 +155,7 @@ export function EditorControlsForm({
             disabled={disabled}
             value={data.description || ""}
             onChange={(e) => onChange("description", e.target.value)}
-            placeholder="We warmly invite our esteemed elders, cherished family, and dear friends..."
+            placeholder="Share your story or a welcome message for your guests..."
             className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>

@@ -23,12 +23,12 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
       <section className="text-center max-w-xl mx-auto space-y-3 bg-surface-container-lowest p-6 sm:p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
         <Icon name="favorite" className="text-wine text-2xl mx-auto block" />
         <h2 className="font-serif text-xl sm:text-2xl text-wine font-medium">
-          Honoring Our Beloved Guests
+          Our guests
         </h2>
         <p className="font-serif text-base text-paper-ink italic leading-relaxed">
           &ldquo;
           {event.description ||
-            "We warmly invite our esteemed elders, cherished family, and dear friends to celebrate love, legacy, and joyous beginnings with us in Lagos."}
+            "We warmly invite our family and friends to celebrate with us."}
           &rdquo;
         </p>
         <div className="w-16 h-0.5 bg-gold mx-auto" />

@@ -59,7 +59,7 @@ export function TableFormModal({
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-outline-variant/40 space-y-5 animate-in fade-in duration-150">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg text-wine font-medium">
-            {initialTable ? "Edit Table Layout" : "Add Banquet Table"}
+            {initialTable ? "Edit Table Layout" : "Add Table"}
           </h2>
           <button
             type="button"
@@ -116,7 +116,7 @@ export function TableFormModal({
                 onChange={(e) => setShape(e.target.value as TableShape)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-paper text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
               >
-                <option value="round">Round Banquet</option>
+                <option value="round">Round</option>
                 <option value="rectangular">Rectangular</option>
                 <option value="oval">Oval</option>
                 <option value="head">Head / High Table</option>

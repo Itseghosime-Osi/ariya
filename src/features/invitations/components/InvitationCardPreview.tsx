@@ -112,7 +112,7 @@ export function InvitationCardPreview({
 
         <div className="pt-2">
           <div className="inline-block px-5 py-2 rounded-xl bg-ivory text-night font-bold text-xs uppercase tracking-wider shadow">
-            Personal Celebration Pass
+            Your guest pass
           </div>
         </div>
       </div>
