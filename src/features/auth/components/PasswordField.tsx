@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 interface PasswordFieldProps {
   id: string;
@@ -10,7 +10,7 @@ interface PasswordFieldProps {
   onChange: (val: string) => void;
   disabled?: boolean;
   placeholder?: string;
-  iconName?: string;
+  iconName?: IconName;
 }
 
 export function PasswordField({
@@ -54,10 +54,7 @@ export function PasswordField({
           onClick={() => setShow(!show)}
           aria-label={show ? `Hide ${label}` : `Show ${label}`}
         >
-          <Icon
-            name={show ? "visibility_off" : "visibility"}
-            className="text-lg"
-          />
+          <Icon name={show ? "visibility" : "visibility"} className="text-lg" />
         </button>
       </div>
     </div>

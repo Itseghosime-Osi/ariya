@@ -20,10 +20,7 @@ export function InvitationQuotaBanner({
   return (
     <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950">
       <div className="flex items-start gap-3">
-        <Icon
-          name="warning"
-          className="text-amber-600 text-xl shrink-0 mt-0.5"
-        />
+        <Icon name="error" className="text-amber-600 text-xl shrink-0 mt-0.5" />
         <div>
           <div className="font-semibold text-sm">
             Free Tier Quota: {invitedCount} / 20 Invitations Sent

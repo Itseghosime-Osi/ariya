@@ -54,7 +54,7 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
                 : "text-on-surface-variant hover:text-wine"
             }`}
           >
-            <Icon name="desktop_windows" className="text-sm" />
+            <Icon name="space_dashboard" className="text-sm" />
             <span>Desktop</span>
           </button>
           <button
@@ -66,7 +66,7 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
                 : "text-on-surface-variant hover:text-wine"
             }`}
           >
-            <Icon name="smartphone" className="text-sm" />
+            <Icon name="qr_code_scanner" className="text-sm" />
             <span>Mobile (390px)</span>
           </button>
         </div>
@@ -125,7 +125,7 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
             {data.dressCode && (
               <div className="bg-wine/5 rounded-xl p-3 border border-wine/10 space-y-1 text-xs">
                 <span className="text-[10px] uppercase tracking-wider text-wine font-bold flex items-center gap-1">
-                  <Icon name="palette" className="text-xs" />
+                  <Icon name="styler" className="text-xs" />
                   Attire & Palette
                 </span>
                 <p className="text-night">{data.dressCode}</p>

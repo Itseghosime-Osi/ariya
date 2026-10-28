@@ -50,7 +50,7 @@ export function UnseatedGuestCard({
             title="Drag guest to table"
             aria-label={`Drag ${guest.name} to table`}
           >
-            <Icon name="drag_indicator" className="text-sm" />
+            <Icon name="more_vert" className="text-sm" />
           </button>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -64,7 +64,7 @@ export function UnseatedGuestCard({
               )}
               {guest.seating_conflict_at && (
                 <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-0.5">
-                  <Icon name="warning" className="text-[10px]" />
+                  <Icon name="error" className="text-[10px]" />
                   <span>party size changed</span>
                 </span>
               )}

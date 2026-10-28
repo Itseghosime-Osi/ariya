@@ -66,7 +66,7 @@ export function InvitationCardPreview({
         {/* Subtle decorative crest */}
         <div className="flex justify-center">
           <div className="w-12 h-12 rounded-full border border-current/20 flex items-center justify-center text-ivory">
-            <Icon name="favorite" className={`text-2xl ${styles.accent}`} />
+            <Icon name="celebration" className={`text-2xl ${styles.accent}`} />
           </div>
         </div>
 

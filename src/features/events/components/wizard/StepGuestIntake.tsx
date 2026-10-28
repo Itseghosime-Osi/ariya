@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 interface StepGuestIntakeProps {
   intakeMethod: "csv" | "manual" | "skip";
@@ -13,24 +13,30 @@ interface StepGuestIntakeProps {
   onNext: () => void;
 }
 
-const INTAKE_OPTIONS = [
+const INTAKE_OPTIONS: {
+  key: "csv" | "manual" | "skip";
+  icon: IconName;
+  title: string;
+  desc: string;
+  footer: string;
+}[] = [
   {
     key: "csv" as const,
-    icon: "table_view",
+    icon: "table_chart_view",
     title: "Upload CSV Spreadsheet",
     desc: "Upload an existing guest list spreadsheet.",
     footer: "Import via Guestbook next",
   },
   {
     key: "manual" as const,
-    icon: "person_add",
+    icon: "diversity_3",
     title: "Add Guests Manually",
     desc: "Enter guest details individually.",
     footer: "Direct web input",
   },
   {
     key: "skip" as const,
-    icon: "fast_forward",
+    icon: "arrow_forward",
     title: "Skip for Now",
     desc: "Set target capacity and add guests later.",
     footer: "Start with blank list",
@@ -96,7 +102,7 @@ export function StepGuestIntake({
                 </p>
               </div>
               <div className="bg-surface-container p-3 rounded-lg flex items-center gap-2 text-wine font-label-sm font-semibold">
-                <Icon name="attachment" className="text-base" />
+                <Icon name="upload" className="text-base" />
                 <span>{opt.footer}</span>
               </div>
             </button>
@@ -119,7 +125,7 @@ export function StepGuestIntake({
                 }
                 className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-paper-ink hover:bg-surface-container-high transition-colors"
               >
-                <Icon name="remove" className="text-lg" />
+                <Icon name="close" className="text-lg" />
               </button>
               <div className="px-6 py-2 bg-surface rounded-lg text-center shadow-xs">
                 <span className="font-headline-md text-headline-md text-wine font-bold">
@@ -134,7 +140,7 @@ export function StepGuestIntake({
                 onClick={() => setTargetParties((prev) => prev + 10)}
                 className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-paper-ink hover:bg-surface-container-high transition-colors"
               >
-                <Icon name="add" className="text-lg" />
+                <Icon name="add_circle" className="text-lg" />
               </button>
             </div>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">

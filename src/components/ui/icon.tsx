@@ -55,7 +55,7 @@ import {
   ArrowLeft,
   DollarSign,
   Receipt,
-  LucideProps,
+  type LucideProps,
 } from "lucide-react";
 
 export type IconName =
@@ -178,10 +178,16 @@ const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
 };
 
 export interface IconProps extends LucideProps {
-  name: IconName | string;
+  name: IconName;
 }
 
 export function Icon({ name, className, size = 18, ...props }: IconProps) {
-  const Component = iconMap[name as IconName] || HelpCircle;
+  const Component = iconMap[name];
+  if (!Component) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[Icon] Unknown icon name: "${String(name)}"`);
+    }
+    return null;
+  }
   return <Component className={className} size={size} {...props} />;
 }

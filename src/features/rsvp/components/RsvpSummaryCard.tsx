@@ -136,7 +136,7 @@ export function RsvpSummaryCard({
           className={`rounded-xl p-4 border text-xs space-y-1 ${theme.noteBox}`}
         >
           <span className="text-[10px] uppercase tracking-wider font-bold block flex items-center gap-1">
-            <Icon name="palette" className="text-xs" />
+            <Icon name="styler" className="text-xs" />
             Dress Code & Aso-Ebi Traditions
           </span>
           <p className="text-night">{event.dress_code}</p>

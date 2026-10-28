@@ -67,7 +67,7 @@ export function AuthArtwork() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-wine font-semibold">
-                <Icon name="sync" className="text-sm" />
+                <Icon name="refresh" className="text-sm" />
                 <span>Self-Updating List</span>
               </div>
               <p className="text-stone-700 text-[11px]">Real-time headcounts</p>
@@ -107,7 +107,7 @@ export function AuthArtwork() {
       {/* Bottom Status Pill */}
       <div className="relative z-10 flex items-center justify-between text-stone-300 pt-6">
         <div className="flex items-center space-x-2 font-body-sm text-body-sm">
-          <Icon name="verified_user" className="text-gold text-base" />
+          <Icon name="shield" className="text-gold text-base" />
           <span>Secure celebration workspace</span>
         </div>
         <span className="font-label-sm text-label-sm text-stone-400">

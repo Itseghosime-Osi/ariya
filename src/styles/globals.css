@@ -1,15 +1,31 @@
 @import "tailwindcss";
+@import "./glass.css";
 
 :root {
-  --wine: #6e1426;
-  --night: #1c070d;
+  --ivory: #f7f2ea;
+  --surface: #ffffff;
+  --night: #1c0f14;
+  --label-2: #5a474e;
+  --label-3: #6e5a61;
+  --burgundy: #6b1e2e;
+  --wine: #4a111d;
+  --gold: #c89b3c;
+  --champagne: #e8d2a6;
+  --gold-ink: #7a5612;
+  --rsvp-accepted: #1f6b4a;
+  --rsvp-declined: #9e2a2b;
+  --rsvp-awaiting: #b88728;
+  --coral: #b8442e;
+  --tint-blush: #f6e3e6;
+  --tint-sage: #e4eee6;
+  --tint-sand: #f3e9d6;
+  --tint-sky: #e3ecf4;
+  --hairline: rgba(28, 7, 13, 0.06);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ink: #0c0406;
-  --gold: #e9c98a;
-  --ivory: #f4efe6;
   --paper: #f3ebdc;
   --paper-ink: #2a2118;
   --mist: #564243;
-
   --primary: #4e0013;
   --primary-container: #6e1426;
   --on-primary: #ffffff;
@@ -19,7 +35,6 @@
   --on-primary-fixed: #40000e;
   --on-primary-fixed-variant: #822434;
   --inverse-primary: #ffb2b8;
-
   --secondary: #735b27;
   --secondary-container: #fddc9b;
   --on-secondary: #ffffff;
@@ -28,7 +43,6 @@
   --secondary-fixed-dim: #e2c384;
   --on-secondary-fixed: #261a00;
   --on-secondary-fixed-variant: #594411;
-
   --tertiary: #341b22;
   --tertiary-container: #4c3037;
   --on-tertiary: #ffffff;
@@ -37,11 +51,9 @@
   --tertiary-fixed-dim: #e5bcc4;
   --on-tertiary-fixed: #2c141b;
   --on-tertiary-fixed-variant: #5c3f45;
-
-  --background: #fef9f0;
-  --on-background: #1d1c16;
-  --surface: #fef9f0;
-  --on-surface: #1d1c16;
+  --background: #faf6ee;
+  --on-background: #1c0f14;
+  --on-surface: #1c0f14;
   --surface-variant: #e7e2d9;
   --on-surface-variant: #564243;
   --surface-container-lowest: #ffffff;
@@ -54,29 +66,59 @@
   --inverse-surface: #32302a;
   --inverse-on-surface: #f5f0e7;
   --surface-tint: #a13b4a;
-
   --outline: #897172;
   --outline-variant: #dcc0c1;
-
-  --success: #2e6a4f;
+  --success: #1f6b4a;
   --success-surface: #eaf4ee;
-
-  --error: #ba1a1a;
+  --error: #9e2a2b;
   --error-container: #ffdad6;
   --on-error: #ffffff;
   --on-error-container: #93000a;
 }
 
+.dark {
+  --ivory: #140c10;
+  --surface: #1d1418;
+  --night: #faf6ee;
+  --label-2: #d8c8ce;
+  --label-3: #b8a4ab;
+  --gold-ink: #e8d2a6;
+  --hairline: rgba(232, 210, 166, 0.14);
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --label-2: #3b2a30;
+    --label-3: #4a373e;
+    --gold-ink: #593d08;
+    --hairline: rgba(28, 15, 20, 0.28);
+  }
+}
+
 @theme {
-  --color-wine: var(--wine);
-  --color-night: var(--night);
-  --color-ink: var(--ink);
-  --color-gold: var(--gold);
   --color-ivory: var(--ivory);
+  --color-surface: var(--surface);
+  --color-night: var(--night);
+  --color-label-2: var(--label-2);
+  --color-label-3: var(--label-3);
+  --color-burgundy: var(--burgundy);
+  --color-wine: var(--wine);
+  --color-gold: var(--gold);
+  --color-champagne: var(--champagne);
+  --color-gold-ink: var(--gold-ink);
+  --color-rsvp-accepted: var(--rsvp-accepted);
+  --color-rsvp-declined: var(--rsvp-declined);
+  --color-rsvp-awaiting: var(--rsvp-awaiting);
+  --color-coral: var(--coral);
+  --color-tint-blush: var(--tint-blush);
+  --color-tint-sage: var(--tint-sage);
+  --color-tint-sand: var(--tint-sand);
+  --color-tint-sky: var(--tint-sky);
+  --color-hairline: var(--hairline);
+  --color-ink: var(--ink);
   --color-paper: var(--paper);
   --color-paper-ink: var(--paper-ink);
   --color-mist: var(--mist);
-
   --color-primary: var(--primary);
   --color-primary-container: var(--primary-container);
   --color-on-primary: var(--on-primary);
@@ -86,7 +128,6 @@
   --color-on-primary-fixed: var(--on-primary-fixed);
   --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
   --color-inverse-primary: var(--inverse-primary);
-
   --color-secondary: var(--secondary);
   --color-secondary-container: var(--secondary-container);
   --color-on-secondary: var(--on-secondary);
@@ -95,7 +136,6 @@
   --color-secondary-fixed-dim: var(--secondary-fixed-dim);
   --color-on-secondary-fixed: var(--on-secondary-fixed);
   --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
-
   --color-tertiary: var(--tertiary);
   --color-tertiary-container: var(--tertiary-container);
   --color-on-tertiary: var(--on-tertiary);
@@ -104,10 +144,8 @@
   --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
   --color-on-tertiary-fixed: var(--on-tertiary-fixed);
   --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
-
   --color-background: var(--background);
   --color-on-background: var(--on-background);
-  --color-surface: var(--surface);
   --color-on-surface: var(--on-surface);
   --color-surface-variant: var(--surface-variant);
   --color-on-surface-variant: var(--on-surface-variant);
@@ -121,18 +159,14 @@
   --color-inverse-surface: var(--inverse-surface);
   --color-inverse-on-surface: var(--inverse-on-surface);
   --color-surface-tint: var(--surface-tint);
-
   --color-outline: var(--outline);
   --color-outline-variant: var(--outline-variant);
-
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);
-
   --color-error: var(--error);
   --color-error-container: var(--error-container);
   --color-on-error: var(--on-error);
   --color-on-error-container: var(--on-error-container);
-
   --font-display: var(--font-bodoni-moda), Georgia, serif;
   --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
 }

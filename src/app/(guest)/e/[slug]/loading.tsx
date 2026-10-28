@@ -8,10 +8,7 @@ export default function PublicEventLoading() {
         À
       </div>
       <div className="flex items-center gap-2 text-xs font-medium text-stone-700">
-        <Icon
-          name="progress_activity"
-          className="animate-spin text-base text-wine"
-        />
+        <Icon name="refresh" className="animate-spin text-base text-wine" />
         <span>Loading celebration...</span>
       </div>
     </div>

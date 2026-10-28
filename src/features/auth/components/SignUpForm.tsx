@@ -92,7 +92,7 @@ export function SignUpForm() {
           </label>
           <div className="relative">
             <Icon
-              name="badge"
+              name="verified"
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-outline pointer-events-none"
               aria-hidden="true"
             />
@@ -150,7 +150,7 @@ export function SignUpForm() {
             value={confirmPassword}
             onChange={setConfirmPassword}
             disabled={isPending}
-            iconName="verified_user"
+            iconName="shield"
           />
         </div>
 
@@ -188,7 +188,7 @@ export function SignUpForm() {
             href="/sign-in"
           >
             <span>Sign In</span>
-            <Icon name="arrow_outward" className="text-sm" />
+            <Icon name="arrow_forward" className="text-sm" />
           </Link>
         </div>
       </form>

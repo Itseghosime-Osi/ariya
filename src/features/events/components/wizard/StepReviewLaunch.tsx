@@ -60,7 +60,7 @@ export function StepReviewLaunch({
       <div className="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-md mb-8">
         <div className="divide-y divide-surface-container-high/60 space-y-6">
           <ReviewSection
-            icon="favorite"
+            icon="celebration"
             heading="Couple"
             onEdit={onEditDetails}
           >
@@ -123,7 +123,7 @@ export function StepReviewLaunch({
 
           <div className="pt-6">
             <ReviewSection
-              icon="groups"
+              icon="diversity_3"
               heading="Guest List Sizing"
               onEdit={onEditGuestSetup}
             >

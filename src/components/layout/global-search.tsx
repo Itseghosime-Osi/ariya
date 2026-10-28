@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { globalSearchAction } from "@/features/search/actions";
 import type { GlobalSearchResults } from "@/features/search/types";
 import { GlobalSearchResultsList } from "./global-search-results";
@@ -61,7 +61,7 @@ export function GlobalSearch({
     router.push(path);
   };
 
-  const quickLinks = [
+  const quickLinks: { label: string; path: string; icon: IconName }[] = [
     {
       label: "Guest Registry",
       path: eventId ? `/events/${eventId}/guests` : "/events",
@@ -117,10 +117,7 @@ export function GlobalSearch({
         <div className="p-4 max-h-[380px] overflow-y-auto space-y-4">
           {isSearching && (
             <div className="py-6 text-center text-xs text-mist flex items-center justify-center gap-2">
-              <Icon
-                name="progress_activity"
-                className="animate-spin text-base"
-              />
+              <Icon name="refresh" className="animate-spin text-base" />
               <span>Searching events, guests, and tables...</span>
             </div>
           )}

@@ -24,7 +24,7 @@ export function NextToCareForCard({
       >
         <div className="flex items-start justify-between gap-space-xs">
           <div className="flex items-start gap-space-sm">
-            <Icon name="warning" className="text-amber-300 mt-0.5 text-xl" />
+            <Icon name="error" className="text-amber-300 mt-0.5 text-xl" />
             <div>
               <h4 className="font-title-md text-ivory font-semibold">
                 {pluralise(metrics.conflictedParties, "seating conflict")}
@@ -131,7 +131,7 @@ export function NextToCareForCard({
         className="bg-night/40 backdrop-blur-sm rounded-2xl p-5 space-y-4 hover:bg-night/50 transition-colors"
       >
         <div className="flex items-start gap-space-sm">
-          <Icon name="group_add" className="text-gold mt-0.5 text-xl" />
+          <Icon name="diversity_3" className="text-gold mt-0.5 text-xl" />
           <div>
             <h4 className="font-title-md text-ivory font-semibold">
               Add guests to get started

@@ -148,10 +148,7 @@ export function CoverImageUpload({
             uploading ? "opacity-60 pointer-events-none" : ""
           }`}
         >
-          <Icon
-            name="cloud_upload"
-            className="text-2xl text-wine mx-auto block"
-          />
+          <Icon name="upload" className="text-2xl text-wine mx-auto block" />
           <p className="text-xs font-semibold text-wine">
             {uploading
               ? "Uploading Cover..."
