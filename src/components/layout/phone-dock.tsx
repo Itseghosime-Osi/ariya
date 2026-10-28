@@ -319,22 +319,51 @@ export function PhoneDock({
               aria-label="Celebration menu"
               data-testid="phone-more-sheet"
               className="absolute inset-x-0 bottom-full mx-auto mb-3 max-h-[min(70dvh,34rem)] max-w-md overflow-y-auto overscroll-contain rounded-[28px] bg-white/95 p-4 shadow-[0_24px_50px_-20px_rgba(28,7,13,0.5),0_2px_8px_-2px_rgba(28,7,13,0.12)] ring-1 ring-black/5"
-              style={{ transformOrigin: bubbleOrigin }}
-              initial={{ opacity: 0, scale: 0.05 }}
+              style={{
+                transformOrigin: bubbleOrigin,
+                // Stops catching taps as soon as it starts drawing back in.
+                pointerEvents: moreOpen ? "auto" : "none",
+              }}
+              initial={{ opacity: 0, scaleX: 0.05, scaleY: 0.05 }}
               animate={{
                 opacity: 1,
-                scale: 1,
+                scaleX: 1,
+                scaleY: 1,
                 transition: {
-                  scale: { type: "spring", bounce: 0.28, duration: 0.6 },
-                  opacity: { duration: 0.14 },
+                  // Chewing-gum: the two axes spring at different rates and
+                  // are barely damped, so it stretches, squashes and wobbles.
+                  scaleX: {
+                    type: "spring",
+                    stiffness: 95,
+                    damping: 7,
+                    mass: 1.2,
+                  },
+                  scaleY: {
+                    type: "spring",
+                    stiffness: 70,
+                    damping: 6,
+                    mass: 1.2,
+                  },
+                  opacity: { duration: 0.25 },
                 },
               }}
               exit={{
                 opacity: 0,
-                scale: 0.05,
+                scaleX: [1, 0.9, 0.05],
+                scaleY: [1, 1.08, 0.05],
                 transition: {
-                  scale: { duration: 0.32, ease: [0.5, 0, 0.8, 0.4] },
-                  opacity: { duration: 0.12, delay: 0.2 },
+                  // Pulled back into the tab: it thins, stretches, then snaps shut.
+                  scaleX: {
+                    duration: 0.9,
+                    times: [0, 0.4, 1],
+                    ease: "easeInOut",
+                  },
+                  scaleY: {
+                    duration: 0.9,
+                    times: [0, 0.4, 1],
+                    ease: "easeInOut",
+                  },
+                  opacity: { duration: 0.2, delay: 0.7 },
                 },
               }}
             >
@@ -368,7 +397,7 @@ export function PhoneDock({
                           opacity: 1,
                           y: 0,
                           scale: 1,
-                          transition: { ...SPRING, delay: 0.06 + i * 0.03 },
+                          transition: { ...SPRING, delay: 0.3 + i * 0.05 },
                         }}
                       >
                         <Link
