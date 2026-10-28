@@ -65,7 +65,7 @@ export function InvitationDesignControls({
     >
       <div className="flex items-center justify-between pb-3 border-b border-outline-variant/40">
         <h3 className="font-serif text-lg font-bold text-night">
-          Card Customisation
+          Invitation design
         </h3>
         <div className="flex items-center gap-3">
           {saved && (
@@ -119,7 +119,7 @@ export function InvitationDesignControls({
           htmlFor="headline"
           className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
         >
-          Ceremonial Headline
+          Headline
         </label>
         <input
           id="headline"

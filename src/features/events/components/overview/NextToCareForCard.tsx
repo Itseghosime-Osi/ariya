@@ -100,11 +100,14 @@ export function NextToCareForCard({
             <Icon name="outgoing_mail" className="text-gold mt-0.5 text-xl" />
             <div>
               <h4 className="font-title-md text-ivory font-semibold">
-                {metrics.awaitingParties} parties awaiting replies
+                {metrics.awaitingParties}{" "}
+                {metrics.awaitingParties === 1 ? "party" : "parties"} awaiting
+                replies
               </h4>
               <p className="font-body-sm text-ivory/70">
-                {metrics.awaitingGuests} people total • Follow up or send
-                reminders
+                {metrics.awaitingGuests}{" "}
+                {metrics.awaitingGuests === 1 ? "person" : "people"} total •
+                Follow up or send reminders
               </p>
             </div>
           </div>

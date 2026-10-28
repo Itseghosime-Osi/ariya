@@ -92,7 +92,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.acceptedGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.acceptedParties} parties
+              {metrics.acceptedParties}{" "}
+              {metrics.acceptedParties === 1 ? "party" : "parties"}
             </span>
           </div>
           <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 space-y-0.5">
@@ -101,7 +102,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.awaitingGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.awaitingParties} parties
+              {metrics.awaitingParties}{" "}
+              {metrics.awaitingParties === 1 ? "party" : "parties"}
             </span>
           </div>
           <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 space-y-0.5">
@@ -110,7 +112,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.declinedGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.declinedParties} parties
+              {metrics.declinedParties}{" "}
+              {metrics.declinedParties === 1 ? "party" : "parties"}
             </span>
           </div>
         </div>

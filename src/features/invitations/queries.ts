@@ -105,7 +105,7 @@ export async function getInvitationDeskData(
       "Aso-Ebi Colour Code: Champagne Gold & Emerald Velvet",
     customMessage:
       (rawEvent.invitation_message as string | null) ||
-      "Dinner, dancing, and grand merriment to follow ceremony.",
+      "Dinner and dancing to follow ceremony.",
   };
 
   return {
