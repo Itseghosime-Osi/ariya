@@ -77,7 +77,7 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
     <section
       aria-labelledby="this-week-heading"
       data-testid="this-week-card"
-      className="bento-card @container flex flex-col justify-between p-5 sm:p-6 lg:col-span-3"
+      className="bento-card @container flex flex-col justify-between p-5 sm:p-6 lg:col-span-4"
     >
       <div>
         <div className="flex items-center justify-between gap-2 mb-3.5">
@@ -114,10 +114,11 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
         <div
           role="group"
           aria-label="Days of the week"
-          className="grid grid-cols-7 gap-1 rounded-2xl bg-ivory/75 p-1.5"
+          className="grid grid-cols-7 gap-1.5"
         >
           {weekDays.map((day) => {
             const isSelected = day.key === selectedKey;
+            const count = itemsByDay.get(day.key)?.length ?? 0;
             return (
               <button
                 key={day.key}
@@ -125,69 +126,99 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
                 onClick={() => setSelectedKey(day.key)}
                 aria-pressed={isSelected}
                 data-testid={`week-day-${day.key}`}
-                className={`flex flex-col items-center justify-center rounded-xl py-1.5 text-center transition-all ${
-                  day.isToday
-                    ? "bg-burgundy text-white font-semibold shadow-2xs"
-                    : isSelected
-                      ? "bg-white text-burgundy font-semibold shadow-2xs"
-                      : "text-night/75 hover:bg-white/60 hover:text-night font-medium"
+                className={`group relative flex flex-col overflow-hidden rounded-xl text-center transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+                  isSelected
+                    ? "bg-[#1c070d] text-ivory shadow-[0_12px_24px_-12px_rgba(28,7,13,0.7)]"
+                    : "bg-white text-night ring-1 ring-hairline"
                 }`}
               >
-                <span className="text-[10px] leading-tight opacity-85">
+                <span
+                  className={`py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${
+                    isSelected
+                      ? "bg-[#e9c98a] text-[#1c070d]"
+                      : day.isToday
+                        ? "bg-burgundy text-white"
+                        : "bg-surface-container text-label-2"
+                  }`}
+                >
                   {day.label}
                 </span>
-                <span className="mt-0.5 text-xs tabular-nums">
+                <span className="py-1.5 font-display text-lg font-bold leading-none tabular-nums">
                   {day.dayNum}
                 </span>
+                <span className="sr-only">
+                  {day.isToday ? ", today" : ""}
+                  {count ? `, ${count} ${count === 1 ? "item" : "items"}` : ""}
+                </span>
                 <span
+                  className="flex h-2 items-center justify-center pb-1.5"
                   aria-hidden="true"
-                  className={`mt-1 h-1.5 w-1.5 rounded-full ${
-                    day.hasItems
-                      ? day.isToday
-                        ? "bg-white"
-                        : "bg-burgundy"
-                      : "bg-transparent"
-                  }`}
-                />
+                >
+                  {count > 0 && (
+                    <span
+                      className={`h-1.5 rounded-full ${isSelected ? "bg-[#e9c98a]" : "bg-burgundy"}`}
+                      style={{ width: 6 + Math.min(3, count - 1) * 4 }}
+                    />
+                  )}
+                </span>
               </button>
             );
           })}
         </div>
       </div>
 
-      <div className="mt-4 flex-1 flex flex-col justify-center">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-label-2 mb-2">
+      <div className="mt-4 flex flex-1 flex-col">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-ink">
           {selectedKey === todayKey
             ? `Today · ${selectedLabel}`
             : selectedLabel}
         </p>
         {selectedItems.length === 0 ? (
-          <div className="rounded-2xl bg-ivory/55 px-3.5 py-5 text-center">
-            <p className="text-xs text-label-2">
-              No tasks or deadlines on this day.
-            </p>
+          <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-hairline px-3.5 py-5 text-center">
+            <p className="text-xs text-label-2">A quiet day. Nothing due.</p>
           </div>
         ) : (
-          <ul className="space-y-1.5">
+          <ul className="relative space-y-2 pl-4">
+            <span
+              className="absolute bottom-2 left-[5px] top-2 w-px bg-[#b8864b]/40"
+              aria-hidden="true"
+            />
             {selectedItems.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} className="relative">
+                <span
+                  className="absolute -left-[15px] top-3.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-burgundy"
+                  aria-hidden="true"
+                />
                 <Link
                   href={item.href}
-                  className="flex items-center justify-between gap-2 rounded-2xl bg-ivory/70 hover:bg-ivory px-3 py-2 text-xs"
+                  className="flex items-center gap-3 rounded-2xl bg-surface-container-low px-3 py-2.5 text-xs transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
                 >
-                  <div className="min-w-0">
-                    <p className="font-semibold text-night truncate">
+                  <span
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-burgundy ring-1 ring-hairline"
+                    aria-hidden="true"
+                  >
+                    <Icon
+                      name={
+                        item.kind === "event_date"
+                          ? "celebration"
+                          : item.kind === "rsvp_deadline"
+                            ? "schedule"
+                            : "restaurant_menu"
+                      }
+                      size={15}
+                    />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-night">
                       {item.title}
-                    </p>
-                    <p className="text-[11px] text-label-2 truncate">
+                    </span>
+                    <span className="block truncate text-[11px] text-label-2">
                       {item.eventTitle}
-                    </p>
-                  </div>
-                  <Icon
-                    name="chevron_right"
-                    size={15}
-                    className="shrink-0 text-label-2"
-                  />
+                    </span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-tint-sand px-2 py-0.5 text-[10px] font-semibold text-gold-ink">
+                    {item.relativeLabel}
+                  </span>
                 </Link>
               </li>
             ))}

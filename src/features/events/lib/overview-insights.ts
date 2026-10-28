@@ -138,6 +138,8 @@ export interface PlanningPhase {
   tasksDone: number;
   tasksTotal: number;
   state: PhaseState;
+  /** The tasks filed in this phase, earliest due first. */
+  tasks: PlanningTask[];
 }
 
 const DAY_MS = 86_400_000;
@@ -216,6 +218,7 @@ export function buildPlanningPhases(
       tasksDone: 0,
       tasksTotal: 0,
       state,
+      tasks: [] as PlanningTask[],
     };
   });
 
@@ -233,6 +236,12 @@ export function buildPlanningPhases(
       : current;
     home.tasksTotal++;
     if (t.isDone) home.tasksDone++;
+    home.tasks.push(t);
+  }
+  for (const p of phases) {
+    p.tasks.sort((a, b) =>
+      (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999")
+    );
   }
   return phases;
 }
@@ -291,86 +300,115 @@ export interface NextAction {
   tone: "urgent" | "steady" | "celebrate";
 }
 
-export function pickNextAction(input: {
+export interface NextActionInput {
   eventId: string;
   metrics: EventMetrics;
   vendors: PlanningVendor[];
   tasks: PlanningTask[];
   todayKey: string;
-}): NextAction {
+}
+
+/**
+ * Everything worth doing next, most pressing first: overdue vendor tasks, replies close to the day,
+ * guests to seat, vendors to line up or confirm, deposits to pay. When nothing is left, one
+ * celebration.
+ */
+export function pickNextActions(input: NextActionInput): NextAction[] {
   const { eventId, metrics, vendors, tasks, todayKey } = input;
   const base = `/events/${eventId}`;
   const overdue = tasks
     .filter((t) => !t.isDone && t.dueDate && t.dueDate < todayKey)
     .sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1));
   const days = metrics.daysAway;
+  const out: NextAction[] = [];
 
   if (metrics.totalParties === 0) {
-    return {
+    out.push({
       title: "Start the guest list",
       reason:
         "Every invitation, seat and plate begins here. Import a CSV or add your first guests.",
       href: `${base}/guests`,
       cta: "Add guests",
       tone: "steady",
-    };
+    });
   }
   if (overdue.length > 0) {
     const t = overdue[0];
-    return {
+    out.push({
       title: `Overdue: ${t.task}`,
       reason: `${overdue.length === 1 ? "1 vendor task is" : `${overdue.length} vendor tasks are`} past due${t.vendorName ? `, starting with ${t.vendorName}` : ""}.`,
       href: `${base}/vendors`,
       cta: "Open vendors",
       tone: "urgent",
-    };
+    });
   }
   if (metrics.awaitingParties > 0 && days <= 30) {
-    return {
+    out.push({
       title: `Nudge ${metrics.awaitingParties} ${metrics.awaitingParties === 1 ? "party" : "parties"} still to reply`,
       reason: `The caterer needs a headcount soon and the day is ${days === 0 ? "today" : `${days} days away`}. A gentle reminder now saves guesswork later.`,
       href: `${base}/guests`,
       cta: "Send reminders",
       tone: days <= 7 ? "urgent" : "steady",
-    };
+    });
   }
   if (metrics.unassignedGuests > 0 && metrics.acceptedGuests > 0) {
-    return {
+    out.push({
       title: `Seat ${metrics.unassignedGuests} confirmed ${metrics.unassignedGuests === 1 ? "guest" : "guests"}`,
       reason:
         "They've said yes. Give every one of them a place at a table before the doors open.",
       href: `${base}/seating`,
       cta: "Open seating",
       tone: "steady",
-    };
+    });
   }
   if (vendors.length === 0) {
-    return {
+    out.push({
       title: "Line up your vendors",
       reason:
         "Caterer, small chops, DJ or live band, MC, decor, photo, makeup and gele: track costs and deposits in one place.",
       href: `${base}/vendors`,
       cta: "Add vendors",
       tone: "steady",
-    };
+    });
+  } else {
+    const unconfirmed = vendors.filter(
+      (v) => v.status !== "confirmed" && v.status !== "completed"
+    ).length;
+    if (unconfirmed > 0) {
+      out.push({
+        title: `Confirm ${unconfirmed} ${unconfirmed === 1 ? "vendor" : "vendors"}`,
+        reason: "A confirmed vendor is one you can stop worrying about.",
+        href: `${base}/vendors`,
+        cta: "Open vendors",
+        tone: "steady",
+      });
+    }
   }
-  if (metrics.awaitingParties > 0) {
-    return {
+  if (metrics.awaitingParties > 0 && days > 30) {
+    out.push({
       title: `${metrics.awaitingParties} ${metrics.awaitingParties === 1 ? "party hasn't" : "parties haven't"} replied yet`,
       reason: "Plenty of time, but a reminder keeps the count honest.",
       href: `${base}/guests`,
       cta: "View guests",
       tone: "steady",
-    };
+    });
   }
-  return {
-    title: "E kú iṣẹ́! Everything is on track",
-    reason:
-      "Every guest has replied and every confirmed guest has a seat. Enjoy the run-up.",
-    href: `${base}/check-in`,
-    cta: "Preview check-in",
-    tone: "celebrate",
-  };
+  if (out.length === 0) {
+    out.push({
+      title: "E kú iṣẹ́! Everything is on track",
+      reason:
+        "Every guest has replied and every confirmed guest has a seat. Enjoy the run-up.",
+      href: `${base}/check-in`,
+      cta: "Preview check-in",
+      tone: "celebrate",
+    });
+  }
+  return out;
+}
+
+/** The single most pressing next step. */
+export function pickNextAction(input: NextActionInput): NextAction {
+  return pickNextActions(input)[0];
 }
 
 /* ---------- Guest constellation layout ---------- */

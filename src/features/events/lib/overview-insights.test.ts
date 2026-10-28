@@ -6,6 +6,7 @@ import {
   formatNairaCompact,
   layoutConstellation,
   pickNextAction,
+  pickNextActions,
   summariseBudget,
   type PlanningTask,
   type PlanningVendor,
@@ -264,5 +265,38 @@ describe("formatNairaCompact", () => {
     expect(formatNairaCompact(1_000_000_00)).toBe("₦1M");
     expect(formatNairaCompact(45_000)).toBe("₦450");
     expect(formatNairaCompact(250_000_000_000_00)).toBe("₦250B");
+  });
+});
+
+describe("pickNextActions", () => {
+  it("ranks everything worth doing, overdue first", () => {
+    const list = pickNextActions({
+      eventId: "e1",
+      metrics: metrics({ daysAway: 20 }),
+      vendors: [vendor(), vendor({ id: "v2", status: "draft" })],
+      tasks: [task({ dueDate: "2026-10-01", task: "Pay DJ deposit" })],
+      todayKey: "2026-11-01",
+    });
+    expect(list.map((a) => a.cta)).toEqual([
+      "Open vendors",
+      "Send reminders",
+      "Open seating",
+      "Open vendors",
+    ]);
+    expect(list[3].title).toBe("Confirm 1 vendor");
+  });
+
+  it("files each phase's own tasks, earliest first", () => {
+    const phases = buildPlanningPhases(
+      "2026-12-12",
+      [
+        task({ id: "b", dueDate: "2026-11-30" }),
+        task({ id: "a", dueDate: "2026-11-05" }),
+      ],
+      "2026-11-01"
+    );
+    expect(
+      phases.find((p) => p.key === "final")!.tasks.map((t) => t.id)
+    ).toEqual(["a", "b"]);
   });
 });

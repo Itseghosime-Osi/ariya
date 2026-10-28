@@ -17,7 +17,7 @@ import { GuestRepliesBentoCard } from "./GuestRepliesBentoCard";
 import { RecentRepliesBentoCard } from "./RecentRepliesBentoCard";
 import { ThisWeekBentoCard } from "./ThisWeekBentoCard";
 import { AllEventsBentoCard } from "./AllEventsBentoCard";
-import { FeaturedCelebration } from "./FeaturedCelebration";
+import { CelebrationStage } from "./CelebrationStage";
 
 export interface EventsHomeProps {
   events: EventWithMetrics[];
@@ -81,9 +81,7 @@ export function EventsHome({
             onSearchQueryChange={setSearchQuery}
           />
 
-          {upcoming[0] && (
-            <FeaturedCelebration item={upcoming[0]} now={now ?? 0} />
-          )}
+          <CelebrationStage items={upcoming} now={now ?? 0} />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <UpcomingEventsBentoCard

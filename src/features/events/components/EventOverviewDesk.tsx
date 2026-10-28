@@ -9,17 +9,18 @@ import type { EventPlanningSnapshot } from "../queries";
 import {
   buildPlanningPhases,
   computeReadiness,
-  pickNextAction,
+  pickNextActions,
   summariseBudget,
 } from "../lib/overview-insights";
-import { RecentResponsesFeed } from "./overview/RecentResponsesFeed";
 import { DeskMotion, DeskItem } from "./desk/DeskMotion";
 import { DeskHero } from "./desk/DeskHero";
-import { NextActionCard } from "./desk/NextActionCard";
-import { ReadinessGauge } from "./desk/ReadinessGauge";
+import { NextUpStrip } from "./desk/NextUpStrip";
+import { ReadinessRings } from "./desk/ReadinessRings";
 import { GuestConstellation } from "./desk/GuestConstellation";
-import { BudgetTile } from "./desk/BudgetTile";
+import { BudgetWeave } from "./desk/BudgetWeave";
 import { PlanningRibbon } from "./desk/PlanningRibbon";
+import { InvitationPreview } from "./desk/InvitationPreview";
+import { Guestbook } from "./desk/Guestbook";
 
 interface EventOverviewDeskProps {
   data: EventWithMetrics;
@@ -66,7 +67,7 @@ export function EventOverviewDesk({
   const readiness = computeReadiness(metrics, planning.vendors, planning.tasks);
   const phases = buildPlanningPhases(eventDateKey, planning.tasks, todayKey);
   const budget = summariseBudget(planning.vendors);
-  const nextAction = pickNextAction({
+  const nextActions = pickNextActions({
     eventId: event.id,
     metrics,
     vendors: planning.vendors,
@@ -95,86 +96,87 @@ export function EventOverviewDesk({
         </DeskItem>
 
         <DeskItem>
-          <NextActionCard action={nextAction} />
+          <NextUpStrip actions={nextActions} />
         </DeskItem>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
           <DeskItem className="lg:col-span-5">
-            <ReadinessGauge eventId={event.id} readiness={readiness} />
+            <ReadinessRings eventId={event.id} readiness={readiness} />
           </DeskItem>
-          <DeskItem className="lg:col-span-4">
+          <DeskItem className="lg:col-span-7">
             <GuestConstellation
               eventId={event.id}
               guests={planning.guests}
               metrics={metrics}
             />
           </DeskItem>
-          <DeskItem className="lg:col-span-3">
-            <BudgetTile eventId={event.id} budget={budget} />
-          </DeskItem>
         </div>
 
         <DeskItem>
-          <PlanningRibbon phases={phases} />
+          <BudgetWeave eventId={event.id} budget={budget} />
         </DeskItem>
 
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
+        <DeskItem>
+          <PlanningRibbon eventId={event.id} phases={phases} />
+        </DeskItem>
+
+        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-8">
           <DeskItem className="lg:col-span-7">
-            <RecentResponsesFeed
-              eventId={event.id}
-              totalAttendees={metrics.totalAttendees}
-              recentResponses={recentResponses}
-            />
-          </DeskItem>
-          <DeskItem className="lg:col-span-5">
-            <div className="h-full bg-paper rounded-[24px] p-space-lg flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] relative border border-surface-container-high/40">
-              <div
-                data-testid="invitation-tile"
-                className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full shadow-md bg-night flex flex-col justify-between p-6"
-              >
-                <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-wine/50 blur-2xl pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-gold/20 blur-2xl pointer-events-none" />
-
-                <div className="relative z-10 self-start px-3 py-1 rounded-full bg-night/80 backdrop-blur-md text-gold font-label-sm tracking-wider uppercase flex items-center gap-1.5 font-bold">
-                  <Icon name="stylus" className="text-sm" />
-                  <span>YOUR INVITATION</span>
-                </div>
-
-                <div className="relative z-10 my-auto flex flex-col items-center justify-center">
-                  <div className="w-14 h-14 rounded-full bg-wine border-2 border-gold flex items-center justify-center shadow-lg">
-                    <Icon name="verified" className="text-gold text-2xl" />
-                  </div>
-                  <span className="font-headline-sm text-headline-sm text-ivory mt-2 tracking-wide font-serif">
-                    {event.couple}
-                  </span>
-                </div>
-
-                <div className="relative z-10 flex items-center justify-between text-ivory/80 text-[12px]">
-                  <span>Ceremony &amp; Reception</span>
-                  <span className="text-gold font-semibold">
-                    Personal Guest Link
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-space-md flex items-center justify-between">
+            <section
+              aria-labelledby="guestbook-title"
+              className="bento-card flex h-full flex-col p-6 sm:p-7"
+            >
+              <div className="mb-5 flex items-end justify-between gap-3">
                 <div>
-                  <div className="font-title-md text-title-md text-paper-ink font-semibold">
-                    A personal invitation
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
+                    Guestbook
                   </div>
-                  <p className="font-body-sm text-on-surface-variant">
-                    Burgundy, ivory and a place for every guest
-                  </p>
+                  <h2
+                    id="guestbook-title"
+                    className="mt-1 font-display text-2xl font-bold text-night"
+                  >
+                    Latest replies
+                  </h2>
                 </div>
                 <Link
                   href={`/events/${event.id}/guests`}
-                  className="w-10 h-10 rounded-xl bg-surface-container-highest text-wine hover:bg-gold hover:text-night transition-colors flex items-center justify-center min-h-[44px] min-w-[44px]"
-                  title="Inspect Proof Details"
+                  className="inline-flex min-h-[40px] items-center gap-1 rounded-full px-3 text-sm font-semibold text-burgundy hover:bg-surface-container"
                 >
-                  <Icon name="arrow_forward" className="text-lg" />
+                  All {metrics.totalParties} guests
+                  <Icon name="arrow_forward" size={14} />
                 </Link>
               </div>
-            </div>
+              <Guestbook
+                entries={recentResponses.map((r) => ({
+                  id: r.id,
+                  name: r.guestName,
+                  status: r.status,
+                  partySize:
+                    r.status === "accepted"
+                      ? r.attendingCount || r.partySize
+                      : r.partySize,
+                  meta: [
+                    /^(bride|groom)$/i.test(r.side ?? "")
+                      ? `${r.side.charAt(0).toUpperCase()}${r.side.slice(1).toLowerCase()}'s side`
+                      : null,
+                    r.groupName,
+                    r.tableName
+                      ? `Table: ${r.tableName}`
+                      : r.status === "accepted"
+                        ? "Not seated yet"
+                        : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · "),
+                  when: r.timeAgo,
+                  href: `/events/${event.id}/guests`,
+                }))}
+                empty="No replies yet. They'll land here, one note at a time, as guests answer their invitations."
+              />
+            </section>
+          </DeskItem>
+          <DeskItem className="lg:col-span-5">
+            <InvitationPreview event={event} />
           </DeskItem>
         </div>
       </DeskMotion>

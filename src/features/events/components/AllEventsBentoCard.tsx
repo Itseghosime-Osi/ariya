@@ -22,6 +22,19 @@ export function AllEventsBentoCard({
 }: AllEventsBentoCardProps) {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sort, setSort] = useState<"soonest" | "replied" | "name">("soonest");
+
+  const sorted = (list: EventWithMetrics[], isPastTab: boolean) => {
+    if (sort === "replied")
+      return [...list].sort((a, b) => b.metrics.rsvpRate - a.metrics.rsvpRate);
+    if (sort === "name")
+      return [...list].sort((a, b) =>
+        a.event.title.localeCompare(b.event.title)
+      );
+    // Soonest: the list arrives in date order already (nearest upcoming, most recent past).
+    void isPastTab;
+    return list;
+  };
 
   const handleCopyShare = async (event: EventWithMetrics["event"]) => {
     const target = getShareTarget(
@@ -61,7 +74,7 @@ export function AllEventsBentoCard({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-hairline text-[11px] font-semibold uppercase tracking-wider text-label-2">
+            <tr className="border-b border-hairline text-[10px] font-bold uppercase tracking-[0.16em] text-label-2">
               <th scope="col" className="py-2 pr-4">
                 Event
               </th>
@@ -72,10 +85,10 @@ export function AllEventsBentoCard({
                 Days left
               </th>
               <th scope="col" className="py-2 px-3">
-                Replied %
+                Replied
               </th>
               <th scope="col" className="py-2 px-3">
-                Seated %
+                Seated
               </th>
               <th scope="col" className="py-2 px-3">
                 Plan
@@ -89,7 +102,7 @@ export function AllEventsBentoCard({
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline text-xs">
-            {list.map((item) => (
+            {sorted(list, isPastTab).map((item) => (
               <AllEventsRow
                 key={item.event.id}
                 item={item}
@@ -116,31 +129,65 @@ export function AllEventsBentoCard({
         onValueChange={(v) => setActiveTab(v as "upcoming" | "past")}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h2
-            id="all-events-heading"
-            className="font-display text-xl font-bold text-night"
-          >
-            All events
-          </h2>
-          <Tabs.List
-            aria-label="Filter celebrations by status"
-            className="inline-flex items-center gap-1 rounded-full bg-ivory p-1 self-start"
-          >
-            <Tabs.Trigger
-              value="upcoming"
-              data-testid="tab-upcoming"
-              className="min-h-[34px] rounded-full px-3.5 py-1 text-xs font-semibold text-night/75 data-[state=active]:bg-white data-[state=active]:text-burgundy data-[state=active]:shadow-2xs tabular-nums"
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-ink">
+              The ledger
+            </div>
+            <h2
+              id="all-events-heading"
+              className="font-display text-xl font-bold text-night"
             >
-              Upcoming ({upcoming.length})
-            </Tabs.Trigger>
-            <Tabs.Trigger
-              value="past"
-              data-testid="tab-past"
-              className="min-h-[34px] rounded-full px-3.5 py-1 text-xs font-semibold text-night/75 data-[state=active]:bg-white data-[state=active]:text-burgundy data-[state=active]:shadow-2xs tabular-nums"
+              All events
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="inline-flex items-center gap-1 rounded-full bg-surface-container p-1"
+              role="group"
+              aria-label="Sort events"
             >
-              Past ({past.length})
-            </Tabs.Trigger>
-          </Tabs.List>
+              {(
+                [
+                  ["soonest", "Soonest"],
+                  ["replied", "Most replied"],
+                  ["name", "A–Z"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={sort === key}
+                  onClick={() => setSort(key)}
+                  className={`min-h-[34px] rounded-full px-3 text-xs font-semibold transition-colors ${
+                    sort === key
+                      ? "bg-white text-night shadow-sm"
+                      : "text-label-2 hover:text-night"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <Tabs.List
+              aria-label="Filter celebrations by status"
+              className="inline-flex items-center gap-1 rounded-full bg-surface-container p-1 self-start"
+            >
+              <Tabs.Trigger
+                value="upcoming"
+                data-testid="tab-upcoming"
+                className="min-h-[34px] rounded-full px-3.5 py-1 text-xs font-semibold text-night/75 data-[state=active]:bg-burgundy data-[state=active]:text-white tabular-nums"
+              >
+                Upcoming ({upcoming.length})
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value="past"
+                data-testid="tab-past"
+                className="min-h-[34px] rounded-full px-3.5 py-1 text-xs font-semibold text-night/75 data-[state=active]:bg-burgundy data-[state=active]:text-white tabular-nums"
+              >
+                Past ({past.length})
+              </Tabs.Trigger>
+            </Tabs.List>
+          </div>
         </div>
         <Tabs.Content value="upcoming">
           {renderRows(upcoming, false)}
