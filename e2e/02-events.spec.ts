@@ -192,7 +192,10 @@ test.describe("Events Creation & Overview", () => {
 
       // Start with 15:00 (3:00 PM WAT). Refill until the preview reacts, so a
       // fill that lands before hydration doesn't count as the app failing.
+      // Clearing first matters: once hydrated, React only fires onChange when
+      // the value differs from what the field already holds.
       await expect(async () => {
+        await ceremonyInput.fill("");
         await ceremonyInput.fill("2026-12-12T15:00");
         await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible({
           timeout: 1000,
