@@ -25,7 +25,7 @@ export interface EventsHomeProps {
   firstName?: string | null;
 }
 
-const TAB_TRIGGER_CLASSES =
+const TAB_CLS =
   "inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-semibold tabular-nums transition-colors data-[state=active]:bg-burgundy data-[state=active]:text-ivory data-[state=inactive]:text-label-2 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
 
 export function EventsHome({
@@ -50,16 +50,16 @@ export function EventsHome({
     () => filterEvents(past, searchQuery),
     [past, searchQuery]
   );
-  const heroEvent = useMemo(
+  const hero = useMemo(
     () => pickHeroEvent(filteredUpcoming),
     [filteredUpcoming]
   );
-  const secondaryUpcoming = useMemo(
+  const restUpcoming = useMemo(
     () =>
-      heroEvent
-        ? filteredUpcoming.filter((e) => e.event.id !== heroEvent.event.id)
+      hero
+        ? filteredUpcoming.filter((e) => e.event.id !== hero.event.id)
         : filteredUpcoming,
-    [filteredUpcoming, heroEvent]
+    [filteredUpcoming, hero]
   );
 
   if (events.length === 0) {
@@ -79,7 +79,7 @@ export function EventsHome({
 
         <Tabs.Root
           value={activeTab}
-          onValueChange={(val) => setActiveTab(val as "upcoming" | "past")}
+          onValueChange={(v) => setActiveTab(v as "upcoming" | "past")}
           className="space-y-6"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-3">
@@ -90,21 +90,18 @@ export function EventsHome({
               <Tabs.Trigger
                 value="upcoming"
                 data-testid="tab-upcoming"
-                className={TAB_TRIGGER_CLASSES}
+                className={TAB_CLS}
               >
-                <span>Upcoming</span>
-                <span className="opacity-85">({upcoming.length})</span>
+                Upcoming ({upcoming.length})
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="past"
                 data-testid="tab-past"
-                className={TAB_TRIGGER_CLASSES}
+                className={TAB_CLS}
               >
-                <span>Past</span>
-                <span className="opacity-85">({past.length})</span>
+                Past ({past.length})
               </Tabs.Trigger>
             </Tabs.List>
-
             {showSearch && (
               <EventsSearch
                 query={searchQuery}
@@ -124,26 +121,22 @@ export function EventsHome({
               />
             ) : (
               <m.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
+                initial={{ y: 4 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.18 }}
                 className="space-y-6"
               >
-                {heroEvent ? (
-                  <HeroEventCard item={heroEvent} />
+                {hero ? (
+                  <HeroEventCard item={hero} />
                 ) : (
-                  <div className="rounded-2xl bg-surface border border-hairline p-8 text-center space-y-1.5">
+                  <div className="rounded-2xl bg-surface border border-hairline p-8 text-center">
                     <p className="font-display text-lg font-semibold text-night">
                       No upcoming events
                     </p>
-                    <p className="text-xs text-label-2">
-                      All of your events are in the Past tab.
-                    </p>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                  {secondaryUpcoming.length > 0 && (
+                  {restUpcoming.length > 0 && (
                     <section
                       aria-labelledby="more-upcoming-heading"
                       className="lg:col-span-7 space-y-3"
@@ -155,7 +148,7 @@ export function EventsHome({
                         More upcoming events
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {secondaryUpcoming.map((item) => (
+                        {restUpcoming.map((item) => (
                           <EventCard key={item.event.id} item={item} />
                         ))}
                       </div>
@@ -163,7 +156,7 @@ export function EventsHome({
                   )}
                   <div
                     className={
-                      secondaryUpcoming.length > 0
+                      restUpcoming.length > 0
                         ? "lg:col-span-5"
                         : "lg:col-span-12"
                     }
@@ -183,12 +176,9 @@ export function EventsHome({
                   onClear={() => setSearchQuery("")}
                 />
               ) : (
-                <div className="rounded-2xl bg-surface border border-hairline p-8 text-center space-y-1.5">
+                <div className="rounded-2xl bg-surface border border-hairline p-8 text-center">
                   <p className="font-display text-lg font-semibold text-night">
                     No past events yet
-                  </p>
-                  <p className="text-xs text-label-2">
-                    Completed and archived events will appear here.
                   </p>
                 </div>
               )

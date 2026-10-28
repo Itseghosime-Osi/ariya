@@ -5,7 +5,8 @@ import React from "react";
  */
 export function EventsSkeleton() {
   return (
-    <div
+    <section
+      role="status"
       data-testid="events-skeleton"
       aria-busy="true"
       aria-label="Loading your events"
@@ -43,6 +44,6 @@ export function EventsSkeleton() {
         </div>
         <div className="lg:col-span-5 h-64 rounded-2xl bg-surface border border-hairline" />
       </div>
-    </div>
+    </section>
   );
 }

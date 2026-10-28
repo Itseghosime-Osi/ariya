@@ -28,10 +28,12 @@ export function TopBar({
         <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
             href="/events"
-            aria-label="Àríyá Home"
             className="md:hidden flex items-center gap-1.5 font-display text-lg font-bold text-night shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy rounded-lg px-1"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-ivory">
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-ivory"
+            >
               À
             </span>
             <span>Àríyá</span>
@@ -40,7 +42,6 @@ export function TopBar({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search events, guests, and vendors"
             className="w-full min-h-[44px] flex items-center justify-between bg-surface/90 hover:bg-surface px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <div className="flex items-center gap-2.5 text-label-2 min-w-0">
@@ -49,7 +50,10 @@ export function TopBar({
                 Search events, guests, tables...
               </span>
             </div>
-            <kbd className="hidden sm:inline-block rounded bg-ivory px-2 py-0.5 text-[10px] font-medium text-label-2 border border-hairline">
+            <kbd
+              aria-hidden="true"
+              className="hidden sm:inline-block rounded bg-ivory px-2 py-0.5 text-[10px] font-medium text-label-2 border border-hairline"
+            >
               ⌘K
             </kbd>
           </button>
@@ -82,16 +86,17 @@ export function TopBar({
             </div>
           )}
 
-          <form action={signOutAction} className="md:hidden">
-            <button
-              type="submit"
-              title="Sign out"
-              aria-label="Sign out"
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-hairline bg-surface/90 text-label-2 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-            >
-              <Icon name="logout" size={17} />
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={() => {
+              void signOutAction();
+            }}
+            title="Sign out"
+            aria-label="Sign out"
+            className="md:hidden flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-hairline bg-surface/90 text-label-2 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="logout" size={17} />
+          </button>
         </div>
       </header>
 

@@ -35,13 +35,15 @@ export function Sidebar({ eventId, userEmail }: SidebarProps) {
       <div className="flex flex-col items-center lg:items-stretch gap-5 min-h-0 flex-1">
         <Link
           href="/events"
-          aria-label="Àríyá Home"
           className="flex items-center justify-center lg:justify-start gap-2.5 px-2 py-1.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-burgundy font-display text-lg font-bold text-ivory shadow-xs">
+          <span
+            aria-hidden="true"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-burgundy font-display text-lg font-bold text-ivory shadow-xs"
+          >
             À
           </span>
-          <span className="hidden lg:inline font-display text-xl font-bold tracking-tight text-night">
+          <span className="sr-only lg:not-sr-only lg:inline font-display text-xl font-bold tracking-tight text-night">
             Àríyá
           </span>
         </Link>
@@ -76,29 +78,32 @@ export function Sidebar({ eventId, userEmail }: SidebarProps) {
       <div className="flex flex-col items-center lg:items-stretch gap-2 pt-3 border-t border-hairline">
         <Link
           href="/events"
-          aria-label="Profile & Settings"
           title="Profile & Settings"
           className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1.5 lg:gap-2.5 min-h-[44px] px-2 lg:px-3 py-1.5 rounded-xl text-label-2 hover:bg-burgundy/8 hover:text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           <div className="w-8 h-8 rounded-full bg-burgundy/12 flex items-center justify-center text-burgundy shrink-0">
             <Icon name="person" size={16} />
           </div>
-          <span className="hidden lg:inline text-xs font-medium text-label-2 truncate">
+          <span className="sr-only">Profile &amp; Settings</span>
+          <span
+            aria-hidden="true"
+            className="hidden lg:inline text-xs font-medium text-label-2 truncate"
+          >
             {userEmail || "Account"}
           </span>
         </Link>
 
-        <form action={signOutAction} className="w-full">
-          <button
-            type="submit"
-            title="Sign out"
-            aria-label="Sign out"
-            className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2.5 w-full min-h-[44px] px-2 lg:px-3 py-2 rounded-xl text-label-2 hover:bg-burgundy/8 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-          >
-            <Icon name="logout" size={17} />
-            <span className="text-[11px] lg:text-xs font-medium">Sign out</span>
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={() => {
+            void signOutAction();
+          }}
+          title="Sign out"
+          className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2.5 w-full min-h-[44px] px-2 lg:px-3 py-2 rounded-xl text-label-2 hover:bg-burgundy/8 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          <Icon name="logout" size={17} />
+          <span className="text-[11px] lg:text-xs font-medium">Sign out</span>
+        </button>
       </div>
     </aside>
   );

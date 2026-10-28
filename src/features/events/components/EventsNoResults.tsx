@@ -16,7 +16,7 @@ export function EventsNoResults({ query, onClear }: EventsNoResultsProps) {
         <Icon name="search" size={20} />
       </div>
       <p className="font-display text-lg font-semibold text-night">
-        No events match &ldquo;{query}&rdquo;
+        No events match &quot;{query}&quot;
       </p>
       <p className="text-xs text-label-2 max-w-sm mx-auto">
         Try searching by event name, couple or host names, or venue.

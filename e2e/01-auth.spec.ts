@@ -24,7 +24,9 @@ test.describe("Authentication & Session", () => {
     await createAndLoginUser(page, context, "auth_user");
     await expect(page).toHaveURL(/\/events/);
     await expect(
-      page.getByText(/Your Celebrations|No Celebrations/i).first()
+      page
+        .getByText(/Your events|Plan your first celebration|Your Celebrations/i)
+        .first()
     ).toBeVisible();
 
     // 4. Sign out

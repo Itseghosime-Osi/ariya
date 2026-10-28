@@ -76,7 +76,7 @@ test.describe("Events Creation & Overview", () => {
 
     // Verify redirected to /events and celebration is archived
     await page.waitForURL(/\/events$/, { timeout: 10000 });
-    await expect(page.locator("h1")).toContainText(/Celebrations/i);
+    await expect(page.locator("h1")).toContainText(/Your events/i);
   });
 
   test("public event page does not crash with non-bucket cover image", async ({
