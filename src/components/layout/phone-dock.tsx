@@ -22,13 +22,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { EventSwitcher } from "./EventSwitcher";
 import {
@@ -95,12 +88,16 @@ export function PhoneDock({
   const reduceMotion = useReducedMotion();
   const menuId = useId();
   const createRef = useRef<HTMLButtonElement>(null);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const morePanelRef = useRef<HTMLDivElement>(null);
+  const moreId = useId();
   const firstActionRef = useRef<HTMLAnchorElement>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [typing, setTyping] = useState(false);
   const [burst, setBurst] = useState(0);
+  const menuOpen = createOpen || moreOpen;
 
   const eventId = isValidEventId(activeEvent?.id) ? activeEvent.id : null;
   const base = eventId ? `/events/${eventId}` : null;
@@ -211,21 +208,36 @@ export function PhoneDock({
     };
   }, []);
 
-  // The create menu: first action takes focus; Escape closes and returns it.
+  // Either menu: focus moves in; Escape closes it and returns focus to its button.
   useEffect(() => {
-    if (!createOpen) return;
-    firstActionRef.current?.focus();
+    if (!menuOpen) return;
+    const opener = createOpen ? createRef.current : moreRef.current;
+    if (createOpen) {
+      firstActionRef.current?.focus();
+    } else {
+      morePanelRef.current
+        ?.querySelector<HTMLElement>("a[href], button")
+        ?.focus();
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setCreateOpen(false);
-        createRef.current?.focus();
-      }
+      if (e.key !== "Escape") return;
+      // Let the event switcher's own dropdown close first.
+      if (document.querySelector('[role="menu"][data-state="open"]')) return;
+      setCreateOpen(false);
+      setMoreOpen(false);
+      opener?.focus();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [createOpen]);
+  }, [menuOpen, createOpen]);
+
+  const toggleMore = () => {
+    setCreateOpen(false);
+    setMoreOpen((open) => !open);
+  };
 
   const toggleCreate = () => {
+    setMoreOpen(false);
     setCreateOpen((open) => {
       if (!open) {
         setBurst((n) => n + 1);
@@ -248,17 +260,20 @@ export function PhoneDock({
       />
 
       <AnimatePresence>
-        {createOpen && (
+        {menuOpen && (
           <motion.div
             key="scrim"
             aria-hidden="true"
-            data-testid="phone-create-scrim"
+            data-testid="phone-scrim"
             className="fixed inset-0 z-40 bg-night/25 backdrop-blur-[2px] md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={() => setCreateOpen(false)}
+            onClick={() => {
+              setCreateOpen(false);
+              setMoreOpen(false);
+            }}
           />
         )}
       </AnimatePresence>
@@ -270,12 +285,93 @@ export function PhoneDock({
         animate={
           typing
             ? { y: "160%", opacity: 0 }
-            : { y: compact && !createOpen ? 6 : 0, opacity: 1 }
+            : { y: compact && !menuOpen ? 6 : 0, opacity: 1 }
         }
         transition={SPRING}
         inert={typing}
         data-hidden={typing || undefined}
       >
+        {/* Celebration menu blooms up from More, above the pill */}
+        <AnimatePresence>
+          {moreOpen && (
+            <motion.div
+              id={moreId}
+              key="more-menu"
+              ref={morePanelRef}
+              role="group"
+              aria-label="Celebration menu"
+              data-testid="phone-more-sheet"
+              className="absolute inset-x-0 bottom-full mx-auto mb-3 max-h-[min(70dvh,34rem)] max-w-md overflow-y-auto overscroll-contain rounded-[28px] bg-white/95 p-4 shadow-[0_24px_50px_-20px_rgba(28,7,13,0.5),0_2px_8px_-2px_rgba(28,7,13,0.12)] ring-1 ring-black/5"
+              style={{ transformOrigin: "62% 100%" }}
+              initial={{ opacity: 0, y: 28, scale: 0.88 }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: SPRING }}
+              exit={{
+                opacity: 0,
+                y: 18,
+                scale: 0.92,
+                transition: { duration: 0.16 },
+              }}
+            >
+              <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
+                <h2 className="font-display text-lg font-bold text-night">
+                  Celebration menu
+                </h2>
+                <span className="text-xs text-label-2">
+                  Switch or jump to a section
+                </span>
+              </div>
+
+              <EventSwitcher
+                events={events}
+                activeEvent={activeEvent}
+                onSelectEvent={onSelectEvent}
+              />
+
+              {moreSections.length > 0 && (
+                <div
+                  data-testid="phone-more-sections"
+                  className="grid grid-cols-2 gap-1.5 pt-3"
+                >
+                  {moreSections.map((item, i) => {
+                    const active = isSectionActive(pathname, item.href);
+                    return (
+                      <motion.div
+                        key={item.name}
+                        initial={{ opacity: 0, y: 14, scale: 0.92 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          transition: { ...SPRING, delay: 0.06 + i * 0.03 },
+                        }}
+                      >
+                        <Link
+                          href={item.href}
+                          aria-current={active ? "page" : undefined}
+                          onClick={() => setMoreOpen(false)}
+                          className={cn(
+                            "flex min-h-[48px] items-center gap-2.5 rounded-2xl px-3 py-2 text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
+                            active
+                              ? "bg-burgundy/[0.09] font-semibold text-burgundy ring-1 ring-burgundy/10"
+                              : "bg-ivory font-medium text-night/80 hover:bg-burgundy/[0.06] hover:text-night"
+                          )}
+                        >
+                          <Icon
+                            name={item.icon}
+                            size={16}
+                            className="shrink-0"
+                          />
+                          <span className="truncate">{item.name}</span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Quick actions bloom up from the Create circle */}
         <AnimatePresence>
           {createOpen && (
@@ -339,7 +435,7 @@ export function PhoneDock({
             aria-label="Mobile navigation"
             data-testid="phone-tab-bar"
             className="dock-pill flex min-w-0 flex-1 items-center rounded-full bg-white p-1.5"
-            animate={{ scale: compact && !createOpen ? 0.94 : 1 }}
+            animate={{ scale: compact && !menuOpen ? 0.94 : 1 }}
             transition={SPRING}
             style={{ transformOrigin: "50% 100%" }}
           >
@@ -387,7 +483,7 @@ export function PhoneDock({
                     <span
                       className={cn(
                         "relative leading-none transition-[opacity,max-height] duration-300",
-                        compact && !createOpen
+                        compact && !menuOpen
                           ? "max-h-0 opacity-0"
                           : "max-h-4 opacity-100"
                       )}
@@ -402,9 +498,10 @@ export function PhoneDock({
               <button
                 type="button"
                 data-testid="phone-more-button"
+                ref={moreRef}
                 aria-expanded={moreOpen}
-                aria-haspopup="dialog"
-                onClick={() => setMoreOpen(true)}
+                aria-controls={moreOpen ? moreId : undefined}
+                onClick={toggleMore}
                 className={cn(
                   "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
                   activeTab === "More"
@@ -430,7 +527,7 @@ export function PhoneDock({
                 <span
                   className={cn(
                     "relative leading-none transition-[opacity,max-height] duration-300",
-                    compact && !createOpen
+                    compact && !menuOpen
                       ? "max-h-0 opacity-0"
                       : "max-h-4 opacity-100"
                   )}
@@ -485,58 +582,6 @@ export function PhoneDock({
           </motion.button>
         </div>
       </motion.div>
-
-      <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-        <DialogContent
-          data-testid="phone-more-sheet"
-          className="fixed bottom-3 left-3 right-3 top-auto mx-auto w-auto max-w-md translate-x-0 translate-y-0 rounded-[28px] border border-hairline bg-ivory p-5 shadow-2xl data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0"
-        >
-          <DialogHeader className="text-left">
-            <DialogTitle className="font-display text-lg font-bold text-night">
-              Celebration menu
-            </DialogTitle>
-            <DialogDescription className="text-xs text-label-2">
-              Switch celebrations or jump to any section.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 pt-1">
-            <EventSwitcher
-              events={events}
-              activeEvent={activeEvent}
-              onSelectEvent={onSelectEvent}
-            />
-
-            {moreSections.length > 0 && (
-              <div
-                data-testid="phone-more-sections"
-                className="grid grid-cols-2 gap-1.5 pt-1"
-              >
-                {moreSections.map((item) => {
-                  const active = isSectionActive(pathname, item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      onClick={() => setMoreOpen(false)}
-                      className={cn(
-                        "flex min-h-[44px] items-center gap-2.5 rounded-2xl px-3 py-2 text-xs transition-colors",
-                        active
-                          ? "bg-white font-semibold text-burgundy shadow-xs"
-                          : "bg-white/60 font-medium text-night/80 hover:bg-white hover:text-night"
-                      )}
-                    >
-                      <Icon name={item.icon} size={16} className="shrink-0" />
-                      <span className="truncate">{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </MotionConfig>
   );
 }
