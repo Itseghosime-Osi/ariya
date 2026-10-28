@@ -66,6 +66,18 @@ test.describe("Film & Marketing Site Integration", () => {
     }
   });
 
+  test("the film and About page never request the song without the demo opt-in", async ({
+    page,
+  }) => {
+    const songRequests: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("music.mp3")) songRequests.push(req.url());
+    });
+    await page.goto("/", { waitUntil: "load" });
+    await page.goto("/about", { waitUntil: "load" });
+    expect(songRequests).toEqual([]);
+  });
+
   test("checks /planner.html and /rsvp.html redirect correctly", async ({
     page,
   }) => {
