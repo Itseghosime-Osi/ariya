@@ -87,9 +87,7 @@ describe("needs-attention", () => {
       { now }
     );
     expect(rsvp1).toHaveLength(1);
-    expect(rsvp1[0].message).toBe(
-      "1 party hasn't replied · RSVP closes tomorrow"
-    );
+    expect(rsvp1[0].message).toBe("1 party awaiting reply · closes tomorrow");
     expect(rsvp1[0].href).toBe("/events/e1/guests?rsvpStatus=pending");
 
     // Rule (b): Unseated accepted guests
@@ -104,7 +102,7 @@ describe("needs-attention", () => {
       { now }
     );
     expect(unseated).toHaveLength(1);
-    expect(unseated[0].message).toBe("3 attending guests aren't seated yet");
+    expect(unseated[0].message).toBe("Seat 3 accepted guests");
     expect(unseated[0].href).toBe("/events/e2/seating");
 
     // Rule (c): Free plan near 20-invite limit (>= 16)
@@ -128,11 +126,11 @@ describe("needs-attention", () => {
       { now }
     );
     expect(soon).toHaveLength(1);
-    expect(soon[0].message).toBe("Ọlá & Adéṣọlá is in 5 days");
+    expect(soon[0].message).toBe("Event in 5 days");
     expect(soon[0].href).toBe("/events/e4");
   });
 
-  it("orders strictly by urgency and caps at 3 items", () => {
+  it("orders strictly by urgency and caps at 5 items", () => {
     const busyEvent = makeEventItem({
       id: "all-four",
       title: "Grand Owambe",
@@ -143,16 +141,26 @@ describe("needs-attention", () => {
       seatedGuests: 15,
       paid_at: null,
     });
-
-    const items = buildNeedsAttention([busyEvent], {
-      now,
-      invitedCountByEventId: { "all-four": 18 },
+    const secondEvent = makeEventItem({
+      id: "second",
+      title: "Second Celebration",
+      date: "2026-11-19T14:00:00Z",
+      acceptedGuests: 10,
+      seatedGuests: 4,
+      paid_at: null,
     });
 
-    expect(items).toHaveLength(3);
+    const items = buildNeedsAttention([busyEvent, secondEvent], {
+      now,
+      invitedCountByEventId: { "all-four": 18, second: 17 },
+    });
+
+    expect(items).toHaveLength(5);
     expect(items.map((i) => i.kind)).toEqual([
       "rsvp_deadline",
       "unseated_guests",
+      "unseated_guests",
+      "free_plan_limit",
       "free_plan_limit",
     ]);
   });

@@ -1,5 +1,9 @@
 import { daysBetweenLagos, getLagosDateKey } from "@/lib/format";
-import type { EventWithMetrics } from "../types";
+import {
+  calculateCelebrationMetrics,
+  type GuestMetricItem,
+} from "@/lib/metrics";
+import type { EventMetrics, EventWithMetrics } from "../types";
 
 /**
  * Returns true if the event has a valid calendar date in Africa/Lagos.
@@ -111,4 +115,62 @@ export function pickHeroEvent(
   if (upcoming.length === 0) return null;
   const { upcoming: sorted } = partitionEvents(upcoming, now);
   return sorted[0] ?? null;
+}
+
+export function aggregateEventMetrics(items: EventWithMetrics[]): EventMetrics {
+  if (items.length === 1) return items[0].metrics;
+
+  const syntheticParties: GuestMetricItem[] = [];
+  let acceptedGuests = 0;
+  let awaitingGuests = 0;
+  let declinedGuests = 0;
+  let totalAttendees = 0;
+  let seatedGuests = 0;
+
+  for (const { metrics: m } of items) {
+    acceptedGuests += m.acceptedGuests;
+    awaitingGuests += m.awaitingGuests;
+    declinedGuests += m.declinedGuests;
+    totalAttendees += m.totalAttendees;
+    seatedGuests += m.seatedGuests;
+
+    for (let i = 0; i < m.acceptedParties; i++) {
+      syntheticParties.push({
+        party_size: 1,
+        rsvp: { status: "accepted", attending_count: 1 },
+      });
+    }
+    for (let i = 0; i < m.declinedParties; i++) {
+      syntheticParties.push({
+        party_size: 1,
+        rsvp: { status: "declined" },
+      });
+    }
+    for (let i = 0; i < m.awaitingParties; i++) {
+      syntheticParties.push({
+        party_size: 1,
+        rsvp: { status: "pending" },
+      });
+    }
+  }
+
+  const summary = calculateCelebrationMetrics(syntheticParties);
+  return {
+    totalParties: summary.totalParties,
+    totalAttendees,
+    acceptedParties: summary.acceptedParties,
+    acceptedGuests,
+    awaitingParties: summary.awaitingParties,
+    awaitingGuests,
+    declinedParties: summary.declinedParties,
+    declinedGuests,
+    seatedGuests,
+    unassignedGuests: Math.max(0, acceptedGuests - seatedGuests),
+    readinessPercentage: summary.rsvpRate,
+    daysAway: items[0]?.metrics.daysAway ?? 0,
+    acceptedPartiesPct: summary.acceptedPartiesPct,
+    declinedPartiesPct: summary.declinedPartiesPct,
+    awaitingPartiesPct: summary.awaitingPartiesPct,
+    rsvpRate: summary.rsvpRate,
+  };
 }

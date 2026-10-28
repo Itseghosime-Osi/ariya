@@ -2,7 +2,7 @@ import { daysBetweenLagos } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
 import type { EventWithMetrics } from "../types";
 
-export const NEEDS_ATTENTION_LIMIT = 3;
+export const NEEDS_ATTENTION_LIMIT = 5;
 export const RSVP_DEADLINE_WARN_DAYS = 7;
 export const EVENT_SOON_WARN_DAYS = 14;
 export const FREE_PLAN_WARN_THRESHOLD = 16;
@@ -34,7 +34,7 @@ function formatCloseRelative(days: number): string {
 }
 
 /**
- * Builds at most 3 real "Needs attention" items across upcoming events,
+ * Builds at most 5 real "To do" (needs-attention) items across upcoming events,
  * ordered strictly by urgency:
  * 1. RSVP deadline within 7 days AND awaitingParties > 0
  * 2. Accepted guests not yet seated (seatedGuests < acceptedGuests)
@@ -64,14 +64,13 @@ export function buildNeedsAttention(
           "party",
           "parties"
         );
-        const verb = metrics.awaitingParties === 1 ? "hasn't" : "haven't";
         candidates.push({
           id: `rsvp-deadline-${event.id}`,
           eventId: event.id,
           eventTitle: event.title,
           kind: "rsvp_deadline",
           urgency: 1,
-          message: `${partiesLabel} ${verb} replied · RSVP closes ${formatCloseRelative(deadlineDays)}`,
+          message: `${partiesLabel} awaiting reply · closes ${formatCloseRelative(deadlineDays)}`,
           ctaLabel: "Review awaiting",
           href: `/events/${event.id}/guests?rsvpStatus=pending`,
         });
@@ -81,15 +80,14 @@ export function buildNeedsAttention(
     // (b) Accepted guests not yet seated (seated < attending)
     if (metrics.seatedGuests < metrics.acceptedGuests) {
       const unseatedCount = metrics.acceptedGuests - metrics.seatedGuests;
-      const guestsLabel = pluralise(unseatedCount, "attending guest");
-      const verb = unseatedCount === 1 ? "isn't" : "aren't";
+      const guestsLabel = pluralise(unseatedCount, "accepted guest");
       candidates.push({
         id: `unseated-${event.id}`,
         eventId: event.id,
         eventTitle: event.title,
         kind: "unseated_guests",
         urgency: 2,
-        message: `${guestsLabel} ${verb} seated yet`,
+        message: `Seat ${guestsLabel}`,
         ctaLabel: "Assign seats",
         href: `/events/${event.id}/seating`,
       });
@@ -122,15 +120,17 @@ export function buildNeedsAttention(
       eventDays >= 0 &&
       eventDays <= EVENT_SOON_WARN_DAYS
     ) {
-      const timing =
-        eventDays === 0 ? "is today" : `is in ${pluralise(eventDays, "day")}`;
+      const message =
+        eventDays === 0
+          ? "Event today"
+          : `Event in ${pluralise(eventDays, "day")}`;
       candidates.push({
         id: `event-soon-${event.id}`,
         eventId: event.id,
         eventTitle: event.title,
         kind: "event_soon",
         urgency: 4,
-        message: `${event.title} ${timing}`,
+        message,
         ctaLabel: "Open event",
         href: `/events/${event.id}`,
       });

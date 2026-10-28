@@ -42,9 +42,6 @@ export interface ComingUpDayGroup {
   items: ComingUpItem[];
 }
 
-/**
- * Formats a relative day label in Africa/Lagos ("Today", "Tomorrow", "In N days", "N days ago").
- */
 export function relativeDayLabel(
   dateInput: string | Date,
   now: Date | string = new Date()
@@ -60,14 +57,14 @@ export function relativeDayLabel(
 
 function isWithinComingUpWindow(
   dateInput: string | null | undefined,
-  now: Date | string
+  now: Date | string,
+  windowDays: number
 ): { valid: boolean; diff: number; key: string } {
   if (!dateInput) return { valid: false, diff: NaN, key: "" };
   const key = getLagosDateKey(dateInput);
   if (!key) return { valid: false, diff: NaN, key: "" };
   const diff = daysBetweenLagos(dateInput, now);
-  const valid =
-    !Number.isNaN(diff) && diff >= 0 && diff < COMING_UP_WINDOW_DAYS;
+  const valid = !Number.isNaN(diff) && diff >= 0 && diff < windowDays;
   return { valid, diff, key };
 }
 
@@ -77,18 +74,18 @@ const KIND_ORDER: Record<ComingUpKind, number> = {
   vendor_task: 3,
 };
 
-/**
- * Builds the 14-day [today, today+14 days) Lagos schedule across all upcoming events:
- * - Event dates
- * - RSVP deadlines (event.rsvp_by)
- * - Open vendor tasks with a due_date
- */
 export function buildComingUp(params: {
   upcomingEvents: EventWithMetrics[];
   vendorTasks?: ComingUpVendorTaskInput[];
   now?: Date | string;
+  windowDays?: number;
 }): ComingUpItem[] {
-  const { upcomingEvents, vendorTasks = [], now = new Date() } = params;
+  const {
+    upcomingEvents,
+    vendorTasks = [],
+    now = new Date(),
+    windowDays = COMING_UP_WINDOW_DAYS,
+  } = params;
   const eventMap = new Map<string, EventWithMetrics>();
   for (const item of upcomingEvents) {
     if (item.event.status !== "archived") {
@@ -99,7 +96,7 @@ export function buildComingUp(params: {
   const results: ComingUpItem[] = [];
 
   for (const { event } of eventMap.values()) {
-    const eventWindow = isWithinComingUpWindow(event.date, now);
+    const eventWindow = isWithinComingUpWindow(event.date, now, windowDays);
     if (eventWindow.valid) {
       results.push({
         id: `event-${event.id}`,
@@ -118,7 +115,7 @@ export function buildComingUp(params: {
     }
 
     if (event.rsvp_by) {
-      const rsvpWindow = isWithinComingUpWindow(event.rsvp_by, now);
+      const rsvpWindow = isWithinComingUpWindow(event.rsvp_by, now, windowDays);
       if (rsvpWindow.valid) {
         results.push({
           id: `rsvp-${event.id}`,
@@ -142,7 +139,7 @@ export function buildComingUp(params: {
     const parent = eventMap.get(task.eventId);
     if (!parent) continue;
 
-    const taskWindow = isWithinComingUpWindow(task.dueDate, now);
+    const taskWindow = isWithinComingUpWindow(task.dueDate, now, windowDays);
     if (taskWindow.valid) {
       results.push({
         id: `task-${task.id}`,

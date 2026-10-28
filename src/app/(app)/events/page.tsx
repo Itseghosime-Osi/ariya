@@ -42,21 +42,29 @@ export default async function EventsPage() {
     getCurrentProfile(),
   ]);
 
-  const { upcoming } = partitionEvents(events);
+  const { upcoming, past } = partitionEvents(events);
   const heroEvent = pickHeroEvent(upcoming);
-  const primaryEvent = heroEvent ?? events[0] ?? null;
+  const primaryEvent = heroEvent ?? past[0] ?? events[0] ?? null;
 
-  const { vendorTasks, invitedCountByEventId } =
-    await getCrossEventHomeData(upcoming);
+  const { vendorTasks, invitedCountByEventId, recentReplies } =
+    await getCrossEventHomeData(events);
 
   const comingUpItems = buildComingUp({
     upcomingEvents: upcoming,
     vendorTasks,
+    windowDays: 21,
   });
 
   const needsAttentionItems = buildNeedsAttention(upcoming, {
     invitedCountByEventId,
   });
+
+  const switcherEvents = [...upcoming, ...past].map((item) => ({
+    id: item.event.id,
+    title: item.event.title,
+    date: item.event.date,
+    couple: item.event.couple,
+  }));
 
   const metaFullName =
     typeof user?.user_metadata?.full_name === "string"
@@ -74,12 +82,14 @@ export default async function EventsPage() {
       eventDate={primaryEvent?.event.date}
       daysAway={primaryEvent?.metrics.daysAway}
       userEmail={user?.email}
+      events={switcherEvents}
       showFloatingNewEvent
     >
       <EventsHome
         events={events}
         comingUpItems={comingUpItems}
         needsAttentionItems={needsAttentionItems}
+        recentReplies={recentReplies}
         firstName={firstName}
       />
     </AppShell>
