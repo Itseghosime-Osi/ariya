@@ -5,30 +5,54 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-function getRemotePatterns() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl) return [];
-
+export function parseSupabaseUrl(supabaseUrl?: string): URL | null {
+  if (!supabaseUrl) return null;
   try {
-    const parsed = new URL(supabaseUrl);
-    const protocol = parsed.protocol.replace(":", "") as "http" | "https";
-    return [
-      {
-        protocol,
-        hostname: parsed.hostname,
-        ...(parsed.port ? { port: parsed.port } : {}),
-      },
-    ];
+    return new URL(supabaseUrl);
   } catch {
-    return [];
+    return null;
   }
 }
+
+export function shouldAllowLocalIP(supabaseUrl?: string): true | undefined {
+  const parsed = parseSupabaseUrl(supabaseUrl);
+  if (!parsed) return undefined;
+
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, "");
+  const localHostnames = ["localhost", "127.0.0.1", "::1"];
+
+  if (localHostnames.includes(hostname)) {
+    return true;
+  }
+
+  return undefined;
+}
+
+export const getDangerouslyAllowLocalIP = shouldAllowLocalIP;
+
+export function getRemotePatterns(
+  supabaseUrl: string | undefined = process.env.NEXT_PUBLIC_SUPABASE_URL
+) {
+  const parsed = parseSupabaseUrl(supabaseUrl);
+  if (!parsed) return [];
+
+  const protocol = parsed.protocol.replace(":", "") as "http" | "https";
+  return [
+    {
+      protocol,
+      hostname: parsed.hostname,
+      ...(parsed.port ? { port: parsed.port } : {}),
+    },
+  ];
+}
+
+const allowLocalIP = shouldAllowLocalIP(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: getRemotePatterns(),
-    dangerouslyAllowLocalIP: true,
+    ...(allowLocalIP ? { dangerouslyAllowLocalIP: true } : {}),
   },
   async redirects() {
     return [
