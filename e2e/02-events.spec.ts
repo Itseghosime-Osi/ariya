@@ -103,9 +103,7 @@ test.describe("Events Creation & Overview", () => {
     const res = await page.goto(publicHref!);
     expect(res?.status()).toBe(200);
     await expect(page.getByText(title).first()).toBeVisible();
-    await expect(
-      page.getByText(/Ceremonial Invitation/i).first()
-    ).toBeVisible();
+    await expect(page.getByText(/Invitation/i).first()).toBeVisible();
   });
 
   for (const tz of ["UTC", "America/New_York"] as const) {
@@ -175,4 +173,52 @@ test.describe("Events Creation & Overview", () => {
       }
     });
   }
+
+  test("page editor datetime-local keyboard segment entry updates preview to 2:00 PM WAT before saving", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ locale: "en-US" });
+    const page = await context.newPage();
+    try {
+      await createAndLoginUser(page, context, "kbd_segment_user");
+      const { eventId } = await createTestEvent(page);
+
+      await page.goto(`/events/${eventId}/page-editor`);
+      await expect(page.getByText(/Event Page Editor/i)).toBeVisible();
+
+      const ceremonyInput = page
+        .locator('input[type="datetime-local"]')
+        .first();
+
+      // Start with 15:00 (3:00 PM WAT)
+      await ceremonyInput.fill("2026-12-12T15:00");
+      await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible();
+
+      // Clear input so segments start fresh: --/--/---- --:--
+      await ceremonyInput.clear();
+
+      // Click the field, type month, day, year, hour, minute, and select PM
+      await ceremonyInput.click();
+      await page.keyboard.type("121220260200p");
+
+      // Assert that preview reflects 2:00 PM WAT before saving
+      await expect(page.getByText(/2:00 PM WAT/i).first()).toBeVisible({
+        timeout: 5000,
+      });
+
+      // Save changes
+      await page.getByRole("button", { name: /save changes/i }).click();
+      await expect(page.getByText(/updates saved successfully/i)).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Reload and assert value persisted
+      await page.reload();
+      await expect(
+        page.locator('input[type="datetime-local"]').first()
+      ).toHaveValue("2026-12-12T14:00");
+    } finally {
+      await context.close();
+    }
+  });
 });

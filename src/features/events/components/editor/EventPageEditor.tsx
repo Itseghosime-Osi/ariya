@@ -66,10 +66,13 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
   };
 
   // Preview reflects converted WAT date instant
+  const previewDate = watDateInput ? parseWatDateToUtc(watDateInput) : "";
+  const previewRsvpBy = watRsvpByInput ? parseWatDateToUtc(watRsvpByInput) : "";
+
   const previewData: LivePreviewData = {
     ...formData,
-    date: watDateInput ? parseWatDateToUtc(watDateInput) : "",
-    rsvpBy: watRsvpByInput ? parseWatDateToUtc(watRsvpByInput) : "",
+    date: previewDate || formData.date,
+    rsvpBy: previewRsvpBy || formData.rsvpBy,
   };
 
   const handleSave = async () => {
@@ -116,8 +119,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             Event Page Editor
           </h1>
           <p className="text-xs text-on-surface-variant">
-            Live preview and publication controls for the public celebration
-            portal.
+            Live preview and publication controls for the public event page.
           </p>
         </div>
 
