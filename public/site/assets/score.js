@@ -99,7 +99,11 @@
       if (MUSIC_URL && !fileFailed) {
         // Try the recording first; fall back to the generated groove if it is missing or won't play.
         var fallback = function () { if (fileFailed) return; fileFailed = true; audioEl = null; if (on) window.AriyaScore.start(); };
-        if (!audioEl) { audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.55; audioEl.addEventListener("error", fallback); }
+        if (!audioEl) {
+          audioEl = new Audio(MUSIC_URL); audioEl.loop = true; audioEl.volume = 0.55; audioEl.addEventListener("error", fallback);
+          // A missing file does not always raise "error" (some browsers just keep loading), so ask for it once and fall back if it is not there.
+          try { fetch(MUSIC_URL, { method: "HEAD" }).then(function (r) { if (!r.ok || /text\/html/.test(r.headers.get("content-type") || "")) fallback(); }, fallback); } catch (e) { /* the error event still covers it */ }
+        }
         if (at > 0) { var seekTo = at; audioEl.addEventListener("loadedmetadata", function () { audioEl.currentTime = seekTo % (audioEl.duration || 1e9); }, { once: true }); if (audioEl.readyState >= 1) audioEl.currentTime = at % audioEl.duration; }
         // Fade the song in rather than starting at full volume.
         audioEl.volume = 0; var v0 = performance.now();
