@@ -1,0 +1,129 @@
+"use server";
+
+import { clientEnv } from "@/lib/env/client";
+import { createClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
+import { mapError } from "@/lib/errors";
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  signInSchema,
+  signUpSchema,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
+  type SignInInput,
+  type SignUpInput,
+} from "./schemas";
+
+export type ActionResult<T = void> =
+  { ok: true; data?: T; redirectTo?: string } | { ok: false; error: string };
+
+export async function signInAction(input: SignInInput): Promise<ActionResult> {
+  const parsed = signInSchema.safeParse(input);
+  if (!parsed.success) {
+    const firstError =
+      parsed.error.errors[0]?.message ?? "Invalid sign-in input";
+    return { ok: false, error: firstError };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to sign in") };
+  }
+
+  const redirectTo = safeRedirectPath(parsed.data.next, "/events");
+  return { ok: true, redirectTo };
+}
+
+export async function signUpAction(
+  input: SignUpInput
+): Promise<ActionResult<{ hasSession: boolean }>> {
+  const parsed = signUpSchema.safeParse(input);
+  if (!parsed.success) {
+    const firstError =
+      parsed.error.errors[0]?.message ?? "Invalid registration input";
+    return { ok: false, error: firstError };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: {
+        full_name: parsed.data.fullName,
+        role: parsed.data.role,
+      },
+      emailRedirectTo: `${clientEnv.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to create account") };
+  }
+
+  return { ok: true, data: { hasSession: Boolean(data.session) } };
+}
+
+export async function forgotPasswordAction(
+  input: ForgotPasswordInput
+): Promise<ActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    const firstError =
+      parsed.error.errors[0]?.message ?? "Invalid email address";
+    return { ok: false, error: firstError };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    parsed.data.email,
+    {
+      redirectTo: `${clientEnv.NEXT_PUBLIC_APP_URL}/reset-password`,
+    }
+  );
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to send reset link") };
+  }
+
+  return { ok: true };
+}
+
+export async function resetPasswordAction(
+  input: ResetPasswordInput
+): Promise<ActionResult> {
+  const parsed = resetPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    const firstError =
+      parsed.error.errors[0]?.message ?? "Invalid password reset input";
+    return { ok: false, error: firstError };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to update password") };
+  }
+
+  return { ok: true };
+}
+
+export async function signOutAction(): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to sign out") };
+  }
+
+  return { ok: true };
+}

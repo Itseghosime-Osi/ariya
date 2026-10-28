@@ -1,0 +1,49 @@
+import { z } from "zod";
+import { isValidCoverImageUrl } from "./cover-image";
+
+export const createEventSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, "Celebration title must be at least 3 characters"),
+  couple: z
+    .string()
+    .trim()
+    .min(3, "Couple names must be at least 3 characters"),
+  date: z.string().min(1, "Celebration date is required"),
+  venue: z.string().trim().min(2, "Venue location is required"),
+  area: z.string().trim().optional(),
+  dressCode: z.string().trim().optional(),
+  registryCode: z.string().trim().optional(),
+  targetParties: z.number().int().min(1).default(200),
+  rsvpBy: z.string().optional(),
+  intakeMethod: z.enum(["csv", "manual", "skip"]).default("csv"),
+});
+
+export type CreateEventInput = z.infer<typeof createEventSchema>;
+
+export const updateEventSchema = createEventSchema.partial().extend({
+  status: z.enum(["draft", "active", "archived"]).optional(),
+  isPublic: z.boolean().optional(),
+  description: z.string().trim().optional(),
+  coverImageUrl: z
+    .string()
+    .trim()
+    .refine((val) => val === "" || isValidCoverImageUrl(val), {
+      message:
+        "Cover image must be an uploaded asset from the celebration storage bucket",
+    })
+    .optional()
+    .nullable(),
+  schedule: z
+    .array(
+      z.object({
+        time: z.string(),
+        title: z.string(),
+        location: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+
+export type UpdateEventInput = z.infer<typeof updateEventSchema>;

@@ -1,56 +1,114 @@
-# Àríyá by OwambePlan
+# Àríyá
 
-In-house experiment for Tech4Youth Edo, Module 06, Project 36: a wedding and event planner for Nigerian couples and planners, replacing guest lists and RSVPs scattered across WhatsApp groups. **OwambePlan** is the product; **Àríyá** (ah-ree-YAH, Yoruba for merriment) is its consumer-facing name.
+Àríyá is a wedding and event planner for Nigerian couples and planners. It replaces guest lists and RSVPs scattered across WhatsApp groups. Every guest gets a personal, unguessable RSVP link. Planners pay per event.
 
-## Pages
+Live deployment: [https://ariya-two.vercel.app](https://ariya-two.vercel.app)
 
-| Path | What it is |
-|---|---|
-| `/` (`index.html`) | "The Yes", the home page: a scroll-driven 3D wedding film in ten chapters (the box, the yes, the colour, the noise, the calm, the invitation, the count, the dance, the send-off). Always starts from the beginning; `?velvet=burgundy\|ruby\|coral` sets the box and silk colour |
-| `about.html` | About Àríyá: live 3D ring box with a "Colour of the day" picker; a WhatsApp storm that collapses into one list; a wax-sealed envelope that opens into a foil invitation you can accept, which flips into your place card; the live 3D hall; fanned invitations |
-| `product.html` | What Àríyá does: invitations and RSVP, guests and seating, vendor checklist, how it works |
-| `pricing.html` | Pay-per-event pricing (placeholder prices) and questions |
-| `planner.html` | Demo planner: guests, CSV import, seating, vendors, on sample data |
-| `rsvp.html?g=<token>` | A guest's own invitation and RSVP page |
-| `film.html` | Old link; redirects to the home page |
+## Architecture
 
-New in the film: **The colour** (aso ebi silk with gold cord lace and strands of Edo coral beads that fall onto it) and **The send-off** (a night lagoon, the Lagos skyline and a cable-stayed bridge, lanterns that lift off the water, fireworks, and stars that gather into the couple's names).
+The project consists of:
 
-`assets/nav.js` and `assets/nav.css` are the shared navigation: a full-screen velvet menu (with the film's chapter index on the home page) and a velvet curtain that closes over the page and opens on the next one. Music carries on across pages from the same moment when the browser allows it.
+1. **Marketing Site & Wedding Film (`public/site/`)**: The static marketing pages and "The Yes" 3D scroll-driven wedding film (Three.js), served framework-free via Next.js rewrites at `/`, `/about`, `/product`, `/pricing`, and `/story`.
+2. **Àríyá Application (`src/`)**: Built on Next.js 16 (App Router), React 19, TypeScript strict mode, Tailwind CSS v4, shadcn/ui (Radix primitives), and Supabase.
+   - **Authenticated Shell**: My Events, Create Event Wizard, Event Overview, Guest Registry, Seating Chart, Invitation Studio, Check-in Desk, Vendors, Team, and Billing.
+   - **Guest Routes**: Public celebration landing (`/e/[slug]`) and guest invitation & RSVP (`/i/[token]`).
+   - **Background & Webhooks**: Paystack webhooks (`/api/webhooks/paystack`) and Vercel Cron reminder triggers (`/api/cron/reminders`).
 
-`assets/score.js` is the About page music, and the film's Sound button plays the same song, at 55% volume. For the class demo the Music button fades in and loops `assets/music.mp3` ("Yori Yori" by Abefe); if that file is missing or can't play, it plays an original owambe groove generated live with the Web Audio API (juju and highlife feel in 12/8: agogo bell, shekere, talking drum, highlife guitars, bass, horn hook). Music only starts when a visitor taps Music. Commercial songs are copyrighted: fine for a private class demo, but don't publish them on a public site without a licence.
+> **Note on `private-media/music.mp3`**: The file `private-media/music.mp3` is a commercial song used solely for private offline local class demos. It is kept completely outside `public/` so it is never bundled, served, or deployed publicly. The film automatically falls back to its live Web Audio API groove when the file is absent.
 
-`assets/fine-card.js` draws the foil invitations, place cards and wax seals in SVG (corner roses, laurel monogram, embossed crest), styled in `assets/ariya.css`.
+> [!IMPORTANT]
+> **Email Confirmation in Local Development vs. Hosted Production**:
+> Email confirmation is disabled in `supabase/config.toml` (`enable_confirmations = false`) strictly for local development convenience to allow automated testing and frictionless iteration. In any hosted staging or production Supabase project, email confirmation must remain enabled (`enable_confirmations = true`). The application sign-up flow in `src/features/auth/` gracefully supports both scenarios: immediate session redirection when confirmations are off, and prompting the user to check their email when confirmation is required.
 
-## What is real and what is sample
+## Local Development
 
-Everything in the planner and RSVP pages runs on **sample data** in `assets/demo.js`, kept in `sessionStorage` for the current tab only. Nothing is sent: no invitations, SMS, WhatsApp messages, emails or payments. Every demo surface says so. Pricing is labelled as placeholder.
+### Prerequisites
 
-`assets/demo.js` models the project's entities, **events, guests, RSVPs, tables and vendors**, and exposes the operations the UI needs (`respond`, `assign`, `unassign`, `previewImport`, `commitImport`, `counts`, `seatsUsed`). Replacing it with API calls is the integration point.
+- Node.js >= 20
+- pnpm >= 10
+- Supabase CLI
 
-### Still needed for a live product
+### Setup
 
-- Accounts and authentication for couples and planners
-- A database and API for events, guests, RSVPs, tables and vendors (the shapes in `demo.js`)
-- Unguessable per-guest tokens issued by the server, so RSVP links can't be enumerated
-- Sending: confirmation emails (e.g. Resend), SMS/WhatsApp delivery of links
-- Payments per event (e.g. Paystack or Flutterwave)
-- Server-side CSV parsing and validation mirroring `previewImport`
+1. Clone the repository and install dependencies:
+   ```bash
+   pnpm install
+   ```
+2. Copy environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Start Supabase locally:
+   ```bash
+   supabase start
+   pnpm db:reset # or supabase db reset
+   ```
+4. Run the development server:
+   ```bash
+   pnpm dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) to view the site, or [http://localhost:3000/events](http://localhost:3000/events) to enter the application.
 
-## Design system
+## Quality & Testing Commands
 
-`assets/ariya.css`: deep burgundy and warm ivory alternate by section, champagne gold is an accent. Bodoni Moda for emotional headlines, Figtree for everything people read or operate, Pinyon Script only for names on paper. Status always pairs colour with a word. Buttons are at least 44px tall, focus is always visible, and `prefers-reduced-motion` removes transitions.
+- `pnpm lint`: Run ESLint across all TypeScript source files.
+- `pnpm typecheck`: Run TypeScript compiler check without emitting files (`tsc --noEmit`).
+- `pnpm test`: Run Vitest unit and integration test suite.
+- `pnpm test:db`: Run pgTAP database security, RLS, and privilege audit tests.
+- `pnpm test:e2e`: Run complete Playwright end-to-end suite (including Axe WCAG 2.1 AA audits).
+- `pnpm check:bundle`: Verify zero Three.js or GSAP presence in App Router client chunks.
+- `pnpm db:seed`: Seed a realistic Nigerian wedding celebration with 60 guests, 7 banquet tables, and 6 vendors.
+- `pnpm build`: Create an optimized production build.
+- `pnpm format:check`: Verify formatting across the repository with Prettier.
+- `pnpm analyze`: Inspect client bundle sizes with Next.js bundle analyzer.
 
-The hero still life and the guest-experience sequence are 2.5D (layered HTML and CSS), not WebGL, so they load instantly, stay sharp, and work everywhere. The RSVP form never depends on animation.
+## Demo Celebration Workspace
 
-## Run it
+To test the application with realistic celebration data:
 
-Static files, no build step. Serve the folder (the film fetches its HDRI):
-
+```bash
+pnpm db:seed
 ```
-npx serve .
-```
 
-## Credits
+- **Demo Host**: `demo@owambe.ng`
+- **Password**: `Celebration2026!`
+- **Celebration Desk**: `/events`
+- **Public Gazette**: `/e/folake-demola-2026`
 
-`assets/hall.exr`: Poly Haven "hall" HDRI (CC0), via `@pmndrs/assets`. three.js 0.169 from jsDelivr (film only).
+## Deploying
+
+The application is deployed on Vercel (project `ariya`, live at [https://ariya-two.vercel.app](https://ariya-two.vercel.app)).
+
+### Target Infrastructure & Regions
+
+- **Hosting (Vercel)**: London, UK (`lhr1`)
+- **Database (Supabase)**: London, UK (`eu-west-2` AWS)
+
+Matching regions minimizes round-trip latency for database operations, authentication, and webhook processing.
+
+### Production Environment Variables
+
+All production environment variables are strictly validated at application startup using Zod schemas (`src/lib/env/server.ts` and `src/lib/env/client.ts`). The application will refuse to boot in production if required variables are missing or invalid (for instance, if `EMAIL_TRANSPORT` is set to `mailpit`).
+
+| Variable                          | Description                             | Required?    | Production Rule / Safe Default                                                                                 |
+| :-------------------------------- | :-------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`             | Canonical public application URL        | **Required** | `https://ariya-two.vercel.app` (used for personal RSVP links in emails)                                        |
+| `NEXT_PUBLIC_SUPABASE_URL`        | Hosted Supabase project URL             | **Required** | `https://<project-ref>.supabase.co`                                                                            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase public anonymous API key       | **Required** | Hosted project anon key                                                                                        |
+| `SUPABASE_SERVICE_ROLE_KEY`       | Supabase service-role admin key         | **Required** | Hosted project service-role key (server-only; used for rate limit enforcement, billing triggers, and webhooks) |
+| `PAYSTACK_SECRET_KEY`             | Paystack merchant secret key            | **Required** | Must start with `sk_live_` (or `sk_test_` in test mode)                                                        |
+| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key for client checkout | **Required** | Must start with `pk_live_` (or `pk_test_` in test mode)                                                        |
+| `PAYSTACK_API_BASE`               | Paystack API base URL                   | Optional     | Defaults to `https://api.paystack.co` (strictly required to match `https://api.paystack.co` in production)     |
+| `EMAIL_TRANSPORT`                 | Email dispatcher transport              | **Required** | Must be strictly `resend` in production (setting `mailpit` causes startup boot failure)                        |
+| `RESEND_API_KEY`                  | Resend transactional email API key      | **Required** | Non-placeholder production key (must start with `re_`)                                                         |
+| `RESEND_FROM_EMAIL`               | Sender email address for invitations    | **Required** | Default: `rsvps@ariya-two.vercel.app` (or your verified domain sender)                                         |
+| `RATE_LIMIT_SECRET`               | HMAC salt for IP anonymization          | **Required** | Minimum 32 characters, no default (`openssl rand -hex 32`)                                                     |
+| `CRON_SECRET`                     | Secret bearer token for Vercel Cron     | **Required** | Bearer token authenticating `/api/cron/reminders`                                                              |
+| `MAILPIT_URL`                     | Mailpit HTTP API endpoint               | Local only   | Ignored in production (default: `http://127.0.0.1:57324`)                                                      |
+
+### Webhook Setup
+
+Configure your Paystack Dashboard webhook URL to:
+`https://ariya-two.vercel.app/api/webhooks/paystack`
+
+Ensure event `charge.success` is selected. The application verifies inbound requests via constant-time HMAC-SHA512.
