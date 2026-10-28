@@ -434,8 +434,11 @@ export function Sidebar({
               </span>
             </span>
             <span className="sb-label flex flex-1 items-center justify-between px-3 text-[13px] font-semibold tracking-wide">
-              Collapse sidebar
-              <kbd className="rounded-md border border-ivory/15 px-1.5 py-0.5 font-sans text-[10px] text-ivory/50">
+              {collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              <kbd
+                aria-hidden="true"
+                className="rounded-md border border-ivory/15 px-1.5 py-0.5 font-sans text-[10px] text-ivory/50"
+              >
                 [
               </kbd>
             </span>
@@ -448,7 +451,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={openAccount}
-              aria-label="Account Menu"
+              aria-label={`${initials(userEmail)}, Account Menu`}
               aria-expanded={accountOpen}
               title="Profile & settings"
               className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold"
