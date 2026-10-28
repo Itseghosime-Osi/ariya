@@ -13,43 +13,23 @@ html {
 @supports (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
-  html {
-    scroll-padding-top: 5rem;
-    scroll-padding-bottom: 7rem;
-  }
-
   .glass {
     background: rgba(250, 246, 238, 0.72);
     -webkit-backdrop-filter: saturate(160%) blur(18px);
     backdrop-filter: saturate(160%) blur(18px);
   }
 }
-.dark html {
-  scroll-padding-top: 5rem;
-  scroll-padding-bottom: 7rem;
-}
-
-.glass {
+.dark .glass {
   background: rgba(29, 20, 24, 0.74);
   border-color: rgba(232, 210, 166, 0.14);
 }
 @media (hover: none) and (max-width: 768px) {
-  html {
-    scroll-padding-top: 5rem;
-    scroll-padding-bottom: 7rem;
-  }
-
   .glass {
     -webkit-backdrop-filter: saturate(140%) blur(12px);
     backdrop-filter: saturate(140%) blur(12px);
   }
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  html {
-    scroll-padding-top: 5rem;
-    scroll-padding-bottom: 7rem;
-  }
-
   .glass {
     background: var(--ivory);
     -webkit-backdrop-filter: none;
@@ -58,11 +38,6 @@ html {
   }
 }
 @media (forced-colors: active) {
-  html {
-    scroll-padding-top: 5rem;
-    scroll-padding-bottom: 7rem;
-  }
-
   .glass {
     background: Canvas;
     color: CanvasText;
