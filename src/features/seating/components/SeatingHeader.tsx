@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { pluralise } from "@/lib/metrics";
 import type { SeatingDeskData } from "../types";
 
 interface SeatingHeaderProps {
@@ -28,8 +29,8 @@ export function SeatingHeader({
           </span>
         </div>
         <p className="text-xs text-on-surface-variant mt-0.5">
-          Curate banquet table arrangements, drag guests or assign by keyboard,
-          and print charts.
+          Curate table arrangements, drag guests or assign by keyboard, and
+          print charts.
         </p>
       </div>
 
@@ -42,7 +43,11 @@ export function SeatingHeader({
           </span>
           <span className="text-on-surface-variant text-[11px]">
             ({stats.seatedAttendees} /{" "}
-            {stats.seatedAttendees + stats.unseatedAttendees} guests)
+            {pluralise(
+              stats.seatedAttendees + stats.unseatedAttendees,
+              "guest"
+            )}
+            )
           </span>
         </div>
 

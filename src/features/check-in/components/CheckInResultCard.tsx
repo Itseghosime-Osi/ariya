@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Icon } from "@/components/ui/icon";
+import { pluralise } from "@/lib/metrics";
 import type { CheckInResult } from "../types";
 
 interface CheckInResultCardProps {
@@ -47,7 +48,7 @@ export function CheckInResultCard({
               Admitted Now
             </span>
             <span className="font-bold text-emerald-950 text-sm">
-              +{result.admitted_now} Guest(s)
+              +{pluralise(result.admitted_now ?? 0, "guest")}
             </span>
           </div>
           <div>

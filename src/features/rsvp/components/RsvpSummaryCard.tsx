@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
+import { pluralise } from "@/lib/metrics";
 import type { InvitationData } from "../types";
 import { getGuestTheme } from "../themes";
 
@@ -61,7 +62,7 @@ export function RsvpSummaryCard({
             className={`font-mono text-xs font-semibold px-2 py-0.5 rounded border ${theme.passBadge}`}
           >
             {isAccepted
-              ? `${rsvp?.attending_count ?? 1} ATTENDEE(S)`
+              ? pluralise(rsvp?.attending_count ?? 1, "attendee")
               : "DECLINED"}
           </span>
         </div>
