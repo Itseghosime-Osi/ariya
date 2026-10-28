@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { EventOverviewDesk } from "@/features/events/components/EventOverviewDesk";
 import {
   getEventById,
+  getEventPlanningSnapshot,
   getEventRecentResponses,
 } from "@/features/events/queries";
+import { getLagosDateKey } from "@/lib/format";
 
 interface EventPageProps {
   params: Promise<{
@@ -29,11 +31,20 @@ export default async function EventOverviewPage({ params }: EventPageProps) {
     notFound();
   }
 
-  const recentResponses = await getEventRecentResponses(eventId);
+  const [recentResponses, planning] = await Promise.all([
+    getEventRecentResponses(eventId),
+    getEventPlanningSnapshot(eventId),
+  ]);
+  const now = Date.now();
 
   return (
-    <>
-      <EventOverviewDesk data={data} recentResponses={recentResponses} />
-    </>
+    <EventOverviewDesk
+      data={data}
+      recentResponses={recentResponses}
+      planning={planning}
+      now={now}
+      todayKey={getLagosDateKey(now) ?? ""}
+      eventDateKey={getLagosDateKey(data.event.date)}
+    />
   );
 }

@@ -73,6 +73,7 @@ export default async function EventsPage() {
         needsAttentionItems={needsAttentionItems}
         recentReplies={recentReplies}
         firstName={firstName}
+        now={Date.now()}
       />
     </>
   );

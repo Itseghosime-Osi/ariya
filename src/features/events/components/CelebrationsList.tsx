@@ -17,6 +17,7 @@ import { GuestRepliesBentoCard } from "./GuestRepliesBentoCard";
 import { RecentRepliesBentoCard } from "./RecentRepliesBentoCard";
 import { ThisWeekBentoCard } from "./ThisWeekBentoCard";
 import { AllEventsBentoCard } from "./AllEventsBentoCard";
+import { CelebrationStage } from "./CelebrationStage";
 
 export interface EventsHomeProps {
   events: EventWithMetrics[];
@@ -24,6 +25,8 @@ export interface EventsHomeProps {
   needsAttentionItems?: NeedsAttentionAlert[];
   recentReplies?: RecentReplyItem[];
   firstName?: string | null;
+  /** Server time, so the featured countdown's first paint matches the server. */
+  now?: number;
 }
 
 export function EventsHome({
@@ -32,6 +35,7 @@ export function EventsHome({
   needsAttentionItems = [],
   recentReplies = [],
   firstName,
+  now,
 }: EventsHomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -76,6 +80,8 @@ export function EventsHome({
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
           />
+
+          <CelebrationStage items={upcoming} now={now ?? 0} />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <UpcomingEventsBentoCard

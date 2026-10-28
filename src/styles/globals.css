@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./glass.css";
+@import "./desk.css";
 
 :root {
   --ivory: #f7f2ea;

@@ -7,13 +7,8 @@ import { Icon } from "@/components/ui/icon";
 import { daysUntil, formatEventDate, getLagosDateKey } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
 import type { EventWithMetrics } from "../types";
-
-const TINT_VARS = [
-  "var(--tint-blush)",
-  "var(--tint-sage)",
-  "var(--tint-sand)",
-  "var(--tint-sky)",
-];
+import { MonogramSeal } from "./desk/MonogramSeal";
+import { TiltCard } from "./desk/TiltCard";
 
 function extractInitials(coupleOrTitle: string): string {
   const cleaned = coupleOrTitle.trim();
@@ -46,10 +41,9 @@ export function UpcomingEventTile({
     ? "Date not set"
     : daysLeft === 0
       ? "Today"
-      : `${pluralise(daysLeft ?? 0, "day")} left`;
+      : pluralise(daysLeft ?? 0, "day");
 
   const initials = extractInitials(event.couple || event.title);
-  const tintBg = TINT_VARS[index % TINT_VARS.length];
   const venueLine =
     [event.venue, event.area]
       .map((s) => s?.trim())
@@ -68,94 +62,166 @@ export function UpcomingEventTile({
         )
       : 0;
 
+  const monthShort = hasDate
+    ? new Intl.DateTimeFormat("en-GB", {
+        month: "short",
+        timeZone: "Africa/Lagos",
+      })
+        .format(new Date(event.date))
+        .toUpperCase()
+    : "";
+  const dayNum = hasDate
+    ? new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        timeZone: "Africa/Lagos",
+      }).format(new Date(event.date))
+    : "";
+  const urgent = daysLeft !== null && daysLeft <= 7;
+
   return (
     <Link
       href={`/events/${event.id}`}
       data-testid={`upcoming-event-tile-${event.id}`}
-      style={{ backgroundColor: tintBg }}
-      className={`bento-tile-hover group flex flex-col justify-between rounded-2xl border border-night/6 p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy snap-start shrink-0 ${
+      className={`group block shrink-0 snap-start rounded-[22px] outline-none focus-visible:ring-4 focus-visible:ring-burgundy/40 ${
         isSingleEventAccount
           ? "w-full"
           : "w-[272px] sm:w-[290px] lg:w-auto lg:min-w-0 lg:flex-1"
       }`}
     >
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between gap-2">
-          <span
+      <TiltCard max={6} className="h-full rounded-[22px]">
+        <div className="desk-paper relative flex h-full flex-col overflow-hidden rounded-[22px] p-5">
+          <span className="foil-sheen" aria-hidden="true" />
+          <div
+            className="weave absolute inset-x-0 top-0 h-8 opacity-[0.1]"
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white font-display text-sm font-bold text-burgundy shadow-2xs border border-night/6"
-          >
-            {initials}
-          </span>
-          <span
-            data-testid={`tile-days-left-${event.id}`}
-            className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-2xs tabular-nums"
-          >
-            {countdownText}
-          </span>
-        </div>
+          />
 
-        <div className="space-y-1">
-          <h3 className="font-display text-lg font-bold text-night leading-snug line-clamp-2 group-hover:text-burgundy transition-colors">
-            {event.title}
-          </h3>
-          <p className="text-xs font-medium text-label-2 tabular-nums truncate">
-            {hasDate ? formatEventDate(event.date) : "Date not set"}
-          </p>
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <MonogramSeal
+                text={event.couple || event.title || initials}
+                size={40}
+                className="drop-shadow-md transition-transform duration-500 group-hover:rotate-[-8deg]"
+              />
+              {hasDate && (
+                <div
+                  className="grid w-11 shrink-0 overflow-hidden rounded-xl bg-white text-center shadow-[0_4px_10px_-6px_rgba(28,7,13,0.4)] ring-1 ring-[#b8864b]/30"
+                  aria-hidden="true"
+                >
+                  <span className="bg-[#6e1426] py-0.5 text-[9px] font-bold tracking-[0.14em] text-ivory">
+                    {monthShort}
+                  </span>
+                  <span className="py-1 font-display text-xl font-bold leading-none text-night">
+                    {dayNum}
+                  </span>
+                </div>
+              )}
+            </div>
+            <span
+              data-testid={`tile-days-left-${event.id}`}
+              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums ${
+                urgent
+                  ? "bg-[#6e1426] text-ivory"
+                  : "bg-[#1c070d] text-[#e9c98a]"
+              }`}
+            >
+              {countdownText}
+            </span>
+          </div>
+
+          <div className="relative mt-4">
+            <div className="min-w-0">
+              <h3 className="font-display text-lg font-bold leading-snug text-[#6e1426] line-clamp-2 [overflow-wrap:anywhere]">
+                {event.title}
+              </h3>
+              <p className="mt-0.5 text-xs font-medium tabular-nums text-[#4a3a30]">
+                {hasDate ? formatEventDate(event.date) : "Date not set"}
+              </p>
+            </div>
+          </div>
           <p
             title={venueLine}
-            className="flex items-center gap-1 text-xs text-label-2 truncate"
+            className="relative mt-2 flex items-center gap-1 truncate text-xs text-[#4a3a30]"
           >
-            <Icon name="location" size={13} className="shrink-0" />
+            <Icon
+              name="location"
+              size={13}
+              className="shrink-0 text-[#8a6620]"
+            />
             <span className="truncate">{venueLine}</span>
           </p>
-        </div>
-      </div>
 
-      <div
-        className={`mt-5 pt-3.5 border-t border-night/8 ${
-          isSingleEventAccount
-            ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
-            : "space-y-2"
-        }`}
-      >
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-medium text-night tabular-nums">
-            <span>Replied</span>
-            <span className="font-semibold">{repliedPct}%</span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/80">
-            <m.div
-              initial={{ width: 0 }}
-              animate={{ width: `${repliedPct}%` }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="h-full rounded-full bg-burgundy"
-            />
-          </div>
-        </div>
-
-        {isSingleEventAccount && (
           <div
-            data-testid="single-event-seating-progress"
-            className="space-y-1.5"
+            className="relative mt-auto grid grid-cols-2 gap-2 border-t border-[#b8864b]/25 pt-4"
+            style={{ marginTop: "1.25rem" }}
           >
-            <div className="flex items-center justify-between text-xs font-medium text-night tabular-nums">
-              <span>Seating</span>
-              <span className="font-semibold">
-                {metrics.seatedGuests} of {metrics.acceptedGuests} seated
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/80">
-              <m.div
-                initial={{ width: 0 }}
-                animate={{ width: `${seatedPct}%` }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="h-full rounded-full bg-rsvp-accepted"
-              />
-            </div>
+            {(
+              [
+                ["Replied", repliedPct, `${repliedPct}%`, "#6e1426", null],
+                [
+                  "Seating",
+                  seatedPct,
+                  isSingleEventAccount
+                    ? `${metrics.seatedGuests} of ${metrics.acceptedGuests} seated`
+                    : `${seatedPct}%`,
+                  "#2e6a4f",
+                  isSingleEventAccount
+                    ? "single-event-seating-progress"
+                    : undefined,
+                ],
+              ] as const
+            ).map(([label, pct, text, colour, testId]) => (
+              <div
+                key={label}
+                className="flex min-w-0 items-center gap-1.5"
+                data-testid={testId ?? undefined}
+              >
+                <svg
+                  viewBox="0 0 36 36"
+                  className="h-8 w-8 shrink-0 -rotate-90"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(184,134,75,0.22)"
+                    strokeWidth="4"
+                  />
+                  <m.circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke={colour}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    pathLength={1}
+                    initial={{ strokeDasharray: "0 1" }}
+                    animate={{
+                      strokeDasharray: `${Math.max(0.001, pct / 100)} 1`,
+                    }}
+                    transition={{
+                      duration: 0.9,
+                      delay: 0.15 + index * 0.08,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                  />
+                </svg>
+                <div className="min-w-0 leading-tight">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#5a474e]">
+                    {label}
+                  </div>
+                  <div className="truncate text-xs font-bold tabular-nums text-night">
+                    {text}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      </TiltCard>
     </Link>
   );
 }
