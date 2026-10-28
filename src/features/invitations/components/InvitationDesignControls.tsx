@@ -79,9 +79,9 @@ export function InvitationDesignControls({
             className="px-4 py-1.5 rounded-xl bg-wine text-ivory text-xs font-semibold hover:bg-wine/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
           >
             {isPending ? (
-              <Icon name="progress_activity" className="animate-spin text-sm" />
+              <Icon name="refresh" className="animate-spin text-sm" />
             ) : (
-              <Icon name="save" className="text-sm" />
+              <Icon name="check" className="text-sm" />
             )}
             <span>Save Design</span>
           </button>

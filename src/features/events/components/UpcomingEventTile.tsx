@@ -96,14 +96,17 @@ export function UpcomingEventTile({
         </div>
 
         <div className="space-y-1">
-          <h3 className="font-display text-lg font-bold text-night leading-snug line-clamp-1 group-hover:text-burgundy transition-colors">
+          <h3 className="font-display text-lg font-bold text-night leading-snug line-clamp-2 group-hover:text-burgundy transition-colors">
             {event.title}
           </h3>
           <p className="text-xs font-medium text-label-2 tabular-nums truncate">
             {hasDate ? formatEventDate(event.date) : "Date not set"}
           </p>
-          <p className="flex items-center gap-1 text-xs text-label-2 truncate">
-            <Icon name="location_on" size={13} className="shrink-0" />
+          <p
+            title={venueLine}
+            className="flex items-center gap-1 text-xs text-label-2 truncate"
+          >
+            <Icon name="location" size={13} className="shrink-0" />
             <span className="truncate">{venueLine}</span>
           </p>
         </div>
@@ -118,7 +121,7 @@ export function UpcomingEventTile({
       >
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-medium text-night tabular-nums">
-            <span>Replied {repliedPct}%</span>
+            <span>Replied</span>
             <span className="font-semibold">{repliedPct}%</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/80">

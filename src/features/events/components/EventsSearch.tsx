@@ -10,9 +10,9 @@ interface EventsSearchProps {
 
 export function EventsSearch({ query, onQueryChange }: EventsSearchProps) {
   return (
-    <div className="relative w-full sm:w-72" data-testid="events-search">
+    <div className="hidden md:block relative w-56" data-testid="events-search">
       <label htmlFor="events-filter-input" className="sr-only">
-        Filter your events by name, couple, or venue
+        Filter events
       </label>
       <Icon
         name="search"
@@ -24,15 +24,15 @@ export function EventsSearch({ query, onQueryChange }: EventsSearchProps) {
         type="search"
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
-        placeholder="Filter by event, couple, or venue..."
-        className="w-full min-h-[44px] rounded-xl border border-hairline bg-surface pl-9 pr-9 py-2 text-xs sm:text-sm text-night placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        placeholder="Filter events"
+        className="w-full min-h-[44px] rounded-full border border-night/15 bg-white pl-9 pr-9 py-2 text-sm text-night placeholder:text-label-3 transition-shadow focus:outline-none focus-visible:border-burgundy focus-visible:ring-2 focus-visible:ring-burgundy/25"
       />
       {query && (
         <button
           type="button"
           onClick={() => onQueryChange("")}
           aria-label="Clear search"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-label-2 hover:bg-night/6 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full text-label-2 hover:bg-night/6 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           <Icon name="close" size={14} />
         </button>

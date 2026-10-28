@@ -26,7 +26,7 @@ export function RecentRepliesBentoCard({
         >
           Recent replies
         </h2>
-        <Icon name="mark_email_read" size={18} className="text-label-2" />
+        <Icon name="mail" size={18} className="text-label-2" />
       </div>
 
       {recentReplies.length === 0 ? (

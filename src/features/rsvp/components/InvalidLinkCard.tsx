@@ -6,7 +6,7 @@ export function InvalidLinkCard() {
   return (
     <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 sm:p-10 shadow-sm text-center space-y-6">
       <div className="w-14 h-14 rounded-full bg-wine/10 text-wine flex items-center justify-center mx-auto">
-        <Icon name="link_off" className="text-2xl" />
+        <Icon name="link" className="text-2xl" />
       </div>
 
       <div className="space-y-2">

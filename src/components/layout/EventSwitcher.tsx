@@ -119,7 +119,7 @@ export function EventSwitcher({
             href="/events/new"
             className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold text-burgundy"
           >
-            <Icon name="add" size={15} />
+            <Icon name="add_circle" size={15} />
             <span>New event</span>
           </Link>
         </DropdownMenuItem>

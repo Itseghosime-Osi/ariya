@@ -135,7 +135,7 @@ export function AppShell({
         onSelectEvent={handleSelectEvent}
       />
 
-      <div className="flex-1 flex flex-col md:pl-[244px] pb-28 md:pb-12">
+      <div className="flex-1 flex flex-col md:pl-[244px] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
         <TopBar eventId={activeEvent?.id} userEmail={userEmail} />
 
         <main

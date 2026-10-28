@@ -21,14 +21,17 @@ function extractFirstName(
   email?: string | null
 ): string | null {
   if (fullName?.trim()) {
-    return fullName.trim().split(/\s+/)[0] ?? null;
+    const first = fullName.trim().split(/\s+/)[0];
+    if (first && !/^user$/i.test(first)) {
+      return first.charAt(0).toUpperCase() + first.slice(1);
+    }
   }
   if (email?.trim()) {
-    const local = email.trim().split("@")[0];
-    if (local) {
-      const token = local.split(/[._-]/)[0];
-      if (token && !/^\d+$/.test(token)) {
-        return token.charAt(0).toUpperCase() + token.slice(1);
+    const local = email.trim().split("@")[0]?.trim();
+    if (local && !/^user(_\d+)?$/i.test(local)) {
+      const clean = local.split(/[._+-]/)[0] || local;
+      if (clean && !/^user$/i.test(clean)) {
+        return clean.charAt(0).toUpperCase() + clean.slice(1);
       }
     }
   }

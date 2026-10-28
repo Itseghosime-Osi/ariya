@@ -12,7 +12,7 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-6 space-y-4">
       <div className="flex items-center gap-2">
-        <Icon name="description" className="text-xl text-wine" />
+        <Icon name="menu_book" className="text-xl text-wine" />
         <h3 className="font-serif text-lg font-bold text-night">
           Tax Invoices & Receipts ({invoices.length})
         </h3>

@@ -88,106 +88,45 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-title"
-              className="text-xs font-semibold text-wine"
-            >
-              Celebration Title
-            </label>
-            <input
-              id="setting-title"
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-couple"
-              className="text-xs font-semibold text-wine"
-            >
-              Couple Names
-            </label>
-            <input
-              id="setting-couple"
-              type="text"
-              required
-              value={couple}
-              onChange={(e) => setCouple(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-slug"
-              className="text-xs font-semibold text-wine"
-            >
-              URL Slug (/e/slug)
-            </label>
-            <input
-              id="setting-slug"
-              type="text"
-              required
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm font-mono text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-date"
-              className="text-xs font-semibold text-wine"
-            >
-              Celebration Date &amp; Time
-            </label>
-            <input
-              id="setting-date"
-              type="datetime-local"
-              required
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-venue"
-              className="text-xs font-semibold text-wine"
-            >
-              Venue Location
-            </label>
-            <input
-              id="setting-venue"
-              type="text"
-              required
-              value={venue}
-              onChange={(e) => setVenue(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="setting-area"
-              className="text-xs font-semibold text-wine"
-            >
-              City / State
-            </label>
-            <input
-              id="setting-area"
-              type="text"
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-            />
-          </div>
+          {(
+            [
+              ["setting-title", "Celebration Title", title, setTitle, true],
+              ["setting-couple", "Couple Names", couple, setCouple, true],
+              [
+                "setting-slug",
+                "URL Slug (/e/slug)",
+                slug,
+                setSlug,
+                true,
+                "text",
+                true,
+              ],
+              [
+                "setting-date",
+                "Celebration Date & Time",
+                date,
+                setDate,
+                true,
+                "datetime-local",
+              ],
+              ["setting-venue", "Venue Location", venue, setVenue, true],
+              ["setting-area", "City / State", area, setArea, false],
+            ] as const
+          ).map(([id, label, val, set, req, type, mono]) => (
+            <div key={id} className="space-y-1.5">
+              <label htmlFor={id} className="text-xs font-semibold text-wine">
+                {label}
+              </label>
+              <input
+                id={id}
+                type={type || "text"}
+                required={req}
+                value={val}
+                onChange={(e) => set(e.target.value)}
+                className={`w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 ${mono ? "font-mono" : ""}`}
+              />
+            </div>
+          ))}
         </div>
 
         <div className="space-y-1.5">
@@ -235,7 +174,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
             disabled={saving}
             className="px-6 py-2.5 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
           >
-            <Icon name="save" className="text-base" />
+            <Icon name="check" className="text-base" />
             <span>{saving ? "Saving Changes..." : "Save Settings"}</span>
           </button>
         </div>

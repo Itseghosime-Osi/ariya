@@ -50,6 +50,10 @@ export function PhoneTabBar({
   return (
     <>
       <div
+        aria-hidden="true"
+        className="fixed inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ivory via-ivory/95 to-transparent pointer-events-none z-30 md:hidden"
+      />
+      <div
         className="fixed left-3 right-3 z-40 pointer-events-none md:hidden"
         style={{
           bottom: "max(0.75rem, env(safe-area-inset-bottom))",
@@ -90,7 +94,7 @@ export function PhoneTabBar({
                 : "text-night/75 hover:text-night font-medium"
             }`}
           >
-            <Icon name="more_horiz" size={17} />
+            <Icon name="more_vert" size={17} />
             <span className="leading-none">More</span>
           </button>
         </nav>

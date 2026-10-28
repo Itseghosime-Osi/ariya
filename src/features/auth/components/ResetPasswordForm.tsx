@@ -94,7 +94,7 @@ export function ResetPasswordForm() {
               onChange={setConfirmPassword}
               disabled={isPending}
               placeholder="••••••••••••"
-              iconName="lock_reset"
+              iconName="lock"
             />
           </div>
 
@@ -108,9 +108,7 @@ export function ResetPasswordForm() {
                 className={`flex items-center gap-1.5 ${hasMinLength ? "text-success font-semibold" : "text-mist"}`}
               >
                 <Icon
-                  name={
-                    hasMinLength ? "check_circle" : "radio_button_unchecked"
-                  }
+                  name={hasMinLength ? "check_circle" : "pending"}
                   className="text-base"
                 />
                 8+ Characters
@@ -119,9 +117,7 @@ export function ResetPasswordForm() {
                 className={`flex items-center gap-1.5 ${hasUppercase ? "text-success font-semibold" : "text-mist"}`}
               >
                 <Icon
-                  name={
-                    hasUppercase ? "check_circle" : "radio_button_unchecked"
-                  }
+                  name={hasUppercase ? "check_circle" : "pending"}
                   className="text-base"
                 />
                 Uppercase Letter
@@ -130,7 +126,7 @@ export function ResetPasswordForm() {
                 className={`flex items-center gap-1.5 ${hasNumber ? "text-success font-semibold" : "text-mist"}`}
               >
                 <Icon
-                  name={hasNumber ? "check_circle" : "radio_button_unchecked"}
+                  name={hasNumber ? "check_circle" : "pending"}
                   className="text-base"
                 />
                 One Number
@@ -139,7 +135,7 @@ export function ResetPasswordForm() {
                 className={`flex items-center gap-1.5 ${hasSpecial ? "text-success font-semibold" : "text-mist"}`}
               >
                 <Icon
-                  name={hasSpecial ? "check_circle" : "radio_button_unchecked"}
+                  name={hasSpecial ? "check_circle" : "pending"}
                   className="text-base"
                 />
                 Special Symbol

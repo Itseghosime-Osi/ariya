@@ -12,7 +12,7 @@ export function EventsEmptyState() {
   return (
     <section
       data-testid="empty-events-state"
-      className="bento-card relative overflow-hidden px-6 py-14 sm:px-12 sm:py-16 text-center"
+      className="bento-card relative overflow-hidden px-6 py-10 sm:px-12 sm:py-16 text-center"
     >
       <svg
         aria-hidden="true"

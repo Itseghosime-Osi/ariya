@@ -58,9 +58,9 @@ export function TodoBentoCard({ alerts }: TodoBentoCardProps) {
       {alerts.length === 0 ? (
         <div
           data-testid="todo-empty-state"
-          className="flex flex-1 flex-col items-center justify-center rounded-2xl bg-ivory/60 px-4 py-8 text-center"
+          className="flex flex-1 flex-col items-start sm:items-center justify-center rounded-2xl bg-ivory/60 px-5 py-5 sm:py-8 text-left sm:text-center"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rsvp-accepted/12 text-rsvp-accepted mb-2.5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rsvp-accepted/12 text-rsvp-accepted mb-2">
             <Icon name="check_circle" size={20} />
           </span>
           <p className="text-sm font-semibold text-night">

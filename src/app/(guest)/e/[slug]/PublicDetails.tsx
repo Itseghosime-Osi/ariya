@@ -21,7 +21,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
     <div className="space-y-8">
       {/* Couple Story / Invocation */}
       <section className="text-center max-w-xl mx-auto space-y-3 bg-surface-container-lowest p-6 sm:p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
-        <Icon name="favorite" className="text-wine text-2xl mx-auto block" />
+        <Icon name="celebration" className="text-wine text-2xl mx-auto block" />
         <h2 className="font-serif text-xl sm:text-2xl text-wine font-medium">
           Our guests
         </h2>
@@ -40,7 +40,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
         <div className="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex flex-col justify-between gap-4">
           <div className="space-y-2">
             <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-wine">
-              <Icon name="location_on" className="text-xl" />
+              <Icon name="location" className="text-xl" />
             </div>
             <h3 className="font-serif text-lg font-medium text-paper-ink">
               Celebration Venue
@@ -58,7 +58,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
             rel="noopener noreferrer"
             className="w-full py-2.5 px-4 rounded-xl bg-surface-container text-wine hover:bg-surface-container-high text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-outline-variant/30"
           >
-            <Icon name="directions" className="text-sm" />
+            <Icon name="location" className="text-sm" />
             <span>Get Directions</span>
           </a>
         </div>
@@ -82,7 +82,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
             rel="noopener noreferrer"
             className="w-full py-2.5 px-4 rounded-xl bg-surface-container text-wine hover:bg-surface-container-high text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-outline-variant/30"
           >
-            <Icon name="event" className="text-sm" />
+            <Icon name="calendar" className="text-sm" />
             <span>Add to Calendar</span>
           </a>
         </div>
@@ -92,7 +92,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
       <div className="relative rounded-2xl overflow-hidden shadow-sm p-6 sm:p-8 bg-gradient-to-r from-wine to-[#581525] border border-outline-variant/30 text-ivory flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-gold text-xs font-semibold uppercase tracking-wider">
-            <Icon name="apartment" className="text-sm" />
+            <Icon name="location" className="text-sm" />
             <span>Celebration Grounds</span>
           </div>
           <h4 className="font-serif text-lg sm:text-xl font-medium text-ivory">
@@ -108,7 +108,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
           rel="noopener noreferrer"
           className="px-4 py-2 rounded-xl bg-gold text-night text-xs font-semibold hover:bg-gold/90 transition-colors flex items-center gap-1.5 shadow-sm"
         >
-          <Icon name="map" className="text-sm" />
+          <Icon name="location" className="text-sm" />
           <span>Open Map</span>
         </a>
       </div>
@@ -147,7 +147,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
       {/* Dress Code & Aṣọ-Ẹbí Colors */}
       <section className="p-6 sm:p-8 rounded-2xl bg-paper border border-outline-variant/30 shadow-sm space-y-4">
         <div className="flex items-center gap-2 text-wine font-medium">
-          <Icon name="palette" className="text-lg" />
+          <Icon name="styler" className="text-lg" />
           <h3 className="font-serif text-lg text-wine">
             Ceremony Attire &amp; Aṣọ-Ẹbí Colors
           </h3>

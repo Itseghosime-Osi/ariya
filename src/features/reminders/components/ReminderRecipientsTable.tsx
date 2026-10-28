@@ -54,7 +54,7 @@ export function ReminderRecipientsTable({
                   <div className="text-on-surface-variant text-[11px]">
                     {r.email || (
                       <span className="text-amber-700 flex items-center gap-0.5">
-                        <Icon name="warning" className="text-xs" />
+                        <Icon name="error" className="text-xs" />
                         No email address
                       </span>
                     )}

@@ -81,7 +81,7 @@ export function CheckInResultCard({
       <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-xs space-y-2 relative">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Icon name="warning" className="text-amber-600 text-xl shrink-0" />
+            <Icon name="error" className="text-amber-600 text-xl shrink-0" />
             <div>
               <span className="text-[10px] uppercase font-bold text-amber-800 block">
                 Already Checked In

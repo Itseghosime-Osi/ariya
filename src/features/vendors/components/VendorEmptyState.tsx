@@ -8,7 +8,10 @@ interface VendorEmptyStateProps {
 export function VendorEmptyState({ onAddVendor }: VendorEmptyStateProps) {
   return (
     <div className="bg-surface-container-low p-12 text-center rounded-2xl border border-outline-variant/30 space-y-3">
-      <Icon name="storefront" className="text-4xl text-wine/40 block mx-auto" />
+      <Icon
+        name="restaurant_menu"
+        className="text-4xl text-wine/40 block mx-auto"
+      />
       <h3 className="font-serif text-lg text-wine font-medium">
         No Vendors Registered
       </h3>

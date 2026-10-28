@@ -71,42 +71,56 @@ export function GuestRepliesBentoCard({
         </div>
 
         {upcomingEvents.length > 1 && (
-          <div
-            role="group"
-            aria-label="Filter guest replies by celebration"
-            data-testid="guest-replies-segmented"
-            className="flex items-center gap-1 overflow-x-auto rounded-full bg-ivory p-1"
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedScope("all")}
-              aria-pressed={selectedScope === "all"}
-              className={`min-h-[32px] shrink-0 rounded-full px-3 py-1 text-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
-                selectedScope === "all"
-                  ? "bg-white text-burgundy font-semibold shadow-2xs"
-                  : "text-night/75 hover:text-night font-medium"
-              }`}
+          <div className="relative rounded-full bg-ivory p-1">
+            <div
+              role="group"
+              aria-label="Filter guest replies by celebration"
+              data-testid="guest-replies-segmented"
+              style={{
+                maskImage:
+                  "linear-gradient(to right, black 0%, black calc(100% - 20px), transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to right, black 0%, black calc(100% - 20px), transparent 100%)",
+              }}
+              className="flex items-center gap-1 overflow-x-auto snap-x snap-mandatory pr-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              All upcoming events
-            </button>
-            {upcomingEvents.map(({ event }) => {
-              const active = selectedScope === event.id;
-              return (
-                <button
-                  key={event.id}
-                  type="button"
-                  onClick={() => setSelectedScope(event.id)}
-                  aria-pressed={active}
-                  className={`min-h-[32px] max-w-[140px] shrink-0 truncate rounded-full px-3 py-1 text-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
-                    active
-                      ? "bg-white text-burgundy font-semibold shadow-2xs"
-                      : "text-night/75 hover:text-night font-medium"
-                  }`}
-                >
-                  {event.title}
-                </button>
-              );
-            })}
+              <button
+                type="button"
+                onClick={() => setSelectedScope("all")}
+                aria-pressed={selectedScope === "all"}
+                title="All upcoming events"
+                aria-label="All upcoming events"
+                className={`min-h-[32px] snap-start shrink-0 rounded-full px-3 py-1 text-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+                  selectedScope === "all"
+                    ? "bg-white text-burgundy font-semibold shadow-2xs"
+                    : "text-night/75 hover:text-night font-medium"
+                }`}
+              >
+                <span className="block truncate">All upcoming events</span>
+              </button>
+              {upcomingEvents.map(({ event }) => {
+                const active = selectedScope === event.id;
+                return (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => setSelectedScope(event.id)}
+                    aria-pressed={active}
+                    title={event.title}
+                    aria-label={event.title}
+                    className={`min-h-[32px] snap-start shrink-0 rounded-full px-3 py-1 text-xs transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+                      active
+                        ? "bg-white text-burgundy font-semibold shadow-2xs"
+                        : "text-night/75 hover:text-night font-medium"
+                    }`}
+                  >
+                    <span className="block max-w-[140px] truncate">
+                      {event.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

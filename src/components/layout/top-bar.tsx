@@ -28,11 +28,11 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
         <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
             href="/events"
-            className="md:hidden flex items-center gap-1.5 font-display text-lg font-bold text-night shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy rounded-lg px-1"
+            className="md:hidden flex items-center gap-2 font-display text-lg font-bold text-night shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy rounded-lg px-1"
           >
             <span
               aria-hidden="true"
-              className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-white"
             >
               À
             </span>
@@ -42,7 +42,7 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="w-full min-h-[44px] flex items-center justify-between bg-white/85 hover:bg-white px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="hidden md:flex w-full min-h-[44px] items-center justify-between bg-white/85 hover:bg-white px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <div className="flex items-center gap-2.5 text-label-2 min-w-0">
               <Icon name="search" size={16} className="shrink-0" />
@@ -59,7 +59,17 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
           </button>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search events, guests, tables"
+            data-testid="mobile-search-trigger"
+            className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-hairline bg-white/85 hover:bg-white text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="search" size={18} />
+          </button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
