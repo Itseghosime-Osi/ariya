@@ -1,16 +1,14 @@
 import React from "react";
 import Image from "next/image";
-import { daysUntil } from "@/lib/format";
 import type { PublicCelebration } from "@/features/events/queries";
 import { isValidCoverImageUrl } from "@/features/events/cover-image";
+import { CountdownStrip } from "./CountdownStrip";
 
 interface PublicHeroProps {
   event: PublicCelebration;
 }
 
 export function PublicHero({ event }: PublicHeroProps) {
-  const daysLeft = daysUntil(event.date);
-  const isPast = daysLeft < 0;
   const hasCover = isValidCoverImageUrl(event.coverImageUrl);
 
   return (
@@ -48,7 +46,7 @@ export function PublicHero({ event }: PublicHeroProps) {
 
         <div className="relative z-10 p-6 sm:p-8 w-full text-ivory space-y-2">
           <span className="text-gold text-xs font-semibold uppercase tracking-widest block drop-shadow">
-            Cordially Request Your Honour
+            You&apos;re invited
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-ivory font-medium leading-tight drop-shadow-md">
             {event.title}
@@ -60,34 +58,7 @@ export function PublicHero({ event }: PublicHeroProps) {
       </div>
 
       {/* Countdown Strip */}
-      <div className="bg-paper py-4 px-6 flex items-center justify-around gap-2 text-center border-t border-b border-outline-variant/20">
-        <div className="flex flex-col">
-          <span className="font-serif text-2xl sm:text-3xl text-wine font-semibold">
-            {isPast ? 0 : Math.max(0, daysLeft)}
-          </span>
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider text-secondary font-medium">
-            {isPast ? "Days Since" : "Days to Go"}
-          </span>
-        </div>
-        <div className="h-7 w-px bg-outline-variant/30" />
-        <div className="flex flex-col">
-          <span className="font-serif text-2xl sm:text-3xl text-wine font-semibold">
-            {isPast ? 0 : 14}
-          </span>
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider text-secondary font-medium">
-            Hours
-          </span>
-        </div>
-        <div className="h-7 w-px bg-outline-variant/30" />
-        <div className="flex flex-col">
-          <span className="font-serif text-2xl sm:text-3xl text-wine font-semibold">
-            {isPast ? 0 : 30}
-          </span>
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider text-secondary font-medium">
-            Minutes
-          </span>
-        </div>
-      </div>
+      <CountdownStrip eventDate={event.date} />
     </div>
   );
 }
