@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { formatWatDatetimeLocal } from "@/lib/format";
 import type { LivePreviewData } from "./LivePagePreview";
 import { CoverImageUpload } from "./CoverImageUpload";
 
@@ -9,6 +8,10 @@ interface EditorControlsFormProps {
   eventId: string;
   data: LivePreviewData;
   onChange: (field: keyof LivePreviewData, value: string | boolean) => void;
+  watDate: string;
+  onChangeWatDate: (val: string) => void;
+  watRsvpBy: string;
+  onChangeWatRsvpBy: (val: string) => void;
   disabled?: boolean;
 }
 
@@ -16,17 +19,20 @@ export function EditorControlsForm({
   eventId,
   data,
   onChange,
+  watDate,
+  onChangeWatDate,
+  watRsvpBy,
+  onChangeWatRsvpBy,
   disabled = false,
 }: EditorControlsFormProps) {
   return (
     <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-5">
       <div className="space-y-1">
         <h3 className="font-serif text-lg text-wine font-medium">
-          Celebration Parameters
+          Event details
         </h3>
         <p className="text-xs text-on-surface-variant">
-          Adjust ceremonial details rendered across public pages and
-          invitations.
+          Edit details shown on public pages and invitations.
         </p>
       </div>
 
@@ -54,7 +60,7 @@ export function EditorControlsForm({
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-            Celebration Headline
+            Headline
           </label>
           <input
             type="text"
@@ -69,7 +75,7 @@ export function EditorControlsForm({
         {/* Couple */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-            Couple Monogram Names
+            Couple names
           </label>
           <input
             type="text"
@@ -90,8 +96,8 @@ export function EditorControlsForm({
             <input
               type="datetime-local"
               disabled={disabled}
-              value={formatWatDatetimeLocal(data.date)}
-              onChange={(e) => onChange("date", e.target.value)}
+              value={watDate}
+              onChange={(e) => onChangeWatDate(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
@@ -100,10 +106,10 @@ export function EditorControlsForm({
               RSVP Deadline
             </label>
             <input
-              type="date"
+              type="datetime-local"
               disabled={disabled}
-              value={data.rsvpBy ? data.rsvpBy.slice(0, 10) : ""}
-              onChange={(e) => onChange("rsvpBy", e.target.value)}
+              value={watRsvpBy}
+              onChange={(e) => onChangeWatRsvpBy(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
@@ -142,7 +148,7 @@ export function EditorControlsForm({
         {/* Story / Invocation */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-            Couple Story / Warm Invocation
+            Your story
           </label>
           <textarea
             rows={2}

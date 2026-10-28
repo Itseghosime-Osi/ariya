@@ -138,7 +138,7 @@ export async function updateEventAction(
     updateData.schedule = parsed.data.schedule;
   if (parsed.data.rsvpBy !== undefined)
     updateData.rsvp_by = parsed.data.rsvpBy
-      ? new Date(parsed.data.rsvpBy).toISOString()
+      ? parseWatDateToUtc(parsed.data.rsvpBy)
       : null;
 
   const { data, error } = await supabase

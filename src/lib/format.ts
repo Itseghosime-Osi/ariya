@@ -121,6 +121,9 @@ export function formatWatDatetimeLocal(
 export function parseWatDateToUtc(input: string | null | undefined): string {
   if (!input) return "";
   const str = input.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return new Date(str + "T00:00:00+01:00").toISOString();
+  }
   if (/[zZ]$|[+-]\d{2}(:?\d{2})?$/.test(str)) {
     return new Date(str).toISOString();
   }

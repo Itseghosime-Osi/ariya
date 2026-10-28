@@ -53,6 +53,7 @@ describe("Formatting utilities", () => {
     expect(parseWatDateToUtc("2026-12-12T13:00:00Z")).toBe(
       "2026-12-12T13:00:00.000Z"
     );
+    expect(parseWatDateToUtc("2026-12-01")).toBe("2026-11-30T23:00:00.000Z");
   });
 
   it("formats UTC date into WAT datetime-local string (13:00 UTC -> 14:00 WAT)", () => {

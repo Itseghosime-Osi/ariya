@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { updateEventAction } from "@/features/events/actions";
 import type { Event } from "@/features/events/types";
+import { formatWatDatetimeLocal, parseWatDateToUtc } from "@/lib/format";
 import { EditorControlsForm } from "./EditorControlsForm";
 import { LivePagePreview, type LivePreviewData } from "./LivePagePreview";
 
@@ -15,6 +16,15 @@ interface EventPageEditorProps {
 
 export function EventPageEditor({ event }: EventPageEditorProps) {
   const router = useRouter();
+
+  // Local WAT datetime input state. Converted with parseWatDateToUtc only on save and for live preview.
+  const [watDateInput, setWatDateInput] = useState<string>(() =>
+    event.date ? formatWatDatetimeLocal(event.date) : ""
+  );
+  const [watRsvpByInput, setWatRsvpByInput] = useState<string>(() =>
+    event.rsvp_by ? formatWatDatetimeLocal(event.rsvp_by) : ""
+  );
+
   const [formData, setFormData] = useState<LivePreviewData>({
     title: event.title || "",
     couple: event.couple || "",
@@ -43,19 +53,45 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
     setErrorMsg(null);
   };
 
+  const handleWatDateChange = (val: string) => {
+    setWatDateInput(val);
+    setSaveSuccess(false);
+    setErrorMsg(null);
+  };
+
+  const handleWatRsvpByChange = (val: string) => {
+    setWatRsvpByInput(val);
+    setSaveSuccess(false);
+    setErrorMsg(null);
+  };
+
+  // Preview reflects converted WAT date instant
+  const previewData: LivePreviewData = {
+    ...formData,
+    date: watDateInput ? parseWatDateToUtc(watDateInput) : "",
+    rsvpBy: watRsvpByInput ? parseWatDateToUtc(watRsvpByInput) : "",
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setSaveSuccess(false);
     setErrorMsg(null);
 
+    const convertedDate = watDateInput
+      ? parseWatDateToUtc(watDateInput)
+      : undefined;
+    const convertedRsvpBy = watRsvpByInput
+      ? parseWatDateToUtc(watRsvpByInput)
+      : undefined;
+
     const res = await updateEventAction(event.id, {
       title: formData.title,
       couple: formData.couple,
-      date: formData.date,
+      date: convertedDate,
       venue: formData.venue,
       area: formData.area || undefined,
       dressCode: formData.dressCode || undefined,
-      rsvpBy: formData.rsvpBy || undefined,
+      rsvpBy: convertedRsvpBy,
       status: formData.status as "draft" | "active" | "archived",
       isPublic: formData.isPublic,
       description: formData.description || undefined,
@@ -131,11 +167,15 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             eventId={event.id}
             data={formData}
             onChange={handleFieldChange}
+            watDate={watDateInput}
+            onChangeWatDate={handleWatDateChange}
+            watRsvpBy={watRsvpByInput}
+            onChangeWatRsvpBy={handleWatRsvpByChange}
             disabled={isSaving}
           />
         </div>
         <div className="lg:col-span-7">
-          <LivePagePreview data={formData} />
+          <LivePagePreview data={previewData} />
         </div>
       </div>
     </div>
