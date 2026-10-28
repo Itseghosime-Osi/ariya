@@ -28,6 +28,8 @@ import { GuestMobileCardList } from "./GuestMobileCardList";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+type GuestAction = (guest: GuestWithDetails) => void;
+
 interface GuestRegistryTableProps {
   guests: GuestWithDetails[];
   totalCount: number;
@@ -36,9 +38,9 @@ interface GuestRegistryTableProps {
   isLoading?: boolean;
   onPageChange: (newPage: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
-  onSelectGuest: (guest: GuestWithDetails) => void;
-  onCopyLink: (guest: GuestWithDetails) => void;
-  onShareWhatsApp: (guest: GuestWithDetails) => void;
+  onSelectGuest: GuestAction;
+  onCopyLink: GuestAction;
+  onShareWhatsApp: GuestAction;
 }
 
 export function GuestRegistryTable({
@@ -104,16 +106,18 @@ export function GuestRegistryTable({
               ))}
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {isLoading || !table.getRowModel().rows?.length ? (
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
                     className="h-32 text-center text-on-surface-variant"
                   >
-                    Loading guests...
+                    {isLoading
+                      ? "Loading guests..."
+                      : "No guests found matching your criteria."}
                   </TableCell>
                 </TableRow>
-              ) : table.getRowModel().rows?.length ? (
+              ) : (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
@@ -130,15 +134,6 @@ export function GuestRegistryTable({
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-32 text-center text-on-surface-variant"
-                  >
-                    No guests found matching your criteria.
-                  </TableCell>
-                </TableRow>
               )}
             </TableBody>
           </Table>
