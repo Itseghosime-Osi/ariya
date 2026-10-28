@@ -52,7 +52,35 @@ interface CreateAction {
 }
 
 const SPRING = { type: "spring", bounce: 0.22, duration: 0.5 } as const;
-const SPARKS = 7;
+// Deep gold and burgundy read on the white cards; pale gold and ivory catch on the dark scrim.
+const SPARK_COLOURS = [
+  "#d9a441",
+  "#e9c98a",
+  "#f6dca8",
+  "#8a2338",
+  "#f57c8a",
+  "#d9a441",
+];
+
+interface Spark {
+  id: number;
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  rot: number;
+  size: number;
+  star: boolean;
+  colour: string;
+  delay: number;
+  dur: number;
+}
+
+interface Ring {
+  id: number;
+  x: number;
+  y: number;
+}
 
 /** Shows a small gold dot while a tapped tab's route is still loading. */
 function PendingDot() {
@@ -97,7 +125,9 @@ export function PhoneDock({
   const [createOpen, setCreateOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [burst, setBurst] = useState(0);
+  const [sparks, setSparks] = useState<Spark[]>([]);
+  const [rings, setRings] = useState<Ring[]>([]);
+  const fxId = useRef(0);
   const menuOpen = createOpen || moreOpen;
   // Where the More button sits relative to the menu, so the bubble grows from
   // it and shrinks back into it.
@@ -253,19 +283,57 @@ export function PhoneDock({
     setMoreOpen((open) => !open);
   };
 
-  const toggleCreate = () => {
-    setMoreOpen(false);
-    setCreateOpen((open) => {
-      if (!open) {
-        setBurst((n) => n + 1);
-        try {
-          navigator.vibrate?.(8);
-        } catch {
-          /* haptics are a nicety */
-        }
-      }
-      return !open;
+  /** A burst of gold from wherever the Create button was tapped. */
+  const burst = (e: React.MouseEvent<HTMLButtonElement>, count: number) => {
+    if (reduceMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Keyboard clicks have no pointer position: burst from the centre.
+    const fromPointer = e.detail > 0;
+    const clamp = (n: number) => Math.max(-24, Math.min(24, n));
+    const x = fromPointer ? clamp(e.clientX - (rect.left + rect.width / 2)) : 0;
+    const y = fromPointer ? clamp(e.clientY - (rect.top + rect.height / 2)) : 0;
+    const batch: Spark[] = Array.from({ length: count }, () => {
+      // Mostly up and out, like a popper, with a few going sideways.
+      const angle =
+        Math.random() < 0.72
+          ? -Math.PI * (0.08 + Math.random() * 0.84)
+          : Math.random() * Math.PI * 2;
+      const dist = 52 + Math.random() * 78;
+      return {
+        id: ++fxId.current,
+        x,
+        y,
+        dx: Math.cos(angle) * dist,
+        dy: Math.sin(angle) * dist,
+        rot: (Math.random() - 0.5) * 720,
+        size: 8 + Math.random() * 8,
+        star: Math.random() < 0.5,
+        colour: SPARK_COLOURS[Math.floor(Math.random() * SPARK_COLOURS.length)],
+        delay: Math.random() * 90,
+        dur: 700 + Math.random() * 380,
+      };
     });
+    const ring: Ring = { id: ++fxId.current, x, y };
+    setSparks((all) => [...all, ...batch]);
+    setRings((all) => [...all, ring]);
+    window.setTimeout(() => {
+      setSparks((all) => all.filter((sp) => !batch.includes(sp)));
+      setRings((all) => all.filter((r) => r.id !== ring.id));
+    }, 1300);
+  };
+
+  const toggleCreate = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setMoreOpen(false);
+    const opening = !createOpen;
+    setCreateOpen(opening);
+    burst(e, opening ? 18 : 8);
+    if (opening) {
+      try {
+        navigator.vibrate?.(8);
+      } catch {
+        /* haptics are a nicety */
+      }
+    }
   };
 
   return (
@@ -334,14 +402,14 @@ export function PhoneDock({
                   // are barely damped, so it stretches, squashes and wobbles.
                   scaleX: {
                     type: "spring",
-                    stiffness: 95,
-                    damping: 7,
+                    stiffness: 108,
+                    damping: 7.46,
                     mass: 1.2,
                   },
                   scaleY: {
                     type: "spring",
-                    stiffness: 70,
-                    damping: 6,
+                    stiffness: 79.5,
+                    damping: 6.39,
                     mass: 1.2,
                   },
                   opacity: { duration: 0.25 },
@@ -354,16 +422,16 @@ export function PhoneDock({
                 transition: {
                   // Pulled back into the tab: it thins, stretches, then snaps shut.
                   scaleX: {
-                    duration: 0.9,
+                    duration: 0.8,
                     times: [0, 0.4, 1],
                     ease: "easeInOut",
                   },
                   scaleY: {
-                    duration: 0.9,
+                    duration: 0.8,
                     times: [0, 0.4, 1],
                     ease: "easeInOut",
                   },
-                  opacity: { duration: 0.2, delay: 0.7 },
+                  opacity: { duration: 0.2, delay: 0.6 },
                 },
               }}
             >
@@ -603,7 +671,7 @@ export function PhoneDock({
             aria-expanded={createOpen}
             aria-controls={createOpen ? menuId : undefined}
             onClick={toggleCreate}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.86 }}
             transition={SPRING}
             className="dock-create relative grid h-[60px] w-[60px] shrink-0 place-items-center rounded-full text-ivory outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
           >
@@ -616,24 +684,41 @@ export function PhoneDock({
               <Plus size={26} strokeWidth={2.4} />
             </motion.span>
             <span
-              key={burst}
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"
             >
-              {burst > 0 &&
-                !reduceMotion &&
-                Array.from({ length: SPARKS }, (_, i) => (
-                  <i
-                    key={i}
-                    className="dock-spark"
-                    style={
-                      {
-                        "--a": `${(i / SPARKS) * 360 + 12}deg`,
-                        animationDelay: `${i * 18}ms`,
-                      } as React.CSSProperties
-                    }
-                  />
-                ))}
+              {rings.map((ring) => (
+                <i
+                  key={ring.id}
+                  className="dock-ring"
+                  style={{
+                    left: `calc(50% + ${ring.x}px)`,
+                    top: `calc(50% + ${ring.y}px)`,
+                  }}
+                />
+              ))}
+              {sparks.map((sp) => (
+                <i
+                  key={sp.id}
+                  className={cn("dock-spark", sp.star && "dock-spark-star")}
+                  style={
+                    {
+                      left: `calc(50% + ${sp.x}px)`,
+                      top: `calc(50% + ${sp.y}px)`,
+                      width: sp.size,
+                      height: sp.size,
+                      marginLeft: -sp.size / 2,
+                      marginTop: -sp.size / 2,
+                      background: sp.colour,
+                      "--dx": `${sp.dx}px`,
+                      "--dy": `${sp.dy}px`,
+                      "--rot": `${sp.rot}deg`,
+                      animationDelay: `${sp.delay}ms`,
+                      animationDuration: `${sp.dur}ms`,
+                    } as React.CSSProperties
+                  }
+                />
+              ))}
             </span>
           </motion.button>
         </div>
