@@ -4,13 +4,21 @@ import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
+async function hideNextDevIndicator(page: import("@playwright/test").Page) {
+  await page.addStyleTag({
+    content:
+      "nextjs-portal, #__next-build-watcher, [data-nextjs-toast] { display: none !important; }",
+  });
+  await page.mouse.move(0, 0);
+}
+
 test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", () => {
   test("empty, single-event, and populated states with event switcher, phone sheet, donut metrics, and Axe AA at 1440px and 390px", async ({
     page,
     context,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await createAndLoginUser(page, context, "events_bento");
+    await createAndLoginUser(page, context, "adeola");
 
     // 1. Empty state (0 events)
     await page.goto("/events");
@@ -47,10 +55,12 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     expect(emptyAxe.violations).toEqual([]);
 
     if (process.env.CAPTURE_SCREENSHOTS === "1") {
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-empty-desktop.png",
       });
       await page.setViewportSize({ width: 390, height: 844 });
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-empty-mobile.png",
       });
@@ -114,10 +124,12 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     );
 
     if (process.env.CAPTURE_SCREENSHOTS === "1") {
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-single-desktop.png",
       });
       await page.setViewportSize({ width: 390, height: 844 });
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-single-mobile.png",
       });
@@ -167,6 +179,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
       page.getByTestId(`upcoming-event-tile-${event1.eventId}`)
     ).toBeVisible();
     await searchInput.fill("");
+    await searchInput.blur();
 
     // 4. Axe WCAG 2.2 AA scan at 1440px (populated)
     const desktopAxe = await new AxeBuilder({ page })
@@ -175,6 +188,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     expect(desktopAxe.violations).toEqual([]);
 
     if (process.env.CAPTURE_SCREENSHOTS === "1") {
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-populated-desktop.png",
       });
@@ -186,6 +200,8 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     await expect(phoneBar).toBeVisible();
     await expect(page.getByTestId("desktop-sidebar")).toBeHidden();
     await expect(page.getByTestId("floating-new-event")).toBeVisible();
+    await expect(page.getByTestId("mobile-search-trigger")).toBeVisible();
+    await expect(page.getByTestId("events-search")).toBeHidden();
     await expect(phoneBar.getByRole("link", { name: "Home" })).toBeVisible();
     await expect(phoneBar.getByRole("link", { name: "Guests" })).toBeVisible();
     await expect(
@@ -193,6 +209,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     ).toBeVisible();
 
     if (process.env.CAPTURE_SCREENSHOTS === "1") {
+      await hideNextDevIndicator(page);
       await page.screenshot({
         path: "docs/screenshots/events-home-populated-mobile.png",
       });
