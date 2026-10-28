@@ -58,7 +58,7 @@ export function EventOverviewDesk({
       : 0;
 
   return (
-    <div className="space-y-space-xl pb-16">
+    <div className="space-y-8 lg:space-y-10 pb-16">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-night text-gold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-gold/30">
@@ -80,11 +80,11 @@ export function EventOverviewDesk({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-baseline gap-x-space-md gap-y-space-xs">
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 sm:gap-6">
             <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
               Every yes, together.
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm tracking-widest uppercase shadow-sm font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm tracking-widest uppercase shadow-sm font-bold w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
               {metrics.daysAway} days to celebration
             </span>
@@ -113,7 +113,7 @@ export function EventOverviewDesk({
       </header>
 
       {/* Asymmetric Hero Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
         <RsvpHorizonBar
           metrics={metrics}
           confirmedPct={confirmedPct}
@@ -173,8 +173,8 @@ export function EventOverviewDesk({
       </section>
 
       {/* Lower Section: RSVP Pace & Curated Priority Deck */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
-        <div className="lg:col-span-7 space-y-gutter-lg">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="lg:col-span-7 space-y-8 lg:space-y-10">
           <RsvpTrajectoryChart metrics={metrics} />
           <RecentResponsesFeed
             eventId={event.id}
