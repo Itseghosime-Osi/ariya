@@ -1,7 +1,8 @@
-/* Scroll at one speed.
-   However the visitor scrolls (a flick, a slow trackpad drag, a mouse wheel, a swipe, the keys), the page travels at
-   the same predefined speed, easing in and out, so every scene plays at the pace it was designed for. Scrolling only
-   says which way to go and for how long. The scrollbar and find-in-page still work; the engine follows them.
+/* Scroll at the designed pace, or faster when the visitor means it.
+   A gentle scroll (a slow trackpad drag, a wheel notch, a soft swipe, the arrow keys) travels at the predefined
+   speed, easing in and out, so every scene plays at the pace it was designed for. Scrolling harder (fast swipes, a
+   spun wheel, repeated flicks) skims: the pace rises smoothly up to MAX_BOOST times, and settles back when the input
+   calms or turns round. The scrollbar and find-in-page still work; the engine follows them.
    Turned off for prefers-reduced-motion, where normal scrolling is kept.
 
    Use: AriyaScroll.init({ speed: 0.8 })   // screens per second
@@ -15,17 +16,29 @@
   var glide = null, speedAt = null, lock = null, onLocked = null; // { from, to, t0, dur } for programmatic moves
   var HOLD_WHEEL = 180, HOLD_KEY = 260, HOLD_PAGE = 900, HOLD_TOUCH = 140, TAIL_TOUCH = 420;
   var TAU_UP = 0.14, TAU_DOWN = 0.26; // seconds: how quickly it reaches speed, and how softly it stops
+  // Skimming: how hard the visitor is scrolling, in screens per second of raw input over the last moment, sets a boost.
+  var MAX_BOOST = 4, RATE_WINDOW = 600, TAU_BOOST = 0.9; // boost settles back over about a second once input calms
+  var boost = 1, inputs = [];
+  function feel(px) {
+    var now = performance.now();
+    inputs.push({ t: now, px: px });
+    while (inputs.length && now - inputs[0].t > RATE_WINDOW) inputs.shift();
+    var sum = 0; for (var i = 0; i < inputs.length; i++) sum += inputs[i].px;
+    var rate = sum / (RATE_WINDOW / 1000) / innerHeight; // screens per second
+    boost = Math.max(boost, clamp(1 + (rate - 0.4) * 1.8, 1, MAX_BOOST)); // a soft drag stays near 1, steady swiping about 2 to 3, fast flicks the most
+  }
   function maxY() { return Math.max(0, document.documentElement.scrollHeight - innerHeight); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function blocked() { return document.documentElement.classList.contains("locked") || !!document.querySelector(".sheet:not([hidden]), .cm:not([hidden])"); }
   function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
   function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
   // Scrolling input: a direction, held for a moment. Repeated input simply keeps it going.
-  function hold(d, ms) {
+  function hold(d, ms, px) {
     if (blocked() || !d) return;
     if (!running) { cur = scrollY; vel = 0; }
     glide = null;
-    if (d !== dir) { dir = d; }
+    if (d !== dir) { dir = d; boost = 1; inputs = []; } // turning back to look again is always gentle
+    if (px) feel(px);
     holdUntil = Math.max(holdUntil, performance.now() + ms);
     start();
   }
@@ -36,7 +49,8 @@
       cur = glide.from + (glide.to - glide.from) * easeInOut(k);
       if (k >= 1) { glide = null; vel = 0; }
     } else {
-      var target = now < holdUntil ? dir * (speedAt ? speedAt(cur) : speed * innerHeight) : 0;
+      boost = 1 + (boost - 1) * Math.exp(-dt / TAU_BOOST);
+      var target = now < holdUntil ? dir * (speedAt ? speedAt(cur) : speed * innerHeight) * boost : 0;
       var tau = Math.abs(target) > Math.abs(vel) ? TAU_UP : TAU_DOWN;
       vel += (target - vel) * (1 - Math.exp(-dt / tau));
       cur += vel * dt;
@@ -65,7 +79,7 @@
         if (e.ctrlKey || blocked() || held(e) || scrollsSideways(e.target, e.deltaX, e.deltaY)) return;
         e.preventDefault();
         if (Math.abs(e.deltaY) < 0.5) return;
-        hold(e.deltaY > 0 ? 1 : -1, HOLD_WHEEL);
+        hold(e.deltaY > 0 ? 1 : -1, HOLD_WHEEL, Math.abs(e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1));
       }, { passive: false });
       window.addEventListener("keydown", function (e) {
         if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || editable(document.activeElement)) return;
@@ -73,8 +87,8 @@
         if (/^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(k) && !blocked() && held(e)) return;
         if (k === "ArrowDown") { e.preventDefault(); hold(1, HOLD_KEY); }
         else if (k === "ArrowUp") { e.preventDefault(); hold(-1, HOLD_KEY); }
-        else if (k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); hold(1, HOLD_PAGE); }
-        else if (k === "PageUp" || (k === " " && e.shiftKey)) { e.preventDefault(); hold(-1, HOLD_PAGE); }
+        else if (k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); hold(1, HOLD_PAGE, innerHeight * 0.4); }
+        else if (k === "PageUp" || (k === " " && e.shiftKey)) { e.preventDefault(); hold(-1, HOLD_PAGE, innerHeight * 0.4); }
         else if (k === "Home") { e.preventDefault(); AriyaScroll.to(0); }
         else if (k === "End") { e.preventDefault(); AriyaScroll.to(maxY()); }
       });
@@ -94,9 +108,9 @@
           if (mode === "skip") return;
         }
         e.preventDefault();
-        if (Math.abs(dy) >= 2) { hold(dy > 0 ? 1 : -1, HOLD_TOUCH); lastY = y; lastX = x; }
+        if (Math.abs(dy) >= 2) { hold(dy > 0 ? 1 : -1, HOLD_TOUCH, Math.abs(dy)); lastY = y; lastX = x; }
       }, { passive: false });
-      window.addEventListener("touchend", function () { if (mode === "pace" && dir) hold(dir, TAIL_TOUCH); mode = null; }, { passive: true });
+      window.addEventListener("touchend", function () { if (mode === "pace" && dir) hold(dir, TAIL_TOUCH * Math.min(2.5, boost)); mode = null; }, { passive: true });
       // In-page links glide there.
       document.addEventListener("click", function (e) {
         var a = e.target.closest && e.target.closest('a[href^="#"]');
@@ -116,14 +130,15 @@
       if (!running) cur = scrollY;
       var dist = Math.abs(y - cur);
       glide = { from: cur, to: y, t0: performance.now(), dur: clamp(dist / (4 * innerHeight), 0.6, 3.2) * 1000 };
-      holdUntil = 0; dir = 0; vel = 0; start();
+      holdUntil = 0; dir = 0; vel = 0; boost = 1; start();
     },
     // Straight there, no glide (Replay).
     jump: function (y) {
-      y = clamp(y, 0, maxY()); glide = null; holdUntil = 0; dir = 0; vel = 0; cur = y; ignoreUntil = performance.now() + 100;
+      y = clamp(y, 0, maxY()); glide = null; holdUntil = 0; dir = 0; vel = 0; boost = 1; cur = y; ignoreUntil = performance.now() + 100;
       window.scrollTo({ top: y, behavior: "instant" });
     },
     get enabled() { return enabled; },
-    get busy() { return running; }
+    get busy() { return running; },
+    get boost() { return boost; } // 1 at the designed pace, up to MAX_BOOST while skimming
   };
 })();

@@ -19,9 +19,9 @@ The repository is partitioned into two distinct domains:
    - Follows a feature-sliced architecture under `src/features/` with isolated actions, queries, schemas, and components.
    - Authenticated shell layout (FINAL 01) with responsive mobile views (MOBILE 01–08).
 
-3. **Private Media (`private-media/`)**
-   - Contains `private-media/music.mp3`, a commercial audio track used exclusively for private offline class demonstration.
-   - It is kept completely outside `public/` so it is never bundled, served, or deployed publicly.
+3. **Music (`public/site/assets/music.mp3`)**
+   - "Yori Yori" by Abefe, a commercial track, served publicly with the film and About page by the owner's choice (copyrighted: remove or replace it if no licence is in place).
+   - If the file is missing, both pages fall back to their generated Web Audio groove.
 
 ## 3. Legacy URL Resolution Matrix
 

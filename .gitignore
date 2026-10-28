@@ -7,8 +7,7 @@ node_modules/
 out/
 
 # Environment files
-.env*.local
-.env
+.env*
 !.env.example
 
 # OS files
@@ -23,6 +22,7 @@ blob-report/
 playwright/.cache/
 
 # Debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -35,3 +35,22 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 AGENTS.md
+
+# Editor files (keep intentional shared VS Code configuration)
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Local screenshots and archives; curated docs/screenshots and site assets stay tracked
+/screenshots/
+/Screenshot*.png
+/Screenshot*.jpg
+/Screenshot*.jpeg
+/screenshot*.png
+/screenshot*.jpg
+/screenshot*.jpeg
+/screenshot*.webp
+*.zip

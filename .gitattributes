@@ -1,0 +1,20 @@
+# Normalise line endings in the repo; check out with LF everywhere.
+* text=auto eol=lf
+
+# Binary assets: never diff or merge as text.
+*.exr binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.ico binary
+*.mp3 binary
+*.woff binary
+*.woff2 binary
+
+# Generated files: collapsed in GitHub diffs, left out of language stats.
+pnpm-lock.yaml linguist-generated=true
+src/lib/supabase/database.types.ts linguist-generated=true
+
+# The static film is vendored, framework-free code.
+public/site/** linguist-vendored=true
