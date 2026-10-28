@@ -61,10 +61,38 @@ for (const file of jsFiles) {
   }
 }
 
+// The commercial song lives in private-media/ and must never be served, so
+// no audio file may reach public/ or the build output.
+const AUDIO_FILE = /\.(mp3|m4a|aac|wav|ogg|oga|flac)$/i;
+
+function findAudioFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  let results: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results = results.concat(findAudioFiles(fullPath));
+    } else if (entry.isFile() && AUDIO_FILE.test(entry.name)) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+const audioFiles = [
+  ...findAudioFiles(path.join(process.cwd(), "public")),
+  ...findAudioFiles(path.join(process.cwd(), ".next/static")),
+];
+for (const file of audioFiles) {
+  violations.push({
+    file: path.relative(process.cwd(), file),
+    pattern:
+      "audio file in public/ or build output (keep it in private-media/)",
+  });
+}
+
 if (violations.length > 0) {
-  console.error(
-    "\n❌ Bundle Check FAILED! Forbidden animation/3D library detected in app chunks:"
-  );
+  console.error("\n❌ Bundle Check FAILED! Forbidden files found:");
   for (const v of violations) {
     console.error(` - ${v.file}: matched ${v.pattern}`);
   }
@@ -72,5 +100,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  "✅ Bundle check PASSED: No Three.js or GSAP found in any app-route chunk."
+  "✅ Bundle check PASSED: No Three.js or GSAP in app chunks, and no audio files in public/ or the build output."
 );

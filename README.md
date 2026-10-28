@@ -14,7 +14,7 @@ The project consists of:
    - **Guest Routes**: Public celebration landing (`/e/[slug]`) and guest invitation & RSVP (`/i/[token]`).
    - **Background & Webhooks**: Paystack webhooks (`/api/webhooks/paystack`) and Vercel Cron reminder triggers (`/api/cron/reminders`).
 
-> **Note on `public/site/assets/music.mp3`**: "Yori Yori" by Abefe, a commercial song, is served publicly with the film and the About page by the owner's choice. It is copyrighted and anyone can download it from the live site; replace or remove it if a licence is not in place. Without the file, the film and About page fall back to their live Web Audio API groove.
+> **Note on `private-media/music.mp3`**: "Yori Yori" by Abefe is a commercial song kept for private class demos only. It lives outside `public/`, so it is never served or deployed, and the live film and About page play their generated Web Audio groove instead. For a local demo, copy it in with `cp private-media/music.mp3 public/site/assets/music.mp3` (that path is git-ignored, and `pnpm check:bundle` fails if an audio file reaches `public/`).
 
 > [!IMPORTANT]
 >
