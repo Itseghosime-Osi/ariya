@@ -1,0 +1,163 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, types, unit tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # The pnpm version comes from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      # CI has no Supabase or Paystack keys; the app's env schema accepts
+      # placeholders during the build only when this flag is set.
+      - name: Build
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+
+  pgtap:
+    name: Database pgTAP tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Run pgTAP tests
+        run: pnpm test:db
+
+  bundle-check:
+    name: App bundle check (no Three.js or GSAP)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+
+      - name: Verify no Three.js or GSAP in app chunks
+        run: pnpm check:bundle
+
+  playwright:
+    name: Playwright E2E tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Start Mailpit
+        run: |
+          docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate test-only secrets and environment
+        run: |
+          STATUS_JSON=$(supabase status -o json 2>/dev/null)
+          ANON_KEY=$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')
+          SERVICE_KEY=$(echo "$STATUS_JSON" | jq -r '.SERVICE_ROLE_KEY')
+          API_URL=$(echo "$STATUS_JSON" | jq -r '.API_URL')
+          PAYSTACK_KEY="sk_test_ci_mock_secret"
+
+          echo "PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}" >> "$GITHUB_ENV"
+
+          cat <<EOF > .env.local
+          NEXT_PUBLIC_APP_URL=http://localhost:3000
+          NEXT_PUBLIC_SUPABASE_URL=${API_URL}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}
+          SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}
+          PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}
+          PAYSTACK_API_BASE=http://127.0.0.1:57328
+          NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_ci_mock_public
+          EMAIL_TRANSPORT=mailpit
+          MAILPIT_URL=http://127.0.0.1:8025
+          RESEND_API_KEY=re_sample_mock_resend_key
+          RESEND_FROM_EMAIL=rsvps@ariya-two.vercel.app
+          RATE_LIMIT_SECRET=$(openssl rand -hex 32)
+          CRON_SECRET=$(openssl rand -hex 16)
+          EOF
+
+      - name: Run Playwright tests
+        run: pnpm test:e2e
+        env:
+          PAYSTACK_SECRET_KEY: sk_test_ci_mock_secret
