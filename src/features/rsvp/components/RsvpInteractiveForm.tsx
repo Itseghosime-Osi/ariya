@@ -179,7 +179,7 @@ export function RsvpInteractiveForm({
           className={`w-full py-3 px-6 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 ${theme.primaryButton}`}
         >
           <Icon
-            name={isPending ? "refresh" : "send"}
+            name={isPending ? "refresh" : "outgoing_mail"}
             className={`text-base ${isPending ? "animate-spin" : ""}`}
           />
           <span>

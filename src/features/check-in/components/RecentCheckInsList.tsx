@@ -14,7 +14,7 @@ export function RecentCheckInsList({ checkIns }: RecentCheckInsListProps) {
     <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-3">
       <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
         <div className="flex items-center gap-2">
-          <Icon name="history" className="text-wine text-base" />
+          <Icon name="schedule" className="text-wine text-base" />
           <h3 className="font-serif text-base font-bold text-wine">
             Admissions Activity Log
           </h3>
@@ -26,7 +26,10 @@ export function RecentCheckInsList({ checkIns }: RecentCheckInsListProps) {
 
       {checkIns.length === 0 ? (
         <div className="p-8 text-center space-y-1">
-          <Icon name="groups" className="text-3xl text-wine/40 block mx-auto" />
+          <Icon
+            name="diversity_3"
+            className="text-3xl text-wine/40 block mx-auto"
+          />
           <p className="text-xs text-wine font-medium">No admissions yet</p>
           <p className="text-[11px] text-on-surface-variant">
             Guests admitted via camera scan or manual code will appear here in

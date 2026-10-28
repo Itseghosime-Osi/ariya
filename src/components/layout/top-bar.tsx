@@ -1,94 +1,124 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import { Badge } from "@/components/ui/badge";
-import { formatEventDate } from "@/lib/format";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { GlobalSearch } from "./global-search";
+import { signOutAction } from "@/features/auth/actions";
 
 interface TopBarProps {
-  title?: string;
-  dateStr?: string;
-  daysAway?: number | null;
-  onOpenSearch?: () => void;
+  eventId?: string;
+  userEmail?: string;
 }
 
-export function TopBar({
-  title = "Àríyá Celebration",
-  dateStr = "",
-  daysAway = null,
-  onOpenSearch,
-}: TopBarProps) {
+export function TopBar({ eventId, userEmail }: TopBarProps) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
-    <header className="sb-offset fixed top-0 left-0 md:left-[var(--sb-offset,84px)] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
-      <div className="h-16 w-full px-6 md:px-8 flex items-center justify-between">
-        {/* Left: Event Quick Context */}
-        <div className="flex items-center gap-3 text-sm flex-wrap">
+    <>
+      <header className="glass sticky top-0 z-30 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
             href="/events"
-            className="font-bold text-primary tracking-wide hover:underline"
+            className="md:hidden flex items-center gap-2 font-display text-lg font-bold text-night shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy rounded-lg px-1"
           >
-            {title}
-          </Link>
-          <span className="text-mist hidden sm:inline">•</span>
-          <span className="text-on-surface-variant hidden sm:inline">
-            {dateStr ? formatEventDate(dateStr) : ""}
-          </span>
-          {daysAway !== null && (
-            <>
-              <span className="text-mist hidden md:inline">•</span>
-              <Badge variant="awaiting" className="text-xs">
-                {daysAway > 0
-                  ? `${daysAway} days away`
-                  : daysAway === 0
-                    ? "Today"
-                    : "Concluded"}
-              </Badge>
-            </>
-          )}
-        </div>
-
-        {/* Right: Search, Workspace Pill, Profile */}
-        <div className="flex items-center gap-3">
-          {onOpenSearch && (
-            <button
-              onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl bg-surface-container text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-wine"
-              title="Search celebration (Cmd + K)"
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-white"
             >
-              <Icon
-                name="search"
-                size={16}
-                className="text-wine"
-                aria-hidden="true"
-              />
-              <span className="sr-only sm:not-sr-only sm:inline">
-                Search celebration...
-              </span>
-              <kbd
-                aria-hidden="true"
-                className="hidden sm:inline-block rounded bg-surface-container-highest px-1.5 py-0.5 text-[10px] text-on-surface-variant"
-              >
-                ⌘K
-              </kbd>
-            </button>
-          )}
-
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-surface-container text-on-surface-variant text-xs font-medium">
-            <Icon name="verified" size={15} className="text-wine" />
-            <span>Àríyá workspace</span>
-          </div>
-
-          <Link
-            href="/events"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-primary flex items-center justify-center text-ivory hover:opacity-90 transition-opacity"
-            title="Celebrations overview"
-            aria-label="Celebrations overview"
-          >
-            <Icon name="celebration" size={20} />
+              À
+            </span>
+            <span>Àríyá</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="hidden md:flex w-full min-h-[44px] items-center justify-between bg-white/85 hover:bg-white px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <div className="flex items-center gap-2.5 text-label-2 min-w-0">
+              <Icon name="search" size={16} className="shrink-0" />
+              <span className="text-xs sm:text-sm truncate">
+                Search events, guests, tables...
+              </span>
+            </div>
+            <kbd
+              aria-hidden="true"
+              className="hidden sm:inline-block rounded bg-ivory px-2 py-0.5 text-[10px] font-medium text-label-2 border border-hairline"
+            >
+              ⌘K
+            </kbd>
+          </button>
         </div>
-      </div>
-    </header>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search events, guests, tables"
+            data-testid="mobile-search-trigger"
+            className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-hairline bg-white/85 hover:bg-white text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="search" size={18} />
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title="Profile & Settings"
+                data-testid="user-avatar-menu"
+                className="flex min-h-[44px] items-center gap-2 rounded-full border border-hairline bg-white/85 hover:bg-white px-2.5 py-1.5 text-xs font-medium text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-burgundy/12 text-burgundy shrink-0">
+                  <Icon name="person" size={16} />
+                </span>
+                <span className="hidden sm:inline max-w-[160px] truncate text-label-2">
+                  {userEmail || "Account"}
+                </span>
+                <Icon
+                  name="expand_more"
+                  size={15}
+                  className="text-label-2 shrink-0"
+                />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="w-56 rounded-2xl border border-hairline bg-surface p-1.5 shadow-lg"
+            >
+              <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-label-2 truncate">
+                {userEmail || "Signed in"}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="my-1 bg-hairline" />
+              <DropdownMenuItem
+                onSelect={() => {
+                  void signOutAction();
+                }}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-burgundy cursor-pointer"
+              >
+                <Icon name="logout" size={16} />
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
+
+      <GlobalSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        eventId={eventId}
+      />
+    </>
   );
 }

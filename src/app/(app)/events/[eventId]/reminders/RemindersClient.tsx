@@ -151,15 +151,12 @@ export function RemindersClient({ eventId, data }: RemindersClientProps) {
             >
               {isPending ? (
                 <>
-                  <Icon
-                    name="progress_activity"
-                    className="animate-spin text-sm"
-                  />
+                  <Icon name="refresh" className="animate-spin text-sm" />
                   <span>Dispatching Reminders...</span>
                 </>
               ) : (
                 <>
-                  <Icon name="send" className="text-sm" />
+                  <Icon name="outgoing_mail" className="text-sm" />
                   <span>
                     Dispatch Reminders (
                     {selectedIds.length > 0

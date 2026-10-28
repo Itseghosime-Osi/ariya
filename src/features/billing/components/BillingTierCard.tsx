@@ -93,15 +93,12 @@ export function BillingTierCard({
           >
             {isPending ? (
               <>
-                <Icon
-                  name="progress_activity"
-                  className="animate-spin text-base"
-                />
+                <Icon name="refresh" className="animate-spin text-base" />
                 <span>Initializing Paystack Checkout...</span>
               </>
             ) : (
               <>
-                <Icon name="payment" className="text-lg" />
+                <Icon name="credit_card" className="text-lg" />
                 <span>Pay with Paystack (Test Mode • ₦50,000)</span>
               </>
             )}

@@ -70,7 +70,7 @@ export function PrintableSeatingChart({
             onClick={() => window.print()}
             className="px-4 py-2 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
           >
-            <Icon name="print" className="text-sm" />
+            <Icon name="download" className="text-sm" />
             <span>Print Sheet</span>
           </button>
         </div>

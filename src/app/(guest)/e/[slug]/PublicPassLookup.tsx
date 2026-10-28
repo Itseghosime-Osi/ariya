@@ -21,7 +21,7 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
       className="p-8 sm:p-10 rounded-2xl bg-night text-ivory text-center space-y-5 shadow-2xl border border-outline-variant/20"
     >
       <div className="w-12 h-12 rounded-2xl bg-wine/40 text-gold flex items-center justify-center mx-auto border border-gold/30 shadow-inner">
-        <Icon name="mark_email_read" className="text-2xl" />
+        <Icon name="mail" className="text-2xl" />
       </div>
 
       <div className="space-y-1.5 max-w-md mx-auto">

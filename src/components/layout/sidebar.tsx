@@ -7,15 +7,32 @@ import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/features/auth/actions";
-import { NAV_GROUPS, NAV_ITEMS, type NavItem } from "./nav-items";
+import { daysUntil, getLagosDateKey } from "@/lib/format";
+import { EventSwitcher } from "./EventSwitcher";
+import {
+  NAV_GROUPS,
+  getEventSections,
+  type NavItem,
+  type SwitcherEvent,
+} from "./nav-items";
 
 interface SidebarProps {
-  eventId?: string;
+  events: SwitcherEvent[];
+  activeEvent: SwitcherEvent | null;
+  onSelectEvent: (eventId: string) => void;
   userEmail?: string;
-  daysAway?: number | null;
   collapsed: boolean;
   onToggle: () => void;
   ready?: boolean;
+}
+
+const HOME: NavItem = { name: "Home", href: "/events", icon: "celebration" };
+const CONFETTI_KEY = "ariya-sidebar-confetti";
+
+function isActiveHref(pathname: string, href: string) {
+  if (href === "/events") return pathname === "/events";
+  if (/^\/events\/[^/]+$/.test(href)) return pathname === href;
+  return pathname.startsWith(href);
 }
 
 interface Spark {
@@ -38,9 +55,10 @@ function initials(email: string) {
 }
 
 export function Sidebar({
-  eventId,
+  events,
+  activeEvent,
+  onSelectEvent,
   userEmail = "Host",
-  daysAway = null,
   collapsed,
   onToggle,
   ready = true,
@@ -61,17 +79,21 @@ export function Sidebar({
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const accountRef = useRef<HTMLDivElement>(null);
 
-  const active = NAV_ITEMS.find((item) => item.activePattern.test(pathname));
+  const sections = getEventSections(activeEvent?.id);
+  const active = [HOME, ...sections].find((item) =>
+    isActiveHref(pathname, item.href)
+  );
 
   // The gold pill glides to whichever item is active.
+  const activeName = active?.name;
   useLayoutEffect(() => {
-    const el = active ? itemRefs.current[active.name] : null;
+    const el = activeName ? itemRefs.current[activeName] : null;
     if (!el) {
-      setPill((p) => ({ ...p, visible: false }));
+      setPill((p) => (p.visible ? { ...p, visible: false } : p));
       return;
     }
     setPill({ top: el.offsetTop, height: el.offsetHeight, visible: true });
-  }, [active, collapsed]);
+  }, [activeName, collapsed, sections.length]);
 
   // The account card closes on a click elsewhere or Escape.
   useEffect(() => {
@@ -132,7 +154,14 @@ export function Sidebar({
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (!reduce) {
+    let celebrated = false;
+    try {
+      celebrated = sessionStorage.getItem(CONFETTI_KEY) === "1";
+      sessionStorage.setItem(CONFETTI_KEY, "1");
+    } catch {
+      /* storage unavailable: celebrate anyway */
+    }
+    if (!reduce && !celebrated) {
       // A little burst of gold, like confetti at the door.
       const base = Date.now();
       const burst = Array.from({ length: 16 }, (_, i) => {
@@ -171,14 +200,14 @@ export function Sidebar({
   };
 
   const renderItem = (item: NavItem) => {
-    const isActive = item === active;
+    const isActive = item.name === activeName;
     return (
       <Link
         key={item.name}
         ref={(el) => {
           itemRefs.current[item.name] = el;
         }}
-        href={item.href(eventId)}
+        href={item.href}
         aria-current={isActive ? "page" : undefined}
         aria-label={collapsed ? item.name : undefined}
         {...tipProps(item.name)}
@@ -206,7 +235,10 @@ export function Sidebar({
     );
   };
 
-  const ringDays = daysAway !== null && daysAway >= 0 ? daysAway : null;
+  const ringDays =
+    activeEvent && getLagosDateKey(activeEvent.date)
+      ? daysUntil(activeEvent.date)
+      : null;
   const ringProgress =
     ringDays === null ? 0 : Math.max(0.04, 1 - Math.min(ringDays, 120) / 120);
 
@@ -219,7 +251,8 @@ export function Sidebar({
           !ready && "sb-still"
         )}
         data-collapsed={collapsed}
-        aria-label="Desktop Navigation"
+        data-testid="desktop-sidebar"
+        aria-label="Primary navigation"
       >
         {/* Brand */}
         <div className="relative flex h-[76px] shrink-0 items-center gap-3 px-5">
@@ -244,9 +277,14 @@ export function Sidebar({
         </div>
 
         {/* Countdown to the big day */}
-        {ringDays !== null && eventId && (
+        {ringDays !== null && (
           <div className="px-5 pb-2">
-            <div className="sb-count flex items-center gap-3 rounded-2xl">
+            <div
+              className="sb-count flex items-center gap-3 rounded-2xl"
+              role="group"
+              aria-label={`${ringDays} ${ringDays === 1 ? "day" : "days"} until ${activeEvent?.title ?? "the big day"}`}
+              {...tipProps(`${ringDays} days to go`)}
+            >
               <div className="relative grid h-11 w-11 shrink-0 place-items-center">
                 <svg
                   viewBox="0 0 44 44"
@@ -313,26 +351,48 @@ export function Sidebar({
             <span key={active?.name} className="sb-pill-chip" />
             <span className="sb-pill-label" />
           </div>
-          <nav className="flex flex-col gap-3" aria-label="Main">
-            {NAV_GROUPS.map((group) => {
-              const items = NAV_ITEMS.filter((item) => item.group === group.id);
-              return (
-                <div key={group.id}>
-                  <div className="sb-section" aria-hidden="true">
-                    <span className="sb-section-text">{group.label}</span>
-                    <span className="sb-section-dot" />
-                  </div>
-                  <div
-                    className={cn(
-                      "flex flex-col gap-1",
-                      group.panel && "sb-panel"
-                    )}
-                  >
-                    {items.map(renderItem)}
-                  </div>
-                </div>
-              );
-            })}
+          <nav className="flex flex-col gap-3" aria-label="Main navigation">
+            <div className="flex flex-col gap-1">{renderItem(HOME)}</div>
+
+            <div className={cn("flex", collapsed ? "justify-start" : "block")}>
+              <EventSwitcher
+                events={events}
+                activeEvent={activeEvent}
+                onSelectEvent={onSelectEvent}
+                tone="velvet"
+                compact={collapsed}
+              />
+            </div>
+
+            {sections.length > 0 && (
+              <div
+                data-testid="sidebar-event-sections"
+                className="flex flex-col gap-3"
+              >
+                {NAV_GROUPS.map((group) => {
+                  const items = sections.filter(
+                    (item) => item.group === group.id
+                  );
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={group.id}>
+                      <div className="sb-section" aria-hidden="true">
+                        <span className="sb-section-text">{group.label}</span>
+                        <span className="sb-section-dot" />
+                      </div>
+                      <div
+                        className={cn(
+                          "flex flex-col gap-1",
+                          group.panel && "sb-panel"
+                        )}
+                      >
+                        {items.map(renderItem)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </nav>
         </div>
 
@@ -456,52 +516,6 @@ export function Sidebar({
           {lastTip.current?.label}
         </div>
       </aside>
-
-      {/* Mobile Bottom Navigation (Tap targets >= 44px) */}
-      <nav
-        className="flex md:hidden fixed bottom-0 left-0 right-0 h-16 bg-wine z-50 items-center justify-around px-2 border-t border-night/20 shadow-[0_-4px_16px_rgba(28,7,13,0.15)]"
-        aria-label="Mobile Navigation"
-      >
-        {[
-          NAV_ITEMS[0],
-          NAV_ITEMS[2],
-          NAV_ITEMS[3],
-          NAV_ITEMS[5],
-          NAV_ITEMS[6],
-        ].map((item) => {
-          const isActive = item.activePattern.test(pathname);
-          return (
-            <Link
-              key={item.name}
-              href={item.href(eventId)}
-              aria-current={isActive ? "page" : undefined}
-              aria-label={item.name}
-              className={cn(
-                "min-w-[44px] min-h-[44px] flex flex-col items-center justify-center rounded-xl p-1 transition-all focus:outline-none focus:ring-2 focus:ring-gold",
-                isActive
-                  ? "text-gold font-semibold"
-                  : "text-ivory/70 hover:text-gold"
-              )}
-            >
-              <Icon name={item.icon} size={20} />
-              <span className="text-[9px] tracking-tight truncate max-w-[56px] text-center mt-0.5">
-                {item.name.split(" ")[0]}
-              </span>
-            </Link>
-          );
-        })}
-        <button
-          type="button"
-          onClick={handleSignOut}
-          aria-label="Sign out"
-          className="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center rounded-xl p-1 text-ivory/70 hover:text-gold transition-all focus:outline-none focus:ring-2 focus:ring-gold"
-        >
-          <Icon name="logout" size={20} />
-          <span className="text-[9px] tracking-tight truncate max-w-[56px] text-center mt-0.5">
-            Sign out
-          </span>
-        </button>
-      </nav>
     </>
   );
 }

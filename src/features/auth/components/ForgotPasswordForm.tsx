@@ -110,7 +110,7 @@ export function ForgotPasswordForm() {
             ) : (
               <>
                 <span>Send Reset Link</span>
-                <Icon name="send" className="text-xl text-gold" />
+                <Icon name="outgoing_mail" className="text-xl text-gold" />
               </>
             )}
           </button>

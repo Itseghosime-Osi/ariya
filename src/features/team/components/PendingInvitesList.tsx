@@ -64,7 +64,7 @@ export function PendingInvitesList({
                 }}
                 className="text-xs text-wine hover:text-wine/80 font-medium px-2.5 py-1.5 rounded-lg border border-outline-variant/60 hover:bg-wine/5 transition-colors flex items-center gap-1"
               >
-                <Icon name="content_copy" className="text-xs" />
+                <Icon name="copy" className="text-xs" />
                 <span>Copy Invite Link</span>
               </button>
 

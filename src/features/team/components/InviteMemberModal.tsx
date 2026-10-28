@@ -44,7 +44,7 @@ export function InviteMemberModal({
       <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-outline-variant/60 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-outline-variant/40">
           <div className="flex items-center gap-2">
-            <Icon name="person_add" className="text-xl text-wine" />
+            <Icon name="diversity_3" className="text-xl text-wine" />
             <h3
               id="invite-modal-title"
               className="font-serif text-lg font-bold text-night"
@@ -132,15 +132,12 @@ export function InviteMemberModal({
             >
               {isPending ? (
                 <>
-                  <Icon
-                    name="progress_activity"
-                    className="animate-spin text-base"
-                  />
+                  <Icon name="refresh" className="animate-spin text-base" />
                   <span>Sending Invitation...</span>
                 </>
               ) : (
                 <>
-                  <Icon name="send" className="text-base" />
+                  <Icon name="outgoing_mail" className="text-base" />
                   <span>Send Team Invite</span>
                 </>
               )}

@@ -1,13 +1,13 @@
-import { IconName } from "@/components/ui/icon";
+import type { IconName } from "@/components/ui/icon";
 
 export type NavGroup = "home" | "plan" | "day" | "manage";
 
 export interface NavItem {
   name: string;
-  href: (eventId?: string) => string;
+  href: string;
   icon: IconName;
-  activePattern: RegExp;
-  group: NavGroup;
+  badge?: string;
+  group?: NavGroup;
 }
 
 /** The sidebar's sections, in order. Grouped sections sit on a tinted panel. */
@@ -18,82 +18,114 @@ export const NAV_GROUPS: { id: NavGroup; label: string; panel: boolean }[] = [
   { id: "manage", label: "Manage", panel: false },
 ];
 
-export const NAV_ITEMS: NavItem[] = [
-  {
-    name: "Desk & Overview",
-    href: (id) => (id ? `/events/${id}` : "/events"),
-    icon: "space_dashboard",
-    activePattern: /^\/events\/[^/]+$/,
-    group: "home",
-  },
-  {
-    name: "Celebrations",
-    href: () => "/events",
-    icon: "celebration",
-    activePattern: /^\/events$/,
-    group: "home",
-  },
-  {
-    name: "Guest Registry",
-    href: (id) => (id ? `/events/${id}/guests` : "/events"),
-    icon: "menu_book",
-    activePattern: /\/guests/,
-    group: "plan",
-  },
-  {
-    name: "Seating Plan",
-    href: (id) => (id ? `/events/${id}/seating` : "/events"),
-    icon: "table_restaurant",
-    activePattern: /\/seating/,
-    group: "plan",
-  },
-  {
-    name: "Event Page & Editor",
-    href: (id) => (id ? `/events/${id}/page-editor` : "/events"),
-    icon: "edit",
-    activePattern: /\/page-editor/,
-    group: "plan",
-  },
-  {
-    name: "Invitations",
-    href: (id) => (id ? `/events/${id}/invitations` : "/events"),
-    icon: "styler",
-    activePattern: /\/invitations/,
-    group: "plan",
-  },
-  {
-    name: "Check-in Desk",
-    href: (id) => (id ? `/events/${id}/check-in` : "/events"),
-    icon: "qr_code_scanner",
-    activePattern: /\/check-in/,
-    group: "day",
-  },
-  {
-    name: "Vendors",
-    href: (id) => (id ? `/events/${id}/vendors` : "/events"),
-    icon: "restaurant_menu",
-    activePattern: /\/vendors/,
-    group: "day",
-  },
-  {
-    name: "Team & Roles",
-    href: (id) => (id ? `/events/${id}/team` : "/events"),
-    icon: "diversity_3",
-    activePattern: /\/team/,
-    group: "manage",
-  },
-  {
-    name: "Billing & Invoicing",
-    href: (id) => (id ? `/events/${id}/billing` : "/events"),
-    icon: "credit_card",
-    activePattern: /\/billing/,
-    group: "manage",
-  },
-  {
-    name: "Settings",
-    href: (id) => (id ? `/events/${id}/settings` : "/events"),
-    icon: "settings",
-    activePattern: /\/settings/,
-    group: "manage",
-  },
-];
+export interface SwitcherEvent {
+  id: string;
+  title: string;
+  date: string;
+  couple?: string | null;
+}
+
+export function isValidEventId(eventId?: string | null): eventId is string {
+  const id = eventId?.trim();
+  return Boolean(id && id !== "default");
+}
+
+export function getEventSections(eventId?: string | null): NavItem[] {
+  if (!isValidEventId(eventId)) return [];
+  const baseUrl = `/events/${eventId.trim()}`;
+
+  return [
+    { name: "Overview", href: baseUrl, icon: "space_dashboard", group: "home" },
+    {
+      name: "Guests",
+      href: `${baseUrl}/guests`,
+      icon: "menu_book",
+      group: "plan",
+    },
+    {
+      name: "Invitations",
+      href: `${baseUrl}/invitations`,
+      icon: "drafts",
+      group: "plan",
+    },
+    {
+      name: "Reminders",
+      href: `${baseUrl}/reminders`,
+      icon: "outgoing_mail",
+      group: "plan",
+    },
+    {
+      name: "Seating",
+      href: `${baseUrl}/seating`,
+      icon: "table_restaurant",
+      group: "plan",
+    },
+    {
+      name: "Check-in",
+      href: `${baseUrl}/check-in`,
+      icon: "qr_code_scanner",
+      group: "day",
+    },
+    {
+      name: "Vendors",
+      href: `${baseUrl}/vendors`,
+      icon: "restaurant_menu",
+      group: "day",
+    },
+    {
+      name: "Team",
+      href: `${baseUrl}/team`,
+      icon: "diversity_3",
+      group: "manage",
+    },
+    {
+      name: "Page editor",
+      href: `${baseUrl}/page-editor`,
+      icon: "styler",
+      group: "plan",
+    },
+    {
+      name: "Billing",
+      href: `${baseUrl}/billing`,
+      icon: "credit_card",
+      group: "manage",
+    },
+    {
+      name: "Settings",
+      href: `${baseUrl}/settings`,
+      icon: "settings",
+      group: "manage",
+    },
+  ];
+}
+
+export function getNavItems(eventId?: string | null): NavItem[] {
+  return [
+    { name: "Home", href: "/events", icon: "celebration", group: "home" },
+    ...getEventSections(eventId),
+  ];
+}
+
+export function getPhonePrimaryTabs(eventId?: string | null): NavItem[] {
+  const valid = isValidEventId(eventId);
+  const baseUrl = valid ? `/events/${eventId.trim()}` : "/events";
+  return [
+    { name: "Home", href: "/events", icon: "celebration" },
+    {
+      name: "Guests",
+      href: valid ? `${baseUrl}/guests` : "/events",
+      icon: "menu_book",
+    },
+    {
+      name: "Check-in",
+      href: valid ? `${baseUrl}/check-in` : "/events",
+      icon: "qr_code_scanner",
+    },
+  ];
+}
+
+export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
+  return getEventSections(eventId).filter(
+    (item) => item.name !== "Guests" && item.name !== "Check-in"
+  );
+}

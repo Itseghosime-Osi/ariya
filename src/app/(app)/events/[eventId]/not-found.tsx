@@ -6,7 +6,7 @@ export default function EventNotFound() {
   return (
     <div className="w-full py-16 flex flex-col items-center justify-center text-center px-4">
       <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mb-4">
-        <Icon name="event_busy" className="text-2xl text-amber-700" />
+        <Icon name="calendar" className="text-2xl text-amber-700" />
       </div>
       <h2 className="font-serif text-2xl font-bold text-night mb-2">
         Celebration Event Not Found

@@ -47,10 +47,10 @@ export function TableCard({
               <Icon
                 name={
                   table.shape === "head"
-                    ? "hotel_class"
+                    ? "verified"
                     : table.shape === "rectangular"
-                      ? "crop_7_5"
-                      : "radio_button_unchecked"
+                      ? "table_restaurant"
+                      : "pending"
                 }
                 className="text-wine text-sm"
               />
@@ -111,7 +111,7 @@ export function TableCard({
         <div className="space-y-2 min-h-[90px]">
           {table.guests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-6 text-center text-on-surface-variant/70 border border-dashed border-outline-variant/50 rounded-xl">
-              <Icon name="event_seat" className="text-lg opacity-40 mb-1" />
+              <Icon name="chair" className="text-lg opacity-40 mb-1" />
               <p className="text-[11px]">Drop guests here or use select menu</p>
             </div>
           ) : (
