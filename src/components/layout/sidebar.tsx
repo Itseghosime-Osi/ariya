@@ -258,7 +258,7 @@ export function Sidebar({
         <div className="relative flex h-[76px] shrink-0 items-center gap-3 px-5">
           <Link
             href="/events"
-            aria-label="Àríyá Suite Home"
+            aria-label="Àríyá Suite"
             className="sb-mono relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold"
             style={{ transform: `rotate(${spins * 360}deg)` }}
           >
@@ -453,7 +453,6 @@ export function Sidebar({
               onClick={openAccount}
               aria-label={`${initials(userEmail)}, Account Menu`}
               aria-expanded={accountOpen}
-              title="Profile & settings"
               className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-gold to-[#b8864b] text-[12px] font-bold text-night ring-2 ring-night">
