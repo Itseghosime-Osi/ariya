@@ -1,12 +1,8 @@
 import React from "react";
-import { AppShell } from "@/components/layout/app-shell";
 import { EventsHome } from "@/features/events/components/CelebrationsList";
 import { getUserEvents } from "@/features/events/queries";
 import { getCrossEventHomeData } from "@/features/events/data/get-coming-up";
-import {
-  partitionEvents,
-  pickHeroEvent,
-} from "@/features/events/lib/select-events";
+import { partitionEvents } from "@/features/events/lib/select-events";
 import { buildComingUp } from "@/features/events/lib/coming-up";
 import { buildNeedsAttention } from "@/features/events/lib/needs-attention";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
@@ -45,9 +41,7 @@ export default async function EventsPage() {
     getCurrentProfile(),
   ]);
 
-  const { upcoming, past } = partitionEvents(events);
-  const heroEvent = pickHeroEvent(upcoming);
-  const primaryEvent = heroEvent ?? past[0] ?? events[0] ?? null;
+  const { upcoming } = partitionEvents(events);
 
   const { vendorTasks, invitedCountByEventId, recentReplies } =
     await getCrossEventHomeData(events);
@@ -62,13 +56,6 @@ export default async function EventsPage() {
     invitedCountByEventId,
   });
 
-  const switcherEvents = [...upcoming, ...past].map((item) => ({
-    id: item.event.id,
-    title: item.event.title,
-    date: item.event.date,
-    couple: item.event.couple,
-  }));
-
   const metaFullName =
     typeof user?.user_metadata?.full_name === "string"
       ? user.user_metadata.full_name
@@ -79,15 +66,7 @@ export default async function EventsPage() {
   );
 
   return (
-    <AppShell
-      primaryEventId={primaryEvent?.event.id}
-      eventTitle={primaryEvent?.event.title}
-      eventDate={primaryEvent?.event.date}
-      daysAway={primaryEvent?.metrics.daysAway}
-      userEmail={user?.email}
-      events={switcherEvents}
-      showFloatingNewEvent
-    >
+    <>
       <EventsHome
         events={events}
         comingUpItems={comingUpItems}
@@ -96,6 +75,6 @@ export default async function EventsPage() {
         firstName={firstName}
         now={Date.now()}
       />
-    </AppShell>
+    </>
   );
 }

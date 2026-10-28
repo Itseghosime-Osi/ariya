@@ -199,7 +199,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     const phoneBar = page.getByTestId("phone-tab-bar");
     await expect(phoneBar).toBeVisible();
     await expect(page.getByTestId("desktop-sidebar")).toBeHidden();
-    await expect(page.getByTestId("floating-new-event")).toBeVisible();
+    await expect(page.getByTestId("phone-create-button")).toBeVisible();
     await expect(page.getByTestId("mobile-search-trigger")).toBeVisible();
     await expect(page.getByTestId("events-search")).toBeHidden();
     await expect(phoneBar.getByRole("link", { name: "Home" })).toBeVisible();
@@ -220,6 +220,22 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
       .withTags(WCAG_TAGS)
       .analyze();
     expect(mobileAxe.violations).toEqual([]);
+
+    // Home tab carries aria-current; the capsule is decorative
+    await expect(phoneBar.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+
+    // Create blooms into quick actions; Escape closes and returns focus
+    const createButton = page.getByTestId("phone-create-button");
+    await createButton.click();
+    await expect(createButton).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByTestId("floating-new-event")).toBeVisible();
+    await expect(page.getByTestId("floating-new-event")).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("phone-create-menu")).toBeHidden();
+    await expect(createButton).toBeFocused();
 
     // Clicking "More" opens the sheet with remaining sections and event switcher
     await page.getByTestId("phone-more-button").click();

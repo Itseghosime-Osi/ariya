@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { PhoneTabBar } from "./PhoneTabBar";
-import { FloatingNewEvent } from "./FloatingNewEvent";
+import { PhoneDock } from "./phone-dock";
 import { isValidEventId, type SwitcherEvent } from "./nav-items";
 import { cn } from "@/lib/utils";
 
@@ -13,32 +12,28 @@ const SIDEBAR_KEY = "ariya-sidebar";
 
 interface AppShellProps {
   children: React.ReactNode;
-  eventId?: string;
-  primaryEventId?: string;
-  eventTitle?: string;
-  eventDate?: string;
-  daysAway?: number;
   userEmail?: string;
-  events?: SwitcherEvent[];
-  showFloatingNewEvent?: boolean;
+  events: SwitcherEvent[];
+  primaryEventId?: string;
 }
 
+/**
+ * The persistent workspace frame, rendered once by app/(app)/layout.tsx.
+ * The active event comes from the URL, so pages never pass it in.
+ */
 export function AppShell({
   children,
-  eventId,
-  primaryEventId,
-  eventTitle,
-  eventDate,
   userEmail,
-  events: propEvents,
-  showFloatingNewEvent = false,
+  events,
+  primaryEventId,
 }: AppShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams<{ eventId?: string }>();
+  const eventId = params?.eventId;
   const userKey = userEmail?.trim().toLowerCase() || "default";
   const selectedKey = `ariya:selected-event:${userKey}`;
-  const cacheKey = `ariya:events-cache:${userKey}`;
 
-  const [cachedEvents, setCachedEvents] = useState<SwitcherEvent[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -82,40 +77,10 @@ export function AppShell({
   const [selectedId, setSelectedId] = useState<string | undefined>(() => {
     if (isValidEventId(eventId)) return eventId;
     if (isValidEventId(primaryEventId)) return primaryEventId;
-    return propEvents?.[0]?.id;
+    return events[0]?.id;
   });
 
-  useEffect(() => {
-    try {
-      if (propEvents) {
-        window.localStorage.setItem(cacheKey, JSON.stringify(propEvents));
-      } else {
-        const raw = window.localStorage.getItem(cacheKey);
-        if (raw) {
-          const parsed = JSON.parse(raw) as SwitcherEvent[];
-          if (Array.isArray(parsed)) {
-            setCachedEvents(parsed);
-          }
-        }
-      }
-    } catch {
-      // Ignore storage failures in private browsing or restricted contexts
-    }
-  }, [cacheKey, propEvents]);
-
-  const availableEvents = useMemo<SwitcherEvent[]>(() => {
-    const base = propEvents ?? cachedEvents;
-    if (isValidEventId(eventId) && eventTitle) {
-      const exists = base.some((ev) => ev.id === eventId);
-      if (!exists) {
-        return [
-          { id: eventId, title: eventTitle, date: eventDate ?? "" },
-          ...base,
-        ];
-      }
-    }
-    return base;
-  }, [cachedEvents, eventDate, eventId, eventTitle, propEvents]);
+  const availableEvents = events;
 
   useEffect(() => {
     try {
@@ -158,15 +123,18 @@ export function AppShell({
     } catch {
       // Ignore storage errors
     }
+    // On an event page, stay on the same section of the newly chosen event.
     if (isValidEventId(eventId) && nextId !== eventId) {
-      router.push(`/events/${nextId}`);
+      const base = `/events/${eventId}`;
+      const rest = pathname.startsWith(base) ? pathname.slice(base.length) : "";
+      router.push(`/events/${nextId}${rest}`);
     }
   };
 
   return (
     <div
       className={cn(
-        "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-28 md:scroll-pb-8",
+        "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
         ready && "sb-ready"
       )}
       style={
@@ -202,8 +170,7 @@ export function AppShell({
         </main>
       </div>
 
-      {showFloatingNewEvent && <FloatingNewEvent />}
-      <PhoneTabBar
+      <PhoneDock
         events={availableEvents}
         activeEvent={activeEvent}
         onSelectEvent={handleSelectEvent}
