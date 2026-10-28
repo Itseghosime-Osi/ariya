@@ -77,7 +77,7 @@ export function StepReviewLaunch({
                 Title
               </p>
               <p className="font-title-lg text-title-lg text-paper-ink font-semibold">
-                {title || `${couple}'s Nuptials`}
+                {title || `${couple}'s Wedding`}
               </p>
             </div>
             <div>

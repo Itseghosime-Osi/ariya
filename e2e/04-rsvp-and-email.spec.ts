@@ -62,4 +62,75 @@ test.describe("RSVP & Email Dispatch", () => {
       .first();
     await expect(checkInCodeElement).toBeVisible();
   });
+
+  test("invitation design save persists across reload and renders on guest invitation pass", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await createAndLoginUser(page, context, "invitation_designer");
+    const { eventId } = await createTestEvent(page);
+
+    // Register a guest to receive an invitation token
+    await page.goto(`/events/${eventId}/guests`);
+    await page.getByRole("button", { name: /add guest/i }).click();
+    await page
+      .locator('input[placeholder="Chief Olawale Adeyemi"]')
+      .fill("Folake Coker");
+    await page.getByRole("button", { name: /add to guestbook/i }).click();
+    await expect(page.getByText("Folake Coker").first()).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Copy the guest's personal invite link
+    await page.getByText("Folake Coker").first().click();
+    await page
+      .getByRole("button", { name: /copy link/i })
+      .first()
+      .click();
+    const inviteUrl = await page.evaluate(() => navigator.clipboard.readText());
+    expect(inviteUrl).toContain("/i/");
+
+    // Navigate to invitations desk
+    await page.goto(`/events/${eventId}/invitations`);
+    await expect(
+      page.getByText(/Invitations & Delivery/i).first()
+    ).toBeVisible();
+
+    // Select emerald_regal theme
+    const emeraldThemeButton = page
+      .locator('button:has-text("Emerald Regal")')
+      .first();
+    await emeraldThemeButton.click();
+
+    // Fill custom headline, subheadline, message
+    const customHeadline = "Joyful Union & Celebration";
+    const customSubheadline = "Together with our families and honored guests";
+    const customMessage =
+      "We warmly welcome you to share this sacred milestone with us.";
+
+    await page.locator("#headline").fill(customHeadline);
+    await page.locator("#subheadline").fill(customSubheadline);
+    await page.locator("#customMessage").fill(customMessage);
+
+    // Save changes
+    await page.getByRole("button", { name: /save design/i }).click();
+    await expect(page.getByText(/saved successfully/i).first()).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Reload page to verify persistence
+    await page.reload();
+    await expect(page.locator("#headline")).toHaveValue(customHeadline);
+    await expect(page.locator("#subheadline")).toHaveValue(customSubheadline);
+    await expect(page.locator("#customMessage")).toHaveValue(customMessage);
+
+    // Visit guest invitation link and confirm custom text appears
+    await page.goto(inviteUrl);
+    await expect(page.getByText(customHeadline).first()).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(customSubheadline).first()).toBeVisible();
+    await expect(page.getByText(customMessage).first()).toBeVisible();
+  });
 });

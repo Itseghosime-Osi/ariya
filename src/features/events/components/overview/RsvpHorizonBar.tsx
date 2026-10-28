@@ -26,9 +26,10 @@ export function RsvpHorizonBar({
           <span className="font-label-sm uppercase tracking-widest text-on-surface-variant font-bold">
             Guest Responses
           </span>
-          <span className="inline-flex items-center gap-1 text-success font-label-sm font-semibold">
-            <Icon name="trending_up" className="text-base" />
-            +14 this week
+          <span className="font-label-sm text-wine font-semibold">
+            {metrics.totalParties > 0
+              ? `${Math.round(((metrics.acceptedParties + metrics.declinedParties) / metrics.totalParties) * 100)}% responded`
+              : "Awaiting invitations"}
           </span>
         </div>
 
@@ -92,48 +93,48 @@ export function RsvpHorizonBar({
       </div>
 
       {/* Inline Protocol Stat Triad */}
-      <div className="grid grid-cols-3 gap-space-sm pt-space-xs">
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-space-xs">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Seated
             </span>
             <Icon name="chair" className="text-wine text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-primary mt-1">
+          <div className="text-2xl font-bold text-wine">
             {metrics.seatedGuests}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             of {metrics.acceptedGuests} people
           </span>
         </div>
 
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Unassigned
             </span>
-            <Icon name="pending" className="text-secondary text-lg" />
+            <Icon name="pending" className="text-amber-800 text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-secondary mt-1">
+          <div className="text-2xl font-bold text-amber-900">
             {metrics.unassignedGuests}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             Awaiting placement
           </span>
         </div>
 
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Parties
             </span>
-            <Icon name="diversity_3" className="text-primary text-lg" />
+            <Icon name="diversity_3" className="text-wine text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-night mt-1">
+          <div className="text-2xl font-bold text-night">
             {metrics.acceptedParties}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             Accepted invites
           </span>
         </div>

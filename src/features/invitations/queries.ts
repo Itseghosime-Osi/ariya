@@ -19,7 +19,9 @@ export async function getInvitationDeskData(
   // 1. Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("id, title, couple, date, venue, dress_code, paid_at")
+    .select(
+      "id, title, couple, date, venue, dress_code, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message"
+    )
     .eq("id", cleanId)
     .maybeSingle();
 
@@ -85,14 +87,25 @@ export async function getInvitationDeskData(
   const invitedGuestsCount = guests.filter((g) => !!g.invitedAt).length;
   const uninvitedGuestsCount = guests.length - invitedGuestsCount;
 
+  const rawEvent = event as Record<string, unknown>;
+  const rawTheme = rawEvent.invitation_theme as string | null;
+  const themeKey =
+    (rawTheme?.replace("-", "_") as InvitationDesign["theme"]) || "royal_gold";
+
   const design: InvitationDesign = {
-    theme: "royal_gold",
-    headline: `The Wedding Celebration of ${event.couple}`,
-    subheadline: "Joyfully request the honor of your presence",
+    theme: themeKey,
+    headline:
+      (rawEvent.invitation_headline as string | null) ||
+      `The Wedding Celebration of ${event.couple}`,
+    subheadline:
+      (rawEvent.invitation_subheadline as string | null) ||
+      "Joyfully request the honor of your presence",
     attireNote:
       event.dress_code ||
       "Aso-Ebi Colour Code: Champagne Gold & Emerald Velvet",
-    customMessage: "Dinner, dancing, and grand merriment to follow ceremony.",
+    customMessage:
+      (rawEvent.invitation_message as string | null) ||
+      "Dinner, dancing, and grand merriment to follow ceremony.",
   };
 
   return {

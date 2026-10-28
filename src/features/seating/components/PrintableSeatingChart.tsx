@@ -87,7 +87,7 @@ export function PrintableSeatingChart({
             {eventTitle}
           </h2>
           <p className="font-serif text-base italic text-wine/80">
-            Nuptials of {couple} • {date}
+            Celebration of {couple} • {date}
           </p>
         </div>
 

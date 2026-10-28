@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatLagosDate, formatLagosTime, daysUntil } from "@/lib/format";
+import { formatEventDate, daysUntil } from "@/lib/format";
 import { Icon } from "@/components/ui/icon";
 
 export interface LivePreviewData {
@@ -26,8 +26,7 @@ interface LivePagePreviewProps {
 export function LivePagePreview({ data }: LivePagePreviewProps) {
   const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   const daysLeft = data.date ? daysUntil(data.date) : 0;
-  const formattedDate = data.date ? formatLagosDate(data.date) : "TBD";
-  const formattedTime = data.date ? formatLagosTime(data.date) : "TBD";
+  const formattedEventDate = data.date ? formatEventDate(data.date) : "TBD";
 
   return (
     <div className="space-y-4">
@@ -88,10 +87,10 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
                 {daysLeft > 0 ? `${daysLeft} Days Away` : "Celebration Day"}
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl text-wine font-medium leading-tight">
-                {data.title || "The Nuptials of the Century"}
+                {data.title || "Wedding Celebration"}
               </h2>
               <p className="font-serif text-lg italic text-wine/90">
-                The Nuptials of {data.couple || "Bride & Groom"}
+                The Celebration of {data.couple || "Bride & Groom"}
               </p>
             </div>
 
@@ -100,12 +99,11 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">
-                  Date & Ceremony
+                  Date &amp; Time
                 </span>
                 <p className="font-medium text-night text-sm">
-                  {formattedDate}
+                  {formattedEventDate}
                 </p>
-                <p className="text-wine/80">{formattedTime}</p>
               </div>
               <div className="space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">

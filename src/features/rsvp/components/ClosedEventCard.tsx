@@ -21,7 +21,7 @@ export function ClosedEventCard({ event }: ClosedEventCardProps) {
           {event.title}
         </h1>
         <p className="font-serif text-base italic text-wine/80">
-          The Nuptials of {event.couple}
+          The Celebration of {event.couple}
         </p>
         <p className="text-sm text-wine/80 max-w-md mx-auto pt-2">
           This celebration has concluded or has been officially archived. RSVP

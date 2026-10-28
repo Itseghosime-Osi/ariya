@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@/components/ui/icon";
+import { formatEventDate } from "@/lib/format";
 import type { InvitationDesign } from "../types";
 
 interface InvitationCardPreviewProps {
@@ -23,28 +24,28 @@ const THEME_STYLES: Record<
     bg: "bg-linear-to-b from-[#1C070D] via-[#2A0E17] to-[#120307]",
     border: "border-amber-400/40",
     textTitle: "text-amber-200",
-    textBody: "text-amber-100/90",
+    textBody: "text-amber-100",
     accent: "text-amber-300",
   },
   emerald_regal: {
     bg: "bg-linear-to-b from-[#062419] via-[#0B3B2B] to-[#041A12]",
     border: "border-emerald-400/40",
     textTitle: "text-emerald-200",
-    textBody: "text-emerald-100/90",
+    textBody: "text-emerald-100",
     accent: "text-emerald-300",
   },
   sunset_asoebi: {
     bg: "bg-linear-to-b from-[#3D1405] via-[#5C230C] to-[#260C03]",
     border: "border-orange-400/40",
     textTitle: "text-orange-200",
-    textBody: "text-orange-100/90",
+    textBody: "text-orange-100",
     accent: "text-orange-300",
   },
   monochrome_velvet: {
     bg: "bg-linear-to-b from-[#18181B] via-[#27272A] to-[#09090B]",
     border: "border-stone-400/40",
     textTitle: "text-stone-100",
-    textBody: "text-stone-200/90",
+    textBody: "text-stone-100",
     accent: "text-stone-300",
   },
 };
@@ -73,7 +74,7 @@ export function InvitationCardPreview({
           <span
             className={`text-[10px] uppercase font-bold tracking-[0.25em] ${styles.accent}`}
           >
-            The Royal Nuptials
+            The Celebration
           </span>
           <h2
             className={`font-serif text-3xl font-bold tracking-tight leading-tight ${styles.textTitle}`}
@@ -86,13 +87,8 @@ export function InvitationCardPreview({
         </div>
 
         <div className="border-y border-white/10 py-4 space-y-2">
-          <div className="text-xs uppercase tracking-wider text-ivory/70 font-semibold">
-            {new Date(eventDate).toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+          <div className="text-xs uppercase tracking-wider text-ivory font-semibold">
+            {formatEventDate(eventDate)}
           </div>
           <div className={`text-sm font-medium ${styles.textTitle}`}>
             {venueName}
@@ -100,7 +96,7 @@ export function InvitationCardPreview({
         </div>
 
         {design.attireNote && (
-          <div className="text-[11px] text-ivory/80 bg-white/5 rounded-xl p-2.5 border border-white/5">
+          <div className="text-[11px] text-ivory bg-white/10 rounded-xl p-2.5 border border-white/10">
             <span className="font-semibold text-ivory block mb-0.5">
               Dress Code & Aso-Ebi
             </span>
@@ -109,7 +105,7 @@ export function InvitationCardPreview({
         )}
 
         {design.customMessage && (
-          <p className="text-[11px] italic text-ivory/70">
+          <p className="text-[11px] italic text-ivory/90">
             &ldquo;{design.customMessage}&rdquo;
           </p>
         )}

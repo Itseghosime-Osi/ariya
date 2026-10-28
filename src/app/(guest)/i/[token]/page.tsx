@@ -92,7 +92,7 @@ export default async function GuestInvitationPage({
       </main>
 
       <footer className="text-center text-xs text-stone-700 font-medium pt-8">
-        <p>Àríyá • Bespoke African Ceremonies &amp; Royal Stationery Suite</p>
+        <p>Àríyá • Celebration Planning &amp; Guest Management</p>
       </footer>
     </div>
   );

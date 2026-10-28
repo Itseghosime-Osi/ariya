@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import type { EventWithMetrics, RecentGuestResponse } from "../types";
 import { RsvpHorizonBar } from "./overview/RsvpHorizonBar";
@@ -19,12 +20,19 @@ export function EventOverviewDesk({
   recentResponses,
 }: EventOverviewDeskProps) {
   const { event, metrics } = data;
+  const searchParams = useSearchParams();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  useEffect(() => {
+    if (searchParams?.get("created")) {
+      showToast("Celebration workspace ready.");
+    }
+  }, [searchParams]);
 
   const confirmedPct =
     metrics.totalAttendees > 0
@@ -34,7 +42,10 @@ export function EventOverviewDesk({
     metrics.totalAttendees > 0
       ? Math.round((metrics.awaitingGuests / metrics.totalAttendees) * 100)
       : 0;
-  const declinedPct = Math.max(0, 100 - confirmedPct - awaitingPct);
+  const declinedPct =
+    metrics.totalAttendees > 0
+      ? Math.round((metrics.declinedGuests / metrics.totalAttendees) * 100)
+      : 0;
 
   return (
     <div className="space-y-space-xl pb-16">
@@ -121,8 +132,10 @@ export function EventOverviewDesk({
             </div>
 
             <div className="relative z-10 flex items-center justify-between text-on-surface-variant text-[12px]">
-              <span>Solemnization &amp; Reception</span>
-              <span className="text-gold font-semibold">Wax Seal Verified</span>
+              <span>Ceremony &amp; Reception</span>
+              <span className="text-gold font-semibold">
+                Personal Guest Link
+              </span>
             </div>
           </div>
 

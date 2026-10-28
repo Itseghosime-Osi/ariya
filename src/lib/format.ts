@@ -87,6 +87,34 @@ export function formatEventDate(
 }
 
 /**
+ * Formats a date into a `YYYY-MM-DDTHH:mm` value in Africa/Lagos (WAT, UTC+1)
+ * suitable for HTML datetime-local inputs.
+ * e.g. "2026-12-12T13:00:00.000Z" -> "2026-12-12T14:00"
+ */
+export function formatWatDatetimeLocal(
+  dateInput: string | Date | number | null | undefined
+): string {
+  if (!dateInput) return "";
+  const d =
+    typeof dateInput === "string" ? new Date(dateInput) : new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  const hour = get("hour") === "24" ? "00" : get("hour");
+  return `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}`;
+}
+
+/**
  * Converts a datetime input from the wizard (WAT, Africa/Lagos, UTC+1) into an ISO UTC string.
  * e.g. "2026-12-12T14:00" in WAT -> "2026-12-12T13:00:00.000Z"
  */

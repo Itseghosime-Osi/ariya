@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatWatDatetimeLocal } from "@/lib/format";
 import type { LivePreviewData } from "./LivePagePreview";
 import { CoverImageUpload } from "./CoverImageUpload";
 
@@ -89,7 +90,7 @@ export function EditorControlsForm({
             <input
               type="datetime-local"
               disabled={disabled}
-              value={data.date ? data.date.slice(0, 16) : ""}
+              value={formatWatDatetimeLocal(data.date)}
               onChange={(e) => onChange("date", e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />

@@ -1,6 +1,10 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/format";
+import {
+  calculateCelebrationMetrics,
+  type GuestMetricItem,
+} from "@/lib/metrics";
 import type {
   EventMetrics,
   EventWithMetrics,
@@ -156,11 +160,10 @@ export async function getEventMetrics(
 ): Promise<EventMetrics> {
   const supabase = await createClient();
 
-  // Query guests and RSVPs for this event
   const { data: rawGuests, error: guestsError } = await supabase
     .from("guests")
     .select(
-      "id, party_size, seating_conflict_at, rsvps (status, attending_count)"
+      "id, party_size, is_vip, seating_conflict_at, rsvps (status, attending_count), seat_assignments (id)"
     )
     .eq("event_id", eventId);
 
@@ -173,26 +176,6 @@ export async function getEventMetrics(
   }
 
   const guests = rawGuests ?? [];
-
-  // Query seating assignments count for this event
-  const { count: seatedCount, error: seatsError } = await supabase
-    .from("seat_assignments")
-    .select("id, tables!inner(event_id)", { count: "exact", head: true })
-    .eq("tables.event_id", eventId);
-
-  if (seatsError) {
-    console.error(
-      "[getEventMetrics] Database error loading seat assignments:",
-      {
-        code: seatsError.code,
-        message: seatsError.message,
-      }
-    );
-    throw new Error(
-      `Database error loading seat assignments: ${seatsError.message}`
-    );
-  }
-
   const daysAway = Math.max(0, daysUntil(eventDate));
 
   if (guests.length === 0) {
@@ -209,61 +192,30 @@ export async function getEventMetrics(
       unassignedGuests: 0,
       readinessPercentage: 0,
       daysAway,
+      conflictedParties: 0,
     };
   }
 
-  const totalParties = guests.length;
-  let totalAttendees = 0;
-  let acceptedParties = 0;
-  let acceptedGuests = 0;
-  let awaitingParties = 0;
-  let awaitingGuests = 0;
-  let declinedParties = 0;
-  let declinedGuests = 0;
-  let conflictedParties = 0;
-
-  for (const g of guests) {
-    if (g.seating_conflict_at) {
-      conflictedParties += 1;
-    }
-    totalAttendees += g.party_size;
-    const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
-    const status = rsvp?.status ?? "pending";
-    const count = rsvp?.attending_count ?? g.party_size;
-
-    if (status === "accepted") {
-      acceptedParties += 1;
-      acceptedGuests += count;
-    } else if (status === "declined") {
-      declinedParties += 1;
-      declinedGuests += count;
-    } else {
-      awaitingParties += 1;
-      awaitingGuests += count;
-    }
-  }
-
-  const seated = seatedCount ?? 0;
-  const unassigned = Math.max(0, acceptedGuests - seated);
+  const m = calculateCelebrationMetrics(guests as unknown as GuestMetricItem[]);
   const readiness =
-    totalAttendees > 0
-      ? Math.round((acceptedGuests / totalAttendees) * 1000) / 10
+    m.totalAttendees > 0
+      ? Math.round((m.expectedPeople / m.totalAttendees) * 1000) / 10
       : 0;
 
   return {
-    totalParties,
-    totalAttendees,
-    acceptedParties,
-    acceptedGuests,
-    awaitingParties,
-    awaitingGuests,
-    declinedParties,
-    declinedGuests,
-    seatedGuests: seated,
-    unassignedGuests: unassigned,
+    totalParties: m.invitedParties,
+    totalAttendees: m.totalAttendees,
+    acceptedParties: m.acceptedParties,
+    acceptedGuests: m.expectedPeople,
+    awaitingParties: m.awaitingParties,
+    awaitingGuests: m.awaitingGuests,
+    declinedParties: m.declinedParties,
+    declinedGuests: m.declinedGuests,
+    seatedGuests: m.seatedPeople,
+    unassignedGuests: m.unassignedPeople,
     readinessPercentage: readiness,
     daysAway,
-    conflictedParties,
+    conflictedParties: m.conflictedParties,
   };
 }
 

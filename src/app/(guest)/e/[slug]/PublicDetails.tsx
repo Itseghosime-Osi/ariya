@@ -1,29 +1,10 @@
 import React from "react";
-import { formatLagosDate, formatLagosTime } from "@/lib/format";
+import { formatEventDate } from "@/lib/format";
 import { Icon } from "@/components/ui/icon";
 import type { PublicCelebration } from "@/features/events/queries";
 
-const DEFAULT_SCHEDULE = [
-  {
-    time: "13:15 WAT",
-    title: "Guest Arrival",
-    location: "Courtyard & Foyer",
-  },
-  {
-    time: "14:00 WAT",
-    title: "Wedding Ceremony",
-    location: "Main Hall",
-  },
-  {
-    time: "15:30 WAT",
-    title: "Reception & Dinner",
-    location: "Reception Hall",
-  },
-];
-
 export function PublicDetails({ event }: { event: PublicCelebration }) {
-  const formattedDate = formatLagosDate(event.date);
-  const formattedTime = formatLagosTime(event.date);
+  const formattedEventDate = formatEventDate(event.date);
   const mapQuery = encodeURIComponent(
     `${event.venue}${event.area ? ", " + event.area : ""}`
   );
@@ -34,9 +15,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
   const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${calStart}/${calStart}&location=${mapQuery}`;
 
   const scheduleSlots =
-    event.schedule && event.schedule.length > 0
-      ? event.schedule
-      : DEFAULT_SCHEDULE;
+    event.schedule && event.schedule.length > 0 ? event.schedule : null;
 
   return (
     <div className="space-y-8">
@@ -94,10 +73,7 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
               Date &amp; Schedule
             </h3>
             <p className="text-sm text-on-surface-variant font-medium">
-              {formattedDate}
-            </p>
-            <p className="text-xs text-on-surface-variant">
-              Prompt arrival requested • {formattedTime}
+              {formattedEventDate}
             </p>
           </div>
           <a
@@ -138,33 +114,35 @@ export function PublicDetails({ event }: { event: PublicCelebration }) {
       </div>
 
       {/* Order of Events / Schedule */}
-      <section className="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
-        <h3 className="font-serif text-xl text-wine font-medium text-center">
-          Order of Events
-        </h3>
-        <div className="space-y-4 pt-2">
-          {scheduleSlots.map((slot, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-4 pb-3 border-b border-outline-variant/20 last:border-0 last:pb-0"
-            >
-              <span className="text-xs font-semibold text-secondary min-w-[76px] tracking-wide pt-0.5">
-                {slot.time}
-              </span>
-              <div className="space-y-0.5">
-                <p className="font-serif text-sm font-medium text-paper-ink">
-                  {slot.title}
-                </p>
-                {slot.location && (
-                  <p className="text-xs text-on-surface-variant">
-                    {slot.location}
+      {scheduleSlots && scheduleSlots.length > 0 && (
+        <section className="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
+          <h3 className="font-serif text-xl text-wine font-medium text-center">
+            Order of Events
+          </h3>
+          <div className="space-y-4 pt-2">
+            {scheduleSlots.map((slot, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-4 pb-3 border-b border-outline-variant/20 last:border-0 last:pb-0"
+              >
+                <span className="text-xs font-semibold text-secondary min-w-[76px] tracking-wide pt-0.5">
+                  {slot.time}
+                </span>
+                <div className="space-y-0.5">
+                  <p className="font-serif text-sm font-medium text-paper-ink">
+                    {slot.title}
                   </p>
-                )}
+                  {slot.location && (
+                    <p className="text-xs text-on-surface-variant">
+                      {slot.location}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Dress Code & Aṣọ-Ẹbí Colors */}
       <section className="p-6 sm:p-8 rounded-2xl bg-paper border border-outline-variant/30 shadow-sm space-y-4">

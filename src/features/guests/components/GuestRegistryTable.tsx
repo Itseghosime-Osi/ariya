@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { GuestWithDetails } from "../types";
 import { getGuestColumns } from "./GuestTableColumns";
+import { GuestMobileCardList } from "./GuestMobileCardList";
+import { useIsMobile } from "@/lib/use-is-mobile";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface GuestRegistryTableProps {
@@ -51,6 +53,7 @@ export function GuestRegistryTable({
   onCopyLink,
   onShareWhatsApp,
 }: GuestRegistryTableProps) {
+  const isMobile = useIsMobile();
   const columns = React.useMemo(
     () => getGuestColumns({ onSelectGuest, onCopyLink, onShareWhatsApp }),
     [onSelectGuest, onCopyLink, onShareWhatsApp]
@@ -70,67 +73,77 @@ export function GuestRegistryTable({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader className="bg-surface-container/60">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center text-on-surface-variant"
-                >
-                  Loading guests...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-surface-container/30 transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+      {isMobile ? (
+        <GuestMobileCardList
+          guests={guests}
+          isLoading={isLoading}
+          onSelectGuest={onSelectGuest}
+          onCopyLink={onCopyLink}
+          onShareWhatsApp={onShareWhatsApp}
+        />
+      ) : (
+        <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest overflow-hidden shadow-sm">
+          <Table>
+            <TableHeader className="bg-surface-container/60">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center text-on-surface-variant"
-                >
-                  No guests found matching your criteria.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-32 text-center text-on-surface-variant"
+                  >
+                    Loading guests...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-surface-container/30 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="py-3">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-32 text-center text-on-surface-variant"
+                  >
+                    No guests found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 text-xs text-on-surface-variant">
         <div className="flex items-center gap-2">

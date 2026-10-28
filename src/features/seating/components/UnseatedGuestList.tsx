@@ -70,7 +70,7 @@ export function UnseatedGuestList({
               onChange={(e) => setVipOnly(e.target.checked)}
               className="rounded text-wine focus:ring-wine/40"
             />
-            <span>VIP Dignitaries Only</span>
+            <span>VIP Guests Only</span>
           </label>
         </div>
       </div>

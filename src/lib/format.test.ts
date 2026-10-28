@@ -5,6 +5,7 @@ import {
   formatPhone,
   formatLagosDate,
   formatEventDate,
+  formatWatDatetimeLocal,
   parseWatDateToUtc,
 } from "./format";
 
@@ -52,5 +53,12 @@ describe("Formatting utilities", () => {
     expect(parseWatDateToUtc("2026-12-12T13:00:00Z")).toBe(
       "2026-12-12T13:00:00.000Z"
     );
+  });
+
+  it("formats UTC date into WAT datetime-local string (13:00 UTC -> 14:00 WAT)", () => {
+    expect(formatWatDatetimeLocal("2026-12-12T13:00:00.000Z")).toBe(
+      "2026-12-12T14:00"
+    );
+    expect(formatWatDatetimeLocal("")).toBe("");
   });
 });

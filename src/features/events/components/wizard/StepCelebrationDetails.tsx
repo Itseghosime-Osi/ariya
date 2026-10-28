@@ -85,9 +85,7 @@ export function StepCelebrationDetails({
             type="text"
             className="w-full bg-paper px-4 py-3 rounded-xl font-body-lg text-body-lg text-paper-ink shadow-inner outline-none focus:bg-white"
             placeholder={
-              couple
-                ? `${couple}'s Nuptials`
-                : "e.g. Chidinma & Tunde's Nuptials"
+              couple ? `${couple}'s Wedding` : "e.g. Chidinma & Tunde's Wedding"
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}

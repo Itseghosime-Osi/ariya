@@ -40,7 +40,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
 
               <div className="relative z-10 self-start px-3 py-1 rounded-full bg-night/85 backdrop-blur-md text-gold font-label-sm text-label-sm shadow-md flex items-center gap-1.5">
                 <Icon name="local_florist" className="text-sm" />
-                <span>Grand Nuptials &amp; Reception</span>
+                <span>Wedding Ceremony &amp; Reception</span>
               </div>
 
               <div className="relative z-10 my-auto flex flex-col items-center justify-center">

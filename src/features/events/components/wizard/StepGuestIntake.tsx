@@ -18,7 +18,7 @@ const INTAKE_OPTIONS = [
     key: "csv" as const,
     icon: "table_view",
     title: "Upload CSV Spreadsheet",
-    desc: "Master roll aggregated from both family liaison committees.",
+    desc: "Upload an existing guest list spreadsheet.",
     footer: "Import via Guestbook next",
   },
   {

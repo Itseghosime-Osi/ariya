@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import { formatLagosDate, formatLagosTime } from "@/lib/format";
+import { formatEventDate } from "@/lib/format";
 import type { InvitationData } from "../types";
 
 interface RsvpSummaryCardProps {
@@ -19,8 +19,7 @@ export function RsvpSummaryCard({
 }: RsvpSummaryCardProps) {
   const { guest, rsvp, event, table_name } = data;
   const isAccepted = rsvp?.status === "accepted";
-  const formattedDate = formatLagosDate(event.date);
-  const formattedTime = formatLagosTime(event.date);
+  const formattedEventDate = formatEventDate(event.date);
 
   return (
     <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
@@ -40,7 +39,7 @@ export function RsvpSummaryCard({
             : `You Will Be Deeply Missed, ${guest.display_name}`}
         </h1>
         <p className="font-serif text-lg italic text-wine/80">
-          The Nuptials of {event.couple}
+          {event.invitation_subheadline || `The Celebration of ${event.couple}`}
         </p>
       </section>
 
@@ -60,10 +59,11 @@ export function RsvpSummaryCard({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">
-              Event Date
+              Event Date &amp; Time
             </span>
-            <p className="font-medium text-night text-sm">{formattedDate}</p>
-            <p className="text-wine/80">{formattedTime}</p>
+            <p className="font-medium text-night text-sm">
+              {formattedEventDate}
+            </p>
           </div>
           <div>
             <span className="text-[10px] uppercase tracking-wider text-wine/70 font-semibold block">

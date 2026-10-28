@@ -40,11 +40,16 @@ export function RsvpInteractiveForm({
           {isRevise ? "Revision Mode" : `Invitation for ${guest.display_name}`}
         </span>
         <h1 className="font-serif text-2xl sm:text-3xl text-wine font-medium">
-          {event.title}
+          {event.invitation_headline || event.title}
         </h1>
         <p className="font-serif text-lg italic text-wine/80">
-          The Nuptials of {event.couple}
+          {event.invitation_subheadline || `The Celebration of ${event.couple}`}
         </p>
+        {event.invitation_message && (
+          <p className="text-xs sm:text-sm text-on-surface-variant max-w-md mx-auto italic">
+            &ldquo;{event.invitation_message}&rdquo;
+          </p>
+        )}
       </section>
 
       {state?.error && (

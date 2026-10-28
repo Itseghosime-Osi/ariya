@@ -51,38 +51,41 @@ export function GuestRegistryView({
   const [isImportOpen, setIsImportOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
+  React.useEffect(() => {
+    const onFocus = () => router.refresh();
+    window.addEventListener("focus", onFocus);
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 30000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      clearInterval(timer);
+    };
+  }, [router]);
+
   const updateQueryParams = (
     newFilters: GuestFilterState,
     newPage: number,
     newPageSize: number
   ) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
-    if (newFilters.search) params.set("search", newFilters.search);
-    else params.delete("search");
+    const setOrDelete = (key: string, val?: string | boolean | null) => {
+      if (val !== undefined && val !== null && val !== "" && val !== "all") {
+        params.set(key, String(val));
+      } else {
+        params.delete(key);
+      }
+    };
 
-    if (newFilters.side && newFilters.side !== "all")
-      params.set("side", newFilters.side);
-    else params.delete("side");
-
-    if (newFilters.group && newFilters.group !== "all")
-      params.set("group", newFilters.group);
-    else params.delete("group");
-
-    if (newFilters.rsvpStatus && newFilters.rsvpStatus !== "all")
-      params.set("rsvpStatus", newFilters.rsvpStatus);
-    else params.delete("rsvpStatus");
-
-    if (newFilters.seatedStatus && newFilters.seatedStatus !== "all")
-      params.set("seatedStatus", newFilters.seatedStatus);
-    else params.delete("seatedStatus");
-
-    if (newFilters.isVip !== undefined)
-      params.set("vip", String(newFilters.isVip));
-    else params.delete("vip");
+    setOrDelete("search", newFilters.search);
+    setOrDelete("side", newFilters.side);
+    setOrDelete("group", newFilters.group);
+    setOrDelete("rsvpStatus", newFilters.rsvpStatus);
+    setOrDelete("seatedStatus", newFilters.seatedStatus);
+    setOrDelete("vip", newFilters.isVip);
 
     params.set("page", String(newPage));
     params.set("pageSize", String(newPageSize));
-
     router.push(`?${params.toString()}`);
   };
 
@@ -118,36 +121,27 @@ export function GuestRegistryView({
     }
   };
 
+  const resetFilters = {
+    search: "",
+    side: "all" as const,
+    group: "all",
+    rsvpStatus: "all" as const,
+    seatedStatus: "all" as const,
+  };
+
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
       <GuestRegistryHeader
         onOpenImport={() => setIsImportOpen(true)}
         onOpenAdd={() => setIsAddOpen(true)}
       />
-
       <GuestRegistryMetrics stats={stats} />
-
       <GuestRegistryFilters
         filters={initialFilters}
         availableGroups={availableGroups}
-        onChange={(newFilters) =>
-          updateQueryParams(newFilters, 1, initialPageSize)
-        }
-        onReset={() =>
-          updateQueryParams(
-            {
-              search: "",
-              side: "all",
-              group: "all",
-              rsvpStatus: "all",
-              seatedStatus: "all",
-            },
-            1,
-            initialPageSize
-          )
-        }
+        onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
+        onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
       />
-
       <GuestRegistryTable
         guests={initialGuests}
         totalCount={totalGuests}
@@ -161,7 +155,6 @@ export function GuestRegistryView({
         onCopyLink={handleCopyLink}
         onShareWhatsApp={handleShareWhatsApp}
       />
-
       <GuestDetailDrawer
         eventId={eventId}
         eventName={eventName}
@@ -174,14 +167,12 @@ export function GuestRegistryView({
         }}
         onRequestDelete={(g) => setGuestToDelete(g)}
       />
-
       <GuestFormModal
         eventId={eventId}
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onSuccess={() => router.refresh()}
       />
-
       <DeleteGuestDialog
         guest={guestToDelete}
         isOpen={Boolean(guestToDelete)}
@@ -189,7 +180,6 @@ export function GuestRegistryView({
         onClose={() => setGuestToDelete(null)}
         onConfirm={handleDeleteConfirm}
       />
-
       <CsvImportModal
         eventId={eventId}
         isOpen={isImportOpen}

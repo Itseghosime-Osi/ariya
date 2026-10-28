@@ -36,8 +36,7 @@ export function CheckInHeader({
             Check-In Desk &amp; Reception Concierge
           </h1>
           <p className="text-xs text-on-surface-variant mt-0.5">
-            Rapid barcode camera admission, unguessable personal codes, and live
-            headcount telemetry.
+            Scan QR passes or search guest names for rapid arrival check-in.
           </p>
         </div>
 
@@ -48,7 +47,7 @@ export function CheckInHeader({
             }`}
           />
           <span className="text-wine font-medium">
-            {isRealtimeActive ? "Realtime Telemetry Active" : "Connecting..."}
+            {isRealtimeActive ? "Live Updates Active" : "Connecting..."}
           </span>
         </div>
       </div>

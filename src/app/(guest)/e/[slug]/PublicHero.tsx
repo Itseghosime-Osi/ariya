@@ -54,7 +54,7 @@ export function PublicHero({ event }: PublicHeroProps) {
             {event.title}
           </h1>
           <p className="font-serif text-base sm:text-lg italic text-ivory/90 drop-shadow">
-            The Nuptials of {event.couple}
+            The Celebration of {event.couple}
           </p>
         </div>
       </div>
