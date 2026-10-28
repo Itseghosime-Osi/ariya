@@ -3,28 +3,28 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
-import { formatEventDate } from "@/lib/format";
 import { signOutAction } from "@/features/auth/actions";
 
 interface TopBarProps {
   eventId?: string;
-  eventTitle?: string;
-  eventDate?: string;
-  daysAway?: number;
+  userEmail?: string;
 }
 
-export function TopBar({
-  eventId,
-  eventTitle,
-  eventDate,
-  daysAway,
-}: TopBarProps) {
+export function TopBar({ eventId, userEmail }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <>
-      <header className="glass sticky top-0 z-30 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-ivory/50 after:to-transparent">
+      <header className="glass sticky top-0 z-30 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
             href="/events"
@@ -32,7 +32,7 @@ export function TopBar({
           >
             <span
               aria-hidden="true"
-              className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-ivory"
+              className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-white"
             >
               À
             </span>
@@ -42,7 +42,7 @@ export function TopBar({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="w-full min-h-[44px] flex items-center justify-between bg-surface/90 hover:bg-surface px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="w-full min-h-[44px] flex items-center justify-between bg-white/85 hover:bg-white px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <div className="flex items-center gap-2.5 text-label-2 min-w-0">
               <Icon name="search" size={16} className="shrink-0" />
@@ -60,43 +60,47 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-2.5">
-          {eventTitle && (
-            <div className="hidden sm:flex items-center gap-2 bg-surface px-3.5 py-1.5 rounded-full border border-hairline">
-              <Icon
-                name="celebration"
-                size={15}
-                className="text-burgundy shrink-0"
-              />
-              <span className="text-xs font-semibold text-night truncate max-w-[180px]">
-                {eventTitle}
-              </span>
-              {eventDate && (
-                <>
-                  <span className="text-label-3">•</span>
-                  <span className="text-xs text-label-2">
-                    {formatEventDate(eventDate)}
-                  </span>
-                </>
-              )}
-              {typeof daysAway === "number" && daysAway >= 0 && (
-                <span className="ml-1 px-2 py-0.5 rounded-full bg-burgundy/10 text-burgundy text-[11px] font-semibold">
-                  {daysAway === 0 ? "Today" : `${daysAway}d`}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title="Profile & Settings"
+                data-testid="user-avatar-menu"
+                className="flex min-h-[44px] items-center gap-2 rounded-full border border-hairline bg-white/85 hover:bg-white px-2.5 py-1.5 text-xs font-medium text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-burgundy/12 text-burgundy shrink-0">
+                  <Icon name="person" size={16} />
                 </span>
-              )}
-            </div>
-          )}
+                <span className="hidden sm:inline max-w-[160px] truncate text-label-2">
+                  {userEmail || "Account"}
+                </span>
+                <Icon
+                  name="expand_more"
+                  size={15}
+                  className="text-label-2 shrink-0"
+                />
+              </button>
+            </DropdownMenuTrigger>
 
-          <button
-            type="button"
-            onClick={() => {
-              void signOutAction();
-            }}
-            title="Sign out"
-            aria-label="Sign out"
-            className="md:hidden flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-hairline bg-surface/90 text-label-2 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-          >
-            <Icon name="logout" size={17} />
-          </button>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 rounded-2xl border border-hairline bg-surface p-1.5 shadow-lg"
+            >
+              <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-label-2 truncate">
+                {userEmail || "Signed in"}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="my-1 bg-hairline" />
+              <DropdownMenuItem
+                onSelect={() => {
+                  void signOutAction();
+                }}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-burgundy cursor-pointer"
+              >
+                <Icon name="logout" size={16} />
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

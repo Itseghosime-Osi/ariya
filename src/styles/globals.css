@@ -2,8 +2,8 @@
 @import "./glass.css";
 
 :root {
-  --ivory: #faf6ee;
-  --surface: #fffdf8;
+  --ivory: #f7f2ea;
+  --surface: #ffffff;
   --night: #1c0f14;
   --label-2: #5a474e;
   --label-3: #6e5a61;
@@ -16,7 +16,11 @@
   --rsvp-declined: #9e2a2b;
   --rsvp-awaiting: #b88728;
   --coral: #b8442e;
-  --hairline: rgba(28, 15, 20, 0.09);
+  --tint-blush: #f6e3e6;
+  --tint-sage: #e4eee6;
+  --tint-sand: #f3e9d6;
+  --tint-sky: #e3ecf4;
+  --hairline: rgba(28, 7, 13, 0.06);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ink: #0c0406;
   --paper: #f3ebdc;
@@ -106,6 +110,10 @@
   --color-rsvp-declined: var(--rsvp-declined);
   --color-rsvp-awaiting: var(--rsvp-awaiting);
   --color-coral: var(--coral);
+  --color-tint-blush: var(--tint-blush);
+  --color-tint-sage: var(--tint-sage);
+  --color-tint-sand: var(--tint-sand);
+  --color-tint-sky: var(--tint-sky);
   --color-hairline: var(--hairline);
   --color-ink: var(--ink);
   --color-paper: var(--paper);
