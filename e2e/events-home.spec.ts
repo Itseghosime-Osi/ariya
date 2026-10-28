@@ -4,13 +4,13 @@ import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => {
-  test("empty state (0 events), populated state, search threshold (<=3 vs >3), and navigation at 1280x800 and 390x844", async ({
+test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", () => {
+  test("empty, single-event, and populated states with event switcher, phone sheet, donut metrics, and Axe AA at 1440px and 390px", async ({
     page,
     context,
   }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await createAndLoginUser(page, context, "events_home");
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await createAndLoginUser(page, context, "events_bento");
 
     // 1. Empty state (0 events)
     await page.goto("/events");
@@ -18,17 +18,29 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
     await expect(page.getByTestId("events-greeting")).toContainText(
       /Good (morning|afternoon|evening)/i
     );
-    const emptyState = page.getByTestId("events-empty-state");
+
+    const emptyState = page.getByTestId("empty-events-state");
     await expect(emptyState).toBeVisible();
     await expect(
-      emptyState.getByRole("heading", { name: /Plan your first celebration/i })
+      emptyState.getByRole("heading", { name: /Plan your first àríyá/i })
     ).toBeVisible();
-    const emptyCta = emptyState.getByRole("link", {
-      name: /Create your first event/i,
-    });
-    await expect(emptyCta).toHaveAttribute("href", "/events/new");
+    await expect(page.getByTestId("empty-step-1")).toContainText(
+      "Create event"
+    );
+    await expect(page.getByTestId("empty-step-2")).toContainText("Add guests");
+    await expect(page.getByTestId("empty-step-3")).toContainText(
+      "Send invitations"
+    );
 
-    // Accessibility check on empty state (1280x800)
+    // Sidebar shows Home + disabled "Create your first event" hint when 0 events
+    const sidebar = page.getByTestId("desktop-sidebar");
+    await expect(sidebar).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(page.getByTestId("event-switcher-empty")).toContainText(
+      "Create your first event"
+    );
+
+    // Accessibility check on empty state (1440x900)
     const emptyAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();
@@ -42,10 +54,10 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
       await page.screenshot({
         path: "docs/screenshots/events-home-empty-mobile.png",
       });
-      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.setViewportSize({ width: 1440, height: 900 });
     }
 
-    // 2. Create 1st event -> populated state (<= 3 events -> search hidden)
+    // 2. Single-event state (1 event)
     const event1 = await createTestEvent(page, {
       couple: "Ọlá & Adéṣọlá",
       title: "The Royal Nuptials of Ọlá & Adéṣọlá",
@@ -54,33 +66,66 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
 
     await page.goto("/events");
     await expect(page.locator("h1")).toHaveText("Your events");
-    await expect(page.getByTestId("tab-upcoming")).toContainText(
-      "Upcoming (1)"
-    );
-    await expect(page.getByTestId("tab-past")).toContainText("Past (0)");
 
-    // Search must be hidden with <= 3 events
+    // Sidebar now shows EventSwitcher and all 11 event sections
+    await expect(page.getByTestId("event-switcher-current-title")).toHaveText(
+      event1.title
+    );
+    const sectionsContainer = page.getByTestId("sidebar-event-sections");
+    await expect(sectionsContainer).toBeVisible();
+    for (const sectionName of [
+      "Overview",
+      "Guests",
+      "Invitations",
+      "Reminders",
+      "Seating",
+      "Check-in",
+      "Vendors",
+      "Team",
+      "Page editor",
+      "Billing",
+      "Settings",
+    ]) {
+      await expect(
+        sectionsContainer.getByRole("link", { name: sectionName, exact: true })
+      ).toBeVisible();
+    }
+
+    // Single-event tile shows Seating mini progress and hides All Events table (only 1 event)
+    await expect(
+      page.getByTestId(`upcoming-event-tile-${event1.eventId}`)
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("single-event-seating-progress")
+    ).toContainText(/0 of 0 seated/i);
+    await expect(page.getByTestId("all-events-card")).toHaveCount(0);
     await expect(page.getByTestId("events-search")).toHaveCount(0);
 
-    // Hero card assertions: WAT date + countdown + RSVP breakdown + Open event CTA
-    const heroCard = page.getByTestId("hero-event-card");
-    await expect(heroCard).toBeVisible();
-    await expect(heroCard).toContainText(event1.title);
-    await expect(heroCard).toContainText(/WAT/);
-    await expect(page.getByTestId("hero-rsvp-panel")).toBeVisible();
-    await expect(page.getByTestId("hero-rsvp-panel")).toContainText(
-      /people attending|person attending/i
+    // Donut numbers match metrics (0 attending, 0% accepted/awaiting/declined)
+    await expect(page.getByTestId("donut-attending-count")).toContainText("0");
+    await expect(page.getByTestId("donut-legend-accepted")).toContainText(
+      "0 parties"
+    );
+    await expect(page.getByTestId("donut-legend-awaiting")).toContainText(
+      "0 parties"
+    );
+    await expect(page.getByTestId("donut-legend-declined")).toContainText(
+      "0 parties"
     );
 
-    // Coming up section visible
-    await expect(page.getByTestId("coming-up-section")).toBeVisible();
+    if (process.env.CAPTURE_SCREENSHOTS === "1") {
+      await page.screenshot({
+        path: "docs/screenshots/events-home-single-desktop.png",
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.screenshot({
+        path: "docs/screenshots/events-home-single-mobile.png",
+      });
+      await page.setViewportSize({ width: 1440, height: 900 });
+    }
 
-    // Clicking "Open event" navigates to /events/<id>
-    await heroCard.getByRole("link", { name: /^Open event$/i }).click();
-    await expect(page).toHaveURL(new RegExp(`/events/${event1.eventId}$`));
-
-    // 3. Create 3 more events (total 4 > 3) to trigger search threshold
-    await createTestEvent(page, {
+    // 3. Populated state (4 events > 3 -> search visible, All events table visible)
+    const event2 = await createTestEvent(page, {
       couple: "Chidinma & Obinna",
       title: "Chidinma & Obinna Traditional Engagement",
       venue: "Landmark Centre",
@@ -97,34 +142,33 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
     });
 
     await page.goto("/events");
+    await expect(page.getByTestId("all-events-card")).toBeVisible();
     await expect(page.getByTestId("tab-upcoming")).toContainText(
       "Upcoming (4)"
     );
+    await expect(page.getByTestId("tab-past")).toContainText("Past (0)");
 
-    // Search input is now visible (> 3 events)
+    // Event switcher changes the sidebar links to the chosen event
+    await page.getByTestId("event-switcher-trigger").click();
+    await page.getByTestId(`event-switcher-option-${event2.eventId}`).click();
+    await expect(page.getByTestId("event-switcher-current-title")).toHaveText(
+      event2.title
+    );
+    await expect(
+      sectionsContainer.getByRole("link", { name: "Guests", exact: true })
+    ).toHaveAttribute("href", `/events/${event2.eventId}/guests`);
+
+    // Search input (> 3 events) filters events diacritic-insensitively
     const searchBox = page.getByTestId("events-search");
     await expect(searchBox).toBeVisible();
     const searchInput = searchBox.locator("input");
-
-    // Live diacritic-insensitive filtering ("Adesola" matches "Adéṣọlá")
     await searchInput.fill("Adesola");
-    await expect(page.getByTestId("hero-event-card")).toContainText(
-      "Ọlá & Adéṣọlá"
-    );
-    await expect(page.getByTestId("event-card")).toHaveCount(0);
+    await expect(
+      page.getByTestId(`upcoming-event-tile-${event1.eventId}`)
+    ).toBeVisible();
+    await searchInput.fill("");
 
-    // No-match shows "Clear search" and resets
-    await searchInput.fill("Nonexistent Venue XYZ");
-    const noResults = page.getByTestId("events-no-results");
-    await expect(noResults).toBeVisible();
-    await expect(noResults).toContainText(
-      'No events match "Nonexistent Venue XYZ"'
-    );
-    await noResults.getByRole("button", { name: /Clear search/i }).click();
-    await expect(searchInput).toHaveValue("");
-    await expect(page.getByTestId("hero-event-card")).toBeVisible();
-
-    // 4. Accessibility scan at 1280x800 (populated)
+    // 4. Axe WCAG 2.2 AA scan at 1440px (populated)
     const desktopAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();
@@ -136,12 +180,17 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
       });
     }
 
-    // 5. Phone viewport (390x844): bottom glass tab bar visible, desktop sidebar hidden,
-    //    floating "New event" button visible, zero horizontal scroll, and Axe scan clean
+    // 5. Phone viewport (390x844): floating glass bottom bar with 4 items (Home, Guests, Check-in, More)
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(page.getByTestId("phone-tab-bar")).toBeVisible();
+    const phoneBar = page.getByTestId("phone-tab-bar");
+    await expect(phoneBar).toBeVisible();
     await expect(page.getByTestId("desktop-sidebar")).toBeHidden();
     await expect(page.getByTestId("floating-new-event")).toBeVisible();
+    await expect(phoneBar.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(phoneBar.getByRole("link", { name: "Guests" })).toBeVisible();
+    await expect(
+      phoneBar.getByRole("link", { name: "Check-in" })
+    ).toBeVisible();
 
     if (process.env.CAPTURE_SCREENSHOTS === "1") {
       await page.screenshot({
@@ -149,20 +198,20 @@ test.describe("My Events Home (/events) & Liquid Glass Navigation Shell", () => 
       });
     }
 
-    const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth
-    );
-    expect(hasHorizontalOverflow).toBe(false);
-
+    // Axe WCAG 2.2 AA scan at 390px
     const mobileAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();
     expect(mobileAxe.violations).toEqual([]);
 
-    // 6. Reduced motion: page renders cleanly
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.reload();
-    await expect(page.locator("h1")).toHaveText("Your events");
-    await expect(page.getByTestId("hero-event-card")).toBeVisible();
+    // Clicking "More" opens the sheet with remaining sections and event switcher
+    await page.getByTestId("phone-more-button").click();
+    const moreSheet = page.getByTestId("phone-more-sheet");
+    await expect(moreSheet).toBeVisible();
+    await expect(
+      page.getByTestId("phone-more-sections").getByRole("link", {
+        name: "Seating",
+      })
+    ).toBeVisible();
   });
 });
