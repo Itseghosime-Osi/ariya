@@ -80,7 +80,7 @@ export async function createTestEvent(
 
   // Step 4: Direct redirect to celebration workspace (/events/<id>) with success toast
   await page.waitForURL(/\/events\/[0-9a-fA-F-]+/, { timeout: 15000 });
-  await expect(page.getByText(/Celebration workspace ready/i)).toBeVisible({
+  await expect(page.getByText(/Your event has been created/i)).toBeVisible({
     timeout: 10000,
   });
 

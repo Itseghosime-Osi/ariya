@@ -16,7 +16,10 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
   const rsvpDeadline = event.rsvpBy ? formatLagosDate(event.rsvpBy) : null;
 
   return (
-    <section className="p-8 sm:p-10 rounded-2xl bg-night text-ivory text-center space-y-5 shadow-2xl border border-outline-variant/20">
+    <section
+      data-testid="attendance-panel"
+      className="p-8 sm:p-10 rounded-2xl bg-night text-ivory text-center space-y-5 shadow-2xl border border-outline-variant/20"
+    >
       <div className="w-12 h-12 rounded-2xl bg-wine/40 text-gold flex items-center justify-center mx-auto border border-gold/30 shadow-inner">
         <Icon name="mark_email_read" className="text-2xl" />
       </div>
@@ -25,7 +28,7 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
         <h3 className="font-serif text-2xl text-gold font-medium">
           Confirm Your Attendance
         </h3>
-        <p className="text-xs sm:text-sm text-mist leading-relaxed">
+        <p className="text-xs sm:text-sm text-ivory/80 leading-relaxed">
           {rsvpDeadline
             ? `Please respond by ${rsvpDeadline} to ensure personalized banquet seating.`
             : "Enter your private invitation passcode sent via WhatsApp or email to access your pass and RSVP."}
@@ -53,7 +56,7 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
         </button>
       </form>
 
-      <p className="text-[11px] uppercase tracking-widest text-mist/80 pt-1">
+      <p className="text-[11px] uppercase tracking-widest text-gold/80 pt-1">
         Personalized Pass Required for Entry
       </p>
     </section>

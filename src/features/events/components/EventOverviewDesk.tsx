@@ -30,21 +30,31 @@ export function EventOverviewDesk({
 
   useEffect(() => {
     if (searchParams?.get("created")) {
-      showToast("Celebration workspace ready.");
+      showToast("Your event has been created");
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("created");
+        window.history.replaceState(
+          null,
+          "",
+          url.pathname + (url.search ? url.search : "")
+        );
+      }
     }
   }, [searchParams]);
 
+  const totalParties = metrics.totalParties;
   const confirmedPct =
-    metrics.totalAttendees > 0
-      ? Math.round((metrics.acceptedGuests / metrics.totalAttendees) * 100)
+    totalParties > 0
+      ? Math.round((metrics.acceptedParties / totalParties) * 100)
       : 0;
   const awaitingPct =
-    metrics.totalAttendees > 0
-      ? Math.round((metrics.awaitingGuests / metrics.totalAttendees) * 100)
+    totalParties > 0
+      ? Math.round((metrics.awaitingParties / totalParties) * 100)
       : 0;
   const declinedPct =
-    metrics.totalAttendees > 0
-      ? Math.round((metrics.declinedGuests / metrics.totalAttendees) * 100)
+    totalParties > 0
+      ? Math.round((metrics.declinedParties / totalParties) * 100)
       : 0;
 
   return (
@@ -113,7 +123,10 @@ export function EventOverviewDesk({
 
         {/* 40% Right Area: Curated Stationery Presentation */}
         <div className="lg:col-span-5 bg-paper rounded-[24px] p-space-lg flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] relative border border-surface-container-high/40">
-          <div className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full shadow-md bg-night flex flex-col justify-between p-6">
+          <div
+            data-testid="invitation-tile"
+            className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full shadow-md bg-night flex flex-col justify-between p-6"
+          >
             <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-wine/50 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-gold/20 blur-2xl pointer-events-none" />
 
@@ -131,7 +144,7 @@ export function EventOverviewDesk({
               </span>
             </div>
 
-            <div className="relative z-10 flex items-center justify-between text-on-surface-variant text-[12px]">
+            <div className="relative z-10 flex items-center justify-between text-ivory/80 text-[12px]">
               <span>Ceremony &amp; Reception</span>
               <span className="text-gold font-semibold">
                 Personal Guest Link
