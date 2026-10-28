@@ -79,7 +79,7 @@ export function InvitationCardPreview({
           <h2
             className={`font-serif text-3xl font-bold tracking-tight leading-tight ${styles.textTitle}`}
           >
-            {coupleName}
+            {design.headline || coupleName}
           </h2>
           <p className={`text-xs italic ${styles.textBody}`}>
             {design.subheadline}

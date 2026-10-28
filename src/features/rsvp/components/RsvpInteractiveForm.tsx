@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { submitRsvpAction } from "../actions";
 import type { InvitationData } from "../types";
+import { getGuestTheme } from "../themes";
 import { AcceptedGuestFields } from "./AcceptedGuestFields";
 
 interface RsvpInteractiveFormProps {
@@ -27,22 +28,39 @@ export function RsvpInteractiveForm({
   const [attendingCount, setAttendingCount] = useState<number>(
     rsvp?.attending_count && rsvp.attending_count > 0
       ? rsvp.attending_count
-      : guest.party_size
+      : guest.party_size || 1
   );
+
+  const handleStatusChange = (newStatus: "accepted" | "declined") => {
+    setStatus(newStatus);
+    if (newStatus === "accepted") {
+      setAttendingCount((prev) => (prev > 0 ? prev : guest.party_size || 1));
+    } else {
+      setAttendingCount(0);
+    }
+  };
+
+  const theme = getGuestTheme(event.invitation_theme);
 
   return (
     <article className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 sm:p-10 shadow-sm space-y-8 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-wine via-gold to-wine" />
+      <div
+        className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${theme.topBar}`}
+      />
 
       {/* Invitation Header */}
       <section className="text-center space-y-3 pt-2">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-wine/10 text-wine">
+        <span
+          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${theme.badge}`}
+        >
           {isRevise ? "Revision Mode" : `Invitation for ${guest.display_name}`}
         </span>
-        <h1 className="font-serif text-2xl sm:text-3xl text-wine font-medium">
+        <h1
+          className={`font-serif text-2xl sm:text-3xl font-medium ${theme.headline}`}
+        >
           {event.invitation_headline || event.title}
         </h1>
-        <p className="font-serif text-lg italic text-wine/80">
+        <p className={`font-serif text-lg italic ${theme.subheadline}`}>
           {event.invitation_subheadline || `The Celebration of ${event.couple}`}
         </p>
         {event.invitation_message && (
@@ -65,42 +83,48 @@ export function RsvpInteractiveForm({
 
         {/* Status Selection */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
+          <label
+            className={`text-xs font-semibold uppercase tracking-wider block ${theme.label}`}
+          >
             Attendance Confirmation
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label
+              htmlFor="status-accepted"
               className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                 status === "accepted"
-                  ? "bg-wine/5 border-wine text-wine font-medium shadow-sm"
+                  ? theme.activeRadio
                   : "bg-white border-outline-variant/60 text-night hover:border-wine/40"
               }`}
             >
               <input
+                id="status-accepted"
                 type="radio"
                 name="status"
                 value="accepted"
                 checked={status === "accepted"}
-                onChange={() => setStatus("accepted")}
-                className="text-wine focus:ring-wine"
+                onChange={() => handleStatusChange("accepted")}
+                className={theme.radioAccent}
               />
               <span className="text-sm">Joyfully Accept</span>
             </label>
 
             <label
+              htmlFor="status-declined"
               className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                 status === "declined"
-                  ? "bg-wine/5 border-wine text-wine font-medium shadow-sm"
+                  ? theme.activeRadio
                   : "bg-white border-outline-variant/60 text-night hover:border-wine/40"
               }`}
             >
               <input
+                id="status-declined"
                 type="radio"
                 name="status"
                 value="declined"
                 checked={status === "declined"}
-                onChange={() => setStatus("declined")}
-                className="text-wine focus:ring-wine"
+                onChange={() => handleStatusChange("declined")}
+                className={theme.radioAccent}
               />
               <span className="text-sm">Regretfully Decline</span>
             </label>
@@ -120,20 +144,24 @@ export function RsvpInteractiveForm({
 
         {/* Email Address for Digital Pass Delivery */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
+          <label
+            className={`text-xs font-semibold uppercase tracking-wider block ${theme.label}`}
+          >
             Email Address (for pass confirmation)
           </label>
           <input
             type="email"
             name="email"
             placeholder="e.g. guest@example.com"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className={`w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 ${theme.focusRing}`}
           />
         </div>
 
         {/* Blessings Note */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80 block">
+          <label
+            className={`text-xs font-semibold uppercase tracking-wider block ${theme.label}`}
+          >
             Blessing or Special Note for {event.couple}
           </label>
           <textarea
@@ -141,14 +169,14 @@ export function RsvpInteractiveForm({
             rows={2}
             defaultValue={rsvp?.note || ""}
             placeholder="Share your prayers and warm wishes..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+            className={`w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 ${theme.focusRing} resize-none`}
           />
         </div>
 
         <button
           type="submit"
           disabled={isPending}
-          className="w-full py-3 px-6 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+          className={`w-full py-3 px-6 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 ${theme.primaryButton}`}
         >
           <Icon
             name={isPending ? "refresh" : "send"}

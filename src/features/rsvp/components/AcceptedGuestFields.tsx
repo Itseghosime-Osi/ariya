@@ -38,7 +38,13 @@ export function AcceptedGuestFields({
         </div>
       )}
 
-      {maxParty <= 1 && <input type="hidden" name="attendingCount" value={1} />}
+      {maxParty <= 1 && (
+        <input
+          type="hidden"
+          name="attendingCount"
+          value={Math.max(1, guest.party_size || 1)}
+        />
+      )}
 
       {guest.plus_ones_allowed && attendingCount > 1 && (
         <div className="space-y-1.5">
