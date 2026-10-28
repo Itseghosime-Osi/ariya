@@ -1,94 +1,105 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import { Badge } from "@/components/ui/badge";
+import { GlobalSearch } from "./global-search";
 import { formatEventDate } from "@/lib/format";
+import { signOutAction } from "@/features/auth/actions";
 
 interface TopBarProps {
-  title?: string;
-  dateStr?: string;
-  daysAway?: number | null;
-  onOpenSearch?: () => void;
+  eventId?: string;
+  eventTitle?: string;
+  eventDate?: string;
+  daysAway?: number;
 }
 
 export function TopBar({
-  title = "Àríyá Celebration",
-  dateStr = "",
-  daysAway = null,
-  onOpenSearch,
+  eventId,
+  eventTitle,
+  eventDate,
+  daysAway,
 }: TopBarProps) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
-    <header className="fixed top-0 left-0 md:left-[84px] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
-      <div className="h-16 w-full px-6 md:px-8 flex items-center justify-between">
-        {/* Left: Event Quick Context */}
-        <div className="flex items-center gap-3 text-sm flex-wrap">
+    <>
+      <header className="glass sticky top-0 z-30 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-ivory/50 after:to-transparent">
+        <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
             href="/events"
-            className="font-bold text-primary tracking-wide hover:underline"
+            aria-label="Àríyá Home"
+            className="md:hidden flex items-center gap-1.5 font-display text-lg font-bold text-night shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy rounded-lg px-1"
           >
-            {title}
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy text-sm font-bold text-ivory">
+              À
+            </span>
+            <span>Àríyá</span>
           </Link>
-          <span className="text-mist hidden sm:inline">•</span>
-          <span className="text-on-surface-variant hidden sm:inline">
-            {dateStr ? formatEventDate(dateStr) : ""}
-          </span>
-          {daysAway !== null && (
-            <>
-              <span className="text-mist hidden md:inline">•</span>
-              <Badge variant="awaiting" className="text-xs">
-                {daysAway > 0
-                  ? `${daysAway} days away`
-                  : daysAway === 0
-                    ? "Today"
-                    : "Concluded"}
-              </Badge>
-            </>
-          )}
-        </div>
 
-        {/* Right: Search, Workspace Pill, Profile */}
-        <div className="flex items-center gap-3">
-          {onOpenSearch && (
-            <button
-              onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl bg-surface-container text-on-surface-variant text-xs hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-wine"
-              title="Search celebration (Cmd + K)"
-            >
-              <Icon
-                name="search"
-                size={16}
-                className="text-wine"
-                aria-hidden="true"
-              />
-              <span className="sr-only sm:not-sr-only sm:inline">
-                Search celebration...
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search events, guests, and vendors"
+            className="w-full min-h-[44px] flex items-center justify-between bg-surface/90 hover:bg-surface px-3.5 py-2 rounded-full border border-hairline transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <div className="flex items-center gap-2.5 text-label-2 min-w-0">
+              <Icon name="search" size={16} className="shrink-0" />
+              <span className="text-xs sm:text-sm truncate">
+                Search events, guests, tables...
               </span>
-              <kbd
-                aria-hidden="true"
-                className="hidden sm:inline-block rounded bg-surface-container-highest px-1.5 py-0.5 text-[10px] text-on-surface-variant"
-              >
-                ⌘K
-              </kbd>
-            </button>
+            </div>
+            <kbd className="hidden sm:inline-block rounded bg-ivory px-2 py-0.5 text-[10px] font-medium text-label-2 border border-hairline">
+              ⌘K
+            </kbd>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          {eventTitle && (
+            <div className="hidden sm:flex items-center gap-2 bg-surface px-3.5 py-1.5 rounded-full border border-hairline">
+              <Icon
+                name="celebration"
+                size={15}
+                className="text-burgundy shrink-0"
+              />
+              <span className="text-xs font-semibold text-night truncate max-w-[180px]">
+                {eventTitle}
+              </span>
+              {eventDate && (
+                <>
+                  <span className="text-label-3">•</span>
+                  <span className="text-xs text-label-2">
+                    {formatEventDate(eventDate)}
+                  </span>
+                </>
+              )}
+              {typeof daysAway === "number" && daysAway >= 0 && (
+                <span className="ml-1 px-2 py-0.5 rounded-full bg-burgundy/10 text-burgundy text-[11px] font-semibold">
+                  {daysAway === 0 ? "Today" : `${daysAway}d`}
+                </span>
+              )}
+            </div>
           )}
 
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-surface-container text-on-surface-variant text-xs font-medium">
-            <Icon name="verified" size={15} className="text-wine" />
-            <span>Àríyá workspace</span>
-          </div>
-
-          <Link
-            href="/events"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-primary flex items-center justify-center text-ivory hover:opacity-90 transition-opacity"
-            title="Celebrations overview"
-            aria-label="Celebrations overview"
-          >
-            <Icon name="celebration" size={20} />
-          </Link>
+          <form action={signOutAction} className="md:hidden">
+            <button
+              type="submit"
+              title="Sign out"
+              aria-label="Sign out"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-hairline bg-surface/90 text-label-2 hover:text-burgundy transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              <Icon name="logout" size={17} />
+            </button>
+          </form>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <GlobalSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        eventId={eventId}
+      />
+    </>
   );
 }
