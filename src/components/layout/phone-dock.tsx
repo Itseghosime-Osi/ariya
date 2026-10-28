@@ -89,6 +89,7 @@ export function PhoneDock({
   const menuId = useId();
   const createRef = useRef<HTMLButtonElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
+  const pillRef = useRef<HTMLElement>(null);
   const morePanelRef = useRef<HTMLDivElement>(null);
   const moreId = useId();
   const firstActionRef = useRef<HTMLAnchorElement>(null);
@@ -98,6 +99,9 @@ export function PhoneDock({
   const [typing, setTyping] = useState(false);
   const [burst, setBurst] = useState(0);
   const menuOpen = createOpen || moreOpen;
+  // Where the More button sits relative to the menu, so the bubble grows from
+  // it and shrinks back into it.
+  const [bubbleOrigin, setBubbleOrigin] = useState("62% 100%");
 
   const eventId = isValidEventId(activeEvent?.id) ? activeEvent.id : null;
   const base = eventId ? `/events/${eventId}` : null;
@@ -233,6 +237,19 @@ export function PhoneDock({
 
   const toggleMore = () => {
     setCreateOpen(false);
+    const button = moreRef.current;
+    const pill = pillRef.current;
+    if (button && pill && !moreOpen) {
+      const b = button.getBoundingClientRect();
+      const n = pill.getBoundingClientRect();
+      // The menu spans the dock (max 28rem) and floats 12px above the pill.
+      const dockWidth = window.innerWidth - 24;
+      const panelWidth = Math.min(dockWidth, 448);
+      const panelLeft = 12 + (dockWidth - panelWidth) / 2;
+      const x = b.left + b.width / 2 - panelLeft;
+      const below = b.top + b.height / 2 - (n.top - 12);
+      setBubbleOrigin(`${Math.round(x)}px calc(100% + ${Math.round(below)}px)`);
+    }
     setMoreOpen((open) => !open);
   };
 
@@ -302,14 +319,23 @@ export function PhoneDock({
               aria-label="Celebration menu"
               data-testid="phone-more-sheet"
               className="absolute inset-x-0 bottom-full mx-auto mb-3 max-h-[min(70dvh,34rem)] max-w-md overflow-y-auto overscroll-contain rounded-[28px] bg-white/95 p-4 shadow-[0_24px_50px_-20px_rgba(28,7,13,0.5),0_2px_8px_-2px_rgba(28,7,13,0.12)] ring-1 ring-black/5"
-              style={{ transformOrigin: "62% 100%" }}
-              initial={{ opacity: 0, y: 28, scale: 0.88 }}
-              animate={{ opacity: 1, y: 0, scale: 1, transition: SPRING }}
+              style={{ transformOrigin: bubbleOrigin }}
+              initial={{ opacity: 0, scale: 0.05 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                transition: {
+                  scale: { type: "spring", bounce: 0.28, duration: 0.6 },
+                  opacity: { duration: 0.14 },
+                },
+              }}
               exit={{
                 opacity: 0,
-                y: 18,
-                scale: 0.92,
-                transition: { duration: 0.16 },
+                scale: 0.05,
+                transition: {
+                  scale: { duration: 0.32, ease: [0.5, 0, 0.8, 0.4] },
+                  opacity: { duration: 0.12, delay: 0.2 },
+                },
               }}
             >
               <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
@@ -432,6 +458,7 @@ export function PhoneDock({
 
         <div className="mx-auto flex max-w-md items-center gap-2.5">
           <motion.nav
+            ref={pillRef}
             aria-label="Mobile navigation"
             data-testid="phone-tab-bar"
             className="dock-pill flex min-w-0 flex-1 items-center rounded-full bg-white p-1.5"
