@@ -332,6 +332,17 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
       tone: "steady",
     });
   }
+  const conflicts = metrics.conflictedParties ?? 0;
+  if (conflicts > 0) {
+    out.push({
+      title: `Resolve ${conflicts} seating ${conflicts === 1 ? "conflict" : "conflicts"}`,
+      reason:
+        "A party size changed on RSVP, so their table no longer fits. Give them a new seat.",
+      href: `${base}/seating`,
+      cta: "Open seating",
+      tone: "urgent",
+    });
+  }
   if (overdue.length > 0) {
     const t = overdue[0];
     out.push({

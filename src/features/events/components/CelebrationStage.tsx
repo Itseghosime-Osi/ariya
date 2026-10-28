@@ -238,7 +238,7 @@ export function CelebrationStage({
               >
                 <Icon name="chevron_left" size={18} />
               </button>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center">
                 {slides.map((s, i) => (
                   <button
                     key={s.event.id}
@@ -246,7 +246,7 @@ export function CelebrationStage({
                     onClick={() => go(i)}
                     aria-label={`Show ${s.event.couple || s.event.title}`}
                     aria-current={i === index ? "true" : undefined}
-                    className="grid h-6 place-items-center px-0.5"
+                    className="grid h-6 min-w-6 place-items-center"
                   >
                     <span
                       className={`block h-1.5 rounded-full transition-all duration-300 ${

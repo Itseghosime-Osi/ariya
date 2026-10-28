@@ -286,6 +286,21 @@ describe("pickNextActions", () => {
     expect(list[3].title).toBe("Confirm 1 vendor");
   });
 
+  it("puts seating conflicts ahead of everything else", () => {
+    const list = pickNextActions({
+      eventId: "e1",
+      metrics: metrics({ daysAway: 20, conflictedParties: 2 }),
+      vendors: [vendor()],
+      tasks: [task({ dueDate: "2026-10-01" })],
+      todayKey: "2026-11-01",
+    });
+    expect(list[0]).toMatchObject({
+      title: "Resolve 2 seating conflicts",
+      href: "/events/e1/seating",
+      tone: "urgent",
+    });
+  });
+
   it("files each phase's own tasks, earliest first", () => {
     const phases = buildPlanningPhases(
       "2026-12-12",

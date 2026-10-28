@@ -131,7 +131,7 @@ export function BudgetWeave({
                     onFocus={() => setActive(c.category)}
                     onBlur={() => setActive(null)}
                     aria-label={`${c.category}: ${formatKobo(c.costKobo)} committed, ${formatKobo(c.paidKobo)} paid`}
-                    className="relative h-full min-w-[10px] overflow-hidden rounded-xl outline-none transition-[opacity,transform] duration-200 focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2"
+                    className="relative h-full min-w-6 overflow-hidden rounded-xl outline-none transition-[opacity,transform] duration-200 focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2"
                     style={{
                       flexGrow: Math.max(c.costKobo, total * 0.02),
                       flexBasis: 0,
