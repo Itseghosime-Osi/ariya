@@ -91,8 +91,8 @@ export function SeatingDesk({ eventId, initialData }: SeatingDeskProps) {
                   No Tables Added Yet
                 </h3>
                 <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-                  Begin orchestrating your floor plan by adding banquet, round,
-                  or head tables.
+                  Begin setting up your floor plan by adding tables and
+                  assigning guests.
                 </p>
                 <button
                   type="button"

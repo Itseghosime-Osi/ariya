@@ -74,7 +74,7 @@ test.describe("Seating Chart & Capacity Conflict", () => {
 
     // Eniola increases attending count to 2 via RSVP
     await page.goto(rsvpLink);
-    await expect(page.getByText(/Personal Celebration Pass/i)).toBeVisible();
+    await expect(page.getByText(/Your guest pass/i)).toBeVisible();
     await page.getByLabel(/Joyfully Accept/i).check();
     const attendeeSelect = page.locator('select[name="attendingCount"]');
     if (await attendeeSelect.isVisible()) {

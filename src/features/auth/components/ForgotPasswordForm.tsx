@@ -48,23 +48,23 @@ export function ForgotPasswordForm() {
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-surface-container text-wine font-semibold">
-            State 01: Identification
+            Account Recovery
           </span>
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Step 1 of 4
+            Step 1 of 2
           </span>
         </div>
 
         <div className="mb-6">
           <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block mb-1 font-bold">
-            CREDENTIAL RECOVERY
+            PASSWORD RECOVERY
           </span>
           <h1 className="font-display text-display text-wine tracking-tight">
-            Forgot Passcode?
+            Forgot Password?
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-            Enter the email address registered with your celebration dossier to
-            receive cryptographic reset instructions.
+            Enter the email address registered with your account to receive
+            password reset instructions.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export function ForgotPasswordForm() {
               className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold"
               htmlFor="reset-email"
             >
-              Registered Planner Email
+              Email Address
             </label>
             <div className="relative">
               <Icon
@@ -87,7 +87,7 @@ export function ForgotPasswordForm() {
               <input
                 className="w-full bg-paper text-night font-body-md text-body-md pl-11 pr-4 py-3 rounded-xl shadow-inner outline-none transition-all placeholder:text-mist focus:bg-surface-container-lowest"
                 id="reset-email"
-                placeholder="curator@celebrations.ng"
+                placeholder="you@example.com"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -96,7 +96,7 @@ export function ForgotPasswordForm() {
               />
             </div>
             <span className="font-body-sm text-body-sm text-mist block pt-0.5">
-              Must match the email used on your wedding workspace.
+              Must match the email used on your account.
             </span>
           </div>
 
@@ -106,10 +106,10 @@ export function ForgotPasswordForm() {
             disabled={isPending}
           >
             {isPending ? (
-              <span>Dispatching Reset Link...</span>
+              <span>Sending Reset Link...</span>
             ) : (
               <>
-                <span>Dispatch Recovery Link</span>
+                <span>Send Reset Link</span>
                 <Icon name="send" className="text-xl text-gold" />
               </>
             )}

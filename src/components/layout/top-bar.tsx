@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
+import { formatEventDate } from "@/lib/format";
 
 interface TopBarProps {
   title?: string;
@@ -13,9 +14,9 @@ interface TopBarProps {
 }
 
 export function TopBar({
-  title = "Chidinma & Tunde",
-  dateStr = "12 Dec 2026",
-  daysAway = 47,
+  title = "Àríyá Celebration",
+  dateStr = "",
+  daysAway = null,
   onOpenSearch,
 }: TopBarProps) {
   return (
@@ -31,7 +32,7 @@ export function TopBar({
           </Link>
           <span className="text-mist hidden sm:inline">•</span>
           <span className="text-on-surface-variant hidden sm:inline">
-            {dateStr}
+            {dateStr ? formatEventDate(dateStr) : ""}
           </span>
           {daysAway !== null && (
             <>

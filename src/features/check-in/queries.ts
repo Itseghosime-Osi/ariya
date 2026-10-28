@@ -5,27 +5,64 @@ import type { CheckInDeskData, RecentCheckIn, CheckInStats } from "./types";
 export async function getCheckInDeskData(
   eventId: string
 ): Promise<CheckInDeskData> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return {
+      stats: {
+        totalExpected: 0,
+        checkedIn: 0,
+        remaining: 0,
+        attendanceRate: 0,
+      },
+      recentCheckIns: [],
+    };
+  }
+
   const supabase = await createClient();
 
   const [expectedRes, checkInsRes, tablesRes] = await Promise.all([
     supabase
       .from("rsvps")
       .select("attending_count, guests!inner(event_id)")
-      .eq("guests.event_id", eventId)
+      .eq("guests.event_id", cleanId)
       .eq("status", "accepted"),
     supabase
       .from("check_ins")
-      .select(
-        "id, guest_id, checked_in_count, checked_in_at, guests(display_name, first_name, name)"
-      )
-      .eq("event_id", eventId)
+      .select("id, guest_id, checked_in_count, checked_in_at, guests(name)")
+      .eq("event_id", cleanId)
       .order("checked_in_at", { ascending: false })
       .limit(20),
     supabase
       .from("seat_assignments")
       .select("guest_id, tables(name)")
-      .eq("tables.event_id", eventId),
+      .eq("tables.event_id", cleanId),
   ]);
+
+  if (expectedRes.error) {
+    console.error("[getCheckInDeskData] Failed to load RSVPs:", {
+      code: expectedRes.error.code,
+      message: expectedRes.error.message,
+    });
+    throw new Error(
+      `Failed to load check-in RSVPs: ${expectedRes.error.message}`
+    );
+  }
+  if (checkInsRes.error) {
+    console.error("[getCheckInDeskData] Failed to load check-ins:", {
+      code: checkInsRes.error.code,
+      message: checkInsRes.error.message,
+    });
+    throw new Error(`Failed to load check-ins: ${checkInsRes.error.message}`);
+  }
+  if (tablesRes.error) {
+    console.error("[getCheckInDeskData] Failed to load seating assignments:", {
+      code: tablesRes.error.code,
+      message: tablesRes.error.message,
+    });
+    throw new Error(
+      `Failed to load check-in tables: ${tablesRes.error.message}`
+    );
+  }
 
   const rawExpected = expectedRes.data || [];
   const totalExpected = rawExpected.reduce(

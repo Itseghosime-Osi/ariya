@@ -14,6 +14,6 @@ process.env.PAYSTACK_API_BASE = "https://api.paystack.co";
 process.env.EMAIL_TRANSPORT = "mailpit";
 process.env.MAILPIT_URL = "http://127.0.0.1:57324";
 process.env.RESEND_API_KEY = "re_test_mocked_key";
-process.env.RESEND_FROM_EMAIL = "rsvps@owambeplan.com";
+process.env.RESEND_FROM_EMAIL = "rsvps@ariya-two.vercel.app";
 process.env.RATE_LIMIT_SECRET = "test_rate_limit_secret_32_characters_long_min";
 process.env.CRON_SECRET = "test_cron_secret";

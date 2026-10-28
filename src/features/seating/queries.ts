@@ -5,6 +5,20 @@ import type { SeatingDeskData, SeatingGuest, TableWithGuests } from "./types";
 export async function getEventSeatingData(
   eventId: string
 ): Promise<SeatingDeskData> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return {
+      tables: [],
+      unseatedGuests: [],
+      stats: {
+        totalCapacity: 0,
+        seatedAttendees: 0,
+        unseatedAttendees: 0,
+        readinessPct: 0,
+      },
+    };
+  }
+
   const supabase = await createClient();
 
   const [tablesRes, guestsRes] = await Promise.all([
@@ -39,6 +53,26 @@ export async function getEventSeatingData(
       .eq("event_id", eventId)
       .order("name", { ascending: true }),
   ]);
+
+  if (tablesRes.error) {
+    console.error("[getEventSeatingData] Failed to load tables:", {
+      code: tablesRes.error.code,
+      message: tablesRes.error.message,
+    });
+    throw new Error(
+      `Failed to load seating tables: ${tablesRes.error.message}`
+    );
+  }
+
+  if (guestsRes.error) {
+    console.error("[getEventSeatingData] Failed to load guests:", {
+      code: guestsRes.error.code,
+      message: guestsRes.error.message,
+    });
+    throw new Error(
+      `Failed to load seating guests: ${guestsRes.error.message}`
+    );
+  }
 
   const rawTables = tablesRes.data || [];
   const rawGuests = guestsRes.data || [];

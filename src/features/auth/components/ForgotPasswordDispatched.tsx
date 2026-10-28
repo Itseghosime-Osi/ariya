@@ -21,10 +21,10 @@ export function ForgotPasswordDispatched({
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
           <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-secondary text-surface-container-lowest font-bold">
-            State 02: Check Inbox
+            Check Your Email
           </span>
           <span className="font-label-md text-label-md text-secondary font-semibold">
-            Step 2 of 4
+            Step 2 of 2
           </span>
         </div>
 
@@ -34,7 +34,7 @@ export function ForgotPasswordDispatched({
           </div>
           <div>
             <span className="font-label-sm text-label-sm uppercase text-secondary font-bold">
-              Dispatch Complete
+              Email Sent
             </span>
             <h2 className="font-headline-md text-headline-md text-night">
               Check Your Inbox
@@ -44,7 +44,7 @@ export function ForgotPasswordDispatched({
 
         <div className="bg-surface-container-lowest p-6 rounded-lg shadow-sm space-y-4 mb-6">
           <p className="font-body-md text-body-md text-paper-ink leading-relaxed">
-            We&apos;ve dispatched a secure passcode reset link to{" "}
+            We&apos;ve sent a secure password reset link to{" "}
             <strong className="font-title-md text-wine font-semibold">
               {email}
             </strong>

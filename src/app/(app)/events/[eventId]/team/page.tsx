@@ -7,7 +7,7 @@ import { TeamPageClient } from "./TeamPageClient";
 export const metadata: Metadata = {
   title: "Team & Roles • Àríyá Celebration Suite",
   description:
-    "Collaborative event orchestration, role-based access, and invitations",
+    "Collaborative event planning, role-based access, and invitations",
 };
 
 interface TeamPageProps {
@@ -34,8 +34,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
           Team & Collaboration Roles
         </h1>
         <p className="text-sm text-on-surface-variant max-w-2xl">
-          Coordinate with co-planners, the celebrant couple, and on-the-day
-          concierge staff with strict Nigerian wedding role hierarchy.
+          Coordinate with co-planners, the celebrant couple, and on-the-day team
+          members with role-based permissions.
         </p>
       </div>
 

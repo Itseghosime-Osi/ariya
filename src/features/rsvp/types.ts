@@ -25,6 +25,10 @@ export interface InvitationEvent {
   dress_code: string | null;
   rsvp_by: string | null;
   status: string;
+  invitation_theme?: string | null;
+  invitation_headline?: string | null;
+  invitation_subheadline?: string | null;
+  invitation_message?: string | null;
 }
 
 export interface InvitationData {

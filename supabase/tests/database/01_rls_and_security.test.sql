@@ -237,7 +237,7 @@ select results_eq(
 -- TEST 25: get_invitation event keys exactly match whitelist
 select results_eq(
   'select jsonb_object_keys(public.get_invitation(''token_valid_guest_1'')->''event'') order by 1',
-  ARRAY['area', 'couple', 'date', 'dress_code', 'id', 'rsvp_by', 'status', 'title', 'venue'],
+  ARRAY['area', 'couple', 'date', 'dress_code', 'id', 'invitation_headline', 'invitation_message', 'invitation_subheadline', 'invitation_theme', 'rsvp_by', 'status', 'title', 'venue'],
   'get_invitation event keys exactly match whitelist'
 );
 

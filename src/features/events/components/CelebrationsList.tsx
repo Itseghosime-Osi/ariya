@@ -65,8 +65,8 @@ export function CelebrationsList({
               Your Celebrations
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant">
-              Curate your portfolio of weddings and milestone gatherings across
-              Lagos, Ikoyi, and the diaspora.
+              Manage your weddings and milestone celebrations from invitation to
+              reception.
             </p>
           </div>
 
@@ -116,8 +116,8 @@ export function CelebrationsList({
               No celebrations yet
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-6">
-              Create your first wedding or celebration to begin orchestrating
-              guest rosters, Aṣọ-Ẹbí, and royal seating plans.
+              Create your first wedding or celebration to begin managing guests,
+              RSVPs, and seating arrangements.
             </p>
             <Link
               href="/events/new"
@@ -148,10 +148,12 @@ export function CelebrationsList({
                     dateStr={sec.event.date}
                     venueStr={sec.event.venue}
                     daysAway={sec.metrics.daysAway}
-                    totalInvited={sec.metrics.totalAttendees}
+                    totalInvited={sec.metrics.totalParties}
                     confirmed={sec.metrics.acceptedGuests}
-                    rsvpRate={sec.metrics.readinessPercentage}
-                    description={sec.event.dress_code || "Ceremonial attire"}
+                    rsvpRate={
+                      sec.metrics.rsvpRate ?? sec.metrics.readinessPercentage
+                    }
+                    description={sec.event.dress_code || "Formal attire"}
                     statusBadge={sec.event.status}
                     iconName="workspace_premium"
                   />
@@ -166,13 +168,10 @@ export function CelebrationsList({
         )}
 
         {/* Bottom Curatorial Note */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-mist font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left text-on-surface-variant font-label-sm text-label-sm pb-space-lg border-t border-surface-container-high pt-4 mt-8">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gold inline-block" />
             <span>Àríyá • Celebration Workspace</span>
-          </div>
-          <div>
-            <span>Synchronized with Lagos Ceremonial Servers</span>
           </div>
         </div>
       </div>

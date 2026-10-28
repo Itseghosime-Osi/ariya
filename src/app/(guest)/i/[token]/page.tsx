@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { getInvitationByToken, getCheckInCode } from "@/features/rsvp/queries";
 import { generateQrDataUrl } from "@/lib/qrcode";
+import { getGuestTheme } from "@/features/rsvp/themes";
 import { InvalidLinkCard } from "@/features/rsvp/components/InvalidLinkCard";
 import { ClosedEventCard } from "@/features/rsvp/components/ClosedEventCard";
 import { DeadlinePassedCard } from "@/features/rsvp/components/DeadlinePassedCard";
@@ -49,18 +50,24 @@ export default async function GuestInvitationPage({
     }
   }
 
+  const theme = getGuestTheme(data?.event?.invitation_theme);
+
   return (
-    <div className="min-h-screen bg-[#f8f5ee] flex flex-col justify-between py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-surface flex flex-col justify-between py-10 px-4 sm:px-6">
       <main className="max-w-xl mx-auto w-full space-y-6">
         {/* Monogram Seal Header */}
         <header className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-wine text-gold shadow-md">
+          <div
+            className={`inline-flex items-center justify-center w-12 h-12 rounded-xl shadow-md ${theme.seal}`}
+          >
             <span className="font-serif text-xl font-bold tracking-wider">
               À
             </span>
           </div>
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-wine/80">
-            Personal Celebration Pass
+          <p
+            className={`text-[11px] font-semibold tracking-widest uppercase ${theme.subheadline}`}
+          >
+            Your guest pass
           </p>
         </header>
 
@@ -92,7 +99,7 @@ export default async function GuestInvitationPage({
       </main>
 
       <footer className="text-center text-xs text-stone-700 font-medium pt-8">
-        <p>Àríyá • Bespoke African Ceremonies &amp; Royal Stationery Suite</p>
+        <p>Àríyá • Celebration Planning &amp; Guest Management</p>
       </footer>
     </div>
   );

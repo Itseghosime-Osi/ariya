@@ -3,6 +3,7 @@
 import React from "react";
 import { Icon } from "@/components/ui/icon";
 import { ReviewSection } from "./ReviewSection";
+import { formatEventDate, parseWatDateToUtc } from "@/lib/format";
 
 interface StepReviewLaunchProps {
   couple: string;
@@ -37,11 +38,7 @@ export function StepReviewLaunch({
   onEditGuestSetup,
   onLaunch,
 }: StepReviewLaunchProps) {
-  const formattedDate = new Date(date).toLocaleString("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Africa/Lagos",
-  });
+  const formattedDate = formatEventDate(parseWatDateToUtc(date));
 
   return (
     <section className="bg-surface-container-low rounded-xl p-6 sm:p-8 shadow-sm border border-surface-container-high">
@@ -54,8 +51,7 @@ export function StepReviewLaunch({
             Stage 3: Review &amp; Launch Summary
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Perform final solemnization checks before provisioning the
-            collaborative workspace.
+            Review your details, then create the event.
           </p>
         </div>
       </div>
@@ -65,7 +61,7 @@ export function StepReviewLaunch({
         <div className="divide-y divide-surface-container-high/60 space-y-6">
           <ReviewSection
             icon="favorite"
-            heading="Parties of Honour"
+            heading="Couple"
             onEdit={onEditDetails}
           >
             <div>
@@ -81,12 +77,12 @@ export function StepReviewLaunch({
                 Title
               </p>
               <p className="font-title-lg text-title-lg text-paper-ink font-semibold">
-                {title || `${couple}'s Nuptials`}
+                {title || `${couple}'s Wedding`}
               </p>
             </div>
             <div>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Aṣọ-Ẹbí Protocol
+                Aṣọ-Ẹbí &amp; Dress Code
               </p>
               <p className="font-body-md text-body-md text-wine font-medium">
                 {dressCode}
@@ -97,7 +93,7 @@ export function StepReviewLaunch({
           <div className="pt-6">
             <ReviewSection
               icon="schedule"
-              heading="Timeline &amp; Territorial Pavilion"
+              heading="Date, Time &amp; Venue"
               onEdit={onEditSchedule}
             >
               <div>
@@ -113,7 +109,7 @@ export function StepReviewLaunch({
               </div>
               <div className="md:col-span-2">
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Primary Venue Coordinates
+                  Venue Location
                 </p>
                 <p className="font-title-lg text-title-lg text-paper-ink font-semibold">
                   {venue}
@@ -128,12 +124,12 @@ export function StepReviewLaunch({
           <div className="pt-6">
             <ReviewSection
               icon="groups"
-              heading="Registry Intake &amp; Sizing"
+              heading="Guest List Sizing"
               onEdit={onEditGuestSetup}
             >
               <div>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Initial Ingestion
+                  Import
                 </p>
                 <p className="font-title-lg text-title-lg text-paper-ink font-semibold uppercase">
                   {intakeMethod}
@@ -150,7 +146,7 @@ export function StepReviewLaunch({
               <div className="bg-surface-container p-3 rounded-lg flex items-center gap-3">
                 <Icon name="verified" className="text-xl text-gold" />
                 <span className="font-body-sm text-body-sm text-paper-ink">
-                  Digital Stationery &amp; Sovereign Protocols enabled
+                  Digital Invitations &amp; RSVP Links enabled
                 </span>
               </div>
             </ReviewSection>

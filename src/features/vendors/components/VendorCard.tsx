@@ -111,7 +111,7 @@ export function VendorCard({
         )}
 
         {/* Financial metrics */}
-        <div className="grid grid-cols-3 gap-2 text-center bg-[#FCFAF7] p-2.5 rounded-xl border border-[#E8DFCF] text-xs">
+        <div className="grid grid-cols-3 gap-2 text-center bg-surface-container-lowest p-2.5 rounded-xl border border-outline-variant/30 text-xs">
           <div>
             <span className="text-[9px] uppercase font-bold text-wine/70 block">
               Contract

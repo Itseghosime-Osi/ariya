@@ -57,7 +57,7 @@ export async function createTestEvent(
 
   await page.goto("/events/new");
   await expect(page.locator("h1")).toContainText(
-    /Create & Orchestrate Celebration/i
+    /Create & Set Up Celebration/i
   );
 
   // Step 1: Celebration Details
@@ -78,14 +78,12 @@ export async function createTestEvent(
     .getByRole("button", { name: /create celebration workspace/i })
     .click();
 
-  // Step 4: Success confirmation
-  await expect(page.getByText(/Celebration Workspace Ready!/i)).toBeVisible({
-    timeout: 15000,
+  // Step 4: Direct redirect to celebration workspace (/events/<id>) with success toast
+  await page.waitForURL(/\/events\/[0-9a-fA-F-]+/, { timeout: 15000 });
+  await expect(page.getByText(/Your event has been created/i)).toBeVisible({
+    timeout: 10000,
   });
 
-  // Step 5: Navigate to Celebration Desk
-  await page.getByRole("link", { name: /open celebration desk/i }).click();
-  await page.waitForURL(/\/events\/[0-9a-fA-F-]+/, { timeout: 15000 });
   const url = page.url();
   const match = url.match(/\/events\/([0-9a-fA-F-]+)/);
   const eventId = match ? match[1] : "";
@@ -207,7 +205,7 @@ export function startMockPaystackServer(port = 57328): {
 
 export function signPayload(
   payload: string,
-  secret = "sk_test_sample"
+  secret = process.env.PAYSTACK_SECRET_KEY || "sk_test_sample"
 ): string {
   return crypto.createHmac("sha512", secret).update(payload).digest("hex");
 }

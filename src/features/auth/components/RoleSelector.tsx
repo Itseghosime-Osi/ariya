@@ -70,8 +70,8 @@ export function RoleSelector({ role, onChange, disabled }: RoleSelectorProps) {
               Professional Event Planner
             </span>
             <span className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-              Managing luxury banquets and milestone itineraries across multiple
-              client registries
+              Managing luxury celebrations and milestone itineraries across
+              multiple client registries
             </span>
           </div>
         </button>

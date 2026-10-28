@@ -44,12 +44,17 @@ export function InvitationDesignControls({
   onDesignChange,
 }: InvitationDesignControlsProps) {
   const [isPending, startTransition] = useTransition();
+  const [saved, setSaved] = React.useState(false);
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
-      await updateInvitationDesignAction(eventId, formData);
+      const res = await updateInvitationDesignAction(eventId, formData);
+      if (res?.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 4000);
+      }
     });
   };
 
@@ -60,20 +65,27 @@ export function InvitationDesignControls({
     >
       <div className="flex items-center justify-between pb-3 border-b border-outline-variant/40">
         <h3 className="font-serif text-lg font-bold text-night">
-          Card Customisation
+          Invitation design
         </h3>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="px-4 py-1.5 rounded-xl bg-wine text-ivory text-xs font-semibold hover:bg-wine/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
-        >
-          {isPending ? (
-            <Icon name="progress_activity" className="animate-spin text-sm" />
-          ) : (
-            <Icon name="save" className="text-sm" />
+        <div className="flex items-center gap-3">
+          {saved && (
+            <span className="text-xs text-emerald-700 font-semibold">
+              Saved successfully!
+            </span>
           )}
-          <span>Save Design</span>
-        </button>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="px-4 py-1.5 rounded-xl bg-wine text-ivory text-xs font-semibold hover:bg-wine/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {isPending ? (
+              <Icon name="progress_activity" className="animate-spin text-sm" />
+            ) : (
+              <Icon name="save" className="text-sm" />
+            )}
+            <span>Save Design</span>
+          </button>
+        </div>
       </div>
 
       {/* Theme selection */}
@@ -101,6 +113,25 @@ export function InvitationDesignControls({
         <input type="hidden" name="theme" value={design.theme} />
       </div>
 
+      {/* Headline */}
+      <div className="space-y-1">
+        <label
+          htmlFor="headline"
+          className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
+        >
+          Headline
+        </label>
+        <input
+          id="headline"
+          name="headline"
+          defaultValue={design.headline}
+          onChange={(e) =>
+            onDesignChange({ ...design, headline: e.target.value })
+          }
+          className="w-full px-3 py-2 rounded-xl border border-outline-variant/60 text-xs focus:ring-2 focus:ring-wine/40"
+        />
+      </div>
+
       {/* Subheadline */}
       <div className="space-y-1">
         <label
@@ -118,7 +149,6 @@ export function InvitationDesignControls({
           }
           className="w-full px-3 py-2 rounded-xl border border-outline-variant/60 text-xs focus:ring-2 focus:ring-wine/40"
         />
-        <input type="hidden" name="headline" value={design.headline} />
       </div>
 
       {/* Dress code note */}
@@ -146,7 +176,7 @@ export function InvitationDesignControls({
           htmlFor="customMessage"
           className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
         >
-          Reception & Banquet Note
+          Reception note
         </label>
         <textarea
           id="customMessage"

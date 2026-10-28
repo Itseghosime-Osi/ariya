@@ -34,7 +34,7 @@ export function UnseatedGuestList({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-serif text-base text-wine font-medium">
-            Unseated Roster
+            Unseated Guests
           </h2>
           <p className="text-[11px] text-on-surface-variant">
             {guests.length} {guests.length === 1 ? "party" : "parties"} awaiting
@@ -70,7 +70,7 @@ export function UnseatedGuestList({
               onChange={(e) => setVipOnly(e.target.checked)}
               className="rounded text-wine focus:ring-wine/40"
             />
-            <span>VIP Dignitaries Only</span>
+            <span>VIP Guests Only</span>
           </label>
         </div>
       </div>

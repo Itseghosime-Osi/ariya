@@ -44,7 +44,7 @@ export async function createTableAction(
   if (error || !data) {
     return {
       ok: false,
-      error: mapError(error, "Failed to create banquet table"),
+      error: mapError(error, "Failed to create table"),
     };
   }
 

@@ -240,14 +240,21 @@ export type Database = {
         Row: {
           area: string | null;
           couple: string;
+          cover_image_url: string | null;
           created_at: string;
           date: string;
+          description: string | null;
           dress_code: string | null;
           id: string;
+          invitation_headline: string | null;
+          invitation_message: string | null;
+          invitation_subheadline: string | null;
+          invitation_theme: string | null;
           is_public: boolean;
           paid_at: string | null;
           registry_code: string | null;
           rsvp_by: string | null;
+          schedule: Json | null;
           slug: string;
           status: string;
           title: string;
@@ -258,14 +265,21 @@ export type Database = {
         Insert: {
           area?: string | null;
           couple: string;
+          cover_image_url?: string | null;
           created_at?: string;
           date: string;
+          description?: string | null;
           dress_code?: string | null;
           id?: string;
+          invitation_headline?: string | null;
+          invitation_message?: string | null;
+          invitation_subheadline?: string | null;
+          invitation_theme?: string | null;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
+          schedule?: Json | null;
           slug: string;
           status?: string;
           title: string;
@@ -275,14 +289,21 @@ export type Database = {
         Update: {
           area?: string | null;
           couple?: string;
+          cover_image_url?: string | null;
           created_at?: string;
           date?: string;
+          description?: string | null;
           dress_code?: string | null;
           id?: string;
+          invitation_headline?: string | null;
+          invitation_message?: string | null;
+          invitation_subheadline?: string | null;
+          invitation_theme?: string | null;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
           rsvp_by?: string | null;
+          schedule?: Json | null;
           slug?: string;
           status?: string;
           title?: string;

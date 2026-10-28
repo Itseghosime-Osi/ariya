@@ -47,19 +47,19 @@ export function StepCelebrationDetails({
             Stage 1: Celebration Details
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Core ceremonial schedule, couple names, and venue coordinates.
+            Date and time, couple names, and venue.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Couple Designation */}
+        {/* Couple */}
         <div className="md:col-span-2 bg-surface-container-lowest p-4 rounded-xl shadow-xs">
           <label
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="couple"
           >
-            Couple Designation / Celebrants *
+            Couple *
           </label>
           <input
             id="couple"
@@ -85,9 +85,7 @@ export function StepCelebrationDetails({
             type="text"
             className="w-full bg-paper px-4 py-3 rounded-xl font-body-lg text-body-lg text-paper-ink shadow-inner outline-none focus:bg-white"
             placeholder={
-              couple
-                ? `${couple}'s Nuptials`
-                : "e.g. Chidinma & Tunde's Nuptials"
+              couple ? `${couple}'s Wedding` : "e.g. Chidinma & Tunde's Wedding"
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -100,7 +98,7 @@ export function StepCelebrationDetails({
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="eventDate"
           >
-            Ceremonial Date &amp; Time (WAT) *
+            Date &amp; Time (WAT) *
           </label>
           <input
             id="eventDate"
@@ -139,7 +137,7 @@ export function StepCelebrationDetails({
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="venue"
           >
-            Primary Reception Pavilion / Venue *
+            Venue *
           </label>
           <input
             id="venue"
@@ -158,7 +156,7 @@ export function StepCelebrationDetails({
             className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1.5 font-semibold"
             htmlFor="dressCode"
           >
-            Aṣọ-Ẹbí Protocol &amp; Dress Code
+            Aṣọ-Ẹbí &amp; Dress Code
           </label>
           <input
             id="dressCode"

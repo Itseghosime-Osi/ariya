@@ -11,7 +11,7 @@ export const VENDOR_CATEGORIES = [
   "Cake & Desserts",
   "Hair & Makeup",
   "Stationery & Calligraphy",
-  "Logistics & Protocol",
+  "Logistics & Coordination",
   "Other",
 ] as const;
 

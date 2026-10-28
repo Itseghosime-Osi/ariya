@@ -83,7 +83,7 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Positive case: Authorize on provider and deliver valid HMAC-SHA512 webhook
     setAuthorized(true);
-    const validSignature = signPayload(webhookPayload, "sk_test_sample");
+    const validSignature = signPayload(webhookPayload);
 
     const webhookRes = await page.request.post("/api/webhooks/paystack", {
       headers: {
@@ -96,9 +96,9 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Celebration Pass unlocked
     await page.goto(`/events/${eventId}/billing`);
-    await expect(
-      page.getByText(/Royal Celebration Pass \(Unlocked\)/i)
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Celebration Pass \(Unlocked\)/i)).toBeVisible({
+      timeout: 15000,
+    });
 
     // Quota banner unlocked on Invitations
     await page.goto(`/events/${eventId}/invitations`);

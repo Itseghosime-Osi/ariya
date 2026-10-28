@@ -12,13 +12,25 @@ export async function getEventGuests(
   eventId: string,
   filters: GuestFilterState
 ): Promise<GuestListResponse> {
-  const supabase = await createClient();
   const page = Math.max(1, filters.page || 1);
   const pageSize = Math.max(5, Math.min(100, filters.pageSize || 25));
   const offset = (page - 1) * pageSize;
 
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return {
+      guests: [],
+      totalCount: 0,
+      page,
+      pageSize,
+      totalPages: 0,
+    };
+  }
+
+  const supabase = await createClient();
+
   const { data, error } = await supabase.rpc("search_guests", {
-    p_event_id: eventId,
+    p_event_id: cleanId,
     p_search: filters.search?.trim() || undefined,
     p_side:
       filters.side && filters.side !== "all"
@@ -39,7 +51,15 @@ export async function getEventGuests(
     p_offset: offset,
   });
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventGuests] Database RPC error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Failed to load event guests: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
     return {
       guests: [],
       totalCount: 0,

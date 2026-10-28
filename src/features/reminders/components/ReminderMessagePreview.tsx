@@ -30,7 +30,7 @@ export function ReminderMessagePreview({
           </div>
           <div className="text-mist">
             <span className="font-semibold text-night">From:</span> Àríyá
-            Celebrations &lt;concierge@ariya.app&gt;
+            Celebrations &lt;notifications@ariya.app&gt;
           </div>
         </div>
 

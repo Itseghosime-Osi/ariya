@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import { formatLagosDate } from "@/lib/format";
+import { formatEventDate } from "@/lib/format";
+import {
+  formatEventCardMetrics,
+  formatConfirmedPartiesSummary,
+} from "@/lib/metrics";
 import type { EventWithMetrics } from "../types";
 import { EventMetricsStrip } from "./EventMetricsStrip";
 
@@ -15,7 +19,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
   const { event, metrics } = item;
   const [copied, setCopied] = useState(false);
 
-  const formattedDate = formatLagosDate(event.date);
+  const formattedDate = formatEventDate(event.date);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/events/${event.id}`;
@@ -40,7 +44,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
 
               <div className="relative z-10 self-start px-3 py-1 rounded-full bg-night/85 backdrop-blur-md text-gold font-label-sm text-label-sm shadow-md flex items-center gap-1.5">
                 <Icon name="local_florist" className="text-sm" />
-                <span>Grand Nuptials &amp; Reception</span>
+                <span>Wedding Ceremony &amp; Reception</span>
               </div>
 
               <div className="relative z-10 my-auto flex flex-col items-center justify-center">
@@ -50,7 +54,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   </span>
                 </div>
                 <span className="font-label-sm text-label-sm uppercase tracking-widest text-gold/80 mt-2 font-bold">
-                  Sovereign Seal
+                  Àríyá Emblem
                 </span>
               </div>
 
@@ -92,12 +96,12 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                 {event.title}
               </h2>
 
-              <div className="flex flex-wrap items-center gap-y-1 gap-x-space-md text-paper-ink font-body-md text-body-md mt-1 mb-space-md">
+              <div className="flex flex-wrap items-center gap-y-1 gap-x-space-md text-paper-ink font-body-md text-body-md mt-1 mb-2">
                 <div className="flex items-center gap-1 text-wine">
                   <Icon name="calendar_month" className="text-lg" />
                   <span className="font-semibold">{formattedDate}</span>
                 </div>
-                <span className="text-mist">•</span>
+                <span className="text-on-surface-variant">•</span>
                 <div className="flex items-center gap-1 text-on-surface-variant">
                   <Icon name="location_on" className="text-lg text-wine" />
                   <span>
@@ -106,6 +110,14 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   </span>
                 </div>
               </div>
+
+              <div className="text-xs font-semibold text-wine/90 mb-space-md">
+                {formatEventCardMetrics({
+                  totalParties: metrics.totalParties,
+                  acceptedGuests: metrics.acceptedGuests,
+                  rsvpRate: metrics.rsvpRate ?? metrics.readinessPercentage,
+                })}
+              </div>
             </div>
 
             <EventMetricsStrip metrics={metrics} />
@@ -113,16 +125,16 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
             {/* Progress Bar Line */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant">
-                <span>Ceremonial Attendance Readiness</span>
+                <span>Confirmed RSVPs</span>
                 <span className="font-semibold text-wine">
-                  {metrics.readinessPercentage}% Confirmed
+                  {formatConfirmedPartiesSummary(metrics)}
                 </span>
               </div>
               <div className="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-wine to-gold rounded-full transition-all duration-500"
                   style={{
-                    width: `${Math.min(100, metrics.readinessPercentage)}%`,
+                    width: `${Math.min(100, metrics.acceptedPartiesPct)}%`,
                   }}
                 />
               </div>
@@ -150,22 +162,6 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                   <Icon name={copied ? "check" : "share"} className="text-lg" />
                   <span>{copied ? "Link Copied!" : "Share Overview"}</span>
                 </button>
-              </div>
-
-              {/* Planners pill */}
-              <div className="flex items-center -space-x-2 overflow-hidden py-1">
-                <div className="w-8 h-8 rounded-full bg-gold/40 flex items-center justify-center text-night font-label-sm text-[10px] font-bold shadow-sm">
-                  CT
-                </div>
-                <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-[10px] font-bold shadow-sm">
-                  AO
-                </div>
-                <div className="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-[10px] font-bold shadow-sm">
-                  FB
-                </div>
-                <span className="pl-3 font-label-sm text-label-sm text-mist font-medium">
-                  +6 planners
-                </span>
               </div>
             </div>
           </div>

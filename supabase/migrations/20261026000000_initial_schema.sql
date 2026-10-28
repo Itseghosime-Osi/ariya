@@ -1,8 +1,7 @@
 -- Àríyá Database Schema & RLS Policies
 -- PostgreSQL Migration for Supabase
 
--- Extensions
-create extension if not exists "uuid-ossp";
+-- Extensions (none needed, gen_random_uuid is built-in)
 
 -- Profiles table (synced with auth.users)
 create table if not exists public.profiles (
@@ -17,7 +16,7 @@ create table if not exists public.profiles (
 
 -- Events table
 create table if not exists public.events (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title text not null,
   couple text not null,
   date timestamptz not null,
@@ -35,7 +34,7 @@ create table if not exists public.events (
 
 -- Event Members table
 create table if not exists public.event_members (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   role text not null check (role in ('owner', 'planner', 'couple', 'staff')),
@@ -46,7 +45,7 @@ create table if not exists public.event_members (
 
 -- Tables (Banquet Seating)
 create table if not exists public.tables (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   name text not null,
   capacity integer not null check (capacity > 0),
@@ -59,7 +58,7 @@ create table if not exists public.tables (
 
 -- Guests table
 create table if not exists public.guests (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   name text not null,
   phone text,
@@ -78,7 +77,7 @@ create table if not exists public.guests (
 
 -- RSVPs table
 create table if not exists public.rsvps (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   guest_id uuid not null references public.guests(id) on delete cascade unique,
   status text not null check (status in ('pending', 'accepted', 'declined')) default 'pending',
   attending_count integer not null default 0 check (attending_count >= 0),
@@ -93,7 +92,7 @@ create table if not exists public.rsvps (
 
 -- Seat Assignments table
 create table if not exists public.seat_assignments (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   guest_id uuid not null references public.guests(id) on delete cascade unique,
   table_id uuid not null references public.tables(id) on delete cascade,
   assigned_at timestamptz not null default now(),
@@ -103,7 +102,7 @@ create table if not exists public.seat_assignments (
 
 -- Vendors table
 create table if not exists public.vendors (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   name text not null,
   category text not null,
@@ -119,7 +118,7 @@ create table if not exists public.vendors (
 
 -- Vendor Tasks table
 create table if not exists public.vendor_tasks (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   vendor_id uuid not null references public.vendors(id) on delete cascade,
   event_id uuid not null references public.events(id) on delete cascade,
   task text not null,
@@ -131,7 +130,7 @@ create table if not exists public.vendor_tasks (
 
 -- Reminders & Email Log table
 create table if not exists public.email_log (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   guest_id uuid references public.guests(id) on delete set null,
   recipient_email text not null,
@@ -145,7 +144,7 @@ create table if not exists public.email_log (
 
 -- Payments & Invoices table
 create table if not exists public.payments (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   paystack_reference text not null unique,
@@ -160,7 +159,7 @@ create table if not exists public.payments (
 
 -- Invoices table
 create table if not exists public.invoices (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   payment_id uuid references public.payments(id) on delete set null,
   event_id uuid not null references public.events(id) on delete cascade,
   invoice_number text not null unique,
@@ -173,7 +172,7 @@ create table if not exists public.invoices (
 
 -- Check-ins table
 create table if not exists public.check_ins (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   guest_id uuid not null references public.guests(id) on delete cascade,
   staff_id uuid references public.profiles(id) on delete set null,

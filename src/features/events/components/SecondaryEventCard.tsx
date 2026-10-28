@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { formatEventDate } from "@/lib/format";
+import { formatEventCardMetrics } from "@/lib/metrics";
 
 interface SecondaryEventCardProps {
   id: string;
@@ -53,31 +55,38 @@ export function SecondaryEventCard({
               {title}
             </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-              {dateStr} • {venueStr}
+              {formatEventDate(dateStr)} • {venueStr}
+            </p>
+            <p className="font-label-sm text-label-sm text-wine font-semibold mt-1">
+              {formatEventCardMetrics({
+                totalParties: totalInvited,
+                acceptedGuests: confirmed,
+                rsvpRate,
+              })}
             </p>
           </div>
         </div>
 
         <div className="my-space-md p-space-sm bg-surface-container rounded-xl grid grid-cols-3 gap-2 text-center">
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
-              Total Invited
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+              Parties
             </div>
             <div className="font-headline-sm text-headline-sm text-night mt-0.5">
               {totalInvited}
             </div>
           </div>
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
-              Confirmed
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+              Attending
             </div>
             <div className="font-headline-sm text-headline-sm text-success mt-0.5">
               {confirmed}
             </div>
           </div>
           <div>
-            <div className="font-label-sm text-label-sm text-mist uppercase font-semibold">
-              RSVP Rate
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+              Responded
             </div>
             <div className="font-headline-sm text-headline-sm text-secondary mt-0.5">
               {rsvpRate}%
@@ -91,7 +100,7 @@ export function SecondaryEventCard({
       </div>
 
       <div className="pt-space-md mt-space-md flex items-center justify-between border-t border-surface-container-high">
-        <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-mist">
+        <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-on-surface-variant">
           <Icon name="verified_user" className="text-success text-base" />
           <span>{statusBadge}</span>
         </div>

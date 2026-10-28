@@ -23,8 +23,8 @@ export function SignUpTermsCheckbox({
         disabled={disabled}
       />
       <span className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-        I agree to the Terms of Service and Privacy Policy governing sensitive
-        matrimonial protocols, family registries, and celebration data handling.
+        I agree to the Terms of Service and Privacy Policy for event and guest
+        data handling.
       </span>
     </label>
   );

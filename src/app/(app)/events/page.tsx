@@ -13,9 +13,9 @@ export default async function EventsPage() {
   const [events, user] = await Promise.all([getUserEvents(), getCurrentUser()]);
 
   const primaryEvent = events[0];
-  const milestones = await getEventMilestones(
-    primaryEvent?.event.id || "default"
-  );
+  const milestones = primaryEvent
+    ? await getEventMilestones(primaryEvent.event.id)
+    : [];
 
   return (
     <AppShell

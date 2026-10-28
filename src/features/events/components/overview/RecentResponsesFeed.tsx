@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { getPartyDisplaySeats } from "@/lib/metrics";
 import type { RecentGuestResponse } from "../../types";
 
 interface RecentResponsesFeedProps {
@@ -56,8 +57,19 @@ export function RecentResponsesFeed({
                     )}
                   </div>
                   <span className="font-body-sm text-on-surface-variant text-[12px]">
-                    {item.side} · Party of {item.attendingCount}
-                    {item.tableName ? ` · ${item.tableName}` : " · Unassigned"}
+                    {item.side} · Party of{" "}
+                    {getPartyDisplaySeats({
+                      party_size: item.partySize,
+                      rsvp: {
+                        status: item.status,
+                        attending_count: item.attendingCount,
+                      },
+                    })}
+                    {item.status === "accepted"
+                      ? item.tableName
+                        ? ` · ${item.tableName}`
+                        : " · Unassigned"
+                      : ""}
                   </span>
                 </div>
               </div>
@@ -67,18 +79,30 @@ export function RecentResponsesFeed({
                   className={`px-3 py-1 rounded-full font-label-sm font-semibold flex items-center gap-1 ${
                     item.status === "accepted"
                       ? "bg-success-surface text-success"
-                      : "bg-secondary-container text-on-secondary-container"
+                      : item.status === "declined"
+                        ? "bg-surface-container-high text-on-surface-variant"
+                        : "bg-secondary-container text-on-secondary-container"
                   }`}
                 >
                   <Icon
-                    name={item.status === "accepted" ? "check" : "schedule"}
+                    name={
+                      item.status === "accepted"
+                        ? "check"
+                        : item.status === "declined"
+                          ? "close"
+                          : "schedule"
+                    }
                     className="text-sm"
                   />
                   <span>
-                    {item.status === "accepted" ? "Confirmed" : "Awaiting"}
+                    {item.status === "accepted"
+                      ? "Confirmed"
+                      : item.status === "declined"
+                        ? "Declined"
+                        : "Awaiting"}
                   </span>
                 </span>
-                <span className="font-body-sm text-mist text-[11px]">
+                <span className="font-body-sm text-on-surface-variant text-[11px]">
                   {item.timeAgo}
                 </span>
               </div>

@@ -126,6 +126,49 @@ describe("Events Domain", () => {
         expect.objectContaining({
           p_title: "Chidinma & Tunde's Nuptials",
           p_couple: "Chidinma & Tunde",
+          p_date: "2026-12-12T13:00:00.000Z",
+        })
+      );
+    });
+
+    it("stores 14:00 WAT as 13:00 UTC, not 14:00 UTC", async () => {
+      const mockRpc = vi.fn().mockResolvedValue({
+        data: { id: "evt-wat-1", slug: "wat-slug-1" },
+        error: null,
+      });
+
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-wat" } },
+            }),
+          },
+          rpc: mockRpc,
+        })
+      );
+
+      const res = await createEventAction({
+        title: "WAT Nuptials",
+        couple: "Folake & Femi",
+        date: "2026-12-12T14:00",
+        venue: "Eko Hotel, Lagos",
+        area: "Victoria Island",
+        targetParties: 100,
+        intakeMethod: "manual",
+      });
+
+      expect(res.ok).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith(
+        "create_event",
+        expect.objectContaining({
+          p_date: "2026-12-12T13:00:00.000Z",
+        })
+      );
+      expect(mockRpc).not.toHaveBeenCalledWith(
+        "create_event",
+        expect.objectContaining({
+          p_date: "2026-12-12T14:00:00.000Z",
         })
       );
     });
@@ -221,11 +264,16 @@ describe("Events Domain", () => {
     });
 
     it("returns events with metrics from get_user_events_with_metrics RPC", async () => {
-      const mockEvents = [
+      const mockRpcResponse = [
         {
           event: { id: "evt-1", title: "Test Event", couple: "A & B" },
           role: "owner",
-          metrics: { totalParties: 10, totalAttendees: 20 },
+          metrics: {
+            totalParties: 10,
+            totalAttendees: 20,
+            acceptedParties: 6,
+            declinedParties: 2,
+          },
         },
       ];
 
@@ -236,12 +284,22 @@ describe("Events Domain", () => {
               data: { user: { id: "user-123" } },
             }),
           },
-          rpc: vi.fn().mockResolvedValue({ data: mockEvents, error: null }),
+          rpc: vi
+            .fn()
+            .mockResolvedValue({ data: mockRpcResponse, error: null }),
         })
       );
 
       const events = await getUserEvents();
-      expect(events).toEqual(mockEvents);
+      expect(events[0].event).toEqual(mockRpcResponse[0].event);
+      expect(events[0].role).toBe("owner");
+      expect(events[0].metrics.totalParties).toBe(10);
+      expect(events[0].metrics.acceptedParties).toBe(6);
+      expect(events[0].metrics.declinedParties).toBe(2);
+      expect(events[0].metrics.acceptedPartiesPct).toBe(60);
+      expect(events[0].metrics.declinedPartiesPct).toBe(20);
+      expect(events[0].metrics.awaitingPartiesPct).toBe(20);
+      expect(events[0].metrics.rsvpRate).toBe(80);
     });
   });
 

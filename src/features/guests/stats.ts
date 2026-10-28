@@ -1,5 +1,9 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import {
+  calculateCelebrationMetrics,
+  type GuestMetricItem,
+} from "@/lib/metrics";
 import type { GuestOverviewStats } from "./types";
 
 export async function getGuestOverviewStats(
@@ -19,7 +23,7 @@ export async function getGuestOverviewStats(
     )
     .eq("event_id", eventId);
 
-  if (!data) {
+  if (!data || data.length === 0) {
     return {
       totalCount: 0,
       totalAttendees: 0,
@@ -33,49 +37,17 @@ export async function getGuestOverviewStats(
     };
   }
 
-  let totalAttendees = 0;
-  let acceptedCount = 0;
-  let acceptedGuests = 0;
-  let pendingCount = 0;
-  let declinedCount = 0;
-  let seatedCount = 0;
-  let vipCount = 0;
-
-  for (const g of data) {
-    totalAttendees += g.party_size;
-    if (g.is_vip) vipCount += 1;
-
-    const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
-    const status = (rsvp as { status?: string })?.status ?? "pending";
-    const attendees =
-      (rsvp as { attending_count?: number })?.attending_count ?? g.party_size;
-
-    if (status === "accepted") {
-      acceptedCount += 1;
-      acceptedGuests += attendees;
-    } else if (status === "declined") {
-      declinedCount += 1;
-    } else {
-      pendingCount += 1;
-    }
-
-    const hasSeat = Array.isArray(g.seat_assignments)
-      ? g.seat_assignments.length > 0
-      : Boolean(g.seat_assignments);
-    if (hasSeat) {
-      seatedCount += status === "accepted" ? attendees : g.party_size;
-    }
-  }
+  const m = calculateCelebrationMetrics(data as unknown as GuestMetricItem[]);
 
   return {
-    totalCount: data.length,
-    totalAttendees,
-    acceptedCount,
-    acceptedGuests,
-    pendingCount,
-    declinedCount,
-    seatedCount,
-    unassignedCount: Math.max(0, acceptedGuests - seatedCount),
-    vipCount,
+    totalCount: m.invitedParties,
+    totalAttendees: m.totalAttendees,
+    acceptedCount: m.acceptedParties,
+    acceptedGuests: m.expectedPeople,
+    pendingCount: m.awaitingParties,
+    declinedCount: m.declinedParties,
+    seatedCount: m.seatedPeople,
+    unassignedCount: m.unassignedPeople,
+    vipCount: m.vipParties,
   };
 }

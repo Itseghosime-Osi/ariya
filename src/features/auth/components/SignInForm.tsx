@@ -47,8 +47,8 @@ export function SignInForm() {
           Welcome Back
         </h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
-          Enter your credentials to access your banquet registers, guest
-          rosters, and Aṣọ-Ẹbí distribution rosters.
+          Sign in to access your celebrations, guest lists, seating plans, and
+          check-in desk.
         </p>
       </div>
 
@@ -77,11 +77,8 @@ export function SignInForm() {
               className="font-label-md text-label-md uppercase tracking-wider text-night font-semibold"
               htmlFor="signin-email"
             >
-              Planner Email
+              Email Address
             </label>
-            <span className="font-body-sm text-body-sm text-stone-700 font-medium">
-              WAT Lagos
-            </span>
           </div>
           <div className="relative">
             <Icon
@@ -92,7 +89,7 @@ export function SignInForm() {
             <input
               className="w-full bg-paper text-night font-body-md text-body-md pl-11 pr-4 py-3 rounded-xl shadow-inner outline-none transition-all placeholder:text-mist focus:bg-surface-container-lowest"
               id="signin-email"
-              placeholder="curator@celebrations.ng"
+              placeholder="you@example.com"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -104,7 +101,7 @@ export function SignInForm() {
 
         <PasswordField
           id="signin-password"
-          label="Passcode"
+          label="Password"
           value={password}
           onChange={setPassword}
           disabled={isPending}
@@ -127,7 +124,7 @@ export function SignInForm() {
             href="/forgot-password"
             className="text-primary hover:text-wine font-label-md font-semibold hover:underline"
           >
-            Forgot passcode?
+            Forgot password?
           </Link>
         </div>
 

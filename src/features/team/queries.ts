@@ -6,6 +6,11 @@ import type { TeamDeskData, TeamMember, TeamInvite, EventRole } from "./types";
 export async function getTeamDeskData(
   eventId: string
 ): Promise<TeamDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -31,7 +36,15 @@ export async function getTeamDeskData(
     )
     .eq("event_id", eventId);
 
-  if (membersError || !rawMembers) return null;
+  if (membersError) {
+    console.error("[getTeamDeskData] Failed to load team members:", {
+      code: membersError.code,
+      message: membersError.message,
+    });
+    throw new Error(`Failed to load team members: ${membersError.message}`);
+  }
+
+  if (!rawMembers) return null;
 
   let currentUserRole: EventRole | null = null;
 

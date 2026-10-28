@@ -37,7 +37,7 @@ export function GuestRegistryFilters({
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:flex-wrap bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/50 shadow-sm">
       <div className="relative flex-1 min-w-[220px]">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-mist" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant" />
         <Input
           placeholder="Search by name, phone or email..."
           value={filters.search || ""}
@@ -47,7 +47,8 @@ export function GuestRegistryFilters({
         {filters.search && (
           <button
             onClick={() => onChange({ ...filters, search: "" })}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-mist hover:text-on-surface"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+            aria-label="Clear search"
           >
             <X className="h-4 w-4" />
           </button>
@@ -61,7 +62,10 @@ export function GuestRegistryFilters({
             onChange({ ...filters, side: val as GuestFilterState["side"] })
           }
         >
-          <SelectTrigger className="w-[130px] bg-surface-container/40">
+          <SelectTrigger
+            aria-label="Filter by side"
+            className="w-[130px] bg-surface-container/40"
+          >
             <SelectValue placeholder="Side" />
           </SelectTrigger>
           <SelectContent>
@@ -84,7 +88,10 @@ export function GuestRegistryFilters({
             })
           }
         >
-          <SelectTrigger className="w-[140px] bg-surface-container/40">
+          <SelectTrigger
+            aria-label="Filter by RSVP status"
+            className="w-[140px] bg-surface-container/40"
+          >
             <SelectValue placeholder="RSVP Status" />
           </SelectTrigger>
           <SelectContent>
@@ -104,7 +111,10 @@ export function GuestRegistryFilters({
             })
           }
         >
-          <SelectTrigger className="w-[135px] bg-surface-container/40">
+          <SelectTrigger
+            aria-label="Filter by seating status"
+            className="w-[135px] bg-surface-container/40"
+          >
             <SelectValue placeholder="Seating" />
           </SelectTrigger>
           <SelectContent>
@@ -119,7 +129,10 @@ export function GuestRegistryFilters({
             value={filters.group || "all"}
             onValueChange={(val) => onChange({ ...filters, group: val })}
           >
-            <SelectTrigger className="w-[140px] bg-surface-container/40">
+            <SelectTrigger
+              aria-label="Filter by group"
+              className="w-[140px] bg-surface-container/40"
+            >
               <SelectValue placeholder="Group" />
             </SelectTrigger>
             <SelectContent>
@@ -144,7 +157,9 @@ export function GuestRegistryFilters({
         >
           <Star
             className={`h-4 w-4 mr-1.5 ${
-              filters.isVip ? "fill-amber-500 text-amber-500" : "text-mist"
+              filters.isVip
+                ? "fill-amber-500 text-amber-500"
+                : "text-on-surface-variant"
             }`}
           />
           VIP
@@ -155,7 +170,7 @@ export function GuestRegistryFilters({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-11 text-mist hover:text-on-surface"
+            className="h-11 text-on-surface-variant hover:text-on-surface"
             onClick={onReset}
           >
             Reset

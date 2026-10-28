@@ -23,7 +23,7 @@ export function PrintableSeatingChart({
   const [activeTab, setActiveTab] = useState<"chart" | "cards">("chart");
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] p-6 sm:p-10 text-night print:p-0 print:bg-white">
+    <div className="min-h-screen bg-surface p-6 sm:p-10 text-night print:p-0 print:bg-white">
       {/* Top Controls Bar (hidden during printing) */}
       <div className="max-w-4xl mx-auto mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-outline-variant/40 shadow-xs print:hidden">
         <div>
@@ -35,7 +35,7 @@ export function PrintableSeatingChart({
             <span>Return to Seating Desk</span>
           </Link>
           <h1 className="font-serif text-xl text-wine font-medium">
-            Ceremonial Seating Dossier & Place Cards
+            Seating Chart & Place Cards
           </h1>
         </div>
 
@@ -81,13 +81,13 @@ export function PrintableSeatingChart({
         {/* Ceremonial Header */}
         <div className="text-center pb-6 border-b border-wine/20 space-y-1.5">
           <span className="text-[10px] font-bold tracking-widest text-wine/80 uppercase">
-            Àríyá Ceremonial Seating Register
+            Àríyá Seating Chart
           </span>
           <h2 className="font-serif text-3xl text-wine font-medium">
             {eventTitle}
           </h2>
           <p className="font-serif text-base italic text-wine/80">
-            Nuptials of {couple} • {date}
+            Celebration of {couple} • {date}
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export function PrintableSeatingChart({
               {tables.map((table) => (
                 <div
                   key={table.id}
-                  className="border border-[#dcd2c4] rounded-xl p-4 bg-[#fdfbf7] print:bg-white break-inside-avoid space-y-3"
+                  className="border border-outline-variant/30 rounded-xl p-4 bg-surface-container-lowest print:bg-white break-inside-avoid space-y-3"
                 >
                   <div className="flex justify-between items-center pb-2 border-b border-wine/10">
                     <h3 className="font-serif text-base text-wine font-semibold">

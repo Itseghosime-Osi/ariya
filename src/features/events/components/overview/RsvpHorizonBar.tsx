@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Icon } from "@/components/ui/icon";
+import { formatRsvpSubtitle, formatRsvpStat, pluralNoun } from "@/lib/metrics";
 import type { EventMetrics } from "../../types";
 
 interface RsvpHorizonBarProps {
@@ -26,9 +27,10 @@ export function RsvpHorizonBar({
           <span className="font-label-sm uppercase tracking-widest text-on-surface-variant font-bold">
             Guest Responses
           </span>
-          <span className="inline-flex items-center gap-1 text-success font-label-sm font-semibold">
-            <Icon name="trending_up" className="text-base" />
-            +14 this week
+          <span className="font-label-sm text-wine font-semibold">
+            {metrics.totalParties > 0
+              ? formatRsvpStat(metrics)
+              : "Awaiting invitations"}
           </span>
         </div>
 
@@ -37,12 +39,15 @@ export function RsvpHorizonBar({
             {metrics.acceptedGuests}
           </span>
           <span className="font-headline-sm text-headline-sm text-on-surface">
-            guests confirmed
+            {pluralNoun(
+              metrics.acceptedGuests,
+              "person attending",
+              "people attending"
+            )}
           </span>
         </div>
         <p className="font-body-md text-on-surface-variant mt-1.5">
-          {metrics.acceptedParties} accepted parties · {metrics.acceptedGuests}{" "}
-          of {metrics.totalAttendees} people
+          {formatRsvpSubtitle(metrics)}
         </p>
       </div>
 
@@ -70,70 +75,76 @@ export function RsvpHorizonBar({
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.acceptedGuests}
+              {metrics.acceptedParties}
             </strong>{" "}
-            Confirmed
+            {metrics.acceptedParties === 1
+              ? "Party Confirmed"
+              : "Parties Confirmed"}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-gold inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.awaitingGuests}
+              {metrics.awaitingParties}
             </strong>{" "}
-            Awaiting
+            {metrics.awaitingParties === 1
+              ? "Party Awaiting"
+              : "Parties Awaiting"}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-mist inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.declinedGuests}
+              {metrics.declinedParties}
             </strong>{" "}
-            Declined
+            {metrics.declinedParties === 1
+              ? "Party Declined"
+              : "Parties Declined"}
           </span>
         </div>
       </div>
 
       {/* Inline Protocol Stat Triad */}
-      <div className="grid grid-cols-3 gap-space-sm pt-space-xs">
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-space-xs">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Seated
             </span>
             <Icon name="chair" className="text-wine text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-primary mt-1">
+          <div className="text-2xl font-bold text-wine">
             {metrics.seatedGuests}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             of {metrics.acceptedGuests} people
           </span>
         </div>
 
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Unassigned
             </span>
-            <Icon name="pending" className="text-secondary text-lg" />
+            <Icon name="pending" className="text-amber-800 text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-secondary mt-1">
+          <div className="text-2xl font-bold text-amber-900">
             {metrics.unassignedGuests}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             Awaiting placement
           </span>
         </div>
 
-        <div className="bg-surface-container-low rounded-2xl p-space-md transition-all hover:bg-surface-container">
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Parties
             </span>
-            <Icon name="diversity_3" className="text-primary text-lg" />
+            <Icon name="diversity_3" className="text-wine text-lg" />
           </div>
-          <div className="font-headline-sm text-headline-sm text-night mt-1">
+          <div className="text-2xl font-bold text-night">
             {metrics.acceptedParties}
           </div>
-          <span className="font-body-sm text-on-surface-variant text-[12px]">
+          <span className="text-xs font-medium text-neutral-700 block">
             Accepted invites
           </span>
         </div>

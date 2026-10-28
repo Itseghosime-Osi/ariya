@@ -3,6 +3,7 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Icon } from "@/components/ui/icon";
+import { pluralise } from "@/lib/metrics";
 import type { SeatingGuest, TableWithGuests } from "../types";
 
 interface UnseatedGuestCardProps {
@@ -75,8 +76,7 @@ export function UnseatedGuestCard({
         </div>
 
         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-wine/10 text-wine shrink-0">
-          {guest.attending_count}{" "}
-          {guest.attending_count === 1 ? "seat" : "seats"}
+          {pluralise(guest.attending_count, "seat")}
         </span>
       </div>
 
@@ -101,7 +101,7 @@ export function UnseatedGuestCard({
           className="flex-1 py-1 px-2 rounded-lg border border-outline-variant/60 bg-paper text-[11px] text-night focus:outline-none focus:ring-1 focus:ring-wine/50"
         >
           <option value="" disabled>
-            Choose banquet table...
+            Choose table...
           </option>
           {tables.map((t) => {
             const seatsLeft = Math.max(0, t.capacity - t.occupiedSeats);

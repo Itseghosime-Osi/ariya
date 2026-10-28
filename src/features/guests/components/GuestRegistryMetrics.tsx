@@ -10,36 +10,36 @@ interface GuestRegistryMetricsProps {
 export function GuestRegistryMetrics({ stats }: GuestRegistryMetricsProps) {
   const cards = [
     {
-      label: "Total Guests",
+      label: "Invited Parties",
       value: stats.totalCount,
-      subtext: `${stats.totalAttendees} expected seats`,
+      subtext: `${stats.totalAttendees} invited seats`,
       icon: Users,
       color: "text-wine bg-wine/10",
     },
     {
-      label: "Attending",
+      label: "Attending Parties",
       value: stats.acceptedCount,
-      subtext: `${stats.totalCount ? Math.round((stats.acceptedCount / stats.totalCount) * 100) : 0}% confirmed`,
+      subtext: `${stats.acceptedGuests} expected people`,
       icon: UserCheck,
       color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40",
     },
     {
-      label: "Declined",
+      label: "Declined Parties",
       value: stats.declinedCount,
-      subtext: "Declined response",
+      subtext: "Declined invitation",
       icon: UserX,
       color: "text-red-600 bg-red-50 dark:bg-red-950/40",
     },
     {
       label: "Pending RSVP",
       value: stats.pendingCount,
-      subtext: "Awaiting response",
+      subtext: "Awaiting reply",
       icon: Clock,
       color: "text-amber-600 bg-amber-50 dark:bg-amber-950/40",
     },
     {
-      label: "Seated",
-      value: `${stats.seatedCount}/${stats.acceptedCount || stats.totalCount}`,
+      label: "Seated People",
+      value: `${stats.seatedCount}/${stats.acceptedGuests || stats.totalAttendees}`,
       subtext: `${stats.unassignedCount} unseated`,
       icon: Armchair,
       color: "text-gold bg-gold/10",
@@ -56,7 +56,7 @@ export function GuestRegistryMetrics({ stats }: GuestRegistryMetricsProps) {
             className="flex flex-col justify-between rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-mist uppercase tracking-wider">
+              <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 {c.label}
               </span>
               <div

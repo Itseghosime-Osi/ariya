@@ -18,22 +18,22 @@ const INTAKE_OPTIONS = [
     key: "csv" as const,
     icon: "table_view",
     title: "Upload CSV Spreadsheet",
-    desc: "Master roll aggregated from both family liaison committees.",
+    desc: "Upload an existing guest list spreadsheet.",
     footer: "Import via Guestbook next",
   },
   {
     key: "manual" as const,
     icon: "person_add",
     title: "Add Guests Manually",
-    desc: "Direct bespoke entry for VIP tables, elders, and monarchs.",
-    footer: "Direct portal input",
+    desc: "Enter guest details individually.",
+    footer: "Direct web input",
   },
   {
     key: "skip" as const,
     icon: "fast_forward",
     title: "Skip for Now",
-    desc: "Preserve ballroom dimensions and estimate attendance.",
-    footer: "Start with blank roster",
+    desc: "Set target capacity and add guests later.",
+    footer: "Start with blank list",
   },
 ];
 
@@ -57,7 +57,7 @@ export function StepGuestIntake({
             Stage 2: Guest Registry Setup
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Intake methodology, seating quota calculation, and party sizing.
+            How will you add guests? Choose your preferred method.
           </p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export function StepGuestIntake({
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           <div className="md:col-span-5">
             <label className="block font-label-md text-label-md text-secondary uppercase tracking-wider mb-1 font-semibold">
-              Seating Quota • Parties Stepper
+              Seats per guest • Estimated Parties
             </label>
             <div className="flex items-center gap-4 mt-2">
               <button

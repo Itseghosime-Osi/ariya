@@ -40,6 +40,13 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       )
     ).toEqual([]);
 
+    // Contrast check on dark overview invitation tile
+    const darkTileResults = await new AxeBuilder({ page })
+      .include('[data-testid="invitation-tile"]')
+      .withRules(["color-contrast"])
+      .analyze();
+    expect(darkTileResults.violations).toEqual([]);
+
     // 3. Guest Registry
     await page.goto(`/events/${eventId}/guests`);
     results = await new AxeBuilder({ page }).analyze();
@@ -102,6 +109,35 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
         (v) => v.impact === "serious" || v.impact === "critical"
       )
     ).toEqual([]);
+
+    // 7. Public Celebration Page & Confirm Your Attendance panel
+    await page.goto(`/events/${eventId}/page-editor`);
+    const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
+    if (!(await isPublicCheckbox.isChecked())) {
+      await isPublicCheckbox.check();
+      await page.getByRole("button", { name: /save changes/i }).click();
+      await expect(page.getByText(/updates saved successfully/i)).toBeVisible();
+    }
+    const publicUrl = await page
+      .locator('a[href*="/e/"]')
+      .first()
+      .getAttribute("href");
+    if (publicUrl) {
+      await page.goto(publicUrl);
+      await expect(page.getByText(/Confirm Your Attendance/i)).toBeVisible();
+      const attendancePanelResults = await new AxeBuilder({ page })
+        .include('[data-testid="attendance-panel"]')
+        .withRules(["color-contrast"])
+        .analyze();
+      expect(attendancePanelResults.violations).toEqual([]);
+
+      results = await new AxeBuilder({ page }).analyze();
+      expect(
+        results.violations.filter(
+          (v) => v.impact === "serious" || v.impact === "critical"
+        )
+      ).toEqual([]);
+    }
   });
 
   test("seating chart is keyboard-operable for seat assignment", async ({

@@ -60,7 +60,13 @@ export async function updateInvitationDesignAction(
   const supabase = await createClient();
   const { error } = await supabase
     .from("events")
-    .update({ dress_code: parsed.data.attireNote || null })
+    .update({
+      dress_code: parsed.data.attireNote || null,
+      invitation_theme: parsed.data.theme,
+      invitation_headline: parsed.data.headline,
+      invitation_subheadline: parsed.data.subheadline || null,
+      invitation_message: parsed.data.customMessage || null,
+    })
     .eq("id", eventId);
 
   if (error) {
@@ -68,6 +74,7 @@ export async function updateInvitationDesignAction(
   }
 
   revalidatePath(`/events/${eventId}/invitations`);
+  revalidatePath(`/events/${eventId}`);
   return { success: true };
 }
 

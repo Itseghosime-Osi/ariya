@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { Icon } from "@/components/ui/icon";
+import { pluralise } from "@/lib/metrics";
 import {
   trackGuestInvitationsAction,
   sendGuestInvitationEmailAction,
@@ -132,7 +133,7 @@ export function InvitationGuestTracker({
                 </div>
                 <p className="text-on-surface-variant">
                   {guest.email || "No email"} • {guest.phone || "No phone"} •{" "}
-                  {guest.partySize} seats
+                  {pluralise(guest.displaySeats, "seat")}
                 </p>
               </div>
 

@@ -1,12 +1,22 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/format";
+import {
+  calculateCelebrationMetrics,
+  type GuestMetricItem,
+} from "@/lib/metrics";
 import type {
   EventMetrics,
   EventWithMetrics,
   MilestoneItem,
   RecentGuestResponse,
 } from "./types";
+
+export interface ScheduleSlot {
+  time: string;
+  title: string;
+  location?: string;
+}
 
 export interface PublicCelebration {
   id: string;
@@ -20,6 +30,9 @@ export interface PublicCelebration {
   rsvpBy: string | null;
   status: string;
   isPublic?: boolean;
+  description?: string | null;
+  coverImageUrl?: string | null;
+  schedule?: ScheduleSlot[];
 }
 
 export async function getPublicEventBySlug(
@@ -33,7 +46,15 @@ export async function getPublicEventBySlug(
     p_slug: cleanSlug,
   });
 
-  if (error || !data || typeof data !== "object") {
+  if (error) {
+    console.error("[getPublicEventBySlug] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading public event: ${error.message}`);
+  }
+
+  if (!data || typeof data !== "object") {
     return null;
   }
 
@@ -54,6 +75,11 @@ export async function getPublicEventBySlug(
     rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
     status: String(raw.status),
     isPublic: Boolean(raw.is_public),
+    description: raw.description ? String(raw.description) : null,
+    coverImageUrl: raw.cover_image_url ? String(raw.cover_image_url) : null,
+    schedule: Array.isArray(raw.schedule)
+      ? (raw.schedule as ScheduleSlot[])
+      : [],
   };
 }
 
@@ -69,16 +95,53 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 
   // Single aggregated query via RPC: eliminates N+1 queries across events, guests, rsvps and tables
   const { data, error } = await supabase.rpc("get_user_events_with_metrics");
-  if (error || !data || !Array.isArray(data)) {
+  if (error) {
+    console.error("[getUserEvents] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading user events: ${error.message}`);
+  }
+
+  if (!data || !Array.isArray(data)) {
     return [];
   }
 
   return data.map((item) => {
     const raw = item as Record<string, unknown>;
+    const rawMetrics = (raw.metrics as Record<string, unknown>) || {};
+    const totalParties = Number(rawMetrics.totalParties || 0);
+    const acceptedParties = Number(rawMetrics.acceptedParties || 0);
+    const declinedParties = Number(rawMetrics.declinedParties || 0);
+    const respondedParties = acceptedParties + declinedParties;
+    const rsvpRate =
+      totalParties > 0
+        ? Math.round((respondedParties / totalParties) * 100)
+        : 0;
+    const acceptedPartiesPct =
+      totalParties > 0 ? Math.round((acceptedParties / totalParties) * 100) : 0;
+    const declinedPartiesPct =
+      totalParties > 0 ? Math.round((declinedParties / totalParties) * 100) : 0;
+    const awaitingPartiesPct =
+      totalParties > 0
+        ? Math.max(0, 100 - acceptedPartiesPct - declinedPartiesPct)
+        : 0;
+
+    const metrics: EventWithMetrics["metrics"] = {
+      ...(rawMetrics as unknown as EventWithMetrics["metrics"]),
+      totalParties,
+      acceptedParties,
+      declinedParties,
+      rsvpRate,
+      acceptedPartiesPct,
+      declinedPartiesPct,
+      awaitingPartiesPct,
+    };
+
     return {
       event: raw.event as EventWithMetrics["event"],
       role: raw.role as EventWithMetrics["role"],
-      metrics: raw.metrics as EventWithMetrics["metrics"],
+      metrics,
     };
   });
 }
@@ -86,15 +149,28 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 export async function getEventById(
   eventId: string
 ): Promise<EventWithMetrics | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
 
   const { data: event, error } = await supabase
     .from("events")
     .select("*")
-    .eq("id", eventId)
+    .eq("id", cleanId)
     .maybeSingle();
 
-  if (error || !event) {
+  if (error) {
+    console.error("[getEventById] Database error loading event:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading event: ${error.message}`);
+  }
+
+  if (!event) {
     return null;
   }
 
@@ -113,22 +189,22 @@ export async function getEventMetrics(
 ): Promise<EventMetrics> {
   const supabase = await createClient();
 
-  // Query guests and RSVPs for this event
-  const { data: rawGuests } = await supabase
+  const { data: rawGuests, error: guestsError } = await supabase
     .from("guests")
     .select(
-      "id, party_size, seating_conflict_at, rsvps (status, attending_count)"
+      "id, party_size, is_vip, seating_conflict_at, rsvps (status, attending_count), seat_assignments (id)"
     )
     .eq("event_id", eventId);
 
+  if (guestsError) {
+    console.error("[getEventMetrics] Database error loading guests:", {
+      code: guestsError.code,
+      message: guestsError.message,
+    });
+    throw new Error(`Database error loading guests: ${guestsError.message}`);
+  }
+
   const guests = rawGuests ?? [];
-
-  // Query seating assignments count for this event
-  const { count: seatedCount } = await supabase
-    .from("seat_assignments")
-    .select("id, tables!inner(event_id)", { count: "exact", head: true })
-    .eq("tables.event_id", eventId);
-
   const daysAway = Math.max(0, daysUntil(eventDate));
 
   if (guests.length === 0) {
@@ -145,61 +221,35 @@ export async function getEventMetrics(
       unassignedGuests: 0,
       readinessPercentage: 0,
       daysAway,
+      conflictedParties: 0,
+      acceptedPartiesPct: 0,
+      declinedPartiesPct: 0,
+      awaitingPartiesPct: 0,
+      rsvpRate: 0,
     };
   }
 
-  const totalParties = guests.length;
-  let totalAttendees = 0;
-  let acceptedParties = 0;
-  let acceptedGuests = 0;
-  let awaitingParties = 0;
-  let awaitingGuests = 0;
-  let declinedParties = 0;
-  let declinedGuests = 0;
-  let conflictedParties = 0;
-
-  for (const g of guests) {
-    if (g.seating_conflict_at) {
-      conflictedParties += 1;
-    }
-    totalAttendees += g.party_size;
-    const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
-    const status = rsvp?.status ?? "pending";
-    const count = rsvp?.attending_count ?? g.party_size;
-
-    if (status === "accepted") {
-      acceptedParties += 1;
-      acceptedGuests += count;
-    } else if (status === "declined") {
-      declinedParties += 1;
-      declinedGuests += count;
-    } else {
-      awaitingParties += 1;
-      awaitingGuests += count;
-    }
-  }
-
-  const seated = seatedCount ?? 0;
-  const unassigned = Math.max(0, acceptedGuests - seated);
-  const readiness =
-    totalAttendees > 0
-      ? Math.round((acceptedGuests / totalAttendees) * 1000) / 10
-      : 0;
+  const m = calculateCelebrationMetrics(guests as unknown as GuestMetricItem[]);
+  const readiness = m.rsvpRate;
 
   return {
-    totalParties,
-    totalAttendees,
-    acceptedParties,
-    acceptedGuests,
-    awaitingParties,
-    awaitingGuests,
-    declinedParties,
-    declinedGuests,
-    seatedGuests: seated,
-    unassignedGuests: unassigned,
+    totalParties: m.invitedParties,
+    totalAttendees: m.totalAttendees,
+    acceptedParties: m.acceptedParties,
+    acceptedGuests: m.expectedPeople,
+    awaitingParties: m.awaitingParties,
+    awaitingGuests: m.awaitingGuests,
+    declinedParties: m.declinedParties,
+    declinedGuests: m.declinedGuests,
+    seatedGuests: m.seatedPeople,
+    unassignedGuests: m.unassignedPeople,
     readinessPercentage: readiness,
     daysAway,
-    conflictedParties,
+    conflictedParties: m.conflictedParties,
+    acceptedPartiesPct: m.acceptedPartiesPct,
+    declinedPartiesPct: m.declinedPartiesPct,
+    awaitingPartiesPct: m.awaitingPartiesPct,
+    rsvpRate: m.rsvpRate,
   };
 }
 
@@ -211,12 +261,22 @@ export async function getEventRecentResponses(
   const { data, error } = await supabase
     .from("guests")
     .select(
-      "id, name, side, group_name, rsvps (status, attending_count, updated_at, dietary), seat_assignments (tables (name))"
+      "id, name, side, group_name, party_size, rsvps (status, attending_count, updated_at, dietary), seat_assignments (tables (name))"
     )
     .eq("event_id", eventId)
     .limit(10);
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventRecentResponses] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(
+      `Database error loading recent responses: ${error.message}`
+    );
+  }
+
+  if (!data || data.length === 0) {
     return [];
   }
 
@@ -238,6 +298,13 @@ export async function getEventRecentResponses(
         ? g.seat_assignments[0]
         : g.seat_assignments;
       const tableName = assignment?.tables?.name ?? null;
+      const partySize = g.party_size && g.party_size > 0 ? g.party_size : 1;
+      const isAccepted = rsvp?.status === "accepted";
+      const attendingCount = isAccepted
+        ? typeof rsvp?.attending_count === "number" && rsvp.attending_count > 0
+          ? rsvp.attending_count
+          : partySize
+        : 0;
 
       return {
         id: g.id,
@@ -247,7 +314,8 @@ export async function getEventRecentResponses(
         groupName: g.group_name ?? null,
         status:
           (rsvp?.status as "accepted" | "declined" | "pending") ?? "accepted",
-        attendingCount: rsvp?.attending_count ?? 1,
+        partySize,
+        attendingCount,
         tableName,
         timeAgo: "Recently",
       };
@@ -257,6 +325,11 @@ export async function getEventRecentResponses(
 export async function getEventMilestones(
   eventId: string
 ): Promise<MilestoneItem[]> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return [];
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -266,7 +339,15 @@ export async function getEventMilestones(
     .order("due_date", { ascending: true })
     .limit(5);
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("[getEventMilestones] Database error:", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error(`Database error loading milestones: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
     return [];
   }
 

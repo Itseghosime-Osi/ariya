@@ -5,15 +5,28 @@ import type { ReminderDeskData, ReminderRecipient } from "./types";
 export async function getReminderDeskData(
   eventId: string
 ): Promise<ReminderDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
 
   const { data: event, error: eventErr } = await supabase
     .from("events")
     .select("id, title, couple, date, venue, paid_at")
-    .eq("id", eventId)
+    .eq("id", cleanId)
     .maybeSingle();
 
-  if (eventErr || !event) return null;
+  if (eventErr) {
+    console.error("[getReminderDeskData] Database error loading event:", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
+    throw new Error(`Database error loading event: ${eventErr.message}`);
+  }
+
+  if (!event) return null;
 
   const { data: rawGuests, error: guestErr } = await supabase
     .from("guests")
@@ -31,7 +44,15 @@ export async function getReminderDeskData(
     .eq("event_id", eventId)
     .order("name", { ascending: true });
 
-  if (guestErr || !rawGuests) return null;
+  if (guestErr) {
+    console.error("[getReminderDeskData] Database error loading guests:", {
+      code: guestErr.code,
+      message: guestErr.message,
+    });
+    throw new Error(`Database error loading guests: ${guestErr.message}`);
+  }
+
+  if (!rawGuests) return null;
 
   const recipients: ReminderRecipient[] = rawGuests.map((g) => {
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;

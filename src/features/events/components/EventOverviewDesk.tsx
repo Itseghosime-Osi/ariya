@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import type { EventWithMetrics, RecentGuestResponse } from "../types";
 import { RsvpHorizonBar } from "./overview/RsvpHorizonBar";
@@ -19,6 +20,7 @@ export function EventOverviewDesk({
   recentResponses,
 }: EventOverviewDeskProps) {
   const { event, metrics } = data;
+  const searchParams = useSearchParams();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -26,18 +28,37 @@ export function EventOverviewDesk({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  useEffect(() => {
+    if (searchParams?.get("created")) {
+      showToast("Your event has been created");
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("created");
+        window.history.replaceState(
+          null,
+          "",
+          url.pathname + (url.search ? url.search : "")
+        );
+      }
+    }
+  }, [searchParams]);
+
+  const totalParties = metrics.totalParties;
   const confirmedPct =
-    metrics.totalAttendees > 0
-      ? Math.round((metrics.acceptedGuests / metrics.totalAttendees) * 100)
+    totalParties > 0
+      ? Math.round((metrics.acceptedParties / totalParties) * 100)
       : 0;
   const awaitingPct =
-    metrics.totalAttendees > 0
-      ? Math.round((metrics.awaitingGuests / metrics.totalAttendees) * 100)
+    totalParties > 0
+      ? Math.round((metrics.awaitingParties / totalParties) * 100)
       : 0;
-  const declinedPct = Math.max(0, 100 - confirmedPct - awaitingPct);
+  const declinedPct =
+    totalParties > 0
+      ? Math.round((metrics.declinedParties / totalParties) * 100)
+      : 0;
 
   return (
-    <div className="space-y-space-xl pb-16">
+    <div className="space-y-8 lg:space-y-10 pb-16">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-night text-gold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-gold/30">
@@ -59,11 +80,11 @@ export function EventOverviewDesk({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-baseline gap-x-space-md gap-y-space-xs">
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 sm:gap-6">
             <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
               Every yes, together.
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm tracking-widest uppercase shadow-sm font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm tracking-widest uppercase shadow-sm font-bold w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
               {metrics.daysAway} days to celebration
             </span>
@@ -92,7 +113,7 @@ export function EventOverviewDesk({
       </header>
 
       {/* Asymmetric Hero Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
         <RsvpHorizonBar
           metrics={metrics}
           confirmedPct={confirmedPct}
@@ -102,7 +123,10 @@ export function EventOverviewDesk({
 
         {/* 40% Right Area: Curated Stationery Presentation */}
         <div className="lg:col-span-5 bg-paper rounded-[24px] p-space-lg flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] relative border border-surface-container-high/40">
-          <div className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full shadow-md bg-night flex flex-col justify-between p-6">
+          <div
+            data-testid="invitation-tile"
+            className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full shadow-md bg-night flex flex-col justify-between p-6"
+          >
             <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-wine/50 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-gold/20 blur-2xl pointer-events-none" />
 
@@ -120,9 +144,11 @@ export function EventOverviewDesk({
               </span>
             </div>
 
-            <div className="relative z-10 flex items-center justify-between text-mist text-[12px]">
-              <span>Solemnization &amp; Reception</span>
-              <span className="text-gold font-semibold">Wax Seal Verified</span>
+            <div className="relative z-10 flex items-center justify-between text-ivory/80 text-[12px]">
+              <span>Ceremony &amp; Reception</span>
+              <span className="text-gold font-semibold">
+                Personal Guest Link
+              </span>
             </div>
           </div>
 
@@ -147,8 +173,8 @@ export function EventOverviewDesk({
       </section>
 
       {/* Lower Section: RSVP Pace & Curated Priority Deck */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
-        <div className="lg:col-span-7 space-y-gutter-lg">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="lg:col-span-7 space-y-8 lg:space-y-10">
           <RsvpTrajectoryChart metrics={metrics} />
           <RecentResponsesFeed
             eventId={event.id}

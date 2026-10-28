@@ -37,7 +37,7 @@ export function DeleteGuestDialog({
             <AlertTriangle className="h-6 w-6" />
           </div>
           <DialogTitle className="text-center font-serif text-xl">
-            Remove Guest from Roster?
+            Remove Guest from Guest List?
           </DialogTitle>
           <DialogDescription className="text-center text-sm text-on-surface-variant">
             Are you sure you want to remove{" "}

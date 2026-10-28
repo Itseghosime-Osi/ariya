@@ -49,8 +49,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - site (legacy marketing site)
-     * - assets (legacy static site assets)
+     * - site (marketing site)
+     * - assets (static site assets)
      * - public files with extensions
      */
     "/((?!_next/static|_next/image|favicon.ico|site|assets|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",

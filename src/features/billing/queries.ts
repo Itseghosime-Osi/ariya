@@ -6,6 +6,11 @@ import type { EventRole } from "../team/types";
 export async function getBillingDeskData(
   eventId: string
 ): Promise<BillingDeskData | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,7 +55,15 @@ export async function getBillingDeskData(
     .eq("id", eventId)
     .single();
 
-  if (eventErr || !event) return null;
+  if (eventErr) {
+    console.error("[getBillingDeskData] Database error loading event:", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
+    throw new Error(`Database error loading event: ${eventErr.message}`);
+  }
+
+  if (!event) return null;
 
   // 3. Fetch payments and invoices (accessible to owner, planner, couple)
   const { data: rawPayments } = await supabase

@@ -12,8 +12,8 @@ export default function EventNotFound() {
         Celebration Event Not Found
       </h2>
       <p className="text-xs text-on-surface-variant max-w-md mb-6">
-        This celebration dossier does not exist, has been archived, or you do
-        not have membership credentials to view it.
+        This celebration does not exist, has been archived, or you do not have
+        permission to view it.
       </p>
       <Link
         href="/events"

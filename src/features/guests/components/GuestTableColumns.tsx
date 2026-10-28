@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { getPartyDisplaySeats } from "@/lib/metrics";
 import { GuestWithDetails } from "../types";
 import { Star } from "lucide-react";
 import { GuestRowActions } from "./GuestRowActions";
@@ -107,10 +108,11 @@ export function getGuestColumns({
       header: "Party Size",
       cell: ({ row }) => {
         const guest = row.original;
+        const seats = getPartyDisplaySeats(guest);
         return (
           <div className="text-xs text-on-surface">
             <span>
-              {guest.party_size} {guest.party_size === 1 ? "seat" : "seats"}
+              {seats} {seats === 1 ? "seat" : "seats"}
             </span>
             {guest.plus_ones_allowed && (
               <span className="text-mist ml-1">(+1 allowed)</span>

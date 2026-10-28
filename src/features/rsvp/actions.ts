@@ -2,6 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { render } from "@react-email/components";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
@@ -30,7 +31,9 @@ export async function submitRsvpAction(
 ): Promise<SubmitRsvpActionResult> {
   const token = String(formData.get("token") || "").trim();
   const status = String(formData.get("status") || "").trim();
-  const attendingCount = Number(formData.get("attendingCount") || 0);
+  const rawAttending = formData.get("attendingCount");
+  const parsedAttending =
+    rawAttending !== null && rawAttending !== "" ? Number(rawAttending) : 0;
   const plusOneName = String(formData.get("plusOneName") || "").trim() || null;
   const dietary = String(formData.get("dietary") || "").trim() || null;
   const note = String(formData.get("note") || "").trim() || null;
@@ -85,11 +88,20 @@ export async function submitRsvpAction(
   const invitation: InvitationData = parsedInv.data;
   const isRevision = Boolean(invitation.rsvp?.responded_at);
 
+  // When accepting with no selector (or missing attendingCount), default to allowed party size (minimum 1)
+  const defaultAttending = Math.max(1, invitation.guest.party_size || 1);
+  const attendingCount =
+    status === "accepted"
+      ? parsedAttending > 0
+        ? parsedAttending
+        : defaultAttending
+      : 0;
+
   // Call submit_rsvp RPC strictly with optional contact email
   const { data: submitData, error } = await supabase.rpc("submit_rsvp", {
     p_token: token,
     p_status: status,
-    p_attending_count: status === "accepted" ? attendingCount : 0,
+    p_attending_count: attendingCount,
     p_plus_one_name: plusOneName || undefined,
     p_dietary: dietary || undefined,
     p_note: note || undefined,
@@ -127,7 +139,7 @@ export async function submitRsvpAction(
     revalidatePath(`/events/${invitation.event.id}/guests`);
   }
 
-  return { ok: true };
+  redirect(`/i/${token}`);
 }
 
 async function sendConfirmationEmail({

@@ -5,10 +5,42 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+function getRemotePatterns() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return [];
+
+  try {
+    const parsed = new URL(supabaseUrl);
+    const protocol = parsed.protocol.replace(":", "") as "http" | "https";
+    return [
+      {
+        protocol,
+        hostname: parsed.hostname,
+        ...(parsed.port ? { port: parsed.port } : {}),
+      },
+    ];
+  } catch {
+    return [];
+  }
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: getRemotePatterns(),
+  },
   async redirects() {
     return [
+      {
+        source: "/login",
+        destination: "/sign-in",
+        permanent: false,
+      },
+      {
+        source: "/signup",
+        destination: "/sign-up",
+        permanent: false,
+      },
       {
         source: "/planner.html",
         destination: "/events",

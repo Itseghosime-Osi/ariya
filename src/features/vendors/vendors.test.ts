@@ -11,7 +11,7 @@ import type { Vendor, VendorTask } from "./types";
 describe("Vendors domain & validation", () => {
   it("validates createVendorSchema correctly", () => {
     const valid = createVendorSchema.safeParse({
-      name: "Tantalizers Banquet Caterers",
+      name: "Tantalizers Caterers",
       category: "Catering & Drinks",
       contact_name: "Adeola Balogun",
       contact_phone: "08031234567",

@@ -27,6 +27,10 @@ export const invitationEventSchema = z.object({
   dress_code: z.string().nullable(),
   rsvp_by: z.string().nullable(),
   status: z.string(),
+  invitation_theme: z.string().nullable().optional(),
+  invitation_headline: z.string().nullable().optional(),
+  invitation_subheadline: z.string().nullable().optional(),
+  invitation_message: z.string().nullable().optional(),
 });
 
 export const invitationDataSchema = z.object({

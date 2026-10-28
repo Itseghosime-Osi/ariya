@@ -67,14 +67,14 @@ export function SignUpForm() {
     <div className="w-full max-w-xl mx-auto flex flex-col my-8">
       <div className="mb-8">
         <span className="font-label-md text-label-md text-secondary uppercase tracking-widest block mb-2 font-bold">
-          Step 01 / Registration Dossier
+          Account Details
         </span>
         <h1 className="font-display text-display text-wine tracking-tight leading-tight">
           Create Your Account
         </h1>
         <p className="font-body-md text-body-md text-on-surface-variant mt-2 max-w-md">
-          Enter the ceremonial suite to orchestrate high-profile banqueting,
-          Aṣọ-Ẹbí distributions, and sovereign seating charts.
+          Create an account to manage your celebrations, send personal RSVP
+          links, arrange table seating, and check in guests.
         </p>
       </div>
 
@@ -88,7 +88,7 @@ export function SignUpForm() {
             className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold"
             htmlFor="fullName"
           >
-            Full Legal Name
+            Full Name
           </label>
           <div className="relative">
             <Icon
@@ -114,7 +114,7 @@ export function SignUpForm() {
             className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold"
             htmlFor="emailInput"
           >
-            Primary Contact Email
+            Email Address
           </label>
           <div className="relative">
             <Icon
@@ -125,7 +125,7 @@ export function SignUpForm() {
             <input
               className="w-full bg-paper text-night font-body-md text-body-md pl-11 pr-4 py-3 rounded-xl shadow-inner outline-none transition-all placeholder:text-mist focus:bg-surface-container-lowest"
               id="emailInput"
-              placeholder="dossier@domain.com"
+              placeholder="you@example.com"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -138,7 +138,7 @@ export function SignUpForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <PasswordField
             id="password"
-            label="Passcode"
+            label="Password"
             value={password}
             onChange={setPassword}
             disabled={isPending}
@@ -146,7 +146,7 @@ export function SignUpForm() {
           />
           <PasswordField
             id="confirmPassword"
-            label="Confirm Passcode"
+            label="Confirm Password"
             value={confirmPassword}
             onChange={setConfirmPassword}
             disabled={isPending}
@@ -181,7 +181,7 @@ export function SignUpForm() {
 
         <div className="flex items-center justify-center gap-2 pt-2">
           <span className="font-body-md text-body-md text-on-surface-variant">
-            Already possess a registry account?
+            Already have an account?
           </span>
           <Link
             className="font-title-md text-title-md text-wine font-bold hover:text-primary hover:underline transition-colors flex items-center gap-1"

@@ -136,7 +136,7 @@ export function TableCard({
                   <button
                     type="button"
                     onClick={() => onUnseatGuest(g.id)}
-                    title="Unseat guest back to roster"
+                    title="Unseat guest"
                     className="opacity-0 group-hover:opacity-100 p-1 text-on-surface-variant hover:text-red-700 transition-opacity"
                   >
                     <Icon name="close" className="text-xs" />

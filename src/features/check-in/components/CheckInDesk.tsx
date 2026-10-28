@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CheckInHeader } from "./CheckInHeader";
 import { CheckInCameraScanner } from "./CheckInCameraScanner";
@@ -21,6 +22,7 @@ interface CheckInDeskProps {
 }
 
 export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
+  const router = useRouter();
   const [stats, setStats] = useState<CheckInStats>(initialData.stats);
   const [recentCheckIns, setRecentCheckIns] = useState<RecentCheckIn[]>(
     initialData.recentCheckIns
@@ -97,14 +99,35 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
     setResult(res.result);
 
     if (res.result.status === "checked_in") {
+      const admittedCount = res.result.admitted_now || count;
+      setStats((prev) => {
+        const nextChecked = prev.checkedIn + admittedCount;
+        const nextRemaining = Math.max(0, prev.totalExpected - nextChecked);
+        const nextRate =
+          prev.totalExpected > 0
+            ? Math.min(
+                100,
+                Math.round((nextChecked / prev.totalExpected) * 100)
+              )
+            : 0;
+
+        return {
+          ...prev,
+          checkedIn: nextChecked,
+          remaining: nextRemaining,
+          attendanceRate: nextRate,
+        };
+      });
+
       const newEntry: RecentCheckIn = {
         id: `local-${Date.now()}`,
         guest_name: res.result.guest_name || "Honoured Guest",
-        count: res.result.admitted_now || count,
+        count: admittedCount,
         checked_in_at: new Date().toISOString(),
         table_name: res.result.table_name || null,
       };
       setRecentCheckIns((prev) => [newEntry, ...prev.slice(0, 19)]);
+      router.refresh();
     }
   };
 

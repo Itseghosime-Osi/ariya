@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidCoverImageUrl } from "./cover-image";
 
 export const createEventSchema = z.object({
   title: z
@@ -24,6 +25,25 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 export const updateEventSchema = createEventSchema.partial().extend({
   status: z.enum(["draft", "active", "archived"]).optional(),
   isPublic: z.boolean().optional(),
+  description: z.string().trim().optional(),
+  coverImageUrl: z
+    .string()
+    .trim()
+    .refine((val) => val === "" || isValidCoverImageUrl(val), {
+      message:
+        "Cover image must be an uploaded asset from the celebration storage bucket",
+    })
+    .optional()
+    .nullable(),
+  schedule: z
+    .array(
+      z.object({
+        time: z.string(),
+        title: z.string(),
+        location: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

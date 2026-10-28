@@ -58,6 +58,94 @@ export function formatLagosTime(
 }
 
 /**
+ * Format user-facing event date as "12 Dec 2026, 2:00 PM WAT" in Africa/Lagos timezone.
+ */
+export function formatEventDate(
+  dateInput: string | Date | number | null | undefined
+): string {
+  if (!dateInput) return "";
+  try {
+    const d =
+      typeof dateInput === "string" ? new Date(dateInput) : new Date(dateInput);
+    if (isNaN(d.getTime())) return String(dateInput);
+    const datePart = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Africa/Lagos",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+    const timePart = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Africa/Lagos",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+    return `${datePart}, ${timePart} WAT`;
+  } catch {
+    return String(dateInput);
+  }
+}
+
+/**
+ * Formats a date into a `YYYY-MM-DDTHH:mm` value in Africa/Lagos (WAT, UTC+1)
+ * suitable for HTML datetime-local inputs.
+ * e.g. "2026-12-12T13:00:00.000Z" -> "2026-12-12T14:00"
+ */
+export function formatWatDatetimeLocal(
+  dateInput: string | Date | number | null | undefined
+): string {
+  if (!dateInput) return "";
+  const d =
+    typeof dateInput === "string" ? new Date(dateInput) : new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  const hour = get("hour") === "24" ? "00" : get("hour");
+  return `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}`;
+}
+
+/**
+ * Converts a datetime input from the wizard (WAT, Africa/Lagos, UTC+1) into an ISO UTC string.
+ * e.g. "2026-12-12T14:00" in WAT -> "2026-12-12T13:00:00.000Z"
+ */
+export function parseWatDateToUtc(input: string | null | undefined): string {
+  if (!input) return "";
+  const str = input.trim();
+  try {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const d = new Date(str + "T00:00:00+01:00");
+      return isNaN(d.getTime()) ? "" : d.toISOString();
+    }
+    if (/[zZ]$|[+-]\d{2}(:?\d{2})?$/.test(str)) {
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? "" : d.toISOString();
+    }
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}$/.test(str)) {
+      const d = new Date(str.replace(" ", "T") + ":00+01:00");
+      return isNaN(d.getTime()) ? "" : d.toISOString();
+    }
+    if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}$/.test(str)) {
+      const d = new Date(str.replace(" ", "T") + "+01:00");
+      return isNaN(d.getTime()) ? "" : d.toISOString();
+    }
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? "" : d.toISOString();
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Calculate days remaining until target date (0 if today or in the past).
  */
 export function daysUntil(dateInput: string | Date | number): number {

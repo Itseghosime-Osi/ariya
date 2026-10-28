@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: CheckInPageProps) {
   const { eventId } = await params;
   const data = await getEventById(eventId);
   return {
-    title: `Check-In Desk & Telemetry • ${data?.event.title || "Celebration"} • Àríyá`,
+    title: `Check-In Desk & Arrival Concierge • ${data?.event.title || "Celebration"} • Àríyá`,
   };
 }
 

@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { createEventAction } from "../actions";
 import { EventWizardStepper } from "./wizard/EventWizardStepper";
-import { EventProvisionedSuccess } from "./wizard/EventProvisionedSuccess";
 import { StepCelebrationDetails } from "./wizard/StepCelebrationDetails";
 import { StepGuestIntake } from "./wizard/StepGuestIntake";
 import { StepReviewLaunch } from "./wizard/StepReviewLaunch";
 
 export function CreateEventWizard() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -27,10 +28,6 @@ export function CreateEventWizard() {
     "csv"
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [createdEvent, setCreatedEvent] = useState<{
-    eventId: string;
-    slug: string;
-  } | null>(null);
 
   const canNavigateToStep2 = Boolean(couple.trim() && venue.trim());
   const canNavigateToStep3 = canNavigateToStep2;
@@ -39,7 +36,7 @@ export function CreateEventWizard() {
     setErrorMessage(null);
     startTransition(async () => {
       const result = await createEventAction({
-        title: title || `${couple}'s Nuptials`,
+        title: title || `${couple}'s Wedding`,
         couple,
         date,
         venue,
@@ -52,22 +49,10 @@ export function CreateEventWizard() {
       if (!result.ok) {
         setErrorMessage(result.error);
       } else if (result.data) {
-        setCreatedEvent(result.data);
+        router.push(`/events/${result.data.eventId}?created=1`);
       }
     });
   };
-
-  if (createdEvent) {
-    return (
-      <EventProvisionedSuccess
-        eventId={createdEvent.eventId}
-        slug={createdEvent.slug}
-        couple={couple}
-        title={title}
-        targetParties={targetParties}
-      />
-    );
-  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
