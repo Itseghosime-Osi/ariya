@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: getRemotePatterns(),
+    dangerouslyAllowLocalIP: true,
   },
   async redirects() {
     return [
