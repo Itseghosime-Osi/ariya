@@ -20,7 +20,7 @@ export function TopBar({
   onOpenSearch,
 }: TopBarProps) {
   return (
-    <header className="fixed top-0 left-0 md:left-[84px] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
+    <header className="sb-offset fixed top-0 left-0 md:left-[var(--sb-offset,84px)] right-0 h-16 bg-ivory/90 backdrop-blur-xl z-40 border-b border-outline-variant/20">
       <div className="h-16 w-full px-6 md:px-8 flex items-center justify-between">
         {/* Left: Event Quick Context */}
         <div className="flex items-center gap-3 text-sm flex-wrap">
