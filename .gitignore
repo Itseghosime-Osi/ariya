@@ -54,3 +54,7 @@ AGENTS.md
 /screenshot*.jpeg
 /screenshot*.webp
 *.zip
+
+# The commercial song stays private (private-media/). It is copied here only
+# for local class demos and must never be committed or deployed.
+/public/site/assets/music.mp3
