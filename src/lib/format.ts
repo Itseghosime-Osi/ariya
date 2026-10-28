@@ -9,17 +9,10 @@ const ngnFormatter = new Intl.NumberFormat("en-NG", {
   maximumFractionDigits: 2,
 });
 
-/**
- * Format money in integer kobo to NGN currency string.
- * e.g., 2500000 kobo -> ₦25,000
- */
 export function formatKobo(kobo: number): string {
   return ngnFormatter.format(kobo / 100);
 }
 
-/**
- * Format date in Africa/Lagos timezone.
- */
 export function formatLagosDate(
   dateInput: string | Date | number,
   options: Intl.DateTimeFormatOptions = {
@@ -38,9 +31,6 @@ export function formatLagosDate(
   }).format(date);
 }
 
-/**
- * Format time in Africa/Lagos timezone.
- */
 export function formatLagosTime(
   dateInput: string | Date | number,
   options: Intl.DateTimeFormatOptions = {
@@ -86,11 +76,6 @@ export function formatEventDate(
   }
 }
 
-/**
- * Formats a date into a `YYYY-MM-DDTHH:mm` value in Africa/Lagos (WAT, UTC+1)
- * suitable for HTML datetime-local inputs.
- * e.g. "2026-12-12T13:00:00.000Z" -> "2026-12-12T14:00"
- */
 export function formatWatDatetimeLocal(
   dateInput: string | Date | number | null | undefined
 ): string {
@@ -114,10 +99,6 @@ export function formatWatDatetimeLocal(
   return `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}`;
 }
 
-/**
- * Converts a datetime input from the wizard (WAT, Africa/Lagos, UTC+1) into an ISO UTC string.
- * e.g. "2026-12-12T14:00" in WAT -> "2026-12-12T13:00:00.000Z"
- */
 export function parseWatDateToUtc(input: string | null | undefined): string {
   if (!input) return "";
   const str = input.trim();
@@ -145,9 +126,6 @@ export function parseWatDateToUtc(input: string | null | undefined): string {
   }
 }
 
-/**
- * Calculate days remaining until target date (0 if today or in the past).
- */
 export function daysUntil(dateInput: string | Date | number): number {
   const target = new Date(dateInput).getTime();
   const now = Date.now();
@@ -155,9 +133,6 @@ export function daysUntil(dateInput: string | Date | number): number {
   return Math.max(0, diffDays);
 }
 
-/**
- * Normalize Nigerian phone numbers to E.164 (+234...)
- */
 export function normalizePhone(rawPhone: string): string | null {
   const cleaned = String(rawPhone || "").replace(/[^\d+]/g, "");
   if (/^\+234\d{10}$/.test(cleaned)) return cleaned;
@@ -166,9 +141,6 @@ export function normalizePhone(rawPhone: string): string | null {
   return null;
 }
 
-/**
- * Format Nigerian phone number for human-friendly display: e.g. 0803 123 4567
- */
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return "";
   const match = phone.match(/^\+234(\d{3})(\d{3})(\d{4})$/);
@@ -176,4 +148,47 @@ export function formatPhone(phone: string | null | undefined): string {
     return `0${match[1]} ${match[2]} ${match[3]}`;
   }
   return phone;
+}
+
+export function getLagosDateKey(
+  dateInput: string | Date | null | undefined
+): string | null {
+  if (!dateInput) return null;
+  if (typeof dateInput === "string") {
+    const trimmed = dateInput.trim();
+    if (!trimmed) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  }
+  const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+export function daysBetweenLagos(
+  targetInput: string | Date,
+  fromInput: string | Date = new Date()
+): number {
+  const targetKey = getLagosDateKey(targetInput);
+  const fromKey = getLagosDateKey(fromInput);
+  if (!targetKey || !fromKey) return NaN;
+  const targetUtc = Date.parse(`${targetKey}T00:00:00Z`);
+  const fromUtc = Date.parse(`${fromKey}T00:00:00Z`);
+  return Math.round((targetUtc - fromUtc) / 86_400_000);
+}
+
+export function getLagosGreeting(now: Date = new Date()): string {
+  const hourStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Africa/Lagos",
+    hour: "2-digit",
+    hour12: false,
+  }).format(now);
+  const hour = Number.parseInt(hourStr, 10) % 24;
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
 }

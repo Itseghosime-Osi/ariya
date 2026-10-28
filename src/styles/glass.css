@@ -1,0 +1,42 @@
+.glass {
+  background: rgba(250, 246, 238, 0.96);
+  border: 1px solid rgba(28, 15, 20, 0.09);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 8px 24px -12px rgba(28, 15, 20, 0.14);
+}
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass {
+    background: rgba(250, 246, 238, 0.72);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    backdrop-filter: saturate(160%) blur(18px);
+  }
+}
+.dark .glass {
+  background: rgba(29, 20, 24, 0.74);
+  border-color: rgba(232, 210, 166, 0.14);
+}
+@media (hover: none) and (max-width: 768px) {
+  .glass {
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass {
+    background: var(--ivory);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: rgba(28, 15, 20, 0.28);
+  }
+}
+@media (forced-colors: active) {
+  .glass {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid ButtonBorder;
+    backdrop-filter: none;
+  }
+}

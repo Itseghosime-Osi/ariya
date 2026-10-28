@@ -178,6 +178,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))
+      '@number-flow/react':
+        specifier: ^0.6.2
+        version: 0.6.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.3.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -220,6 +223,9 @@ importers:
       '@zxing/browser':
         specifier: ^0.2.1
         version: 0.2.1(@zxing/library@0.23.0)
+      canvas-confetti:
+        specifier: ^1.9.4
+        version: 1.9.4
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -229,6 +235,9 @@ importers:
       lucide-react:
         specifier: ^1.16.0
         version: 1.61.0(@types/react@19.3.0)(react@19.3.1)
+      motion:
+        specifier: ^14.7.1
+        version: 14.7.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       next:
         specifier: ^16.0.0
         version: 16.4.3(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.64.1)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -287,6 +296,9 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.8(@testing-library/dom@10.4.2)
+      '@types/canvas-confetti':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@types/node':
         specifier: ^22.13.0
         version: 22.20.5
@@ -1048,6 +1060,12 @@ packages:
   '@nolyfill/is-core-module@1.0.39':
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
+
+  '@number-flow/react@0.6.2':
+    resolution: {integrity: sha512-WjZuV4aA+vhRCgCF+adGLgFVVAJ8vdvq6EchRT2FiBIgElTXtDOA3YgkcMr9UHpvpS9v4H70AB5wZv0D9jc3QA==}
+    peerDependencies:
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
 
   '@playwright/test@1.64.1':
     resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
@@ -1963,6 +1981,9 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/canvas-confetti@1.9.0':
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -2378,6 +2399,9 @@ packages:
   caniuse-lite@1.0.30001819:
     resolution: {integrity: sha512-LFUqIIAwpzsIuevnKnsR9qnStBcgzPShTX61lBwN9uFkkf8o8zLiebEjbW8AYtZiF+1YKDWfdt/pWDtMuG8Xwg==}
 
+  canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
+
   chai@5.3.3:
     resolution: {integrity: sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw==}
     engines: {node: '>=18'}
@@ -2725,6 +2749,9 @@ packages:
       jiti:
         optional: true
 
+  esm-env@1.2.2:
+    resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
+
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -2806,6 +2833,17 @@ packages:
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
+
+  framer-motion@14.7.1:
+    resolution: {integrity: sha512-mFDYZxyfeZnpvL/zEQEqLZNYVA/ya47c9TBfZb/PEoNBBVSVvCLkMrCv9U38cuw72W161XENZwZB0+4nIBLEJg==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -3329,6 +3367,23 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
+  motion-dom@14.7.1:
+    resolution: {integrity: sha512-p9q9F7+HoijbQjUG/cSGNmWS2t1OaAKxkd2RG5gQJRoDwoTap/Khb7K1P5rLW90crnSmx0rcRXzh3Jd5UNrpEw==}
+
+  motion-utils@14.7.0:
+    resolution: {integrity: sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==}
+
+  motion@14.7.1:
+    resolution: {integrity: sha512-o+q7MExUC0RuCUF62HxF9v+fNVX7pUMYZqlyigQJJFAgAsmnnSlAOYeG41hGYkamxFR0rdBA0KXpaBJ28/GGAw==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
     engines: {node: '>=10'}
@@ -3377,6 +3432,9 @@ packages:
   node-releases@2.0.60:
     resolution: {integrity: sha512-OmO8+GM1JUZqXET720VrJCwkjUCXmCMQm0Z3UDDRbfNLHS4NEAvY60j5jiFv0tkKw2PNNlqOLhahVmwJIOLDIQ==}
     engines: {node: '>=18'}
+
+  number-flow@0.6.2:
+    resolution: {integrity: sha512-MCnImG4Q5vPwhSXnov56nOuyyKn6LC+Qd7II1UiKc+ACRtug5iAtn0+CwXNxM38AC5lSowEY+oYEtZX2qMnUyw==}
 
   nwsapi@2.2.28:
     resolution: {integrity: sha512-IlVB7OS7qrOsVYlpnFIkETjMwT9jwvmocJmmM+GZU/PAB3uGi9Ezd7vcWhWBUnSc0ya4ppmQITOyP1ez9gg8cg==}
@@ -4771,6 +4829,13 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
+  '@number-flow/react@0.6.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      esm-env: 1.2.2
+      number-flow: 0.6.2
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
   '@playwright/test@1.64.1':
     dependencies:
       playwright: 1.64.1
@@ -5569,6 +5634,8 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.11
 
+  '@types/canvas-confetti@1.9.0': {}
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -6003,6 +6070,8 @@ snapshots:
   camelcase@5.3.1: {}
 
   caniuse-lite@1.0.30001819: {}
+
+  canvas-confetti@1.9.4: {}
 
   chai@5.3.3:
     dependencies:
@@ -6520,6 +6589,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  esm-env@1.2.2: {}
+
   espree@10.4.0:
     dependencies:
       acorn: 8.19.0
@@ -6596,6 +6667,15 @@ snapshots:
   for-each@0.3.5:
     dependencies:
       is-callable: 1.2.7
+
+  framer-motion@14.7.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    dependencies:
+      motion-dom: 14.7.1
+      motion-utils: 14.7.0
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
 
   fsevents@2.3.3:
     optional: true
@@ -7098,6 +7178,20 @@ snapshots:
 
   minimist@1.2.8: {}
 
+  motion-dom@14.7.1:
+    dependencies:
+      motion-utils: 14.7.0
+
+  motion-utils@14.7.0: {}
+
+  motion@14.7.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    dependencies:
+      framer-motion: 14.7.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
   mrmime@2.0.1: {}
 
   ms@2.1.3: {}
@@ -7142,6 +7236,10 @@ snapshots:
       semver: 6.3.1
 
   node-releases@2.0.60: {}
+
+  number-flow@0.6.2:
+    dependencies:
+      esm-env: 1.2.2
 
   nwsapi@2.2.28: {}
 

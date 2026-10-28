@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 
 const bodoniModa = Bodoni_Moda({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-bodoni-moda",
   display: "swap",
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-plus-jakarta-sans",
   display: "swap",
 });
@@ -22,6 +22,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en-NG"
       className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
     >
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
