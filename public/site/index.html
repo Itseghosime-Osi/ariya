@@ -832,10 +832,18 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
      highlife-ambient soundtrack that follows the story as the fallback if the song is missing or won't play ---------- */
   var Score = (function () {
     var ctx = null, master, bus, tone, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf;
-    var SONG = "assets/music.mp3", song = null, songFailed = false, songLoop = true, songChecked = false;
+    var SONG = "assets/music.mp3", song = null, songFailed = false, songLoop = true, songChecked = false, songSrc = SONG, lastSeek = 0;
+    // Fetch the whole song while the hall is being set, and play it from memory: streaming it on a phone stalls to
+    // buffer mid-song, and the stalls are what made it stutter. If it isn't ready by the door, it streams as before.
+    try {
+      fetch(SONG, { priority: "low" }).then(function (r) {
+        if (!r.ok || /text\/html/.test(r.headers.get("content-type") || "")) throw new Error("no song");
+        return r.blob();
+      }).then(function (b) { if (!song) songSrc = URL.createObjectURL(b); }).catch(function () { /* playSong's own check falls back */ });
+    } catch (e) { /* streams instead */ }
     function playSong() {
       var fallback = function () { if (songFailed) return; songFailed = true; song = null; if (on) { on = false; Score.start(); } };
-      if (!song) { song = new Audio(SONG); song.loop = songLoop; song.preload = "auto"; }
+      if (!song) { song = new Audio(songSrc); song.loop = songLoop; song.preload = "auto"; }
       if (!songChecked) {
         songChecked = true; song.addEventListener("error", fallback);
         // A missing file does not always raise "error" (some browsers just keep loading), so ask for it once and fall back if it is not there.
@@ -950,7 +958,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       start: function (at) {
         try { if (!ctx) build(); ctx.resume(); } catch (e) { return false; }
         on = true;
-        if (at > 0 && !song && !songFailed) { song = new Audio(SONG); song.loop = songLoop; song.preload = "auto"; song.addEventListener("loadedmetadata", function () { song.currentTime = at % (song.duration || 1e9); }, { once: true }); }
+        if (at > 0 && !song && !songFailed) { song = new Audio(songSrc); song.loop = songLoop; song.preload = "auto"; song.addEventListener("loadedmetadata", function () { song.currentTime = at % (song.duration || 1e9); }, { once: true }); }
         master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0.85, ctx.currentTime, 0.3); // chimes over the song
         if (!songFailed) { playSong(); return true; }
         if (!timer) { nextT = ctx.currentTime + 0.1; timer = setInterval(schedule, 25); }
@@ -962,7 +970,15 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       time: function () { return song ? song.currentTime : 0; },
       // Watch keeps time by the song: its position while it is really playing, and a way to move it with the film.
       clock: function () { return song && on && !song.paused && song.readyState >= 2 ? song.currentTime : null; },
-      seek: function (t) { if (song) { try { song.currentTime = Math.max(0, t); } catch (e) { /* not loaded yet */ } } },
+      // Moving the song makes it stop and pick up again, so it moves only for a real jump: never for a small difference, never twice in a moment.
+      seek: function (t) {
+        if (!song) return;
+        var now = performance.now();
+        if (Math.abs(song.currentTime - t) < 0.4 || now - lastSeek < 350) return;
+        lastSeek = now; try { song.currentTime = Math.max(0, t); } catch (e) { /* not loaded yet */ }
+      },
+      // The song is playing but waiting for data: Watch holds the picture rather than run ahead of it.
+      waiting: function () { return !!(song && on && !songFailed && !song.paused && song.readyState < 3); },
       // In Watch the song plays once and ends with the film; scrolling, it goes round again.
       loop: function (v) { songLoop = v; if (song) song.loop = v; },
       restart: function () { if (song) { try { song.currentTime = 0; } catch (e) { /* not loaded yet */ } } step = 0; },
@@ -971,7 +987,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       // The score sits under the dialogue until the yes, then rises.
       level: function (l) {
         levelTarget = l; levelNow += (levelTarget - levelNow) * (levelTarget > levelNow ? 0.015 : 0.08);
-        if (song && on && !song.paused) song.volume = Math.max(0, Math.min(1, 0.55 * levelNow));
+        if (song && on && !song.paused) { var v = Math.max(0, Math.min(1, 0.55 * levelNow)); if (Math.abs(song.volume - v) > 0.01) song.volume = v; }
         else if (ctx && on && timer) master.gain.setTargetAtTime(0.85 * levelNow, ctx.currentTime, 0.2);
       },
       chime: function () { if (!on) return; var t = ctx.currentTime; [72, 76, 79, 84].forEach(function (m, i) { pluck(m, t + i * 0.09, 0.09); }); },
@@ -1312,13 +1328,14 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
     if (!playing) return;
     var dt = Math.min(0.25, (now - playLast) / 1000); playLast = now; // keeps its pace on a slow phone, without leaping after a stall
     // A chapter jump, Skip, Home or the scrollbar moved the film: Watch carries on from wherever it landed.
-    if (Math.abs(window.scrollY - playY) > 3 || (window.AriyaScroll && AriyaScroll.busy)) { playY = window.scrollY; wt = tFromS(sFromY(playY)); Score.seek(wt); requestAnimationFrame(playStep); return; }
-    // The song is the clock when it is playing, so picture and music finish together; otherwise the film keeps its own time.
+    if (Math.abs(window.scrollY - playY) > 40 || (window.AriyaScroll && AriyaScroll.busy)) { playY = window.scrollY; wt = tFromS(sFromY(playY)); Score.seek(wt); requestAnimationFrame(playStep); return; }
+    // The song is the clock: the picture follows it, and waits while it gathers data, so the song is never pulled
+    // about (each pull made it skip). Without the song (silent, or the generated score) the film keeps its own time.
     var ck = Score.clock();
-    if (ck === null) wt = Math.min(TT, wt + dt);
-    else if (wt > TT - 1.5 && ck < 1.5) wt = TT; // the song has just come round to its start: the film is over
-    else if (Math.abs(ck - wt) < 1.5) wt = Math.min(TT, Math.max(wt, ck));
-    else { Score.seek(wt); wt = Math.min(TT, wt + dt); }
+    if (ck !== null) {
+      if (wt > TT - 1.5 && ck < 1.5) wt = TT; // the song has come round to its start: the film is over
+      else wt = Math.min(TT, Math.abs(ck - wt) < 1.5 ? Math.max(wt, ck) : ck);
+    } else if (!Score.waiting()) wt = Math.min(TT, wt + dt);
     window.scrollTo({ top: yFromS(sFromT(wt)), behavior: "instant" }); playY = window.scrollY;
     if (wt >= TT) { setHow("scroll"); return; } // the film is over; the song plays on, low, under the page
     requestAnimationFrame(playStep);
