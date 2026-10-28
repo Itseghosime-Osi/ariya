@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/format";
 import {
@@ -83,7 +84,7 @@ export async function getPublicEventBySlug(
   };
 }
 
-export async function getUserEvents(): Promise<EventWithMetrics[]> {
+export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -144,44 +145,44 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
       metrics,
     };
   });
-}
+});
 
-export async function getEventById(
-  eventId: string
-): Promise<EventWithMetrics | null> {
-  const cleanId = eventId?.trim();
-  if (!cleanId || cleanId === "default") {
-    return null;
+export const getEventById = cache(
+  async (eventId: string): Promise<EventWithMetrics | null> => {
+    const cleanId = eventId?.trim();
+    if (!cleanId || cleanId === "default") {
+      return null;
+    }
+
+    const supabase = await createClient();
+
+    const { data: event, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", cleanId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[getEventById] Database error loading event:", {
+        code: error.code,
+        message: error.message,
+      });
+      throw new Error(`Database error loading event: ${error.message}`);
+    }
+
+    if (!event) {
+      return null;
+    }
+
+    const metrics = await getEventMetrics(event.id, event.date);
+
+    return {
+      event,
+      role: "owner",
+      metrics,
+    };
   }
-
-  const supabase = await createClient();
-
-  const { data: event, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", cleanId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[getEventById] Database error loading event:", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error(`Database error loading event: ${error.message}`);
-  }
-
-  if (!event) {
-    return null;
-  }
-
-  const metrics = await getEventMetrics(event.id, event.date);
-
-  return {
-    event,
-    role: "owner",
-    metrics,
-  };
-}
+);
 
 export async function getEventMetrics(
   eventId: string,

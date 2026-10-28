@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { AppShell } from "@/components/layout/app-shell";
 import { Icon } from "@/components/ui/icon";
 
 export default function EventsError({
@@ -16,7 +15,7 @@ export default function EventsError({
   }, [error]);
 
   return (
-    <AppShell showFloatingNewEvent>
+    <>
       <div
         role="alert"
         data-testid="events-error-state"
@@ -47,6 +46,6 @@ export default function EventsError({
           </button>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

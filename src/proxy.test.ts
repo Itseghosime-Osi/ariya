@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
-import { middleware } from "./middleware";
+import { proxy } from "./proxy";
 import * as supabaseMiddleware from "@/lib/supabase/middleware";
 
 vi.mock("@/lib/supabase/middleware", () => ({
@@ -30,7 +30,7 @@ function mockSession(
   });
 }
 
-describe("middleware route protection", () => {
+describe("proxy route protection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -39,7 +39,7 @@ describe("middleware route protection", () => {
     mockSession(null);
 
     const req = new NextRequest("http://localhost:3000/events?tab=overview");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe(
@@ -59,7 +59,7 @@ describe("middleware route protection", () => {
     ]);
 
     const req = new NextRequest("http://localhost:3000/events");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const cookie = res.cookies.get("sb-auth-token");
@@ -70,7 +70,7 @@ describe("middleware route protection", () => {
     mockSession({ id: "user-123" });
 
     const req = new NextRequest("http://localhost:3000/sign-in");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("http://localhost:3000/events");
@@ -80,7 +80,7 @@ describe("middleware route protection", () => {
     mockSession({ id: "recovery-user-123" });
 
     const req = new NextRequest("http://localhost:3000/reset-password");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     // Should not redirect to /events; let the recovery session reach the reset form
     expect(res.status).not.toBe(307);
@@ -93,7 +93,7 @@ describe("middleware route protection", () => {
     const req = new NextRequest(
       "http://localhost:3000/sign-in?next=/events/event-abc"
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe(
@@ -107,7 +107,7 @@ describe("middleware route protection", () => {
     const req = new NextRequest(
       "http://localhost:3000/sign-in?next=//evil.com"
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("http://localhost:3000/events");
@@ -119,7 +119,7 @@ describe("middleware route protection", () => {
     const req = new NextRequest(
       "http://localhost:3000/sign-in?next=/\\evil.com"
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("http://localhost:3000/events");
@@ -131,7 +131,7 @@ describe("middleware route protection", () => {
     const req = new NextRequest(
       "http://localhost:3000/sign-in?next=https://attacker.com"
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("http://localhost:3000/events");
