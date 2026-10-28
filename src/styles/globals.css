@@ -189,3 +189,353 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Sidebar: a floating velvet panel that folds to its icons ---------- */
+.sb {
+  --sb-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --sb-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  width: 268px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      120% 60% at 0% 0%,
+      rgba(161, 59, 74, 0.38),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 40% at 100% 100%,
+      rgba(233, 201, 138, 0.1),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #2b0b15 0%, #1c070d 55%, #12040a 100%);
+  box-shadow:
+    0 30px 60px -20px rgba(28, 7, 13, 0.55),
+    0 12px 24px -12px rgba(28, 7, 13, 0.4),
+    inset 0 0 0 1px rgba(233, 201, 138, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: width 620ms var(--sb-spring);
+}
+.sb[data-collapsed="true"] {
+  width: 84px;
+}
+.sb.sb-still,
+.sb.sb-still * {
+  transition: none !important;
+}
+
+/* Labels slip away before the panel folds, and arrive after it opens. */
+.sb-label {
+  transition:
+    opacity 260ms ease 140ms,
+    transform 420ms var(--sb-spring) 120ms;
+}
+.sb[data-collapsed="true"] .sb-label {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+  transition:
+    opacity 140ms ease,
+    transform 200ms ease;
+}
+
+/* The monogram spins a full turn every time the panel folds or opens. */
+.sb-mono {
+  background: linear-gradient(
+    145deg,
+    rgba(110, 20, 38, 0.9),
+    rgba(28, 7, 13, 0.9)
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(233, 201, 138, 0.35),
+    0 6px 16px -6px rgba(233, 201, 138, 0.35);
+  transition: transform 900ms var(--sb-spring);
+}
+
+.sb-count {
+  padding: 0;
+  transition: background-color 300ms ease;
+}
+.sb[data-collapsed="false"] .sb-count {
+  background: rgba(233, 201, 138, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(233, 201, 138, 0.14);
+}
+.sb-ring {
+  transition: stroke-dashoffset 1400ms var(--sb-ease);
+}
+
+/* Sections: a quiet label when open, a single gold dot when folded. */
+.sb-section {
+  position: relative;
+  height: 22px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+}
+.sb-section-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(233, 201, 138, 0.62);
+  white-space: nowrap;
+  transition: opacity 220ms ease 120ms;
+}
+.sb-section-dot {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 999px;
+  background: rgba(233, 201, 138, 0.5);
+  opacity: 0;
+  transform: scale(0);
+  transition:
+    opacity 200ms ease,
+    transform 400ms var(--sb-spring);
+}
+.sb[data-collapsed="true"] .sb-section-text {
+  opacity: 0;
+  transition-delay: 0ms;
+}
+.sb[data-collapsed="true"] .sb-section-dot {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 180ms;
+}
+
+/* Grouped items sit on a tinted panel, as in a menu card. */
+.sb-panel {
+  margin: 0 -6px;
+  padding: 6px;
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 239, 230, 0.05),
+    rgba(244, 239, 230, 0.02)
+  );
+  box-shadow: inset 0 0 0 1px rgba(244, 239, 230, 0.05);
+}
+
+/* Hover: a soft gold light follows the cursor down the list, and the icon gives a little shimmy. */
+.sb-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    160px 90px at 50% var(--my, -200px),
+    rgba(233, 201, 138, 0.1),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.sb-nav:hover .sb-glow {
+  opacity: 1;
+}
+.sb-item:hover .sb-ico svg,
+.sb-item:focus-visible .sb-ico svg {
+  animation: sb-shimmy 600ms var(--sb-spring);
+}
+.sb-item:focus-visible .sb-ico {
+  box-shadow: 0 0 0 2px var(--gold);
+}
+@keyframes sb-shimmy {
+  0% {
+    transform: rotate(0) scale(1);
+  }
+  30% {
+    transform: rotate(-12deg) scale(1.12);
+  }
+  60% {
+    transform: rotate(9deg) scale(1.06);
+  }
+  100% {
+    transform: rotate(0) scale(1);
+  }
+}
+
+/* The active pill: a gold chip and a gold label that glide, with a squash on arrival. */
+.sb-pill {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 560ms var(--sb-spring),
+    height 300ms ease,
+    opacity 200ms ease;
+}
+.sb-pill-on {
+  opacity: 1;
+}
+.sb-pill-chip {
+  width: 44px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f6dca8, #e9c98a 55%, #c9a465);
+  box-shadow:
+    0 8px 20px -8px rgba(233, 201, 138, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  animation: sb-squash 560ms var(--sb-spring);
+}
+.sb-pill-label {
+  flex: 1;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #e9c98a, #f3d9a6);
+  box-shadow: 0 8px 22px -10px rgba(233, 201, 138, 0.6);
+  transform-origin: left center;
+  transition:
+    opacity 240ms ease 120ms,
+    transform 460ms var(--sb-spring) 100ms;
+}
+.sb[data-collapsed="true"] .sb-pill-label {
+  opacity: 0;
+  transform: scaleX(0.2);
+  transition:
+    opacity 120ms ease,
+    transform 160ms ease;
+}
+@keyframes sb-squash {
+  0% {
+    transform: scale(0.7, 1.15);
+  }
+  45% {
+    transform: scale(1.12, 0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Folded tooltips and the account card pop out beside the panel. */
+.sb-tooltip {
+  position: fixed;
+  z-index: 60;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: #2a0e17;
+  color: var(--ivory);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow:
+    0 12px 28px -10px rgba(28, 7, 13, 0.7),
+    inset 0 0 0 1px rgba(233, 201, 138, 0.25);
+  opacity: 0;
+  transform: translate(-8px, -50%) scale(0.85);
+  transform-origin: left center;
+  transition:
+    opacity 160ms ease,
+    transform 360ms var(--sb-spring);
+}
+.sb-tooltip::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  background: #2a0e17;
+  transform: rotate(45deg);
+  box-shadow: inset 1px -1px 0 rgba(233, 201, 138, 0.25);
+}
+.sb-tooltip-on {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+}
+
+.sb-popover {
+  position: fixed;
+  z-index: 60;
+  width: 220px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 18px;
+  background: #1c070d;
+  box-shadow:
+    0 20px 40px -14px rgba(28, 7, 13, 0.75),
+    inset 0 0 0 1px rgba(233, 201, 138, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.92);
+  transform-origin: bottom left;
+  transition:
+    opacity 180ms ease,
+    transform 380ms var(--sb-spring),
+    visibility 0s linear 380ms;
+}
+.sb-popover-side {
+  transform: translateX(-8px) scale(0.92);
+}
+.sb-popover-on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 180ms ease,
+    transform 380ms var(--sb-spring);
+}
+
+/* Confetti at the fold. */
+.sb-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 3px;
+  margin: -1.5px 0 0 -3px;
+  border-radius: 2px;
+  animation: sb-burst 820ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes sb-burst {
+  0% {
+    transform: translate(0, 0) rotate(0) scale(0.4);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), calc(var(--y) + 14px)) rotate(var(--r))
+      scale(1);
+    opacity: 0;
+  }
+}
+
+.sb-nav {
+  scrollbar-width: none;
+}
+.sb-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* The page and its top bar slide over with the sidebar. */
+.sb-ready .sb-offset {
+  transition:
+    padding-left 620ms cubic-bezier(0.34, 1.25, 0.64, 1),
+    left 620ms cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+/* A soft fade where the list runs on below the fold, so it reads as scrollable. */
+.sb-nav {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 28px),
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
