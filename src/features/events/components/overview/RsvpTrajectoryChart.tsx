@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatRsvpProgress, pluralise } from "@/lib/metrics";
 import type { EventMetrics } from "../../types";
 
 interface RsvpTrajectoryChartProps {
@@ -35,11 +36,6 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
     );
   }
 
-  const total = metrics.totalAttendees || 1;
-  const acceptedRatio = Math.round((metrics.acceptedGuests / total) * 100);
-  const declinedRatio = Math.round((metrics.declinedGuests / total) * 100);
-  const awaitingRatio = Math.max(0, 100 - acceptedRatio - declinedRatio);
-
   return (
     <div className="bg-surface-container-lowest rounded-[24px] p-margin shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] space-y-space-md border border-surface-container-high/40">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -48,37 +44,36 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
             RSVP Progress
           </h2>
           <p className="font-body-sm text-on-surface-variant">
-            {metrics.acceptedGuests} of {metrics.totalAttendees} invited people
-            confirmed
+            {formatRsvpProgress(metrics)}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
           <span className="w-2 h-2 rounded-full bg-emerald-600" />
-          {metrics.readinessPercentage}% attendance readiness
+          {metrics.acceptedPartiesPct}% accepted
         </span>
       </div>
 
       <div className="space-y-3 pt-2">
         <div className="h-4 w-full rounded-full bg-surface-container flex overflow-hidden p-0.5 gap-1">
-          {acceptedRatio > 0 && (
+          {metrics.acceptedPartiesPct > 0 && (
             <div
               className="h-full bg-wine rounded-full transition-all"
-              style={{ width: `${acceptedRatio}%` }}
-              title={`${metrics.acceptedGuests} accepted`}
+              style={{ width: `${metrics.acceptedPartiesPct}%` }}
+              title={`${metrics.acceptedPartiesPct}% accepted`}
             />
           )}
-          {awaitingRatio > 0 && (
+          {metrics.awaitingPartiesPct > 0 && (
             <div
               className="h-full bg-gold rounded-full transition-all"
-              style={{ width: `${awaitingRatio}%` }}
-              title={`${metrics.awaitingGuests} awaiting`}
+              style={{ width: `${metrics.awaitingPartiesPct}%` }}
+              title={`${metrics.awaitingPartiesPct}% awaiting`}
             />
           )}
-          {declinedRatio > 0 && (
+          {metrics.declinedPartiesPct > 0 && (
             <div
               className="h-full bg-mist rounded-full transition-all"
-              style={{ width: `${declinedRatio}%` }}
-              title={`${metrics.declinedGuests} declined`}
+              style={{ width: `${metrics.declinedPartiesPct}%` }}
+              title={`${metrics.declinedPartiesPct}% declined`}
             />
           )}
         </div>
@@ -92,8 +87,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.acceptedGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.acceptedParties}{" "}
-              {metrics.acceptedParties === 1 ? "party" : "parties"}
+              {pluralise(metrics.acceptedParties, "party", "parties")} (
+              {metrics.acceptedPartiesPct}%)
             </span>
           </div>
           <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 space-y-0.5">
@@ -102,8 +97,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.awaitingGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.awaitingParties}{" "}
-              {metrics.awaitingParties === 1 ? "party" : "parties"}
+              {pluralise(metrics.awaitingParties, "party", "parties")} (
+              {metrics.awaitingPartiesPct}%)
             </span>
           </div>
           <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 space-y-0.5">
@@ -112,8 +107,8 @@ export function RsvpTrajectoryChart({ metrics }: RsvpTrajectoryChartProps) {
               {metrics.declinedGuests}
             </span>
             <span className="text-[11px] text-neutral-600 block">
-              {metrics.declinedParties}{" "}
-              {metrics.declinedParties === 1 ? "party" : "parties"}
+              {pluralise(metrics.declinedParties, "party", "parties")} (
+              {metrics.declinedPartiesPct}%)
             </span>
           </div>
         </div>

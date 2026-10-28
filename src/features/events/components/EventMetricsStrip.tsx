@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { pluralise } from "@/lib/metrics";
 import type { EventMetrics } from "../types";
 
 interface EventMetricsStripProps {
@@ -18,9 +19,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
           {metrics.totalParties}
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          {metrics.totalParties === 1
-            ? "1 party"
-            : `${metrics.totalParties} parties`}
+          {pluralise(metrics.totalParties, "party", "parties")}
         </div>
       </div>
 
@@ -31,13 +30,15 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
         <div className="font-headline-sm text-headline-sm text-success">
           {metrics.acceptedParties}{" "}
           <span className="font-label-sm text-label-sm font-normal text-on-surface-variant">
-            ({metrics.readinessPercentage}%)
+            ({metrics.acceptedPartiesPct}%)
           </span>
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          {metrics.acceptedGuests === 1
-            ? "1 person attending"
-            : `${metrics.acceptedGuests} people attending`}
+          {pluralise(
+            metrics.acceptedGuests,
+            "person attending",
+            "people attending"
+          )}
         </div>
       </div>
 
@@ -49,8 +50,7 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
           {metrics.seatedGuests}
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          of {metrics.acceptedGuests}{" "}
-          {metrics.acceptedGuests === 1 ? "person" : "people"}
+          of {pluralise(metrics.acceptedGuests, "person", "people")}
         </div>
       </div>
 

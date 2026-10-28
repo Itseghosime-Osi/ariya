@@ -3,6 +3,12 @@ import {
   calculateCelebrationMetrics,
   getPartyDisplaySeats,
   formatEventCardMetrics,
+  formatRsvpSubtitle,
+  formatRsvpStat,
+  formatRsvpProgress,
+  formatConfirmedPartiesSummary,
+  pluralise,
+  pluralNoun,
   type GuestMetricItem,
 } from "./metrics";
 
@@ -155,11 +161,100 @@ describe("metrics", () => {
       const cardSummary = formatEventCardMetrics({
         totalParties: metrics.totalParties,
         acceptedGuests: metrics.expectedPeople,
-        rsvpRate: 67, // e.g. 67% responded
+        rsvpRate: metrics.rsvpRate, // 100% responded
       });
       expect(cardSummary).toBe(
-        "3 parties invited · 3 people attending · 67% responded"
+        "3 parties invited · 3 people attending · 100% responded"
       );
+
+      // Top subtitle and stat header consistency
+      expect(formatRsvpSubtitle(metrics)).toBe(
+        "3 of 3 parties responded · 1 party declined"
+      );
+      expect(formatRsvpStat(metrics)).toBe("3 of 3 parties responded");
+
+      // Lower RSVP Progress section
+      expect(formatRsvpProgress(metrics)).toBe(
+        "2 of 3 parties accepted · 3 people attending"
+      );
+      expect(`${metrics.acceptedPartiesPct}% accepted`).toBe("67% accepted");
+
+      // Search-expanded card Confirmed RSVPs
+      expect(formatConfirmedPartiesSummary(metrics)).toBe(
+        "2 of 3 parties accepted (67%)"
+      );
+      expect(
+        `${metrics.acceptedParties} (${metrics.acceptedPartiesPct}%)`
+      ).toBe("2 (67%)");
+
+      // Party size on secondary surfaces (Amina accepted 2, Tola accepted 1, Chidi declined)
+      expect(getPartyDisplaySeats(guests[0])).toBe(2);
+      expect(getPartyDisplaySeats(guests[1])).toBe(1);
+      expect(getPartyDisplaySeats(guests[2])).toBe(1);
+
+      // Invitation delivery tracker seats label
+      expect(pluralise(getPartyDisplaySeats(guests[0]), "seat")).toBe(
+        "2 seats"
+      );
+      expect(pluralise(getPartyDisplaySeats(guests[1]), "seat")).toBe("1 seat");
+      expect(pluralise(getPartyDisplaySeats(guests[2]), "seat")).toBe("1 seat");
+
+      // Recent responses feed party size
+      expect(
+        `Party of ${getPartyDisplaySeats({
+          party_size: guests[0].party_size,
+          rsvp: guests[0].rsvp,
+        })}`
+      ).toBe("Party of 2");
+      expect(
+        `Party of ${getPartyDisplaySeats({
+          party_size: guests[1].party_size,
+          rsvp: guests[1].rsvp,
+        })}`
+      ).toBe("Party of 1");
+      expect(
+        `Party of ${getPartyDisplaySeats({
+          party_size: guests[2].party_size,
+          rsvp: guests[2].rsvp,
+        })}`
+      ).toBe("Party of 1");
+
+      // Progress breakdown cards
+      expect(
+        `${pluralise(metrics.acceptedParties, "party", "parties")} (${metrics.acceptedPartiesPct}%)`
+      ).toBe("2 parties (67%)");
+      expect(
+        `${pluralise(metrics.declinedParties, "party", "parties")} (${metrics.declinedPartiesPct}%)`
+      ).toBe("1 party (33%)");
+      expect(
+        `${pluralise(metrics.awaitingParties, "party", "parties")} (${metrics.awaitingPartiesPct}%)`
+      ).toBe("0 parties (0%)");
+    });
+  });
+
+  describe("pluralise and pluralNoun helpers", () => {
+    it("handles seats correctly", () => {
+      expect(pluralise(1, "seat")).toBe("1 seat");
+      expect(pluralise(2, "seat")).toBe("2 seats");
+    });
+
+    it("handles attendees correctly", () => {
+      expect(pluralise(1, "attendee")).toBe("1 attendee");
+      expect(pluralise(2, "attendee")).toBe("2 attendees");
+    });
+
+    it("handles unassigned guests correctly", () => {
+      expect(pluralise(1, "unassigned guest")).toBe("1 unassigned guest");
+      expect(pluralise(3, "unassigned guest")).toBe("3 unassigned guests");
+    });
+
+    it("handles irregular plurals with custom plural form", () => {
+      expect(pluralise(1, "party", "parties")).toBe("1 party");
+      expect(pluralise(3, "party", "parties")).toBe("3 parties");
+      expect(pluralise(1, "person", "people")).toBe("1 person");
+      expect(pluralise(2, "person", "people")).toBe("2 people");
+      expect(pluralNoun(1, "person", "people")).toBe("person");
+      expect(pluralNoun(2, "person", "people")).toBe("people");
     });
   });
 });

@@ -17,6 +17,7 @@ export interface InvitationGuest {
   side: string | null;
   groupName: string | null;
   partySize: number;
+  displaySeats: number;
   isVip: boolean;
   rsvpToken: string;
   invitedAt: string | null;

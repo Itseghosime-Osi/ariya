@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getPartyDisplaySeats } from "@/lib/metrics";
 import type {
   InvitationDeskData,
   InvitationGuest,
@@ -50,7 +51,7 @@ export async function getInvitationDeskData(
       is_vip,
       rsvp_token,
       invited_at,
-      rsvps (status)
+      rsvps (status, attending_count)
     `
     )
     .eq("event_id", eventId)
@@ -68,6 +69,15 @@ export async function getInvitationDeskData(
 
   const guests: InvitationGuest[] = rawGuests.map((g) => {
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
+    const displaySeats = getPartyDisplaySeats({
+      party_size: g.party_size,
+      rsvp: rsvp
+        ? {
+            status: rsvp.status,
+            attending_count: rsvp.attending_count,
+          }
+        : null,
+    });
     return {
       id: g.id,
       name: g.name,
@@ -76,6 +86,7 @@ export async function getInvitationDeskData(
       side: g.side,
       groupName: g.group_name,
       partySize: g.party_size,
+      displaySeats,
       isVip: g.is_vip,
       rsvpToken: g.rsvp_token,
       invitedAt: g.invited_at,

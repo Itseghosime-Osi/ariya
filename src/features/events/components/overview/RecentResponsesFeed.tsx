@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { getPartyDisplaySeats } from "@/lib/metrics";
 import type { RecentGuestResponse } from "../../types";
 
 interface RecentResponsesFeedProps {
@@ -57,7 +58,13 @@ export function RecentResponsesFeed({
                   </div>
                   <span className="font-body-sm text-on-surface-variant text-[12px]">
                     {item.side} · Party of{" "}
-                    {item.partySize || item.attendingCount || 1}
+                    {getPartyDisplaySeats({
+                      party_size: item.partySize,
+                      rsvp: {
+                        status: item.status,
+                        attending_count: item.attendingCount,
+                      },
+                    })}
                     {item.status === "accepted"
                       ? item.tableName
                         ? ` · ${item.tableName}`

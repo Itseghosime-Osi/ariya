@@ -19,10 +19,10 @@ export interface EventMetrics {
   readinessPercentage: number;
   daysAway: number;
   conflictedParties?: number;
-  acceptedPartiesPct?: number;
-  declinedPartiesPct?: number;
-  awaitingPartiesPct?: number;
-  rsvpRate?: number;
+  acceptedPartiesPct: number;
+  declinedPartiesPct: number;
+  awaitingPartiesPct: number;
+  rsvpRate: number;
 }
 
 export interface EventWithMetrics {

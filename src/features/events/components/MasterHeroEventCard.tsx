@@ -4,7 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
-import { formatEventCardMetrics } from "@/lib/metrics";
+import {
+  formatEventCardMetrics,
+  formatConfirmedPartiesSummary,
+} from "@/lib/metrics";
 import type { EventWithMetrics } from "../types";
 import { EventMetricsStrip } from "./EventMetricsStrip";
 
@@ -122,16 +125,16 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
             {/* Progress Bar Line */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant">
-                <span>Attendance Readiness</span>
+                <span>Confirmed RSVPs</span>
                 <span className="font-semibold text-wine">
-                  {metrics.readinessPercentage}% Confirmed
+                  {formatConfirmedPartiesSummary(metrics)}
                 </span>
               </div>
               <div className="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-wine to-gold rounded-full transition-all duration-500"
                   style={{
-                    width: `${Math.min(100, metrics.readinessPercentage)}%`,
+                    width: `${Math.min(100, metrics.acceptedPartiesPct)}%`,
                   }}
                 />
               </div>

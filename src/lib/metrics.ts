@@ -219,3 +219,85 @@ export function formatEventCardMetrics(m: {
   const rateUnit = `${m.rsvpRate}% responded`;
   return `${partyUnit} · ${peopleUnit} · ${rateUnit}`;
 }
+
+/**
+ * Returns singular or plural form with count:
+ * e.g. pluralise(1, "seat") -> "1 seat"
+ * e.g. pluralise(2, "attendee") -> "2 attendees"
+ */
+export function pluralise(
+  count: number,
+  singular: string,
+  plural?: string
+): string {
+  const form = count === 1 ? singular : (plural ?? `${singular}s`);
+  return `${count} ${form}`;
+}
+
+/**
+ * Returns only the noun without count:
+ * e.g. pluralNoun(1, "party", "parties") -> "party"
+ */
+export function pluralNoun(
+  count: number,
+  singular: string,
+  plural?: string
+): string {
+  return count === 1 ? singular : (plural ?? `${singular}s`);
+}
+
+/**
+ * Top subtitle helper:
+ * e.g. "3 of 3 parties responded · 1 party declined"
+ */
+export function formatRsvpSubtitle(m: {
+  acceptedParties: number;
+  declinedParties: number;
+  totalParties: number;
+}): string {
+  const responded = m.acceptedParties + m.declinedParties;
+  const partyUnit = m.totalParties === 1 ? "party" : "parties";
+  const declinedUnit = m.declinedParties === 1 ? "party" : "parties";
+  return `${responded} of ${m.totalParties} ${partyUnit} responded · ${m.declinedParties} ${declinedUnit} declined`;
+}
+
+/**
+ * Stat header helper:
+ * e.g. "3 of 3 parties responded"
+ */
+export function formatRsvpStat(m: {
+  acceptedParties: number;
+  declinedParties: number;
+  totalParties: number;
+}): string {
+  const responded = m.acceptedParties + m.declinedParties;
+  const partyUnit = m.totalParties === 1 ? "party" : "parties";
+  return `${responded} of ${m.totalParties} ${partyUnit} responded`;
+}
+
+/**
+ * Lower RSVP progress section helper:
+ * e.g. "2 of 3 parties accepted · 3 people attending"
+ */
+export function formatRsvpProgress(m: {
+  acceptedParties: number;
+  totalParties: number;
+  acceptedGuests: number;
+}): string {
+  const partyUnit = m.totalParties === 1 ? "party" : "parties";
+  const peopleUnit = m.acceptedGuests === 1 ? "person" : "people";
+  return `${m.acceptedParties} of ${m.totalParties} ${partyUnit} accepted · ${m.acceptedGuests} ${peopleUnit} attending`;
+}
+
+/**
+ * Formatted confirmed parties label for expanded event card:
+ * e.g. "2 of 3 parties accepted (67%)"
+ */
+export function formatConfirmedPartiesSummary(m: {
+  acceptedParties: number;
+  totalParties: number;
+  acceptedPartiesPct: number;
+}): string {
+  const partyUnit = m.totalParties === 1 ? "party" : "parties";
+  return `${m.acceptedParties} of ${m.totalParties} ${partyUnit} accepted (${m.acceptedPartiesPct}%)`;
+}

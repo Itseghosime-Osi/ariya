@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Icon } from "@/components/ui/icon";
+import { formatRsvpSubtitle, formatRsvpStat, pluralNoun } from "@/lib/metrics";
 import type { EventMetrics } from "../../types";
 
 interface RsvpHorizonBarProps {
@@ -28,7 +29,7 @@ export function RsvpHorizonBar({
           </span>
           <span className="font-label-sm text-wine font-semibold">
             {metrics.totalParties > 0
-              ? `${metrics.acceptedParties + metrics.declinedParties} of ${metrics.totalParties} ${metrics.totalParties === 1 ? "party" : "parties"} responded`
+              ? formatRsvpStat(metrics)
               : "Awaiting invitations"}
           </span>
         </div>
@@ -38,16 +39,15 @@ export function RsvpHorizonBar({
             {metrics.acceptedGuests}
           </span>
           <span className="font-headline-sm text-headline-sm text-on-surface">
-            {metrics.acceptedGuests === 1
-              ? "person attending"
-              : "people attending"}
+            {pluralNoun(
+              metrics.acceptedGuests,
+              "person attending",
+              "people attending"
+            )}
           </span>
         </div>
         <p className="font-body-md text-on-surface-variant mt-1.5">
-          {metrics.acceptedParties} of {metrics.totalParties}{" "}
-          {metrics.totalParties === 1 ? "party" : "parties"} responded ·{" "}
-          {metrics.declinedParties}{" "}
-          {metrics.declinedParties === 1 ? "party" : "parties"} declined
+          {formatRsvpSubtitle(metrics)}
         </p>
       </div>
 

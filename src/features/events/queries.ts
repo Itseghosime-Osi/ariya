@@ -109,10 +109,39 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
 
   return data.map((item) => {
     const raw = item as Record<string, unknown>;
+    const rawMetrics = (raw.metrics as Record<string, unknown>) || {};
+    const totalParties = Number(rawMetrics.totalParties || 0);
+    const acceptedParties = Number(rawMetrics.acceptedParties || 0);
+    const declinedParties = Number(rawMetrics.declinedParties || 0);
+    const respondedParties = acceptedParties + declinedParties;
+    const rsvpRate =
+      totalParties > 0
+        ? Math.round((respondedParties / totalParties) * 100)
+        : 0;
+    const acceptedPartiesPct =
+      totalParties > 0 ? Math.round((acceptedParties / totalParties) * 100) : 0;
+    const declinedPartiesPct =
+      totalParties > 0 ? Math.round((declinedParties / totalParties) * 100) : 0;
+    const awaitingPartiesPct =
+      totalParties > 0
+        ? Math.max(0, 100 - acceptedPartiesPct - declinedPartiesPct)
+        : 0;
+
+    const metrics: EventWithMetrics["metrics"] = {
+      ...(rawMetrics as unknown as EventWithMetrics["metrics"]),
+      totalParties,
+      acceptedParties,
+      declinedParties,
+      rsvpRate,
+      acceptedPartiesPct,
+      declinedPartiesPct,
+      awaitingPartiesPct,
+    };
+
     return {
       event: raw.event as EventWithMetrics["event"],
       role: raw.role as EventWithMetrics["role"],
-      metrics: raw.metrics as EventWithMetrics["metrics"],
+      metrics,
     };
   });
 }
@@ -193,6 +222,10 @@ export async function getEventMetrics(
       readinessPercentage: 0,
       daysAway,
       conflictedParties: 0,
+      acceptedPartiesPct: 0,
+      declinedPartiesPct: 0,
+      awaitingPartiesPct: 0,
+      rsvpRate: 0,
     };
   }
 
