@@ -42,7 +42,10 @@ export interface CelebrationMetricsSummary {
   awaitingParties: number;
   awaitingGuests: number;
   respondedParties: number;
-  rsvpRate: number; // percentage 0 - 100
+  rsvpRate: number; // percentage 0 - 100 of responded parties / invited parties
+  acceptedPartiesPct: number; // percentage of accepted parties over invited parties
+  declinedPartiesPct: number; // percentage of declined parties over invited parties
+  awaitingPartiesPct: number; // percentage of awaiting parties over invited parties
   totalAttendees: number; // total invited seats capacity
   seatedPeople: number;
   seatedGuests: number; // alias for seatedPeople
@@ -155,6 +158,18 @@ export function calculateCelebrationMetrics(
     invitedParties > 0
       ? Math.round((respondedParties / invitedParties) * 100)
       : 0;
+  const acceptedPartiesPct =
+    invitedParties > 0
+      ? Math.round((acceptedParties / invitedParties) * 100)
+      : 0;
+  const declinedPartiesPct =
+    invitedParties > 0
+      ? Math.round((declinedParties / invitedParties) * 100)
+      : 0;
+  const awaitingPartiesPct =
+    invitedParties > 0
+      ? Math.max(0, 100 - acceptedPartiesPct - declinedPartiesPct)
+      : 0;
 
   const unassignedPeople = Math.max(0, expectedPeople - seatedPeople);
 
@@ -170,6 +185,9 @@ export function calculateCelebrationMetrics(
     awaitingGuests,
     respondedParties,
     rsvpRate,
+    acceptedPartiesPct,
+    declinedPartiesPct,
+    awaitingPartiesPct,
     totalAttendees,
     seatedPeople,
     seatedGuests: seatedPeople,
@@ -179,4 +197,25 @@ export function calculateCelebrationMetrics(
     conflictedParties,
     vipParties,
   };
+}
+
+/**
+ * Formats event card metric string with explicit units:
+ * e.g. "3 parties invited · 3 people attending · 67% responded"
+ */
+export function formatEventCardMetrics(m: {
+  totalParties: number;
+  acceptedGuests: number;
+  rsvpRate: number;
+}): string {
+  const partyUnit =
+    m.totalParties === 1
+      ? "1 party invited"
+      : `${m.totalParties} parties invited`;
+  const peopleUnit =
+    m.acceptedGuests === 1
+      ? "1 person attending"
+      : `${m.acceptedGuests} people attending`;
+  const rateUnit = `${m.rsvpRate}% responded`;
+  return `${partyUnit} · ${peopleUnit} · ${rateUnit}`;
 }

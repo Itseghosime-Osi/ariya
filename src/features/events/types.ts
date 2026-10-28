@@ -19,6 +19,10 @@ export interface EventMetrics {
   readinessPercentage: number;
   daysAway: number;
   conflictedParties?: number;
+  acceptedPartiesPct?: number;
+  declinedPartiesPct?: number;
+  awaitingPartiesPct?: number;
+  rsvpRate?: number;
 }
 
 export interface EventWithMetrics {
@@ -44,6 +48,7 @@ export interface RecentGuestResponse {
   side: string;
   groupName: string | null;
   status: "accepted" | "declined" | "pending";
+  partySize: number;
   attendingCount: number;
   tableName: string | null;
   timeAgo: string;

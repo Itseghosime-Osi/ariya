@@ -28,7 +28,7 @@ export function RsvpHorizonBar({
           </span>
           <span className="font-label-sm text-wine font-semibold">
             {metrics.totalParties > 0
-              ? `${Math.round(((metrics.acceptedParties + metrics.declinedParties) / metrics.totalParties) * 100)}% responded`
+              ? `${metrics.acceptedParties + metrics.declinedParties} of ${metrics.totalParties} ${metrics.totalParties === 1 ? "party" : "parties"} responded`
               : "Awaiting invitations"}
           </span>
         </div>
@@ -38,12 +38,16 @@ export function RsvpHorizonBar({
             {metrics.acceptedGuests}
           </span>
           <span className="font-headline-sm text-headline-sm text-on-surface">
-            guests confirmed
+            {metrics.acceptedGuests === 1
+              ? "person attending"
+              : "people attending"}
           </span>
         </div>
         <p className="font-body-md text-on-surface-variant mt-1.5">
-          {metrics.acceptedParties} accepted parties · {metrics.acceptedGuests}{" "}
-          of {metrics.totalAttendees} people
+          {metrics.acceptedParties} of {metrics.totalParties}{" "}
+          {metrics.totalParties === 1 ? "party" : "parties"} responded ·{" "}
+          {metrics.declinedParties}{" "}
+          {metrics.declinedParties === 1 ? "party" : "parties"} declined
         </p>
       </div>
 
@@ -71,23 +75,29 @@ export function RsvpHorizonBar({
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.acceptedGuests}
+              {metrics.acceptedParties}
             </strong>{" "}
-            Confirmed
+            {metrics.acceptedParties === 1
+              ? "Party Confirmed"
+              : "Parties Confirmed"}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-gold inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.awaitingGuests}
+              {metrics.awaitingParties}
             </strong>{" "}
-            Awaiting
+            {metrics.awaitingParties === 1
+              ? "Party Awaiting"
+              : "Parties Awaiting"}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-mist inline-block" />
             <strong className="text-on-surface font-semibold">
-              {metrics.declinedGuests}
+              {metrics.declinedParties}
             </strong>{" "}
-            Declined
+            {metrics.declinedParties === 1
+              ? "Party Declined"
+              : "Parties Declined"}
           </span>
         </div>
       </div>

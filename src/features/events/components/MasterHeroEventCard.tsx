@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
+import { formatEventCardMetrics } from "@/lib/metrics";
 import type { EventWithMetrics } from "../types";
 import { EventMetricsStrip } from "./EventMetricsStrip";
 
@@ -92,7 +93,7 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                 {event.title}
               </h2>
 
-              <div className="flex flex-wrap items-center gap-y-1 gap-x-space-md text-paper-ink font-body-md text-body-md mt-1 mb-space-md">
+              <div className="flex flex-wrap items-center gap-y-1 gap-x-space-md text-paper-ink font-body-md text-body-md mt-1 mb-2">
                 <div className="flex items-center gap-1 text-wine">
                   <Icon name="calendar_month" className="text-lg" />
                   <span className="font-semibold">{formattedDate}</span>
@@ -105,6 +106,14 @@ export function MasterHeroEventCard({ item }: MasterHeroEventCardProps) {
                     {event.area ? `, ${event.area}` : ""}
                   </span>
                 </div>
+              </div>
+
+              <div className="text-xs font-semibold text-wine/90 mb-space-md">
+                {formatEventCardMetrics({
+                  totalParties: metrics.totalParties,
+                  acceptedGuests: metrics.acceptedGuests,
+                  rsvpRate: metrics.rsvpRate ?? metrics.readinessPercentage,
+                })}
               </div>
             </div>
 

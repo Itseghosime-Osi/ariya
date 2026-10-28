@@ -197,10 +197,7 @@ export async function getEventMetrics(
   }
 
   const m = calculateCelebrationMetrics(guests as unknown as GuestMetricItem[]);
-  const readiness =
-    m.totalAttendees > 0
-      ? Math.round((m.expectedPeople / m.totalAttendees) * 1000) / 10
-      : 0;
+  const readiness = m.rsvpRate;
 
   return {
     totalParties: m.invitedParties,
@@ -216,6 +213,10 @@ export async function getEventMetrics(
     readinessPercentage: readiness,
     daysAway,
     conflictedParties: m.conflictedParties,
+    acceptedPartiesPct: m.acceptedPartiesPct,
+    declinedPartiesPct: m.declinedPartiesPct,
+    awaitingPartiesPct: m.awaitingPartiesPct,
+    rsvpRate: m.rsvpRate,
   };
 }
 
@@ -227,7 +228,7 @@ export async function getEventRecentResponses(
   const { data, error } = await supabase
     .from("guests")
     .select(
-      "id, name, side, group_name, rsvps (status, attending_count, updated_at, dietary), seat_assignments (tables (name))"
+      "id, name, side, group_name, party_size, rsvps (status, attending_count, updated_at, dietary), seat_assignments (tables (name))"
     )
     .eq("event_id", eventId)
     .limit(10);
@@ -264,6 +265,13 @@ export async function getEventRecentResponses(
         ? g.seat_assignments[0]
         : g.seat_assignments;
       const tableName = assignment?.tables?.name ?? null;
+      const partySize = g.party_size && g.party_size > 0 ? g.party_size : 1;
+      const isAccepted = rsvp?.status === "accepted";
+      const attendingCount = isAccepted
+        ? typeof rsvp?.attending_count === "number" && rsvp.attending_count > 0
+          ? rsvp.attending_count
+          : partySize
+        : 0;
 
       return {
         id: g.id,
@@ -273,7 +281,8 @@ export async function getEventRecentResponses(
         groupName: g.group_name ?? null,
         status:
           (rsvp?.status as "accepted" | "declined" | "pending") ?? "accepted",
-        attendingCount: rsvp?.attending_count ?? 1,
+        partySize,
+        attendingCount,
         tableName,
         timeAgo: "Recently",
       };

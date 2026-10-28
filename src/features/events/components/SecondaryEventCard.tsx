@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
+import { formatEventCardMetrics } from "@/lib/metrics";
 
 interface SecondaryEventCardProps {
   id: string;
@@ -56,13 +57,20 @@ export function SecondaryEventCard({
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
               {formatEventDate(dateStr)} • {venueStr}
             </p>
+            <p className="font-label-sm text-label-sm text-wine font-semibold mt-1">
+              {formatEventCardMetrics({
+                totalParties: totalInvited,
+                acceptedGuests: confirmed,
+                rsvpRate,
+              })}
+            </p>
           </div>
         </div>
 
         <div className="my-space-md p-space-sm bg-surface-container rounded-xl grid grid-cols-3 gap-2 text-center">
           <div>
             <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
-              Total Invited
+              Parties
             </div>
             <div className="font-headline-sm text-headline-sm text-night mt-0.5">
               {totalInvited}
@@ -70,7 +78,7 @@ export function SecondaryEventCard({
           </div>
           <div>
             <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
-              Confirmed
+              Attending
             </div>
             <div className="font-headline-sm text-headline-sm text-success mt-0.5">
               {confirmed}
@@ -78,7 +86,7 @@ export function SecondaryEventCard({
           </div>
           <div>
             <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
-              RSVP Rate
+              Responded
             </div>
             <div className="font-headline-sm text-headline-sm text-secondary mt-0.5">
               {rsvpRate}%

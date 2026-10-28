@@ -148,9 +148,11 @@ export function CelebrationsList({
                     dateStr={sec.event.date}
                     venueStr={sec.event.venue}
                     daysAway={sec.metrics.daysAway}
-                    totalInvited={sec.metrics.totalAttendees}
+                    totalInvited={sec.metrics.totalParties}
                     confirmed={sec.metrics.acceptedGuests}
-                    rsvpRate={sec.metrics.readinessPercentage}
+                    rsvpRate={
+                      sec.metrics.rsvpRate ?? sec.metrics.readinessPercentage
+                    }
                     description={sec.event.dress_code || "Formal attire"}
                     statusBadge={sec.event.status}
                     iconName="workspace_premium"

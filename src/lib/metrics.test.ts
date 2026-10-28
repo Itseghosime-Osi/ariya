@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   calculateCelebrationMetrics,
   getPartyDisplaySeats,
+  formatEventCardMetrics,
   type GuestMetricItem,
 } from "./metrics";
 
@@ -106,6 +107,59 @@ describe("metrics", () => {
       // Awaiting parties = 1 party, 4 guests
       expect(metrics.awaitingParties).toBe(1);
       expect(metrics.awaitingGuests).toBe(4);
+    });
+
+    it("correctly computes units and party-based percentages for Amina (accepted 2), Tola (accepted 1), and Chidi (declined)", () => {
+      const guests: GuestMetricItem[] = [
+        {
+          id: "amina",
+          party_size: 1,
+          rsvp: { status: "accepted", attending_count: 2 },
+        },
+        {
+          id: "tola",
+          party_size: 1,
+          rsvp: { status: "accepted", attending_count: 1 },
+        },
+        {
+          id: "chidi",
+          party_size: 1,
+          rsvp: { status: "declined", attending_count: 0 },
+        },
+      ];
+
+      const metrics = calculateCelebrationMetrics(guests);
+
+      // Explicit party & people metrics
+      expect(metrics.invitedParties).toBe(3);
+      expect(metrics.totalParties).toBe(3);
+      expect(metrics.acceptedParties).toBe(2);
+      expect(metrics.declinedParties).toBe(1);
+      expect(metrics.awaitingParties).toBe(0);
+      expect(metrics.respondedParties).toBe(3);
+
+      // People attending = Amina (2) + Tola (1) = 3 people
+      expect(metrics.expectedPeople).toBe(3);
+      expect(metrics.acceptedGuests).toBe(3);
+
+      // Percentages computed over parties
+      expect(metrics.acceptedPartiesPct).toBe(67); // 2 of 3 parties = 67%
+      expect(metrics.declinedPartiesPct).toBe(33); // 1 of 3 parties = 33%
+      expect(metrics.awaitingPartiesPct).toBe(0);
+
+      // Must never report 100% confirmed alongside 33% declined
+      expect(metrics.acceptedPartiesPct + metrics.declinedPartiesPct).toBe(100);
+      expect(metrics.acceptedPartiesPct).not.toBe(100);
+
+      // Event card formatting helper
+      const cardSummary = formatEventCardMetrics({
+        totalParties: metrics.totalParties,
+        acceptedGuests: metrics.expectedPeople,
+        rsvpRate: 67, // e.g. 67% responded
+      });
+      expect(cardSummary).toBe(
+        "3 parties invited · 3 people attending · 67% responded"
+      );
     });
   });
 });

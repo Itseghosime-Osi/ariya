@@ -18,7 +18,9 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
           {metrics.totalParties}
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          {metrics.totalAttendees} total guests
+          {metrics.totalParties === 1
+            ? "1 party"
+            : `${metrics.totalParties} parties`}
         </div>
       </div>
 
@@ -33,7 +35,9 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
           </span>
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          {metrics.acceptedGuests} guests attending
+          {metrics.acceptedGuests === 1
+            ? "1 person attending"
+            : `${metrics.acceptedGuests} people attending`}
         </div>
       </div>
 
@@ -45,7 +49,8 @@ export function EventMetricsStrip({ metrics }: EventMetricsStripProps) {
           {metrics.seatedGuests}
         </div>
         <div className="font-body-sm text-body-sm text-on-surface-variant">
-          of {metrics.acceptedGuests} confirmed people
+          of {metrics.acceptedGuests}{" "}
+          {metrics.acceptedGuests === 1 ? "person" : "people"}
         </div>
       </div>
 
