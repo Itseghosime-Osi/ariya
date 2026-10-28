@@ -4,8 +4,10 @@ import { AppShell } from "@/components/layout/app-shell";
 import { EventOverviewDesk } from "@/features/events/components/EventOverviewDesk";
 import {
   getEventById,
+  getEventPlanningSnapshot,
   getEventRecentResponses,
 } from "@/features/events/queries";
+import { getLagosDateKey } from "@/lib/format";
 import { getCurrentUser } from "@/features/auth/queries";
 
 interface EventPageProps {
@@ -34,7 +36,11 @@ export default async function EventOverviewPage({ params }: EventPageProps) {
     notFound();
   }
 
-  const recentResponses = await getEventRecentResponses(eventId);
+  const [recentResponses, planning] = await Promise.all([
+    getEventRecentResponses(eventId),
+    getEventPlanningSnapshot(eventId),
+  ]);
+  const now = Date.now();
 
   return (
     <AppShell
@@ -44,7 +50,14 @@ export default async function EventOverviewPage({ params }: EventPageProps) {
       daysAway={data.metrics.daysAway}
       userEmail={user?.email}
     >
-      <EventOverviewDesk data={data} recentResponses={recentResponses} />
+      <EventOverviewDesk
+        data={data}
+        recentResponses={recentResponses}
+        planning={planning}
+        now={now}
+        todayKey={getLagosDateKey(now) ?? ""}
+        eventDateKey={getLagosDateKey(data.event.date)}
+      />
     </AppShell>
   );
 }

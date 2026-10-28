@@ -1,0 +1,198 @@
+/* ---------- The celebration desk: the Àríyá weave, aurora, grain and the gold ring ---------- */
+
+/* The Àríyá weave: narrow strip-weave bands with pinstripes and openwork dots, after alaari aso-oke,
+   the wine-red wedding cloth. Always a whisper: it sits at a few percent over burgundy and night. */
+.weave {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23e9c98a'%3E%3Cpath d='M4 0v48M20 0v48M28 0v48M44 0v48' stroke-width='1'/%3E%3Cpath d='M12 0v48M36 0v48' stroke-width='3' stroke-opacity='.6'/%3E%3Cpath d='M0 12h48M0 36h48' stroke-width='.6' stroke-dasharray='2 4'/%3E%3C/g%3E%3Cg fill='%23e9c98a'%3E%3Ccircle cx='24' cy='12' r='1.4'/%3E%3Ccircle cx='0' cy='36' r='1.4'/%3E%3Ccircle cx='48' cy='36' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 48px 48px;
+}
+
+/* A progress fill woven like a strip of aso-oke. */
+.weave-fill {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.22) 0 2px,
+      transparent 2px 9px,
+      rgba(28, 7, 13, 0.18) 9px 10px,
+      transparent 10px 14px
+    ),
+    linear-gradient(90deg, #c9a465, #e9c98a 60%, #f6dca8);
+}
+
+/* Film grain, so the gradients never band. */
+.desk-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .85 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+/* Aurora: slow, blurred burgundy and gold light behind the hero. */
+.desk-aurora {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  filter: blur(60px);
+}
+.desk-aurora span {
+  position: absolute;
+  border-radius: 999px;
+  opacity: 0.75;
+  animation: desk-drift 22s ease-in-out infinite alternate;
+}
+.desk-aurora span:nth-child(1) {
+  width: 46%;
+  height: 70%;
+  left: 2%;
+  top: 6%;
+  background: radial-gradient(circle, rgba(193, 40, 61, 0.75), transparent 65%);
+}
+.desk-aurora span:nth-child(2) {
+  width: 40%;
+  height: 60%;
+  right: 4%;
+  top: 0;
+  background: radial-gradient(
+    circle,
+    rgba(233, 201, 138, 0.42),
+    transparent 65%
+  );
+  animation-duration: 28s;
+  animation-delay: -6s;
+}
+.desk-aurora span:nth-child(3) {
+  width: 52%;
+  height: 60%;
+  left: 30%;
+  bottom: -6%;
+  background: radial-gradient(circle, rgba(110, 20, 38, 0.9), transparent 65%);
+  animation-duration: 34s;
+  animation-delay: -12s;
+}
+@keyframes desk-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-4%, 5%, 0) scale(0.96);
+  }
+}
+
+/* The gold ring: a champagne conic border that turns slowly, kept for the one thing that matters most. */
+@property --desk-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.desk-ring {
+  position: relative;
+  isolation: isolate;
+}
+.desk-ring::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--desk-angle),
+    rgba(233, 201, 138, 0.05),
+    rgba(233, 201, 138, 0.9) 18%,
+    rgba(246, 220, 168, 0.2) 34%,
+    rgba(233, 201, 138, 0.05) 60%,
+    rgba(233, 201, 138, 0.75) 82%,
+    rgba(233, 201, 138, 0.05)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: desk-turn 9s linear infinite;
+}
+@keyframes desk-turn {
+  to {
+    --desk-angle: 360deg;
+  }
+}
+
+/* Spotlight: a soft light under the cursor, from two CSS variables (fine pointers only). */
+.desk-spot {
+  position: relative;
+}
+.desk-spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, -40%),
+    rgba(233, 201, 138, 0.16),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .desk-spot:hover::after {
+    opacity: 1;
+  }
+}
+
+/* The morph from the featured card on the list into the desk's hero. */
+::view-transition-group(.desk-morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-image-pair(.desk-morph) {
+  animation-name: desk-via-blur;
+}
+@keyframes desk-via-blur {
+  35% {
+    filter: blur(3px);
+  }
+}
+
+/* A gentle pulse for "you are here". */
+@keyframes desk-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(233, 201, 138, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(233, 201, 138, 0);
+  }
+}
+.desk-here {
+  animation: desk-pulse 1.8s ease-out 3;
+}
+
+/* Stars pop into the constellation one by one. */
+@keyframes desk-star {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-aurora span,
+  .desk-ring::before,
+  .desk-here {
+    animation: none !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
