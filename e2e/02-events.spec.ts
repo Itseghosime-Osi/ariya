@@ -76,7 +76,7 @@ test.describe("Events Creation & Overview", () => {
 
     // Verify redirected to /events and celebration is archived
     await page.waitForURL(/\/events$/, { timeout: 10000 });
-    await expect(page.locator("h1")).toContainText(/Celebrations/i);
+    await expect(page.locator("h1")).toContainText(/Your events/i);
   });
 
   test("public event page does not crash with non-bucket cover image", async ({
@@ -190,9 +190,17 @@ test.describe("Events Creation & Overview", () => {
         .locator('input[type="datetime-local"]')
         .first();
 
-      // Start with 15:00 (3:00 PM WAT)
-      await ceremonyInput.fill("2026-12-12T15:00");
-      await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible();
+      // Start with 15:00 (3:00 PM WAT). Refill until the preview reacts, so a
+      // fill that lands before hydration doesn't count as the app failing.
+      // Clearing first matters: once hydrated, React only fires onChange when
+      // the value differs from what the field already holds.
+      await expect(async () => {
+        await ceremonyInput.fill("");
+        await ceremonyInput.fill("2026-12-12T15:00");
+        await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible({
+          timeout: 1000,
+        });
+      }).toPass({ timeout: 15000 });
 
       // Clear input so segments start fresh: --/--/---- --:--
       await ceremonyInput.clear();

@@ -47,7 +47,7 @@ export function VendorHeader({
           onClick={onAddVendor}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-wine text-ivory text-xs font-semibold shadow-xs hover:bg-wine/90 transition-colors shrink-0"
         >
-          <Icon name="add" className="text-sm text-gold" />
+          <Icon name="add_circle" className="text-sm text-gold" />
           <span>Add Vendor</span>
         </button>
       </div>

@@ -36,7 +36,7 @@ export function TeamPageClient({ eventId, data }: TeamPageClientProps) {
             onClick={() => setIsInviteModalOpen(true)}
             className="px-4 py-2.5 rounded-xl bg-wine text-ivory text-sm font-semibold hover:bg-wine/90 transition-all flex items-center gap-2 shadow-sm"
           >
-            <Icon name="person_add" className="text-base" />
+            <Icon name="diversity_3" className="text-base" />
             <span>Invite Member</span>
           </button>
         )}

@@ -58,7 +58,7 @@ export function SeatingHeader({
           rel="noopener noreferrer"
           className="px-3.5 py-2 rounded-xl border border-wine/30 text-wine hover:bg-wine/5 text-xs font-semibold flex items-center gap-1.5 transition-colors"
         >
-          <Icon name="print" className="text-sm" />
+          <Icon name="download" className="text-sm" />
           <span>Print Cards & Chart</span>
         </Link>
 
@@ -68,7 +68,7 @@ export function SeatingHeader({
           onClick={onAddTable}
           className="px-4 py-2 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
         >
-          <Icon name="add" className="text-sm" />
+          <Icon name="add_circle" className="text-sm" />
           <span>New Table</span>
         </button>
       </div>

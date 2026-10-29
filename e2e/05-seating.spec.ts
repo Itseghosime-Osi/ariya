@@ -92,9 +92,10 @@ test.describe("Seating Chart & Capacity Conflict", () => {
       timeout: 10000,
     });
 
-    // Overview displays priority conflict card
+    // Overview leads its "Next up" strip with the seating conflict
     await page.goto(`/events/${eventId}`);
-    await expect(page.getByText(/Next to Care For/i)).toBeVisible();
-    await expect(page.getByText(/seating conflict/i).first()).toBeVisible();
+    const nextUp = page.getByRole("region", { name: /next up/i });
+    await expect(nextUp).toBeVisible();
+    await expect(nextUp.getByText(/seating conflict/i)).toBeVisible();
   });
 });

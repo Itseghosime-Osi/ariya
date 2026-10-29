@@ -115,7 +115,7 @@ export function CheckInCameraScanner({
     <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-4">
       <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
         <div className="flex items-center gap-2">
-          <Icon name="photo_camera" className="text-wine text-base" />
+          <Icon name="camera" className="text-wine text-base" />
           <h3 className="font-serif text-base font-bold text-wine">
             Camera QR &amp; Pass Scanner
           </h3>
@@ -130,14 +130,14 @@ export function CheckInCameraScanner({
               : "bg-wine text-ivory hover:bg-wine/90"
           }`}
         >
-          <Icon name={isActive ? "stop" : "videocam"} className="text-sm" />
+          <Icon name={isActive ? "close" : "camera"} className="text-sm" />
           <span>{isActive ? "Turn Off Camera" : "Launch Camera Scanner"}</span>
         </button>
       </div>
 
       {cameraError && (
         <div className="p-3 bg-red-50 text-red-800 text-xs rounded-xl border border-red-200 flex items-center gap-2">
-          <Icon name="videocam_off" className="text-sm shrink-0" />
+          <Icon name="close" className="text-sm shrink-0" />
           <span>
             {cameraError} (Use manual code entry below if camera is
             unavailable).

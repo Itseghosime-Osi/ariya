@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/layout/app-shell";
 import { GuestRegistryView } from "@/features/guests/components/GuestRegistryView";
 import { getEventById } from "@/features/events/queries";
 import {
@@ -8,7 +7,6 @@ import {
   getGuestFilterOptions,
   getGuestOverviewStats,
 } from "@/features/guests/queries";
-import { getCurrentUser } from "@/features/auth/queries";
 import type { GuestFilterState } from "@/features/guests/types";
 
 interface GuestPageProps {
@@ -58,9 +56,8 @@ export default async function GuestRegistryPage({
     pageSize,
   };
 
-  const [eventData, user, filterGroups, stats, guestList] = await Promise.all([
+  const [eventData, filterGroups, stats, guestList] = await Promise.all([
     getEventById(eventId),
-    getCurrentUser(),
     getGuestFilterOptions(eventId),
     getGuestOverviewStats(eventId),
     getEventGuests(eventId, filterState),
@@ -71,13 +68,7 @@ export default async function GuestRegistryPage({
   }
 
   return (
-    <AppShell
-      eventId={eventData.event.id}
-      eventTitle={eventData.event.title}
-      eventDate={eventData.event.date}
-      daysAway={eventData.metrics.daysAway}
-      userEmail={user?.email}
-    >
+    <>
       <GuestRegistryView
         eventId={eventId}
         eventName={eventData.event.title}
@@ -89,6 +80,6 @@ export default async function GuestRegistryPage({
         initialPageSize={pageSize}
         initialFilters={filterState}
       />
-    </AppShell>
+    </>
   );
 }

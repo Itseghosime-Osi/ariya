@@ -23,7 +23,7 @@ export function VendorTaskList({
     <div className="space-y-2 pt-1">
       <div className="flex items-center justify-between text-xs">
         <span className="font-bold text-wine text-[11px] uppercase tracking-wider flex items-center gap-1">
-          <Icon name="checklist" className="text-xs" />
+          <Icon name="check_circle" className="text-xs" />
           <span>Deliverables ({tasks.length})</span>
         </span>
         <button
@@ -31,7 +31,7 @@ export function VendorTaskList({
           onClick={onAddTask}
           className="text-[11px] font-semibold text-wine hover:underline flex items-center gap-0.5"
         >
-          <Icon name="add" className="text-xs" />
+          <Icon name="add_circle" className="text-xs" />
           <span>Add</span>
         </button>
       </div>

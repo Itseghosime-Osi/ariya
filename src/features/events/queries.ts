@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/format";
 import {
@@ -11,6 +12,11 @@ import type {
   MilestoneItem,
   RecentGuestResponse,
 } from "./types";
+import type {
+  ConstellationGuest,
+  PlanningTask,
+  PlanningVendor,
+} from "./lib/overview-insights";
 
 export interface ScheduleSlot {
   time: string;
@@ -83,7 +89,7 @@ export async function getPublicEventBySlug(
   };
 }
 
-export async function getUserEvents(): Promise<EventWithMetrics[]> {
+export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -144,44 +150,44 @@ export async function getUserEvents(): Promise<EventWithMetrics[]> {
       metrics,
     };
   });
-}
+});
 
-export async function getEventById(
-  eventId: string
-): Promise<EventWithMetrics | null> {
-  const cleanId = eventId?.trim();
-  if (!cleanId || cleanId === "default") {
-    return null;
+export const getEventById = cache(
+  async (eventId: string): Promise<EventWithMetrics | null> => {
+    const cleanId = eventId?.trim();
+    if (!cleanId || cleanId === "default") {
+      return null;
+    }
+
+    const supabase = await createClient();
+
+    const { data: event, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", cleanId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[getEventById] Database error loading event:", {
+        code: error.code,
+        message: error.message,
+      });
+      throw new Error(`Database error loading event: ${error.message}`);
+    }
+
+    if (!event) {
+      return null;
+    }
+
+    const metrics = await getEventMetrics(event.id, event.date);
+
+    return {
+      event,
+      role: "owner",
+      metrics,
+    };
   }
-
-  const supabase = await createClient();
-
-  const { data: event, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", cleanId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[getEventById] Database error loading event:", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error(`Database error loading event: ${error.message}`);
-  }
-
-  if (!event) {
-    return null;
-  }
-
-  const metrics = await getEventMetrics(event.id, event.date);
-
-  return {
-    event,
-    role: "owner",
-    metrics,
-  };
-}
+);
 
 export async function getEventMetrics(
   eventId: string,
@@ -365,4 +371,97 @@ export async function getEventMilestones(
     daysAway: t.due_date ? Math.max(0, daysUntil(t.due_date)) : 0,
     eventTitle: "",
   }));
+}
+
+export interface EventPlanningSnapshot {
+  vendors: PlanningVendor[];
+  tasks: PlanningTask[];
+  guests: ConstellationGuest[];
+  checkedInPeople: number;
+}
+
+/**
+ * Everything the celebration desk draws beyond the headline metrics: vendors and their costs, vendor
+ * tasks, one row per guest party for the constellation, and how many people have checked in today.
+ * A failed side query degrades to empty rather than taking the page down.
+ */
+export async function getEventPlanningSnapshot(
+  eventId: string
+): Promise<EventPlanningSnapshot> {
+  const supabase = await createClient();
+  const [vendorsRes, tasksRes, guestsRes, checkInsRes] = await Promise.all([
+    supabase
+      .from("vendors")
+      .select("id, name, category, cost_kobo, deposit_kobo, status")
+      .eq("event_id", eventId),
+    supabase
+      .from("vendor_tasks")
+      .select("id, task, due_date, is_done, vendors (name)")
+      .eq("event_id", eventId),
+    supabase
+      .from("guests")
+      .select("id, name, side, party_size, rsvps (status)")
+      .eq("event_id", eventId)
+      .limit(1200),
+    supabase
+      .from("check_ins")
+      .select("checked_in_count")
+      .eq("event_id", eventId),
+  ]);
+
+  for (const [label, res] of [
+    ["vendors", vendorsRes],
+    ["vendor_tasks", tasksRes],
+    ["guests", guestsRes],
+    ["check_ins", checkInsRes],
+  ] as const) {
+    if (res.error) {
+      console.error(`[getEventPlanningSnapshot] Could not load ${label}:`, {
+        code: res.error.code,
+        message: res.error.message,
+      });
+    }
+  }
+
+  const vendors: PlanningVendor[] = (vendorsRes.data ?? []).map((v) => ({
+    id: v.id,
+    name: v.name,
+    category: v.category,
+    costKobo: Number(v.cost_kobo) || 0,
+    depositKobo: Number(v.deposit_kobo) || 0,
+    status: v.status,
+  }));
+
+  const tasks: PlanningTask[] = (tasksRes.data ?? []).map((t) => {
+    const vendor = Array.isArray(t.vendors) ? t.vendors[0] : t.vendors;
+    return {
+      id: t.id,
+      task: t.task,
+      dueDate: t.due_date,
+      isDone: t.is_done,
+      vendorName: vendor?.name ?? null,
+    };
+  });
+
+  const guests: ConstellationGuest[] = (guestsRes.data ?? []).map((g) => {
+    const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
+    const status =
+      rsvp?.status === "accepted" || rsvp?.status === "declined"
+        ? rsvp.status
+        : "pending";
+    return {
+      id: g.id,
+      name: g.name,
+      side: g.side,
+      partySize: g.party_size ?? 1,
+      status,
+    };
+  });
+
+  const checkedInPeople = (checkInsRes.data ?? []).reduce(
+    (sum, c) => sum + (c.checked_in_count ?? 1),
+    0
+  );
+
+  return { vendors, tasks, guests, checkedInPeople };
 }

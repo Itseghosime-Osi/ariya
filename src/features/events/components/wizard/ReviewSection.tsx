@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 interface ReviewSectionProps {
-  icon: string;
+  icon: IconName;
   heading: string;
   onEdit: () => void;
   children: React.ReactNode;

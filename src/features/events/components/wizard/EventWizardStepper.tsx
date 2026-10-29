@@ -135,7 +135,7 @@ export function EventWizardStepper({
               </div>
             </div>
             <Icon
-              name={currentStep > 2 ? "verified" : "groups"}
+              name={currentStep > 2 ? "verified" : "diversity_3"}
               className={`text-lg ${currentStep === 2 ? "text-gold" : "text-mist"}`}
             />
           </button>
@@ -176,7 +176,7 @@ export function EventWizardStepper({
               </div>
             </div>
             <Icon
-              name="auto_awesome"
+              name="styler"
               className={`text-lg ${currentStep === 3 ? "text-gold" : "text-mist"}`}
             />
           </button>

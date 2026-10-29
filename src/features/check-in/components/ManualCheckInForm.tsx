@@ -32,7 +32,7 @@ export function ManualCheckInForm({
       className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-4"
     >
       <div className="flex items-center gap-2 border-b border-outline-variant/20 pb-3">
-        <Icon name="keyboard" className="text-wine text-base" />
+        <Icon name="edit" className="text-wine text-base" />
         <h3 className="font-serif text-base font-bold text-wine">
           Manual Code &amp; Pass Lookup
         </h3>

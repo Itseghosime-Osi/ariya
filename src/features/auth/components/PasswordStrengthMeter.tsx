@@ -68,7 +68,7 @@ export function PasswordStrengthMeter({
           }`}
         >
           <Icon
-            name={hasMinLength ? "check_circle" : "circle"}
+            name={hasMinLength ? "check_circle" : "pending"}
             className="text-sm"
           />
           <span>8+ Characters</span>
@@ -79,7 +79,7 @@ export function PasswordStrengthMeter({
           }`}
         >
           <Icon
-            name={hasNumber ? "check_circle" : "circle"}
+            name={hasNumber ? "check_circle" : "pending"}
             className="text-sm"
           />
           <span>1+ Number</span>
@@ -90,7 +90,7 @@ export function PasswordStrengthMeter({
           }`}
         >
           <Icon
-            name={hasSpecial ? "check_circle" : "circle"}
+            name={hasSpecial ? "check_circle" : "pending"}
             className="text-sm"
           />
           <span>1+ Special symbol</span>
