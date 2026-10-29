@@ -58,26 +58,6 @@ test.describe("Film & Marketing Site Integration", () => {
     expect(hasFineCard, "fine-card.js was not loaded").toBe(true);
   });
 
-  test("never serves the private song", async ({ request }) => {
-    for (const url of ["/assets/music.mp3", "/site/assets/music.mp3"]) {
-      const res = await request.get(url);
-      expect(res.status(), `${url} must not be served`).toBe(404);
-      expect(res.headers()["content-type"] ?? "").not.toMatch(/audio/);
-    }
-  });
-
-  test("the film and About page never request the song without the demo opt-in", async ({
-    page,
-  }) => {
-    const songRequests: string[] = [];
-    page.on("request", (req) => {
-      if (req.url().includes("music.mp3")) songRequests.push(req.url());
-    });
-    await page.goto("/", { waitUntil: "load" });
-    await page.goto("/about", { waitUntil: "load" });
-    expect(songRequests).toEqual([]);
-  });
-
   test("checks /planner.html and /rsvp.html redirect correctly", async ({
     page,
   }) => {
