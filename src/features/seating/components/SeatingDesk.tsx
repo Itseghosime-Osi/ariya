@@ -73,7 +73,7 @@ function ViewSwitch({
           aria-checked={view === key}
           onClick={() => onChange(key)}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+            "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
             compact ? "min-h-9" : "min-h-10",
             view === key
               ? "bg-burgundy text-ivory"
@@ -94,17 +94,23 @@ export function SeatingDesk({
   hallLayout = null,
   hallLayoutAvailable = false,
 }: SeatingDeskProps) {
-  // The hall is the default on tablets and laptops; phones start on the list, which suits them.
-  const [view, setView] = useState<"hall" | "list">("hall");
+  // The hall studio is for tablets and laptops; phones get the table list, which suits them.
+  const [chosen, setView] = useState<"hall" | "list">("hall");
+  const [phone, setPhone] = useState(false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(VIEW_KEY);
-      if (saved === "hall" || saved === "list") return setView(saved);
+      if (saved === "hall" || saved === "list") setView(saved);
     } catch {
       /* no storage */
     }
-    if (window.matchMedia("(max-width: 767px)").matches) setView("list");
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setPhone(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
   }, []);
+  const view = phone ? "list" : chosen;
   const chooseView = (v: "hall" | "list") => {
     setView(v);
     try {
@@ -220,7 +226,7 @@ export function SeatingDesk({
           <h1 className="truncate font-display text-lg font-bold text-night">
             Seating &amp; Floor Plan
           </h1>
-          <span className="hidden rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[11px] font-semibold text-burgundy md:inline">
+          <span className="hidden whitespace-nowrap rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[11px] font-semibold text-burgundy lg:inline">
             {data.stats.readinessPct}% seated
             <span className="font-normal text-label-2">
               {" "}
@@ -229,7 +235,7 @@ export function SeatingDesk({
             </span>
           </span>
           <div className="mx-auto">
-            <ViewSwitch view={view} onChange={chooseView} compact />
+            {!phone && <ViewSwitch view={view} onChange={chooseView} compact />}
           </div>
           <Link
             href={`/events/${eventId}/seating/print`}

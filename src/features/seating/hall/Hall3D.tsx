@@ -60,6 +60,8 @@ export interface Scene {
   assigning: boolean;
   /** The page background, which the daytime board takes on so the hall sits on the page. */
   board: string;
+  /** Pixels of the hall covered by floating panels (right and bottom), kept out of "fit". */
+  inset: { right: number; bottom: number };
 }
 
 export type HallCommand =

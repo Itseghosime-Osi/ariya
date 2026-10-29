@@ -1918,14 +1918,29 @@ function applyCamera() {
   requestRender();
 }
 
+/** Shift the picture so the hall centres in the part not covered by the floating panels. */
+function applyViewOffset() {
+  const w = stage.clientWidth;
+  const h = stage.clientHeight;
+  const r = state.inset?.right || 0;
+  const b = state.inset?.bottom || 0;
+  if (r || b) camera.setViewOffset(w, h, r / 2, b / 2, w, h);
+  else camera.clearViewOffset();
+}
+
 function hallFitDistance(pol) {
   const L = state.layout;
   if (!L) return 50;
-  const aspect = stage.clientWidth / Math.max(1, stage.clientHeight);
+  const W = stage.clientWidth;
+  const H = Math.max(1, stage.clientHeight);
+  // Only the part of the hall not under the floating panels counts.
+  const fx = Math.max(0.25, (W - (state.inset?.right || 0)) / W);
+  const fy = Math.max(0.25, (H - (state.inset?.bottom || 0)) / H);
+  const aspect = W / H;
   const half = Math.tan((camera.fov * DEG) / 2);
   const w = L.width + 3;
   const l = L.length + 3;
-  const d = Math.max(l / 2 / half, w / 2 / (half * aspect));
+  const d = Math.max(l / 2 / (half * fy), w / 2 / (half * aspect * fx));
   return d * (pol < 0.1 ? 1.05 : 1.12) + (pol < 0.1 ? L.ceiling : 0);
 }
 
@@ -2039,6 +2054,7 @@ function resize() {
   bloom.resolution.set(w / 2, h / 2);
   labelRenderer.setSize(w, h);
   camera.aspect = w / Math.max(1, h);
+  applyViewOffset();
   camera.updateProjectionMatrix();
   if (state.layout) fitDist = hallFitDistance(cam.pol);
   applyCamera();
@@ -2124,10 +2140,13 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (pointers.size === 2) {
     const [a, b] = [...pointers.values()];
+    // Two fingers: pinch to zoom, move both to pan, the point between them stays put.
+    goal = null;
     drag = {
       kind: "pinch",
       d0: Math.hypot(a.x - b.x, a.y - b.y),
       dist0: cam.dist,
+      p0: floorPoint({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 }),
     };
     return;
   }
@@ -2242,6 +2261,15 @@ renderer.domElement.addEventListener("pointermove", (e) => {
       600
     );
     applyCamera();
+    const p = floorPoint({
+      clientX: (a.x + b.x) / 2,
+      clientY: (a.y + b.y) / 2,
+    });
+    if (drag.p0 && p) {
+      cam.tx += drag.p0.x - p.x;
+      cam.tz += drag.p0.z - p.z;
+      applyCamera();
+    }
   } else if (drag.kind === "orbit") {
     if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4)
       drag.moved = true;
@@ -2482,6 +2510,8 @@ let first = true;
 
 function applyScene(s) {
   const moodChanged = !state.layout || state.layout.mood !== s.layout.mood;
+  const insetChanged =
+    JSON.stringify(state.inset || {}) !== JSON.stringify(s.inset || {});
   Object.assign(state, s);
   buildShell(state.layout);
   // New walls start opaque; fade the ones in front of the camera again.
@@ -2494,6 +2524,11 @@ function applyScene(s) {
   syncSelection();
   labelRenderer.domElement.style.display = state.labels ? "" : "none";
   document.body.classList.toggle("assigning", !!state.assigning);
+  if (insetChanged) {
+    applyViewOffset();
+    fitDist = hallFitDistance(cam.pol);
+    applyCamera();
+  }
   if (first) {
     first = false;
     fitDist = hallFitDistance(cam.pol);

@@ -18,7 +18,6 @@ import {
   LayoutGrid,
   Maximize,
   Minus,
-  MonitorSmartphone,
   Moon,
   MousePointer2,
   Palette,
@@ -228,18 +227,31 @@ export function HallStudio({
   });
   const [busy, setBusy] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
-  const [narrow, setNarrow] = useState(false);
-  const [hideNarrowTip, setHideNarrowTip] = useState(false);
   const say = (msg: string) => setAnnounce(msg);
 
+  // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
+  const body = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const [inset, setInset] = useState({ right: 0, bottom: 0 });
   useEffect(() => {
-    const mq = window.matchMedia(
-      "(max-width: 767px), (pointer: coarse) and (max-width: 1023px)"
-    );
-    const on = () => setNarrow(mq.matches);
-    on();
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
+    const el = body.current;
+    if (!el) return;
+    const measure = () => {
+      const p = panel.current;
+      if (!p) return;
+      const wide = window.matchMedia("(min-width: 1024px)").matches;
+      // The tool rail on the right of the hall takes about 70px as well.
+      const next = wide
+        ? { right: p.offsetWidth + 12 + 70, bottom: 0 }
+        : { right: 70, bottom: p.offsetHeight + 12 };
+      setInset((cur) =>
+        cur.right === next.right && cur.bottom === next.bottom ? cur : next
+      );
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // The daytime board takes the page's own background, so the hall sits on the page.
@@ -467,6 +479,7 @@ export function HallStudio({
           : [],
       assigning: assigning !== null,
       board: pageBg,
+      inset,
     }),
     [
       layout,
@@ -482,6 +495,7 @@ export function HallStudio({
       preset,
       assigning,
       pageBg,
+      inset,
     ]
   );
 
@@ -1121,40 +1135,17 @@ export function HallStudio({
         {announce}
       </p>
 
-      {narrow && !hideNarrowTip && (
-        <div
-          className="flex shrink-0 items-start gap-3 border-b border-hairline bg-[#f6f1e8] px-4 py-2.5"
-          role="note"
-        >
-          <MonitorSmartphone
-            size={18}
-            className="mt-0.5 shrink-0 text-burgundy"
-          />
-          <p className="flex-1 text-[13px] leading-snug text-night">
-            Designing the hall works best on a tablet or laptop. Here you can
-            look around and seat guests from the tools below.
-          </p>
-          <button
-            type="button"
-            onClick={() => setHideNarrowTip(true)}
-            aria-label="Dismiss tip"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full hover:bg-black/5"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* Canvas */}
-        <div className="relative min-h-0 flex-1">
-          <Hall3D
-            ref={view3d}
-            scene={scene}
-            onMessage={onMessage}
-            className="absolute inset-0"
-          />
-
+      {/* The hall fills the whole studio; the controls and the side panel float over it, so
+          panning never crops it at a box edge. */}
+      <div ref={body} className="relative min-h-0 flex-1">
+        <Hall3D
+          ref={view3d}
+          scene={scene}
+          onMessage={onMessage}
+          className="absolute inset-0"
+        />
+        {/* Canvas controls */}
+        <div className="pointer-events-none absolute inset-0 max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]">
           {/* Hall size, live numbers and status */}
           <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-11rem)] flex-col items-start gap-1.5">
             <div
@@ -1265,7 +1256,7 @@ export function HallStudio({
           <div
             className={cn(
               float,
-              "absolute right-3 top-3 flex items-center gap-0.5 p-1"
+              "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
             )}
           >
             <button
@@ -1319,7 +1310,7 @@ export function HallStudio({
             aria-orientation="vertical"
             className={cn(
               float,
-              "absolute right-3 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1 rounded-[26px] p-1.5"
+              "pointer-events-auto absolute right-3 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1 rounded-[26px] p-1.5"
             )}
           >
             <button
@@ -1428,7 +1419,7 @@ export function HallStudio({
           {/* Flyouts */}
           {flyout && (
             <div
-              className="absolute right-[4.25rem] top-1/2 z-10 w-[min(300px,calc(100%-6rem))] -translate-y-1/2 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+              className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 w-[min(300px,calc(100%-6rem))] -translate-y-1/2 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
               role="dialog"
               aria-label={
                 flyout === "table"
@@ -1540,7 +1531,7 @@ export function HallStudio({
           )}
 
           {/* Zoom and camera */}
-          <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+          <div className="pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
             <div className={cn(float, "flex items-center gap-0.5 p-1")}>
               <button
                 type="button"
@@ -1643,7 +1634,10 @@ export function HallStudio({
         </div>
 
         {/* Side bar: planning tools and the inspector */}
-        <div className="mt-3 flex h-[44%] min-h-0 shrink-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] lg:ml-3 lg:mt-0 lg:h-auto lg:w-[360px]">
+        <div
+          ref={panel}
+          className="absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]"
+        >
           <div
             role="tablist"
             aria-label="Planning tools"
