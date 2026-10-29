@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
 import { PhoneDock } from "./phone-dock";
+import { EventDayCelebration } from "./event-day-celebration";
 import { InstallHint } from "./install-hint";
 import { isValidEventId, type SwitcherEvent } from "./nav-items";
 import { cn } from "@/lib/utils";
@@ -218,6 +219,8 @@ export function AppShell({
           {children}
         </main>
       </div>
+
+      <EventDayCelebration events={availableEvents} />
 
       <PhoneDock
         events={availableEvents}
