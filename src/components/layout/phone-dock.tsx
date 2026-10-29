@@ -125,6 +125,8 @@ export function PhoneDock({
   const [createOpen, setCreateOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [typing, setTyping] = useState(false);
+  // The tab just tapped, shown as active right away while its page loads.
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [sparks, setSparks] = useState<Spark[]>([]);
   const [rings, setRings] = useState<Ring[]>([]);
   const fxId = useRef(0);
@@ -160,7 +162,8 @@ export function PhoneDock({
       active: Boolean(base && pathname.startsWith(`${base}/check-in`)),
     },
   ];
-  const activeTab = moreActive ? "More" : tabs.find((tab) => tab.active)?.name;
+  const activeTab =
+    pendingTab ?? (moreActive ? "More" : tabs.find((tab) => tab.active)?.name);
 
   const actions: CreateAction[] = [
     {
@@ -199,7 +202,15 @@ export function PhoneDock({
     setCreateOpen(false);
     setMoreOpen(false);
     setCompact(false);
+    setPendingTab(null);
   }, [pathname]);
+
+  // If a tapped page never arrives (offline, failed), stop pretending it did.
+  useEffect(() => {
+    if (!pendingTab) return;
+    const id = window.setTimeout(() => setPendingTab(null), 10000);
+    return () => window.clearTimeout(id);
+  }, [pendingTab]);
 
   // iOS-style minimise: shrink while reading down, restore on the way back up.
   useEffect(() => {
@@ -471,7 +482,10 @@ export function PhoneDock({
                         <Link
                           href={item.href}
                           aria-current={active ? "page" : undefined}
-                          onClick={() => setMoreOpen(false)}
+                          onClick={() => {
+                            setMoreOpen(false);
+                            if (!active) setPendingTab("More");
+                          }}
                           className={cn(
                             "flex min-h-[48px] items-center gap-2.5 rounded-2xl px-3 py-2 text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
                             active
@@ -571,7 +585,15 @@ export function PhoneDock({
                   <Link
                     key={tab.name}
                     href={tab.href}
-                    aria-current={active ? "page" : undefined}
+                    aria-current={
+                      tab.active && !pendingTab ? "page" : undefined
+                    }
+                    onClick={() => {
+                      // Respond on the tap, not when the page arrives: reveal
+                      // the labels and glide the capsule over straight away.
+                      setCompact(false);
+                      if (!tab.active) setPendingTab(tab.name);
+                    }}
                     className={cn(
                       "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
                       active

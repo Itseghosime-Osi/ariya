@@ -36,6 +36,12 @@ export function AppShell({
 
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
+  // Tablets (narrow windows and touch devices up to 1366px) start folded to icons; opening the sidebar slides it
+  // over the page instead of squeezing the content, and it closes again after
+  // a navigation. That drawer state is never remembered.
+  const [narrow, setNarrow] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const folded = narrow ? !drawerOpen : collapsed;
 
   // Remember whether the sidebar was folded; animate only once that is known, so the page doesn't slide on load.
   useEffect(() => {
@@ -48,7 +54,38 @@ export function AppShell({
     return () => cancelAnimationFrame(id);
   }, []);
 
+  useEffect(() => {
+    const query = window.matchMedia(
+      // Narrow windows, plus touch tablets held sideways (iPad landscape).
+      "(max-width: 1023px), ((pointer: coarse) and (max-width: 1366px))"
+    );
+    const sync = () => {
+      setNarrow(query.matches);
+      setDrawerOpen(false);
+    };
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
+
   const toggleSidebar = useCallback(() => {
+    if (narrow) {
+      setDrawerOpen((open) => !open);
+      return;
+    }
     setCollapsed((c) => {
       try {
         localStorage.setItem(SIDEBAR_KEY, c ? "open" : "collapsed");
@@ -57,7 +94,7 @@ export function AppShell({
       }
       return !c;
     });
-  }, []);
+  }, [narrow]);
 
   // "[" folds and opens the sidebar, unless someone is typing.
   useEffect(() => {
@@ -138,7 +175,9 @@ export function AppShell({
         ready && "sb-ready"
       )}
       style={
-        { "--sb-offset": collapsed ? "108px" : "292px" } as React.CSSProperties
+        {
+          "--sb-offset": narrow || collapsed ? "108px" : "292px",
+        } as React.CSSProperties
       }
     >
       <a
@@ -148,12 +187,21 @@ export function AppShell({
         Skip to main content
       </a>
 
+      {narrow && drawerOpen && (
+        <div
+          aria-hidden="true"
+          data-testid="sidebar-scrim"
+          onClick={() => setDrawerOpen(false)}
+          className="animate-in fade-in fixed inset-0 z-40 hidden bg-night/25 backdrop-blur-[2px] duration-200 md:block"
+        />
+      )}
+
       <Sidebar
         events={availableEvents}
         activeEvent={activeEvent}
         onSelectEvent={handleSelectEvent}
         userEmail={userEmail}
-        collapsed={collapsed}
+        collapsed={folded}
         onToggle={toggleSidebar}
         ready={ready}
       />
