@@ -64,10 +64,10 @@ export function GuestRegistryFilters({
               type="button"
               aria-pressed={status === t.value}
               onClick={() => onChange({ ...filters, rsvpStatus: t.value })}
-              className={`min-h-11 whitespace-nowrap border-b-2 pb-2 pt-2 text-sm font-semibold transition-colors ${
+              className={`relative min-h-11 whitespace-nowrap pb-2 pt-2 text-sm font-semibold transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:origin-left after:scale-x-0 after:bg-gold after:transition-transform after:duration-300 aria-pressed:after:scale-x-100 ${
                 status === t.value
-                  ? "border-gold text-on-surface"
-                  : "border-transparent text-on-surface-variant hover:text-on-surface"
+                  ? "text-on-surface"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               {t.label}
@@ -76,23 +76,23 @@ export function GuestRegistryFilters({
           ))}
         </div>
 
-        <div className="relative mb-2 w-full sm:w-64">
+        <div className="relative mb-2 w-full sm:w-72">
           <Search
             aria-hidden="true"
-            className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant"
+            className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant"
           />
           <Input
             aria-label="Search guests"
             placeholder="Search by name, phone or email"
             value={filters.search || ""}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
-            className="h-11 rounded-none border-0 border-b border-outline-variant bg-transparent pl-6 pr-7 shadow-none focus-visible:ring-0 focus-visible:border-gold"
+            className="h-11 rounded-full border-outline-variant/70 bg-ivory pl-10 pr-9 shadow-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/30"
           />
           {filters.search && (
             <button
               type="button"
               onClick={() => onChange({ ...filters, search: "" })}
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />

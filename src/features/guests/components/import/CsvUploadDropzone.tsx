@@ -66,10 +66,10 @@ export function CsvUploadDropzone({
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-colors ${
+        className={`group flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-200 ${
           dragOver
-            ? "border-wine bg-wine/5"
-            : "border-outline-variant hover:border-wine/60 hover:bg-surface-container/40"
+            ? "scale-[1.01] border-wine bg-wine/5"
+            : "border-gold/50 bg-surface-container-low hover:border-gold hover:bg-gold/5"
         }`}
       >
         <input
@@ -84,15 +84,15 @@ export function CsvUploadDropzone({
           }}
         />
 
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-container text-wine mb-4 shadow-sm">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-wine text-ivory shadow-[0_8px_20px_-8px_rgba(74,17,29,0.6)] ring-4 ring-gold/30 transition-transform duration-200 group-hover:-translate-y-0.5">
           {isLoading ? (
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-wine border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-ivory border-t-transparent" />
           ) : (
             <UploadCloud className="h-7 w-7" />
           )}
         </div>
 
-        <h3 className="font-serif text-lg font-bold text-on-surface">
+        <h3 className="font-serif text-2xl font-bold text-on-surface">
           Upload Guest CSV Roster
         </h3>
         <p className="mt-1 text-xs text-mist max-w-sm">
@@ -100,11 +100,24 @@ export function CsvUploadDropzone({
           2MB per upload.
         </p>
 
+        <ul className="mt-4 flex flex-wrap justify-center gap-1.5">
+          {["Name", "Phone", "Email", "Side", "Group", "Party size"].map(
+            (field) => (
+              <li
+                key={field}
+                className="rounded-full border border-outline-variant/70 bg-ivory px-2.5 py-0.5 text-[11px] font-medium text-on-surface-variant"
+              >
+                {field}
+              </li>
+            )
+          )}
+        </ul>
+
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="mt-5 pointer-events-none"
+          className="pointer-events-none mt-5 rounded-full border-gold/50 px-5"
         >
           <FileText className="h-4 w-4 mr-2" />
           Browse CSV File

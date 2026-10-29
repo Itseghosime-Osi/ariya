@@ -11,6 +11,10 @@ import { GuestRegistryHeader } from "./GuestRegistryHeader";
 import { GuestRegistryMetrics } from "./GuestRegistryMetrics";
 import { GuestRegistryFilters } from "./GuestRegistryFilters";
 import { GuestLedger } from "./GuestLedger";
+import {
+  DeskItem,
+  DeskMotion,
+} from "@/features/events/components/desk/DeskMotion";
 import { GuestDetailDrawer } from "./GuestDetailDrawer";
 import { GuestFormModal } from "./GuestFormModal";
 import { DeleteGuestDialog } from "./DeleteGuestDialog";
@@ -121,6 +125,15 @@ export function GuestRegistryView({
     }
   };
 
+  const hasFilters = Boolean(
+    initialFilters.search ||
+    (initialFilters.side && initialFilters.side !== "all") ||
+    (initialFilters.group && initialFilters.group !== "all") ||
+    (initialFilters.rsvpStatus && initialFilters.rsvpStatus !== "all") ||
+    (initialFilters.seatedStatus && initialFilters.seatedStatus !== "all") ||
+    initialFilters.isVip !== undefined
+  );
+
   const resetFilters = {
     search: "",
     side: "all" as const,
@@ -130,33 +143,40 @@ export function GuestRegistryView({
   };
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-6 sm:px-8 sm:py-10">
-      <GuestRegistryHeader
-        eventName={eventName}
-        onOpenImport={() => setIsImportOpen(true)}
-        onOpenAdd={() => setIsAddOpen(true)}
-      />
+    <DeskMotion className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-8 sm:py-10 lg:gap-8">
+      <DeskItem>
+        <GuestRegistryHeader
+          eventName={eventName}
+          onOpenImport={() => setIsImportOpen(true)}
+          onOpenAdd={() => setIsAddOpen(true)}
+        />
+      </DeskItem>
       <GuestRegistryMetrics eventId={eventId} stats={stats} />
-      <GuestRegistryFilters
-        filters={initialFilters}
-        stats={stats}
-        availableGroups={availableGroups}
-        onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
-        onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
-      />
-      <GuestLedger
-        guests={initialGuests}
-        totalCount={totalGuests}
-        page={initialPage}
-        pageSize={initialPageSize}
-        onPageChange={(p) =>
-          updateQueryParams(initialFilters, p, initialPageSize)
-        }
-        onPageSizeChange={(ps) => updateQueryParams(initialFilters, 1, ps)}
-        onSelectGuest={(g) => setSelectedGuest(g)}
-        onCopyLink={handleCopyLink}
-        onShareWhatsApp={handleShareWhatsApp}
-      />
+      <DeskItem className="flex flex-col gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 pt-4 pb-5 sm:px-7 sm:pt-5">
+        <GuestRegistryFilters
+          filters={initialFilters}
+          stats={stats}
+          availableGroups={availableGroups}
+          onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
+          onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
+        />
+        <GuestLedger
+          guests={initialGuests}
+          totalCount={totalGuests}
+          hasFilters={hasFilters}
+          page={initialPage}
+          pageSize={initialPageSize}
+          onPageChange={(p) =>
+            updateQueryParams(initialFilters, p, initialPageSize)
+          }
+          onPageSizeChange={(ps) => updateQueryParams(initialFilters, 1, ps)}
+          onSelectGuest={(g) => setSelectedGuest(g)}
+          onCopyLink={handleCopyLink}
+          onShareWhatsApp={handleShareWhatsApp}
+          onOpenAdd={() => setIsAddOpen(true)}
+          onOpenImport={() => setIsImportOpen(true)}
+        />
+      </DeskItem>
       <GuestDetailDrawer
         eventId={eventId}
         eventName={eventName}
@@ -188,6 +208,6 @@ export function GuestRegistryView({
         onClose={() => setIsImportOpen(false)}
         onImportComplete={() => router.refresh()}
       />
-    </div>
+    </DeskMotion>
   );
 }
