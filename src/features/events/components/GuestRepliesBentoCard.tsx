@@ -35,7 +35,7 @@ export function GuestRepliesBentoCard({
     {
       key: "awaiting",
       label: "Awaiting",
-      dotClass: "h-2.5 w-2.5 border-[1.5px] border-[#8a6620] bg-white",
+      dotClass: "h-2.5 w-2.5 border-[1.5px] border-[#8a6620] bg-ivory",
       parties: activeMetrics.awaitingParties,
       pct: activeMetrics.awaitingPartiesPct,
     },
@@ -154,7 +154,7 @@ export function GuestRepliesBentoCard({
               <li
                 key={row.key}
                 data-testid={`donut-legend-${row.key}`}
-                className="flex items-center justify-between gap-2 rounded-xl bg-surface-container-low px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-xl bg-surface-container px-3 py-2 text-xs"
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <span

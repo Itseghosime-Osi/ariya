@@ -190,7 +190,7 @@ export function PlanningRibbon({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className={`rounded-3xl p-5 sm:p-6 ${phase.state === "current" ? "bg-[#1c070d] text-ivory" : "bg-surface-container-low"}`}
+            className={`rounded-3xl p-5 sm:p-6 ${phase.state === "current" ? "bg-[#1c070d] text-ivory" : "bg-surface-container"}`}
           >
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-display text-xl font-bold">{phase.title}</h3>
@@ -239,7 +239,7 @@ export function PlanningRibbon({
                         className={`flex min-h-[52px] cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-2.5 transition-colors ${
                           dark
                             ? "bg-ivory/[0.07] hover:bg-ivory/[0.12]"
-                            : "bg-surface-container-lowest ring-1 ring-hairline hover:bg-surface-container"
+                            : "bg-ivory ring-1 ring-hairline hover:bg-surface-container-high"
                         }`}
                       >
                         <input

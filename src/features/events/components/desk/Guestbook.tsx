@@ -113,12 +113,12 @@ export function Guestbook({
             {e.href ? (
               <Link
                 href={e.href}
-                className="block rounded-2xl bg-surface-container-lowest p-3 ring-1 ring-hairline transition-shadow hover:shadow-[0_10px_24px_-14px_rgba(28,7,13,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                className="block rounded-2xl bg-ivory p-3 ring-1 ring-hairline transition-shadow hover:shadow-[0_10px_24px_-14px_rgba(28,7,13,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
               >
                 {body}
               </Link>
             ) : (
-              <div className="rounded-2xl bg-surface-container-lowest p-3 ring-1 ring-hairline">
+              <div className="rounded-2xl bg-ivory p-3 ring-1 ring-hairline">
                 {body}
               </div>
             )}

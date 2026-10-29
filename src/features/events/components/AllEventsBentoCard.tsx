@@ -160,7 +160,7 @@ export function AllEventsBentoCard({
                   onClick={() => setSort(key)}
                   className={`min-h-[34px] rounded-full px-3 text-xs font-semibold transition-colors ${
                     sort === key
-                      ? "bg-white text-night shadow-sm"
+                      ? "bg-ivory text-night shadow-sm"
                       : "text-label-2 hover:text-night"
                   }`}
                 >

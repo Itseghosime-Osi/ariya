@@ -10,7 +10,7 @@ export function EventsNoResults({ query, onClear }: EventsNoResultsProps) {
   return (
     <div
       data-testid="events-no-results"
-      className="rounded-2xl bg-surface border border-hairline p-8 text-center space-y-3"
+      className="rounded-2xl bg-surface-container-low border border-hairline p-8 text-center space-y-3"
     >
       <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-ivory text-label-2">
         <Icon name="search" size={20} />

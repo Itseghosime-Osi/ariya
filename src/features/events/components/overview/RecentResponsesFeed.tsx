@@ -18,7 +18,7 @@ export function RecentResponsesFeed({
   recentResponses,
 }: RecentResponsesFeedProps) {
   return (
-    <div className="bg-surface-container-lowest rounded-[24px] p-margin shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] space-y-space-md border border-surface-container-high/40">
+    <div className="bg-surface-container-low rounded-[24px] p-margin shadow-[0_2px_8px_-2px_rgba(28,7,13,0.05),0_1px_3px_0_rgba(28,7,13,0.04)] space-y-space-md border border-surface-container-high/40">
       <div className="flex items-center justify-between">
         <h3 className="font-headline-sm text-headline-sm text-night">
           Recent Responses
@@ -41,7 +41,7 @@ export function RecentResponsesFeed({
           recentResponses.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"
+              className="flex items-center justify-between p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <div className="flex items-center gap-space-sm">
                 <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-title-md font-bold">
