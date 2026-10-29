@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
@@ -43,6 +43,7 @@ export function EventOverviewDesk({
   const { event, metrics } = data;
   const searchParams = useSearchParams();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const celebrated = useRef(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -52,6 +53,17 @@ export function EventOverviewDesk({
   useEffect(() => {
     if (searchParams?.get("created")) {
       showToast("Your event has been created");
+      // Fireworks for a celebration that now exists (once, even when React runs the effect twice).
+      if (!celebrated.current) {
+        celebrated.current = true;
+        void import("@/lib/fireworks").then(({ startFireworks }) => {
+          startFireworks({
+            scale: "finale",
+            kicker: "It's official",
+            caption: event.couple?.trim() || event.title,
+          });
+        });
+      }
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
         url.searchParams.delete("created");
