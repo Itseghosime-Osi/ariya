@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import NumberFlow from "@number-flow/react";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { Calendar } from "./Calendar";
 import { Chip, Eyebrow, fieldClass } from "./Chips";
 import {
   AREAS,
@@ -19,6 +20,8 @@ import {
   VENUE_STARTERS,
   dayParts,
   occasionOf,
+  saturdayInMonths,
+  saturdayOnOrAfter,
   type IntakeMethod,
   type OccasionKey,
 } from "./wizard-data";
@@ -45,6 +48,23 @@ export interface StepProps {
 
 const legend = "mb-3 block";
 const sr = "sr-only";
+
+/** A text field that ticks itself green the moment it is good to go. */
+function Tick({ ok }: { ok: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full bg-rsvp-accepted text-white transition-[transform,opacity] duration-300 ease-out",
+        ok ? "scale-100 opacity-100" : "scale-50 opacity-0"
+      )}
+    >
+      <Icon name="check" size={13} />
+    </span>
+  );
+}
+const addDays = (d: Date, n: number) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 
 /** Step 1: what are we celebrating, and for whom. */
 export function StepWho({
@@ -88,15 +108,18 @@ export function StepWho({
           <label htmlFor="name-1" className="mb-2 block">
             <Eyebrow>{occasion.nameLabels[0]}</Eyebrow>
           </label>
-          <input
-            id="name-1"
-            type="text"
-            autoComplete="off"
-            className={cn(fieldClass, "font-display text-xl")}
-            placeholder={occasion.namePlaceholders[0]}
-            value={draft.name1}
-            onChange={(e) => set({ name1: e.target.value })}
-          />
+          <div className="relative">
+            <input
+              id="name-1"
+              type="text"
+              autoComplete="off"
+              className={cn(fieldClass, "pr-12 font-display text-xl")}
+              placeholder={occasion.namePlaceholders[0]}
+              value={draft.name1}
+              onChange={(e) => set({ name1: e.target.value })}
+            />
+            <Tick ok={draft.name1.trim().length > 0} />
+          </div>
         </div>
         {twoNames && (
           <>
@@ -110,15 +133,18 @@ export function StepWho({
               <label htmlFor="name-2" className="mb-2 block">
                 <Eyebrow>{occasion.nameLabels[1]}</Eyebrow>
               </label>
-              <input
-                id="name-2"
-                type="text"
-                autoComplete="off"
-                className={cn(fieldClass, "font-display text-xl")}
-                placeholder={occasion.namePlaceholders[1]}
-                value={draft.name2}
-                onChange={(e) => set({ name2: e.target.value })}
-              />
+              <div className="relative">
+                <input
+                  id="name-2"
+                  type="text"
+                  autoComplete="off"
+                  className={cn(fieldClass, "pr-12 font-display text-xl")}
+                  placeholder={occasion.namePlaceholders[1]}
+                  value={draft.name2}
+                  onChange={(e) => set({ name2: e.target.value })}
+                />
+                <Tick ok={draft.name2.trim().length > 0} />
+              </div>
             </div>
           </>
         )}
@@ -160,123 +186,108 @@ export function StepWho({
   );
 }
 
-/** Step 2: pick a Saturday and a time of day. */
+/** Step 2: a calendar to tap, a time of day, and a few shortcuts. */
 export function StepWhen({
   draft,
   set,
-  saturdays,
+  now,
   daysAway,
-}: StepProps & { saturdays: string[]; daysAway: number | null }) {
+}: StepProps & { now: Date | null; daysAway: number | null }) {
   const slot = TIME_SLOTS.find((s) => s.key === draft.slot);
   const picked = dayParts(draft.ymd);
-  const isSaturday = saturdays.includes(draft.ymd);
+  const quick = now
+    ? [
+        { label: "Next Saturday", ymd: saturdayOnOrAfter(addDays(now, 7)) },
+        { label: "In 3 months", ymd: saturdayInMonths(now, 3) },
+        { label: "In 6 months", ymd: saturdayInMonths(now, 6) },
+        { label: "In a year", ymd: saturdayInMonths(now, 12) },
+      ]
+    : [];
   return (
-    <div className="space-y-8">
-      <fieldset>
-        <legend className={legend}>
-          <Eyebrow>Pick a Saturday</Eyebrow>
-        </legend>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {saturdays.map((ymd, i) => {
-            const p = dayParts(ymd);
-            if (!p) return null;
-            const on = draft.ymd === ymd;
-            return (
-              <label
-                key={ymd}
-                className="wiz-rise relative"
+    <div className="grid gap-8 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-10">
+      {now ? (
+        <Calendar
+          value={draft.ymd}
+          onChange={(ymd) => set({ ymd })}
+          now={now}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="min-h-[380px] animate-pulse rounded-3xl bg-gold-ink/10"
+        />
+      )}
+
+      <div className="space-y-7">
+        <fieldset>
+          <legend className={legend}>
+            <Eyebrow>Jump to</Eyebrow>
+          </legend>
+          <div className="flex flex-wrap gap-2.5">
+            {quick.map((q, i) => (
+              <button
+                key={q.label}
+                type="button"
+                onClick={() => set({ ymd: q.ymd })}
                 style={{ "--i": i } as React.CSSProperties}
+                className={cn(
+                  "wiz-rise min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition-[transform,background-color,border-color] duration-150 hover:border-gold-ink/60 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink",
+                  draft.ymd === q.ymd
+                    ? "border-burgundy bg-burgundy/10 text-burgundy"
+                    : "border-gold-ink/25 bg-white/70 text-night"
+                )}
               >
-                <input
-                  type="radio"
-                  name="saturday"
-                  value={ymd}
-                  checked={on}
-                  onChange={() => set({ ymd })}
-                  className="peer sr-only"
-                />
-                <span
-                  className={cn(
-                    "flex min-h-[84px] cursor-pointer flex-col overflow-hidden rounded-2xl border bg-white/80 text-center transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
-                    on
-                      ? "wiz-pop -translate-y-1 border-burgundy shadow-[0_14px_26px_-14px_rgba(110,20,38,0.75)]"
-                      : "border-gold-ink/25"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "py-1 text-[10px] font-bold tracking-[0.18em] transition-colors",
-                      on
-                        ? "bg-burgundy text-ivory"
-                        : "bg-burgundy/90 text-ivory"
-                    )}
-                  >
-                    {p.month}
-                  </span>
-                  <span className="flex flex-1 items-center justify-center font-display text-2xl font-bold tabular-nums text-night">
-                    {p.day}
-                  </span>
+                {q.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className={legend}>
+            <Eyebrow>Time of day (Lagos time)</Eyebrow>
+          </legend>
+          <div className="flex flex-wrap gap-2.5">
+            {TIME_SLOTS.map((s, i) => (
+              <Chip
+                key={s.key}
+                name="slot"
+                value={s.key}
+                checked={draft.slot === s.key}
+                onChange={(v) => set({ slot: v })}
+                index={i + 2}
+                testId={`slot-${s.key}`}
+              >
+                {s.label}
+                <span className="text-xs font-medium opacity-75">
+                  {s.clock}
                 </span>
-              </label>
-            );
-          })}
-        </div>
-        <div className="mt-4">
-          <label htmlFor="eventDate" className="mb-2 block">
-            <Eyebrow>{isSaturday ? "Or another day" : "Your day"}</Eyebrow>
-          </label>
-          <input
-            id="eventDate"
-            type="date"
-            className={cn(fieldClass, "max-w-xs")}
-            value={draft.ymd}
-            onChange={(e) => set({ ymd: e.target.value })}
-          />
-        </div>
-      </fieldset>
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
 
-      <fieldset>
-        <legend className={legend}>
-          <Eyebrow>Time of day (Lagos time)</Eyebrow>
-        </legend>
-        <div className="flex flex-wrap gap-2.5">
-          {TIME_SLOTS.map((s, i) => (
-            <Chip
-              key={s.key}
-              index={i + 2}
-              name="slot"
-              value={s.key}
-              checked={draft.slot === s.key}
-              onChange={(v) => set({ slot: v })}
-              testId={`slot-${s.key}`}
-            >
-              {s.label}
-              <span className="text-xs font-medium opacity-75">{s.clock}</span>
-            </Chip>
-          ))}
-        </div>
-      </fieldset>
-
-      <p
-        aria-live="polite"
-        className="rounded-2xl bg-tint-sand px-4 py-3 text-sm text-night"
-      >
-        {picked ? (
-          <>
-            <strong className="font-display text-base">{picked.long}</strong>
-            {slot ? ` at ${slot.clock}` : ""}
-            {daysAway !== null && daysAway > 0
-              ? `. That's ${daysAway} ${daysAway === 1 ? "day" : "days"} from today.`
-              : daysAway === 0
-                ? ". That's today!"
-                : daysAway !== null
-                  ? ". That date has already passed."
-                  : ""}
-          </>
-        ) : (
-          "Choose a day and we'll count down to it."
-        )}
-      </p>
+        <p
+          aria-live="polite"
+          className="rounded-2xl bg-tint-sand px-4 py-3 text-sm text-night"
+        >
+          {picked ? (
+            <span key={draft.ymd + draft.slot} className="wiz-in inline-block">
+              <strong className="font-display text-base">{picked.long}</strong>
+              {slot ? ` at ${slot.clock}` : ""}
+              {daysAway !== null && daysAway > 0
+                ? `. That's ${daysAway} ${daysAway === 1 ? "day" : "days"} from today.`
+                : daysAway === 0
+                  ? ". That's today!"
+                  : daysAway !== null
+                    ? ". That date has already passed."
+                    : ""}
+            </span>
+          ) : (
+            "Choose a day and we'll count down to it."
+          )}
+        </p>
+      </div>
     </div>
   );
 }
@@ -344,16 +355,19 @@ export function StepWhere({ draft, set }: StepProps) {
         <label htmlFor="venue" className={sr}>
           Venue name
         </label>
-        <input
-          ref={venueRef}
-          id="venue"
-          type="text"
-          autoComplete="off"
-          className={cn(fieldClass, "mt-3")}
-          placeholder="Venue name, e.g. The Grand Pavilion"
-          value={draft.venue}
-          onChange={(e) => set({ venue: e.target.value })}
-        />
+        <div className="relative mt-3">
+          <input
+            ref={venueRef}
+            id="venue"
+            type="text"
+            autoComplete="off"
+            className={cn(fieldClass, "pr-12")}
+            placeholder="Venue name, e.g. The Grand Pavilion"
+            value={draft.venue}
+            onChange={(e) => set({ venue: e.target.value })}
+          />
+          <Tick ok={draft.venue.trim().length >= 2} />
+        </div>
       </fieldset>
 
       <fieldset>
@@ -366,7 +380,7 @@ export function StepWhere({ draft, set }: StepProps) {
             return (
               <label
                 key={p.key}
-                className="wiz-rise relative block min-w-0"
+                className="wiz-rise group relative block min-w-0"
                 style={{ "--i": i } as React.CSSProperties}
               >
                 <input
@@ -389,7 +403,7 @@ export function StepWhere({ draft, set }: StepProps) {
                 >
                   <span
                     aria-hidden="true"
-                    className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10"
+                    className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110"
                     style={{
                       background: `linear-gradient(135deg, ${p.colors[0]} 0 55%, ${p.colors[1]} 55% 100%)`,
                     }}

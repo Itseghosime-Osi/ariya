@@ -73,4 +73,4 @@ export function Eyebrow({
 }
 
 export const fieldClass =
-  "w-full min-h-12 rounded-2xl border border-gold-ink/25 bg-white/80 px-4 py-3 text-base text-night shadow-inner outline-none transition-colors placeholder:text-label-3 hover:border-gold-ink/50 focus:border-burgundy focus:bg-white focus-visible:ring-2 focus-visible:ring-burgundy/30";
+  "w-full min-h-12 rounded-2xl border border-gold-ink/25 bg-white/80 px-4 py-3 text-base text-night shadow-inner outline-none transition-colors placeholder:text-label-3 hover:border-gold-ink/50 focus:border-burgundy focus:bg-white focus:shadow-[0_0_0_4px_rgba(184,134,75,0.2)] focus-visible:ring-2 focus-visible:ring-burgundy/30";

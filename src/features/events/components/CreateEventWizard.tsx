@@ -31,7 +31,6 @@ import {
   occasionOf,
   paletteOf,
   suggestedSaturday,
-  upcomingSaturdays,
 } from "./wizard/wizard-data";
 
 const STEPS: {
@@ -122,7 +121,6 @@ export function CreateEventWizard() {
   );
   const title = draft.title.trim() || suggestions[0] || "";
 
-  const saturdays = useMemo(() => (now ? upcomingSaturdays(now) : []), [now]);
   const slot = TIME_SLOTS.find((s) => s.key === draft.slot) ?? TIME_SLOTS[1];
   const date = draft.ymd ? `${draft.ymd}T${slot.hm}` : "";
   const parts = dayParts(draft.ymd);
@@ -187,6 +185,11 @@ export function CreateEventWizard() {
     <LiveInvitation
       occasion={occasion}
       names={names}
+      parts={
+        occasion.names === 2
+          ? [draft.name1, draft.name2].map((n) => n.trim()).filter(Boolean)
+          : [draft.name1.trim()].filter(Boolean)
+      }
       dateLabel={
         parts ? `${parts.weekday} ${parts.day} ${parts.monthShort}` : ""
       }
@@ -344,12 +347,7 @@ export function CreateEventWizard() {
               <StepWho draft={draft} set={set} suggestions={suggestions} />
             )}
             {step === 1 && (
-              <StepWhen
-                draft={draft}
-                set={set}
-                saturdays={saturdays}
-                daysAway={daysAway}
-              />
+              <StepWhen draft={draft} set={set} now={now} daysAway={daysAway} />
             )}
             {step === 2 && <StepWhere draft={draft} set={set} />}
             {step === 3 && <StepGuests draft={draft} set={set} />}
@@ -369,9 +367,10 @@ export function CreateEventWizard() {
             )}
             <button
               type="submit"
+              key={`${step}-${valid[step]}`}
               disabled={!valid[step] || isPending}
               data-testid={last ? "wizard-launch" : "wizard-next"}
-              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-burgundy px-6 text-xs font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-burgundy px-6 text-xs font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] enabled:animate-[wiz-ready_900ms_var(--ease-out)] motion-reduce:animate-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               {last ? (
                 isPending ? (
@@ -424,7 +423,7 @@ export function CreateEventWizard() {
             <div aria-hidden="true" className="desk-grain absolute inset-0" />
             <div className="relative">
               <Eyebrow className="text-champagne">Your invitation</Eyebrow>
-              <p className="mb-5 mt-1 font-display text-xl text-ivory">
+              <p className="mb-5 mt-1 line-clamp-2 font-display text-xl text-ivory [overflow-wrap:anywhere]">
                 {names ? title || occasion.label : "Takes shape as you go"}
               </p>
               <div className="flex justify-center">{preview}</div>

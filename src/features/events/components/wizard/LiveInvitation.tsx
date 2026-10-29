@@ -12,6 +12,8 @@ export type WizardStage = "who" | "when" | "where" | "guests";
 interface LiveInvitationProps {
   occasion: Occasion;
   names: string;
+  /** The names as typed, so a long pair can be set on two lines. */
+  parts: string[];
   dateLabel: string;
   timeLabel: string;
   venue: string;
@@ -37,7 +39,7 @@ function Hot({
     <span
       data-hot={on}
       className={cn(
-        "rounded-md px-1.5 transition-[background-color,box-shadow] duration-300 data-[hot=true]:bg-[#e9c98a]/35 data-[hot=true]:shadow-[0_0_0_1px_rgba(184,134,75,0.45)]",
+        "box-decoration-clone rounded-md px-1.5 transition-[background-color,box-shadow] duration-300 data-[hot=true]:bg-[#e9c98a]/35 data-[hot=true]:shadow-[0_0_0_1px_rgba(184,134,75,0.45)]",
         className
       )}
     >
@@ -53,6 +55,7 @@ function Hot({
 export function LiveInvitation({
   occasion,
   names,
+  parts,
   dateLabel,
   timeLabel,
   venue,
@@ -65,7 +68,22 @@ export function LiveInvitation({
 }: LiveInvitationProps) {
   const placeholder = occasion.names === 2 ? "Your names" : "Their name";
   const shown = names.trim() || placeholder;
-  const seal = names.trim() ? monogramOf(names) : "À";
+  const seal = names.trim() ? monogramOf(names.replace(/^the\s+/i, "")) : "À";
+  // A long pair of names is set on two lines around a gold ampersand; the type shrinks to fit what is written.
+  const stacked = parts.length === 2 && `${parts[0]} & ${parts[1]}`.length > 17;
+  const longest = stacked
+    ? Math.max(parts[0].length, parts[1].length)
+    : shown.length;
+  const nameSize =
+    longest <= 10
+      ? 1.9
+      : longest <= 16
+        ? 1.65
+        : longest <= 24
+          ? 1.4
+          : longest <= 34
+            ? 1.2
+            : 1.05;
   const place = [venue.trim(), area.trim()].filter(Boolean).join(", ");
   const [c1, c2] = palette.colors;
 
@@ -88,7 +106,7 @@ export function LiveInvitation({
           aria-hidden="true"
           className="weave absolute inset-x-0 top-0 h-3 opacity-30 mix-blend-overlay"
         />
-        <div className="relative flex h-full flex-col items-center">
+        <div className="relative flex h-full min-h-0 flex-col items-center">
           <div key={seal} className="wiz-stamp">
             <MonogramSeal text={seal} size={58} className="drop-shadow-md" />
           </div>
@@ -96,15 +114,38 @@ export function LiveInvitation({
             {occasion.kicker}
           </p>
           <p
+            data-testid="wizard-invitation-names"
             className={cn(
-              "mt-3 break-words font-display text-[1.65rem] font-bold leading-tight transition-colors duration-500 [overflow-wrap:anywhere]",
+              "mt-3 w-full text-balance font-display font-bold leading-[1.15] transition-[color,font-size] duration-300 [overflow-wrap:anywhere] [hyphens:auto]",
               names.trim() ? "" : "opacity-45"
             )}
-            style={{ color: palette.ink }}
+            style={{ color: palette.ink, fontSize: `${nameSize}rem` }}
           >
-            <Hot on={stage === "who"}>{shown}</Hot>
+            {stacked ? (
+              <span
+                key={parts.join("|")}
+                className="wiz-in flex flex-col items-center"
+              >
+                <span className="line-clamp-2">
+                  <Hot on={stage === "who"}>{parts[0]}</Hot>
+                </span>
+                <span
+                  aria-label="and"
+                  className="font-display text-[0.8em] font-normal italic text-[#8f6420]"
+                >
+                  &amp;
+                </span>
+                <span className="line-clamp-2">
+                  <Hot on={stage === "who"}>{parts[1]}</Hot>
+                </span>
+              </span>
+            ) : (
+              <span className="line-clamp-4">
+                <Hot on={stage === "who"}>{shown}</Hot>
+              </span>
+            )}
           </p>
-          <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-[#4a3a30]">
+          <p className="mt-3 max-w-[15rem] text-balance text-xs leading-relaxed text-[#4a3a30]">
             {occasion.message}
           </p>
           <div
@@ -115,16 +156,16 @@ export function LiveInvitation({
             <span className="text-[#b8864b]">✦</span>
             <span className="h-px flex-1 bg-[#b8864b]/50" />
           </div>
-          <p className="text-sm font-semibold text-[#2a2118]">
+          <p className="text-balance text-sm font-semibold text-[#2a2118]">
             <Hot on={stage === "when"}>
               {dateLabel || "Date to be chosen"}
               {dateLabel && timeLabel ? ` · ${timeLabel}` : ""}
             </Hot>
           </p>
-          <p className="mt-1.5 text-xs text-[#4a3a30]">
+          <p className="mt-1.5 line-clamp-3 text-balance text-xs text-[#4a3a30] [overflow-wrap:anywhere]">
             <Hot on={stage === "where"}>{place || "Venue to be chosen"}</Hot>
           </p>
-          <p className="mt-2 text-[11px] italic text-[#5a474e]">
+          <p className="mt-2 line-clamp-3 text-balance text-[11px] italic text-[#5a474e] [overflow-wrap:anywhere]">
             <Hot on={stage === "where"}>{dressCode}</Hot>
           </p>
           <p className="mt-auto pt-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7a5612]">

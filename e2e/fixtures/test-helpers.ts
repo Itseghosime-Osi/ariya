@@ -98,7 +98,7 @@ export async function createTestEvent(
   await page.getByTestId("wizard-next").click();
 
   // Step 2: when. A Saturday is already chosen once the page has loaded.
-  await expect(page.locator("#eventDate")).not.toHaveValue("");
+  await expect(page.getByTestId("wizard-next")).toBeEnabled();
   await page.getByTestId("wizard-next").click();
 
   // Step 3: where.

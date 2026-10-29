@@ -307,6 +307,14 @@
   transform-origin: left;
   animation: wiz-sweep 700ms var(--ease-out) both;
 }
+@keyframes wiz-ready {
+  0% {
+    box-shadow: 0 0 0 0 rgba(184, 134, 75, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgba(184, 134, 75, 0);
+  }
+}
 @keyframes wiz-stamp {
   0% {
     opacity: 0;

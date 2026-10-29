@@ -271,3 +271,26 @@ export const PARTY_PRESETS = [50, 100, 200, 300, 500];
 export const PARTY_MIN = 10;
 export const PARTY_MAX = 1000;
 export const GUESTS_PER_PARTY = 2;
+
+/** The first Saturday on or after `from`. */
+export function saturdayOnOrAfter(from: Date): string {
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7));
+  return toYmd(d);
+}
+
+/** The Saturday closest to `months` months from `from`. */
+export function saturdayInMonths(from: Date, months: number): string {
+  const d = new Date(
+    from.getFullYear(),
+    from.getMonth() + months,
+    from.getDate()
+  );
+  return saturdayOnOrAfter(d);
+}
+
+export function parseYmd(ymd: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  const d = new Date(`${ymd}T12:00:00`);
+  return isNaN(d.getTime()) ? null : d;
+}
