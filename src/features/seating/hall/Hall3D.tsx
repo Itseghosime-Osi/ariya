@@ -139,10 +139,8 @@ export const Hall3D = forwardRef<
       if (!m || m.source !== "ariya-hall3d") return;
       if (m.t === "ready") setReady(true);
       else if (m.t === "error") setFailed(true);
-      else if (m.t === "wheel") {
-        // The hall never zooms on scroll; the page scrolls instead.
-        window.scrollBy({ left: 0, top: m.dy ?? 0 });
-      } else handler.current(m);
+      // Scrolling over the hall does nothing: the studio page itself never scrolls.
+      else if (m.t !== "wheel") handler.current(m);
     };
     window.addEventListener("message", listen);
     // The hall may have finished loading before this page hydrated; ask it again.

@@ -190,8 +190,15 @@ export function SeatingDesk({
     };
     fit();
     window.addEventListener("resize", fit);
+    // Hidden overflow still lets the page be scrolled by code or by focusing a control near the
+    // bottom; keep it pinned so the workspace never shifts.
+    const pin = () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
+    };
+    window.addEventListener("scroll", pin, { passive: true });
     return () => {
       window.removeEventListener("resize", fit);
+      window.removeEventListener("scroll", pin);
       html.style.overflow = prev;
     };
   }, [view]);
