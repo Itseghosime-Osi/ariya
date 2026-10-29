@@ -1492,6 +1492,35 @@ function buildZone(z) {
       g.add(plinth);
       break;
     }
+    case "custom": {
+      const h = z.height ?? (z.variant === "block" ? 1 : TABLE_H);
+      const shape = z.shape ?? "rect";
+      if (z.variant === "block") {
+        const m = new THREE.MeshPhysicalMaterial({
+          color: colour,
+          roughness: 0.45,
+          clearcoat: 0.3,
+        });
+        const { mesh, pts } = platform(z, h, m, m);
+        mesh.castShadow = true;
+        g.add(mesh, goldEdge(pts, h + 0.01));
+      } else {
+        const cloth = new THREE.Mesh(
+          drape({
+            shape: shape === "rect" ? "rect" : shape,
+            w: z.w,
+            h: z.h,
+            top: h,
+            seed: hash(z.id),
+          }),
+          clothMat(colour)
+        );
+        cloth.castShadow = cloth.receiveShadow = true;
+        g.add(cloth);
+        zoneFlowers(g, ARR.small, flower, mat(0, h + 0.02, 0), 1.2);
+      }
+      break;
+    }
     case "pillar": {
       const rad = Math.min(z.w, z.h) / 2;
       const H = L.ceiling;
@@ -1522,6 +1551,7 @@ function buildZone(z) {
 function defaultZoneColour(kind) {
   return (
     {
+      custom: "#e9c98a",
       stage: "#6e1426",
       dance: "#141014",
       buffet: "#f4efe6",
@@ -1549,6 +1579,7 @@ function syncZones() {
       z.color,
       z.finish,
       z.height,
+      z.variant,
       L.decor.drape,
       L.decor.flower,
       L.mood,
@@ -2031,9 +2062,14 @@ const EVENING_DOT = "#606060";
 
 function applyMood() {
   const evening = state.layout.mood === "evening";
-  boardMat.uniforms.uBg.value.set(evening ? EVENING_BG : "#f2f2f0");
-  boardMat.uniforms.uDot.value.set(evening ? EVENING_DOT : "#c5c5c2");
-  scene.background = new THREE.Color(evening ? EVENING_BG : "#f2f2f0");
+  // By day the board is the page's own background, with dots a shade darker.
+  const day = state.board || "#f2f2f0";
+  boardMat.uniforms.uBg.value.set(evening ? EVENING_BG : day);
+  boardMat.uniforms.uDot.value.set(
+    evening ? EVENING_DOT : new THREE.Color(day).offsetHSL(0, -0.05, -0.16)
+  );
+  scene.background = new THREE.Color(evening ? EVENING_BG : day);
+  document.body.style.background = evening ? "#2c2c2c" : day;
   document.body.classList.toggle("evening", evening);
   renderer.toneMappingExposure = evening ? 0.85 : 0.92;
   hemi.intensity = evening ? 0.12 : 0.55;
@@ -2449,10 +2485,8 @@ function applyScene(s) {
   buildShell(state.layout);
   // New walls start opaque; fade the ones in front of the camera again.
   applyCamera();
-  if (moodChanged) {
-    applyMood();
-    zoneCache.forEach((e) => (e.sig = ""));
-  }
+  applyMood();
+  if (moodChanged) zoneCache.forEach((e) => (e.sig = ""));
   syncZones();
   syncTables();
   rebuildInstances();

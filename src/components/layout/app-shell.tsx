@@ -172,6 +172,7 @@ export function AppShell({
 
   return (
     <div
+      data-app-shell
       className={cn(
         "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
         ready && "sb-ready"

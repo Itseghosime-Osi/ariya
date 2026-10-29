@@ -10,6 +10,7 @@ import {
   List,
   Plus,
   Printer,
+  Trash2,
 } from "lucide-react";
 import {
   DndContext,
@@ -21,6 +22,14 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { TableListView } from "./TableListView";
 import { TableFormModal } from "./TableFormModal";
 import { useSeatingDesk } from "./useSeatingDesk";
@@ -120,6 +129,10 @@ export function SeatingDesk({
     executeSeatChange,
     handleSaveTable,
     handleDeleteTable,
+    pendingDelete,
+    cancelDelete,
+    confirmDelete,
+    deleteTables,
   } = useSeatingDesk(eventId, initialData);
 
   const sensors = useSensors(
@@ -184,6 +197,8 @@ export function SeatingDesk({
     </span>
   ) : null;
 
+  const deleting = data.tables.find((t) => t.id === pendingDelete);
+
   const iconLink =
     "grid h-10 w-10 shrink-0 place-items-center rounded-full text-night hover:bg-[#f1ece4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
 
@@ -198,9 +213,10 @@ export function SeatingDesk({
       <div
         ref={frame}
         style={height ? { height } : undefined}
-        className="flex h-[calc(100dvh-10rem)] min-h-[420px] flex-col overflow-hidden rounded-[24px] border border-hairline bg-white shadow-[0_24px_50px_-34px_rgba(28,7,13,0.45)]"
+        data-seating-frame
+        className="flex h-[calc(100dvh-10rem)] min-h-[420px] flex-col overflow-hidden"
       >
-        <header className="flex h-14 shrink-0 items-center gap-1.5 border-b border-hairline bg-white px-3 sm:gap-2 sm:px-4">
+        <header className="flex h-14 shrink-0 items-center gap-1.5 pb-2 sm:gap-2">
           <h1 className="truncate font-display text-lg font-bold text-night">
             Seating &amp; Floor Plan
           </h1>
@@ -249,10 +265,11 @@ export function SeatingDesk({
               executeSeatChange(guestId, tableId)
             }
             onDeleteTable={handleDeleteTable}
+            deleteTables={deleteTables}
             notice={notice}
           />
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto bg-[#fbf9f5] p-3 sm:p-5">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-4">
             {notice && (
               <p
                 role="status"
@@ -274,6 +291,44 @@ export function SeatingDesk({
           </div>
         )}
       </div>
+
+      <Dialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => !open && cancelDelete()}
+      >
+        <DialogContent className="max-w-md rounded-[24px] bg-white">
+          <DialogHeader>
+            <span className="mb-2 grid h-11 w-11 place-items-center rounded-full bg-[#fbe9ea] text-[#9e2a2b]">
+              <Trash2 size={19} />
+            </span>
+            <DialogTitle className="font-display text-xl text-night">
+              Delete {deleting?.name ?? "this table"}?
+            </DialogTitle>
+            <DialogDescription className="text-sm text-label-2">
+              {deleting && deleting.guests.length > 0
+                ? `${deleting.guests.length} ${deleting.guests.length === 1 ? "guest" : "guests"} seated here will go back to Waiting for a seat.`
+                : "Nobody is seated here yet."}{" "}
+              You can add the table again at any time.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-2 gap-2 sm:gap-2">
+            <button
+              type="button"
+              onClick={cancelDelete}
+              className="min-h-11 rounded-full border border-hairline bg-white px-5 text-xs font-semibold text-night hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              Keep it
+            </button>
+            <button
+              type="button"
+              onClick={() => void confirmDelete()}
+              className="min-h-11 rounded-full bg-[#9e2a2b] px-5 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              Delete table
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <TableFormModal
         isOpen={isModalOpen}

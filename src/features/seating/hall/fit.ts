@@ -49,6 +49,7 @@ export interface FitResult {
 
 function zoneClearance(z: Zone) {
   if (z.kind === "pillar") return 0.3;
+  if (z.kind === "custom") return 0.6;
   if (z.kind === "entrance") return 1.6;
   return ZONE_CLEARANCE;
 }

@@ -731,3 +731,23 @@ body {
     font-size: 16px;
   }
 }
+
+/* Seating studio in evening light: the whole page goes Figma-dark grey, not just the hall. */
+html[data-seating-mood="evening"],
+html[data-seating-mood="evening"] body,
+html[data-seating-mood="evening"] [data-app-shell] {
+  background-color: #2c2c2c;
+  transition: background-color 0.4s ease;
+}
+html[data-seating-mood="evening"] [data-top-bar] {
+  background-color: rgb(44 44 44 / 0.94);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: none;
+}
+html[data-seating-mood="evening"] [data-seating-frame] > header h1,
+html[data-seating-mood="evening"] [data-seating-frame] > header > a {
+  color: #f4efe6;
+}
+html[data-seating-mood="evening"] [data-seating-frame] > header > a:hover {
+  background-color: rgb(255 255 255 / 0.08);
+}

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   chairPositions,
   footprint,
+  defaultLayout,
   gapBetween,
+  gapToWalls,
   normaliseLayout,
   tableTop,
   styleOf,
@@ -10,6 +12,7 @@ import {
 } from "./model";
 import { canPlace, findFreeSpot, fitTables } from "./fit";
 import { planSeating } from "./autoseat";
+import { autoArrange } from "./arrange";
 
 describe("table geometry", () => {
   it("uses real table sizes", () => {
@@ -231,5 +234,46 @@ describe("normaliseLayout for the 3D studio", () => {
     expect(styleOf(l, "t1").cloth).toBe("#000000");
     expect(styleOf(l, "t1").chair).toBe("chiavari-gold");
     expect(styleOf(l, "t2").cloth).toBe(l.decor.linen);
+  });
+});
+
+describe("autoArrange", () => {
+  const tables = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      id: `t${i}`,
+      shape: "round",
+      capacity: 10,
+      occupied: i % 3,
+    }));
+
+  it("places every table without overlaps in a medium hall", () => {
+    const layout = defaultLayout(30, 20);
+    const all = [
+      { id: "h", shape: "head", capacity: 8, occupied: 8 },
+      ...tables(14),
+    ];
+    const r = autoArrange(layout, all, 0.6);
+    expect(r.unplaced).toEqual([]);
+    const fps = all.map((t) => {
+      const p = r.positions[t.id];
+      return footprint(t.shape, t.capacity, p.x, p.y, p.rot);
+    });
+    for (let i = 0; i < fps.length; i++)
+      for (let j = i + 1; j < fps.length; j++)
+        expect(gapBetween(fps[i], fps[j])).toBeGreaterThan(0.5);
+    for (const f of fps) expect(gapToWalls(f, 30, 20)).toBeGreaterThan(0);
+  });
+
+  it("puts the stage at the front and the entrance at the back", () => {
+    const r = autoArrange(defaultLayout(30, 20), [], 0.6);
+    const stage = r.zones.find((z) => z.kind === "stage")!;
+    const entrance = r.zones.find((z) => z.kind === "entrance")!;
+    expect(stage.y).toBeLessThan(4);
+    expect(entrance.y).toBeGreaterThan(18);
+  });
+
+  it("reports tables that do not fit", () => {
+    const r = autoArrange(defaultLayout(12, 10), tables(40), 0.6);
+    expect(r.unplaced.length).toBeGreaterThan(0);
   });
 });

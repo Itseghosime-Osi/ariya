@@ -37,6 +37,7 @@ import {
   ChairGlyph,
   MetreField,
   Section,
+  Segmented,
   ShapeGlyph,
   Stepper,
   Swatches,
@@ -432,7 +433,14 @@ export function TableInspector({
 
 // ---------------------------------------------------------------- zone
 
-const SHAPED: Zone["kind"][] = ["stage", "dance", "photo", "pillar", "cake"];
+const SHAPED: Zone["kind"][] = [
+  "stage",
+  "dance",
+  "photo",
+  "pillar",
+  "cake",
+  "custom",
+];
 const FINISHES: Record<
   string,
   { key: ZoneFinish; label: string; c: string }[]
@@ -508,6 +516,7 @@ const COLOUR_LABEL: Partial<Record<Zone["kind"], string>> = {
   photo: "Flower wall",
   pillar: "Pillar",
   dj: "Booth panel",
+  custom: "Colour",
 };
 
 export function ZoneInspector({
@@ -546,6 +555,23 @@ export function ZoneInspector({
           className="h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base text-night outline-none focus:border-night sm:text-sm"
         />
       </Section>
+      {zone.kind === "custom" && (
+        <Section title="Kind of item">
+          <Segmented<"table" | "block">
+            label="Kind of item"
+            value={zone.variant ?? "table"}
+            onPick={(v) => onChange({ variant: v })}
+            options={[
+              { key: "table", label: "Draped table" },
+              { key: "block", label: "Solid item" },
+            ]}
+          />
+          <p className="mt-2 text-[11px] text-label-2">
+            Name it anything: a DJ riser, a lounge sofa, a sweets table, a plant
+            stand.
+          </p>
+        </Section>
+      )}
       {SHAPED.includes(zone.kind) && (
         <Section title="Shape">
           <Tiles<ZoneShape>
@@ -629,6 +655,16 @@ export function ZoneInspector({
             max={360}
             onCommit={(v) => onChange({ rot: ((v % 360) + 360) % 360 })}
           />
+          {zone.kind === "custom" && (
+            <MetreField
+              id="zone-height"
+              label="Height"
+              value={zone.height ?? (zone.variant === "block" ? 1 : 0.76)}
+              min={0.05}
+              max={3}
+              onCommit={(v) => onChange({ height: v })}
+            />
+          )}
           {zone.kind === "stage" && (
             <MetreField
               id="zone-height"

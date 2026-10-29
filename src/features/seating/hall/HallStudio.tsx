@@ -28,6 +28,7 @@ import {
   RotateCw,
   Ruler,
   Shapes,
+  Sparkles,
   Square,
   Sun,
   Tag,
@@ -68,6 +69,7 @@ import {
 } from "./model";
 import { findFreeSpot, fitTables, frontOf, nearestToFront } from "./fit";
 import { planSeating } from "./autoseat";
+import { autoArrange } from "./arrange";
 import {
   Hall3D,
   type Hall3DHandle,
@@ -133,6 +135,8 @@ const ZONE_GALLERY: {
   { kind: "photo", label: "Flower wall" },
   { kind: "gifts", label: "Gifts table" },
   { kind: "pillar", label: "Pillar", shape: "round" },
+  { kind: "custom", label: "Custom table", w: 1.8, h: 0.9 },
+  { kind: "custom", label: "Custom item", w: 1.2, h: 1.2 },
 ];
 
 const CHAIR_GROUPS = [
@@ -160,6 +164,8 @@ interface HallStudioProps {
   ) => Promise<{ seated: number; failed: number }>;
   onAssignTable: (guestId: string, tableId: string | null) => void;
   onDeleteTable: (tableId: string) => void;
+  /** Remove several tables without asking for each (shrinking a crowded hall). */
+  deleteTables: (ids: string[]) => Promise<number>;
   /** A short message to show over the hall (saved, could not save…). */
   notice?: React.ReactNode;
 }
@@ -199,6 +205,7 @@ export function HallStudio({
   bulkAssign,
   onAssignTable,
   onDeleteTable,
+  deleteTables,
   notice,
 }: HallStudioProps) {
   const hall = useHallLayout({
@@ -234,6 +241,29 @@ export function HallStudio({
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
+
+  // The daytime board takes the page's own background, so the hall sits on the page.
+  const [pageBg, setPageBg] = useState("#f7f2ea");
+  useEffect(() => {
+    const m = getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+    if (m && m.length >= 3)
+      setPageBg(
+        "#" +
+          m
+            .slice(0, 3)
+            .map((n) => Number(n).toString(16).padStart(2, "0"))
+            .join("")
+      );
+  }, []);
+  // Evening darkens the whole page, not just the hall, while the studio is open.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (layout.mood === "evening") html.dataset.seatingMood = "evening";
+    else delete html.dataset.seatingMood;
+    return () => {
+      delete html.dataset.seatingMood;
+    };
+  }, [layout.mood]);
 
   const positions: Positions = useMemo(() => {
     const out: Positions = {};
@@ -436,6 +466,7 @@ export function HallStudio({
             }))
           : [],
       assigning: assigning !== null,
+      board: pageBg,
     }),
     [
       layout,
@@ -450,6 +481,7 @@ export function HallStudio({
       fitAround,
       preset,
       assigning,
+      pageBg,
     ]
   );
 
@@ -642,7 +674,8 @@ export function HallStudio({
   const placeNew = async (
     shape: TableShape,
     capacity: number,
-    near?: { x: number; y: number }
+    near?: { x: number; y: number },
+    select = true
   ) => {
     const spot = findFreeSpot(
       {
@@ -673,7 +706,8 @@ export function HallStudio({
         position_y: toCm(spot.y),
       },
     ]);
-    if (created[0]) setSelection([{ type: "table", id: created[0].id }]);
+    if (created[0] && select)
+      setSelection([{ type: "table", id: created[0].id }]);
   };
 
   const addChairs = (n: number, spacing: number) => {
@@ -696,13 +730,25 @@ export function HallStudio({
     const z: Zone = {
       id: zoneId(),
       kind: g.kind,
-      label: g.kind === "dance" ? "Dance floor" : def.label,
+      label:
+        g.kind === "dance"
+          ? "Dance floor"
+          : g.kind === "custom"
+            ? g.label === "Custom table"
+              ? "Custom table"
+              : "Item"
+            : def.label,
       x: round2(layout.width / 2),
       y: round2(layout.length / 2),
       w: g.w ?? def.w,
       h: g.h ?? def.h,
       ...(g.shape ? { shape: g.shape } : {}),
       ...(g.kind === "stage" ? { height: 0.8 } : {}),
+      ...(g.kind === "custom"
+        ? g.label === "Custom table"
+          ? { variant: "table" as const, height: 0.76 }
+          : { variant: "block" as const, height: 1 }
+        : {}),
     };
     updateLayout((l) => ({ ...l, zones: [...l.zones, z] }));
     setSelection([{ type: "zone", id: z.id }]);
@@ -757,11 +803,17 @@ export function HallStudio({
     setSelection([]);
   };
 
-  const fill = async (onlyNeeded: boolean) => {
-    const list = onlyNeeded
-      ? nearestToFront(fitAround.placements, front, tablesNeeded)
-      : fitAround.placements;
-    if (list.length === 0) return;
+  const fill = async (onlyNeeded: boolean, count?: number) => {
+    const list =
+      count !== undefined
+        ? nearestToFront(fitAround.placements, front, count)
+        : onlyNeeded
+          ? nearestToFront(fitAround.placements, front, tablesNeeded)
+          : fitAround.placements;
+    if (list.length === 0) {
+      say("There is no free space left for another table of that size.");
+      return;
+    }
     setBusy("fill");
     const names = nextTableNames(data.tables, list.length);
     const created = await addTables(
@@ -782,7 +834,103 @@ export function HallStudio({
         },
       }));
     setBusy(null);
-    say(`${created.length} tables added`);
+    say(
+      count !== undefined && list.length < count
+        ? `Only ${created.length} more tables fit. Try snug spacing or smaller tables.`
+        : `${created.length} tables added`
+    );
+  };
+
+  /** Take away empty tables: the crowded ones first, then those furthest from the stage. */
+  const removeTables = async (n: number) => {
+    const empty = data.tables.filter(
+      (t) => t.occupiedSeats === 0 && t.shape !== "head"
+    );
+    const far = (t: TableWithGuests) => {
+      const p = positions[t.id] ?? { x: 0, y: 0 };
+      return Math.hypot(p.x - front.x, p.y - front.y);
+    };
+    const pick = empty
+      .sort(
+        (a, b) =>
+          Number(!!warnings[b.id] && warnings[b.id] !== "tight") -
+            Number(!!warnings[a.id] && warnings[a.id] !== "tight") ||
+          far(b) - far(a)
+      )
+      .slice(0, n);
+    if (pick.length === 0) {
+      say(
+        "Every table has guests. Move guests off a table before removing it."
+      );
+      return;
+    }
+    setBusy("remove");
+    setSelection([]);
+    const removed = await deleteTables(pick.map((t) => t.id));
+    setBusy(null);
+    say(
+      removed < n
+        ? `${removed} empty ${removed === 1 ? "table" : "tables"} removed; the rest have guests.`
+        : `${removed} ${removed === 1 ? "table" : "tables"} removed`
+    );
+  };
+
+  /** Arrange the whole hall: areas in their usual places, tables packed in rows. */
+  const autoLayout = () => {
+    const r = autoArrange(
+      layout,
+      data.tables.map((t) => ({
+        id: t.id,
+        shape: t.shape,
+        capacity: t.capacity,
+        occupied: t.occupiedSeats,
+      })),
+      gap
+    );
+    hall.update(
+      (l) => ({
+        ...l,
+        zones: r.zones,
+        rotations: {
+          ...l.rotations,
+          ...Object.fromEntries(
+            Object.entries(r.positions).map(([id, p]) => [id, p.rot])
+          ),
+        },
+      }),
+      positions
+    );
+    void setTablePositions(
+      Object.entries(r.positions).map(([id, p]) => ({
+        id,
+        x: toCm(p.x),
+        y: toCm(p.y),
+      }))
+    );
+    setSelection([]);
+    view3d.current?.command("fit");
+    say(
+      r.unplaced.length
+        ? `Hall arranged. ${r.unplaced.length} ${r.unplaced.length === 1 ? "table does" : "tables do"} not fit; remove some or use snug spacing.`
+        : "Hall arranged. Undo if you prefer how it was."
+    );
+    return r;
+  };
+
+  /** Auto layout, then take away empty tables that still have no room. */
+  const fixCrowding = async () => {
+    const r = autoLayout();
+    const removable = r.unplaced.filter(
+      (id) => data.tables.find((t) => t.id === id)?.occupiedSeats === 0
+    );
+    if (removable.length) {
+      setBusy("remove");
+      const removed = await deleteTables(removable);
+      setBusy(null);
+      say(
+        `Hall arranged and ${removed} empty ${removed === 1 ? "table" : "tables"} without room removed.`
+      );
+    }
   };
 
   const seatEveryone = async () => {
@@ -966,10 +1114,7 @@ export function HallStudio({
     <section
       ref={studio}
       aria-label="Hall studio"
-      className={cn(
-        "relative flex min-h-0 flex-1 flex-col text-night",
-        layout.mood === "evening" ? "bg-[#2c2c2c]" : "bg-[#f2f2f0]"
-      )}
+      className={cn("relative flex min-h-0 flex-1 flex-col text-night")}
       data-testid="hall-studio"
     >
       <p className="sr-only" aria-live="polite">
@@ -1088,15 +1233,20 @@ export function HallStudio({
                 </span>
               )}
               {warnCount > 0 && (
-                <span
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelection([]);
+                    setDeck("fit");
+                  }}
                   className={cn(
                     float,
-                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b]"
+                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b] hover:bg-white"
                   )}
                 >
                   {warnCount} {warnCount === 1 ? "table needs" : "tables need"}{" "}
-                  more space
-                </span>
+                  more space · Fix
+                </button>
               )}
               {data.tables.length === 0 && !assigning && (
                 <span
@@ -1191,6 +1341,16 @@ export function HallStudio({
               title="Pan around (H, or hold Space)"
             >
               <Hand size={18} />
+            </button>
+            <button
+              type="button"
+              className={rail}
+              onClick={autoLayout}
+              disabled={busy !== null}
+              aria-label="Auto layout"
+              title="Auto layout: arrange the hall for you"
+            >
+              <Sparkles size={18} />
             </button>
             <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
             <button
@@ -1483,7 +1643,7 @@ export function HallStudio({
         </div>
 
         {/* Side bar: planning tools and the inspector */}
-        <div className="flex h-[44%] min-h-0 shrink-0 flex-col border-t border-hairline bg-[#fbf9f5] lg:h-auto lg:w-[360px] lg:border-l lg:border-t-0">
+        <div className="mt-3 flex h-[44%] min-h-0 shrink-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_18px_40px_-30px_rgba(28,7,13,0.5)] lg:ml-3 lg:mt-0 lg:h-auto lg:w-[360px]">
           <div
             role="tablist"
             aria-label="Planning tools"
@@ -1666,6 +1826,17 @@ export function HallStudio({
                 gap={gap}
                 busy={busy}
                 onFill={fill}
+                tableCount={data.tables.length}
+                emptyCount={
+                  data.tables.filter((t) => t.occupiedSeats === 0).length
+                }
+                crowded={warnCount}
+                onAddOne={() =>
+                  void placeNew(preset.shape, preset.capacity, undefined, false)
+                }
+                onRemove={(n) => void removeTables(n)}
+                onFixCrowding={() => void fixCrowding()}
+                onAutoLayout={autoLayout}
               />
             ) : deck === "seat" ? (
               <SeatPanel

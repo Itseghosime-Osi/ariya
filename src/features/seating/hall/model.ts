@@ -17,7 +17,8 @@ export type ZoneKind =
   | "gifts"
   | "photo"
   | "pillar"
-  | "cake";
+  | "cake"
+  | "custom";
 
 export type ZoneShape =
   "rect" | "round" | "oval" | "hexagon" | "octagon" | "heart";
@@ -41,8 +42,10 @@ export interface Zone {
   /** Main colour: stage skirt, runner, bar front, arch flowers… */
   color?: string;
   finish?: ZoneFinish;
-  /** Platform height in metres (stages). */
+  /** Platform height in metres (stages), or the height of a custom item. */
   height?: number;
+  /** Custom items: a draped table, or a solid block (a booth, a sofa, a plant stand…). */
+  variant?: "table" | "block";
 }
 
 export type ChairType =
@@ -123,6 +126,7 @@ export const ZONE_DEFAULTS: Record<
   photo: { label: "Photo spot", w: 3, h: 3, fill: "#40202c" },
   pillar: { label: "Pillar", w: 0.8, h: 0.8, fill: "#3a3030" },
   cake: { label: "Cake table", w: 1.5, h: 1.5, fill: "#5a3a2a" },
+  custom: { label: "Custom item", w: 1.8, h: 0.9, fill: "#4a4040" },
 };
 
 /** The colour each zone starts with in the 3D hall. */
@@ -137,6 +141,7 @@ export const ZONE_COLOURS: Record<ZoneKind, string> = {
   photo: "#f4d7dc",
   pillar: "#f4efe6",
   cake: "#f4efe6",
+  custom: "#e9c98a",
 };
 
 export const CHAIR_TYPES: { key: ChairType; label: string }[] = [

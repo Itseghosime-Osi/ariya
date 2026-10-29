@@ -48,6 +48,7 @@ const zoneSchema = z.object({
     "photo",
     "pillar",
     "cake",
+    "custom",
   ]),
   label: z.string().trim().max(60),
   x: z.number().finite(),
@@ -66,6 +67,7 @@ const zoneSchema = z.object({
     .enum(["gloss", "led", "white", "wood", "checker", "carpet", "marble"])
     .optional(),
   height: z.number().min(0).max(3).optional(),
+  variant: z.enum(["table", "block"]).optional(),
 });
 
 const hexColour = z.string().regex(/^#[0-9a-fA-F]{6}$/);

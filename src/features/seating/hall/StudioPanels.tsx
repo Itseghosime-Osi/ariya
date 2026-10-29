@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Crown,
@@ -36,6 +36,7 @@ import {
   MetreField,
   Section,
   Segmented,
+  Stepper,
   Swatches,
   TableGlyph,
   Tiles,
@@ -481,6 +482,13 @@ export function FitPanel({
   gap,
   busy,
   onFill,
+  tableCount,
+  emptyCount,
+  crowded,
+  onAddOne,
+  onRemove,
+  onFixCrowding,
+  onAutoLayout,
 }: {
   presets: { key: string; label: string; shape: string; capacity: number }[];
   preset: { key: string; shape: string; capacity: number };
@@ -496,10 +504,91 @@ export function FitPanel({
   tablesNeeded: number;
   gap: number;
   busy: string | null;
-  onFill: (onlyNeeded: boolean) => void;
+  onFill: (onlyNeeded: boolean, count?: number) => void;
+  tableCount: number;
+  emptyCount: number;
+  crowded: number;
+  onAddOne: () => void;
+  onRemove: (n: number) => void;
+  onFixCrowding: () => void;
+  onAutoLayout: () => void;
 }) {
+  const [want, setWant] = useState(String(tableCount));
+  useEffect(() => setWant(String(tableCount)), [tableCount]);
+  const wanted = Math.max(0, Math.round(Number(want) || 0));
   return (
     <div>
+      <Section title="Tables in the hall">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <Stepper
+              label="Tables"
+              value={tableCount}
+              min={0}
+              max={400}
+              onChange={(v) => (v > tableCount ? onAddOne() : onRemove(1))}
+            />
+          </div>
+          <p className="text-[11px] leading-tight text-label-2">
+            {emptyCount} empty
+            <br />
+            {tableCount - emptyCount} with guests
+          </p>
+        </div>
+        <div className="mt-2 flex items-end gap-2">
+          <label className="flex-1 text-[11px] font-semibold text-label-2">
+            Set the number of tables
+            <input
+              type="text"
+              inputMode="numeric"
+              value={want}
+              onChange={(e) => setWant(e.target.value.replace(/[^0-9]/g, ""))}
+              className="mt-1 h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base tabular-nums text-night outline-none focus:border-night sm:text-sm"
+            />
+          </label>
+          <button
+            type="button"
+            disabled={busy !== null || wanted === tableCount}
+            onClick={() =>
+              wanted > tableCount
+                ? onFill(false, wanted - tableCount)
+                : onRemove(tableCount - wanted)
+            }
+            className="min-h-10 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            Apply
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] text-label-2">
+          Fewer tables take away empty ones first, starting with the most
+          crowded and those furthest from the stage. Guests are never unseated
+          this way.
+        </p>
+        {crowded > 0 && (
+          <div className="mt-3 rounded-xl bg-[#fbeeee] p-3">
+            <p className="text-sm text-[#7a1f20]">
+              {crowded} {crowded === 1 ? "table is" : "tables are"} too close to
+              another table, a wall or an area.
+            </p>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={onFixCrowding}
+              className="mt-2 min-h-10 w-full rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              Fix the crowding
+            </button>
+          </div>
+        )}
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={onAutoLayout}
+          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-hairline bg-white px-4 text-xs font-semibold text-night hover:border-night/40 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          <Sparkles size={15} /> Auto layout the whole hall
+        </button>
+      </Section>
       <Section title="How many tables fit">
         <div className="flex items-end gap-3">
           <p className="font-display text-5xl font-bold leading-none tabular-nums text-night">

@@ -154,18 +154,33 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     }
   };
 
-  const handleDeleteTable = async (tableId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this table? Assigned guests will become unseated."
-      )
-    ) {
-      return;
-    }
+  /** Asking first: the page shows a dialog for the table waiting here. */
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const handleDeleteTable = (tableId: string) => setPendingDelete(tableId);
+  const cancelDelete = () => setPendingDelete(null);
+  const confirmDelete = async () => {
+    const id = pendingDelete;
+    setPendingDelete(null);
+    if (id && (await removeTable(id))) setSuccessMsg("Table deleted.");
+  };
+
+  /** Remove several tables at once (shrinking a crowded hall), without asking for each. */
+  const deleteTables = async (ids: string[]) => {
+    setErrorMsg(null);
+    let removed = 0;
+    for (const id of ids) if (await removeTable(id)) removed += 1;
+    if (removed)
+      setSuccessMsg(
+        `${removed} ${removed === 1 ? "table" : "tables"} removed from the hall.`
+      );
+    return removed;
+  };
+
+  const removeTable = async (tableId: string) => {
     const res = await deleteTableAction(eventId, tableId);
     if (!res.ok) {
       setErrorMsg(res.error || "Failed to delete table");
-      return;
+      return false;
     }
     setData((prev) => {
       const target = prev.tables.find((t) => t.id === tableId);
@@ -187,6 +202,7 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
         },
       };
     });
+    return true;
   };
 
   /** Change a table's name, seats or shape straight from the hall studio (optimistic). */
@@ -348,5 +364,9 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     executeSeatChange,
     handleSaveTable,
     handleDeleteTable,
+    pendingDelete,
+    cancelDelete,
+    confirmDelete,
+    deleteTables,
   };
 }

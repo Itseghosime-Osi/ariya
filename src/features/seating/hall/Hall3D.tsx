@@ -58,6 +58,8 @@ export interface Scene {
   warnings: Record<string, string>;
   ghosts: { x: number; y: number; rot: number; top: TableTop }[];
   assigning: boolean;
+  /** The page background, which the daytime board takes on so the hall sits on the page. */
+  board: string;
 }
 
 export type HallCommand =
