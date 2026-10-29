@@ -21,9 +21,8 @@ The repository is partitioned into two distinct domains:
 
 3. **Private Media (`private-media/`)**
    - Holds `private-media/music.mp3` ("Yori Yori" by Abefe), a commercial track for private class demos only.
-   - It is kept outside `public/`, so it is never served or deployed. The live film and About page play their generated Web Audio groove.
-   - The film and About page only request the song on a browser that opted in with `?song=1` (remembered in localStorage; `?song=0` clears it). Visitors never request it.
-   - For a local demo, copy it to `public/site/assets/music.mp3` (git-ignored) and open `/?song=1`. `pnpm check:bundle` fails if any audio file is under `public/`.
+   - It is kept outside `public/`, so it is never served or deployed. The live film and About page request `assets/music.mp3`, get a 404 and play their generated Web Audio groove.
+   - For a local demo, copy it to `public/site/assets/music.mp3` (git-ignored). `pnpm check:bundle` fails if any audio file is under `public/`.
 
 ## 3. Legacy URL Resolution Matrix
 

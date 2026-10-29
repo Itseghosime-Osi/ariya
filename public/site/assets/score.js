@@ -8,15 +8,7 @@
 
    Nothing plays until AriyaScore.start() is called from a click or tap. */
 (function () {
-  // The song is private (private-media/, never deployed): it is only tried on a browser that opted in for a class
-  // demo with ?song=1 on the film or this page (?song=0 turns it off). Otherwise the generated groove plays at once.
-  var MUSIC_URL = (function () {
-    try {
-      var q = new URLSearchParams(location.search).get("song");
-      if (q === "1") localStorage.setItem("ariya-song", "1"); else if (q === "0") localStorage.removeItem("ariya-song");
-      return localStorage.getItem("ariya-song") === "1" ? "assets/music.mp3" : null;
-    } catch (e) { return null; }
-  })();
+  var MUSIC_URL = "assets/music.mp3";
   var fileFailed = false;
 
   var ctx = null, master, bus, verb, comp, timer = null, nextT = 0, step = 0, on = false, noiseBuf, audioEl = null;
