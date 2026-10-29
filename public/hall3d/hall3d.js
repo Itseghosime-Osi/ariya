@@ -1919,19 +1919,28 @@ function applyCamera() {
 }
 
 /** Shift the picture so the hall centres in the part not covered by the floating panels. */
-// The shift glides when panels open or close, so the hall eases into its new centre.
-const offset = { x: 0, y: 0, tx: 0, ty: 0, ready: false };
+// The shift glides when panels open or close, so the hall eases into its new centre. The glide
+// is timed, not counted in frames, so a slow machine draws only a frame or two of it.
+const offset = { x: 0, y: 0, fx: 0, fy: 0, tx: 0, ty: 0, t0: 0, ready: false };
+const OFFSET_MS = 420;
 function applyViewOffset(animate = true) {
   const i = state.inset || {};
-  offset.tx = ((i.right || 0) - (i.left || 0)) / 2;
-  offset.ty = ((i.bottom || 0) - (i.top || 0)) / 2;
+  const tx = ((i.right || 0) - (i.left || 0)) / 2;
+  const ty = ((i.bottom || 0) - (i.top || 0)) / 2;
+  if (offset.ready && tx === offset.tx && ty === offset.ty) return setOffset();
+  offset.tx = tx;
+  offset.ty = ty;
   if (!animate || !offset.ready || reduceMotion) {
-    offset.x = offset.tx;
-    offset.y = offset.ty;
+    offset.x = tx;
+    offset.y = ty;
     offset.ready = true;
+  } else {
+    offset.fx = offset.x;
+    offset.fy = offset.y;
+    offset.t0 = performance.now();
   }
   setOffset();
-  loop();
+  requestRender();
 }
 function setOffset() {
   const w = stage.clientWidth;
@@ -2007,18 +2016,13 @@ function loop() {
 function frame(now) {
   looping = false;
   if (offset.x !== offset.tx || offset.y !== offset.ty) {
-    offset.x += (offset.tx - offset.x) * 0.16;
-    offset.y += (offset.ty - offset.y) * 0.16;
-    if (
-      Math.abs(offset.tx - offset.x) < 0.5 &&
-      Math.abs(offset.ty - offset.y) < 0.5
-    ) {
-      offset.x = offset.tx;
-      offset.y = offset.ty;
-    }
+    const k = Math.min(1, (now - offset.t0) / OFFSET_MS);
+    const e = 1 - Math.pow(1 - k, 3);
+    offset.x = k >= 1 ? offset.tx : offset.fx + (offset.tx - offset.fx) * e;
+    offset.y = k >= 1 ? offset.ty : offset.fy + (offset.ty - offset.fy) * e;
     setOffset();
     dirty = true;
-    loop();
+    if (k < 1) loop();
   }
   if (goal) {
     const k = Math.min(1, (now - goal.t0) / goal.ms);
