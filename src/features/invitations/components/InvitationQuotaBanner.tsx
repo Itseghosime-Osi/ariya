@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { Icon } from "@/components/ui/icon";
 
 interface InvitationQuotaBannerProps {
   eventId: string;
@@ -18,26 +17,23 @@ export function InvitationQuotaBanner({
   const remaining = Math.max(0, 20 - invitedCount);
 
   return (
-    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950">
-      <div className="flex items-start gap-3">
-        <Icon name="error" className="text-amber-600 text-xl shrink-0 mt-0.5" />
-        <div>
-          <div className="font-semibold text-sm">
-            Free Tier Quota: {invitedCount} / 20 Invitations Sent
-          </div>
-          <p className="text-xs text-amber-900/80">
-            {remaining > 0
-              ? `You have ${remaining} free invitation${remaining === 1 ? "" : "s"} remaining before a celebration pass is required.`
-              : "Free tier capacity reached. Unlock unlimited guest invitations & reminders with celebration pass."}
-          </p>
-        </div>
+    <div className="flex flex-col justify-between gap-3 rounded-3xl border border-gold/40 bg-gold/10 p-5 sm:flex-row sm:items-center sm:px-6">
+      <div>
+        <p className="font-serif text-lg font-bold text-on-surface">
+          Free plan: {invitedCount} of 20 invitations used
+        </p>
+        <p className="text-sm text-on-surface-variant">
+          {remaining > 0
+            ? `You have ${remaining} free invitation${remaining === 1 ? "" : "s"} left before a celebration pass is needed.`
+            : "The free limit is reached. A celebration pass unlocks unlimited invitations and reminders."}
+        </p>
       </div>
 
       <Link
         href={`/events/${eventId}/billing`}
-        className="px-4 py-2 rounded-xl bg-amber-500 text-night font-semibold text-xs hover:bg-amber-400 transition-all self-start sm:self-center shrink-0 shadow-sm"
+        className="shrink-0 self-start rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-night shadow-sm transition-transform hover:-translate-y-0.5 sm:self-center"
       >
-        Upgrade Celebration Pass
+        Upgrade celebration pass
       </Link>
     </div>
   );
