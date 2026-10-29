@@ -10,9 +10,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getPartyDisplaySeats } from "@/lib/metrics";
 import { GuestWithDetails } from "../types";
-import { ChevronLeft, ChevronRight, Upload, UserPlus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  MessageCircle,
+  MoreHorizontal,
+  Upload,
+  UserPlus,
+} from "lucide-react";
 
 type GuestAction = (guest: GuestWithDetails) => void;
 
@@ -133,21 +147,32 @@ export function GuestLedger({
                   </span>
                 </button>
 
-                <div className="hidden items-center gap-4 pr-3 text-xs font-semibold text-on-surface-variant opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 md:flex">
-                  <button
-                    type="button"
-                    onClick={() => onCopyLink(guest)}
-                    className="min-h-11 underline decoration-outline-variant underline-offset-4 hover:text-wine"
-                  >
-                    Copy link
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onShareWhatsApp(guest)}
-                    className="min-h-11 underline decoration-outline-variant underline-offset-4 hover:text-wine"
-                  >
-                    WhatsApp
-                  </button>
+                <div className="hidden pr-2 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 has-[[data-state=open]]:opacity-100 md:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-11 w-11 rounded-full p-0 text-on-surface-variant hover:text-wine"
+                        aria-label={`Actions for ${guest.name}`}
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onSelectGuest(guest)}>
+                        View details and edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onCopyLink(guest)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy RSVP link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onShareWhatsApp(guest)}>
+                        <MessageCircle className="mr-2 h-4 w-4 text-emerald-600" />
+                        Share on WhatsApp
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </m.li>
             );
