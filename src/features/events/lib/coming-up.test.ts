@@ -19,6 +19,7 @@ function makeUpcomingEvent(
       venue: "Eko Hotel",
       area: "VI",
       dress_code: null,
+      hall_layout: null,
       description: null,
       cover_image_url: null,
       is_public: false,

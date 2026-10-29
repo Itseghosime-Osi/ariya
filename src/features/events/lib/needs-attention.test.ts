@@ -27,6 +27,7 @@ function makeEventItem(overrides: {
       venue: "Civic Centre",
       area: "Victoria Island",
       dress_code: null,
+      hall_layout: null,
       description: null,
       cover_image_url: null,
       is_public: false,
