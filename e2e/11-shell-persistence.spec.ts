@@ -62,15 +62,16 @@ test.describe("Persistent app shell (shared layout)", () => {
     await expect(sidebar).toBeVisible();
     await expect(sidebar).toHaveAttribute("data-collapsed", "true");
 
-    // Opening slides it over the page (no layout squeeze) with a backdrop.
+    // Opening slides it over the page: the content stays where it was, at the
+    // folded offset (108px), instead of being squeezed aside.
     const main = page.locator("#main-content");
-    const before = await main.boundingBox();
+    const contentLeft = async () =>
+      Math.round((await main.boundingBox())?.x ?? -1);
+    await expect.poll(contentLeft).toBe(108);
     await page.getByRole("button", { name: "Expand sidebar" }).click();
     await expect(sidebar).toHaveAttribute("data-collapsed", "false");
     await expect(page.getByTestId("sidebar-scrim")).toBeVisible();
-    await expect
-      .poll(async () => (await main.boundingBox())?.x)
-      .toBe(before?.x);
+    await expect.poll(contentLeft).toBe(108);
 
     // The backdrop closes it again.
     await page
