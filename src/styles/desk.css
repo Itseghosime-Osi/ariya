@@ -249,7 +249,42 @@
     0 24px 48px -28px rgba(28, 7, 13, 0.55);
 }
 
+/* Create flow: a step slides up into place, and the wax seal is pressed when the names change. */
+@keyframes wiz-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.wiz-in {
+  animation: wiz-in 320ms var(--ease-out) both;
+}
+@keyframes wiz-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(2deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+.wiz-stamp {
+  animation: wiz-stamp 480ms var(--ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .wiz-in,
+  .wiz-stamp {
+    animation: none !important;
+  }
   .desk-tilt {
     transform: none !important;
   }

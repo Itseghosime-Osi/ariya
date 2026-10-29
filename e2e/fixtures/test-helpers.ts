@@ -88,27 +88,26 @@ export async function createTestEvent(
   const venue = options?.venue || "Grand Ballroom, Victoria Island";
 
   await page.goto("/events/new");
-  await expect(page.locator("h1")).toContainText(
-    /Create & Set Up Celebration/i
-  );
+  await expect(page.locator("h1")).toContainText(/plan your celebration/i);
 
-  // Step 1: Celebration Details
-  await page.locator("#couple").fill(couple);
+  // Step 1: who. Two names make a wedding, the default occasion.
+  const [first, ...rest] = couple.split(" & ");
+  await page.locator("#name-1").fill(first);
+  await page.locator("#name-2").fill(rest.join(" & "));
   await page.locator("#title").fill(title);
+  await page.getByTestId("wizard-next").click();
+
+  // Step 2: when. A Saturday is already chosen once the page has loaded.
+  await expect(page.locator("#eventDate")).not.toHaveValue("");
+  await page.getByTestId("wizard-next").click();
+
+  // Step 3: where.
   await page.locator("#venue").fill(venue);
   await page.locator("#area").fill("Victoria Island, Lagos");
+  await page.getByTestId("wizard-next").click();
 
-  // Step 2: Intake Method
-  await page
-    .getByRole("button", { name: /continue to guest registry setup/i })
-    .click();
-
-  // Step 3: Review & Launch
-  await page.getByRole("button", { name: /continue to review/i }).click();
-
-  await page
-    .getByRole("button", { name: /create celebration workspace/i })
-    .click();
+  // Step 4: guests, then launch.
+  await page.getByTestId("wizard-launch").click();
 
   // Step 4: Direct redirect to celebration workspace (/events/<id>) with success toast
   await page.waitForURL(/\/events\/[0-9a-fA-F-]+/, { timeout: 15000 });
