@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
 import { PhoneDock } from "./phone-dock";
+import { InstallHint } from "./install-hint";
 import { isValidEventId, type SwitcherEvent } from "./nav-items";
 import { cn } from "@/lib/utils";
 
@@ -223,6 +224,7 @@ export function AppShell({
         activeEvent={activeEvent}
         onSelectEvent={handleSelectEvent}
       />
+      <InstallHint />
     </div>
   );
 }
