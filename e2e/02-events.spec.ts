@@ -237,4 +237,92 @@ test.describe("Events Creation & Overview", () => {
       await context.close();
     }
   });
+
+  test("upload cover as owner, open public page signed out, and assert image loads HTTP 200", async ({
+    browser,
+  }) => {
+    const ownerContext = await browser.newContext();
+    const ownerPage = await ownerContext.newPage();
+    try {
+      await createAndLoginUser(ownerPage, ownerContext, "cover_owner_user");
+      const { eventId, title } = await createTestEvent(ownerPage);
+
+      await ownerPage.goto(`/events/${eventId}/page-editor`);
+      await expect(ownerPage.getByText(/Event Page Editor/i)).toBeVisible();
+
+      // Ensure public event discovery is checked
+      const publicCheckbox = ownerPage
+        .locator('input[type="checkbox"]')
+        .first();
+      if (!(await publicCheckbox.isChecked())) {
+        await publicCheckbox.check();
+      }
+
+      // Upload a valid 1x1 PNG cover image
+      const fileInput = ownerPage.locator(
+        'input[type="file"][accept*="image"]'
+      );
+      const pngBuffer = Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        "base64"
+      );
+      await fileInput.setInputFiles({
+        name: "test-cover.png",
+        mimeType: "image/png",
+        buffer: pngBuffer,
+      });
+
+      // Confirm upload succeeded
+      await expect(ownerPage.getByText(/Cover Banner Uploaded/i)).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Save changes
+      await ownerPage.getByRole("button", { name: /save changes/i }).click();
+      await expect(
+        ownerPage.getByText(/updates saved successfully/i)
+      ).toBeVisible({ timeout: 10000 });
+
+      const publicPageLink = ownerPage.getByRole("link", {
+        name: /view public page/i,
+      });
+      const publicHref = await publicPageLink.getAttribute("href");
+      expect(publicHref).toBeTruthy();
+
+      // Open public page in an independent, signed-out browser context
+      const guestContext = await browser.newContext();
+      const guestPage = await guestContext.newPage();
+      try {
+        const res = await guestPage.goto(publicHref!);
+        expect(res?.status()).toBe(200);
+        await expect(guestPage.getByText(title).first()).toBeVisible();
+
+        // Locate cover image on public page
+        const coverImg = guestPage.locator(`img[alt="${title}"]`);
+        await expect(coverImg).toBeVisible({ timeout: 10000 });
+
+        // Retrieve the rendered image source
+        const src = await coverImg.getAttribute("src");
+        expect(src).toBeTruthy();
+
+        // Request the optimized image directly from the public guest context (HTTP 200)
+        const imgResponse = await guestPage.request.get(src!);
+        expect(imgResponse.status()).toBe(200);
+
+        // Also verify the raw public storage object URL loads with HTTP 200 without auth
+        const rawStorageUrl = new URL(
+          src!,
+          "http://localhost:3000"
+        ).searchParams.get("url");
+        if (rawStorageUrl) {
+          const rawResponse = await guestPage.request.get(rawStorageUrl);
+          expect(rawResponse.status()).toBe(200);
+        }
+      } finally {
+        await guestContext.close();
+      }
+    } finally {
+      await ownerContext.close();
+    }
+  });
 });
