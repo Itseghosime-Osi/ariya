@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
-  ArrowLeft,
   CircleAlert,
   CircleCheck,
   LayoutGrid,
@@ -21,11 +20,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { TableListView } from "./TableListView";
 import { TableFormModal } from "./TableFormModal";
-import { SeatingHeader } from "./SeatingHeader";
 import { useSeatingDesk } from "./useSeatingDesk";
 import { HallStudio } from "../hall/HallStudio";
 import type { SeatingDeskData } from "../types";
@@ -151,88 +148,44 @@ export function SeatingDesk({
     setIsModalOpen(true);
   };
 
-  const modal = (
-    <TableFormModal
-      isOpen={isModalOpen}
-      initialTable={editingTable}
-      onClose={() => setIsModalOpen(false)}
-      onSubmit={handleSaveTable}
-    />
-  );
+  // Both views live in one frame that fills the space between the app's bars, so switching
+  // between the studio and the list only swaps what is inside it. The page itself does not scroll.
+  const frame = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    window.scrollTo(0, 0);
+    const fit = () => {
+      const el = frame.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const phone = window.matchMedia("(max-width: 767px)").matches;
+      // On phones the bottom dock covers the last stretch of the screen.
+      const gap = phone ? 156 : 24;
+      setHeight(Math.max(420, window.innerHeight - top - gap));
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      html.style.overflow = prev;
+    };
+  }, []);
 
-  if (view === "hall")
-    return (
-      <>
-        <HallStudio
-          eventId={eventId}
-          data={data}
-          initialLayout={hallLayout}
-          layoutAvailable={hallLayoutAvailable}
-          addTables={addTables}
-          updateTable={updateTable}
-          setTablePositions={setTablePositions}
-          bulkAssign={bulkAssign}
-          onAssignTable={(guestId, tableId) =>
-            executeSeatChange(guestId, tableId)
-          }
-          onDeleteTable={handleDeleteTable}
-          notice={
-            errorMsg ? (
-              <span className="inline-flex items-center gap-2 text-[#9e2a2b]">
-                <CircleAlert size={15} /> {errorMsg}
-              </span>
-            ) : successMsg ? (
-              <span className="inline-flex items-center gap-2 text-[#1f6b4a]">
-                <CircleCheck size={15} /> {successMsg}
-              </span>
-            ) : null
-          }
-          header={
-            <>
-              <Link
-                href={`/events/${eventId}`}
-                aria-label="Back to the event"
-                title="Back to the event"
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-night hover:bg-[#f1ece4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-              >
-                <ArrowLeft size={18} />
-              </Link>
-              <h1 className="truncate font-display text-lg font-bold text-night">
-                Seating &amp; Floor Plan
-              </h1>
-              <div className="mx-auto">
-                <ViewSwitch view={view} onChange={chooseView} compact />
-              </div>
-              <span className="hidden text-xs text-label-2 xl:inline">
-                <strong className="font-semibold text-night">
-                  {data.stats.readinessPct}%
-                </strong>{" "}
-                seated
-              </span>
-              <Link
-                href={`/events/${eventId}/seating/print`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Print cards and chart"
-                title="Print cards and chart"
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-night hover:bg-[#f1ece4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-              >
-                <Printer size={17} />
-              </Link>
-              <button
-                type="button"
-                onClick={openNewTable}
-                className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-burgundy px-4 text-xs font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-              >
-                <Plus size={15} />
-                <span className="max-sm:sr-only">New Table</span>
-              </button>
-            </>
-          }
-        />
-        {modal}
-      </>
-    );
+  const notice = errorMsg ? (
+    <span className="inline-flex items-center gap-2 text-[#9e2a2b]">
+      <CircleAlert size={15} /> {errorMsg}
+    </span>
+  ) : successMsg ? (
+    <span className="inline-flex items-center gap-2 text-[#1f6b4a]">
+      <CircleCheck size={15} /> {successMsg}
+    </span>
+  ) : null;
+
+  const iconLink =
+    "grid h-10 w-10 shrink-0 place-items-center rounded-full text-night hover:bg-[#f1ece4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
 
   return (
     <DndContext
@@ -242,45 +195,92 @@ export function SeatingDesk({
       onDragEnd={handleDragEnd}
       onDragCancel={() => setDragging(null)}
     >
-      <div className="space-y-6">
-        <SeatingHeader
-          eventId={eventId}
-          stats={data.stats}
-          onAddTable={openNewTable}
-        />
-
-        {errorMsg && (
-          <div className="p-3 bg-red-50 text-red-800 text-xs rounded-xl border border-red-200 flex items-center gap-2">
-            <Icon name="error" className="text-sm text-red-600 shrink-0" />
-            <span>{errorMsg}</span>
+      <div
+        ref={frame}
+        style={height ? { height } : undefined}
+        className="flex h-[calc(100dvh-10rem)] min-h-[420px] flex-col overflow-hidden rounded-[24px] border border-hairline bg-white shadow-[0_24px_50px_-34px_rgba(28,7,13,0.45)]"
+      >
+        <header className="flex h-14 shrink-0 items-center gap-1.5 border-b border-hairline bg-white px-3 sm:gap-2 sm:px-4">
+          <h1 className="truncate font-display text-lg font-bold text-night">
+            Seating &amp; Floor Plan
+          </h1>
+          <span className="hidden rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[11px] font-semibold text-burgundy md:inline">
+            {data.stats.readinessPct}% seated
+            <span className="font-normal text-label-2">
+              {" "}
+              · {data.stats.seatedAttendees} of{" "}
+              {data.stats.seatedAttendees + data.stats.unseatedAttendees}
+            </span>
+          </span>
+          <div className="mx-auto">
+            <ViewSwitch view={view} onChange={chooseView} compact />
           </div>
-        )}
+          <Link
+            href={`/events/${eventId}/seating/print`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Print cards and chart"
+            title="Print cards and chart"
+            className={iconLink}
+          >
+            <Printer size={17} />
+          </Link>
+          <button
+            type="button"
+            onClick={openNewTable}
+            className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-burgundy px-4 text-xs font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Plus size={15} />
+            <span className="max-sm:sr-only">New Table</span>
+          </button>
+        </header>
 
-        {successMsg && (
-          <div className="p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl border border-emerald-200 flex items-center gap-2">
-            <Icon
-              name="check_circle"
-              className="text-sm text-emerald-600 shrink-0"
+        {view === "hall" ? (
+          <HallStudio
+            eventId={eventId}
+            data={data}
+            initialLayout={hallLayout}
+            layoutAvailable={hallLayoutAvailable}
+            addTables={addTables}
+            updateTable={updateTable}
+            setTablePositions={setTablePositions}
+            bulkAssign={bulkAssign}
+            onAssignTable={(guestId, tableId) =>
+              executeSeatChange(guestId, tableId)
+            }
+            onDeleteTable={handleDeleteTable}
+            notice={notice}
+          />
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto bg-[#fbf9f5] p-3 sm:p-5">
+            {notice && (
+              <p
+                role="status"
+                className="mb-4 rounded-2xl border border-hairline bg-white px-4 py-2.5 text-xs font-semibold"
+              >
+                {notice}
+              </p>
+            )}
+            <TableListView
+              data={data}
+              onAddTable={openNewTable}
+              onAssign={executeSeatChange}
+              onEditTable={(t) => {
+                setEditingTable(t);
+                setIsModalOpen(true);
+              }}
+              onDeleteTable={handleDeleteTable}
             />
-            <span>{successMsg}</span>
           </div>
         )}
-
-        <ViewSwitch view={view} onChange={chooseView} />
-
-        <TableListView
-          data={data}
-          onAddTable={openNewTable}
-          onAssign={executeSeatChange}
-          onEditTable={(t) => {
-            setEditingTable(t);
-            setIsModalOpen(true);
-          }}
-          onDeleteTable={handleDeleteTable}
-        />
-
-        {modal}
       </div>
+
+      <TableFormModal
+        isOpen={isModalOpen}
+        initialTable={editingTable}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSaveTable}
+      />
       {typeof document !== "undefined" &&
         createPortal(
           <DragOverlay dropAnimation={null} zIndex={80}>

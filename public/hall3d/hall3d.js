@@ -2024,11 +2024,16 @@ new ResizeObserver(resize).observe(stage);
 
 // ---------------------------------------------------------------- mood
 
+// Figma-style dark grey board for evening (set a touch lighter than shown, since the evening
+// pass tone-maps the whole frame).
+const EVENING_BG = "#3b3b3b";
+const EVENING_DOT = "#606060";
+
 function applyMood() {
   const evening = state.layout.mood === "evening";
-  boardMat.uniforms.uBg.value.set(evening ? "#231c25" : "#f2f2f0");
-  boardMat.uniforms.uDot.value.set(evening ? "#4a4150" : "#c5c5c2");
-  scene.background = new THREE.Color(evening ? "#231c25" : "#f2f2f0");
+  boardMat.uniforms.uBg.value.set(evening ? EVENING_BG : "#f2f2f0");
+  boardMat.uniforms.uDot.value.set(evening ? EVENING_DOT : "#c5c5c2");
+  scene.background = new THREE.Color(evening ? EVENING_BG : "#f2f2f0");
   document.body.classList.toggle("evening", evening);
   renderer.toneMappingExposure = evening ? 0.85 : 0.92;
   hemi.intensity = evening ? 0.12 : 0.55;
@@ -2442,6 +2447,8 @@ function applyScene(s) {
   const moodChanged = !state.layout || state.layout.mood !== s.layout.mood;
   Object.assign(state, s);
   buildShell(state.layout);
+  // New walls start opaque; fade the ones in front of the camera again.
+  applyCamera();
   if (moodChanged) {
     applyMood();
     zoneCache.forEach((e) => (e.sig = ""));

@@ -25,10 +25,10 @@ export function UnseatedGuestCard({
   return (
     <div
       ref={setNodeRef}
-      className={`p-3.5 rounded-2xl border transition-all text-xs bg-white space-y-2.5 ${
+      className={`space-y-2 rounded-xl border bg-white p-2.5 text-xs transition-all ${
         isDragging
           ? "opacity-40 border-dashed border-wine"
-          : "border-outline-variant/50 hover:border-wine/40 shadow-xs"
+          : "border-hairline hover:border-night/30"
       }`}
     >
       <div className="flex items-start justify-between gap-2">

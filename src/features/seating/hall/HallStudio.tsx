@@ -160,8 +160,6 @@ interface HallStudioProps {
   ) => Promise<{ seated: number; failed: number }>;
   onAssignTable: (guestId: string, tableId: string | null) => void;
   onDeleteTable: (tableId: string) => void;
-  /** The page's top bar: back link, title, view switch and page actions. */
-  header?: React.ReactNode;
   /** A short message to show over the hall (saved, could not save…). */
   notice?: React.ReactNode;
 }
@@ -201,7 +199,6 @@ export function HallStudio({
   bulkAssign,
   onAssignTable,
   onDeleteTable,
-  header,
   notice,
 }: HallStudioProps) {
   const hall = useHallLayout({
@@ -236,16 +233,6 @@ export function HallStudio({
     on();
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
-  }, []);
-
-  // The studio fills the screen like a design tool: the page behind it does not scroll.
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.overflow;
-    html.style.overflow = "hidden";
-    return () => {
-      html.style.overflow = prev;
-    };
   }, []);
 
   const positions: Positions = useMemo(() => {
@@ -979,16 +966,15 @@ export function HallStudio({
     <section
       ref={studio}
       aria-label="Hall studio"
-      className="fixed inset-0 z-[60] flex flex-col bg-[#f2f2f0] text-night"
+      className={cn(
+        "relative flex min-h-0 flex-1 flex-col text-night",
+        layout.mood === "evening" ? "bg-[#2c2c2c]" : "bg-[#f2f2f0]"
+      )}
       data-testid="hall-studio"
     >
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
-
-      <header className="flex h-14 shrink-0 items-center gap-1.5 border-b border-hairline bg-white px-2 sm:gap-2 sm:px-3">
-        {header}
-      </header>
 
       {narrow && !hideNarrowTip && (
         <div
