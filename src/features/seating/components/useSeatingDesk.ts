@@ -189,6 +189,34 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     });
   };
 
+  /** Change a table's name, seats or shape straight from the hall studio (optimistic). */
+  const updateTable = async (
+    tableId: string,
+    patch: { name?: string; capacity?: number; shape?: TableShape }
+  ) => {
+    setErrorMsg(null);
+    const before = data.tables.find((t) => t.id === tableId);
+    if (!before) return;
+    const apply = (t: TableWithGuests) =>
+      setData((prev) => {
+        const tables = prev.tables.map((x) => (x.id === tableId ? t : x));
+        return {
+          ...prev,
+          tables,
+          stats: {
+            ...prev.stats,
+            totalCapacity: tables.reduce((a, x) => a + x.capacity, 0),
+          },
+        };
+      });
+    apply({ ...before, ...patch });
+    const res = await updateTableAction(eventId, tableId, patch);
+    if (!res.ok) {
+      apply(before);
+      setErrorMsg(res.error || "Could not update the table.");
+    }
+  };
+
   /** Add many tables at once, each already placed in the hall (positions in centimetres). */
   const addTables = async (items: CreateTableInput[]) => {
     setErrorMsg(null);
@@ -307,6 +335,7 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
 
   return {
     addTables,
+    updateTable,
     setTablePositions,
     bulkAssign,
     data,

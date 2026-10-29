@@ -10,8 +10,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Icon } from "@/components/ui/icon";
-import { TableCard } from "./TableCard";
-import { UnseatedGuestList } from "./UnseatedGuestList";
+import { TableListView } from "./TableListView";
 import { TableFormModal } from "./TableFormModal";
 import { SeatingHeader } from "./SeatingHeader";
 import { useSeatingDesk } from "./useSeatingDesk";
@@ -55,6 +54,7 @@ export function SeatingDesk({
 
   const {
     addTables,
+    updateTable,
     setTablePositions,
     bulkAssign,
     data,
@@ -148,71 +148,28 @@ export function SeatingDesk({
             initialLayout={hallLayout}
             layoutAvailable={hallLayoutAvailable}
             addTables={addTables}
+            updateTable={updateTable}
             setTablePositions={setTablePositions}
             bulkAssign={bulkAssign}
             onAssignTable={(guestId, tableId) =>
               executeSeatChange(guestId, tableId)
             }
+            onDeleteTable={handleDeleteTable}
+          />
+        ) : (
+          <TableListView
+            data={data}
+            onAddTable={() => {
+              setEditingTable(null);
+              setIsModalOpen(true);
+            }}
+            onAssign={executeSeatChange}
             onEditTable={(t) => {
               setEditingTable(t);
               setIsModalOpen(true);
             }}
             onDeleteTable={handleDeleteTable}
           />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 space-y-4">
-              {data.tables.length === 0 ? (
-                <div className="bg-surface-container-low p-12 text-center rounded-2xl border border-outline-variant/30 space-y-3">
-                  <Icon
-                    name="table_restaurant"
-                    className="text-4xl text-wine/40 block mx-auto"
-                  />
-                  <h3 className="font-serif text-lg text-wine font-medium">
-                    No Tables Added Yet
-                  </h3>
-                  <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-                    Begin setting up your floor plan by adding tables and
-                    assigning guests.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-4 py-2 rounded-xl bg-wine text-ivory text-xs font-semibold"
-                  >
-                    Create First Table
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {data.tables.map((table) => (
-                    <TableCard
-                      key={table.id}
-                      table={table}
-                      onUnseatGuest={(guestId) =>
-                        executeSeatChange(guestId, null)
-                      }
-                      onEditTable={(t) => {
-                        setEditingTable(t);
-                        setIsModalOpen(true);
-                      }}
-                      onDeleteTable={handleDeleteTable}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="lg:col-span-4 sticky top-6">
-              <UnseatedGuestList
-                guests={data.unseatedGuests}
-                tables={data.tables}
-                onAssignTable={(guestId, tableId) =>
-                  executeSeatChange(guestId, tableId)
-                }
-              />
-            </div>
-          </div>
         )}
 
         <TableFormModal

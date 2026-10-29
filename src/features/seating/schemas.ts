@@ -47,15 +47,43 @@ const zoneSchema = z.object({
     "gifts",
     "photo",
     "pillar",
+    "cake",
   ]),
   label: z.string().trim().max(60),
   x: z.number().finite(),
   y: z.number().finite(),
   w: z.number().positive().max(120),
   h: z.number().positive().max(120),
+  shape: z
+    .enum(["rect", "round", "oval", "hexagon", "octagon", "heart"])
+    .optional(),
+  rot: z.number().min(-360).max(360).optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  finish: z
+    .enum(["gloss", "led", "white", "wood", "checker", "carpet", "marble"])
+    .optional(),
+  height: z.number().min(0).max(3).optional(),
 });
 
 const hexColour = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const chairTypeSchema = z.enum([
+  "chiavari-gold",
+  "chiavari-silver",
+  "chiavari-white",
+  "ghost",
+  "crossback",
+  "covered",
+]);
+const centrepieceSchema = z.enum([
+  "tall",
+  "low",
+  "candles",
+  "lanterns",
+  "none",
+]);
 
 export const hallLayoutSchema = z.object({
   version: z.literal(1),
@@ -65,15 +93,42 @@ export const hallLayoutSchema = z.object({
   zones: z.array(zoneSchema).max(60),
   decor: z.object({
     linen: hexColour,
-    sash: hexColour,
-    chair: z.enum(["gold", "white", "black", "clear"]),
-    centrepiece: z.enum(["tall", "low", "candles", "none"]),
+    sash: hexColour.nullable(),
+    chair: chairTypeSchema,
+    cover: hexColour,
+    centrepiece: centrepieceSchema,
     flower: hexColour,
     uplight: hexColour.nullable(),
     drape: hexColour.nullable(),
-    floor: z.enum(["marble", "wood", "dark"]),
+    floor: z.enum(["marble", "wood", "dark", "carpet"]),
+    wall: hexColour,
   }),
   rotations: z.record(z.string().uuid(), z.number().min(-360).max(360)),
+  tableStyles: z.record(
+    z.string().uuid(),
+    z.object({
+      cloth: hexColour.optional(),
+      chair: chairTypeSchema.optional(),
+      cover: hexColour.optional(),
+      sash: hexColour.nullable().optional(),
+      centrepiece: centrepieceSchema.optional(),
+      flower: hexColour.optional(),
+    })
+  ),
+  chairs: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(40),
+        x: z.number().finite(),
+        y: z.number().finite(),
+        rot: z.number().min(-360).max(360),
+        chair: chairTypeSchema.optional(),
+      })
+    )
+    .max(400),
+  mood: z.enum(["day", "evening"]),
+  chandeliers: z.boolean(),
+  ceiling: z.number().min(3).max(15),
 });
 
 export const tablePositionsSchema = z

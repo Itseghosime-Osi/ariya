@@ -5,6 +5,7 @@ import {
   gapBetween,
   normaliseLayout,
   tableTop,
+  styleOf,
   type Zone,
 } from "./model";
 import { canPlace, findFreeSpot, fitTables } from "./fit";
@@ -197,5 +198,38 @@ describe("normaliseLayout", () => {
     expect(l?.width).toBe(120);
     expect(l?.length).toBe(6);
     expect(l?.zones.length).toBeGreaterThan(0);
+  });
+});
+
+describe("normaliseLayout for the 3D studio", () => {
+  it("upgrades a first-version layout", () => {
+    const old = {
+      version: 1,
+      width: 30,
+      length: 20,
+      spacing: "snug",
+      zones: [{ id: "z1", kind: "stage", label: "", x: 15, y: 2, w: 9, h: 4 }],
+      decor: { linen: "#6e1426", sash: "#e9c98a", chair: "clear" },
+      rotations: {},
+    };
+    const l = normaliseLayout(old);
+    expect(l?.decor.chair).toBe("ghost");
+    expect(l?.decor.cover).toBeTruthy();
+    expect(l?.tableStyles).toEqual({});
+    expect(l?.chairs).toEqual([]);
+    expect(l?.mood).toBe("day");
+    expect(l?.ceiling).toBe(5);
+    expect(l?.zones[0].label).toBe("Stage & band");
+  });
+
+  it("lets a table's own style win over the hall décor", () => {
+    const l = normaliseLayout({
+      width: 20,
+      length: 15,
+      tableStyles: { t1: { cloth: "#000000", chair: "gold" } },
+    })!;
+    expect(styleOf(l, "t1").cloth).toBe("#000000");
+    expect(styleOf(l, "t1").chair).toBe("chiavari-gold");
+    expect(styleOf(l, "t2").cloth).toBe(l.decor.linen);
   });
 });
