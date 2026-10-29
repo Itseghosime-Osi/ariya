@@ -249,11 +249,12 @@
     0 24px 48px -28px rgba(28, 7, 13, 0.55);
 }
 
-/* Create flow: a step slides up into place, and the wax seal is pressed when the names change. */
+/* Create flow: steps glide in from the side you are heading, choices rise in one after another, a pick
+   pops, the ribbon is drawn across the card, and the wax seal is pressed when the names change. */
 @keyframes wiz-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateX(var(--wiz-dx, 18px));
   }
   to {
     opacity: 1;
@@ -261,7 +262,50 @@
   }
 }
 .wiz-in {
-  animation: wiz-in 320ms var(--ease-out) both;
+  animation: wiz-in 380ms var(--ease-out) both;
+}
+.wiz-in[data-dir="back"] {
+  --wiz-dx: -18px;
+}
+@keyframes wiz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.wiz-rise {
+  animation: wiz-rise 420ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 38ms + 80ms);
+}
+@keyframes wiz-pop {
+  0% {
+    transform: scale(0.94);
+  }
+  55% {
+    transform: scale(1.045);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.wiz-pop {
+  animation: wiz-pop 320ms var(--ease-out);
+}
+@keyframes wiz-sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.wiz-sweep {
+  transform-origin: left;
+  animation: wiz-sweep 700ms var(--ease-out) both;
 }
 @keyframes wiz-stamp {
   0% {
@@ -282,6 +326,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wiz-in,
+  .wiz-rise,
+  .wiz-pop,
+  .wiz-sweep,
   .wiz-stamp {
     animation: none !important;
   }

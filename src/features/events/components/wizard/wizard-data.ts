@@ -166,12 +166,8 @@ export const AREAS = [
   "Ikoyi, Lagos",
   "Lekki, Lagos",
   "Ikeja, Lagos",
-  "Surulere, Lagos",
   "Abuja",
   "Ibadan",
-  "Port Harcourt",
-  "Benin City",
-  "Enugu",
 ];
 
 export const VENUE_STARTERS = [

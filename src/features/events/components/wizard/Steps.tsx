@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import NumberFlow from "@number-flow/react";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { Chip, Eyebrow, fieldClass } from "./Chips";
@@ -43,7 +44,7 @@ export interface StepProps {
 }
 
 const legend = "mb-3 block";
-const hint = "mt-2 text-xs text-label-2";
+const sr = "sr-only";
 
 /** Step 1: what are we celebrating, and for whom. */
 export function StepWho({
@@ -60,9 +61,10 @@ export function StepWho({
           <Eyebrow>The occasion</Eyebrow>
         </legend>
         <div className="flex flex-wrap gap-2.5">
-          {OCCASIONS.map((o) => (
+          {OCCASIONS.map((o, i) => (
             <Chip
               key={o.key}
+              index={i}
               name="occasion"
               value={o.key}
               checked={draft.occasion === o.key}
@@ -122,41 +124,38 @@ export function StepWho({
         )}
       </div>
 
-      {suggestions.length > 0 && (
-        <fieldset>
-          <legend className={legend}>
-            <Eyebrow>Pick a title, or write your own</Eyebrow>
-          </legend>
-          <div className="flex flex-wrap gap-2.5">
-            {suggestions.map((s) => (
-              <Chip
-                key={s}
-                name="title-suggestion"
-                value={s}
-                checked={draft.title === s}
-                onChange={(v) => set({ title: v })}
-              >
-                {s}
-              </Chip>
-            ))}
-          </div>
-          <label htmlFor="title" className="mb-2 mt-4 block">
-            <Eyebrow>Celebration title</Eyebrow>
-          </label>
+      <div>
+        <label htmlFor="title" className="mb-2 block">
+          <Eyebrow>Title</Eyebrow>
+        </label>
+        <div className="flex items-center gap-2">
           <input
             id="title"
             type="text"
             autoComplete="off"
             className={fieldClass}
-            placeholder={suggestions[0]}
+            placeholder={suggestions[0] ?? "Appears once you add the names"}
             value={draft.title}
             onChange={(e) => set({ title: e.target.value })}
           />
-          <p className={hint}>
-            This is the name on your dashboard and your guests' link.
-          </p>
-        </fieldset>
-      )}
+          <button
+            type="button"
+            disabled={suggestions.length < 2}
+            onClick={() => {
+              const at = suggestions.indexOf(draft.title);
+              set({ title: suggestions[(at + 1) % suggestions.length] });
+            }}
+            aria-label="Suggest another title"
+            className="group grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/70 text-burgundy transition-[transform,border-color] hover:border-gold-ink/60 active:scale-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon
+              name="refresh"
+              size={18}
+              className="transition-transform duration-500 group-active:rotate-180"
+            />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -178,12 +177,16 @@ export function StepWhen({
           <Eyebrow>Pick a Saturday</Eyebrow>
         </legend>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {saturdays.map((ymd) => {
+          {saturdays.map((ymd, i) => {
             const p = dayParts(ymd);
             if (!p) return null;
             const on = draft.ymd === ymd;
             return (
-              <label key={ymd} className="relative">
+              <label
+                key={ymd}
+                className="wiz-rise relative"
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <input
                   type="radio"
                   name="saturday"
@@ -194,9 +197,9 @@ export function StepWhen({
                 />
                 <span
                   className={cn(
-                    "flex min-h-[84px] cursor-pointer flex-col overflow-hidden rounded-2xl border bg-white/80 text-center transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
+                    "flex min-h-[84px] cursor-pointer flex-col overflow-hidden rounded-2xl border bg-white/80 text-center transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
                     on
-                      ? "border-burgundy shadow-[0_10px_24px_-14px_rgba(110,20,38,0.7)]"
+                      ? "wiz-pop -translate-y-1 border-burgundy shadow-[0_14px_26px_-14px_rgba(110,20,38,0.75)]"
                       : "border-gold-ink/25"
                   )}
                 >
@@ -237,9 +240,10 @@ export function StepWhen({
           <Eyebrow>Time of day (Lagos time)</Eyebrow>
         </legend>
         <div className="flex flex-wrap gap-2.5">
-          {TIME_SLOTS.map((s) => (
+          {TIME_SLOTS.map((s, i) => (
             <Chip
               key={s.key}
+              index={i + 2}
               name="slot"
               value={s.key}
               checked={draft.slot === s.key}
@@ -289,12 +293,13 @@ export function StepWhere({ draft, set }: StepProps) {
     <div className="space-y-8">
       <fieldset>
         <legend className={legend}>
-          <Eyebrow>Where in the country</Eyebrow>
+          <Eyebrow>City</Eyebrow>
         </legend>
         <div className="flex flex-wrap gap-2.5">
-          {AREAS.map((a) => (
+          {AREAS.map((a, i) => (
             <Chip
               key={a}
+              index={i}
               name="area-chip"
               value={a}
               checked={draft.area === a}
@@ -304,15 +309,15 @@ export function StepWhere({ draft, set }: StepProps) {
             </Chip>
           ))}
         </div>
-        <label htmlFor="area" className="mb-2 mt-4 block">
-          <Eyebrow>Somewhere else</Eyebrow>
+        <label htmlFor="area" className={sr}>
+          Another city or area
         </label>
         <input
           id="area"
           type="text"
           autoComplete="off"
-          className={cn(fieldClass, "max-w-md")}
-          placeholder="e.g. Asaba, Delta"
+          className={cn(fieldClass, "mt-3 max-w-md")}
+          placeholder="Another city or area"
           value={draft.area}
           onChange={(e) => set({ area: e.target.value })}
         />
@@ -320,12 +325,13 @@ export function StepWhere({ draft, set }: StepProps) {
 
       <fieldset>
         <legend className={legend}>
-          <Eyebrow>The kind of place</Eyebrow>
+          <Eyebrow>Venue</Eyebrow>
         </legend>
         <div className="flex flex-wrap gap-2.5">
-          {VENUE_STARTERS.map((v) => (
+          {VENUE_STARTERS.map((v, i) => (
             <Chip
               key={v}
+              index={i}
               name="venue-starter"
               value={v}
               checked={draft.venue === v}
@@ -335,22 +341,19 @@ export function StepWhere({ draft, set }: StepProps) {
             </Chip>
           ))}
         </div>
-        <label htmlFor="venue" className="mb-2 mt-4 block">
-          <Eyebrow>Venue name</Eyebrow>
+        <label htmlFor="venue" className={sr}>
+          Venue name
         </label>
         <input
           ref={venueRef}
           id="venue"
           type="text"
           autoComplete="off"
-          className={fieldClass}
-          placeholder="e.g. The Grand Pavilion, Water Corporation Drive"
+          className={cn(fieldClass, "mt-3")}
+          placeholder="Venue name, e.g. The Grand Pavilion"
           value={draft.venue}
           onChange={(e) => set({ venue: e.target.value })}
         />
-        <p className={hint}>
-          Pick a kind of place to start, then add its name.
-        </p>
       </fieldset>
 
       <fieldset>
@@ -358,10 +361,14 @@ export function StepWhere({ draft, set }: StepProps) {
           <Eyebrow>Aṣọ-Ẹbí colours</Eyebrow>
         </legend>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {PALETTES.map((p) => {
+          {PALETTES.map((p, i) => {
             const on = draft.paletteKey === p.key;
             return (
-              <label key={p.key} className="relative block min-w-0">
+              <label
+                key={p.key}
+                className="wiz-rise relative block min-w-0"
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <input
                   type="radio"
                   name="palette"
@@ -376,7 +383,7 @@ export function StepWhere({ draft, set }: StepProps) {
                   className={cn(
                     "flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border bg-white/80 px-3 py-2 text-sm font-semibold text-night transition-[transform,border-color,box-shadow] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
                     on
-                      ? "border-burgundy shadow-[0_10px_24px_-16px_rgba(110,20,38,0.7)]"
+                      ? "wiz-pop border-burgundy shadow-[0_10px_24px_-16px_rgba(110,20,38,0.7)]"
                       : "border-gold-ink/25"
                   )}
                 >
@@ -456,10 +463,14 @@ export function StepGuests({ draft, set }: StepProps) {
           <Eyebrow>How will guests come in?</Eyebrow>
         </legend>
         <div className="grid gap-3 md:grid-cols-3">
-          {INTAKE_OPTIONS.map((o) => {
+          {INTAKE_OPTIONS.map((o, i) => {
             const on = draft.intake === o.key;
             return (
-              <label key={o.key} className="relative">
+              <label
+                key={o.key}
+                className="wiz-rise relative"
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <input
                   type="radio"
                   name="intake"
@@ -550,9 +561,11 @@ export function StepGuests({ draft, set }: StepProps) {
           </button>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
-          <span className="font-display text-4xl font-bold tabular-nums text-burgundy">
-            {draft.parties}
-          </span>
+          <NumberFlow
+            value={draft.parties}
+            respectMotionPreference
+            className="font-display text-4xl font-bold tabular-nums text-burgundy"
+          />
           <span className="text-sm text-label-2">invitations</span>
           <span className="mx-1 h-6 w-px bg-gold-ink/25" aria-hidden="true" />
           {PARTY_PRESETS.map((n) => (
@@ -575,14 +588,16 @@ export function StepGuests({ draft, set }: StepProps) {
           {Array.from({ length: dots }, (_, i) => (
             <span
               key={i}
-              className="h-2.5 w-2.5 rounded-full bg-[#b8864b] transition-opacity"
-              style={{ opacity: 0.45 + ((i * 7) % 11) / 20 }}
+              className="wiz-rise h-2.5 w-2.5 rounded-full bg-[#b8864b]"
+              style={
+                {
+                  opacity: 0.45 + ((i * 7) % 11) / 20,
+                  "--i": Math.min(i, 24) / 3,
+                } as React.CSSProperties
+              }
             />
           ))}
         </div>
-        <p className={hint}>
-          Each dot is ten invitations. You can change this any time.
-        </p>
       </div>
     </div>
   );

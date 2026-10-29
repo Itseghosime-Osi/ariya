@@ -77,8 +77,9 @@ export function LiveInvitation({
       >
         <span className="foil-sheen" aria-hidden="true" />
         <div
+          key={palette.key}
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-3 transition-colors duration-500"
+          className="wiz-sweep absolute inset-x-0 top-0 h-3"
           style={{
             background: `linear-gradient(90deg, ${c1} 0 70%, ${c2} 70% 100%)`,
           }}

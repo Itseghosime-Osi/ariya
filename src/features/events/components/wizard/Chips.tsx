@@ -15,6 +15,7 @@ export function Chip({
   children,
   className,
   testId,
+  index = 0,
 }: {
   name: string;
   value: string;
@@ -23,9 +24,14 @@ export function Chip({
   children: React.ReactNode;
   className?: string;
   testId?: string;
+  /** Position in its row, so a group rises in one chip after another. */
+  index?: number;
 }) {
   return (
-    <label className="relative inline-flex">
+    <label
+      className="wiz-rise relative inline-flex"
+      style={{ "--i": index } as React.CSSProperties}
+    >
       <input
         type="radio"
         name={name}
@@ -37,7 +43,7 @@ export function Chip({
       />
       <span
         className={cn(
-          "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-4 py-2 text-sm font-semibold text-night transition-[background-color,border-color,color,transform] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-checked:border-burgundy peer-checked:bg-burgundy peer-checked:text-ivory peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
+          "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-4 py-2 text-sm font-semibold text-night transition-[background-color,border-color,color,transform] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-checked:border-burgundy peer-checked:bg-burgundy peer-checked:text-ivory peer-checked:animate-[wiz-pop_320ms_var(--ease-out)] motion-reduce:peer-checked:animate-none peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
           className
         )}
       >

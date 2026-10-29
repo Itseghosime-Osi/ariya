@@ -44,25 +44,25 @@ const STEPS: {
     key: "who",
     label: "Who",
     heading: "What are we celebrating?",
-    blurb: "Tap the occasion, then tell us whose day it is.",
+    blurb: "Tap the occasion, then add the names.",
   },
   {
     key: "when",
     label: "When",
     heading: "Pick the day",
-    blurb: "Most owambe happen on a Saturday, so we lined a few up.",
+    blurb: "Saturdays are lined up. Or choose any day.",
   },
   {
     key: "where",
     label: "Where",
-    heading: "Where will everyone gather?",
-    blurb: "Choose the city, the kind of place and your aṣọ-ẹbí colours.",
+    heading: "Where will you gather?",
+    blurb: "City, venue and your aṣọ-ẹbí colours.",
   },
   {
     key: "guests",
     label: "Guests",
     heading: "Who's coming?",
-    blurb: "Choose how the list comes in and roughly how big it is.",
+    blurb: "How the list comes in, and how big it is.",
   },
 ];
 
@@ -85,6 +85,7 @@ export function CreateEventWizard() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState(0);
+  const [dir, setDir] = useState<"forward" | "back">("forward");
   const [draft, setDraft] = useState<Draft>(INITIAL);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [peek, setPeek] = useState(false);
@@ -138,6 +139,7 @@ export function CreateEventWizard() {
   const goTo = (i: number) => {
     if (i < 0 || i >= STEPS.length || !reachable(i)) return;
     moved.current = true;
+    setDir(i < step ? "back" : "forward");
     setErrorMessage(null);
     setStep(i);
   };
@@ -209,11 +211,8 @@ export function CreateEventWizard() {
           Back to your events
         </Link>
         <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-night sm:text-4xl">
-          Let&apos;s plan your celebration
+          Plan your celebration
         </h1>
-        <p className="mt-1 max-w-xl text-sm text-label-2">
-          Tap through four quick steps. Your invitation takes shape as you go.
-        </p>
       </header>
 
       <nav aria-label="Setup steps" className="mb-6">
@@ -340,7 +339,7 @@ export function CreateEventWizard() {
             </div>
           )}
 
-          <div key={current.key} className="wiz-in">
+          <div key={current.key} className="wiz-in" data-dir={dir}>
             {step === 0 && (
               <StepWho draft={draft} set={set} suggestions={suggestions} />
             )}
@@ -372,11 +371,13 @@ export function CreateEventWizard() {
               type="submit"
               disabled={!valid[step] || isPending}
               data-testid={last ? "wizard-launch" : "wizard-next"}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-burgundy px-6 text-xs font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-burgundy px-6 text-xs font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               {last ? (
                 isPending ? (
-                  "Creating…"
+                  <span className="animate-pulse motion-reduce:animate-none">
+                    Creating…
+                  </span>
                 ) : (
                   <>
                     Create celebration workspace
@@ -386,7 +387,11 @@ export function CreateEventWizard() {
               ) : (
                 <>
                   {`Next: ${STEPS[step + 1].label}`}
-                  <Icon name="arrow_forward" size={16} />
+                  <Icon
+                    name="arrow_forward"
+                    size={16}
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  />
                 </>
               )}
             </button>
