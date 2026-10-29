@@ -311,29 +311,6 @@ export function beam() {
   );
 }
 
-/** Soft shadow under the hall, so it sits on the board. */
-export function contact() {
-  return cached("contact", () =>
-    tex(
-      canvas(256, 256, (g, w) => {
-        const grad = g.createRadialGradient(
-          w / 2,
-          w / 2,
-          w * 0.3,
-          w / 2,
-          w / 2,
-          w / 2
-        );
-        grad.addColorStop(0, "rgba(0,0,0,0.28)");
-        grad.addColorStop(1, "rgba(0,0,0,0)");
-        g.fillStyle = grad;
-        g.fillRect(0, 0, w, w);
-      }),
-      { repeat: false }
-    )
-  );
-}
-
 /** Wall panelling: a wainscot with mouldings and a smooth upper wall, one repeat per 2 m. */
 export function panels(wall = "#efe7da") {
   return cached("panels" + wall, () =>

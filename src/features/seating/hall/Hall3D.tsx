@@ -158,7 +158,7 @@ export const Hall3D = forwardRef<
         ref={frame}
         src="/hall3d/index.html"
         title="3D hall: drag tables, chairs and areas to arrange the room"
-        className="block h-full w-full border-0"
+        className="block h-full w-full border-0 bg-transparent [color-scheme:normal]"
         onLoad={() => send({ t: "hello" })}
       />
       {!ready && !failed && (

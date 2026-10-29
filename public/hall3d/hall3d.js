@@ -45,6 +45,8 @@ try {
   renderer = new THREE.WebGLRenderer({
     antialias: true,
     preserveDrawingBuffer: true,
+    // By day the canvas is see-through, so the page's own background shows round the hall.
+    alpha: true,
   });
 } catch {
   document.body.classList.add("no-webgl");
@@ -89,7 +91,10 @@ const boardMat = new THREE.ShaderMaterial({
     uBg: { value: new THREE.Color("#f2f2f0") },
     uDot: { value: new THREE.Color("#c5c5c2") },
     uCam: { value: new THREE.Vector3() },
+    uOpaque: { value: 0 },
   },
+  transparent: true,
+  depthWrite: false,
   vertexShader: /* glsl */ `
     varying vec3 vW;
     void main() {
@@ -98,7 +103,7 @@ const boardMat = new THREE.ShaderMaterial({
       gl_Position = projectionMatrix * viewMatrix * w;
     }`,
   fragmentShader: /* glsl */ `
-    uniform vec3 uBg; uniform vec3 uDot; uniform vec3 uCam;
+    uniform vec3 uBg; uniform vec3 uDot; uniform vec3 uCam; uniform float uOpaque;
     varying vec3 vW;
     void main() {
       vec2 g = (fract(vW.xz + 0.5) - 0.5);
@@ -107,27 +112,16 @@ const boardMat = new THREE.ShaderMaterial({
       float r = 0.045;
       float a = 1.0 - smoothstep(r - fw, r + fw, d);
       a *= clamp(r / (fw * 2.5), 0.0, 1.0);
-      gl_FragColor = vec4(mix(uBg, uDot, a), 1.0);
+      // Opaque in the evening; by day only the dots are drawn over the page.
+      gl_FragColor = vec4(mix(uBg, uDot, a), max(uOpaque, a));
       #include <colorspace_fragment>
     }`,
 });
 const board = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), boardMat);
 board.rotation.x = -Math.PI / 2;
 board.position.y = -0.2;
+board.renderOrder = -1;
 scene.add(board);
-
-const contact = new THREE.Mesh(
-  new THREE.PlaneGeometry(1, 1),
-  new THREE.MeshBasicMaterial({
-    map: T.contact(),
-    transparent: true,
-    depthWrite: false,
-    toneMapped: false,
-  })
-);
-contact.rotation.x = -Math.PI / 2;
-contact.position.y = -0.19;
-scene.add(contact);
 
 // ---------------------------------------------------------------- lights
 
@@ -694,8 +688,6 @@ function buildShell(L) {
   slab.position.set(W / 2, -0.1, Ln / 2);
   slab.receiveShadow = true;
   shell.add(slab);
-  contact.scale.set(W * 1.45 + 6, Ln * 1.45 + 6, 1);
-  contact.position.set(W / 2, -0.19, Ln / 2);
 
   // Walls with panelling, skirting and a gold cornice.
   const t = 0.25;
@@ -2057,8 +2049,8 @@ new ResizeObserver(resize).observe(stage);
 
 // Figma-style dark grey board for evening (set a touch lighter than shown, since the evening
 // pass tone-maps the whole frame).
-const EVENING_BG = "#3b3b3b";
-const EVENING_DOT = "#606060";
+const EVENING_BG = "#3f3f3f";
+const EVENING_DOT = "#666666";
 
 function applyMood() {
   const evening = state.layout.mood === "evening";
@@ -2068,8 +2060,10 @@ function applyMood() {
   boardMat.uniforms.uDot.value.set(
     evening ? EVENING_DOT : new THREE.Color(day).offsetHSL(0, -0.05, -0.16)
   );
-  scene.background = new THREE.Color(evening ? EVENING_BG : day);
-  document.body.style.background = evening ? "#2c2c2c" : day;
+  boardMat.uniforms.uOpaque.value = evening ? 1 : 0;
+  scene.background = evening ? new THREE.Color(EVENING_BG) : null;
+  renderer.setClearColor(0x000000, 0);
+  document.body.style.background = evening ? "#2c2c2c" : "transparent";
   document.body.classList.toggle("evening", evening);
   renderer.toneMappingExposure = evening ? 0.85 : 0.92;
   hemi.intensity = evening ? 0.12 : 0.55;
@@ -2450,7 +2444,14 @@ function snapshot() {
   renderer.setPixelRatio(Math.min(3, prev * 1.5));
   resize();
   if (state.layout.mood === "evening") composer.render();
-  else renderer.render(scene, camera);
+  else {
+    // The picture gets the page colour behind it rather than a see-through background.
+    scene.background = new THREE.Color(state.board || "#f7f2ea");
+    boardMat.uniforms.uOpaque.value = 1;
+    renderer.render(scene, camera);
+    scene.background = null;
+    boardMat.uniforms.uOpaque.value = 0;
+  }
   const url = renderer.domElement.toDataURL("image/png");
   renderer.setPixelRatio(prev);
   resize();

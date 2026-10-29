@@ -1643,7 +1643,7 @@ export function HallStudio({
         </div>
 
         {/* Side bar: planning tools and the inspector */}
-        <div className="mt-3 flex h-[44%] min-h-0 shrink-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_18px_40px_-30px_rgba(28,7,13,0.5)] lg:ml-3 lg:mt-0 lg:h-auto lg:w-[360px]">
+        <div className="mt-3 flex h-[44%] min-h-0 shrink-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] lg:ml-3 lg:mt-0 lg:h-auto lg:w-[360px]">
           <div
             role="tablist"
             aria-label="Planning tools"
