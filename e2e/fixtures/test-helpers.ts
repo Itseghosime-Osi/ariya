@@ -2,6 +2,38 @@ import http from "http";
 import crypto from "crypto";
 import { Page, BrowserContext, expect } from "@playwright/test";
 
+/**
+ * Wait for CSS transitions and finite animations to finish before measuring.
+ * After a resize, elements can still be animating to their new size for a few
+ * hundred milliseconds, and an Axe scan taken then reports touch targets that
+ * are smaller than they really are. Endless animations (skeletons, spinners)
+ * are ignored, and the wait is bounded.
+ */
+export async function waitForAnimationsToSettle(page: Page) {
+  await page.evaluate(async () => {
+    const running = () =>
+      document
+        .getAnimations()
+        .filter(
+          (a) =>
+            a.playState === "running" &&
+            a.effect !== null &&
+            a.effect.getComputedTiming().iterations !== Infinity
+        );
+    const deadline = performance.now() + 3000;
+    while (running().length > 0 && performance.now() < deadline) {
+      await Promise.race([
+        Promise.all(running().map((a) => a.finished.catch(() => undefined))),
+        new Promise((resolve) => setTimeout(resolve, 500)),
+      ]);
+    }
+    // Let the final frame paint.
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    );
+  });
+}
+
 export interface TestUser {
   email: string;
   password: string;

@@ -93,7 +93,7 @@ export function VendorCard({
                   href={`tel:${vendor.contact_phone}`}
                   className="hover:underline flex items-center gap-1"
                 >
-                  <Icon name="call" className="text-xs text-wine/70" />
+                  <Icon name="phone" className="text-xs text-wine/70" />
                   <span>{formatPhone(vendor.contact_phone)}</span>
                 </a>
               )}

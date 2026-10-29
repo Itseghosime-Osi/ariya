@@ -30,7 +30,7 @@ export function ForgotPasswordDispatched({
 
         <div className="flex items-center gap-4 mb-6">
           <div className="w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm shrink-0">
-            <Icon name="mark_email_unread" className="text-2xl text-wine" />
+            <Icon name="mail" className="text-2xl text-wine" />
           </div>
           <div>
             <span className="font-label-sm text-label-sm uppercase text-secondary font-bold">
@@ -66,7 +66,7 @@ export function ForgotPasswordDispatched({
             type="button"
             onClick={onResend}
           >
-            <Icon name="forward_to_inbox" className="text-xl" />
+            <Icon name="outgoing_mail" className="text-xl" />
             <span>Resend Email</span>
           </button>
           <div className="text-center">

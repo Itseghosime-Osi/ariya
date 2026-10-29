@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 import type { ReminderFilter } from "../types";
 
 interface ReminderFilterSelectorProps {
@@ -21,7 +21,7 @@ export function ReminderFilterSelector({
     id: ReminderFilter;
     label: string;
     count: number;
-    icon: string;
+    icon: IconName;
     desc: string;
   }[] = [
     {
@@ -35,14 +35,14 @@ export function ReminderFilterSelector({
       id: "no_email",
       label: "Missing Email",
       count: noEmailCount,
-      icon: "mail_outline",
+      icon: "mail",
       desc: "Guests requiring phone / WhatsApp follow-up",
     },
     {
       id: "all",
       label: "All Guests",
       count: totalGuests,
-      icon: "groups",
+      icon: "diversity_3",
       desc: "Entire guest registry cohort",
     },
   ];

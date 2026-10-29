@@ -8,7 +8,7 @@ import { safeRedirectPath } from "@/lib/safe-redirect";
 // prematurely redirected away.
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/forgot-password"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 

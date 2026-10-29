@@ -145,7 +145,7 @@ export function InvitationGuestTracker({
                   className="px-3 py-1.5 rounded-lg border border-outline-variant/60 font-medium hover:border-wine hover:text-wine bg-white transition-all flex items-center gap-1"
                 >
                   <Icon
-                    name={copiedId === guest.id ? "check" : "content_copy"}
+                    name={copiedId === guest.id ? "check" : "copy"}
                     className="text-sm"
                   />
                   <span>{copiedId === guest.id ? "Copied!" : "Copy Link"}</span>
@@ -163,7 +163,7 @@ export function InvitationGuestTracker({
                     }}
                     className="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1"
                   >
-                    <Icon name="chat" className="text-sm" />
+                    <Icon name="mail" className="text-sm" />
                     <span>WhatsApp</span>
                   </a>
                 )}

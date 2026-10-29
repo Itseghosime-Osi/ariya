@@ -131,7 +131,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             className="px-4 py-2 rounded-xl border border-wine/30 text-wine hover:bg-wine/5 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>View Public Page</span>
-            <Icon name="open_in_new" className="text-sm" />
+            <Icon name="arrow_forward" className="text-sm" />
           </Link>
           <button
             type="button"
@@ -140,7 +140,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             className="px-5 py-2 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold flex items-center gap-2 transition-all shadow-sm disabled:opacity-50"
           >
             <Icon
-              name={isSaving ? "refresh" : "save"}
+              name={isSaving ? "refresh" : "check"}
               className={`text-sm ${isSaving ? "animate-spin" : ""}`}
             />
             <span>{isSaving ? "Saving..." : "Save Changes"}</span>

@@ -1,8 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/layout/app-shell";
 import { getEventById } from "@/features/events/queries";
-import { getCurrentUser } from "@/features/auth/queries";
 import { getVendorsWithTasks } from "@/features/vendors/queries";
 import { VendorRoster } from "@/features/vendors/components/VendorRoster";
 
@@ -20,9 +18,8 @@ export async function generateMetadata({ params }: VendorsPageProps) {
 
 export default async function VendorsPageRoute({ params }: VendorsPageProps) {
   const { eventId } = await params;
-  const [eventData, user, vendorsData] = await Promise.all([
+  const [eventData, vendorsData] = await Promise.all([
     getEventById(eventId),
-    getCurrentUser(),
     getVendorsWithTasks(eventId),
   ]);
 
@@ -31,14 +28,8 @@ export default async function VendorsPageRoute({ params }: VendorsPageProps) {
   }
 
   return (
-    <AppShell
-      eventId={eventData.event.id}
-      eventTitle={eventData.event.title}
-      eventDate={eventData.event.date}
-      daysAway={eventData.metrics.daysAway}
-      userEmail={user?.email}
-    >
+    <>
       <VendorRoster eventId={eventId} initialData={vendorsData} />
-    </AppShell>
+    </>
   );
 }

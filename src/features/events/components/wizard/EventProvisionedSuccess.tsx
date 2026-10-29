@@ -27,7 +27,7 @@ export function EventProvisionedSuccess({
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
         <div className="flex items-start gap-5">
           <div className="w-16 h-16 rounded-full bg-success-surface text-success flex items-center justify-center shrink-0 shadow-sm">
-            <Icon name="task_alt" className="text-3xl text-success" />
+            <Icon name="check_circle" className="text-3xl text-success" />
           </div>
           <div>
             <span className="font-label-sm text-label-sm text-gold uppercase tracking-widest block mb-1 font-bold">
