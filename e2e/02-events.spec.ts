@@ -189,6 +189,9 @@ test.describe("Events Creation & Overview", () => {
       const ceremonyInput = page
         .locator('input[type="datetime-local"]')
         .first();
+      // A date that is always in the future, whatever day this runs and whichever
+      // date the create flow suggested.
+      const year = new Date().getFullYear() + 1;
 
       // Start with 15:00 (3:00 PM WAT). Refill until the preview reacts, so a
       // fill that lands before hydration doesn't count as the app failing.
@@ -196,7 +199,7 @@ test.describe("Events Creation & Overview", () => {
       // the value differs from what the field already holds.
       await expect(async () => {
         await ceremonyInput.fill("");
-        await ceremonyInput.fill("2026-12-12T15:00");
+        await ceremonyInput.fill(`${year}-12-12T15:00`);
         await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible({
           timeout: 1000,
         });
@@ -205,9 +208,14 @@ test.describe("Events Creation & Overview", () => {
       // Clear input so segments start fresh: --/--/---- --:--
       await ceremonyInput.clear();
 
-      // Click the field, type month, day, year, hour, minute, and select PM
-      await ceremonyInput.click();
-      await page.keyboard.type("121220260200p");
+      // Focus the first segment, then type month and day, the year, Tab out of the
+      // year (it accepts six digits), then hour, minute and PM.
+      await ceremonyInput.focus();
+      await page.keyboard.type("1212");
+      await page.keyboard.type(String(year));
+      await page.keyboard.press("Tab");
+      await page.keyboard.type("0200");
+      await page.keyboard.type("P");
 
       // Assert that preview reflects 2:00 PM WAT before saving
       await expect(page.getByText(/2:00 PM WAT/i).first()).toBeVisible({
@@ -224,7 +232,7 @@ test.describe("Events Creation & Overview", () => {
       await page.reload();
       await expect(
         page.locator('input[type="datetime-local"]').first()
-      ).toHaveValue("2026-12-12T14:00");
+      ).toHaveValue(`${year}-12-12T14:00`);
     } finally {
       await context.close();
     }
