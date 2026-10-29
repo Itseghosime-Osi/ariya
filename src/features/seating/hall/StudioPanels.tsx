@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import {
+  AlertTriangle,
   Crown,
   Hand,
   Moon,
@@ -240,6 +241,12 @@ export function GuestsPanel({
                     <p className="truncate text-sm font-semibold text-night">
                       {g.name}
                     </p>
+                    {g.seating_conflict_at && (
+                      <p className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[#fdf1d8] px-2 py-0.5 text-[10px] font-semibold text-[#7a4a06]">
+                        <AlertTriangle size={11} aria-hidden="true" />
+                        party size changed, please seat again
+                      </p>
+                    )}
                     <p className="truncate text-[11px] text-label-2">
                       {g.attending_count}{" "}
                       {g.attending_count === 1 ? "seat" : "seats"}
