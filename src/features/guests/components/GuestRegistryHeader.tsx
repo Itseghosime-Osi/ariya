@@ -1,41 +1,39 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { UserPlus, Upload } from "lucide-react";
 
 interface GuestRegistryHeaderProps {
+  eventName: string;
   onOpenImport: () => void;
   onOpenAdd: () => void;
 }
 
 export function GuestRegistryHeader({
+  eventName,
   onOpenImport,
   onOpenAdd,
 }: GuestRegistryHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-on-surface">
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0">
+        <p className="truncate text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+          {eventName}
+        </p>
+        <h1 className="mt-2 font-serif text-3xl font-bold leading-tight text-on-surface sm:text-4xl">
           Guest Registry
         </h1>
-        <p className="text-sm text-on-surface-variant mt-1">
-          Curate attendance, manage party sizes, and generate unique digital
-          RSVP invitations.
-        </p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
+      <div className="flex w-full items-center justify-between gap-5 sm:w-auto sm:justify-end">
+        <button
+          type="button"
           onClick={onOpenImport}
-          className="border-outline-variant shadow-sm"
+          className="min-h-11 text-sm font-semibold text-on-surface-variant underline decoration-outline-variant underline-offset-4 hover:text-wine"
         >
-          <Upload className="h-4 w-4 mr-2" />
           Import CSV
-        </Button>
-        <Button onClick={onOpenAdd} className="shadow-sm">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Add Guest
+        </button>
+        <Button onClick={onOpenAdd} className="rounded-full px-6">
+          Add guest
         </Button>
       </div>
     </div>

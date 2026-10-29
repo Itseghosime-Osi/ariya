@@ -61,6 +61,7 @@ export interface GuestOverviewStats {
   acceptedGuests: number;
   pendingCount: number;
   declinedCount: number;
+  declinedGuests: number;
   seatedCount: number;
   unassignedCount: number;
   vipCount: number;

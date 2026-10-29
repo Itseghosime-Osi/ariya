@@ -10,7 +10,7 @@ import {
 import { GuestRegistryHeader } from "./GuestRegistryHeader";
 import { GuestRegistryMetrics } from "./GuestRegistryMetrics";
 import { GuestRegistryFilters } from "./GuestRegistryFilters";
-import { GuestRegistryTable } from "./GuestRegistryTable";
+import { GuestLedger } from "./GuestLedger";
 import { GuestDetailDrawer } from "./GuestDetailDrawer";
 import { GuestFormModal } from "./GuestFormModal";
 import { DeleteGuestDialog } from "./DeleteGuestDialog";
@@ -130,19 +130,21 @@ export function GuestRegistryView({
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-6 sm:px-8 sm:py-10">
       <GuestRegistryHeader
+        eventName={eventName}
         onOpenImport={() => setIsImportOpen(true)}
         onOpenAdd={() => setIsAddOpen(true)}
       />
-      <GuestRegistryMetrics stats={stats} />
+      <GuestRegistryMetrics eventId={eventId} stats={stats} />
       <GuestRegistryFilters
         filters={initialFilters}
+        stats={stats}
         availableGroups={availableGroups}
         onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
         onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
       />
-      <GuestRegistryTable
+      <GuestLedger
         guests={initialGuests}
         totalCount={totalGuests}
         page={initialPage}
