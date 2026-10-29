@@ -15,7 +15,7 @@ The project consists of:
    - **Background & Webhooks**: Paystack webhooks (`/api/webhooks/paystack`) and Vercel Cron reminder triggers (`/api/cron/reminders`).
    - **Installable app**: `src/app/manifest.ts` and the icons in `public/icons/` let phones add Àríyá to the home screen, where it opens full screen (`display: standalone`) with no browser address bar. A small hint in the app shell (`src/components/layout/install-hint.tsx`) shows iPhone and iPad users the Share steps and offers Android and Chrome touch devices an Install button; laptops are left to their browser's own install button. There is deliberately no service worker, so nothing is cached offline.
 
-> **Note on `private-media/music.mp3`**: "Yori Yori" by Abefe is a commercial song kept for private class demos only. It lives outside `public/`, so it is never served or deployed, and the live film and About page play their generated Web Audio groove instead. For a local demo, copy it in with `cp private-media/music.mp3 public/site/assets/music.mp3` (that path is git-ignored, and `pnpm check:bundle` fails if an audio file reaches `public/`).
+> **Note on `public/site/assets/music.mp3`**: "Yori Yori" by Abefe, a commercial song, is served publicly with the film and the About page by the owner's choice. It is copyrighted and anyone can download it from the live site; replace or remove it if a licence is not in place. Without the file, the film and About page fall back to their live Web Audio API groove.
 
 > [!IMPORTANT]
 >
