@@ -398,3 +398,23 @@
     animation: none !important;
   }
 }
+
+/* Hall studio: the tools that wait by the undo buttons while the side panel is tucked away. */
+@keyframes hall-pop {
+  from {
+    opacity: 0;
+    transform: translateX(10px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hall-pop {
+  animation: hall-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hall-pop {
+    animation: none;
+  }
+}

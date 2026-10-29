@@ -1919,14 +1919,27 @@ function applyCamera() {
 }
 
 /** Shift the picture so the hall centres in the part not covered by the floating panels. */
-function applyViewOffset() {
+// The shift glides when panels open or close, so the hall eases into its new centre.
+const offset = { x: 0, y: 0, tx: 0, ty: 0, ready: false };
+function applyViewOffset(animate = true) {
+  const i = state.inset || {};
+  offset.tx = ((i.right || 0) - (i.left || 0)) / 2;
+  offset.ty = ((i.bottom || 0) - (i.top || 0)) / 2;
+  if (!animate || !offset.ready || reduceMotion) {
+    offset.x = offset.tx;
+    offset.y = offset.ty;
+    offset.ready = true;
+  }
+  setOffset();
+  loop();
+}
+function setOffset() {
   const w = stage.clientWidth;
   const h = stage.clientHeight;
-  const i = state.inset || {};
-  const dx = ((i.right || 0) - (i.left || 0)) / 2;
-  const dy = ((i.bottom || 0) - (i.top || 0)) / 2;
-  if (dx || dy) camera.setViewOffset(w, h, dx, dy, w, h);
+  if (offset.x || offset.y)
+    camera.setViewOffset(w, h, offset.x, offset.y, w, h);
   else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
 }
 
 function hallFitDistance(pol) {
@@ -1993,6 +2006,20 @@ function loop() {
 }
 function frame(now) {
   looping = false;
+  if (offset.x !== offset.tx || offset.y !== offset.ty) {
+    offset.x += (offset.tx - offset.x) * 0.16;
+    offset.y += (offset.ty - offset.y) * 0.16;
+    if (
+      Math.abs(offset.tx - offset.x) < 0.5 &&
+      Math.abs(offset.ty - offset.y) < 0.5
+    ) {
+      offset.x = offset.tx;
+      offset.y = offset.ty;
+    }
+    setOffset();
+    dirty = true;
+    loop();
+  }
   if (goal) {
     const k = Math.min(1, (now - goal.t0) / goal.ms);
     const e = 1 - Math.pow(1 - k, 3);
@@ -2056,7 +2083,7 @@ function resize() {
   bloom.resolution.set(w / 2, h / 2);
   labelRenderer.setSize(w, h);
   camera.aspect = w / Math.max(1, h);
-  applyViewOffset();
+  applyViewOffset(false);
   camera.updateProjectionMatrix();
   if (state.layout) fitDist = hallFitDistance(cam.pol);
   applyCamera();

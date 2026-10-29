@@ -11,6 +11,8 @@ import {
   Armchair,
   Box,
   Camera,
+  PanelRightClose,
+  PanelRightOpen,
   ChevronDown,
   ChevronUp,
   CirclePlus,
@@ -229,6 +231,31 @@ export function HallStudio({
   const [announce, setAnnounce] = useState("");
   const say = (msg: string) => setAnnounce(msg);
 
+  // The side panel can be tucked away for a bigger hall; the choice is remembered.
+  const [panelOpen, setPanelOpen] = useState(true);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("ariya:hall-panel") === "closed")
+        setPanelOpen(false);
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const togglePanel = (open?: boolean) =>
+    setPanelOpen((cur) => {
+      const next = open ?? !cur;
+      try {
+        localStorage.setItem("ariya:hall-panel", next ? "open" : "closed");
+      } catch {
+        /* not remembered */
+      }
+      return next;
+    });
+  // Selecting something brings the panel back: its design controls live there.
+  useEffect(() => {
+    if (selection.length > 0) togglePanel(true);
+  }, [selection.length]);
+
   // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
   const body = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -249,8 +276,12 @@ export function HallStudio({
       const next = {
         left: Math.round(r.left),
         top: Math.round(r.top),
-        right: Math.round(outRight + 70 + (wide ? p.offsetWidth + 12 : 0)),
-        bottom: Math.round(outBottom + (wide ? 0 : p.offsetHeight + 12)),
+        right: Math.round(
+          outRight + 70 + (wide && panelOpen ? p.offsetWidth + 12 : 0)
+        ),
+        bottom: Math.round(
+          outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : 0)
+        ),
       };
       setInset((cur) =>
         cur.left === next.left &&
@@ -269,7 +300,7 @@ export function HallStudio({
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [panelOpen]);
 
   // The daytime board takes the page's own background, so the hall sits on the page.
   const [pageBg, setPageBg] = useState("#f7f2ea");
@@ -994,6 +1025,7 @@ export function HallStudio({
       else setSelection([]);
     } else if (k === "v") setTool("select");
     else if (k === "h") setTool("hand");
+    else if (key === "\\") togglePanel();
     else if (key === "Delete" || key === "Backspace") remove();
     else if (k === "r") rotateBy(shift ? -15 : 15);
     else if (key === "ArrowLeft") nudge(-step, 0);
@@ -1162,18 +1194,23 @@ export function HallStudio({
           className="fixed inset-0 z-0"
         />
         {/* Canvas controls */}
-        <div className="pointer-events-none absolute inset-0 max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]">
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 transition-[right,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            panelOpen && "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
+          )}
+        >
           {/* Hall size, live numbers and status */}
-          <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-11rem)] flex-col items-start gap-1.5">
+          <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-15rem)] flex-col items-start gap-1.5">
             <div
               className={cn(
                 float,
-                "pointer-events-auto flex items-center gap-x-4 rounded-2xl px-4 py-2"
+                "pointer-events-auto flex max-w-full items-center gap-x-4 overflow-hidden rounded-2xl px-4 py-2"
               )}
             >
               <p className="whitespace-nowrap text-sm font-semibold">
                 {layout.width} × {layout.length} m
-                <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 xl:inline">
+                <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 2xl:inline">
                   {formatFeet(layout.width)} × {formatFeet(layout.length)}
                   {hall.saving
                     ? " · saving…"
@@ -1308,6 +1345,50 @@ export function HallStudio({
               title="Save a picture"
             >
               <Camera size={17} />
+            </button>
+            <span className="mx-0.5 h-5 w-px bg-hairline" aria-hidden="true" />
+            {/* With the panel tucked away, its tools wait here: one click springs it open on one. */}
+            {!panelOpen &&
+              tiles.map(({ key, label, icon: I }, n) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={cn(chip, "hall-pop")}
+                  style={{ animationDelay: `${n * 45}ms` }}
+                  onClick={() => {
+                    setSelection([]);
+                    setDeck(key);
+                    togglePanel(true);
+                  }}
+                  aria-label={`Open ${label}`}
+                  title={label}
+                >
+                  <I size={17} />
+                </button>
+              ))}
+            <button
+              type="button"
+              className={cn(
+                chip,
+                "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-90",
+                !panelOpen && "bg-night text-white hover:bg-burgundy"
+              )}
+              onClick={() => togglePanel()}
+              aria-pressed={!panelOpen}
+              aria-label={
+                panelOpen ? "Hide the side panel" : "Show the side panel"
+              }
+              title={
+                panelOpen
+                  ? "Hide the panel for a bigger hall (\\)"
+                  : "Show the panel (\\)"
+              }
+            >
+              {panelOpen ? (
+                <PanelRightClose size={17} />
+              ) : (
+                <PanelRightOpen size={17} />
+              )}
             </button>
           </div>
 
@@ -1656,7 +1737,13 @@ export function HallStudio({
         {/* Side bar: planning tools and the inspector */}
         <div
           ref={panel}
-          className="absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]"
+          inert={!panelOpen}
+          aria-hidden={!panelOpen || undefined}
+          className={cn(
+            "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]",
+            !panelOpen &&
+              "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
+          )}
         >
           <div
             role="tablist"
