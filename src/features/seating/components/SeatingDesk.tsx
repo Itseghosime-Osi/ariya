@@ -171,7 +171,13 @@ export function SeatingDesk({
   // between the studio and the list only swaps what is inside it. The page itself does not scroll.
   const frame = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number | null>(null);
+  // The studio is a workspace: its frame fills the screen and the page does not scroll. The
+  // list is an ordinary page that scrolls (behind the phone dock on phones).
   useLayoutEffect(() => {
+    if (view !== "hall") {
+      setHeight(null);
+      return;
+    }
     const html = document.documentElement;
     const prev = html.style.overflow;
     html.style.overflow = "hidden";
@@ -180,10 +186,7 @@ export function SeatingDesk({
       const el = frame.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      const phone = window.matchMedia("(max-width: 767px)").matches;
-      // On phones the bottom dock covers the last stretch of the screen.
-      const gap = phone ? 156 : 24;
-      setHeight(Math.max(420, window.innerHeight - top - gap));
+      setHeight(Math.max(420, window.innerHeight - top - 24));
     };
     fit();
     window.addEventListener("resize", fit);
@@ -191,7 +194,7 @@ export function SeatingDesk({
       window.removeEventListener("resize", fit);
       html.style.overflow = prev;
     };
-  }, []);
+  }, [view]);
 
   const notice = errorMsg ? (
     <span className="inline-flex items-center gap-2 text-[#9e2a2b]">
@@ -220,9 +223,12 @@ export function SeatingDesk({
         ref={frame}
         style={height ? { height } : undefined}
         data-seating-frame
-        className="flex h-[calc(100dvh-10rem)] min-h-[420px] flex-col overflow-hidden"
+        className={cn(
+          "relative z-10 flex flex-col",
+          view === "hall" && "h-[calc(100dvh-10rem)] min-h-[420px]"
+        )}
       >
-        <header className="flex h-14 shrink-0 items-center gap-1.5 pb-2 sm:gap-2">
+        <header className="relative z-10 flex h-14 shrink-0 items-center gap-1.5 pb-2 sm:gap-2">
           <h1 className="min-w-0 truncate whitespace-nowrap font-display text-lg font-bold text-night">
             Seating &amp; Floor Plan
           </h1>
@@ -275,7 +281,7 @@ export function SeatingDesk({
             notice={notice}
           />
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto pb-4">
+          <div className="pb-4">
             {notice && (
               <p
                 role="status"

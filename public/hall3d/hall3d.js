@@ -1922,9 +1922,10 @@ function applyCamera() {
 function applyViewOffset() {
   const w = stage.clientWidth;
   const h = stage.clientHeight;
-  const r = state.inset?.right || 0;
-  const b = state.inset?.bottom || 0;
-  if (r || b) camera.setViewOffset(w, h, r / 2, b / 2, w, h);
+  const i = state.inset || {};
+  const dx = ((i.right || 0) - (i.left || 0)) / 2;
+  const dy = ((i.bottom || 0) - (i.top || 0)) / 2;
+  if (dx || dy) camera.setViewOffset(w, h, dx, dy, w, h);
   else camera.clearViewOffset();
 }
 
@@ -1934,8 +1935,9 @@ function hallFitDistance(pol) {
   const W = stage.clientWidth;
   const H = Math.max(1, stage.clientHeight);
   // Only the part of the hall not under the floating panels counts.
-  const fx = Math.max(0.25, (W - (state.inset?.right || 0)) / W);
-  const fy = Math.max(0.25, (H - (state.inset?.bottom || 0)) / H);
+  const i = state.inset || {};
+  const fx = Math.max(0.25, (W - (i.left || 0) - (i.right || 0)) / W);
+  const fy = Math.max(0.25, (H - (i.top || 0) - (i.bottom || 0)) / H);
   const aspect = W / H;
   const half = Math.tan((camera.fov * DEG) / 2);
   const w = L.width + 3;
@@ -2416,12 +2418,51 @@ renderer.domElement.addEventListener("pointerleave", () => {
   }
 });
 
-// The wheel never zooms: it scrolls the page around the studio instead.
+/** Zoom by a factor, keeping the floor point under the pointer where it is. */
+function zoomAt(x, y, f) {
+  goal = null;
+  const before = floorPoint({ clientX: x, clientY: y });
+  cam.dist = THREE.MathUtils.clamp(cam.dist * f, 2.5, 600);
+  applyCamera();
+  const after = floorPoint({ clientX: x, clientY: y });
+  if (before && after) {
+    cam.tx += before.x - after.x;
+    cam.tz += before.z - after.z;
+    applyCamera();
+  }
+}
+
+// Safari reports trackpad pinches as gesture events instead.
+let gestureScale = 1;
+window.addEventListener("gesturestart", (e) => {
+  e.preventDefault();
+  gestureScale = 1;
+});
+window.addEventListener("gesturechange", (e) => {
+  e.preventDefault();
+  // A finger pinch on a touch screen is already handled through its two pointers.
+  if (pointers.size >= 2) return;
+  const f = gestureScale / e.scale;
+  gestureScale = e.scale;
+  zoomAt(e.clientX, e.clientY, f);
+});
+window.addEventListener("gestureend", (e) => e.preventDefault());
+
+// Scrolling never zooms: plain wheel movement goes to the page instead.
 window.addEventListener(
   "wheel",
   (e) => {
     e.preventDefault();
-    if (e.ctrlKey) return;
+    // A two-finger pinch on a trackpad arrives as a wheel event with ctrlKey: zoom towards the
+    // pointer. Ordinary scrolling never zooms.
+    if (e.ctrlKey) {
+      zoomAt(
+        e.clientX,
+        e.clientY,
+        Math.exp(THREE.MathUtils.clamp(e.deltaY, -30, 30) * 0.01)
+      );
+      return;
+    }
     post({
       t: "wheel",
       dx: e.deltaX,

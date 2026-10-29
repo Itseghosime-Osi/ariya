@@ -232,26 +232,43 @@ export function HallStudio({
   // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
   const body = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
-  const [inset, setInset] = useState({ right: 0, bottom: 0 });
+  // The 3D hall spans the whole screen behind the app's bars; this is how much of it each side
+  // covers (sidebar, top bar and header, side panel and tool rail), so "fit" frames the room in
+  // the part that is left.
+  const [inset, setInset] = useState({ left: 0, top: 0, right: 0, bottom: 0 });
   useEffect(() => {
     const el = body.current;
     if (!el) return;
     const measure = () => {
       const p = panel.current;
       if (!p) return;
+      const r = el.getBoundingClientRect();
       const wide = window.matchMedia("(min-width: 1024px)").matches;
-      // The tool rail on the right of the hall takes about 70px as well.
-      const next = wide
-        ? { right: p.offsetWidth + 12 + 70, bottom: 0 }
-        : { right: 70, bottom: p.offsetHeight + 12 };
+      const outRight = Math.max(0, window.innerWidth - r.right);
+      const outBottom = Math.max(0, window.innerHeight - r.bottom);
+      const next = {
+        left: Math.round(r.left),
+        top: Math.round(r.top),
+        right: Math.round(outRight + 70 + (wide ? p.offsetWidth + 12 : 0)),
+        bottom: Math.round(outBottom + (wide ? 0 : p.offsetHeight + 12)),
+      };
       setInset((cur) =>
-        cur.right === next.right && cur.bottom === next.bottom ? cur : next
+        cur.left === next.left &&
+        cur.top === next.top &&
+        cur.right === next.right &&
+        cur.bottom === next.bottom
+          ? cur
+          : next
       );
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   // The daytime board takes the page's own background, so the hall sits on the page.
@@ -1142,7 +1159,7 @@ export function HallStudio({
           ref={view3d}
           scene={scene}
           onMessage={onMessage}
-          className="absolute inset-0"
+          className="fixed inset-0 z-0"
         />
         {/* Canvas controls */}
         <div className="pointer-events-none absolute inset-0 max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]">
