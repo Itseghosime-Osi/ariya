@@ -223,7 +223,7 @@ export function SeatingDesk({
         className="flex h-[calc(100dvh-10rem)] min-h-[420px] flex-col overflow-hidden"
       >
         <header className="flex h-14 shrink-0 items-center gap-1.5 pb-2 sm:gap-2">
-          <h1 className="truncate font-display text-lg font-bold text-night">
+          <h1 className="min-w-0 truncate whitespace-nowrap font-display text-lg font-bold text-night">
             Seating &amp; Floor Plan
           </h1>
           <span className="hidden whitespace-nowrap rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[11px] font-semibold text-burgundy lg:inline">
@@ -250,10 +250,10 @@ export function SeatingDesk({
           <button
             type="button"
             onClick={openNewTable}
-            className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-burgundy px-4 text-xs font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-burgundy text-xs font-semibold max-lg:px-0 lg:px-4 text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <Plus size={15} />
-            <span className="max-sm:sr-only">New Table</span>
+            <span className="max-lg:sr-only">New Table</span>
           </button>
         </header>
 

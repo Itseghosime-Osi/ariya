@@ -1151,12 +1151,12 @@ export function HallStudio({
             <div
               className={cn(
                 float,
-                "pointer-events-auto flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl px-4 py-2"
+                "pointer-events-auto flex items-center gap-x-4 rounded-2xl px-4 py-2"
               )}
             >
-              <p className="text-sm font-semibold">
+              <p className="whitespace-nowrap text-sm font-semibold">
                 {layout.width} × {layout.length} m
-                <span className="ml-1.5 text-[11px] font-normal text-label-2">
+                <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 xl:inline">
                   {formatFeet(layout.width)} × {formatFeet(layout.length)}
                   {hall.saving
                     ? " · saving…"
@@ -1165,10 +1165,7 @@ export function HallStudio({
                       : ""}
                 </span>
               </p>
-              <dl
-                className="hidden flex-wrap gap-x-4 gap-y-1 md:flex"
-                data-testid="hall-meter"
-              >
+              <dl className="hidden gap-x-4 xl:flex" data-testid="hall-meter">
                 {[
                   {
                     k: "Guests",
@@ -1182,10 +1179,16 @@ export function HallStudio({
                       seats >= target ? "enough" : `${target - seats} short`,
                     bad: seats < target,
                   },
-                  { k: "Hall fits", v: fitEmpty.seats },
-                  { k: "Fire guide", v: fireGuide, note: "max" },
+                  { k: "Hall fits", v: fitEmpty.seats, wide: true },
+                  { k: "Fire guide", v: fireGuide, note: "max", wide: true },
                 ].map((m) => (
-                  <div key={m.k} className="flex items-baseline gap-1">
+                  <div
+                    key={m.k}
+                    className={cn(
+                      "items-baseline gap-1 whitespace-nowrap",
+                      "wide" in m ? "hidden 2xl:flex" : "flex"
+                    )}
+                  >
                     <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
                       {m.k}
                     </dt>
