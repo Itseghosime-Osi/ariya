@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -30,6 +31,13 @@ interface CsvImportModalProps {
 }
 
 type ImportStep = "upload" | "mapping" | "validation" | "summary";
+
+const STEPS: { key: ImportStep; label: string }[] = [
+  { key: "upload", label: "Choose file" },
+  { key: "mapping", label: "Match columns" },
+  { key: "validation", label: "Review" },
+  { key: "summary", label: "Done" },
+];
 
 export function CsvImportModal({
   eventId,
@@ -58,6 +66,8 @@ export function CsvImportModal({
   const [importedCount, setImportedCount] = React.useState(0);
   const [skippedCount, setSkippedCount] = React.useState(0);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+
+  const stepIndex = STEPS.findIndex((item) => item.key === step);
 
   const resetState = () => {
     setStep("upload");
@@ -152,52 +162,115 @@ export function CsvImportModal({
         }
       }}
     >
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl">
+      <DialogContent className="max-h-[92vh] max-w-2xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
+        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+            Guest registry
+          </p>
+          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
             {step === "summary" ? "Import Summary" : "Import Guests from CSV"}
           </DialogTitle>
+          <DialogDescription>
+            Bring in a whole spreadsheet at once. You can review everything
+            before it is added.
+          </DialogDescription>
+          <ol
+            aria-label="Import progress"
+            className="mt-3 flex items-center gap-2 text-xs font-semibold"
+          >
+            {STEPS.map((item, index) => {
+              const state =
+                index < stepIndex
+                  ? "done"
+                  : index === stepIndex
+                    ? "current"
+                    : "todo";
+              return (
+                <li
+                  key={item.key}
+                  aria-current={state === "current" ? "step" : undefined}
+                  className="flex items-center gap-2"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] transition-colors ${
+                      state === "todo"
+                        ? "border border-outline-variant text-on-surface-variant"
+                        : state === "current"
+                          ? "bg-wine text-ivory"
+                          : "bg-gold text-night"
+                    }`}
+                  >
+                    {state === "done" ? "✓" : index + 1}
+                  </span>
+                  <span
+                    className={`hidden sm:inline ${
+                      state === "current"
+                        ? "text-on-surface"
+                        : "text-on-surface-variant"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                  {index < STEPS.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className={`h-px w-5 sm:w-8 ${
+                        index < stepIndex ? "bg-gold" : "bg-outline-variant"
+                      }`}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
+          />
         </DialogHeader>
 
-        {errorMsg && (
-          <div className="rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
-            {errorMsg}
-          </div>
-        )}
+        <div className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8">
+          {errorMsg && (
+            <div className="rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+              {errorMsg}
+            </div>
+          )}
 
-        {step === "upload" && (
-          <CsvUploadDropzone onFileSelected={handleFileSelected} />
-        )}
+          {step === "upload" && (
+            <CsvUploadDropzone onFileSelected={handleFileSelected} />
+          )}
 
-        {step === "mapping" && (
-          <CsvColumnMappingDesk
-            csvHeaders={csvHeaders}
-            mapping={mapping}
-            onMappingChange={setMapping}
-            onBack={() => setStep("upload")}
-            onProceed={handleProceedToValidation}
-          />
-        )}
+          {step === "mapping" && (
+            <CsvColumnMappingDesk
+              csvHeaders={csvHeaders}
+              mapping={mapping}
+              onMappingChange={setMapping}
+              onBack={() => setStep("upload")}
+              onProceed={handleProceedToValidation}
+            />
+          )}
 
-        {step === "validation" && validation && (
-          <CsvValidationPreview
-            validation={validation}
-            isSubmitting={isSubmitting}
-            onBack={() => setStep("mapping")}
-            onCommitImport={handleCommitImport}
-          />
-        )}
+          {step === "validation" && validation && (
+            <CsvValidationPreview
+              validation={validation}
+              isSubmitting={isSubmitting}
+              onBack={() => setStep("mapping")}
+              onCommitImport={handleCommitImport}
+            />
+          )}
 
-        {step === "summary" && (
-          <CsvImportSummary
-            importedCount={importedCount}
-            skippedCount={skippedCount}
-            onDone={() => {
-              resetState();
-              onClose();
-            }}
-          />
-        )}
+          {step === "summary" && (
+            <CsvImportSummary
+              importedCount={importedCount}
+              skippedCount={skippedCount}
+              onDone={() => {
+                resetState();
+                onClose();
+              }}
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

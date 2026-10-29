@@ -1,81 +1,147 @@
 "use client";
 
+import Link from "next/link";
+import NumberFlow from "@number-flow/react";
+import { m } from "motion/react";
+import { DeskItem } from "@/features/events/components/desk/DeskMotion";
 import { GuestOverviewStats } from "../types";
-import { Users, UserCheck, UserX, Clock, Armchair } from "lucide-react";
 
 interface GuestRegistryMetricsProps {
+  eventId: string;
   stats: GuestOverviewStats;
 }
 
-export function GuestRegistryMetrics({ stats }: GuestRegistryMetricsProps) {
-  const cards = [
-    {
-      label: "Invited Parties",
-      value: stats.totalCount,
-      subtext: `${stats.totalAttendees} invited seats`,
-      icon: Users,
-      color: "text-wine bg-wine/10",
-    },
-    {
-      label: "Attending Parties",
-      value: stats.acceptedCount,
-      subtext: `${stats.acceptedGuests} expected people`,
-      icon: UserCheck,
-      color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40",
-    },
-    {
-      label: "Declined Parties",
-      value: stats.declinedCount,
-      subtext: "Declined invitation",
-      icon: UserX,
-      color: "text-red-600 bg-red-50 dark:bg-red-950/40",
-    },
-    {
-      label: "Pending RSVP",
-      value: stats.pendingCount,
-      subtext: "Awaiting reply",
-      icon: Clock,
-      color: "text-amber-600 bg-amber-50 dark:bg-amber-950/40",
-    },
-    {
-      label: "Seated People",
-      value: `${stats.seatedCount}/${stats.acceptedGuests || stats.totalAttendees}`,
-      subtext: `${stats.unassignedCount} unseated`,
-      icon: Armchair,
-      color: "text-gold bg-gold/10",
-    },
+const card =
+  "bento-tile-hover flex flex-col justify-between gap-5 rounded-3xl border border-outline-variant/60 bg-surface-container-low p-5 sm:p-6";
+const eyebrow =
+  "text-[11px] font-bold uppercase tracking-[0.14em] text-gold-ink";
+const cta =
+  "inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-wine transition-transform hover:translate-x-0.5";
+
+export function GuestRegistryMetrics({
+  eventId,
+  stats,
+}: GuestRegistryMetricsProps) {
+  const confirmed = stats.acceptedGuests;
+  const total = stats.totalAttendees;
+  const declined = stats.declinedGuests;
+  const awaiting = Math.max(0, total - confirmed - declined);
+  const seated = stats.seatedCount;
+  const seatedPct =
+    confirmed > 0 ? Math.min(100, (seated / confirmed) * 100) : 0;
+
+  const legend = [
+    { label: "Attending", value: confirmed, dot: "bg-success" },
+    { label: "Declined", value: declined, dot: "bg-error" },
+    { label: "Awaiting", value: awaiting, dot: "bg-outline-variant" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      {cards.map((c) => {
-        const Icon = c.icon;
-        return (
+    <section
+      aria-label="RSVP progress"
+      className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5"
+    >
+      <DeskItem className={`${card} lg:col-span-6`}>
+        <div className="flex flex-col gap-3">
+          <p className={eyebrow}>Seats confirmed</p>
+          <p className="font-serif text-xl text-on-surface-variant">
+            <NumberFlow
+              value={confirmed}
+              className="mr-1.5 text-5xl font-bold tabular-nums text-on-surface"
+            />
+            of {total} {total === 1 ? "seat" : "seats"}
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
           <div
-            key={c.label}
-            className="flex flex-col justify-between rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 shadow-sm"
+            role="img"
+            aria-label={`${confirmed} attending, ${declined} declined, ${awaiting} awaiting reply`}
+            className="flex h-2 gap-[3px] overflow-hidden rounded-full"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-                {c.label}
-              </span>
-              <div
-                className={`flex h-7 w-7 items-center justify-center rounded-lg ${c.color}`}
-              >
-                <Icon className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-2">
-              <div className="font-serif text-2xl font-bold text-on-surface">
-                {c.value}
-              </div>
-              <div className="text-[11px] text-on-surface-variant truncate mt-0.5">
-                {c.subtext}
-              </div>
-            </div>
+            <m.i
+              className="block bg-success"
+              initial={{ flexGrow: 0 }}
+              animate={{ flexGrow: confirmed }}
+              transition={{ type: "spring", visualDuration: 0.7, bounce: 0.1 }}
+            />
+            <m.i
+              className="block bg-error"
+              initial={{ flexGrow: 0 }}
+              animate={{ flexGrow: declined }}
+              transition={{ type: "spring", visualDuration: 0.7, bounce: 0.1 }}
+            />
+            <m.i
+              className="block bg-outline-variant"
+              initial={{ flexGrow: 0 }}
+              animate={{ flexGrow: awaiting }}
+              transition={{ type: "spring", visualDuration: 0.7, bounce: 0.1 }}
+            />
           </div>
-        );
-      })}
-    </div>
+          <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-on-surface-variant">
+            {legend.map((item) => (
+              <li key={item.label} className="flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className={`h-2 w-2 rounded-full ${item.dot}`}
+                />
+                {item.label}
+                <b className="font-semibold tabular-nums text-on-surface">
+                  {item.value}
+                </b>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </DeskItem>
+
+      <DeskItem className={`${card} lg:col-span-3`}>
+        <div className="flex flex-col gap-3">
+          <p className={eyebrow}>Awaiting reply</p>
+          <p className="font-serif text-xl text-on-surface-variant">
+            <NumberFlow
+              value={stats.pendingCount}
+              className="mr-1.5 text-5xl font-bold tabular-nums text-on-surface"
+            />
+            {stats.pendingCount === 1 ? "party" : "parties"}
+          </p>
+        </div>
+        {stats.pendingCount === 0 ? (
+          <p className="text-sm text-on-surface-variant">
+            Every party has replied.
+          </p>
+        ) : (
+          <Link href={`/events/${eventId}/reminders`} className={cta}>
+            Send reminders <span aria-hidden="true">→</span>
+          </Link>
+        )}
+      </DeskItem>
+
+      <DeskItem className={`${card} lg:col-span-3`}>
+        <div className="flex flex-col gap-3">
+          <p className={eyebrow}>Seated</p>
+          <p className="font-serif text-xl text-on-surface-variant">
+            <NumberFlow
+              value={seated}
+              className="mr-1.5 text-5xl font-bold tabular-nums text-on-surface"
+            />
+            of {confirmed}
+          </p>
+          <div className="h-1.5 overflow-hidden rounded-full bg-outline-variant/60">
+            <m.div
+              className="h-full rounded-full bg-gold"
+              initial={{ width: 0 }}
+              animate={{ width: `${seatedPct}%` }}
+              transition={{ type: "spring", visualDuration: 0.7, bounce: 0.1 }}
+            />
+          </div>
+        </div>
+        <Link href={`/events/${eventId}/seating`} className={cta}>
+          {stats.unassignedCount > 0
+            ? `${stats.unassignedCount} still need a table`
+            : "Open seating"}{" "}
+          <span aria-hidden="true">→</span>
+        </Link>
+      </DeskItem>
+    </section>
   );
 }
