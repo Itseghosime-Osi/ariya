@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  waitForAnimationsToSettle,
+} from "./fixtures/test-helpers";
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
@@ -49,6 +53,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     );
 
     // Accessibility check on empty state (1440x900)
+    await waitForAnimationsToSettle(page);
     const emptyAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();
@@ -182,6 +187,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     await searchInput.blur();
 
     // 4. Axe WCAG 2.2 AA scan at 1440px (populated)
+    await waitForAnimationsToSettle(page);
     const desktopAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();
@@ -216,6 +222,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     }
 
     // Axe WCAG 2.2 AA scan at 390px
+    await waitForAnimationsToSettle(page);
     const mobileAxe = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
       .analyze();

@@ -703,3 +703,31 @@ body {
     scroll-padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
   }
 }
+
+/* ---------- Touch devices: no zoom-on-focus ---------- */
+/*
+ * iPhone Safari zooms into any focused text field whose text is under 16px,
+ * and doesn't zoom back out. Rather than switching pinch-zoom off for the
+ * whole site (which locks out people who need to zoom to read, WCAG 1.4.4),
+ * every text-entry field on a touch device gets 16px text. Unlayered on
+ * purpose: it has to win over Tailwind's text-sm / text-xs utilities, which
+ * live in a cascade layer.
+ */
+@media (pointer: coarse) {
+  input:not(
+    [type="checkbox"],
+    [type="radio"],
+    [type="range"],
+    [type="file"],
+    [type="color"],
+    [type="button"],
+    [type="submit"],
+    [type="reset"],
+    [type="image"],
+    [type="hidden"]
+  ),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

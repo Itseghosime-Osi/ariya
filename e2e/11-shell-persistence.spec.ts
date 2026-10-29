@@ -48,4 +48,43 @@ test.describe("Persistent app shell (shared layout)", () => {
     await expect(page.getByTestId("phone-tab-bar")).toHaveCount(0);
     await expect(page.getByTestId("desktop-sidebar")).toHaveCount(0);
   });
+
+  test("on a tablet the sidebar starts folded and opens over the page", async ({
+    page,
+    context,
+  }) => {
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await createAndLoginUser(page, context, "tablet_folder");
+    const { eventId } = await createTestEvent(page);
+
+    await page.goto(`/events/${eventId}`);
+    const sidebar = page.getByTestId("desktop-sidebar");
+    await expect(sidebar).toBeVisible();
+    await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+
+    // Opening slides it over the page: the content stays where it was, at the
+    // folded offset (108px), instead of being squeezed aside.
+    const main = page.locator("#main-content");
+    const contentLeft = async () =>
+      Math.round((await main.boundingBox())?.x ?? -1);
+    await expect.poll(contentLeft).toBe(108);
+    await page.getByRole("button", { name: "Expand sidebar" }).click();
+    await expect(sidebar).toHaveAttribute("data-collapsed", "false");
+    await expect(page.getByTestId("sidebar-scrim")).toBeVisible();
+    await expect.poll(contentLeft).toBe(108);
+
+    // The backdrop closes it again.
+    await page
+      .getByTestId("sidebar-scrim")
+      .click({ position: { x: 700, y: 600 } });
+    await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+
+    // Choosing a page closes it too, and it is never remembered as open.
+    await page.getByRole("button", { name: "Expand sidebar" }).click();
+    await sidebar.getByRole("link", { name: "Guests", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/events/${eventId}/guests$`));
+    await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+    await page.reload();
+    await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+  });
 });
