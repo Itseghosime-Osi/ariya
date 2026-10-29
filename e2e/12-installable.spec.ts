@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { createAndLoginUser } from "./fixtures/test-helpers";
 
+const IPAD_UA =
+  "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
 const IPHONE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
 
@@ -59,6 +61,32 @@ test.describe("Installable app", () => {
       await page.reload();
       await page.waitForTimeout(6000);
       await expect(page.getByTestId("install-hint")).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("an iPad visitor gets the card too, beside the page rather than over the nav", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      userAgent: IPAD_UA,
+      viewport: { width: 820, height: 1180 },
+      isMobile: true,
+      hasTouch: true,
+    });
+    const page = await context.newPage();
+    try {
+      await createAndLoginUser(page, context, "ipad_install_user");
+      await page.goto("/events");
+
+      const hint = page.getByTestId("install-hint");
+      await expect(hint).toBeVisible({ timeout: 15000 });
+      await expect(hint).toContainText("Add to Home Screen");
+      // On a tablet it sits in the bottom-right corner, not full width.
+      const box = await hint.boundingBox();
+      expect(box?.width ?? 0).toBeLessThan(420);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeGreaterThan(700);
     } finally {
       await context.close();
     }

@@ -31,6 +31,11 @@ function isIOS() {
   );
 }
 
+/** Phones and tablets: touch is the main input. Laptops get the browser's own install button. */
+function isTouchDevice() {
+  return window.matchMedia("(pointer: coarse)").matches;
+}
+
 function snoozed() {
   try {
     const at = Number(localStorage.getItem(DISMISSED_KEY));
@@ -41,9 +46,11 @@ function snoozed() {
 }
 
 /**
- * A small phone-only card that explains how to install Àríyá so it opens full
- * screen like an app. iPhones can't show an install button, so they get the
- * Share steps; Android and Chrome get a real Install button.
+ * A small card for phones and tablets that explains how to install Àríyá so it
+ * opens full screen like an app. iPhones and iPads can't show an install
+ * button, so they get the Share steps; Android and Chrome get a real Install
+ * button. Laptops are left alone: their browser already offers install in the
+ * address bar.
  */
 export function InstallHint() {
   const [mode, setMode] = useState<HintMode | null>(null);
@@ -59,6 +66,7 @@ export function InstallHint() {
     };
 
     const onPrompt = (e: Event) => {
+      if (!isTouchDevice()) return;
       // Keep Chrome's own mini-bar away; we show our own card instead.
       e.preventDefault();
       deferred.current = e as BeforeInstallPromptEvent;
@@ -106,8 +114,7 @@ export function InstallHint() {
     <section
       aria-label="Install the app"
       data-testid="install-hint"
-      className="animate-in fade-in slide-in-from-bottom-3 fixed inset-x-3 z-30 mx-auto max-w-md duration-500 md:hidden"
-      style={{ bottom: "calc(6.25rem + env(safe-area-inset-bottom))" }}
+      className="animate-in fade-in slide-in-from-bottom-3 fixed inset-x-3 bottom-[calc(6.25rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-md duration-500 md:inset-x-auto md:bottom-[calc(1.5rem+env(safe-area-inset-bottom))] md:right-6 md:mx-0 md:w-[24rem]"
     >
       <div className="flex items-start gap-3 rounded-[22px] bg-white/95 p-3 pr-2 shadow-[0_18px_40px_-18px_rgba(28,7,13,0.45),0_2px_6px_-2px_rgba(28,7,13,0.12)] ring-1 ring-black/5">
         <span
