@@ -65,7 +65,7 @@ export function AllEventsRow({
   return (
     <tr
       data-testid={`all-events-row-${event.id}`}
-      className="group relative transition-colors hover:bg-surface-container-low"
+      className="group relative transition-colors hover:bg-surface-container"
     >
       <th scope="row" className="py-3 pr-4 font-semibold text-night">
         <Link
@@ -91,7 +91,7 @@ export function AllEventsRow({
         {hasDate ? (
           <span className="flex items-center gap-2.5">
             <span
-              className="grid w-10 overflow-hidden rounded-lg bg-white text-center ring-1 ring-hairline"
+              className="grid w-10 overflow-hidden rounded-lg bg-ivory text-center ring-1 ring-hairline"
               aria-hidden="true"
             >
               <span className="bg-burgundy py-px text-[8px] font-bold tracking-[0.12em] text-white">
@@ -163,7 +163,7 @@ export function AllEventsRow({
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
             isPaid
               ? "bg-[#e4eee6] text-[#1f4d36]"
-              : "border border-hairline bg-surface-container-low text-label-2"
+              : "border border-hairline bg-surface-container text-label-2"
           }`}
         >
           {isPaid ? "Paid" : "Free"}
@@ -175,7 +175,7 @@ export function AllEventsRow({
             type="button"
             onClick={() => onCopyShare(event)}
             data-testid={`share-event-${event.id}`}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-hairline bg-white px-2.5 py-1 text-[11px] font-semibold text-night hover:bg-surface-container"
+            className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-hairline bg-ivory px-2.5 py-1 text-[11px] font-semibold text-night hover:bg-surface-container"
           >
             <Icon name={copiedId === event.id ? "check" : "share"} size={13} />
             <span>{copiedId === event.id ? "Link copied" : "Share"}</span>

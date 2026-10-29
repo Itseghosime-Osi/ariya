@@ -129,7 +129,7 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
                 className={`group relative flex flex-col overflow-hidden rounded-xl text-center transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
                   isSelected
                     ? "bg-[#1c070d] text-ivory shadow-[0_12px_24px_-12px_rgba(28,7,13,0.7)]"
-                    : "bg-white text-night ring-1 ring-hairline"
+                    : "bg-ivory text-night ring-1 ring-hairline"
                 }`}
               >
                 <span
@@ -191,10 +191,10 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
                 />
                 <Link
                   href={item.href}
-                  className="flex items-center gap-3 rounded-2xl bg-surface-container-low px-3 py-2.5 text-xs transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                  className="flex items-center gap-3 rounded-2xl bg-surface-container px-3 py-2.5 text-xs transition-colors hover:bg-surface-container-high focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
                 >
                   <span
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-burgundy ring-1 ring-hairline"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-ivory text-burgundy ring-1 ring-hairline"
                     aria-hidden="true"
                   >
                     <Icon

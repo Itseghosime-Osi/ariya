@@ -105,7 +105,7 @@ export function UpcomingEventTile({
               />
               {hasDate && (
                 <div
-                  className="grid w-11 shrink-0 overflow-hidden rounded-xl bg-white text-center shadow-[0_4px_10px_-6px_rgba(28,7,13,0.4)] ring-1 ring-[#b8864b]/30"
+                  className="grid w-11 shrink-0 overflow-hidden rounded-xl bg-ivory text-center shadow-[0_4px_10px_-6px_rgba(28,7,13,0.4)] ring-1 ring-[#b8864b]/30"
                   aria-hidden="true"
                 >
                   <span className="bg-[#6e1426] py-0.5 text-[9px] font-bold tracking-[0.14em] text-ivory">

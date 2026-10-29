@@ -151,7 +151,7 @@ export function TodoBentoCard({ alerts }: TodoBentoCardProps) {
                 role="tab"
                 aria-selected={tab === key}
                 onClick={() => setTab(key)}
-                className={`rounded-full px-3 py-1 transition-colors ${tab === key ? "bg-white text-night shadow-sm" : "text-label-2 hover:text-night"}`}
+                className={`rounded-full px-3 py-1 transition-colors ${tab === key ? "bg-ivory text-night shadow-sm" : "text-label-2 hover:text-night"}`}
               >
                 {label}
               </button>
@@ -227,7 +227,7 @@ export function TodoBentoCard({ alerts }: TodoBentoCardProps) {
         <ul className="flex flex-1 flex-col gap-2">
           <AnimatePresence initial={false}>
             {doneList.length === 0 ? (
-              <li className="rounded-2xl bg-surface-container-low px-4 py-6 text-center text-sm text-label-2">
+              <li className="rounded-2xl bg-surface-container px-4 py-6 text-center text-sm text-label-2">
                 Tick things off and they&apos;ll gather here.
               </li>
             ) : (
@@ -239,7 +239,7 @@ export function TodoBentoCard({ alerts }: TodoBentoCardProps) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-3 rounded-2xl bg-surface-container-low px-3 py-2.5"
+                    className="flex items-center gap-3 rounded-2xl bg-surface-container px-3 py-2.5"
                   >
                     <span
                       className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#2e6a4f] text-white"
@@ -295,7 +295,7 @@ function TodoItem({
         scale: 1.03,
         boxShadow: "0 18px 36px -18px rgba(28,7,13,0.45)",
       }}
-      className="relative flex items-center gap-2 overflow-hidden rounded-2xl bg-surface-container-lowest py-2 pl-1.5 pr-2 ring-1 ring-hairline"
+      className="relative flex items-center gap-2 overflow-hidden rounded-2xl bg-ivory py-2 pl-1.5 pr-2 ring-1 ring-hairline"
     >
       <span
         className="absolute inset-y-2 left-0 w-1 rounded-full"

@@ -25,7 +25,7 @@ export function EventsSearch({ query, onQueryChange }: EventsSearchProps) {
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         placeholder="Filter events"
-        className="w-full min-h-[44px] rounded-full border border-night/15 bg-white pl-9 pr-9 py-2 text-sm text-night placeholder:text-label-3 transition-shadow focus:outline-none focus-visible:border-burgundy focus-visible:ring-2 focus-visible:ring-burgundy/25"
+        className="w-full min-h-[44px] rounded-full border border-night/15 bg-ivory pl-9 pr-9 py-2 text-sm text-night placeholder:text-label-3 transition-shadow focus:outline-none focus-visible:border-burgundy focus-visible:ring-2 focus-visible:ring-burgundy/25"
       />
       {query && (
         <button
