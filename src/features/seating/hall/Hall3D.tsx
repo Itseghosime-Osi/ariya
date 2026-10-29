@@ -68,6 +68,8 @@ export type HallCommand =
   | "perspective"
   | "rotateLeft"
   | "rotateRight"
+  | "tiltUp"
+  | "tiltDown"
   | "snapshot";
 
 export interface HallMessage {

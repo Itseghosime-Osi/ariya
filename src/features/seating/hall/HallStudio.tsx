@@ -11,6 +11,8 @@ import {
   Armchair,
   Box,
   Camera,
+  ChevronDown,
+  ChevronUp,
   CirclePlus,
   Hand,
   LayoutGrid,
@@ -158,6 +160,10 @@ interface HallStudioProps {
   ) => Promise<{ seated: number; failed: number }>;
   onAssignTable: (guestId: string, tableId: string | null) => void;
   onDeleteTable: (tableId: string) => void;
+  /** The page's top bar: back link, title, view switch and page actions. */
+  header?: React.ReactNode;
+  /** A short message to show over the hall (saved, could not save…). */
+  notice?: React.ReactNode;
 }
 
 function nextTableNames(tables: TableWithGuests[], count: number): string[] {
@@ -195,6 +201,8 @@ export function HallStudio({
   bulkAssign,
   onAssignTable,
   onDeleteTable,
+  header,
+  notice,
 }: HallStudioProps) {
   const hall = useHallLayout({
     eventId,
@@ -228,6 +236,16 @@ export function HallStudio({
     on();
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
+  }, []);
+
+  // The studio fills the screen like a design tool: the page behind it does not scroll.
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+    };
   }, []);
 
   const positions: Positions = useMemo(() => {
@@ -961,16 +979,20 @@ export function HallStudio({
     <section
       ref={studio}
       aria-label="Hall studio"
-      className="overflow-hidden rounded-[28px] border border-hairline bg-white text-night shadow-[0_30px_60px_-36px_rgba(28,7,13,0.5)]"
+      className="fixed inset-0 z-[60] flex flex-col bg-[#f2f2f0] text-night"
       data-testid="hall-studio"
     >
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
 
+      <header className="flex h-14 shrink-0 items-center gap-1.5 border-b border-hairline bg-white px-2 sm:gap-2 sm:px-3">
+        {header}
+      </header>
+
       {narrow && !hideNarrowTip && (
         <div
-          className="flex items-start gap-3 border-b border-hairline bg-[#f6f1e8] px-4 py-3"
+          className="flex shrink-0 items-start gap-3 border-b border-hairline bg-[#f6f1e8] px-4 py-2.5"
           role="note"
         >
           <MonitorSmartphone
@@ -978,8 +1000,8 @@ export function HallStudio({
             className="mt-0.5 shrink-0 text-burgundy"
           />
           <p className="flex-1 text-[13px] leading-snug text-night">
-            Designing the hall works best on a tablet or laptop. On this screen
-            you can look around and seat guests from the tools below.
+            Designing the hall works best on a tablet or laptop. Here you can
+            look around and seat guests from the tools below.
           </p>
           <button
             type="button"
@@ -992,71 +1014,9 @@ export function HallStudio({
         </div>
       )}
 
-      {/* Header and live numbers */}
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-hairline px-4 py-3 sm:px-5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-burgundy">
-            Hall studio
-          </p>
-          <p className="font-display text-xl font-bold">
-            {layout.width} × {layout.length} m
-            <span className="ml-2 text-sm font-normal text-label-2">
-              {formatFeet(layout.width)} × {formatFeet(layout.length)}
-              {hall.saving
-                ? " · saving…"
-                : hall.storedLocally
-                  ? " · saved on this device"
-                  : ""}
-            </span>
-          </p>
-        </div>
-        <dl className="flex flex-wrap gap-x-6 gap-y-2" data-testid="hall-meter">
-          {[
-            {
-              k: "Guests coming",
-              v: guests,
-              note: buffer ? `${target} with buffer` : undefined,
-            },
-            {
-              k: "Seats placed",
-              v: seats,
-              note: seats >= target ? "enough" : `${target - seats} short`,
-              bad: seats < target,
-            },
-            {
-              k: "Hall fits",
-              v: fitEmpty.seats,
-              note: `${fitEmpty.count} × ${preset.capacity}-seat`,
-            },
-            { k: "Fire guidance", v: fireGuide, note: "diners max" },
-          ].map((m) => (
-            <div key={m.k}>
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-label-2">
-                {m.k}
-              </dt>
-              <dd className="flex items-baseline gap-1.5">
-                <span className="font-display text-xl font-bold tabular-nums">
-                  {m.v}
-                </span>
-                {m.note && (
-                  <span
-                    className={cn(
-                      "text-[11px]",
-                      m.bad ? "text-[#9e2a2b]" : "text-label-2"
-                    )}
-                  >
-                    {m.note}
-                  </span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Canvas */}
-        <div className="relative h-[440px] border-b border-hairline sm:h-[580px] lg:h-[700px] lg:border-b-0 lg:border-r">
+        <div className="relative min-h-0 flex-1">
           <Hall3D
             ref={view3d}
             scene={scene}
@@ -1064,43 +1024,105 @@ export function HallStudio({
             className="absolute inset-0"
           />
 
-          {/* Status chips */}
-          <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-11rem)] flex-wrap gap-1.5">
-            {assigning && (
-              <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-burgundy py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white shadow-lg">
-                Click a table for{" "}
-                {data.unseatedGuests.find((g) => g.id === assigning)?.name}
-                <button
-                  type="button"
-                  onClick={() => setAssigning(null)}
-                  className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/20"
-                  aria-label="Stop choosing a table"
+          {/* Hall size, live numbers and status */}
+          <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-11rem)] flex-col items-start gap-1.5">
+            <div
+              className={cn(
+                float,
+                "pointer-events-auto flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl px-4 py-2"
+              )}
+            >
+              <p className="text-sm font-semibold">
+                {layout.width} × {layout.length} m
+                <span className="ml-1.5 text-[11px] font-normal text-label-2">
+                  {formatFeet(layout.width)} × {formatFeet(layout.length)}
+                  {hall.saving
+                    ? " · saving…"
+                    : hall.storedLocally
+                      ? " · saved on this device"
+                      : ""}
+                </span>
+              </p>
+              <dl
+                className="hidden flex-wrap gap-x-4 gap-y-1 md:flex"
+                data-testid="hall-meter"
+              >
+                {[
+                  {
+                    k: "Guests",
+                    v: guests,
+                    note: buffer ? `${target} with buffer` : undefined,
+                  },
+                  {
+                    k: "Seats",
+                    v: seats,
+                    note:
+                      seats >= target ? "enough" : `${target - seats} short`,
+                    bad: seats < target,
+                  },
+                  { k: "Hall fits", v: fitEmpty.seats },
+                  { k: "Fire guide", v: fireGuide, note: "max" },
+                ].map((m) => (
+                  <div key={m.k} className="flex items-baseline gap-1">
+                    <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
+                      {m.k}
+                    </dt>
+                    <dd className="flex items-baseline gap-1">
+                      <span className="text-sm font-bold tabular-nums">
+                        {m.v}
+                      </span>
+                      {m.note && (
+                        <span
+                          className={cn(
+                            "text-[10px]",
+                            m.bad ? "text-[#9e2a2b]" : "text-label-2"
+                          )}
+                        >
+                          {m.note}
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {assigning && (
+                <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-burgundy py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white shadow-lg">
+                  Click a table for{" "}
+                  {data.unseatedGuests.find((g) => g.id === assigning)?.name}
+                  <button
+                    type="button"
+                    onClick={() => setAssigning(null)}
+                    className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/20"
+                    aria-label="Stop choosing a table"
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              )}
+              {warnCount > 0 && (
+                <span
+                  className={cn(
+                    float,
+                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b]"
+                  )}
                 >
-                  <X size={13} />
-                </button>
-              </span>
-            )}
-            {warnCount > 0 && (
-              <span
-                className={cn(
-                  float,
-                  "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b]"
-                )}
-              >
-                {warnCount} {warnCount === 1 ? "table needs" : "tables need"}{" "}
-                more space
-              </span>
-            )}
-            {data.tables.length === 0 && !assigning && (
-              <span
-                className={cn(
-                  float,
-                  "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
-                )}
-              >
-                Add tables from the toolbar, or use Fit to fill the hall
-              </span>
-            )}
+                  {warnCount} {warnCount === 1 ? "table needs" : "tables need"}{" "}
+                  more space
+                </span>
+              )}
+              {data.tables.length === 0 && !assigning && (
+                <span
+                  className={cn(
+                    float,
+                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
+                  )}
+                >
+                  Add tables from the toolbar, or use Fit to fill the hall
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Undo, redo, picture */}
@@ -1141,6 +1163,18 @@ export function HallStudio({
               <Camera size={17} />
             </button>
           </div>
+
+          {notice && (
+            <div
+              role="status"
+              className={cn(
+                float,
+                "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
+              )}
+            >
+              {notice}
+            </div>
+          )}
 
           {/* Tool rail */}
           <div
@@ -1427,7 +1461,7 @@ export function HallStudio({
                 className={chip}
                 onClick={() => view3d.current?.command("rotateLeft")}
                 aria-label="Turn the view left"
-                title="Turn the view (or right-drag)"
+                title="Turn the view (or drag empty space)"
               >
                 <RotateCcw size={16} />
               </button>
@@ -1436,16 +1470,34 @@ export function HallStudio({
                 className={chip}
                 onClick={() => view3d.current?.command("rotateRight")}
                 aria-label="Turn the view right"
-                title="Turn the view (or right-drag)"
+                title="Turn the view (or drag empty space)"
               >
                 <RotateCw size={16} />
+              </button>
+              <button
+                type="button"
+                className={chip}
+                onClick={() => view3d.current?.command("tiltUp")}
+                aria-label="Look down from higher"
+                title="Look from higher (or drag down on empty space)"
+              >
+                <ChevronUp size={17} />
+              </button>
+              <button
+                type="button"
+                className={chip}
+                onClick={() => view3d.current?.command("tiltDown")}
+                aria-label="Look from lower"
+                title="Look from lower, down to eye level"
+              >
+                <ChevronDown size={17} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Side bar: planning tools and the inspector */}
-        <div className="flex min-h-0 flex-col bg-[#fbf9f5] lg:h-[700px]">
+        <div className="flex h-[44%] min-h-0 shrink-0 flex-col border-t border-hairline bg-[#fbf9f5] lg:h-auto lg:w-[360px] lg:border-l lg:border-t-0">
           <div
             role="tablist"
             aria-label="Planning tools"
@@ -1650,8 +1702,8 @@ export function HallStudio({
             )}
           </div>
           <p className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block">
-            Drag to move · right-drag to turn the view · Space or H to pan · R
-            rotates · arrows nudge
+            Drag a table to move it · drag empty space to turn the hall ·
+            right-drag or Space to pan · Shift-drag to select many
           </p>
         </div>
       </div>

@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { Crown, GripVertical, Pencil, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tableSizeLabel } from "../hall/model";
@@ -24,15 +23,16 @@ function GuestChip({
   guest: SeatingGuest;
   onUnseat: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: guest.id, data: { guestId: guest.id } });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: guest.id,
+    data: { guestId: guest.id },
+  });
   return (
     <li
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform) }}
       className={cn(
         "flex items-center gap-1 rounded-full border border-hairline bg-white py-0.5 pl-0.5 pr-0.5 text-xs text-night",
-        isDragging && "z-20 shadow-lg ring-2 ring-burgundy/30"
+        isDragging && "border-dashed opacity-40"
       )}
     >
       <button

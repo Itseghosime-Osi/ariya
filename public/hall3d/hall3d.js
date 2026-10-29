@@ -1842,7 +1842,13 @@ const cam = { tx: 15, tz: 10, az: 0, pol: 0.95, dist: 50 };
 let goal = null;
 let fitDist = 50;
 
+/** The lowest the camera may go: down to eye level, never under the floor. */
+function maxPolar(dist) {
+  return Math.min(1.53, Math.acos(Math.min(1, 0.5 / Math.max(0.5, dist))));
+}
+
 function applyCamera() {
+  cam.pol = Math.min(cam.pol, maxPolar(cam.dist));
   const { tx, tz, az, pol, dist } = cam;
   camera.position.set(
     tx + dist * Math.sin(pol) * Math.sin(az),
@@ -1968,8 +1974,38 @@ function frame(now) {
     if (state.layout?.mood === "evening") composer.render();
     else renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
+    declutter();
   }
   if (goal) loop();
+}
+
+/**
+ * Hide labels that would sit on top of another: the selected item first, then areas, then the
+ * tables nearest the camera. Zooming in brings the hidden ones back.
+ */
+function declutter() {
+  if (!state.labels) return;
+  const list = [];
+  for (const [k, l] of labels) {
+    if (l.el.style.display === "none") continue;
+    const sel = l.el.classList.contains("sel");
+    const d = l.obj.getWorldPosition(tmpV).distanceTo(camera.position);
+    list.push({ l, rank: sel ? -1e9 : (k.startsWith("zone:") ? -1e6 : 0) + d });
+  }
+  list.sort((a, b) => a.rank - b.rank);
+  const placed = [];
+  for (const { l } of list) {
+    const r = l.el.getBoundingClientRect();
+    const hit = placed.some(
+      (p) =>
+        r.left < p.right + 2 &&
+        r.right > p.left - 2 &&
+        r.top < p.bottom + 1 &&
+        r.bottom > p.top - 1
+    );
+    l.el.classList.toggle("muted", hit);
+    if (!hit) placed.push(r);
+  }
 }
 
 function resize() {
@@ -2061,8 +2097,9 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     return;
   }
   goal = null;
-  const orbit = e.button === 2 || (e.button === 0 && e.altKey && e.shiftKey);
-  const pan = e.button === 1 || state.tool === "hand" || spaceDown;
+  const orbit = e.button === 0 && e.altKey;
+  const pan =
+    e.button === 1 || e.button === 2 || state.tool === "hand" || spaceDown;
   if (orbit) {
     drag = {
       kind: "orbit",
@@ -2114,6 +2151,20 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     document.body.classList.add("grabbing");
     return;
   }
+  // Dragging empty space turns the hall; Shift-drag draws a selection box instead.
+  if (!e.shiftKey) {
+    drag = {
+      kind: "orbit",
+      x: e.clientX,
+      y: e.clientY,
+      az: cam.az,
+      pol: cam.pol,
+      empty: true,
+      moved: false,
+    };
+    document.body.classList.add("grabbing");
+    return;
+  }
   drag = {
     kind: "marquee",
     x: e.clientX,
@@ -2157,11 +2208,15 @@ renderer.domElement.addEventListener("pointermove", (e) => {
     );
     applyCamera();
   } else if (drag.kind === "orbit") {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4)
+      drag.moved = true;
+    if (!drag.moved) return;
+    goal = null;
     cam.az = drag.az - (e.clientX - drag.x) * 0.006;
     cam.pol = THREE.MathUtils.clamp(
       drag.pol - (e.clientY - drag.y) * 0.005,
       0.0001,
-      1.32
+      maxPolar(cam.dist)
     );
     applyCamera();
   } else if (drag.kind === "pan" && drag.p0) {
@@ -2177,7 +2232,15 @@ renderer.domElement.addEventListener("pointermove", (e) => {
     const dz = snap(p.z - drag.p0.z, e);
     if (!drag.moved && Math.hypot(dx, dz) < 0.04) return;
     drag.moved = true;
-    for (const s of drag.start) s.i.obj.position.set(s.x + dx, 0, s.z + dz);
+    // Keep everything inside the room.
+    const W = state.layout.width;
+    const L = state.layout.length;
+    for (const s of drag.start)
+      s.i.obj.position.set(
+        THREE.MathUtils.clamp(s.x + dx, 0, W),
+        0,
+        THREE.MathUtils.clamp(s.z + dz, 0, L)
+      );
     if (drag.start.some((s) => s.i.type !== "zone")) rebuildInstances();
     renderer.shadowMap.needsUpdate = true;
     requestRender();
@@ -2217,6 +2280,11 @@ function endDrag(e) {
   document.body.classList.remove("grabbing");
   const d = drag;
   drag = null;
+  if (d.kind === "orbit" && d.empty && !d.moved && state.selection.length) {
+    state.selection = [];
+    post({ t: "select", items: [] });
+    syncSelection();
+  }
   if (d.kind === "move") {
     if (d.moved) {
       post({
@@ -2440,6 +2508,12 @@ window.addEventListener("message", (e) => {
         break;
       case "rotateRight":
         tweenTo({ az: cam.az - Math.PI / 4 }, 420);
+        break;
+      case "tiltUp":
+        tweenTo({ pol: Math.max(0.0001, cam.pol - 0.2) }, 360);
+        break;
+      case "tiltDown":
+        tweenTo({ pol: Math.min(maxPolar(cam.dist), cam.pol + 0.2) }, 360);
         break;
       case "focus": {
         const item = items.get(m.key);
