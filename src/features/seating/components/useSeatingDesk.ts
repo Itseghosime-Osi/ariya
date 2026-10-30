@@ -1,12 +1,17 @@
 import { useState } from "react";
 import {
   assignSeatAction,
+  bulkAssignSeatsAction,
   createTableAction,
+  createTablesBulkAction,
   updateTableAction,
   deleteTableAction,
+  saveTablePositionsAction,
 } from "../actions";
+import type { CreateTableInput } from "../schemas";
 import type {
   SeatingDeskData,
+  SeatingGuest,
   Table,
   TableShape,
   TableWithGuests,
@@ -149,18 +154,33 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     }
   };
 
-  const handleDeleteTable = async (tableId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this table? Assigned guests will become unseated."
-      )
-    ) {
-      return;
-    }
+  /** Asking first: the page shows a dialog for the table waiting here. */
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const handleDeleteTable = (tableId: string) => setPendingDelete(tableId);
+  const cancelDelete = () => setPendingDelete(null);
+  const confirmDelete = async () => {
+    const id = pendingDelete;
+    setPendingDelete(null);
+    if (id && (await removeTable(id))) setSuccessMsg("Table deleted.");
+  };
+
+  /** Remove several tables at once (shrinking a crowded hall), without asking for each. */
+  const deleteTables = async (ids: string[]) => {
+    setErrorMsg(null);
+    let removed = 0;
+    for (const id of ids) if (await removeTable(id)) removed += 1;
+    if (removed)
+      setSuccessMsg(
+        `${removed} ${removed === 1 ? "table" : "tables"} removed from the hall.`
+      );
+    return removed;
+  };
+
+  const removeTable = async (tableId: string) => {
     const res = await deleteTableAction(eventId, tableId);
     if (!res.ok) {
       setErrorMsg(res.error || "Failed to delete table");
-      return;
+      return false;
     }
     setData((prev) => {
       const target = prev.tables.find((t) => t.id === tableId);
@@ -172,11 +192,168 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
         ...prev,
         tables: remainingTables,
         unseatedGuests: [...prev.unseatedGuests, ...newlyUnseated],
+        stats: {
+          ...prev.stats,
+          totalCapacity: prev.stats.totalCapacity - (target?.capacity ?? 0),
+          seatedAttendees:
+            prev.stats.seatedAttendees - (target?.occupiedSeats ?? 0),
+          unseatedAttendees:
+            prev.stats.unseatedAttendees + (target?.occupiedSeats ?? 0),
+        },
       };
     });
+    return true;
+  };
+
+  /** Change a table's name, seats or shape straight from the hall studio (optimistic). */
+  const updateTable = async (
+    tableId: string,
+    patch: { name?: string; capacity?: number; shape?: TableShape }
+  ) => {
+    setErrorMsg(null);
+    const before = data.tables.find((t) => t.id === tableId);
+    if (!before) return;
+    const apply = (t: TableWithGuests) =>
+      setData((prev) => {
+        const tables = prev.tables.map((x) => (x.id === tableId ? t : x));
+        return {
+          ...prev,
+          tables,
+          stats: {
+            ...prev.stats,
+            totalCapacity: tables.reduce((a, x) => a + x.capacity, 0),
+          },
+        };
+      });
+    apply({ ...before, ...patch });
+    const res = await updateTableAction(eventId, tableId, patch);
+    if (!res.ok) {
+      apply(before);
+      setErrorMsg(res.error || "Could not update the table.");
+    }
+  };
+
+  /** Add many tables at once, each already placed in the hall (positions in centimetres). */
+  const addTables = async (items: CreateTableInput[]) => {
+    setErrorMsg(null);
+    const res = await createTablesBulkAction(eventId, items);
+    if (!res.ok || !res.data) {
+      setErrorMsg(res.error || "Could not add the tables.");
+      return [];
+    }
+    const now = new Date().toISOString();
+    const created: TableWithGuests[] = res.data.map((row, i) => ({
+      id: row.id,
+      event_id: eventId,
+      name: row.name,
+      capacity: items[i].capacity,
+      shape: items[i].shape,
+      position_x: items[i].position_x,
+      position_y: items[i].position_y,
+      created_at: now,
+      updated_at: now,
+      guests: [],
+      occupiedSeats: 0,
+    }));
+    setData((prev) => ({
+      ...prev,
+      tables: [...prev.tables, ...created].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      ),
+      stats: {
+        ...prev.stats,
+        totalCapacity:
+          prev.stats.totalCapacity +
+          created.reduce((acc, t) => acc + t.capacity, 0),
+      },
+    }));
+    setSuccessMsg(`${created.length} tables added to the hall.`);
+    return created;
+  };
+
+  /** Move tables in the hall (centimetres). Applied at once; saved in the background. */
+  const setTablePositions = async (
+    items: { id: string; x: number; y: number }[],
+    persist = true
+  ) => {
+    if (items.length === 0) return;
+    const byId = new Map(items.map((i) => [i.id, i]));
+    setData((prev) => ({
+      ...prev,
+      tables: prev.tables.map((t) => {
+        const p = byId.get(t.id);
+        return p ? { ...t, position_x: p.x, position_y: p.y } : t;
+      }),
+    }));
+    if (!persist) return;
+    const res = await saveTablePositionsAction(eventId, items);
+    if (!res.ok) setErrorMsg(res.error || "Could not save table positions.");
+  };
+
+  /** Seat many guests at once (auto-seat). Optimistic, then reconciled with what the server accepted. */
+  const bulkAssign = async (pairs: { guestId: string; tableId: string }[]) => {
+    if (pairs.length === 0) return { seated: 0, failed: 0 };
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    const previous = data;
+    const target = new Map(pairs.map((p) => [p.guestId, p.tableId]));
+    const apply = (prev: SeatingDeskData, keep: (id: string) => boolean) => {
+      const moving: SeatingGuest[] = [];
+      const unseated = prev.unseatedGuests.filter((g) => {
+        if (target.has(g.id) && keep(g.id)) {
+          moving.push({ ...g, table_id: target.get(g.id) ?? null });
+          return false;
+        }
+        return true;
+      });
+      const tables = prev.tables.map((t) => {
+        const add = moving.filter((g) => g.table_id === t.id);
+        if (add.length === 0) return t;
+        const guests = [...t.guests, ...add];
+        return {
+          ...t,
+          guests,
+          occupiedSeats: guests.reduce((a, g) => a + g.attending_count, 0),
+        };
+      });
+      const seated = tables.reduce((a, t) => a + t.occupiedSeats, 0);
+      const waiting = unseated.reduce((a, g) => a + g.attending_count, 0);
+      return {
+        tables,
+        unseatedGuests: unseated,
+        stats: {
+          totalCapacity: prev.stats.totalCapacity,
+          seatedAttendees: seated,
+          unseatedAttendees: waiting,
+          readinessPct:
+            seated + waiting > 0
+              ? Math.min(100, Math.round((seated / (seated + waiting)) * 100))
+              : 0,
+        },
+      };
+    };
+    setData((prev) => apply(prev, () => true));
+    const res = await bulkAssignSeatsAction(eventId, pairs);
+    if (!res.ok || !res.data) {
+      setData(previous);
+      setErrorMsg(res.error || "Could not seat the guests.");
+      return { seated: 0, failed: pairs.length };
+    }
+    const failed = new Set(res.data.failed);
+    if (failed.size > 0) setData(apply(previous, (id) => !failed.has(id)));
+    setSuccessMsg(
+      failed.size > 0
+        ? `Seated ${res.data.seated}; ${failed.size} could not be seated.`
+        : `Seating chart updated: ${res.data.seated} guests seated.`
+    );
+    return { seated: res.data.seated, failed: failed.size };
   };
 
   return {
+    addTables,
+    updateTable,
+    setTablePositions,
+    bulkAssign,
     data,
     errorMsg,
     successMsg,
@@ -187,5 +364,9 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     executeSeatChange,
     handleSaveTable,
     handleDeleteTable,
+    pendingDelete,
+    cancelDelete,
+    confirmDelete,
+    deleteTables,
   };
 }

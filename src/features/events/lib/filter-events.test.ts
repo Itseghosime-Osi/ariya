@@ -26,6 +26,7 @@ function makeItem(
       date: "2026-12-12T14:00:00Z",
       rsvp_by: null,
       dress_code: null,
+      hall_layout: null,
       description: null,
       cover_image_url: null,
       is_public: false,

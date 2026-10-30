@@ -332,7 +332,51 @@
   animation: wiz-stamp 480ms var(--ease-out) both;
 }
 
+/* Hall studio's decorated view: candles flicker, LED floor twinkles, uplights breathe. */
+@keyframes hall-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.7;
+  }
+  60% {
+    opacity: 0.95;
+  }
+}
+.hall-flicker {
+  animation: hall-flicker 1.6s ease-in-out infinite;
+}
+@keyframes hall-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.hall-twinkle {
+  animation: hall-twinkle 2.4s ease-in-out infinite;
+}
+@keyframes hall-breathe {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.hall-breathe {
+  animation: hall-breathe 5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .hall-flicker,
+  .hall-twinkle,
+  .hall-breathe,
   .wiz-in,
   .wiz-rise,
   .wiz-pop,
@@ -352,5 +396,25 @@
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+}
+
+/* Hall studio: the tools that wait by the undo buttons while the side panel is tucked away. */
+@keyframes hall-pop {
+  from {
+    opacity: 0;
+    transform: translateX(10px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hall-pop {
+  animation: hall-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hall-pop {
+    animation: none;
   }
 }

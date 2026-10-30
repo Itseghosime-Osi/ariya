@@ -16,6 +16,7 @@ function makeEvent(
       venue: overrides.venue ?? "Eko Hotel, Victoria Island",
       area: overrides.area ?? "Victoria Island, Lagos",
       dress_code: overrides.dress_code ?? null,
+      hall_layout: null,
       description: overrides.description ?? null,
       cover_image_url: overrides.cover_image_url ?? null,
       is_public: overrides.is_public ?? false,

@@ -30,18 +30,18 @@ export function UnseatedGuestList({
   });
 
   return (
-    <div className="bg-surface-container-low rounded-2xl border border-outline-variant/30 p-4 space-y-4 flex flex-col h-full max-h-[800px]">
+    <div className="flex h-full max-h-[calc(100dvh-16rem)] flex-col space-y-3 rounded-[22px] border border-hairline bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-base text-wine font-medium">
-            Unseated Guests
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
+            Waiting for a seat
           </h2>
-          <p className="text-[11px] text-on-surface-variant">
+          <p className="mt-0.5 text-[11px] text-label-2">
             {guests.length} {guests.length === 1 ? "party" : "parties"} awaiting
             table allocation
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-wine/10 text-wine">
+        <span className="rounded-full bg-burgundy px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-white">
           {guests.reduce((acc, g) => acc + g.attending_count, 0)} guests
         </span>
       </div>
@@ -55,27 +55,26 @@ export function UnseatedGuestList({
           />
           <input
             type="text"
-            placeholder="Search unseated guests..."
+            placeholder="Find a guest"
+            aria-label="Find a guest waiting for a seat"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-outline-variant/60 bg-white text-xs text-night focus:outline-none focus:ring-1 focus:ring-wine/50"
+            className="h-10 w-full rounded-full border border-hairline bg-white pl-9 pr-3 text-base text-night outline-none focus:border-night sm:text-sm"
           />
         </div>
 
         <div className="flex items-center justify-between text-xs pt-1">
-          <label className="flex items-center gap-1.5 cursor-pointer text-on-surface-variant text-[11px]">
+          <label className="flex min-h-9 cursor-pointer items-center gap-2 text-xs text-label-2">
             <input
               type="checkbox"
               checked={vipOnly}
               onChange={(e) => setVipOnly(e.target.checked)}
-              className="rounded text-wine focus:ring-wine/40"
+              className="h-4 w-4 accent-[#6e1426]"
             />
-            <span>VIP Guests Only</span>
+            <span>VIPs only</span>
           </label>
         </div>
       </div>
-
-      <hr className="border-outline-variant/30" />
 
       {/* List Container */}
       <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">

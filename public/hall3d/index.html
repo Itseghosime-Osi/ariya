@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3D hall</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+        color-scheme: normal;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      body.evening {
+        background: #2c2c2c;
+      }
+      main,
+      #stage {
+        position: absolute;
+        inset: 0;
+      }
+      #stage canvas {
+        display: block;
+        touch-action: none;
+        outline: none;
+      }
+      .labels {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .lbl {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px 4px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.94);
+        color: #1c1418;
+        font-size: 11px;
+        line-height: 1.2;
+        white-space: nowrap;
+        box-shadow:
+          0 1px 2px rgba(28, 7, 13, 0.18),
+          0 6px 16px -8px rgba(28, 7, 13, 0.35);
+        transform: translateY(-50%);
+      }
+      .lbl b {
+        font-weight: 600;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .lbl span {
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: #f3ead8;
+        color: #5c4013;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .lbl.full span {
+        background: #6e1426;
+        color: #fff;
+      }
+      .lbl {
+        transition: opacity 0.15s;
+      }
+      .lbl.muted {
+        opacity: 0;
+      }
+      .lbl.zone {
+        background: rgba(28, 20, 24, 0.82);
+        color: #f6efe3;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .lbl.sel {
+        background: #6e1426;
+        color: #fff;
+      }
+      .lbl.sel span {
+        background: #e9c98a;
+        color: #1c070d;
+      }
+      #marquee {
+        position: fixed;
+        display: none;
+        border: 1px solid #6e1426;
+        background: rgba(110, 20, 38, 0.08);
+        border-radius: 2px;
+        pointer-events: none;
+      }
+      body.grabbing canvas {
+        cursor: grabbing !important;
+      }
+      .fallback {
+        display: none;
+        position: absolute;
+        inset: 0;
+        place-items: center;
+        padding: 24px;
+        text-align: center;
+        color: #1c1418;
+        font-size: 14px;
+      }
+      body.no-webgl .fallback {
+        display: grid;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main id="stage" aria-label="3D hall"></main>
+    <div id="marquee"></div>
+    <p class="fallback">
+      This device cannot draw the 3D hall. Use the table list to plan seating.
+    </p>
+    <script type="module" src="./hall3d.js"></script>
+  </body>
+</html>

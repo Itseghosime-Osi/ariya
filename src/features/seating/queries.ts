@@ -152,7 +152,13 @@ export async function getEventSeatingData(
     return a.name.localeCompare(b.name);
   });
 
-  const tables = Array.from(tableMap.values());
+  // "Table 2" before "Table 10".
+  const tables = Array.from(tableMap.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
+  );
   const totalCapacity = tables.reduce((acc, t) => acc + t.capacity, 0);
   const totalAttendees = seatedAttendees + unseatedAttendees;
   const readinessPct =
@@ -170,4 +176,27 @@ export async function getEventSeatingData(
       readinessPct,
     },
   };
+}
+
+/**
+ * The hall studio's room document for an event. `available` is false when the database has not
+ * been migrated yet, so the studio can fall back to keeping the layout on the device.
+ */
+export async function getHallLayout(
+  eventId: string
+): Promise<{ layout: unknown; available: boolean }> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default")
+    return { layout: null, available: false };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("events")
+    .select("hall_layout")
+    .eq("id", cleanId)
+    .maybeSingle();
+  if (error) {
+    console.warn("[getHallLayout] hall_layout unavailable:", error.code);
+    return { layout: null, available: false };
+  }
+  return { layout: data?.hall_layout ?? null, available: true };
 }

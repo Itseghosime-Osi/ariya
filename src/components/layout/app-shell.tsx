@@ -172,6 +172,7 @@ export function AppShell({
 
   return (
     <div
+      data-app-shell
       className={cn(
         "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
         ready && "sb-ready"
@@ -214,7 +215,13 @@ export function AppShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 px-4 sm:px-6 lg:px-8 pt-6 max-w-[1280px] w-full mx-auto focus:outline-none"
+          className={cn(
+            "flex-1 px-4 sm:px-6 lg:px-8 pt-6 w-full mx-auto focus:outline-none",
+            // The seating studio is a workspace: it uses the full width between the bars.
+            /\/events\/[^/]+\/seating$/.test(pathname)
+              ? "max-w-none"
+              : "max-w-[1280px]"
+          )}
         >
           {children}
         </main>

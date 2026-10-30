@@ -55,7 +55,7 @@ export function TableFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-outline-variant/40 space-y-5 animate-in fade-in duration-150">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg text-wine font-medium">

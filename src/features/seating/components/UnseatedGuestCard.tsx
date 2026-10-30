@@ -17,27 +17,18 @@ export function UnseatedGuestCard({
   tables,
   onAssignTable,
 }: UnseatedGuestCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: guest.id,
-      data: { guestId: guest.id, attendingCount: guest.attending_count },
-    });
-
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: 999,
-      }
-    : undefined;
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: guest.id,
+    data: { guestId: guest.id, attendingCount: guest.attending_count },
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
-      className={`p-3.5 rounded-2xl border transition-all text-xs bg-white space-y-2.5 ${
+      className={`space-y-2 rounded-xl border bg-white p-2.5 text-xs transition-all ${
         isDragging
-          ? "opacity-50 ring-2 ring-wine shadow-xl border-wine"
-          : "border-outline-variant/50 hover:border-wine/40 shadow-xs"
+          ? "opacity-40 border-dashed border-wine"
+          : "border-hairline hover:border-night/30"
       }`}
     >
       <div className="flex items-start justify-between gap-2">

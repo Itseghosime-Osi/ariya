@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
-import { getEventSeatingData } from "@/features/seating/queries";
+import { getEventSeatingData, getHallLayout } from "@/features/seating/queries";
 import { SeatingDesk } from "@/features/seating/components/SeatingDesk";
 
 interface SeatingPageProps {
@@ -18,9 +18,10 @@ export async function generateMetadata({ params }: SeatingPageProps) {
 
 export default async function SeatingPageRoute({ params }: SeatingPageProps) {
   const { eventId } = await params;
-  const [eventData, seatingData] = await Promise.all([
+  const [eventData, seatingData, hall] = await Promise.all([
     getEventById(eventId),
     getEventSeatingData(eventId),
+    getHallLayout(eventId),
   ]);
 
   if (!eventData) {
@@ -29,7 +30,12 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
 
   return (
     <>
-      <SeatingDesk eventId={eventId} initialData={seatingData} />
+      <SeatingDesk
+        eventId={eventId}
+        initialData={seatingData}
+        hallLayout={hall.layout}
+        hallLayoutAvailable={hall.available}
+      />
     </>
   );
 }
