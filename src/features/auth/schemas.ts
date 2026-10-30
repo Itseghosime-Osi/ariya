@@ -27,9 +27,7 @@ export const signUpSchema = z
       ),
     confirmPassword: z.string().min(1, "Please confirm your passcode"),
     agreeTerms: z.literal(true, {
-      errorMap: () => ({
-        message: "You must agree to the terms and privacy policy",
-      }),
+      error: "You must agree to the terms and privacy policy",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

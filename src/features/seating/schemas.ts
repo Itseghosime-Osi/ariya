@@ -29,8 +29,8 @@ export const updateTableSchema = createTableSchema.partial();
 export type UpdateTableInput = z.infer<typeof updateTableSchema>;
 
 export const assignSeatInputSchema = z.object({
-  guestId: z.string().uuid("Invalid guest identifier"),
-  tableId: z.string().uuid("Invalid table identifier").nullable(),
+  guestId: z.guid("Invalid guest identifier"),
+  tableId: z.guid("Invalid table identifier").nullable(),
 });
 
 export type AssignSeatInput = z.infer<typeof assignSeatInputSchema>;

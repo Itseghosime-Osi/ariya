@@ -6,6 +6,9 @@ import type { GlobalSearchResults } from "./types";
 export async function globalSearchAction(
   query: string
 ): Promise<{ data?: GlobalSearchResults; error?: string }> {
+  if (typeof query !== "string" || query.length > 200) {
+    return { error: "Search must be 200 characters or fewer." };
+  }
   const trimmed = query.trim();
   if (!trimmed) {
     return {
@@ -24,7 +27,7 @@ export async function globalSearchAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: "Search is unavailable. Please try again." };
   }
 
   return {

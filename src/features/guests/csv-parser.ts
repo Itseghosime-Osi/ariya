@@ -137,7 +137,7 @@ export function parseGuestCsvContent(
       errorRows.push({
         rowIndex,
         raw: row,
-        errors: validated.error.errors.map(
+        errors: validated.error.issues.map(
           (e) => `${e.path.join(".")}: ${e.message}`
         ),
       });

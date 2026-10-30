@@ -15,7 +15,7 @@ export const inviteTeamMemberSchema = z.object({
 export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
 
 export const updateTeamMemberRoleSchema = z.object({
-  targetUserId: z.string().uuid("Invalid user ID"),
+  targetUserId: z.guid("Invalid user ID"),
   newRole: eventRoleEnum,
 });
 
@@ -24,7 +24,7 @@ export type UpdateTeamMemberRoleInput = z.infer<
 >;
 
 export const removeTeamMemberSchema = z.object({
-  targetUserId: z.string().uuid("Invalid user ID"),
+  targetUserId: z.guid("Invalid user ID"),
 });
 
 export type RemoveTeamMemberInput = z.infer<typeof removeTeamMemberSchema>;

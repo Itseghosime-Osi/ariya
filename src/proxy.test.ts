@@ -35,6 +35,21 @@ describe("proxy route protection", () => {
     vi.clearAllMocks();
   });
 
+  it.each([
+    "/",
+    "/about",
+    "/product",
+    "/pricing",
+    "/robots.txt",
+    "/sitemap.xml",
+  ])("serves %s without a Supabase authentication request", async (path) => {
+    const response = await proxy(
+      new NextRequest(`http://localhost:3000${path}`)
+    );
+    expect(response.status).toBe(200);
+    expect(supabaseMiddleware.updateSession).not.toHaveBeenCalled();
+  });
+
   it("redirects unauthenticated user accessing /events to /sign-in?next=/events", async () => {
     mockSession(null);
 

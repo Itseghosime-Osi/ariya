@@ -11,8 +11,8 @@
 <meta property="og:site_name" content="Àríyá by OwambePlan">
 <meta property="og:title" content="The Yes · Àríyá">
 <meta property="og:description" content="One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in seventeen chapters, from Àríyá by OwambePlan.">
-<meta property="og:url" content="https://owambeplan.vercel.app/">
-<meta property="og:image" content="https://owambeplan.vercel.app/assets/og.jpg">
+<meta property="og:url" content="https://ariya-two.vercel.app/">
+<meta property="og:image" content="https://ariya-two.vercel.app/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
@@ -429,6 +429,8 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   }
 }
 </script>
+<link rel="canonical" href="https://ariya-two.vercel.app/">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://ariya-two.vercel.app/#organization", "name": "Àríyá by OwambePlan", "url": "https://ariya-two.vercel.app/"}, {"@type": "WebSite", "@id": "https://ariya-two.vercel.app/#website", "name": "Àríyá", "url": "https://ariya-two.vercel.app/", "publisher": {"@id": "https://ariya-two.vercel.app/#organization"}}]}</script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -468,7 +470,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
   <div class="where mono" aria-live="off"><span>Chapter</span><b id="whereNo">000</b><span id="whereName">The words</span></div>
   <div class="right">
     <a class="btn gold small" href="planner.html">Start planning</a>
-    <button class="icon-btn" id="soundBtn" type="button" aria-pressed="false"><span class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="lbl">Sound</span></button>
+    <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound" aria-pressed="false"><span class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span class="lbl">Sound</span></button>
     <button class="icon-btn" id="menuBtn" type="button" data-cm-open data-cm-label>Menu</button>
   </div>
 </header>
@@ -529,7 +531,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       </div>
       <div class="env-front"><p class="to"><small>Hand delivered to</small><span id="toName">Mama Ijeoma</span></p></div>
       <div class="env-flap" aria-hidden="true"><div class="outside"><p class="foil">Chidinma &amp; Tunde<small>12 · 12 · 2026</small></p></div><div class="inside"></div></div>
-      <button class="seal" id="seal" type="button" aria-label="Break the seal and open the invitation"></button>
+      <button class="seal" id="seal" type="button" aria-label="CT — Break the seal and open the invitation"></button>
       <p class="seal-hint mono">Tap the seal</p>
     </div>
   </div>
@@ -696,7 +698,7 @@ html.embed, html.embed body { overflow: hidden; background: #1c070d; }
       <div class="close-cta">
         <a class="btn gold" href="planner.html">Start planning</a>
         <a class="btn" href="rsvp.html?g=k701Qx">Try a personal invitation</a>
-        <a class="quiet-link" href="pricing.html">Pricing: free for small events, ₦45,000 per celebration <small>(placeholder prices)</small></a>
+        <a class="quiet-link" href="pricing.html">Pricing: free for small events, ₦50,000 per celebration <small>(per event)</small></a>
       </div>
     </div>
   </section>
@@ -1537,13 +1539,18 @@ async function start() {
   scene.add(setA, setB);
 
   /* ---------- Environment: a real ballroom with chandeliers (Poly Haven, CC0) ---------- */
-  const envTex = await new EXRLoader().loadAsync("assets/hall.exr");
+  // Fetch independent lighting assets together; keep the same textures and fallback.
+  const [envTex, roomTexture, nightTexture] = await Promise.all([
+    new EXRLoader().loadAsync("assets/hall.exr"),
+    new EXRLoader().loadAsync("assets/apartment.exr").catch(() => null),
+    new EXRLoader().loadAsync("assets/night.exr").catch(() => null)
+  ]);
   envTex.mapping = THREE.EquirectangularReflectionMapping;
   OP.loaded = 0.35;
   const envEuler = new THREE.Euler(0, 2.2, 0);
   scene.environment = envTex;
   // Each place gets light from a real place: a lived-in apartment for the two rooms, a night sky for the lagoon (Poly Haven, CC0).
-  const [envRoom, envNight] = await Promise.all(["assets/apartment.exr", "assets/night.exr"].map((u) => new EXRLoader().loadAsync(u).catch(() => envTex)));
+  const envRoom = roomTexture || envTex, envNight = nightTexture || envTex;
   envRoom.mapping = envNight.mapping = THREE.EquirectangularReflectionMapping;
   scene.environmentRotation.copy(envEuler);
   scene.backgroundRotation.copy(envEuler);

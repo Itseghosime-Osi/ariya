@@ -14,21 +14,13 @@ interface GuestInvitationPageProps {
   searchParams: Promise<{ revise?: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: GuestInvitationPageProps): Promise<Metadata> {
-  const { token } = await params;
-  const result = await getInvitationByToken(token);
-
-  if (!result.data) {
-    return { title: "Invitation Pass • Àríyá" };
-  }
-
-  return {
-    title: `Invitation for ${result.data.guest.display_name} • ${result.data.event.title} • Àríyá`,
-    description: `Official celebration pass and RSVP confirmation for ${result.data.guest.display_name}.`,
-  };
-}
+// Personal names and event details must not be exposed in link previews or search results.
+export const metadata: Metadata = {
+  title: "Invitation Pass • Àríyá",
+  description: "Open your personal invitation to view the details and RSVP.",
+  robots: { index: false, follow: false, noarchive: true },
+  referrer: "no-referrer",
+};
 
 export default async function GuestInvitationPage({
   params,

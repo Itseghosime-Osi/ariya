@@ -31,7 +31,7 @@ export async function createEventAction(
   const parsed = createEventSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid celebration input";
+      parsed.error.issues[0]?.message ?? "Invalid celebration input";
     return { ok: false, error: firstError };
   }
 
@@ -105,7 +105,7 @@ export async function updateEventAction(
   const parsed = updateEventSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid update input";
+      parsed.error.issues[0]?.message ?? "Invalid update input";
     return { ok: false, error: firstError };
   }
 

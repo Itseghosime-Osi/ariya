@@ -18,7 +18,7 @@ export const invitationDesignSchema = z.object({
 export type InvitationDesignInput = z.infer<typeof invitationDesignSchema>;
 
 export const trackInvitationsSchema = z.object({
-  guestIds: z.array(z.string().uuid("Invalid guest ID")).min(1),
+  guestIds: z.array(z.guid("Invalid guest ID")).min(1),
 });
 
 export type TrackInvitationsInput = z.infer<typeof trackInvitationsSchema>;
