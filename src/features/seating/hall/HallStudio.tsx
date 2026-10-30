@@ -32,6 +32,7 @@ import {
   Sparkles,
   Square,
   Sun,
+  Keyboard,
   Tag,
   Undo2,
   Users,
@@ -222,6 +223,7 @@ export function HallStudio({
   const [deck, setDeck] = useState<Deck>("guests");
   const [flyout, setFlyout] = useState<Flyout>(null);
   const [labels, setLabels] = useState(true);
+  const [keysOpen, setKeysOpen] = useState(false);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [cam, setCam] = useState<{ pct: number; view: "top" | "3d" }>({
     pct: 100,
@@ -1006,6 +1008,20 @@ export function HallStudio({
     setAssigning(null);
   };
 
+  const toggleKeys = () => {
+    setFlyout(null);
+    setKeysOpen((v) => !v);
+  };
+  const openDecor = () => {
+    setSelection([]);
+    setDeck("decor");
+  };
+  const toggleMood = () =>
+    updateLayout((l) => ({
+      ...l,
+      mood: l.mood === "evening" ? "day" : "evening",
+    }));
+
   // ---------- keyboard (from the page, or forwarded by the 3D hall) ----------
   type Key = { key: string; shift: boolean; ctrl: boolean; meta: boolean };
   const keyRef = useRef<(k: Key) => boolean>(() => false);
@@ -1020,11 +1036,22 @@ export function HallStudio({
     else if (mod && k === "d") duplicate();
     else if (mod) return false;
     else if (key === "Escape") {
-      if (assigning) setAssigning(null);
+      if (keysOpen) setKeysOpen(false);
+      else if (assigning) setAssigning(null);
       else if (flyout) setFlyout(null);
       else setSelection([]);
-    } else if (k === "v") setTool("select");
-    else if (k === "h") setTool("hand");
+    } else if (key === "?") toggleKeys();
+    else if (k === "v" || k === "m") setTool("select");
+    else if (k === "h" || k === "d") setTool("hand");
+    else if (k === "a") {
+      if (busy === null) autoLayout();
+    } else if (k === "t") setFlyout(flyout === "table" ? null : "table");
+    else if (k === "c") setFlyout(flyout === "chair" ? null : "chair");
+    else if (k === "s") setFlyout(flyout === "zone" ? null : "zone");
+    else if (k === "p") openDecor();
+    else if (k === "l") setLabels((v) => !v);
+    else if (k === "n") toggleMood();
+    else if (k === "f") view3d.current?.command("fit");
     else if (key === "\\") togglePanel();
     else if (key === "Delete" || key === "Backspace") remove();
     else if (k === "r") rotateBy(shift ? -15 : 15);
@@ -1113,7 +1140,7 @@ export function HallStudio({
   const evening = layout.mood === "evening";
 
   const rail =
-    "grid h-11 w-11 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] aria-pressed:bg-night aria-pressed:text-white aria-expanded:bg-night aria-expanded:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
+    "group/rail relative grid h-11 w-11 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] aria-pressed:bg-night aria-pressed:text-white aria-expanded:bg-night aria-expanded:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
   const chip =
     "grid h-10 w-10 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
   const float =
@@ -1322,7 +1349,7 @@ export function HallStudio({
               onClick={undo}
               disabled={!hall.canUndo}
               aria-label="Undo"
-              title="Undo (Ctrl+Z)"
+              title="Undo (Ctrl + Z)"
             >
               <Undo2 size={17} />
             </button>
@@ -1332,7 +1359,7 @@ export function HallStudio({
               onClick={redo}
               disabled={!hall.canRedo}
               aria-label="Redo"
-              title="Redo (Ctrl+Shift+Z)"
+              title="Redo (Ctrl + Shift + Z)"
             >
               <Redo2 size={17} />
             </button>
@@ -1420,9 +1447,10 @@ export function HallStudio({
               aria-pressed={tool === "select"}
               onClick={() => setTool("select")}
               aria-label="Select and move"
-              title="Select and move (V)"
+              aria-keyshortcuts="V M"
             >
               <MousePointer2 size={18} />
+              <RailTip label="Move" keys={["V", "M"]} />
             </button>
             <button
               type="button"
@@ -1430,9 +1458,13 @@ export function HallStudio({
               aria-pressed={tool === "hand"}
               onClick={() => setTool("hand")}
               aria-label="Pan around"
-              title="Pan around (H, or hold Space)"
+              aria-keyshortcuts="H D"
             >
               <Hand size={18} />
+              <RailTip
+                label="Drag the view (or hold Space)"
+                keys={["H", "D"]}
+              />
             </button>
             <button
               type="button"
@@ -1440,9 +1472,10 @@ export function HallStudio({
               onClick={autoLayout}
               disabled={busy !== null}
               aria-label="Auto layout"
-              title="Auto layout: arrange the hall for you"
+              aria-keyshortcuts="A"
             >
               <Sparkles size={18} />
+              <RailTip label="Auto layout" keys={["A"]} />
             </button>
             <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
             <button
@@ -1451,9 +1484,10 @@ export function HallStudio({
               aria-expanded={flyout === "table"}
               onClick={() => setFlyout(flyout === "table" ? null : "table")}
               aria-label="Add a table"
-              title="Add a table"
+              aria-keyshortcuts="T"
             >
               <CirclePlus size={18} />
+              <RailTip label="Add a table" keys={["T"]} />
             </button>
             <button
               type="button"
@@ -1461,9 +1495,10 @@ export function HallStudio({
               aria-expanded={flyout === "chair"}
               onClick={() => setFlyout(flyout === "chair" ? null : "chair")}
               aria-label="Add chairs"
-              title="Add chairs"
+              aria-keyshortcuts="C"
             >
               <Armchair size={18} />
+              <RailTip label="Add chairs" keys={["C"]} />
             </button>
             <button
               type="button"
@@ -1471,23 +1506,22 @@ export function HallStudio({
               aria-expanded={flyout === "zone"}
               onClick={() => setFlyout(flyout === "zone" ? null : "zone")}
               aria-label="Add a stage, dance floor or area"
-              title="Add a stage, dance floor or area"
+              aria-keyshortcuts="S"
             >
               <Shapes size={18} />
+              <RailTip label="Stage, dance floor or area" keys={["S"]} />
             </button>
             <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
             <button
               type="button"
               className={rail}
               aria-pressed={deck === "decor" && selection.length === 0}
-              onClick={() => {
-                setSelection([]);
-                setDeck("decor");
-              }}
+              onClick={openDecor}
               aria-label="Décor"
-              title="Décor"
+              aria-keyshortcuts="P"
             >
               <Palette size={18} />
+              <RailTip label="Décor palette" keys={["P"]} />
             </button>
             <button
               type="button"
@@ -1495,27 +1529,43 @@ export function HallStudio({
               aria-pressed={labels}
               onClick={() => setLabels((v) => !v)}
               aria-label="Show table names"
-              title="Show table names"
+              aria-keyshortcuts="L"
             >
               <Tag size={18} />
+              <RailTip label="Table names" keys={["L"]} />
             </button>
             <button
               type="button"
               className={rail}
-              onClick={() =>
-                updateLayout((l) => ({
-                  ...l,
-                  mood: l.mood === "evening" ? "day" : "evening",
-                }))
-              }
+              onClick={toggleMood}
               aria-label={
                 evening ? "Switch to daytime light" : "Switch to evening light"
               }
-              title={evening ? "Daytime light" : "Evening light"}
+              aria-keyshortcuts="N"
             >
               {evening ? <Sun size={18} /> : <Moon size={18} />}
+              <RailTip
+                label={evening ? "Daytime light" : "Evening light"}
+                keys={["N"]}
+              />
+            </button>
+            <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
+            <button
+              type="button"
+              className={cn(rail, "h-9 text-label-2")}
+              aria-expanded={keysOpen}
+              onClick={toggleKeys}
+              aria-label="Keyboard shortcuts"
+              aria-keyshortcuts="Shift+?"
+            >
+              <Keyboard size={16} />
+              <RailTip label="Keyboard shortcuts" keys={["?"]} />
             </button>
           </div>
+
+          {keysOpen && !flyout && (
+            <ShortcutSheet onClose={() => setKeysOpen(false)} />
+          )}
 
           {/* Flyouts */}
           {flyout && (
@@ -1667,7 +1717,7 @@ export function HallStudio({
                 className={chip}
                 onClick={() => view3d.current?.command("fit")}
                 aria-label="Fit the hall in view"
-                title="Fit (0)"
+                title="Fit (F or 0)"
               >
                 <Maximize size={16} />
               </button>
@@ -1961,10 +2011,151 @@ export function HallStudio({
           </div>
           <p className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block">
             Drag a table to move it · drag empty space to turn the hall ·
-            right-drag or Space to pan · Shift-drag to select many
+            right-drag or Space to pan · Shift-drag to select many · press ? for
+            shortcuts
           </p>
         </div>
       </div>
     </section>
+  );
+}
+
+/** The hover label beside a rail button, with its letter keys. */
+function RailTip({ label, keys }: { label: string; keys: string[] }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute right-full top-1/2 z-20 mr-3 flex -translate-y-1/2 translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
+    >
+      {label}
+      <Keys keys={keys.map((k) => [k])} dark />
+    </span>
+  );
+}
+
+/**
+ * Key caps for a shortcut: each entry is one way to trigger it, written as the keys pressed
+ * together. Keys pressed together are joined with "+", alternatives with "or".
+ */
+function Keys({ keys, dark }: { keys: string[][]; dark?: boolean }) {
+  const cap = dark
+    ? "bg-white/15"
+    : "border border-hairline bg-[#f7f4ef] text-night";
+  const sep = dark ? "text-white/60" : "text-label-2";
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      {keys.map((combo, i) => (
+        <React.Fragment key={combo.join("+")}>
+          {i > 0 && <span className={cn("text-[10px]", sep)}>or</span>}
+          {combo.map((k, j) => (
+            <React.Fragment key={k}>
+              {j > 0 && (
+                <span className={cn("text-[11px] font-semibold", sep)}>+</span>
+              )}
+              <kbd
+                className={cn(
+                  "grid h-5 min-w-5 place-items-center rounded px-1 font-sans text-[11px] font-semibold",
+                  cap
+                )}
+              >
+                {k}
+              </kbd>
+            </React.Fragment>
+          ))}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
+
+const SHORTCUTS = (
+  mod: string
+): { group: string; items: [string[][], string][] }[] => [
+  {
+    group: "Tools",
+    items: [
+      [[["V"], ["M"]], "Move and select"],
+      [[["H"], ["D"]], "Drag the view"],
+      [[["Space"]], "Hold to drag the view"],
+      [[["A"]], "Auto layout"],
+      [[["T"]], "Add a table"],
+      [[["C"]], "Add chairs"],
+      [[["S"]], "Stage, dance floor or area"],
+      [[["P"]], "Décor palette"],
+      [[["L"]], "Show table names"],
+      [[["N"]], "Day or evening light"],
+    ],
+  },
+  {
+    group: "Edit",
+    items: [
+      [[["R"]], "Rotate 15°"],
+      [[["Shift", "R"]], "Rotate back 15°"],
+      [[["Arrow keys"]], "Nudge 10 cm"],
+      [[["Shift", "Arrow keys"]], "Nudge 1 m"],
+      [[[mod, "D"]], "Duplicate"],
+      [[["Del"]], "Delete"],
+      [[[mod, "Z"]], "Undo"],
+      [
+        [
+          [mod, "Shift", "Z"],
+          [mod, "Y"],
+        ],
+        "Redo",
+      ],
+      [[["Esc"]], "Clear selection or close"],
+    ],
+  },
+  {
+    group: "View",
+    items: [
+      [[["F"], ["0"]], "Fit the hall"],
+      [[["+"]], "Zoom in"],
+      [[["−"]], "Zoom out"],
+      [[["\\"]], "Hide or show the side panel"],
+      [[["?"]], "This list"],
+    ],
+  },
+];
+
+function ShortcutSheet({ onClose }: { onClose: () => void }) {
+  // The sheet only opens after a click or key press, so reading the platform here is safe.
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  return (
+    <div
+      role="dialog"
+      aria-label="Keyboard shortcuts"
+      className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 max-h-[calc(100%-2rem)] w-[min(340px,calc(100%-6rem))] -translate-y-1/2 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
+          Keyboard shortcuts
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="grid h-7 w-7 place-items-center rounded-full text-label-2 hover:bg-[#f1ece4]"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      {SHORTCUTS(mac ? "⌘" : "Ctrl").map(({ group, items }) => (
+        <div key={group} className="mb-3 last:mb-0">
+          <p className="mb-1 text-xs font-semibold text-night">{group}</p>
+          <ul className="space-y-1">
+            {items.map(([keys, what]) => (
+              <li
+                key={what}
+                className="flex items-center justify-between gap-3 text-xs text-label-2"
+              >
+                <span>{what}</span>
+                <Keys keys={keys} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
