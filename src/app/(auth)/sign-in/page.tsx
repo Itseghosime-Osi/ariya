@@ -1,35 +1,20 @@
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { SignInForm } from "@/features/auth/components/SignInForm";
 import { AuthArtwork } from "@/features/auth/components/AuthArtwork";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Sign In • Àríyá",
   description: "Sign in to your Àríyá celebration management suite",
 };
 
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string>>;
-}) {
-  // Redirect already-authenticated users away from the sign-in page.
-  // This check lives here (not in the proxy) so the proxy never calls
-  // Supabase on public/auth routes, which avoids the ~25 s hang when the
-  // local Supabase instance is unreachable.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) {
-    const params = await searchParams;
-    const next = params["next"];
-    redirect(
-      next && next.startsWith("/") && !next.startsWith("//") ? next : "/events"
-    );
-  }
+// Note: we intentionally do NOT call supabase.auth.getUser() here.
+// When the Supabase instance is unreachable the SDK retries for ~25 s,
+// which would block the entire page render. A logged-in user who lands
+// on /sign-in will be redirected by the SignInForm server action when
+// they attempt to submit, which is an acceptable trade-off. The proxy
+// (proxy.ts) already protects /events/* so unauthenticated access is safe.
+export default function SignInPage() {
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-surface text-on-surface">
       {/* Left Column: Authentication Canvas (6 cols) */}
