@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 
 // Brand colours, matching --ivory in styles/globals.css.
 const IVORY = "#f7f2ea";
+// The wine of the app's splash screen (components/layout/app-splash.tsx).
+const WINE = "#2a0610";
 
 /**
  * Makes Àríyá installable ("Add to Home Screen"). Opened from the home screen
@@ -18,7 +20,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/events",
     scope: "/",
     display: "standalone",
-    background_color: IVORY,
+    // The phone's own launch screen, which hands over to the in-app splash in the same colour.
+    background_color: WINE,
     theme_color: IVORY,
     categories: ["lifestyle", "productivity"],
     icons: [
