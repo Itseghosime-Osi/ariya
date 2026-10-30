@@ -116,9 +116,13 @@ export async function submitRsvpAction(
   }
 
   const parsedSubmit = submitRsvpRpcResultSchema.safeParse(submitData);
-  const delivery = parsedSubmit.success
-    ? parsedSubmit.data.email_delivery
-    : undefined;
+  if (!parsedSubmit.success || !parsedSubmit.data.ok) {
+    return {
+      ok: false,
+      error: "Unable to submit your RSVP. Please wait a minute and try again.",
+    };
+  }
+  const delivery = parsedSubmit.data.email_delivery;
 
   // Dispatch confirmation email if permitted by DB cap and email exists
   if (delivery?.can_send && delivery.target_email) {

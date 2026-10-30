@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -28,6 +28,7 @@ export function GlobalSearch({
   const [results, setResults] = useState<GlobalSearchResults | null>(null);
   const [isSearching, startTransition] = useTransition();
   const router = useRouter();
+  const requestVersion = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,18 +41,27 @@ export function GlobalSearch({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
+  useEffect(() => {
+    const version = ++requestVersion.current;
+    if (!open || !query.trim()) return;
+    const timer = setTimeout(() => {
+      startTransition(async () => {
+        const res = await globalSearchAction(query);
+        if (requestVersion.current === version) {
+          setResults(res.data ?? null);
+        }
+      });
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      requestVersion.current++;
+    };
+  }, [query, open]);
+
   const handleQueryChange = (val: string) => {
+    requestVersion.current++;
     setQuery(val);
-    if (!val.trim()) {
-      setResults(null);
-      return;
-    }
-    startTransition(async () => {
-      const res = await globalSearchAction(val);
-      if (res.data) {
-        setResults(res.data);
-      }
-    });
+    setResults(null);
   };
 
   const navigateTo = (path: string) => {
@@ -103,6 +113,8 @@ export function GlobalSearch({
         <div className="flex items-center border-b border-outline-variant/20 px-4 py-3 bg-surface-container-low">
           <Icon name="search" size={20} className="text-primary mr-3" />
           <input
+            aria-label="Search events, guests, vendors"
+            maxLength={200}
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="Search events, guests, vendors..."

@@ -54,8 +54,57 @@ const nextConfig: NextConfig = {
     remotePatterns: getRemotePatterns(),
     ...(allowLocalIP ? { dangerouslyAllowLocalIP: true } : {}),
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Keep same-origin film embeds, inline scripts and payment integrations working.
+          {
+            key: "Content-Security-Policy",
+            value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+          },
+        ],
+      },
+      {
+        source: "/e/:path*",
+        has: [{ type: "query", key: "token" }],
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
+      ...[
+        "/i/:path*",
+        "/rsvp/:path*",
+        "/rsvp.html",
+        "/invite/:path*",
+        "/events/:path*",
+        "/sign-in",
+        "/sign-up",
+        "/forgot-password",
+        "/reset-password",
+      ].map((source) => ({
+        source,
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      })),
+    ];
+  },
   async redirects() {
     return [
+      ...["about", "product", "pricing", "story", "film"].map((page) => ({
+        source: `/${page}.html`,
+        destination: page === "film" || page === "story" ? "/" : `/${page}`,
+        permanent: true,
+      })),
       {
         source: "/login",
         destination: "/sign-in",

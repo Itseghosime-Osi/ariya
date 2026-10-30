@@ -15,6 +15,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ariya-two.vercel.app"),
   title: "Àríyá — Wedding & Event Suite",
   description: "Wedding and event planner for Nigerian couples and planners.",
   applicationName: "Àríyá",

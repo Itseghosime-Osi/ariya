@@ -9,8 +9,23 @@ import { safeRedirectPath } from "@/lib/safe-redirect";
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/forgot-password"];
 
 export async function proxy(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
+  // Static marketing pages do not need an authentication round trip.
+  if (
+    [
+      "/",
+      "/about",
+      "/product",
+      "/pricing",
+      "/story",
+      "/film",
+      "/robots.txt",
+      "/sitemap.xml",
+    ].includes(pathname)
+  ) {
+    return NextResponse.next();
+  }
+  const { supabaseResponse, user } = await updateSession(request);
 
   const isAuthPath = AUTH_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)

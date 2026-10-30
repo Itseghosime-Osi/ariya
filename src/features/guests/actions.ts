@@ -18,7 +18,7 @@ export async function createGuestAction(
 ): Promise<ActionResult<Guest>> {
   const parsed = guestRowSchema.safeParse(rawInput);
   if (!parsed.success) {
-    const firstErr = parsed.error.errors[0]?.message ?? "Invalid guest data";
+    const firstErr = parsed.error.issues[0]?.message ?? "Invalid guest data";
     return { ok: false, error: firstErr };
   }
 
@@ -57,7 +57,7 @@ export async function updateGuestAction(
 ): Promise<ActionResult<Guest>> {
   const parsed = guestRowSchema.safeParse(rawInput);
   if (!parsed.success) {
-    const firstErr = parsed.error.errors[0]?.message ?? "Invalid guest data";
+    const firstErr = parsed.error.issues[0]?.message ?? "Invalid guest data";
     return { ok: false, error: firstErr };
   }
 
@@ -153,7 +153,7 @@ export async function importGuestsAction(
   for (let i = 0; i < rawRows.length; i++) {
     const validated = guestRowSchema.safeParse(rawRows[i]);
     if (!validated.success) {
-      const err = validated.error.errors[0]?.message ?? "Invalid row";
+      const err = validated.error.issues[0]?.message ?? "Invalid row";
       return { ok: false, error: `Row ${i + 1}: ${err}` };
     }
     validPayload.push({

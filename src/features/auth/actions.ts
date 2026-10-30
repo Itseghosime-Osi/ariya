@@ -22,7 +22,7 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
   const parsed = signInSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid sign-in input";
+      parsed.error.issues[0]?.message ?? "Invalid sign-in input";
     return { ok: false, error: firstError };
   }
 
@@ -46,7 +46,7 @@ export async function signUpAction(
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid registration input";
+      parsed.error.issues[0]?.message ?? "Invalid registration input";
     return { ok: false, error: firstError };
   }
 
@@ -76,7 +76,7 @@ export async function forgotPasswordAction(
   const parsed = forgotPasswordSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid email address";
+      parsed.error.issues[0]?.message ?? "Invalid email address";
     return { ok: false, error: firstError };
   }
 
@@ -101,7 +101,7 @@ export async function resetPasswordAction(
   const parsed = resetPasswordSchema.safeParse(input);
   if (!parsed.success) {
     const firstError =
-      parsed.error.errors[0]?.message ?? "Invalid password reset input";
+      parsed.error.issues[0]?.message ?? "Invalid password reset input";
     return { ok: false, error: firstError };
   }
 

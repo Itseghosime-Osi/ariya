@@ -23,6 +23,7 @@ export async function generateMetadata({
 
   return {
     title: `${event.title} • Àríyá`,
+    alternates: { canonical: `/e/${encodeURIComponent(slug)}` },
     description: `Join us in celebrating ${event.couple}. Order of events, venue directions, attire, and guest pass access.`,
   };
 }

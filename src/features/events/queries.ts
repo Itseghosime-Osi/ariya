@@ -41,53 +41,54 @@ export interface PublicCelebration {
   schedule?: ScheduleSlot[];
 }
 
-export async function getPublicEventBySlug(
-  slug: string
-): Promise<PublicCelebration | null> {
-  const cleanSlug = slug.trim();
-  if (!cleanSlug) return null;
+// Request-scoped only: metadata and the page share one lookup, never a cross-user cache.
+export const getPublicEventBySlug = cache(
+  async (slug: string): Promise<PublicCelebration | null> => {
+    const cleanSlug = slug.trim();
+    if (!cleanSlug) return null;
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_public_event", {
-    p_slug: cleanSlug,
-  });
-
-  if (error) {
-    console.error("[getPublicEventBySlug] Database error:", {
-      code: error.code,
-      message: error.message,
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_public_event", {
+      p_slug: cleanSlug,
     });
-    throw new Error(`Database error loading public event: ${error.message}`);
-  }
 
-  if (!data || typeof data !== "object") {
-    return null;
-  }
+    if (error) {
+      console.error("[getPublicEventBySlug] Database error:", {
+        code: error.code,
+        message: error.message,
+      });
+      throw new Error(`Database error loading public event: ${error.message}`);
+    }
 
-  const raw = data as Record<string, unknown>;
-  if (!raw.id || !raw.slug) {
-    return null;
-  }
+    if (!data || typeof data !== "object") {
+      return null;
+    }
 
-  return {
-    id: String(raw.id),
-    slug: String(raw.slug),
-    title: String(raw.title),
-    couple: String(raw.couple),
-    date: String(raw.date),
-    venue: String(raw.venue),
-    area: raw.area ? String(raw.area) : null,
-    dressCode: raw.dress_code ? String(raw.dress_code) : null,
-    rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
-    status: String(raw.status),
-    isPublic: Boolean(raw.is_public),
-    description: raw.description ? String(raw.description) : null,
-    coverImageUrl: raw.cover_image_url ? String(raw.cover_image_url) : null,
-    schedule: Array.isArray(raw.schedule)
-      ? (raw.schedule as ScheduleSlot[])
-      : [],
-  };
-}
+    const raw = data as Record<string, unknown>;
+    if (!raw.id || !raw.slug) {
+      return null;
+    }
+
+    return {
+      id: String(raw.id),
+      slug: String(raw.slug),
+      title: String(raw.title),
+      couple: String(raw.couple),
+      date: String(raw.date),
+      venue: String(raw.venue),
+      area: raw.area ? String(raw.area) : null,
+      dressCode: raw.dress_code ? String(raw.dress_code) : null,
+      rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
+      status: String(raw.status),
+      isPublic: Boolean(raw.is_public),
+      description: raw.description ? String(raw.description) : null,
+      coverImageUrl: raw.cover_image_url ? String(raw.cover_image_url) : null,
+      schedule: Array.isArray(raw.schedule)
+        ? (raw.schedule as ScheduleSlot[])
+        : [],
+    };
+  }
+);
 
 export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
   const supabase = await createClient();

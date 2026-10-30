@@ -59,7 +59,7 @@ export const updateVendorSchema = createVendorSchema.partial();
 export type UpdateVendorInput = z.infer<typeof updateVendorSchema>;
 
 export const createVendorTaskSchema = z.object({
-  vendor_id: z.string().uuid("Invalid vendor ID"),
+  vendor_id: z.guid("Invalid vendor ID"),
   task: z
     .string()
     .trim()
