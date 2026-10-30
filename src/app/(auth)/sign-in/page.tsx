@@ -1,14 +1,35 @@
 import React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SignInForm } from "@/features/auth/components/SignInForm";
 import { AuthArtwork } from "@/features/auth/components/AuthArtwork";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Sign In • Àríyá",
   description: "Sign in to your Àríyá celebration management suite",
 };
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  // Redirect already-authenticated users away from the sign-in page.
+  // This check lives here (not in the proxy) so the proxy never calls
+  // Supabase on public/auth routes, which avoids the ~25 s hang when the
+  // local Supabase instance is unreachable.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const params = await searchParams;
+    const next = params["next"];
+    redirect(
+      next && next.startsWith("/") && !next.startsWith("//") ? next : "/events"
+    );
+  }
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-surface text-on-surface">
       {/* Left Column: Authentication Canvas (6 cols) */}
