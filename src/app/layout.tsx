@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
+import { AppSplash, splashScript } from "@/components/layout/app-splash";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -61,8 +62,14 @@ export default function RootLayout({
     <html
       lang="en-NG"
       className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
+      // The launch script may mark <html> for the splash before React loads.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: splashScript }} />
+      </head>
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
+        <AppSplash />
         {children}
       </body>
     </html>
