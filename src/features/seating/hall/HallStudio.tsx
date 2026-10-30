@@ -1349,7 +1349,7 @@ export function HallStudio({
               onClick={undo}
               disabled={!hall.canUndo}
               aria-label="Undo"
-              title="Undo (Ctrl+Z)"
+              title="Undo (Ctrl + Z)"
             >
               <Undo2 size={17} />
             </button>
@@ -1359,7 +1359,7 @@ export function HallStudio({
               onClick={redo}
               disabled={!hall.canRedo}
               aria-label="Redo"
-              title="Redo (Ctrl+Shift+Z)"
+              title="Redo (Ctrl + Shift + Z)"
             >
               <Redo2 size={17} />
             </button>
@@ -2028,60 +2028,99 @@ function RailTip({ label, keys }: { label: string; keys: string[] }) {
       className="pointer-events-none absolute right-full top-1/2 z-20 mr-3 flex -translate-y-1/2 translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
     >
       {label}
-      <span className="flex gap-1">
-        {keys.map((k) => (
-          <kbd
-            key={k}
-            className="grid h-5 min-w-5 place-items-center rounded bg-white/15 px-1 font-sans text-[11px] font-semibold"
-          >
-            {k}
-          </kbd>
-        ))}
-      </span>
+      <Keys keys={keys.map((k) => [k])} dark />
     </span>
   );
 }
 
-const SHORTCUTS: { group: string; items: [string[], string][] }[] = [
+/**
+ * Key caps for a shortcut: each entry is one way to trigger it, written as the keys pressed
+ * together. Keys pressed together are joined with "+", alternatives with "or".
+ */
+function Keys({ keys, dark }: { keys: string[][]; dark?: boolean }) {
+  const cap = dark
+    ? "bg-white/15"
+    : "border border-hairline bg-[#f7f4ef] text-night";
+  const sep = dark ? "text-white/60" : "text-label-2";
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      {keys.map((combo, i) => (
+        <React.Fragment key={combo.join("+")}>
+          {i > 0 && <span className={cn("text-[10px]", sep)}>or</span>}
+          {combo.map((k, j) => (
+            <React.Fragment key={k}>
+              {j > 0 && (
+                <span className={cn("text-[11px] font-semibold", sep)}>+</span>
+              )}
+              <kbd
+                className={cn(
+                  "grid h-5 min-w-5 place-items-center rounded px-1 font-sans text-[11px] font-semibold",
+                  cap
+                )}
+              >
+                {k}
+              </kbd>
+            </React.Fragment>
+          ))}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
+
+const SHORTCUTS = (
+  mod: string
+): { group: string; items: [string[][], string][] }[] => [
   {
     group: "Tools",
     items: [
-      [["V", "M"], "Move and select"],
-      [["H", "D"], "Drag the view"],
-      [["Space"], "Hold to drag the view"],
-      [["A"], "Auto layout"],
-      [["T"], "Add a table"],
-      [["C"], "Add chairs"],
-      [["S"], "Stage, dance floor or area"],
-      [["P"], "Décor palette"],
-      [["L"], "Show table names"],
-      [["N"], "Day or evening light"],
+      [[["V"], ["M"]], "Move and select"],
+      [[["H"], ["D"]], "Drag the view"],
+      [[["Space"]], "Hold to drag the view"],
+      [[["A"]], "Auto layout"],
+      [[["T"]], "Add a table"],
+      [[["C"]], "Add chairs"],
+      [[["S"]], "Stage, dance floor or area"],
+      [[["P"]], "Décor palette"],
+      [[["L"]], "Show table names"],
+      [[["N"]], "Day or evening light"],
     ],
   },
   {
     group: "Edit",
     items: [
-      [["R"], "Rotate 15° (Shift turns back)"],
-      [["←", "→", "↑", "↓"], "Nudge (Shift for 1 m)"],
-      [["Ctrl", "D"], "Duplicate"],
-      [["Del"], "Delete"],
-      [["Ctrl", "Z"], "Undo"],
-      [["Ctrl", "Shift", "Z"], "Redo"],
-      [["Esc"], "Clear selection or close"],
+      [[["R"]], "Rotate 15°"],
+      [[["Shift", "R"]], "Rotate back 15°"],
+      [[["Arrow keys"]], "Nudge 10 cm"],
+      [[["Shift", "Arrow keys"]], "Nudge 1 m"],
+      [[[mod, "D"]], "Duplicate"],
+      [[["Del"]], "Delete"],
+      [[[mod, "Z"]], "Undo"],
+      [
+        [
+          [mod, "Shift", "Z"],
+          [mod, "Y"],
+        ],
+        "Redo",
+      ],
+      [[["Esc"]], "Clear selection or close"],
     ],
   },
   {
     group: "View",
     items: [
-      [["F", "0"], "Fit the hall"],
-      [["+", "−"], "Zoom in or out"],
-      [["\\"], "Hide or show the side panel"],
-      [["?"], "This list"],
+      [[["F"], ["0"]], "Fit the hall"],
+      [[["+"]], "Zoom in"],
+      [[["−"]], "Zoom out"],
+      [[["\\"]], "Hide or show the side panel"],
+      [[["?"]], "This list"],
     ],
   },
 ];
 
 function ShortcutSheet({ onClose }: { onClose: () => void }) {
+  // The sheet only opens after a click or key press, so reading the platform here is safe.
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
   return (
     <div
       role="dialog"
@@ -2101,7 +2140,7 @@ function ShortcutSheet({ onClose }: { onClose: () => void }) {
           <X size={14} />
         </button>
       </div>
-      {SHORTCUTS.map(({ group, items }) => (
+      {SHORTCUTS(mac ? "⌘" : "Ctrl").map(({ group, items }) => (
         <div key={group} className="mb-3 last:mb-0">
           <p className="mb-1 text-xs font-semibold text-night">{group}</p>
           <ul className="space-y-1">
@@ -2111,16 +2150,7 @@ function ShortcutSheet({ onClose }: { onClose: () => void }) {
                 className="flex items-center justify-between gap-3 text-xs text-label-2"
               >
                 <span>{what}</span>
-                <span className="flex shrink-0 gap-1">
-                  {keys.map((k) => (
-                    <kbd
-                      key={k}
-                      className="grid h-5 min-w-5 place-items-center rounded border border-hairline bg-[#f7f4ef] px-1 font-sans text-[11px] font-semibold text-night"
-                    >
-                      {k}
-                    </kbd>
-                  ))}
-                </span>
+                <Keys keys={keys} />
               </li>
             ))}
           </ul>
