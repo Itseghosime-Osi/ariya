@@ -33,3 +33,39 @@ describe("public marketing integrity", () => {
     );
   });
 });
+
+describe("homepage social metadata and payload", () => {
+  const html = readFileSync(join(site, "index.html"), "utf8");
+  it("provides social descriptions, images, locale and install icons", () => {
+    for (const tag of [
+      "og:description",
+      "og:image",
+      "og:url",
+      "og:site_name",
+      "og:locale",
+      "twitter:description",
+      "twitter:image",
+      "twitter:title",
+    ]) {
+      expect(html).toMatch(
+        new RegExp(`<meta (?:name|property)="${tag}" content="[^"\\n]+"`)
+      );
+    }
+    expect(html).toContain('rel="apple-touch-icon"');
+    expect(html).toContain('href="/manifest.webmanifest"');
+    expect(html).toContain('href="/favicon-32x32.png"');
+    expect(html).toContain('href="/favicon-96x96.png"');
+    // There is no official brand X account; do not invent attribution.
+    expect(html).not.toContain('name="twitter:site"');
+  });
+  it("has one primary heading and keeps film implementation outside the document", () => {
+    expect([...html.matchAll(/<h1(?:\s|>)/g)]).toHaveLength(1);
+    expect(Buffer.byteLength(html)).toBeLessThan(100_000);
+    expect(html).toMatch(
+      /<script src="assets\/the-yes-controls\.[a-f0-9]+\.js"><\/script>/
+    );
+    expect(html).toMatch(
+      /<script type="module" src="assets\/the-yes-scene\.[a-f0-9]+\.js"><\/script>/
+    );
+  });
+});

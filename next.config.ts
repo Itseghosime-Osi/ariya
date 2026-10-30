@@ -56,6 +56,20 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      ...[
+        "/assets/the-yes-controls.6317cb20d947.js",
+        "/assets/the-yes-scene.83edb5453053.js",
+        "/site/assets/the-yes-controls.6317cb20d947.js",
+        "/site/assets/the-yes-scene.83edb5453053.js",
+      ].map((source) => ({
+        source,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      })),
       {
         source: "/:path*",
         headers: [
