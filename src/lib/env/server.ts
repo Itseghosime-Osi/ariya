@@ -15,7 +15,7 @@ export const serverEnvSchema = z
     RESEND_FROM_EMAIL: z.string().email(),
     RATE_LIMIT_SECRET: z
       .string({
-        required_error: "RATE_LIMIT_SECRET is required",
+        error: "RATE_LIMIT_SECRET is required",
       })
       .min(32, "RATE_LIMIT_SECRET must be at least 32 characters"),
     CRON_SECRET: z.string().min(1),

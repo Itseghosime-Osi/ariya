@@ -10,11 +10,16 @@
 <meta property="og:site_name" content="Àríyá by OwambePlan">
 <meta property="og:title" content="Àríyá by OwambePlan">
 <meta property="og:description" content="Personal invitations, live RSVPs and seating for Nigerian weddings, introductions and owambes.">
-<meta property="og:url" content="https://owambeplan.vercel.app/about.html">
-<meta property="og:image" content="https://owambeplan.vercel.app/assets/og.jpg">
+<meta property="og:url" content="https://ariya-two.vercel.app/about">
+<meta property="og:image" content="https://ariya-two.vercel.app/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:locale" content="en_NG">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#16040a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -246,6 +251,11 @@ body { background: var(--wine-950); color: var(--on-dark); }
 }
 @media (prefers-reduced-motion: reduce) { .fleck, .scroll-hint i { animation: none; display: none; } }
 </style>
+<link rel="canonical" href="https://ariya-two.vercel.app/about">
+<meta name="twitter:title" content="Àríyá by OwambePlan">
+<meta name="twitter:description" content="Personal invitations, live RSVPs and seating for Nigerian weddings, introductions and owambes.">
+<meta name="twitter:image" content="https://ariya-two.vercel.app/assets/og.jpg">
+<meta name="twitter:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -260,7 +270,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
       <a href="pricing.html">Pricing</a>
       <a class="btn btn-primary btn-small" href="planner.html">Start planning</a>
     </nav>
-    <button class="music head-music" id="musicBtn" type="button" aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lbl">Music</span><span class="sr-only"> (Yori Yori by Abefe)</span></button>
+    <button class="music head-music" id="musicBtn" type="button" aria-label="Music (Yori Yori by Abefe)" aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lbl">Music</span><span class="sr-only"> (Yori Yori by Abefe)</span></button>
     <button class="btn btn-ghost btn-small cm-btn" type="button" data-cm-open data-cm-label>Menu</button>
   </div>
 </header>
@@ -332,7 +342,7 @@ body { background: var(--wine-950); color: var(--on-dark); }
               <div class="env-flap" aria-hidden="true"><i></i><i></i></div>
             </div>
             <div class="card-wrap"><div class="flip" id="flip"><div class="face front" id="cardFront"></div><div class="face back" id="cardBack"></div></div></div>
-            <button class="seal" id="seal" type="button" aria-label="Break the seal and open the invitation"></button>
+            <button class="seal" id="seal" type="button" aria-label="CT — Break the seal and open the invitation"></button>
           </div>
           <p class="seal-hint"><b>Break the seal</b>Tap it to open your invitation</p>
         </div>
@@ -630,13 +640,13 @@ body { background: var(--wine-950); color: var(--on-dark); }
         var t = D.byId(D.state.tables, g.tableId), used = t ? D.seatsUsed(t.id) : 0;
         $("cardBack").innerHTML = F.place({ variant: "ivory", name: g.name.split(" ")[0] + (plus ? " & " + pn.split(" ")[0] : ""), table: t ? t.name : "Table to follow", used: used, cap: t ? t.capacity : 8, initials: "C T" });
         setTimeout(function () { stage.classList.add("placed"); }, reduce ? 0 : wasOpen ? 500 : 1600);
-        res.innerHTML = "<h4>You're confirmed, " + esc(g.name.split(" ")[0]) + ".</h4><p>" + (t ? esc(t.name) + ", now " + used + " of " + t.capacity + " seats filled. " : "") + "A confirmation email with the date, venue and table follows to " + esc(g.email) + ".</p>";
+        res.innerHTML = "<h4>You're confirmed, " + esc(g.name.split(" ")[0]) + ".</h4><p>" + (t ? esc(t.name) + ", now " + used + " of " + t.capacity + " seats filled. " : "") + "This sample reply stays in your browser tab; no confirmation email is sent.</p>";
         var rb = btn.getBoundingClientRect(); burst(rb.left + rb.width / 2, rb.top);
         if (navigator.vibrate) navigator.vibrate([18, 40, 18]);
         Score.chime();
       } else {
         stage.classList.remove("placed");
-        res.innerHTML = "<h4>Thank you for letting them know.</h4><p>Chidinma and Tunde see your reply straight away, and a short email confirms it.</p>";
+        res.innerHTML = "<h4>Thank you for letting them know.</h4><p>This sample reply stays in your browser tab; no message or email is sent.</p>";
       }
       res.hidden = false; res.focus({ preventScroll: true });
     }, reduce ? 0 : 350);

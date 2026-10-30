@@ -116,9 +116,9 @@
     var line = crack.map(function (p) { return p[0] + " " + p[1]; }).join(" L");
     var left = "M-70 -70 L" + line + " L-70 70Z", right = "M70 -70 L" + line + " L70 70Z";
     return open +
-      '<clipPath id="' + id + 'L"><path d="' + left + '"/></clipPath><clipPath id="' + id + 'R"><path d="' + right + '"/></clipPath><clipPath id="' + id + 'B"><path d="' + blob + '"/></clipPath></defs>' +
-      '<g class="half half-l"><g clip-path="url(#' + id + 'L)">' + body + '</g></g>' +
-      '<g class="half half-r"><g clip-path="url(#' + id + 'R)">' + body + '</g></g>' +
+      '<g id="' + id + 'body">' + body + '</g><clipPath id="' + id + 'L"><path d="' + left + '"/></clipPath><clipPath id="' + id + 'R"><path d="' + right + '"/></clipPath><clipPath id="' + id + 'B"><path d="' + blob + '"/></clipPath></defs>' +
+      '<g class="half half-l"><g clip-path="url(#' + id + 'L)">' + '<use href="#' + id + 'body"/></g></g>' +
+      '<g class="half half-r"><g clip-path="url(#' + id + 'R)">' + '<use href="#' + id + 'body"/></g></g>' +
       '<g clip-path="url(#' + id + 'B)"><path class="crack" d="M' + line + '" fill="none" stroke="#120104" stroke-width="1.8" stroke-linejoin="round" pathLength="1"/>' +
       '<path class="crack" d="M' + line + '" fill="none" stroke="#ffd4da" stroke-opacity=".45" stroke-width=".6" stroke-linejoin="round" pathLength="1" transform="translate(1.2 .6)"/></g>' +
       '</svg>';

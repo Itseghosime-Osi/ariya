@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
+import { isValidCoverImage } from "./validate-cover";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -49,6 +50,13 @@ export async function uploadEventCoverAction(
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
+  if (!(await isValidCoverImage(buffer, file.type))) {
+    return {
+      ok: false,
+      error:
+        "Please upload a valid JPEG, PNG, or WebP image (up to 40 megapixels).",
+    };
+  }
 
   const { data, error } = await supabase.storage
     .from("event-covers")

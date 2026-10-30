@@ -58,7 +58,7 @@ describe("Auth Schemas", () => {
       });
       expect(invalid.success).toBe(false);
       if (!invalid.success) {
-        expect(invalid.error.errors[0]?.message).toBe("Passcodes do not match");
+        expect(invalid.error.issues[0]?.message).toBe("Passcodes do not match");
       }
     });
 
