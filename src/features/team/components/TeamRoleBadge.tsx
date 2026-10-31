@@ -1,47 +1,24 @@
 import React from "react";
-import { Icon, type IconName } from "@/components/ui/icon";
+import { Icon } from "@/components/ui/icon";
 import type { EventRole } from "../types";
-
-const ROLE_CONFIG: Record<
-  EventRole,
-  { label: string; icon: IconName; badgeClass: string }
-> = {
-  owner: {
-    label: "Owner",
-    icon: "verified",
-    badgeClass: "bg-amber-100 text-amber-900 border-amber-300",
-  },
-  planner: {
-    label: "Lead Planner",
-    icon: "calendar",
-    badgeClass: "bg-purple-100 text-purple-900 border-purple-300",
-  },
-  couple: {
-    label: "Celebrant Couple",
-    icon: "celebration",
-    badgeClass: "bg-rose-100 text-rose-900 border-rose-300",
-  },
-  staff: {
-    label: "Event Staff",
-    icon: "verified",
-    badgeClass: "bg-stone-100 text-stone-800 border-stone-300",
-  },
-};
+import { roleMeta } from "../lib/roles";
 
 interface TeamRoleBadgeProps {
   role: EventRole;
   className?: string;
 }
 
+/** The role as a tinted pill. Colour is never the only signal: the icon and the word come with it. */
 export function TeamRoleBadge({ role, className = "" }: TeamRoleBadgeProps) {
-  const config = ROLE_CONFIG[role] || ROLE_CONFIG.staff;
+  const meta = roleMeta(role);
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${config.badgeClass} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${className}`}
+      style={{ backgroundColor: meta.wash, color: meta.ink }}
     >
-      <Icon name={config.icon} className="text-xs" />
-      <span>{config.label}</span>
+      <Icon name={meta.icon} size={12} />
+      <span>{meta.label}</span>
     </span>
   );
 }

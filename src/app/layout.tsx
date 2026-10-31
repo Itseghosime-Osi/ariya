@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
+import { Bodoni_Moda, Great_Vibes, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { AppSplash, splashScript } from "@/components/layout/app-splash";
 
@@ -12,6 +12,13 @@ const bodoniModa = Bodoni_Moda({
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
   variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
+
+const greatVibes = Great_Vibes({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-great-vibes",
   display: "swap",
 });
 
@@ -61,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-NG"
-      className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
+      className={`${bodoniModa.variable} ${plusJakartaSans.variable} ${greatVibes.variable}`}
       // The launch script may mark <html> for the splash before React loads.
       suppressHydrationWarning
     >

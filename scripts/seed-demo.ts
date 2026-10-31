@@ -133,12 +133,108 @@ async function seed() {
   const eventId = event.id;
   console.log(`✓ Created celebration suite: ${event.title} (ID: ${eventId})`);
 
-  // 4. Attach Event Members (Owner, Planner, Staff)
+  // 4. Attach Event Members (Owner, Planner, Couple, Staff)
   await supabase.from("event_members").insert({
     event_id: eventId,
     user_id: userId,
     role: "owner",
   });
+
+  const collaborators = [
+    { email: "bisola@owambe.ng", fullName: "Bisola Bankole", role: "planner" },
+    { email: "demola@owambe.ng", fullName: "Demola Alakija", role: "couple" },
+    { email: "tolu@owambe.ng", fullName: "Tolu Adeyemi", role: "staff" },
+  ];
+
+  for (const person of collaborators) {
+    const { data: created, error: userError } =
+      await supabase.auth.admin.createUser({
+        email: person.email,
+        password: demoPassword,
+        email_confirm: true,
+        user_metadata: { full_name: person.fullName },
+      });
+
+    if (userError || !created?.user) {
+      console.error(
+        `[seed-demo] Collaborator "${person.email}" failed:`,
+        userError
+      );
+      continue;
+    }
+
+    const { error: memberError } = await supabase.from("event_members").insert({
+      event_id: eventId,
+      user_id: created.user.id,
+      role: person.role,
+    });
+
+    if (memberError) {
+      console.error(
+        `[seed-demo] Membership for "${person.email}" failed:`,
+        memberError
+      );
+    }
+  }
+
+  const { error: inviteError } = await supabase.from("event_invites").insert({
+    event_id: eventId,
+    email: "yetunde@owambe.ng",
+    role: "staff",
+    invited_by: userId,
+    expires_at: new Date(Date.now() + 6 * 86_400_000).toISOString(),
+  });
+
+  if (inviteError) {
+    console.error("[seed-demo] Pending invite failed:", inviteError);
+  }
+
+  // 4b. Billing history: one settled celebration pass and one abandoned attempt
+  const { data: settledPayment, error: paymentError } = await supabase
+    .from("payments")
+    .insert({
+      event_id: eventId,
+      user_id: userId,
+      paystack_reference: `ARY-DEMO-${generateToken(10)}`,
+      amount_kobo: 5_000_000,
+      status: "success",
+      channel: "card",
+      paid_at: new Date(Date.now() - 12 * 86_400_000).toISOString(),
+    })
+    .select()
+    .single();
+
+  if (paymentError || !settledPayment) {
+    console.error("[seed-demo] Settled payment failed:", paymentError);
+  } else {
+    const { error: invoiceError } = await supabase.from("invoices").insert({
+      payment_id: settledPayment.id,
+      event_id: eventId,
+      invoice_number: `ARY-2026-${String(Date.now()).slice(-5)}`,
+      amount_kobo: 5_000_000,
+      issued_at: new Date(Date.now() - 12 * 86_400_000).toISOString(),
+      paid_at: new Date(Date.now() - 12 * 86_400_000).toISOString(),
+      status: "paid",
+    });
+
+    if (invoiceError) {
+      console.error("[seed-demo] Invoice failed:", invoiceError);
+    }
+  }
+
+  const { error: failedPaymentError } = await supabase.from("payments").insert({
+    event_id: eventId,
+    user_id: userId,
+    paystack_reference: `ARY-DEMO-${generateToken(10)}`,
+    amount_kobo: 5_000_000,
+    status: "failed",
+    channel: "bank_transfer",
+    paid_at: null,
+  });
+
+  if (failedPaymentError) {
+    console.error("[seed-demo] Failed payment failed:", failedPaymentError);
+  }
 
   // 5. Insert Banquet Tables
   const tableData = [
@@ -831,40 +927,63 @@ async function seed() {
     },
   ];
 
-  for (const v of vendorsData) {
-    const { data: createdVendor } = await supabase
+  const vendorDossiers = [
+    { cost: 4_800_000_00, deposit: 4_800_000_00 },
+    { cost: 3_500_000_00, deposit: 2_100_000_00 },
+    { cost: 2_200_000_00, deposit: 2_200_000_00 },
+    { cost: 6_500_000_00, deposit: 3_900_000_00 },
+    { cost: 1_450_000_00, deposit: 725_000_00 },
+    { cost: 1_100_000_00, deposit: 550_000_00 },
+  ];
+
+  for (const [index, v] of vendorsData.entries()) {
+    const dossier = vendorDossiers[index];
+    const { data: createdVendor, error: vendorError } = await supabase
       .from("vendors")
       .insert({
         event_id: eventId,
         name: v.name,
         category: v.category,
         contact_name: v.contact_name,
-        phone: v.phone,
-        email: v.email,
+        contact_phone: v.phone,
+        contact_email: v.email,
+        cost_kobo: dossier.cost,
+        deposit_kobo: dossier.deposit,
         status: v.status,
-        notes: v.notes,
       })
       .select()
       .single();
 
-    if (createdVendor) {
-      await supabase.from("vendor_tasks").insert([
-        {
-          vendor_id: createdVendor.id,
-          title: "Initial ceremonial dossier & scope signoff",
-          completed: true,
-        },
-        {
-          vendor_id: createdVendor.id,
-          title: "Onsite technical rehearsal at Grand Monarch Ballroom",
-          completed: false,
-        },
-        {
-          vendor_id: createdVendor.id,
-          title: "Final day-of coordinator briefing & access passes",
-          completed: false,
-        },
-      ]);
+    if (vendorError || !createdVendor) {
+      console.error(`[seed-demo] Vendor "${v.name}" failed:`, vendorError);
+      continue;
+    }
+
+    const { error: taskError } = await supabase.from("vendor_tasks").insert([
+      {
+        vendor_id: createdVendor.id,
+        event_id: eventId,
+        task: "Initial ceremonial dossier & scope signoff",
+        is_done: true,
+      },
+      {
+        vendor_id: createdVendor.id,
+        event_id: eventId,
+        task: "Onsite technical rehearsal at Grand Monarch Ballroom",
+        due_date: "2026-12-08",
+        is_done: false,
+      },
+      {
+        vendor_id: createdVendor.id,
+        event_id: eventId,
+        task: "Final day-of coordinator briefing & access passes",
+        due_date: "2026-12-11",
+        is_done: false,
+      },
+    ]);
+
+    if (taskError) {
+      console.error(`[seed-demo] Tasks for "${v.name}" failed:`, taskError);
     }
   }
   console.log(`✓ Provisioned 6 vendors with coordination task dossiers`);

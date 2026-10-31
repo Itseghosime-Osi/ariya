@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@/components/ui/icon";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { VENDOR_CATEGORIES, type CreateVendorInput } from "../schemas";
 import { VendorContactFields } from "./VendorContactFields";
 import { useVendorForm } from "./useVendorForm";
@@ -13,6 +21,10 @@ interface VendorModalProps {
   onClose: () => void;
   onSubmit: (input: CreateVendorInput) => Promise<void>;
 }
+
+const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
+const FIELD =
+  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function VendorModal({
   isOpen,
@@ -42,54 +54,65 @@ export function VendorModal({
     handleSubmit,
   } = useVendorForm(initialVendor, isOpen, onSubmit, onClose);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-night/50 backdrop-blur-xs">
-      <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
-          <h2 className="font-serif text-lg font-bold text-wine">
-            {initialVendor ? "Edit Vendor Contract" : "Register New Vendor"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-on-surface-variant hover:text-wine p-1 rounded-lg"
-          >
-            <Icon name="close" className="text-lg" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[92vh] max-w-xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
+        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+            Vendor loom
+          </p>
+          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
+            {initialVendor ? "Edit vendor contract" : "Register a vendor"}
+          </DialogTitle>
+          <DialogDescription>
+            {initialVendor
+              ? "Change the terms, contact or what has been paid so far."
+              : "Add a supplier with their contract value and the deposit already paid."}
+          </DialogDescription>
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
+          />
+        </DialogHeader>
 
-        {error && (
-          <div className="p-3 bg-red-50 text-red-800 text-xs rounded-xl border border-red-200">
-            {error}
-          </div>
-        )}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8"
+        >
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-error/30 bg-error-container px-3 py-2 text-xs text-error"
+            >
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-wine mb-1">
+            <label htmlFor="vendor-name" className={LABEL}>
               Vendor / Business Name *
             </label>
             <input
+              id="vendor-name"
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Ile-Ila Catering Services"
-              className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden"
+              className={FIELD}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-wine mb-1">
+              <label htmlFor="vendor-category" className={LABEL}>
                 Category *
               </label>
               <select
+                id="vendor-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden bg-white"
+                className={`${FIELD} cursor-pointer`}
               >
                 {VENDOR_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -100,13 +123,14 @@ export function VendorModal({
             </div>
 
             <div>
-              <label className="block font-semibold text-wine mb-1">
+              <label htmlFor="vendor-status" className={LABEL}>
                 Contract Status
               </label>
               <select
+                id="vendor-status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as VendorStatus)}
-                className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden bg-white"
+                className={`${FIELD} cursor-pointer`}
               >
                 <option value="draft">Draft / Inquiry</option>
                 <option value="contracted">Contracted</option>
@@ -118,29 +142,31 @@ export function VendorModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-wine mb-1">
+              <label htmlFor="vendor-cost" className={LABEL}>
                 Total Cost (NGN ₦)
               </label>
               <input
+                id="vendor-cost"
                 type="number"
                 min="0"
                 step="1000"
                 value={costNaira}
                 onChange={(e) => setCostNaira(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden"
+                className={`${FIELD} tabular-nums`}
               />
             </div>
             <div>
-              <label className="block font-semibold text-wine mb-1">
+              <label htmlFor="vendor-deposit" className={LABEL}>
                 Deposit Paid (NGN ₦)
               </label>
               <input
+                id="vendor-deposit"
                 type="number"
                 min="0"
                 step="1000"
                 value={depositNaira}
                 onChange={(e) => setDepositNaira(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden"
+                className={`${FIELD} tabular-nums`}
               />
             </div>
           </div>
@@ -154,28 +180,30 @@ export function VendorModal({
             onEmailChange={setContactEmail}
           />
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/20">
-            <button
+          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-outline-variant/50 text-wine hover:bg-wine/5 font-semibold"
+              disabled={loading}
+              className="rounded-full px-5"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl bg-wine text-ivory font-semibold hover:bg-wine/90 disabled:opacity-50"
+              className="rounded-full px-6"
             >
               {loading
                 ? "Saving..."
                 : initialVendor
                   ? "Save Changes"
                   : "Create Vendor"}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

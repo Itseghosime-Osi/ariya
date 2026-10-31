@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(11);
+select plan(13);
 
 -- 1. Privilege Audit for anon
 select set_eq(
@@ -53,12 +53,25 @@ select set_eq(
       ('regenerate_guest_token'),
       ('remove_team_member'),
       ('search_guests'),
+      ('shares_event_with'),
       ('submit_rsvp'),
       ('table_seats_used'),
       ('track_invitations_sent'),
       ('update_team_member_role')
   $$,
   'Privilege audit: Only explicitly allowed functions are executable by authenticated'
+);
+
+select is(
+  has_function_privilege('anon', 'public.shares_event_with(uuid)', 'execute'),
+  false,
+  'anon cannot inspect collaborator relationships'
+);
+
+select is(
+  has_function_privilege('authenticated', 'public.shares_event_with(uuid)', 'execute'),
+  true,
+  'authenticated users can check shared-event relationships'
 );
 
 -- 3. Check record_successful_payment permissions

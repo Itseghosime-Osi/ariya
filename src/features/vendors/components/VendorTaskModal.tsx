@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Icon } from "@/components/ui/icon";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface VendorTaskModalProps {
   isOpen: boolean;
@@ -9,6 +17,10 @@ interface VendorTaskModalProps {
   onClose: () => void;
   onSubmit: (task: string, dueDate: string | null) => Promise<void>;
 }
+
+const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
+const FIELD =
+  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function VendorTaskModal({
   isOpen,
@@ -20,8 +32,6 @@ export function VendorTaskModal({
   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,77 +55,85 @@ export function VendorTaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-night/50 backdrop-blur-xs">
-      <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 max-w-md w-full p-6 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
-          <div>
-            <h2 className="font-serif text-lg font-bold text-wine">
-              Add Deliverable / Task
-            </h2>
-            <p className="text-[11px] text-on-surface-variant">
-              For {vendorName}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-on-surface-variant hover:text-wine p-1 rounded-lg"
-          >
-            <Icon name="close" className="text-lg" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[92vh] max-w-md gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
+        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+            Deliverables
+          </p>
+          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
+            Add a task
+          </DialogTitle>
+          <DialogDescription>
+            What {vendorName} still owes before the day, and by when.
+          </DialogDescription>
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
+          />
+        </DialogHeader>
 
-        {error && (
-          <div className="p-3 bg-red-50 text-red-800 text-xs rounded-xl border border-red-200">
-            {error}
-          </div>
-        )}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8"
+        >
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-error/30 bg-error-container px-3 py-2 text-xs text-error"
+            >
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-wine mb-1">
+            <label htmlFor="task-description" className={LABEL}>
               Task Description *
             </label>
             <input
+              id="task-description"
               type="text"
               required
               value={task}
               onChange={(e) => setTask(e.target.value)}
               placeholder="e.g. Confirm menu tasting and food warmers"
-              className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden"
+              className={FIELD}
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-wine mb-1">
+            <label htmlFor="task-due" className={LABEL}>
               Due Date (Optional)
             </label>
             <input
+              id="task-due"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-outline-variant/50 focus:border-wine outline-hidden bg-white"
+              className={FIELD}
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/20">
-            <button
+          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-outline-variant/50 text-wine hover:bg-wine/5 font-semibold"
+              disabled={loading}
+              className="rounded-full px-5"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl bg-wine text-ivory font-semibold hover:bg-wine/90 disabled:opacity-50"
+              className="rounded-full px-6"
             >
               {loading ? "Adding..." : "Add Task"}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

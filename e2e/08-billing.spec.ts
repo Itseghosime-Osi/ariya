@@ -40,10 +40,12 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Navigate to billing
     await page.goto(`/events/${eventId}/billing`);
-    await expect(page.getByText(/Free Tier \(Trial\)/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "On a free trial" })
+    ).toBeVisible();
 
     // Click checkout
-    await page.getByRole("button", { name: /pay with paystack/i }).click();
+    await page.getByRole("button", { name: /unlock with paystack/i }).click();
 
     // Redirect to mock checkout
     await page.waitForURL(/57328\/mock-checkout/, { timeout: 15000 });
@@ -79,7 +81,9 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Event stays unpaid
     await page.goto(`/events/${eventId}/billing`);
-    await expect(page.getByText(/Free Tier \(Trial\)/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "On a free trial" })
+    ).toBeVisible();
 
     // Positive case: Authorize on provider and deliver valid HMAC-SHA512 webhook
     setAuthorized(true);
@@ -96,9 +100,9 @@ test.describe("Billing & Paystack Checkout", () => {
 
     // Celebration Pass unlocked
     await page.goto(`/events/${eventId}/billing`);
-    await expect(page.getByText(/Celebration Pass \(Unlocked\)/i)).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(
+      page.getByRole("heading", { name: "Unlocked for the day" })
+    ).toBeVisible({ timeout: 15000 });
 
     // Quota banner unlocked on Invitations
     await page.goto(`/events/${eventId}/invitations`);
