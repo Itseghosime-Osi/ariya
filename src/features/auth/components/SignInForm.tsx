@@ -15,7 +15,11 @@ export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    searchParams?.get("error") === "auth_callback_failed"
+      ? "That link has expired or was already used. Sign in, or ask for a new link."
+      : null
+  );
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const welcomed = useRef(false);
 
