@@ -22,10 +22,12 @@ export function Countdown({
   dateIso,
   initialNow,
   tone = "dark",
+  compact = false,
 }: {
   dateIso: string;
   initialNow: number;
   tone?: "dark" | "light";
+  compact?: boolean;
 }) {
   const target = new Date(dateIso).getTime();
   const [now, setNow] = useState(initialNow);
@@ -46,7 +48,7 @@ export function Countdown({
       role="timer"
       aria-live="off"
       aria-label={label}
-      className="flex items-end gap-4 sm:gap-6"
+      className={`flex items-end ${compact ? "gap-2" : "gap-4 sm:gap-6"}`}
     >
       <NumberFlowGroup>
         {(
@@ -66,11 +68,25 @@ export function Countdown({
               format={{ minimumIntegerDigits: i === 0 ? 1 : 2 }}
               respectMotionPreference
               className={`font-display font-bold leading-none tabular-nums ${num} ${
-                i === 0 ? "text-6xl sm:text-7xl" : "text-4xl sm:text-5xl"
+                compact
+                  ? i === 0
+                    ? "text-3xl"
+                    : i === 1
+                      ? "text-xl"
+                      : "text-lg"
+                  : i === 0
+                    ? "text-6xl sm:text-7xl"
+                    : i === 1
+                      ? "text-4xl sm:text-5xl"
+                      : "text-2xl sm:text-3xl"
               }`}
             />
             <span
-              className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] ${unit}`}
+              className={`mt-1 font-semibold uppercase ${
+                compact
+                  ? "text-[8px] tracking-[0.14em]"
+                  : "text-[10px] tracking-[0.24em]"
+              } ${unit}`}
             >
               {name}
             </span>
