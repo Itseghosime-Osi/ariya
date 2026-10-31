@@ -39,7 +39,7 @@ export function PasswordField({
           aria-hidden="true"
         />
         <input
-          className="w-full bg-paper text-night font-body-md text-body-md pl-11 pr-11 py-3 rounded-xl shadow-inner outline-none transition-all focus:bg-surface-container-lowest"
+          className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-11 text-sm text-night shadow-inner outline-none transition-all focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
           id={id}
           placeholder={placeholder}
           type={show ? "text" : "password"}

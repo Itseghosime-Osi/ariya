@@ -49,26 +49,23 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <section className="relative bg-paper rounded-xl p-8 lg:p-10 shadow-md flex flex-col justify-between overflow-hidden max-w-lg mx-auto w-full">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-wine" />
+    <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-surface-container text-wine font-semibold">
+          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-wine">
             Step 2: Set New Password
           </span>
-          <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Step 2 of 2
-          </span>
+          <span className="text-xs text-label-2">Step 2 of 2</span>
         </div>
 
         <div className="mb-6">
-          <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block mb-1 font-bold">
+          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-gold-ink">
             PASSWORD RESET
           </span>
-          <h1 className="font-display text-display text-wine tracking-tight">
+          <h1 className="font-display text-4xl font-semibold leading-tight text-wine sm:text-5xl">
             Set New Password
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-2">
+          <p className="mt-2 text-sm leading-relaxed text-label-2">
             Choose a new password to protect your events, guest lists, and
             seating plans.
           </p>
@@ -99,11 +96,11 @@ export function ResetPasswordForm() {
           </div>
 
           {/* Validation Checklist */}
-          <div className="bg-surface-container-low p-4 rounded-xl space-y-2 border border-surface-container-high/60">
+          <div className="space-y-3 border-y border-gold/30 py-4">
             <span className="font-label-sm text-label-sm uppercase text-secondary font-bold block mb-1">
               Password Requirements:
             </span>
-            <div className="grid grid-cols-2 gap-2 font-body-sm text-body-sm">
+            <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
               <span
                 className={`flex items-center gap-1.5 ${hasMinLength ? "text-success font-semibold" : "text-mist"}`}
               >
@@ -151,7 +148,7 @@ export function ResetPasswordForm() {
 
           <div className="pt-2">
             <button
-              className="w-full py-4 px-6 rounded-lg bg-wine hover:bg-night text-ivory font-title-md text-title-md shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-60 min-h-[44px]"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-wine px-6 py-3.5 text-sm font-semibold text-ivory shadow-[0_8px_24px_-12px_rgba(74,17,29,0.8)] transition-all hover:-translate-y-0.5 hover:bg-burgundy hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-60"
               type="submit"
               disabled={isPending || !hasMinLength}
             >

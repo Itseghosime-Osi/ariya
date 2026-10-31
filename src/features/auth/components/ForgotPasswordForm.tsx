@@ -43,26 +43,23 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <section className="relative bg-paper rounded-xl p-8 lg:p-10 shadow-md flex flex-col justify-between overflow-hidden max-w-lg mx-auto w-full">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-wine" />
+    <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-surface-container text-wine font-semibold">
+          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-wine">
             Account Recovery
           </span>
-          <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Step 1 of 2
-          </span>
+          <span className="text-xs text-label-2">Step 1 of 2</span>
         </div>
 
         <div className="mb-6">
-          <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block mb-1 font-bold">
+          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-gold-ink">
             PASSWORD RECOVERY
           </span>
-          <h1 className="font-display text-display text-wine tracking-tight">
+          <h1 className="font-display text-4xl font-semibold leading-tight text-wine sm:text-5xl">
             Forgot Password?
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-2">
+          <p className="mt-2 text-sm leading-relaxed text-label-2">
             Enter the email address registered with your account to receive
             password reset instructions.
           </p>
@@ -85,7 +82,7 @@ export function ForgotPasswordForm() {
                 aria-hidden="true"
               />
               <input
-                className="w-full bg-paper text-night font-body-md text-body-md pl-11 pr-4 py-3 rounded-xl shadow-inner outline-none transition-all placeholder:text-mist focus:bg-surface-container-lowest"
+                className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-4 text-sm text-night shadow-inner outline-none transition-all placeholder:text-mist focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
                 id="reset-email"
                 placeholder="you@example.com"
                 type="email"
@@ -101,7 +98,7 @@ export function ForgotPasswordForm() {
           </div>
 
           <button
-            className="w-full py-4 px-6 rounded-lg bg-wine hover:bg-night text-ivory font-title-md text-title-md shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-60 min-h-[44px]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-wine px-6 py-3.5 text-sm font-semibold text-ivory shadow-[0_8px_24px_-12px_rgba(74,17,29,0.8)] transition-all hover:-translate-y-0.5 hover:bg-burgundy hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-60"
             type="submit"
             disabled={isPending}
           >

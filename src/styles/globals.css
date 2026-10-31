@@ -181,6 +181,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body:has([data-auth-shell]) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

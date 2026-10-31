@@ -1,119 +1,69 @@
 import React from "react";
 import { Icon } from "@/components/ui/icon";
+import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 
 export function AuthArtwork() {
   return (
-    <div className="hidden lg:col-span-6 lg:flex flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-night text-ivory">
-      {/* Ambient Gradients */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-wine/30 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
-
-      {/* Top Badge */}
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-wine/60 shadow-inner">
-          <span className="w-2 h-2 rounded-full bg-gold" />
-          <span className="font-label-sm text-label-sm uppercase tracking-widest text-gold font-bold">
-            Àríyá Celebration Suite
-          </span>
-        </div>
-        <div className="font-body-sm text-body-sm text-stone-300 tracking-wide">
-          Host Workspace
-        </div>
+    <aside className="relative hidden h-full min-h-0 flex-col justify-between overflow-hidden bg-[#1c070d] p-12 text-ivory lg:flex xl:p-16">
+      <div className="desk-aurora" aria-hidden="true">
+        <span />
+        <span />
+        <span />
       </div>
+      <div
+        className="weave absolute inset-0 opacity-[0.07]"
+        aria-hidden="true"
+      />
+      <div className="desk-grain absolute inset-0" aria-hidden="true" />
 
-      {/* Center Editorial Narrative & Example Card */}
-      <div className="relative z-10 my-auto py-10 flex flex-col space-y-8">
-        <div className="space-y-4 max-w-lg">
-          <p className="font-display text-headline-lg xl:text-display text-ivory leading-tight">
-            Event hosting made simple, from invitation to reception.
-          </p>
-          <p className="font-body-md text-body-md text-stone-300 leading-relaxed">
-            Personal RSVP links for every guest, a guest list that updates
-            itself, interactive table seating, and door check-in.
-          </p>
-        </div>
-
-        {/* Clear Example Preview Card */}
-        <div className="w-full max-w-md bg-paper text-night rounded-2xl p-7 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold via-secondary-container to-gold" />
-
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-wine font-semibold">
-                Example Celebration
-              </span>
-              <h3 className="font-headline-sm text-headline-sm text-primary leading-snug">
-                Sample Event Desk
-              </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Preview of celebration tools and guest management
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-wine/10 flex items-center justify-center shrink-0">
-              <Icon name="celebration" className="text-wine text-xl" />
-            </div>
-          </div>
-
-          {/* 4 Real Features */}
-          <div className="grid grid-cols-2 gap-3 mt-6 pt-5 bg-surface-container-high/60 rounded-xl p-3.5 text-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-wine font-semibold">
-                <Icon name="link" className="text-sm" />
-                <span>Personal RSVPs</span>
-              </div>
-              <p className="text-stone-700 text-[11px]">
-                Unique links per guest
-              </p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-wine font-semibold">
-                <Icon name="refresh" className="text-sm" />
-                <span>Self-Updating List</span>
-              </div>
-              <p className="text-stone-700 text-[11px]">Real-time headcounts</p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-wine font-semibold">
-                <Icon name="chair" className="text-sm" />
-                <span>Table Seating</span>
-              </div>
-              <p className="text-stone-700 text-[11px]">
-                Floor plan &amp; charts
-              </p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-wine font-semibold">
-                <Icon name="qr_code_scanner" className="text-sm" />
-                <span>Door Check-in</span>
-              </div>
-              <p className="text-stone-700 text-[11px]">
-                QR passes &amp; codes
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between pt-1">
-            <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-600" />
-              <span>Active synchronization</span>
-            </span>
-            <span className="font-label-sm text-label-sm text-on-surface-variant italic">
-              Example demonstration
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Status Pill */}
-      <div className="relative z-10 flex items-center justify-between text-stone-300 pt-6">
-        <div className="flex items-center space-x-2 font-body-sm text-body-sm">
-          <Icon name="shield" className="text-gold text-base" />
-          <span>Secure celebration workspace</span>
-        </div>
-        <span className="font-label-sm text-label-sm text-stone-400">
-          Àríyá 2026
+      <header className="relative z-10 flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
+          Àríyá Celebration Suite
         </span>
+        <span className="text-xs text-ivory/60">Host Workspace</span>
+      </header>
+
+      <div className="relative z-10 my-auto w-full max-w-3xl">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
+          Made for the joy of bringing people together
+        </p>
+        <h2 className="mt-5 max-w-[14ch] font-display text-5xl font-semibold leading-[1.08] text-ivory xl:text-6xl">
+          Make room for a little more joy.
+        </h2>
+        <p className="mt-5 max-w-lg text-base leading-relaxed text-ivory/70">
+          From the first invitation to the last dance, keep your people and
+          every thoughtful detail close.
+        </p>
+
+        <div className="mt-10 flex items-center gap-6 border-y border-[#e9c98a]/20 py-5">
+          <div
+            className="relative grid h-28 w-28 shrink-0 place-items-center overflow-hidden rounded-full xl:h-36 xl:w-36"
+            aria-hidden="true"
+          >
+            <div className="absolute inset-0 rounded-full border border-[#e9c98a]/25" />
+            <div className="absolute inset-3 rounded-full border border-[#e9c98a]/20" />
+            <div className="absolute inset-6 rounded-full bg-[radial-gradient(circle,rgba(233,201,138,0.24),transparent_72%)] blur-md" />
+            <MonogramSeal
+              text="Àríyá"
+              size={104}
+              className="relative h-24 w-24 drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)] xl:h-28 xl:w-28"
+            />
+            <span className="foil-sheen rounded-full" />
+          </div>
+          <p className="font-display text-2xl leading-snug text-ivory/90 xl:text-3xl">
+            Invite <span className="text-[#e9c98a]">·</span> Gather{" "}
+            <span className="text-[#e9c98a]">·</span> Celebrate
+          </p>
+        </div>
       </div>
-    </div>
+
+      <footer className="relative z-10 flex items-center justify-between border-t border-[#e9c98a]/20 pt-5 text-xs text-ivory/60">
+        <span className="inline-flex items-center gap-2">
+          <Icon name="shield" size={15} className="text-[#e9c98a]" />
+          Secure celebration workspace
+        </span>
+        <span>Àríyá 2026</span>
+      </footer>
+    </aside>
   );
 }

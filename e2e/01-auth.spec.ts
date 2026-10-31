@@ -10,14 +10,17 @@ test.describe("Authentication & Session", () => {
     await page.goto("/sign-up");
     await expect(page).toHaveTitle(/(Sign Up|Create Account) • Àríyá/i);
 
-    // 2. Validation: passwords mismatch
+    // 2. Move through the short setup steps and reject mismatched passcodes.
     await page.locator("#fullName").fill("Adeola Bakare");
+    await page.getByTestId("signup-continue").click();
+    await expect(
+      page.getByRole("heading", { name: /where can we reach you/i })
+    ).toBeVisible();
     await page.locator("#emailInput").fill("mismatch@owambe.ng");
+    await page.getByTestId("signup-continue").click();
     await page.locator("#password").fill("Password123!");
     await page.locator("#confirmPassword").fill("Password456!");
-    await page
-      .getByRole("button", { name: /create celebration account/i })
-      .click();
+    await page.getByTestId("signup-submit").click();
     await expect(page.getByText(/passcodes do not match/i)).toBeVisible();
 
     // 3. Complete valid registration & login via helper
@@ -28,12 +31,5 @@ test.describe("Authentication & Session", () => {
         .getByText(/Your events|Plan your first celebration|Your Celebrations/i)
         .first()
     ).toBeVisible();
-
-    // 4. Sign out
-    await page.goto("/events");
-    const profileLink = page.getByTitle(/profile & settings/i);
-    if (await profileLink.isVisible()) {
-      await profileLink.click();
-    }
   });
 });
