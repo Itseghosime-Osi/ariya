@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
-import { signOutAction } from "@/features/auth/actions";
+import { SignOutConfirmation } from "./SignOutConfirmation";
 
 interface TopBarProps {
   eventId?: string;
@@ -21,6 +21,7 @@ interface TopBarProps {
 
 export function TopBar({ eventId, userEmail }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
   return (
     <>
@@ -99,9 +100,7 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="my-1 bg-hairline" />
               <DropdownMenuItem
-                onSelect={() => {
-                  void signOutAction();
-                }}
+                onSelect={() => setSignOutOpen(true)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-burgundy cursor-pointer"
               >
                 <Icon name="logout" size={16} />
@@ -117,6 +116,7 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
         onOpenChange={setSearchOpen}
         eventId={eventId}
       />
+      <SignOutConfirmation open={signOutOpen} onOpenChange={setSignOutOpen} />
     </>
   );
 }
