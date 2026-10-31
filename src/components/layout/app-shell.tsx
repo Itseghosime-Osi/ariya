@@ -9,6 +9,7 @@ import { EventDayCelebration } from "./event-day-celebration";
 import { InstallHint } from "./install-hint";
 import { isValidEventId, type SwitcherEvent } from "./nav-items";
 import { cn } from "@/lib/utils";
+import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 
 const SIDEBAR_KEY = "ariya-sidebar";
 
@@ -73,6 +74,8 @@ export function AppShell({
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
+
+  useEffect(() => enableFireworkAudioOnInteraction(), []);
 
   useEffect(() => {
     const url = new URL(window.location.href);
