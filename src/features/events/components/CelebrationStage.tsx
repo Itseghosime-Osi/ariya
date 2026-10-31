@@ -179,10 +179,10 @@ export function CelebrationStage({
                 </ViewTransition>
               </div>
 
-              <div className="desk-ring mx-auto flex items-center gap-6 rounded-[28px] bg-[#1c070d]/60 p-5 backdrop-blur-sm md:col-span-2 lg:col-span-1 lg:mx-0">
+              <div className="desk-ring mx-auto hidden items-center gap-6 rounded-[28px] bg-[#1c070d]/60 p-5 backdrop-blur-sm md:col-span-2 md:flex lg:col-span-1 lg:mx-0">
                 {hasDate && <Countdown dateIso={event.date} initialNow={now} />}
                 <div
-                  className="relative grid h-24 w-24 shrink-0 place-items-center"
+                  className="relative grid h-32 w-32 shrink-0 place-items-center"
                   role="img"
                   aria-label={`${replied}% of guests have replied`}
                 >
@@ -216,7 +216,7 @@ export function CelebrationStage({
                     />
                   </svg>
                   <div className="text-center leading-none" aria-hidden="true">
-                    <div className="font-display text-2xl font-bold tabular-nums">
+                    <div className="font-display text-xl font-bold tabular-nums">
                       {replied}%
                     </div>
                     <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-ivory/75">
@@ -270,6 +270,35 @@ export function CelebrationStage({
           )}
         </div>
       </SparkleSurface>
+      <section
+        aria-label="Countdown and RSVP status"
+        className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-[#e9c98a]/20 bg-[#1c070d] px-4 py-3 text-ivory shadow-[0_12px_30px_-20px_rgba(28,7,13,0.8)] md:hidden"
+      >
+        <div className="min-w-0">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e9c98a]">
+            Countdown
+          </p>
+          {hasDate ? (
+            <Countdown dateIso={event.date} initialNow={now} compact />
+          ) : (
+            <p className="text-sm text-ivory/75">
+              Set a date to start the countdown
+            </p>
+          )}
+        </div>
+        <div
+          className="border-l border-ivory/15 pl-4 text-right"
+          role="img"
+          aria-label={`${replied}% of guests have replied`}
+        >
+          <div className="font-display text-2xl font-bold tabular-nums">
+            {replied}%
+          </div>
+          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-ivory/70">
+            replied
+          </div>
+        </div>
+      </section>
     </section>
   );
 }
