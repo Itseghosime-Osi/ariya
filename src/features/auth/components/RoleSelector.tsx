@@ -10,72 +10,54 @@ interface RoleSelectorProps {
 
 export function RoleSelector({ role, onChange, disabled }: RoleSelectorProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="font-label-md text-label-md uppercase tracking-wider text-wine font-semibold">
-        I Am Registering As
-      </label>
-      <div className="grid grid-cols-1 gap-3">
-        {/* Couple Option */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onChange("couple")}
-          className={`text-left flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-            role === "couple"
-              ? "bg-paper shadow-sm ring-1 ring-gold"
-              : "bg-surface-container hover:bg-paper"
-          }`}
-        >
-          <div
-            className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center ${
-              role === "couple" ? "bg-wine text-ivory" : "bg-surface-dim"
-            }`}
-          >
-            {role === "couple" && (
-              <div className="w-2 h-2 rounded-full bg-gold" />
-            )}
-          </div>
-          <div className="flex flex-col pr-2">
-            <span className="font-title-md text-title-md text-night font-semibold">
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-wine">
+        I am registering as
+      </legend>
+      <div className="divide-y divide-outline-variant/60 border-y border-outline-variant/60">
+        <label className="flex min-h-11 cursor-pointer items-start gap-3 py-3">
+          <input
+            className="peer sr-only"
+            type="radio"
+            name="account-role"
+            value="couple"
+            checked={role === "couple"}
+            onChange={() => onChange("couple")}
+            disabled={disabled}
+          />
+          <span className="relative mt-0.5 h-5 w-5 shrink-0 rounded-full border border-outline before:absolute before:inset-[5px] before:rounded-full before:bg-gold before:opacity-0 before:content-[''] peer-checked:border-wine peer-checked:bg-wine peer-checked:before:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-burgundy" />
+          <span>
+            <span className="block text-sm font-semibold text-night">
               Bride, Groom or Couple
             </span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            <span className="mt-1 block text-xs leading-relaxed text-label-2">
               Planning our celebration with family registers and curated tables
             </span>
-          </div>
-        </button>
+          </span>
+        </label>
 
-        {/* Planner Option */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onChange("planner")}
-          className={`text-left flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-            role === "planner"
-              ? "bg-paper shadow-sm ring-1 ring-gold"
-              : "bg-surface-container hover:bg-paper"
-          }`}
-        >
-          <div
-            className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center ${
-              role === "planner" ? "bg-wine text-ivory" : "bg-surface-dim"
-            }`}
-          >
-            {role === "planner" && (
-              <div className="w-2 h-2 rounded-full bg-gold" />
-            )}
-          </div>
-          <div className="flex flex-col pr-2">
-            <span className="font-title-md text-title-md text-night font-semibold">
+        <label className="flex min-h-11 cursor-pointer items-start gap-3 py-3">
+          <input
+            className="peer sr-only"
+            type="radio"
+            name="account-role"
+            value="planner"
+            checked={role === "planner"}
+            onChange={() => onChange("planner")}
+            disabled={disabled}
+          />
+          <span className="relative mt-0.5 h-5 w-5 shrink-0 rounded-full border border-outline before:absolute before:inset-[5px] before:rounded-full before:bg-gold before:opacity-0 before:content-[''] peer-checked:border-wine peer-checked:bg-wine peer-checked:before:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-burgundy" />
+          <span>
+            <span className="block text-sm font-semibold text-night">
               Professional Event Planner
             </span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            <span className="mt-1 block text-xs leading-relaxed text-label-2">
               Managing luxury celebrations and milestone itineraries across
               multiple client registries
             </span>
-          </div>
-        </button>
+          </span>
+        </label>
       </div>
-    </div>
+    </fieldset>
   );
 }

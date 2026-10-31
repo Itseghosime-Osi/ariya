@@ -75,6 +75,26 @@ export function AppShell({
   }, [pathname]);
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("welcome") !== "1") return;
+
+    void import("@/lib/fireworks").then(({ startFireworks }) => {
+      startFireworks({
+        scale: "finale",
+        kicker: "Welcome to Àríyá",
+        caption: "A new celebration begins.",
+      });
+    });
+
+    url.searchParams.delete("welcome");
+    window.history.replaceState(
+      null,
+      "",
+      url.pathname + (url.search ? url.search : "") + url.hash
+    );
+  }, []);
+
+  useEffect(() => {
     if (!drawerOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setDrawerOpen(false);

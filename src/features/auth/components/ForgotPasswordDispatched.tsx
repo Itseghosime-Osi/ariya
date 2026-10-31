@@ -16,33 +16,32 @@ export function ForgotPasswordDispatched({
   onChangeEmail,
 }: ForgotPasswordDispatchedProps) {
   return (
-    <section className="relative bg-paper rounded-xl p-8 lg:p-10 shadow-md flex flex-col justify-between overflow-hidden max-w-lg mx-auto w-full">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-secondary-fixed" />
+    <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-secondary text-surface-container-lowest font-bold">
+          <span className="rounded-full bg-secondary text-surface-container-lowest px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em]">
             Check Your Email
           </span>
-          <span className="font-label-md text-label-md text-secondary font-semibold">
+          <span className="text-xs font-semibold text-secondary">
             Step 2 of 2
           </span>
         </div>
 
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm shrink-0">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container shadow-sm">
             <Icon name="mail" className="text-2xl text-wine" />
           </div>
           <div>
-            <span className="font-label-sm text-label-sm uppercase text-secondary font-bold">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-secondary">
               Email Sent
             </span>
-            <h2 className="font-headline-md text-headline-md text-night">
+            <h2 className="font-display text-2xl font-semibold text-night">
               Check Your Inbox
             </h2>
           </div>
         </div>
 
-        <div className="bg-surface-container-lowest p-6 rounded-lg shadow-sm space-y-4 mb-6">
+        <div className="mb-6 space-y-4 border-y border-gold/30 py-5">
           <p className="font-body-md text-body-md text-paper-ink leading-relaxed">
             We&apos;ve sent a secure password reset link to{" "}
             <strong className="font-title-md text-wine font-semibold">
@@ -51,7 +50,7 @@ export function ForgotPasswordDispatched({
             . The link remains valid for{" "}
             <span className="font-semibold text-night">60 minutes</span>.
           </p>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+          <div className="flex items-start gap-3 border-l-2 border-gold pl-3 text-sm text-label-2">
             <Icon name="info" className="text-lg text-secondary shrink-0" />
             <span>
               Spam filter alert: Check promotional tabs if not arrived in 2
@@ -62,7 +61,7 @@ export function ForgotPasswordDispatched({
 
         <div className="space-y-4">
           <button
-            className="w-full py-3.5 px-6 rounded-lg bg-wine text-ivory font-title-md text-title-md flex items-center justify-center gap-2 shadow hover:bg-night hover:text-gold transition-all min-h-[44px]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-wine px-6 py-3.5 text-sm font-semibold text-ivory shadow-[0_8px_24px_-12px_rgba(74,17,29,0.8)] transition-all hover:-translate-y-0.5 hover:bg-burgundy hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             type="button"
             onClick={onResend}
           >

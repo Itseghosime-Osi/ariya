@@ -8,29 +8,26 @@ export function ResetPasswordSuccess() {
   const router = useRouter();
 
   return (
-    <section className="relative bg-paper rounded-xl p-8 lg:p-10 shadow-md flex flex-col justify-between overflow-hidden max-w-lg mx-auto w-full">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-success" />
+    <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="font-label-sm text-label-sm uppercase tracking-wider px-3 py-1 rounded-full bg-success-surface text-success font-bold">
+          <span className="rounded-full bg-success-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success">
             Password Updated
           </span>
-          <span className="font-label-md text-label-md text-success font-semibold">
-            Complete
-          </span>
+          <span className="text-xs font-semibold text-success">Complete</span>
         </div>
 
-        <div className="flex flex-col items-center text-center py-6 px-4 bg-surface-container-lowest rounded-xl shadow-sm mb-6">
-          <div className="w-20 h-20 rounded-full bg-success-surface text-success flex items-center justify-center mb-4 shadow">
+        <div className="mb-6 flex flex-col items-center border-y border-success/20 py-7 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-surface text-success shadow-sm">
             <Icon name="check_circle" className="text-4xl" />
           </div>
-          <span className="font-label-md text-label-md uppercase tracking-widest text-success mb-1 font-bold">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-success">
             Password Changed
           </span>
-          <h2 className="font-headline-md text-headline-md text-night mb-2">
+          <h2 className="mb-2 font-display text-2xl font-semibold text-night">
             Password Reset Successfully
           </h2>
-          <p className="font-body-md text-body-md text-paper-ink max-w-md">
+          <p className="max-w-md text-sm leading-relaxed text-label-2">
             Your password has been updated. You can now sign in to manage your
             events, guest lists, and seating plans.
           </p>
@@ -38,7 +35,7 @@ export function ResetPasswordSuccess() {
 
         <div className="space-y-4">
           <button
-            className="w-full py-4 px-6 rounded-lg bg-gold text-night font-title-md text-title-md flex items-center justify-center gap-2 shadow-lg hover:bg-secondary-fixed transition-all min-h-[44px]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-semibold text-night shadow-[0_8px_24px_-12px_rgba(74,17,29,0.5)] transition-all hover:-translate-y-0.5 hover:bg-secondary-fixed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
             type="button"
             onClick={() => router.push("/events")}
           >

@@ -59,3 +59,27 @@ export async function celebrate(
     /* a missed celebration is fine */
   }
 }
+
+export async function celebrateStep(
+  origin: { x: number; y: number } = { x: 0.5, y: 0.45 }
+) {
+  if (typeof window === "undefined") return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  try {
+    const confetti = (await import("canvas-confetti")).default;
+    confetti({
+      origin,
+      particleCount: 18,
+      spread: 42,
+      startVelocity: 20,
+      gravity: 0.9,
+      scalar: 0.65,
+      ticks: 110,
+      colors: ["#e9c98a", "#f6dca8", "#c1283d"],
+      disableForReducedMotion: true,
+      zIndex: 80,
+    });
+  } catch {
+    /* A missed step celebration is fine. */
+  }
+}

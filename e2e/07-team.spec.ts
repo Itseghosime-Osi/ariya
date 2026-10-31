@@ -42,12 +42,12 @@ test.describe("Team & Roles", () => {
     // Staff registers with matching email
     await staffPage.goto("/sign-up");
     await staffPage.locator("#fullName").fill("Staff Concierge");
+    await staffPage.getByTestId("signup-continue").click();
     await staffPage.locator("#emailInput").fill(staffEmail);
+    await staffPage.getByTestId("signup-continue").click();
     await staffPage.locator("#password").fill("Celebration2026!");
     await staffPage.locator("#confirmPassword").fill("Celebration2026!");
-    await staffPage
-      .getByRole("button", { name: /create celebration account/i })
-      .click();
+    await staffPage.getByTestId("signup-submit").click();
     await staffPage.waitForURL(/\/(events|sign-in)/, { timeout: 15000 });
 
     if (staffPage.url().includes("/sign-in")) {

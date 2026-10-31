@@ -58,12 +58,12 @@ export async function createAndLoginUser(
 
   await page.goto("/sign-up");
   await page.locator("#fullName").fill(testUser.fullName);
+  await page.getByTestId("signup-continue").click();
   await page.locator("#emailInput").fill(testUser.email);
+  await page.getByTestId("signup-continue").click();
   await page.locator("#password").fill(testUser.password);
   await page.locator("#confirmPassword").fill(testUser.password);
-  await page
-    .getByRole("button", { name: /create celebration account/i })
-    .click();
+  await page.getByTestId("signup-submit").click();
 
   await page.waitForURL(/\/(events|sign-in)/, { timeout: 15000 });
 

@@ -25,7 +25,7 @@ export function PasswordStrengthMeter({
   };
 
   return (
-    <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-3">
+    <div className="flex flex-col gap-3 border-y border-outline-variant/60 py-4">
       <div className="flex items-center justify-between">
         <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
           Credential Strength
