@@ -13,7 +13,9 @@ test.describe("Team & Roles", () => {
 
     // Navigate to Team
     await page.goto(`/events/${eventId}/team`);
-    await expect(page.getByText(/Team & Collaboration Roles/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "The people behind the day" })
+    ).toBeVisible();
 
     // Invite new staff member
     const timestamp = Date.now();

@@ -1,6 +1,15 @@
 "use client";
 
 import React, { useActionState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { inviteTeamMemberAction, type TeamActionState } from "../actions";
 
@@ -10,6 +19,10 @@ interface InviteMemberModalProps {
   canManageOwners: boolean;
   onClose: () => void;
 }
+
+const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
+const FIELD =
+  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function InviteMemberModal({
   eventId,
@@ -32,73 +45,62 @@ export function InviteMemberModal({
     }
   }, [state.success, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-night/60 backdrop-blur-xs animate-in fade-in"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="invite-modal-title"
-    >
-      <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-outline-variant/60 space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b border-outline-variant/40">
-          <div className="flex items-center gap-2">
-            <Icon name="diversity_3" className="text-xl text-wine" />
-            <h3
-              id="invite-modal-title"
-              className="font-serif text-lg font-bold text-night"
-            >
-              Invite Team Member
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="p-1 rounded-lg text-mist hover:text-night hover:bg-surface-container"
-          >
-            <Icon name="close" className="text-lg" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[92vh] max-w-md gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
+        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+            The circle
+          </p>
+          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
+            Invite to the team
+          </DialogTitle>
+          <DialogDescription>
+            They get a link by email and see only what their role allows.
+          </DialogDescription>
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
+          />
+        </DialogHeader>
 
-        {state.error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 text-xs p-3 rounded-xl flex items-center gap-2">
-            <Icon name="error" className="text-base text-red-600 shrink-0" />
-            <span>{state.error}</span>
-          </div>
-        )}
-
-        <form action={formAction} className="space-y-4">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="email"
-              className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
+        <form
+          action={formAction}
+          className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8"
+        >
+          {state.error && (
+            <div
+              role="alert"
+              className="flex items-center gap-2 rounded-xl border border-error/30 bg-error-container px-3 py-2 text-xs text-error"
             >
+              <Icon name="error" size={14} className="shrink-0" />
+              <span>{state.error}</span>
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="invite-email" className={LABEL}>
               Collaborator Email
             </label>
             <input
-              id="email"
+              id="invite-email"
               name="email"
               type="email"
               required
               placeholder="colleague@lagos.ng"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 text-sm focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className={FIELD}
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="role"
-              className="text-xs font-semibold uppercase tracking-wider text-wine/80 block"
-            >
+          <div>
+            <label htmlFor="invite-role" className={LABEL}>
               Assigned Role
             </label>
             <select
-              id="role"
+              id="invite-role"
               name="role"
               defaultValue="staff"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 text-sm focus:outline-none focus:ring-2 focus:ring-wine/40 bg-white"
+              className={`${FIELD} cursor-pointer`}
             >
               {canManageOwners && (
                 <option value="owner">Owner (Full access)</option>
@@ -117,34 +119,26 @@ export function InviteMemberModal({
             </select>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3">
-            <button
+          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-night"
+              disabled={isPending}
+              className="rounded-full px-5"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2 rounded-xl bg-wine text-ivory text-sm font-semibold hover:bg-wine/90 transition-all disabled:opacity-50 flex items-center gap-2 min-h-[40px]"
+              className="rounded-full px-6"
             >
-              {isPending ? (
-                <>
-                  <Icon name="refresh" className="animate-spin text-base" />
-                  <span>Sending Invitation...</span>
-                </>
-              ) : (
-                <>
-                  <Icon name="outgoing_mail" className="text-base" />
-                  <span>Send Team Invite</span>
-                </>
-              )}
-            </button>
-          </div>
+              {isPending ? "Sending Invitation..." : "Send Team Invite"}
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -170,6 +170,7 @@
   --color-on-error-container: var(--on-error-container);
   --font-display: var(--font-bodoni-moda), Georgia, serif;
   --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  --font-signature: var(--font-great-vibes), "Snell Roundhand", cursive;
 }
 
 body {
