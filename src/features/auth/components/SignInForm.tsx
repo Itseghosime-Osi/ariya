@@ -15,7 +15,12 @@ export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // A confirmation or reset link that has expired or was already used lands here.
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    searchParams?.get("error") === "auth_callback_failed"
+      ? "That link has expired or was already used. Sign in, or ask for a new link."
+      : null
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
