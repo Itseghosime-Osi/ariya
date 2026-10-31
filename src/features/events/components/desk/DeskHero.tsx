@@ -63,205 +63,265 @@ export function DeskHero({
   const expected = Math.max(metrics.acceptedGuests, 0);
 
   return (
-    <ViewTransition
-      name={`celebration-${event.id}`}
-      share="desk-morph"
-      default="none"
-    >
-      <SparkleSurface className="overflow-hidden rounded-4xl bg-[#1c070d] text-ivory shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]">
-        <div className="desk-aurora" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <div
-          className="weave absolute inset-0 opacity-[0.05]"
-          aria-hidden="true"
-        />
-        <GoldDust density={46} />
-        <div className="desk-grain absolute inset-0" aria-hidden="true" />
+    <div className="space-y-3">
+      <ViewTransition
+        name={`celebration-${event.id}`}
+        share="desk-morph"
+        default="none"
+      >
+        <SparkleSurface className="overflow-hidden rounded-4xl bg-[#1c070d] text-ivory shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]">
+          <div className="desk-aurora" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div
+            className="weave absolute inset-0 opacity-[0.05]"
+            aria-hidden="true"
+          />
+          <GoldDust density={46} />
+          <div className="desk-grain absolute inset-0" aria-hidden="true" />
 
-        <section
-          aria-labelledby="desk-title"
-          className="relative grid items-center gap-8 p-6 sm:p-9 lg:grid-cols-[auto_1fr_auto] lg:gap-10 lg:p-11"
-        >
-          <TiltCard max={12} className="mx-auto w-fit rounded-full lg:mx-0">
-            <div className="relative grid h-36 w-36 place-items-center rounded-full sm:h-44 sm:w-44">
-              <span
-                className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(233,201,138,0.35),transparent_68%)] blur-md"
-                aria-hidden="true"
-              />
-              <MonogramSeal
-                text={names}
-                size={168}
-                className="relative h-full w-full drop-shadow-[0_18px_28px_rgba(0,0,0,0.55)]"
-              />
-              <span className="foil-sheen rounded-full" aria-hidden="true" />
-            </div>
-          </TiltCard>
+          <section
+            aria-labelledby="desk-title"
+            className="relative grid items-center gap-8 p-6 sm:p-9 lg:grid-cols-[auto_1fr_auto] lg:gap-10 lg:p-11"
+          >
+            <TiltCard max={12} className="mx-auto w-fit rounded-full lg:mx-0">
+              <div className="relative grid h-36 w-36 place-items-center rounded-full sm:h-44 sm:w-44">
+                <span
+                  className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(233,201,138,0.35),transparent_68%)] blur-md"
+                  aria-hidden="true"
+                />
+                <MonogramSeal
+                  text={names}
+                  size={168}
+                  className="relative h-full w-full drop-shadow-[0_18px_28px_rgba(0,0,0,0.55)]"
+                />
+                <span className="foil-sheen rounded-full" aria-hidden="true" />
+              </div>
+            </TiltCard>
 
-          <div className="min-w-0 text-center lg:text-left">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#e9c98a]">
-              Celebration Desk{" "}
-              <span className="px-1.5 text-ivory/40" aria-hidden="true">
-                ·
-              </span>
-              <span className="normal-case tracking-normal text-ivory/75">
-                Every yes, together.
-              </span>
+            <div className="min-w-0 text-center lg:text-left">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#e9c98a]">
+                Celebration Desk{" "}
+                <span className="px-1.5 text-ivory/40" aria-hidden="true">
+                  ·
+                </span>
+                <span className="normal-case tracking-normal text-ivory/75">
+                  Every yes, together.
+                </span>
+              </div>
+              <h1
+                id="desk-title"
+                className="mt-3 font-display text-4xl font-bold leading-[1.02] text-ivory sm:text-6xl"
+              >
+                {names}
+              </h1>
+              {event.couple && event.title && event.couple !== event.title && (
+                <p className="mt-2 font-display text-lg italic text-ivory/75">
+                  {event.title}
+                </p>
+              )}
+              <p className="mt-4 text-sm text-ivory/80">
+                {hasDate ? formatEventDate(event.date) : "Date to be set"}
+                {venue && (
+                  <>
+                    <span className="px-2 text-[#e9c98a]" aria-hidden="true">
+                      ✦
+                    </span>
+                    {venue}
+                  </>
+                )}
+              </p>
+              <nav
+                aria-label="Quick actions"
+                className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start"
+              >
+                {[
+                  {
+                    href: `/events/${event.id}/guests`,
+                    label: "Guests",
+                    icon: "add_circle" as const,
+                    primary: true,
+                  },
+                  {
+                    href: `/events/${event.id}/page-editor`,
+                    label: "Event page",
+                    icon: "visibility" as const,
+                  },
+                  {
+                    href: `/events/${event.id}/check-in`,
+                    label: "Check-in",
+                    icon: "qr_code_scanner" as const,
+                  },
+                ].map((a) => (
+                  <Link
+                    key={a.href}
+                    href={a.href}
+                    className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
+                      a.primary
+                        ? "bg-[#e9c98a] text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)]"
+                        : "bg-ivory/10 text-ivory ring-1 ring-ivory/20 hover:bg-ivory/15"
+                    }`}
+                  >
+                    <Icon name={a.icon} size={17} />
+                    {a.label}
+                  </Link>
+                ))}
+              </nav>
             </div>
-            <h1
-              id="desk-title"
-              className="mt-3 font-display text-4xl font-bold leading-[1.02] text-ivory sm:text-6xl"
-            >
-              {names}
-            </h1>
-            {event.couple && event.title && event.couple !== event.title && (
-              <p className="mt-2 font-display text-lg italic text-ivory/75">
-                {event.title}
+
+            {/* One number: the countdown, in a halo that fills through the planning season */}
+            <div className="mx-auto hidden lg:mx-0 lg:block">
+              <div className="relative grid h-48 w-48 place-items-center sm:h-56 sm:w-56">
+                <svg
+                  viewBox="0 0 200 200"
+                  className="absolute inset-0 -rotate-90"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="92"
+                    fill="none"
+                    stroke="rgba(244,239,230,0.1)"
+                    strokeWidth="3"
+                  />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="92"
+                    fill="none"
+                    stroke="url(#halo-gold)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    pathLength={1}
+                    strokeDasharray={`${isToday ? 1 : elapsed} 1`}
+                    className="transition-[stroke-dasharray] duration-1000"
+                  />
+                  <defs>
+                    <linearGradient id="halo-gold" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stopColor="#f6dca8" />
+                      <stop offset="1" stopColor="#b8864b" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div
+                  className="desk-ring absolute inset-3 rounded-full"
+                  aria-hidden="true"
+                />
+                <div className="relative h-full w-full">
+                  {isToday ? (
+                    <div className="relative text-center" aria-live="polite">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
+                        Owambe mode
+                      </div>
+                      <div className="mt-1 font-display text-6xl font-bold leading-none tabular-nums">
+                        {checkedInPeople}
+                      </div>
+                      <div className="mt-1 text-xs text-ivory/75">
+                        of {expected} at the gate
+                      </div>
+                    </div>
+                  ) : hasDate ? (
+                    <div
+                      className="relative text-center"
+                      role="timer"
+                      aria-live="off"
+                      aria-label={`${days} days, ${hours} hours and ${minutes} minutes to go`}
+                    >
+                      <NumberFlow
+                        value={days}
+                        respectMotionPreference
+                        className="font-display text-6xl font-bold leading-none text-[#e9c98a] tabular-nums sm:text-7xl"
+                        aria-hidden="true"
+                      />
+                      <div
+                        className="text-[11px] font-semibold uppercase tracking-[0.26em] text-ivory/80"
+                        aria-hidden="true"
+                      >
+                        {days === 1 ? "day to go" : "days to go"}
+                      </div>
+                      <div
+                        className="mt-1 text-xs tabular-nums text-ivory/70"
+                        aria-hidden="true"
+                      >
+                        {hours}h {String(minutes).padStart(2, "0")}m
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="relative max-w-36 text-center text-sm text-ivory/80">
+                      Set a date to start the countdown
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="mt-3 text-center text-xs text-ivory/75">
+                {metrics.acceptedGuests}{" "}
+                {metrics.acceptedGuests === 1 ? "guest" : "guests"} coming so
+                far
+              </p>
+            </div>
+          </section>
+        </SparkleSurface>
+      </ViewTransition>
+      <section
+        aria-label="Countdown and guest count"
+        className="rounded-2xl border border-[#e9c98a]/20 bg-[#1c070d] px-4 py-3 text-ivory shadow-[0_12px_30px_-20px_rgba(28,7,13,0.8)] lg:hidden"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e9c98a]">
+              {isToday ? "Owambe mode" : "Countdown"}
+            </p>
+            {isToday ? (
+              <div
+                className="mt-1 flex items-baseline gap-2"
+                aria-live="polite"
+              >
+                <div className="font-display text-3xl font-bold tabular-nums">
+                  {checkedInPeople}
+                </div>
+                <span className="text-xs text-ivory/75">at the gate</span>
+              </div>
+            ) : hasDate ? (
+              <div
+                className="mt-1"
+                role="timer"
+                aria-live="off"
+                aria-label={`${days} days, ${hours} hours and ${minutes} minutes to go`}
+              >
+                <div className="flex items-baseline gap-2">
+                  <NumberFlow
+                    value={days}
+                    respectMotionPreference
+                    className="font-display text-3xl font-bold leading-none text-[#e9c98a] tabular-nums"
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm text-ivory/80">
+                    {days === 1 ? "day to go" : "days to go"}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs tabular-nums text-ivory/70">
+                  {hours}h {String(minutes).padStart(2, "0")}m
+                </p>
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-ivory/75">
+                Set a date to start the countdown
               </p>
             )}
-            <p className="mt-4 text-sm text-ivory/80">
-              {hasDate ? formatEventDate(event.date) : "Date to be set"}
-              {venue && (
-                <>
-                  <span className="px-2 text-[#e9c98a]" aria-hidden="true">
-                    ✦
-                  </span>
-                  {venue}
-                </>
-              )}
-            </p>
-            <nav
-              aria-label="Quick actions"
-              className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start"
-            >
-              {[
-                {
-                  href: `/events/${event.id}/guests`,
-                  label: "Guests",
-                  icon: "add_circle" as const,
-                  primary: true,
-                },
-                {
-                  href: `/events/${event.id}/page-editor`,
-                  label: "Event page",
-                  icon: "visibility" as const,
-                },
-                {
-                  href: `/events/${event.id}/check-in`,
-                  label: "Check-in",
-                  icon: "qr_code_scanner" as const,
-                },
-              ].map((a) => (
-                <Link
-                  key={a.href}
-                  href={a.href}
-                  className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
-                    a.primary
-                      ? "bg-[#e9c98a] text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)]"
-                      : "bg-ivory/10 text-ivory ring-1 ring-ivory/20 hover:bg-ivory/15"
-                  }`}
-                >
-                  <Icon name={a.icon} size={17} />
-                  {a.label}
-                </Link>
-              ))}
-            </nav>
           </div>
-
-          {/* One number: the countdown, in a halo that fills through the planning season */}
-          <div className="mx-auto lg:mx-0">
-            <div className="relative grid h-48 w-48 place-items-center sm:h-56 sm:w-56">
-              <svg
-                viewBox="0 0 200 200"
-                className="absolute inset-0 -rotate-90"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="92"
-                  fill="none"
-                  stroke="rgba(244,239,230,0.1)"
-                  strokeWidth="3"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="92"
-                  fill="none"
-                  stroke="url(#halo-gold)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  pathLength={1}
-                  strokeDasharray={`${isToday ? 1 : elapsed} 1`}
-                  className="transition-[stroke-dasharray] duration-1000"
-                />
-                <defs>
-                  <linearGradient id="halo-gold" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#f6dca8" />
-                    <stop offset="1" stopColor="#b8864b" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div
-                className="desk-ring absolute inset-3 rounded-full"
-                aria-hidden="true"
-              />
-              <div className="relative h-full w-full">
-                {isToday ? (
-                  <div className="relative text-center" aria-live="polite">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
-                      Owambe mode
-                    </div>
-                    <div className="mt-1 font-display text-6xl font-bold leading-none tabular-nums">
-                      {checkedInPeople}
-                    </div>
-                    <div className="mt-1 text-xs text-ivory/75">
-                      of {expected} at the gate
-                    </div>
-                  </div>
-                ) : hasDate ? (
-                  <div
-                    className="relative text-center"
-                    role="timer"
-                    aria-live="off"
-                    aria-label={`${days} days, ${hours} hours and ${minutes} minutes to go`}
-                  >
-                    <NumberFlow
-                      value={days}
-                      respectMotionPreference
-                      className="font-display text-6xl font-bold leading-none text-[#e9c98a] tabular-nums sm:text-7xl"
-                      aria-hidden="true"
-                    />
-                    <div
-                      className="text-[11px] font-semibold uppercase tracking-[0.26em] text-ivory/80"
-                      aria-hidden="true"
-                    >
-                      {days === 1 ? "day to go" : "days to go"}
-                    </div>
-                    <div
-                      className="mt-1 text-xs tabular-nums text-ivory/70"
-                      aria-hidden="true"
-                    >
-                      {hours}h {String(minutes).padStart(2, "0")}m
-                    </div>
-                  </div>
-                ) : (
-                  <p className="relative max-w-36 text-center text-sm text-ivory/80">
-                    Set a date to start the countdown
-                  </p>
-                )}
-              </div>
+          <div className="shrink-0 rounded-xl bg-ivory/5 px-3 py-2 text-center ring-1 ring-ivory/10">
+            <div className="font-display text-2xl font-bold tabular-nums">
+              {metrics.acceptedGuests}
             </div>
-            <p className="mt-3 text-center text-xs text-ivory/75">
-              {metrics.acceptedGuests}{" "}
-              {metrics.acceptedGuests === 1 ? "guest" : "guests"} coming so far
-            </p>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-ivory/70">
+              guests coming
+            </div>
           </div>
-        </section>
-      </SparkleSurface>
-    </ViewTransition>
+        </div>
+      </section>
+    </div>
   );
 }
