@@ -18,10 +18,12 @@ export default function AuthLayout({
           <header className="sticky top-0 z-10 -mx-5 flex items-center justify-between gap-4 bg-ivory/95 px-5 pb-3 pt-1 backdrop-blur-sm sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 xl:-mx-16 xl:px-16">
             <Link
               href="/product"
-              aria-label="Àríyá celebration suite"
               className="flex min-h-11 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-burgundy"
             >
-              <span className="grid h-11 w-11 place-items-center rounded-full border border-gold/50 bg-wine font-display text-2xl font-bold text-gold shadow-[0_8px_22px_-10px_rgba(74,17,29,0.8)]">
+              <span
+                aria-hidden="true"
+                className="grid h-11 w-11 place-items-center rounded-full border border-gold/50 bg-wine font-display text-2xl font-bold text-gold shadow-[0_8px_22px_-10px_rgba(74,17,29,0.8)]"
+              >
                 À
               </span>
               <span className="flex flex-col">
