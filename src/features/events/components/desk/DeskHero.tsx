@@ -68,7 +68,7 @@ export function DeskHero({
       share="desk-morph"
       default="none"
     >
-      <SparkleSurface className="overflow-hidden rounded-[32px] bg-[#1c070d] text-ivory shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]">
+      <SparkleSurface className="overflow-hidden rounded-4xl bg-[#1c070d] text-ivory shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]">
         <div className="desk-aurora" aria-hidden="true">
           <span />
           <span />
@@ -157,7 +157,7 @@ export function DeskHero({
                 <Link
                   key={a.href}
                   href={a.href}
-                  className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
+                  className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
                     a.primary
                       ? "bg-[#e9c98a] text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)]"
                       : "bg-ivory/10 text-ivory ring-1 ring-ivory/20 hover:bg-ivory/15"
@@ -209,49 +209,51 @@ export function DeskHero({
                 className="desk-ring absolute inset-3 rounded-full"
                 aria-hidden="true"
               />
-              {isToday ? (
-                <div className="relative text-center" aria-live="polite">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
-                    Owambe mode
+              <div className="relative h-full w-full">
+                {isToday ? (
+                  <div className="relative text-center" aria-live="polite">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
+                      Owambe mode
+                    </div>
+                    <div className="mt-1 font-display text-6xl font-bold leading-none tabular-nums">
+                      {checkedInPeople}
+                    </div>
+                    <div className="mt-1 text-xs text-ivory/75">
+                      of {expected} at the gate
+                    </div>
                   </div>
-                  <div className="mt-1 font-display text-6xl font-bold leading-none tabular-nums">
-                    {checkedInPeople}
-                  </div>
-                  <div className="mt-1 text-xs text-ivory/75">
-                    of {expected} at the gate
-                  </div>
-                </div>
-              ) : hasDate ? (
-                <div
-                  className="relative text-center"
-                  role="timer"
-                  aria-live="off"
-                  aria-label={`${days} days, ${hours} hours and ${minutes} minutes to go`}
-                >
-                  <NumberFlow
-                    value={days}
-                    respectMotionPreference
-                    className="font-display text-7xl font-bold leading-none text-[#e9c98a] tabular-nums sm:text-8xl"
-                    aria-hidden="true"
-                  />
+                ) : hasDate ? (
                   <div
-                    className="mt-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-ivory/80"
-                    aria-hidden="true"
+                    className="relative text-center"
+                    role="timer"
+                    aria-live="off"
+                    aria-label={`${days} days, ${hours} hours and ${minutes} minutes to go`}
                   >
-                    {days === 1 ? "day to go" : "days to go"}
+                    <NumberFlow
+                      value={days}
+                      respectMotionPreference
+                      className="font-display text-6xl font-bold leading-none text-[#e9c98a] tabular-nums sm:text-7xl"
+                      aria-hidden="true"
+                    />
+                    <div
+                      className="text-[11px] font-semibold uppercase tracking-[0.26em] text-ivory/80"
+                      aria-hidden="true"
+                    >
+                      {days === 1 ? "day to go" : "days to go"}
+                    </div>
+                    <div
+                      className="mt-1 text-xs tabular-nums text-ivory/70"
+                      aria-hidden="true"
+                    >
+                      {hours}h {String(minutes).padStart(2, "0")}m
+                    </div>
                   </div>
-                  <div
-                    className="mt-2 text-xs tabular-nums text-ivory/70"
-                    aria-hidden="true"
-                  >
-                    {hours}h {String(minutes).padStart(2, "0")}m
-                  </div>
-                </div>
-              ) : (
-                <p className="relative max-w-[9rem] text-center text-sm text-ivory/80">
-                  Set a date to start the countdown
-                </p>
-              )}
+                ) : (
+                  <p className="relative max-w-36 text-center text-sm text-ivory/80">
+                    Set a date to start the countdown
+                  </p>
+                )}
+              </div>
             </div>
             <p className="mt-3 text-center text-xs text-ivory/75">
               {metrics.acceptedGuests}{" "}

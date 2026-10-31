@@ -182,7 +182,7 @@ export function CelebrationStage({
               <div className="desk-ring mx-auto flex items-center gap-6 rounded-[28px] bg-[#1c070d]/60 p-5 backdrop-blur-sm md:col-span-2 lg:col-span-1 lg:mx-0">
                 {hasDate && <Countdown dateIso={event.date} initialNow={now} />}
                 <div
-                  className="relative grid h-24 w-24 shrink-0 place-items-center"
+                  className="relative grid h-32 w-32 shrink-0 place-items-center"
                   role="img"
                   aria-label={`${replied}% of guests have replied`}
                 >
@@ -216,7 +216,7 @@ export function CelebrationStage({
                     />
                   </svg>
                   <div className="text-center leading-none" aria-hidden="true">
-                    <div className="font-display text-2xl font-bold tabular-nums">
+                    <div className="font-display text-xl font-bold tabular-nums">
                       {replied}%
                     </div>
                     <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-ivory/75">

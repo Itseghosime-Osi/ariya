@@ -66,7 +66,11 @@ export function Countdown({
               format={{ minimumIntegerDigits: i === 0 ? 1 : 2 }}
               respectMotionPreference
               className={`font-display font-bold leading-none tabular-nums ${num} ${
-                i === 0 ? "text-6xl sm:text-7xl" : "text-4xl sm:text-5xl"
+                i === 0
+                  ? "text-6xl sm:text-7xl"
+                  : i === 1
+                    ? "text-4xl sm:text-5xl"
+                    : "text-2xl sm:text-3xl"
               }`}
             />
             <span
