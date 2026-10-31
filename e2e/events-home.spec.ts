@@ -44,13 +44,23 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
       "Send invitations"
     );
 
-    // Sidebar shows Home + disabled "Create your first event" hint when 0 events
+    // Empty accounts go straight to their first event instead of an empty Home tab.
     const sidebar = page.getByTestId("desktop-sidebar");
     await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(page.getByTestId("event-switcher-empty")).toContainText(
+    await expect(sidebar.getByRole("link", { name: "Home" })).toHaveCount(0);
+    const createFirstEvent = page.getByTestId("event-switcher-empty");
+    await expect(createFirstEvent).toHaveText("Create your first event");
+    await expect(createFirstEvent).toHaveAttribute("href", "/events/new");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByTestId("desktop-sidebar")).toBeHidden();
+    await expect(page.getByTestId("phone-tab-bar")).toHaveCount(0);
+    await expect(page.getByTestId("phone-more-button")).toHaveCount(0);
+    await expect(page.getByTestId("phone-create-button")).toBeVisible();
+    await expect(page.getByTestId("phone-create-button")).toContainText(
       "Create your first event"
     );
+    await page.setViewportSize({ width: 1440, height: 900 });
 
     // Accessibility check on empty state (1440x900)
     await waitForAnimationsToSettle(page);
