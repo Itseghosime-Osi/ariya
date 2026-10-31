@@ -136,34 +136,39 @@ export function PhoneDock({
   const [bubbleOrigin, setBubbleOrigin] = useState("62% 100%");
 
   const eventId = isValidEventId(activeEvent?.id) ? activeEvent.id : null;
+  const hasEvents = events.length > 0;
   const base = eventId ? `/events/${eventId}` : null;
   const moreSections = getPhoneMoreSections(eventId);
   const moreActive =
     moreOpen ||
     moreSections.some((item) => isSectionActive(pathname, item.href));
 
-  const tabs: DockTab[] = [
-    {
-      name: "Home",
-      href: "/events",
-      icon: House,
-      active: pathname === "/events",
-    },
-    {
-      name: "Guests",
-      href: base ? `${base}/guests` : "/events",
-      icon: Users,
-      active: Boolean(base && pathname.startsWith(`${base}/guests`)),
-    },
-    {
-      name: "Check-in",
-      href: base ? `${base}/check-in` : "/events",
-      icon: ScanLine,
-      active: Boolean(base && pathname.startsWith(`${base}/check-in`)),
-    },
-  ];
-  const activeTab =
-    pendingTab ?? (moreActive ? "More" : tabs.find((tab) => tab.active)?.name);
+  const tabs: DockTab[] = hasEvents
+    ? [
+        {
+          name: "Home",
+          href: "/events",
+          icon: House,
+          active: pathname === "/events",
+        },
+        {
+          name: "Guests",
+          href: base ? `${base}/guests` : "/events",
+          icon: Users,
+          active: Boolean(base && pathname.startsWith(`${base}/guests`)),
+        },
+        {
+          name: "Check-in",
+          href: base ? `${base}/check-in` : "/events",
+          icon: ScanLine,
+          active: Boolean(base && pathname.startsWith(`${base}/check-in`)),
+        },
+      ]
+    : [];
+  const activeTab = hasEvents
+    ? (pendingTab ??
+      (moreActive ? "More" : tabs.find((tab) => tab.active)?.name))
+    : undefined;
 
   const actions: CreateAction[] = [
     {
@@ -567,129 +572,135 @@ export function PhoneDock({
           )}
         </AnimatePresence>
 
-        <div className="mx-auto flex max-w-md items-center gap-2.5">
-          <motion.nav
-            ref={pillRef}
-            aria-label="Mobile navigation"
-            data-testid="phone-tab-bar"
-            className="dock-pill flex min-w-0 flex-1 items-center rounded-full bg-white p-1.5"
-            animate={{ scale: compact && !menuOpen ? 0.94 : 1 }}
-            transition={SPRING}
-            style={{ transformOrigin: "50% 100%" }}
-          >
-            <LayoutGroup id="phone-dock">
-              {tabs.map((tab) => {
-                const TabIcon = tab.icon;
-                const active = activeTab === tab.name;
-                return (
-                  <Link
-                    key={tab.name}
-                    href={tab.href}
-                    aria-current={
-                      tab.active && !pendingTab ? "page" : undefined
-                    }
-                    onClick={() => {
-                      // Respond on the tap, not when the page arrives: reveal
-                      // the labels and glide the capsule over straight away.
-                      setCompact(false);
-                      if (!tab.active) setPendingTab(tab.name);
-                    }}
-                    className={cn(
-                      "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
-                      active
-                        ? "font-semibold text-burgundy"
-                        : "font-medium text-night/60 active:text-night"
-                    )}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="dock-capsule"
-                        aria-hidden="true"
-                        className="dock-capsule absolute inset-0 rounded-full"
-                        style={{ borderRadius: 9999 }}
-                        transition={SPRING}
-                      />
-                    )}
-                    <motion.span
-                      className="relative"
-                      animate={
-                        active && !reduceMotion
-                          ? { scale: [1, 1.16, 1], y: [0, -2, 0] }
-                          : { scale: 1, y: 0 }
+        <div
+          className={cn(
+            "mx-auto flex max-w-md items-center gap-2.5",
+            !hasEvents && "justify-center"
+          )}
+        >
+          {hasEvents && (
+            <motion.nav
+              ref={pillRef}
+              aria-label="Mobile navigation"
+              data-testid="phone-tab-bar"
+              className="dock-pill flex min-w-0 flex-1 items-center rounded-full bg-white p-1.5"
+              animate={{ scale: compact && !menuOpen ? 0.94 : 1 }}
+              transition={SPRING}
+              style={{ transformOrigin: "50% 100%" }}
+            >
+              <LayoutGroup id="phone-dock">
+                {tabs.map((tab) => {
+                  const TabIcon = tab.icon;
+                  const active = activeTab === tab.name;
+                  return (
+                    <Link
+                      key={tab.name}
+                      href={tab.href}
+                      aria-current={
+                        tab.active && !pendingTab ? "page" : undefined
                       }
-                      transition={{ duration: 0.42, ease: "easeOut" }}
-                    >
-                      <TabIcon
-                        size={22}
-                        strokeWidth={active ? 2.4 : 1.8}
-                        fill={active ? "currentColor" : "none"}
-                        fillOpacity={active ? 0.14 : 0}
-                      />
-                    </motion.span>
-                    <span
+                      onClick={() => {
+                        // Respond on the tap, not when the page arrives: reveal
+                        // the labels and glide the capsule over straight away.
+                        setCompact(false);
+                        if (!tab.active) setPendingTab(tab.name);
+                      }}
                       className={cn(
-                        "relative leading-none transition-[opacity,max-height] duration-300",
-                        compact && !menuOpen
-                          ? "max-h-0 opacity-0"
-                          : "max-h-4 opacity-100"
+                        "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
+                        active
+                          ? "font-semibold text-burgundy"
+                          : "font-medium text-night/60 active:text-night"
                       )}
                     >
-                      {tab.name}
-                    </span>
-                    <PendingDot />
-                  </Link>
-                );
-              })}
+                      {active && (
+                        <motion.span
+                          layoutId="dock-capsule"
+                          aria-hidden="true"
+                          className="dock-capsule absolute inset-0 rounded-full"
+                          style={{ borderRadius: 9999 }}
+                          transition={SPRING}
+                        />
+                      )}
+                      <motion.span
+                        className="relative"
+                        animate={
+                          active && !reduceMotion
+                            ? { scale: [1, 1.16, 1], y: [0, -2, 0] }
+                            : { scale: 1, y: 0 }
+                        }
+                        transition={{ duration: 0.42, ease: "easeOut" }}
+                      >
+                        <TabIcon
+                          size={22}
+                          strokeWidth={active ? 2.4 : 1.8}
+                          fill={active ? "currentColor" : "none"}
+                          fillOpacity={active ? 0.14 : 0}
+                        />
+                      </motion.span>
+                      <span
+                        className={cn(
+                          "relative leading-none transition-[opacity,max-height] duration-300",
+                          compact && !menuOpen
+                            ? "max-h-0 opacity-0"
+                            : "max-h-4 opacity-100"
+                        )}
+                      >
+                        {tab.name}
+                      </span>
+                      <PendingDot />
+                    </Link>
+                  );
+                })}
 
-              <button
-                type="button"
-                data-testid="phone-more-button"
-                ref={moreRef}
-                aria-expanded={moreOpen}
-                aria-controls={moreOpen ? moreId : undefined}
-                onClick={toggleMore}
-                className={cn(
-                  "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
-                  activeTab === "More"
-                    ? "font-semibold text-burgundy"
-                    : "font-medium text-night/60 active:text-night"
-                )}
-              >
-                {activeTab === "More" && (
-                  <motion.span
-                    layoutId="dock-capsule"
-                    aria-hidden="true"
-                    className="dock-capsule absolute inset-0 rounded-full"
-                    style={{ borderRadius: 9999 }}
-                    transition={SPRING}
-                  />
-                )}
-                <span className="relative">
-                  <LayoutGrid
-                    size={22}
-                    strokeWidth={activeTab === "More" ? 2.4 : 1.8}
-                  />
-                </span>
-                <span
+                <button
+                  type="button"
+                  data-testid="phone-more-button"
+                  ref={moreRef}
+                  aria-expanded={moreOpen}
+                  aria-controls={moreOpen ? moreId : undefined}
+                  onClick={toggleMore}
                   className={cn(
-                    "relative leading-none transition-[opacity,max-height] duration-300",
-                    compact && !menuOpen
-                      ? "max-h-0 opacity-0"
-                      : "max-h-4 opacity-100"
+                    "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[11px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-burgundy",
+                    activeTab === "More"
+                      ? "font-semibold text-burgundy"
+                      : "font-medium text-night/60 active:text-night"
                   )}
                 >
-                  More
-                </span>
-              </button>
-            </LayoutGroup>
-          </motion.nav>
+                  {activeTab === "More" && (
+                    <motion.span
+                      layoutId="dock-capsule"
+                      aria-hidden="true"
+                      className="dock-capsule absolute inset-0 rounded-full"
+                      style={{ borderRadius: 9999 }}
+                      transition={SPRING}
+                    />
+                  )}
+                  <span className="relative">
+                    <LayoutGrid
+                      size={22}
+                      strokeWidth={activeTab === "More" ? 2.4 : 1.8}
+                    />
+                  </span>
+                  <span
+                    className={cn(
+                      "relative leading-none transition-[opacity,max-height] duration-300",
+                      compact && !menuOpen
+                        ? "max-h-0 opacity-0"
+                        : "max-h-4 opacity-100"
+                    )}
+                  >
+                    More
+                  </span>
+                </button>
+              </LayoutGroup>
+            </motion.nav>
+          )}
 
           {/* Create: detached from the tabs, because actions aren't places */}
           <motion.button
             ref={createRef}
             type="button"
             data-testid="phone-create-button"
-            aria-label={createOpen ? "Close create menu" : "Create"}
             aria-expanded={createOpen}
             aria-controls={createOpen ? menuId : undefined}
             onClick={toggleCreate}
@@ -702,9 +713,17 @@ export function PhoneDock({
               className="relative"
               animate={{ rotate: createOpen ? 135 : 0 }}
               transition={SPRING}
+              aria-hidden="true"
             >
               <Plus size={26} strokeWidth={2.4} />
             </motion.span>
+            <span className="sr-only">
+              {createOpen
+                ? "Close create menu"
+                : hasEvents
+                  ? "Create"
+                  : "Create your first event"}
+            </span>
             <span
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"

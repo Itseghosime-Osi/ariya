@@ -2,13 +2,13 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
-import { signOutAction } from "@/features/auth/actions";
 import { daysUntil, getLagosDateKey } from "@/lib/format";
 import { EventSwitcher } from "./EventSwitcher";
+import { SignOutConfirmation } from "./SignOutConfirmation";
 import {
   NAV_GROUPS,
   getEventSections,
@@ -64,7 +64,7 @@ export function Sidebar({
   ready = true,
 }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [spins, setSpins] = useState(0);
   const [sparks, setSparks] = useState<Spark[]>([]);
@@ -80,9 +80,8 @@ export function Sidebar({
   const accountRef = useRef<HTMLDivElement>(null);
 
   const sections = getEventSections(activeEvent?.id);
-  const active = [HOME, ...sections].find((item) =>
-    isActiveHref(pathname, item.href)
-  );
+  const activeItems = events.length > 0 ? [HOME, ...sections] : sections;
+  const active = activeItems.find((item) => isActiveHref(pathname, item.href));
 
   // The gold pill glides to whichever item is active.
   const activeName = active?.name;
@@ -180,15 +179,6 @@ export function Sidebar({
       window.setTimeout(() => setSparks([]), 900);
     }
     onToggle();
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOutAction();
-    } finally {
-      router.push("/sign-in");
-      router.refresh();
-    }
   };
 
   const onNavMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -352,9 +342,15 @@ export function Sidebar({
             <span className="sb-pill-label" />
           </div>
           <nav className="flex flex-col gap-3" aria-label="Main navigation">
-            <div className="flex flex-col gap-1">{renderItem(HOME)}</div>
-
-            <div className={cn("flex", collapsed ? "justify-start" : "block")}>
+            {events.length > 0 && (
+              <div className="flex flex-col gap-1">{renderItem(HOME)}</div>
+            )}
+            <div
+              className={cn(
+                "flex",
+                collapsed || events.length === 0 ? "justify-start" : "block"
+              )}
+            >
               <EventSwitcher
                 events={events}
                 activeEvent={activeEvent}
@@ -470,7 +466,7 @@ export function Sidebar({
             </div>
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => setSignOutOpen(true)}
               aria-label="Sign out"
               title="Sign out"
               className="sb-label grid h-9 w-9 shrink-0 place-items-center rounded-xl text-ivory/60 outline-none transition-colors hover:bg-ivory/[0.07] hover:text-gold focus-visible:ring-2 focus-visible:ring-gold"
@@ -495,7 +491,7 @@ export function Sidebar({
             </div>
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => setSignOutOpen(true)}
               tabIndex={accountOpen ? 0 : -1}
               className="flex items-center gap-2 rounded-xl bg-wine px-3 py-2 text-xs font-semibold tracking-wide text-ivory transition-colors hover:bg-wine/80"
             >
@@ -518,6 +514,7 @@ export function Sidebar({
           {lastTip.current?.label}
         </div>
       </aside>
+      <SignOutConfirmation open={signOutOpen} onOpenChange={setSignOutOpen} />
     </>
   );
 }

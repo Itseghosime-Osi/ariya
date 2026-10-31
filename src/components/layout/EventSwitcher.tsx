@@ -45,25 +45,25 @@ export function EventSwitcher({
 
   if (!activeEvent && events.length === 0) {
     return (
-      <div
+      <Link
+        href="/events/new"
         data-testid="event-switcher-empty"
-        aria-disabled="true"
         aria-label={compact ? "Create your first event" : undefined}
         className={cn(
-          "flex min-h-[44px] items-center gap-2.5 rounded-2xl border text-xs font-medium select-none",
-          compact ? "w-11 justify-center" : "px-3.5 py-2.5",
+          "flex min-h-[44px] items-center gap-2.5 rounded-2xl border text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2",
+          compact ? "w-11 justify-center" : "w-full px-3.5 py-2.5",
           velvet
-            ? "border-ivory/10 bg-ivory/[0.04] text-ivory/70"
-            : "border-hairline bg-white/55 text-label-2"
+            ? "border-gold/25 bg-ivory/[0.04] text-ivory/80 hover:border-gold/50 hover:bg-ivory/[0.08] focus-visible:outline-gold"
+            : "border-gold/30 bg-transparent text-burgundy hover:bg-burgundy/[0.05] focus-visible:outline-burgundy"
         )}
       >
         <Icon
           name="celebration"
           size={16}
-          className={cn("shrink-0", velvet ? "text-gold/70" : "text-label-3")}
+          className={cn("shrink-0", velvet ? "text-gold" : "text-gold-ink")}
         />
         {!compact && <span className="truncate">Create your first event</span>}
-      </div>
+      </Link>
     );
   }
 
