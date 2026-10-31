@@ -764,8 +764,16 @@ html[data-seating-mood="evening"] [data-seating-frame] > header > a:hover {
   display: none;
 }
 html[data-splash] {
-  background: #2a0610;
+  background: radial-gradient(
+    120% 80% at 50% 38%,
+    #5a0f22 0%,
+    #2a0610 55%,
+    #14050a 100%
+  );
   overflow: hidden;
+}
+html[data-splash] body {
+  background: transparent;
 }
 html[data-splash] .app-splash {
   position: fixed;
@@ -788,7 +796,7 @@ html[data-splash] .app-splash {
     opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s linear 0.65s;
   /* Never strand anyone behind it if the app fails to load. */
-  animation: splash-giveup 0.6s ease 6s forwards;
+  animation: splash-giveup 0.6s ease 10s forwards;
 }
 .app-splash[data-leaving] {
   opacity: 0;
@@ -802,17 +810,14 @@ html[data-splash] .app-splash {
   height: 100%;
   cursor: pointer;
 }
-.app-splash__glow {
-  position: absolute;
-  width: 80vmin;
-  height: 80vmin;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 155, 60, 0.3),
-    rgba(200, 155, 60, 0) 65%
-  );
-  animation: splash-glow 2.4s ease-in-out infinite alternate;
+.app-splash__seal-stage {
+  position: relative;
+  display: grid;
+  width: 7rem;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 30px;
 }
 .app-splash__body {
   position: relative;
@@ -831,6 +836,9 @@ html[data-splash] .app-splash {
 }
 .app-splash__seal {
   position: relative;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
   border-radius: 23px;
   transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -838,11 +846,12 @@ html[data-splash] .app-splash {
 }
 .app-splash__seal svg {
   display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 23px;
   box-shadow:
     0 0 0 1px rgba(246, 226, 173, 0.18),
-    0 24px 60px -18px rgba(0, 0, 0, 0.7),
-    0 0 60px -8px rgba(200, 155, 60, 0.5);
+    0 18px 34px -18px rgba(0, 0, 0, 0.72);
 }
 .app-splash__seal.is-pulse svg {
   animation: splash-pulse 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -904,7 +913,7 @@ html[data-splash] .app-splash {
 }
 .app-splash__hint {
   position: absolute;
-  bottom: calc(10vh + env(safe-area-inset-bottom));
+  bottom: calc(8vh + env(safe-area-inset-bottom));
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -928,11 +937,8 @@ html[data-splash] .app-splash {
 }
 @keyframes splash-pulse {
   40% {
-    transform: scale(1.12);
-    box-shadow:
-      0 0 0 1px rgba(246, 226, 173, 0.4),
-      0 24px 60px -18px rgba(0, 0, 0, 0.7),
-      0 0 90px 4px rgba(246, 213, 138, 0.75);
+    transform: scale(1.08);
+    filter: brightness(1.12);
   }
 }
 @keyframes splash-shine {
@@ -965,16 +971,6 @@ html[data-splash] .app-splash {
 @keyframes splash-breathe {
   to {
     opacity: 0.35;
-  }
-}
-@keyframes splash-glow {
-  from {
-    transform: scale(0.9);
-    opacity: 0.7;
-  }
-  to {
-    transform: scale(1.1);
-    opacity: 1;
   }
 }
 @keyframes splash-giveup {

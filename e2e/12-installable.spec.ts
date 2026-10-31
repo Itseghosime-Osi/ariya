@@ -7,6 +7,32 @@ const IPHONE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
 
 test.describe("Installable app", () => {
+  test("launch splash flowers bloom without a tap, then reveal the page", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/sign-in?splash");
+
+    const splash = page.getByTestId("app-splash");
+    await expect(splash).toBeVisible();
+    await page.waitForTimeout(1200);
+    const canvasHasParticles = await splash.locator("canvas").evaluate((el) => {
+      const canvas = el as HTMLCanvasElement;
+      const context = canvas.getContext("2d");
+      if (!context) return false;
+      const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] > 0) return true;
+      }
+      return false;
+    });
+
+    expect(canvasHasParticles).toBe(true);
+    await page.waitForTimeout(4000);
+    await expect(splash).toBeVisible();
+    await expect(splash).toBeHidden({ timeout: 5000 });
+  });
+
   test("serves a manifest that opens standalone, with real icons", async ({
     request,
   }) => {

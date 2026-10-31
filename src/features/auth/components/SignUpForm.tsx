@@ -11,6 +11,7 @@ import { PasswordField } from "./PasswordField";
 import { AuthFeedbackAlert } from "./AuthFeedbackAlert";
 import { SignUpTermsCheckbox } from "./SignUpTermsCheckbox";
 import { celebrateStep } from "@/features/events/components/desk/celebrate";
+import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 
 const STEPS = [
   {
@@ -63,6 +64,8 @@ export function SignUpForm() {
     const timeout = window.setTimeout(() => setStepMessage(null), 2200);
     return () => window.clearTimeout(timeout);
   }, [stepMessage]);
+
+  useEffect(() => enableFireworkAudioOnInteraction(), []);
 
   const advanceStep = () => {
     if (step === 1 && fullName.trim().length < 2) {

@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 /** Set on <html> before the first paint when the installed app is launching. */
 const FLAG = "data-splash";
-/** The splash stays up at least this long from launch, so it reads as a moment, not a flicker. */
-const MIN_MS = 2400;
-/** Once the page can respond, there is always this long to play with the petals. */
-const PLAY_MS = 1800;
-/** While someone is still playing, it waits up to this long after the page can respond. */
-const MAX_PLAY_MS = 4000;
+/** Let the welcome animation play long enough to feel like an opening, not a flash. */
+const MIN_MS = 6200;
+/** Keep the total welcome moment short even when someone is playing with the petals. */
+const MAX_PLAY_MS = 9000;
+const INTERACTION_QUIET_MS = 700;
 const LEAVE_MS = 650;
 
 /**
@@ -58,8 +57,8 @@ interface Bit {
 }
 
 /**
- * Petals drift down over the splash; a finger leaves a trail of gold sparks and a tap throws a
- * burst of petals. Returns a stop function.
+ * Petals drift down and blossom in small automatic bursts; a finger leaves a trail and can add
+ * another burst. Returns a stop function.
  */
 function celebrate(
   canvas: HTMLCanvasElement,
@@ -80,6 +79,7 @@ function celebrate(
   };
   size();
   const bits: Bit[] = [];
+  let burstTimer = 0;
   const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
   const petal = (x: number, y: number, burst = false): Bit => {
     const a = Math.random() * Math.PI * 2;
@@ -122,6 +122,32 @@ function celebrate(
     bits.push(b);
   }
 
+  const burstAt = (x: number, y: number) => {
+    for (let i = 0; i < 14; i++) {
+      bits.push(
+        petal(
+          x + (Math.random() - 0.5) * 28,
+          y + (Math.random() - 0.5) * 28,
+          true
+        )
+      );
+    }
+    for (let i = 0; i < 20; i++) bits.push(spark(x, y, 1.25));
+    seal.classList.remove("is-pulse");
+    void seal.offsetWidth;
+    seal.classList.add("is-pulse");
+  };
+  const automaticBurst = () => {
+    const marginX = Math.min(42, w * 0.1);
+    const marginY = Math.min(64, h * 0.1);
+    burstAt(
+      marginX + Math.random() * Math.max(1, w - marginX * 2),
+      marginY + Math.random() * Math.max(1, h - marginY * 2)
+    );
+    burstTimer = window.setTimeout(automaticBurst, 680 + Math.random() * 620);
+  };
+  burstTimer = window.setTimeout(automaticBurst, 380);
+
   let last = 0;
   const move = (e: PointerEvent) => {
     const now = performance.now();
@@ -137,11 +163,7 @@ function celebrate(
     onTouch();
   };
   const tap = (e: PointerEvent) => {
-    for (let i = 0; i < 18; i++) bits.push(petal(e.clientX, e.clientY, true));
-    for (let i = 0; i < 26; i++) bits.push(spark(e.clientX, e.clientY, 1.6));
-    seal.classList.remove("is-pulse");
-    void seal.offsetWidth;
-    seal.classList.add("is-pulse");
+    burstAt(e.clientX, e.clientY);
     navigator.vibrate?.(12);
     onTouch();
   };
@@ -203,6 +225,7 @@ function celebrate(
   raf = requestAnimationFrame(frame);
   return () => {
     cancelAnimationFrame(raf);
+    window.clearTimeout(burstTimer);
     canvas.removeEventListener("pointermove", move);
     canvas.removeEventListener("pointerdown", tap);
     window.removeEventListener("resize", size);
@@ -211,9 +234,9 @@ function celebrate(
 
 /**
  * The launch screen of the installed app: the Àríyá seal and a greeting for the time of day, with
- * petals falling, gold sparks under your finger and a burst of petals wherever you tap. It then
- * lifts away to reveal the app. Hidden by CSS unless the launch script marked the page, and it
- * fades on its own should the app never finish loading.
+ * petals falling, and small flower bursts that happen on their own. A finger can add sparks and
+ * petals. It then lifts away to reveal the app. Hidden by CSS unless the launch script marked the
+ * page, and it fades on its own should the app never finish loading.
  */
 export function AppSplash() {
   const [state, setState] = useState<"show" | "leaving" | "gone">("show");
@@ -243,9 +266,8 @@ export function AppSplash() {
       const played = now - ready;
       // Someone still playing gets a moment longer, but never past MAX_PLAY_MS.
       if (
-        now < MIN_MS ||
-        played < PLAY_MS ||
-        (now - touched < 700 && played < MAX_PLAY_MS)
+        played < MIN_MS ||
+        (now - touched < INTERACTION_QUIET_MS && played < MAX_PLAY_MS)
       ) {
         timer = setTimeout(check, 150);
         return;
@@ -268,50 +290,52 @@ export function AppSplash() {
   return (
     <div
       className="app-splash"
+      data-testid="app-splash"
       data-leaving={state === "leaving" || undefined}
       role="status"
       aria-label="Opening Àríyá"
     >
-      <div className="app-splash__glow" aria-hidden="true" />
       <div className="app-splash__body" aria-hidden="true">
-        <div className="app-splash__seal" ref={seal}>
-          <svg viewBox="0 0 64 64" width="104" height="104">
-            <defs>
-              <linearGradient id="splash-gold" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#f6e2ad" />
-                <stop offset=".5" stopColor="#c39446" />
-                <stop offset="1" stopColor="#f1d9a0" />
-              </linearGradient>
-              <radialGradient id="splash-wine" cx=".35" cy=".3" r=".9">
-                <stop offset="0" stopColor="#7a1530" />
-                <stop offset="1" stopColor="#2a0610" />
-              </radialGradient>
-            </defs>
-            <rect width="64" height="64" rx="14" fill="url(#splash-wine)" />
-            <rect
-              x="4"
-              y="4"
-              width="56"
-              height="56"
-              rx="11"
-              fill="none"
-              stroke="url(#splash-gold)"
-              strokeWidth="1.2"
-              opacity=".7"
-            />
-            <text
-              x="32"
-              y="47"
-              textAnchor="middle"
-              fontFamily="var(--font-bodoni-moda), Didot, Georgia, serif"
-              fontStyle="italic"
-              fontSize="40"
-              fill="url(#splash-gold)"
-            >
-              À
-            </text>
-          </svg>
-          <span className="app-splash__shine" />
+        <div className="app-splash__seal-stage" aria-hidden="true">
+          <div className="app-splash__seal" ref={seal}>
+            <svg viewBox="0 0 64 64" width="104" height="104">
+              <defs>
+                <linearGradient id="splash-gold" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#f6e2ad" />
+                  <stop offset=".5" stopColor="#c39446" />
+                  <stop offset="1" stopColor="#f1d9a0" />
+                </linearGradient>
+                <radialGradient id="splash-wine" cx=".35" cy=".3" r=".9">
+                  <stop offset="0" stopColor="#7a1530" />
+                  <stop offset="1" stopColor="#2a0610" />
+                </radialGradient>
+              </defs>
+              <rect width="64" height="64" rx="14" fill="url(#splash-wine)" />
+              <rect
+                x="4"
+                y="4"
+                width="56"
+                height="56"
+                rx="11"
+                fill="none"
+                stroke="url(#splash-gold)"
+                strokeWidth="1.2"
+                opacity=".7"
+              />
+              <text
+                x="32"
+                y="47"
+                textAnchor="middle"
+                fontFamily="var(--font-bodoni-moda), Didot, Georgia, serif"
+                fontStyle="italic"
+                fontSize="40"
+                fill="url(#splash-gold)"
+              >
+                À
+              </text>
+            </svg>
+            <span className="app-splash__shine" />
+          </div>
         </div>
         <p className="app-splash__word">Àríyá</p>
         <p className="app-splash__tag">Wedding &amp; Event Suite</p>
@@ -323,7 +347,7 @@ export function AppSplash() {
       </div>
       <canvas ref={canvas} className="app-splash__fx" aria-hidden="true" />
       <p className="app-splash__hint" aria-hidden="true">
-        Tap for petals
+        A little joy is on its way
       </p>
     </div>
   );

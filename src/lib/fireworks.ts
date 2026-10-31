@@ -8,6 +8,7 @@
  *
  * Browser only: import it lazily from an effect so it stays out of the main bundle.
  */
+import { playFireworkSound } from "./firework-audio";
 
 export type FireworksScale = "finale" | "eventDay";
 
@@ -218,6 +219,7 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   const MAX_SPARKS = 4200;
 
   const launch = (power = 1, atX?: number) => {
+    playFireworkSound("launch");
     const u = unit();
     const kind: Kind = pick(["peony", "peony", "willow", "ring", "crackle"]);
     const x = atX ?? rand(w * 0.12, w * 0.88);
@@ -253,6 +255,7 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   };
 
   const burst = (r: Rocket) => {
+    playFireworkSound("burst");
     const u = unit();
     const big = cfg.size * r.power;
     const base =
