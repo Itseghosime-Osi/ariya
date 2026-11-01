@@ -10,6 +10,9 @@
 --   * ai_connection_settings     -- which celebrations an app may touch, and a read-only switch
 --   * ai_quota_usage             -- one atomic statement instead of count-then-write
 --   * ai_activity_log            -- one row per tool call, append only
+--   * daily limits for app tokens -- 10 celebrations and 500 guests a day, charged where the rows
+--     are actually written, so a direct PostgREST call cannot skip the tool layer's checks
+--   * rsvps                      -- no app token writes a reply, in either direction
 --   * has_event_role/is_event_member widened to honour the celebration scope, so every existing
 --     policy that already leans on them picks it up without being rewritten
 --
@@ -589,6 +592,73 @@ $$;
 revoke execute on function public.consume_quota(text, integer, integer) from public, anon;
 grant execute on function public.consume_quota(text, integer, integer) to authenticated;
 
+-- ----------------------------------------------------------------------------
+-- 5b. Daily limits that do not depend on the tool layer
+-- ----------------------------------------------------------------------------
+--
+-- The tools already refuse an eleventh celebration and cap an import, but those checks live in
+-- TypeScript: a token can walk around them by writing to the tables directly. These charges sit
+-- where the rows actually appear, so the ceiling holds either way.
+--
+-- Both are keyed off is_app_token(), so a host's own session — which never carries a client_id —
+-- is not charged and behaves exactly as before.
+
+create or replace function public.charge_app_token_quota(
+  p_key text,
+  p_amount integer,
+  p_daily_limit integer,
+  p_message text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_quota jsonb;
+begin
+  if not public.is_app_token() then
+    return;
+  end if;
+
+  v_quota := public.consume_quota(p_key, p_amount, p_daily_limit);
+
+  if not (v_quota ->> 'allowed')::boolean then
+    raise exception '%', p_message
+      using errcode = 'P0001', hint = 'DAILY_LIMIT';
+  end if;
+end;
+$$;
+
+-- A trigger function is invoked without an EXECUTE check, but the call to charge_app_token_quota
+-- inside it is a normal call, so this one has to be definer-owned for the revokes below to hold.
+create or replace function public.charge_guest_quota()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.charge_app_token_quota(
+    'guests',
+    1,
+    500,
+    'Daily limit reached: this connection can add 500 guests a day. Try again tomorrow.'
+  );
+  return new;
+end;
+$$;
+
+revoke execute on function public.charge_app_token_quota(text, integer, integer, text)
+  from public, anon, authenticated;
+revoke execute on function public.charge_guest_quota() from public, anon, authenticated;
+
+-- Covers add_guest, import_guests and a direct insert alike, because they all end here.
+drop trigger if exists tr_guests_app_token_quota on public.guests;
+create trigger tr_guests_app_token_quota
+before insert on public.guests
+for each row execute function public.charge_guest_quota();
+
 -- ============================================================================
 -- 6. RESTRICTIVE POLICIES: WHAT AN APP TOKEN MAY NOT DO
 -- ============================================================================
@@ -673,7 +743,16 @@ create policy "ai_app_tokens_cannot_write_email_update" on public.email_log
 create policy "ai_app_tokens_cannot_insert_events" on public.events
   as restrictive for insert to authenticated with check (not public.is_app_token());
 
--- 6e. The read-only switch. A host who flips it stops every write an app can make to their
+-- 6e. No RSVP writes at all, in either direction. No tool needs one, and an app that could write
+--     here would be answering on a guest's behalf — forging replies and moving head counts without
+--     the guest ever seeing the invitation.
+create policy "ai_app_tokens_cannot_write_rsvps_insert" on public.rsvps
+  as restrictive for insert to authenticated with check (not public.is_app_token());
+create policy "ai_app_tokens_cannot_write_rsvps_update" on public.rsvps
+  as restrictive for update to authenticated
+  using (not public.is_app_token()) with check (not public.is_app_token());
+
+-- 6f. The read-only switch. A host who flips it stops every write an app can make to their
 --     celebrations, including through a raw PostgREST call.
 create policy "ai_read_only_cannot_write_update" on public.events
   as restrictive for update to authenticated
@@ -790,6 +869,15 @@ begin
   end if;
 
   perform public.assert_ai_write_allowed();
+
+  -- The tool layer enforces the same number, but only for calls that come through /mcp. This charge
+  -- is what makes the ceiling true for a token pointed straight at the RPC.
+  perform public.charge_app_token_quota(
+    'create_event',
+    1,
+    10,
+    'Daily limit reached: this connection can create 10 celebrations a day. Try again tomorrow.'
+  );
 
   if nullif(trim(p_title), '') is null then
     raise exception 'Celebration title is required';

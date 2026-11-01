@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(35);
+select plan(47);
 
 -- ============================================================================
 -- Fixture
@@ -402,6 +402,172 @@ select is(
    where has_table_privilege('authenticated', 'public.ai_quota_usage', p.priv)),
   0,
   'authenticated holds no privileges on the quota ledger');
+
+-- ============================================================================
+-- 8. DAILY LIMITS: ENFORCED IN THE DATABASE, APP TOKENS ONLY
+--
+-- The ledger is seeded to each ceiling rather than by writing five hundred guest rows: what is
+-- under test is the charge, not the arithmetic (section 6 covers consume_quota itself).
+-- ============================================================================
+
+reset role;
+
+insert into public.ai_quota_usage (user_id, key, day, used)
+values
+  ((select host from lk), 'create_event', (timezone('utc', now()))::date, 10),
+  ((select host from lk), 'guests', (timezone('utc', now()))::date, 500)
+on conflict (user_id, key, day) do update set used = excluded.used;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lk), 'role', 'authenticated', 'client_id', 'client-lockdown')::text, true);
+set local role authenticated;
+
+select throws_ok(
+  $sql$select public.create_event(
+    p_title := 'Over the line', p_couple := 'E & F',
+    p_date := now() + interval '30 days', p_venue := 'Hall Z')$sql$,
+  'P0001',
+  'Daily limit reached: this connection can create 10 celebrations a day. Try again tomorrow.',
+  'an app token at its daily ceiling cannot create a celebration through the RPC');
+
+select throws_ok(
+  format('insert into public.guests (event_id, name, party_size) values (%L, %L, 1)',
+         (select event_a from lk), 'Over the line guest'),
+  'P0001',
+  'Daily limit reached: this connection can add 500 guests a day. Try again tomorrow.',
+  'an app token at its daily ceiling cannot insert a guest directly');
+
+reset role;
+
+-- One under the ceiling still goes through, so the charge is a limit and not a wall.
+update public.ai_quota_usage set used = 499
+where user_id = (select host from lk) and key = 'guests'
+  and day = (timezone('utc', now()))::date;
+
+set local role authenticated;
+
+do $$ declare n integer; begin
+  insert into public.guests (event_id, name, party_size)
+  values ((select event_a from lk), 'Under the line', 1);
+  get diagnostics n = row_count;
+  perform set_config('lk.rows', n::text, true);
+end $$;
+
+select is(current_setting('lk.rows')::integer, 1,
+  'an app token one guest under the ceiling still adds a guest');
+
+reset role;
+
+select is(
+  (select used from public.ai_quota_usage
+   where user_id = (select host from lk) and key = 'guests'
+     and day = (timezone('utc', now()))::date), 500,
+  'the successful insert charged exactly one guest');
+
+-- A first-party session is never charged, so the ceiling does not reach the app itself.
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lk), 'role', 'authenticated')::text, true);
+set local role authenticated;
+
+do $$ declare n integer; begin
+  insert into public.guests (event_id, name, party_size)
+  values ((select event_a from lk), 'First party over the line', 1);
+  get diagnostics n = row_count;
+  perform set_config('lk.rows', n::text, true);
+end $$;
+
+select is(current_setting('lk.rows')::integer, 1,
+  'a first-party session adds a guest with the app ledger already at its ceiling');
+
+select is(
+  (public.create_event(
+    p_title := 'First party over the line',
+    p_couple := 'G & H',
+    p_slug := 'first-party-' || gen_random_uuid()::text,
+    p_date := now() + interval '30 days',
+    p_venue := 'Hall Y')->>'id') is not null,
+  true,
+  'a first-party session creates a celebration with the app ledger already at its ceiling');
+
+reset role;
+
+select is(
+  (select used from public.ai_quota_usage
+   where user_id = (select host from lk) and key = 'guests'
+     and day = (timezone('utc', now()))::date), 500,
+  'first-party writes are not charged against the app ledger');
+
+-- ============================================================================
+-- 9. RSVPS ARE NOT AN APP TOKEN'S TO WRITE
+--
+-- No tool answers on a guest's behalf. These policies make that true for a token pointed straight
+-- at the table, in both directions.
+-- ============================================================================
+
+reset role;
+
+insert into public.rsvps (guest_id, status)
+values ((select id from public.guests
+         where event_id = (select event_a from lk) and name = 'Stable'), 'pending');
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lk), 'role', 'authenticated', 'client_id', 'client-lockdown')::text, true);
+set local role authenticated;
+
+select throws_ok(
+  format('insert into public.rsvps (guest_id, status) values (%L, %L)',
+         (select id from public.guests
+          where event_id = (select event_a from lk) and name = 'Stable Two'), 'accepted'),
+  '42501', null,
+  'app token cannot insert an rsvp');
+
+do $$ declare n integer; begin
+  update public.rsvps set status = 'declined'
+  where guest_id = (select id from public.guests
+                    where event_id = (select event_a from lk) and name = 'Stable');
+  get diagnostics n = row_count;
+  perform set_config('lk.rows', n::text, true);
+end $$;
+
+select is(current_setting('lk.rows')::integer, 0,
+  'app token updates no rsvp row');
+
+reset role;
+
+select is(
+  (select status from public.rsvps
+   where guest_id = (select id from public.guests
+                     where event_id = (select event_a from lk) and name = 'Stable')), 'pending',
+  'the reply the app tried to change is untouched');
+
+-- The host's own session still writes replies; the restrictive policies are keyed off the token.
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lk), 'role', 'authenticated')::text, true);
+set local role authenticated;
+
+do $$ declare n integer; begin
+  update public.rsvps set status = 'accepted'
+  where guest_id = (select id from public.guests
+                    where event_id = (select event_a from lk) and name = 'Stable');
+  get diagnostics n = row_count;
+  perform set_config('lk.rows', n::text, true);
+end $$;
+
+select is(current_setting('lk.rows')::integer, 1,
+  'a first-party session can still update an rsvp');
+
+do $$ declare n integer; begin
+  insert into public.rsvps (guest_id, status)
+  values ((select id from public.guests
+           where event_id = (select event_a from lk) and name = 'Stable Two'), 'accepted');
+  get diagnostics n = row_count;
+  perform set_config('lk.rows', n::text, true);
+end $$;
+
+select is(current_setting('lk.rows')::integer, 1,
+  'a first-party session can still insert an rsvp');
+
+reset role;
 
 select * from finish();
 rollback;

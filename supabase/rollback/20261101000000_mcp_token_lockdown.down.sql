@@ -42,6 +42,8 @@ drop policy if exists "ai_app_tokens_cannot_write_billing_update" on public.invo
 drop policy if exists "ai_app_tokens_cannot_write_email_insert" on public.email_log;
 drop policy if exists "ai_app_tokens_cannot_write_email_update" on public.email_log;
 drop policy if exists "ai_app_tokens_cannot_insert_events" on public.events;
+drop policy if exists "ai_app_tokens_cannot_write_rsvps_insert" on public.rsvps;
+drop policy if exists "ai_app_tokens_cannot_write_rsvps_update" on public.rsvps;
 drop policy if exists "ai_read_only_cannot_write_update" on public.events;
 drop policy if exists "ai_read_only_cannot_write_insert" on public.tables;
 drop policy if exists "ai_read_only_cannot_write_update" on public.tables;
@@ -1084,7 +1086,11 @@ $function$
 
 ;
 
--- 3. Functions the migration introduced
+-- 3. Trigger and functions the migration introduced
+-- The trigger has to go before its function, or the drop is refused.
+drop trigger if exists tr_guests_app_token_quota on public.guests;
+drop function if exists public.charge_guest_quota();
+drop function if exists public.charge_app_token_quota(text,integer,integer,text);
 drop function if exists public.ai_connection_event_allowed(uuid);
 drop function if exists public.ai_connection_read_only();
 drop function if exists public.assert_ai_cannot_manage_team();
