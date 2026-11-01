@@ -21,8 +21,9 @@ const CARD =
   "rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 pt-5 pb-6 sm:px-7";
 const EYEBROW =
   "text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink";
+// Phones wrap the command rather than hiding half of it; there is room to scroll from sm up.
 const CODE =
-  "block overflow-x-auto whitespace-pre rounded-2xl border border-wine/10 bg-ivory px-4 py-3 font-mono text-xs leading-relaxed text-on-surface";
+  "block min-w-0 overflow-x-auto whitespace-pre-wrap break-words rounded-2xl border border-wine/10 bg-ivory px-4 py-3 font-mono text-xs leading-relaxed text-on-surface sm:whitespace-pre sm:break-normal";
 
 export default async function ConnectAiPage() {
   const user = await getCurrentUser();
