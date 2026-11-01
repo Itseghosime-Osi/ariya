@@ -34,6 +34,37 @@ Supabase Auth still considers the token valid.
 | Gate each call on event role     | `src/features/mcp/guard.ts`                          |
 | Wrap results and log the call    | `src/features/mcp/result.ts`                         |
 
+## Which apps the consent screen trusts
+
+Every authorization request is classified on the server, from the **redirect URI only**. The client
+name, logo and homepage are supplied by whoever registered the OAuth client, so an attacker picks
+them; the redirect URI is where the host's token actually goes.
+
+| Tier        | Rule                                                                 | What the host sees                                                                                  |
+| ----------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Known**   | Exact match against the vendors' documented callbacks, below.        | A "Known app" badge, the app's logo, and a normal Approve button.                                   |
+| **Local**   | `localhost`, `127.0.0.1` or `[::1]` on any port, over http or https. | "An app on your own computer" — never the word verified.                                            |
+| **Unknown** | Everything else, including anything that only looks like a vendor.   | A red warning, no logo, a cleaned and truncated name, the return address, and an approval checkbox. |
+
+An unknown app is **warned about, not blocked**. It can still connect, but only after the host ticks
+"I understand this app has not been verified by Àríyá…". The browser disables Approve until then, and
+`decideConsentAction` classifies again from `getAuthorizationDetails` before approving, so the posted
+flag cannot talk it into approving something the server considers unknown.
+
+The exact allowlist lives in `src/features/mcp/app-trust.ts`:
+
+| Redirect URI                                            | Vendor  | Source                                                                                                                                   |
+| ------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `https://claude.ai/api/mcp/auth_callback`               | Claude  | Claude Docs, _Authentication for connectors_ → Callback URLs                                                                             |
+| `https://chatgpt.com/connector_platform_oauth_redirect` | ChatGPT | OpenAI Apps SDK, _Authentication_ → stable redirect URI                                                                                  |
+| `https://chatgpt.com/connector/oauth/<callback_id>`     | ChatGPT | Same page: per-connection callbacks. The id is issued per connection, so this one is matched on host and path shape rather than exactly. |
+
+There is no documented `claude.com` OAuth callback, so `claude.com` is not allowlisted. Comparison is
+against the normalised URL, so look-alikes all land in **unknown**: `claude.ai.evil.com`,
+`evil.com/claude.ai`, `claude.ai@evil.com`, `http://` instead of `https://`, an unexpected port, an
+extra path segment, a query or fragment, a trailing dot, and punycode or homoglyph hosts. Each of
+those is a case in `src/features/mcp/app-trust.test.ts`.
+
 ## Limits
 
 | Limit                                       | Value                            | Where                             |
@@ -151,7 +182,10 @@ Disconnecting an app does not delete data it created while connected.
 ## Tests
 
 - Unit: `src/app/mcp/route.test.ts`, `src/features/mcp/{guard,schemas,metadata,result}.test.ts`,
-  `src/features/mcp/tools/write.test.ts`, `src/lib/supabase/request-context.test.ts`.
+  `src/features/mcp/tools/write.test.ts`, `src/lib/supabase/request-context.test.ts`, and the consent
+  safety suite: `src/features/mcp/app-trust.test.ts` (the classifier and every look-alike),
+  `src/features/mcp/consent.test.ts` (the action refuses an unacknowledged unknown app) and
+  `src/features/mcp/components/ConsentCard.test.tsx` (all three tiers).
 - End to end: `e2e/14-mcp.spec.ts` — real password-grant tokens, JSON-RPC over `/mcp`, a second host
   refused, an oversized import rejected, both metadata paths, and the consent screen's signed-out
   and incomplete-link states.
