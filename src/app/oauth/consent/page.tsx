@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { createClient } from "@/lib/supabase/server";
+import { classifyApp } from "@/features/mcp/app-trust";
 import {
   ConsentCard,
   type ConsentRequest,
@@ -81,6 +82,8 @@ export default async function OAuthConsentPage({
     redirectHost: hostOf(data.redirect_uri),
     accountEmail: user.email ?? data.user.email,
     scopes: data.scope.split(/\s+/).filter(Boolean),
+    // Decided here, from the redirect URI, and never from the client's own name or logo.
+    trust: classifyApp(data.redirect_uri),
   };
 
   return (
