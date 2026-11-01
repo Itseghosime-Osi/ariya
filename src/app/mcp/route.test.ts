@@ -174,3 +174,67 @@ describe("GET /mcp", () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe("/mcp Origin check", () => {
+  it("answers 403 for an Origin that is not allowlisted, before spending a token", async () => {
+    const response = await POST(
+      call(
+        { jsonrpc: "2.0", id: 1, method: "tools/list" },
+        { authorization: `Bearer ${TOKEN}`, origin: "https://evil.example" }
+      )
+    );
+
+    expect(response.status).toBe(403);
+    const body = (await response.json()) as { error: { message: string } };
+    expect(body.error.message).toContain("Origin");
+
+    // A rebound page must not even reach token verification or the rate limiter.
+    expect(verifyAccessTokenMock).not.toHaveBeenCalled();
+    expect(checkRateLimitMock).not.toHaveBeenCalled();
+    expect(createBearerClientMock).not.toHaveBeenCalled();
+  });
+
+  it("answers 403 on GET for a blocked Origin too", async () => {
+    const response = await GET(
+      new Request("http://localhost:3000/mcp", {
+        headers: {
+          authorization: `Bearer ${TOKEN}`,
+          origin: "https://evil.example",
+        },
+      })
+    );
+
+    expect(response.status).toBe(403);
+    expect(verifyAccessTokenMock).not.toHaveBeenCalled();
+  });
+
+  it("lets an allowlisted Origin through", async () => {
+    for (const origin of [
+      "https://claude.ai",
+      "https://chatgpt.com",
+      "http://localhost:3000",
+      "http://127.0.0.1:57321",
+    ]) {
+      const response = await POST(
+        call(
+          { jsonrpc: "2.0", id: 1, method: "tools/list" },
+          { authorization: `Bearer ${TOKEN}`, origin }
+        )
+      );
+
+      expect(response.status).toBe(200);
+    }
+  });
+
+  it("leaves a request with no Origin header unaffected", async () => {
+    const response = await POST(
+      call(
+        { jsonrpc: "2.0", id: 1, method: "tools/list" },
+        { authorization: `Bearer ${TOKEN}` }
+      )
+    );
+
+    expect(response.status).toBe(200);
+    expect(verifyAccessTokenMock).toHaveBeenCalledWith(TOKEN);
+  });
+});
