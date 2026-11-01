@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import {
+  TABLES,
+  hallLayout,
+  payloadOf,
+} from "../src/features/approvals/fixtures";
 import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
 import { serviceRoleClient } from "./fixtures/service-role";
 
@@ -49,6 +54,23 @@ async function seedInvitedGuests(
   return (data ?? []).map((row) => row.id as string);
 }
 
+/** A table on the floor, so a seating proposal has something to seat guests at. */
+async function seedTable(
+  eventId: string,
+  name: string,
+  capacity: number
+): Promise<string> {
+  const { data, error } = await admin()
+    .from("tables")
+    .insert({ event_id: eventId, name, capacity })
+    .select("id")
+    .single();
+
+  expect(error, JSON.stringify(error)).toBeNull();
+  if (!data) throw new Error(`The table ${name} was not written back.`);
+  return data.id as string;
+}
+
 async function seedProposal(input: {
   userId: string;
   eventId: string;
@@ -57,6 +79,8 @@ async function seedProposal(input: {
   summary: string;
   note?: string;
   kind?: string;
+  /** Replaces the default send-shaped payload, for the kinds that carry a room or a seating plan. */
+  payload?: Record<string, unknown>;
   expiresInMs?: number;
   /** Defaults to pending. A decided row needs `decidedAt` to satisfy the table's own constraint. */
   status?: string;
@@ -71,7 +95,7 @@ async function seedProposal(input: {
       kind: input.kind ?? "send_invitations",
       title: input.title,
       summary: input.summary,
-      payload: {
+      payload: input.payload ?? {
         guestIds: input.guestIds,
         requestedCount: input.guestIds.length,
         ...(input.note ? { note: input.note } : {}),
@@ -285,41 +309,111 @@ test.describe("Approvals desk", () => {
     ).toBeVisible();
   });
 
-  test("offers only a rejection for a kind the app cannot carry out yet", async ({
+  test("shows the seating a proposal would change, then applies it from the card", async ({
     page,
     context,
   }) => {
-    const user = await createAndLoginUser(
-      page,
-      context,
-      "approvals_unapplicable"
-    );
+    const user = await createAndLoginUser(page, context, "approvals_seating");
     const { eventId } = await createTestEvent(page);
     const userId = await userIdFor(user.email);
-    const guestIds = await seedInvitedGuests(eventId, ["Ngozi Eze"]);
+    const tableId = await seedTable(eventId, "Top table", 4);
+    const [guestId] = await seedInvitedGuests(eventId, ["Ngozi Eze"]);
 
     const proposalId = await seedProposal({
       userId,
       eventId,
-      guestIds,
+      guestIds: [guestId],
       kind: "apply_seating_plan",
       title: "Apply a seating plan",
-      summary: "Seat 1 guest across 1 table.",
+      summary: "Seat 1 guest at 1 table.",
+      payload: { assignments: [{ guestId, tableId }] },
     });
 
     await page.goto("/approvals");
 
     const card = page.getByTestId("approval-card");
     await expect(card).toContainText("Apply a seating plan");
-    await expect(
-      card.getByText(/àríyá cannot carry this out yet/i)
-    ).toBeVisible();
-    await expect(card.getByTestId("approve-proposal")).toHaveCount(0);
 
-    // Only a rejection is offered here, so it is found by its name rather than its test id.
-    await card.getByRole("button", { name: /^reject$/i }).click();
+    // The plan is read against the celebration as it stands, so the guest and the table are the
+    // host's own names rather than whatever the app wrote in its summary.
+    await expect(card).toContainText("Ngozi Eze");
+    await expect(card).toContainText("Top table");
+    await expect(card.getByTestId("approve-proposal")).toBeVisible();
+
+    await card.getByTestId("approve-proposal").click();
+    await card.getByTestId("confirm-approve-proposal").click();
 
     await expect(page.getByText(/nothing is waiting/i)).toBeVisible();
-    expect((await proposalRow(proposalId)).status).toBe("rejected");
+    await expect(page.getByText(/1 guest was seated/i)).toBeVisible();
+
+    expect((await proposalRow(proposalId)).status).toBe("applied");
+
+    // The host has a week to change their mind, and the offer comes from the recorded snapshot.
+    await expect(page.getByTestId("restore-proposal")).toBeVisible();
+  });
+
+  test("draws the room a proposal would make, applies it, then puts it back", async ({
+    page,
+    context,
+  }) => {
+    const user = await createAndLoginUser(page, context, "approvals_hall");
+    const { eventId } = await createTestEvent(page);
+    const userId = await userIdFor(user.email);
+    const first = await seedTable(eventId, "Table 1", 8);
+    const second = await seedTable(eventId, "Table 2", 8);
+
+    // The same room and the same two places the preview tests start from, so this test is about
+    // what the host sees rather than about geometry.
+    const proposalId = await seedProposal({
+      userId,
+      eventId,
+      guestIds: [],
+      kind: "apply_hall_layout",
+      title: "Apply a hall layout",
+      summary: "Set out a 30 m × 20 m room with two tables.",
+      payload: payloadOf(hallLayout(), [
+        { ...TABLES[0], id: first },
+        { ...TABLES[1], id: second },
+      ]),
+    });
+
+    await page.goto("/approvals");
+
+    const card = page.getByTestId("approval-card");
+    await expect(card).toContainText("Apply a hall layout");
+
+    // A plan the host cannot touch, drawn by the studio's own renderer…
+    await expect(card.getByTestId("hall-plan-shield")).toBeVisible();
+    // …and, in words, what approving it would do.
+    await expect(card).toContainText(
+      "This celebration has no saved room yet, so this plan would create one: 30 m × 20 m."
+    );
+
+    await card.getByTestId("approve-proposal").click();
+    await card.getByTestId("confirm-approve-proposal").click();
+
+    await expect(page.getByText(/nothing is waiting/i)).toBeVisible();
+    await expect(
+      page.getByText(/the room was updated: 2 tables/i)
+    ).toBeVisible();
+    expect((await proposalRow(proposalId)).status).toBe("applied");
+
+    await page.getByTestId("restore-proposal").click();
+
+    await expect(
+      page.getByText(
+        "The previous room is back: 2 tables in the places they stood before."
+      )
+    ).toBeVisible();
+    await expect(page.getByText("Restored", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("restore-proposal")).toHaveCount(0);
+    expect((await proposalRow(proposalId)).result).toMatchObject({
+      restoredCount: 2,
+    });
+
+    // Coming back to the desk is another chance to ask, and it still refuses: the row remembers.
+    await page.reload();
+    await expect(page.getByText("Restored", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("restore-proposal")).toHaveCount(0);
   });
 });

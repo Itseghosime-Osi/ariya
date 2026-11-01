@@ -26,8 +26,6 @@ const GUEST_B = "44444444-4444-4444-8444-444444444444";
 
 const UNIDENTIFIED = "That proposal could not be identified.";
 const SIGNED_OUT = "Sign in to approve a proposal.";
-const NOT_AVAILABLE =
-  "That kind of proposal cannot be applied yet. Nothing was sent, and nothing was changed.";
 const ALREADY_DECIDED =
   "That proposal has already been decided, or it has expired. Nothing more was sent.";
 const NOT_APPROVED = "That proposal is not waiting to be applied.";
@@ -198,14 +196,27 @@ describe("approveProposalAction", () => {
     expect(fake.rpcCalls("record_ai_proposal_result")).toEqual([]);
   });
 
-  it("refuses a kind the app cannot carry out yet, and sends nothing", async () => {
+  it("refuses a hall it cannot read, and changes nothing", async () => {
     install(
       fakeClient(approvedProposal("apply_hall_layout", { guestIds: [GUEST_A] }))
     );
 
     const result = await approveProposalAction(PROPOSAL_ID);
 
-    expect(result).toEqual({ ok: false, error: NOT_AVAILABLE });
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        proposalId: PROPOSAL_ID,
+        status: "failed",
+        sentCount: 0,
+        skippedCount: 0,
+        appliedCount: 0,
+        seatedCount: 0,
+        movedCount: 0,
+        message:
+          "The proposed room was not in a form Àríyá can act on, so nothing in the hall was changed.",
+      },
+    });
     expect(mockedSendInvitation).not.toHaveBeenCalled();
     expect(mockedSendBatch).not.toHaveBeenCalled();
   });
@@ -224,6 +235,9 @@ describe("approveProposalAction", () => {
         status: "failed",
         sentCount: 0,
         skippedCount: 0,
+        appliedCount: 0,
+        seatedCount: 0,
+        movedCount: 0,
         message:
           "This proposal's details were not in a form Àríyá can act on, so nothing was sent.",
       },
@@ -269,6 +283,9 @@ describe("approveProposalAction", () => {
         status: "applied",
         sentCount: 2,
         skippedCount: 0,
+        appliedCount: 0,
+        seatedCount: 0,
+        movedCount: 0,
         message: "Sent to all 2 guests.",
       },
     });
@@ -452,6 +469,9 @@ describe("approveProposalAction", () => {
         status: "applied",
         sentCount: 2,
         skippedCount: 0,
+        appliedCount: 0,
+        seatedCount: 0,
+        movedCount: 0,
         message: "2 reminders sent.",
       },
     });

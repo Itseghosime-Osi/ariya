@@ -203,6 +203,13 @@ describe("listProposalFeed", () => {
       skippedCount: 0,
       totalCount: 2,
       reason: null,
+      appliedCount: 0,
+      seatedCount: 0,
+      movedCount: 0,
+      tableCount: 0,
+      restoredAt: null,
+      restoredCount: 0,
+      restoreUnavailable: null,
     });
   });
 
@@ -530,6 +537,13 @@ describe("proposal results", () => {
       skippedCount: 0,
       totalCount: 2,
       reason: "1 invitation could not be sent.",
+      appliedCount: 0,
+      seatedCount: 0,
+      movedCount: 0,
+      tableCount: 0,
+      restoredAt: null,
+      restoredCount: 0,
+      restoreUnavailable: null,
     });
   });
 
