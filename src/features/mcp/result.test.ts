@@ -27,7 +27,7 @@ afterEach(() => {
 
 describe("runTool", () => {
   it("logs the host, the connected app, the tool and a success", async () => {
-    const result = await runTool(caller, "list_guests", async () =>
+    const result = await runTool(caller, "list_guests", {}, async () =>
       dataResult({ items: [] })
     );
 
@@ -44,7 +44,7 @@ describe("runTool", () => {
   });
 
   it("logs an error outcome for a tool that answered with one", async () => {
-    await runTool(caller, "add_guest", async () =>
+    await runTool(caller, "add_guest", {}, async () =>
       errorResult("That guest is already on this celebration.")
     );
 
@@ -57,7 +57,7 @@ describe("runTool", () => {
   });
 
   it("turns a thrown error into a safe result and still logs the call", async () => {
-    const result = await runTool(caller, "import_guests", async () => {
+    const result = await runTool(caller, "import_guests", {}, async () => {
       throw new ToolError("Nothing was written.");
     });
 
@@ -75,7 +75,7 @@ describe("runTool", () => {
   it("never logs guest text that a tool handled", async () => {
     const secret = "Ada Obi, allergic to peanuts, +234 801 234 5678";
 
-    await runTool(caller, "list_guests", async () =>
+    await runTool(caller, "list_guests", {}, async () =>
       dataResult({ items: [secret] })
     );
 
@@ -86,6 +86,7 @@ describe("runTool", () => {
     await runTool(
       { user: { id: "user-2" }, clientId: null },
       "list_events",
+      {},
       async () => dataResult([])
     );
 

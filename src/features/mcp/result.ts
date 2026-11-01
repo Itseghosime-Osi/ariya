@@ -1,4 +1,6 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabase/database.types";
 
 /**
  * Every list tool answers with the same envelope, so a model never has to guess whether it has seen
@@ -46,23 +48,42 @@ export function errorResult(message: string): CallToolResult {
 export interface ToolCaller {
   user: { id: string };
   clientId: string | null;
+  /** Absent only in tests; a real call always carries the client that writes the activity row. */
+  client?: SupabaseClient<Database>;
 }
 
 /**
+ * What a call is remembered by, beyond who made it. `note` is a fixed phrase chosen by the tool
+ * layer — never an argument, and never anything a guest typed.
+ */
+export interface ToolLog {
+  eventId?: string | null;
+  note?: string | null;
+}
+
+type ToolOutcome = "ok" | "denied" | "error";
+
+/**
  * Runs a tool body and converts anything thrown into a safe tool error, so one bad call cannot take
- * down the request. Every call leaves one log line, success or failure.
+ * down the request. Every call leaves one log line and one activity row, success or failure.
  */
 export async function runTool(
   caller: ToolCaller,
   toolName: string,
+  log: ToolLog,
   body: () => Promise<CallToolResult>
 ): Promise<CallToolResult> {
   try {
     const result = await body();
-    logToolCall(caller, toolName, result.isError ? "error" : "ok");
+    await recordCall(caller, toolName, result.isError ? "error" : "ok", log);
     return result;
   } catch (error) {
-    logToolCall(caller, toolName, "error");
+    await recordCall(
+      caller,
+      toolName,
+      isDenial(error) ? "denied" : "error",
+      log
+    );
     return errorResult(errorMessage(error));
   }
 }
@@ -70,12 +91,17 @@ export async function runTool(
 /**
  * Which host, through which connected app, which tool, and whether it worked — never the arguments
  * and never anything a guest typed, so nothing sensitive reaches the logs.
+ *
+ * The activity row is what the host reads back on the Connect your AI page. Writing it is best
+ * effort: a tool that did its job must not be reported as failed because the audit row could not be
+ * written, so a failure here is swallowed.
  */
-function logToolCall(
+async function recordCall(
   caller: ToolCaller,
   toolName: string,
-  outcome: "ok" | "error"
-): void {
+  outcome: ToolOutcome,
+  log: ToolLog
+): Promise<void> {
   console.info(
     JSON.stringify({
       event: "mcp_tool_call",
@@ -85,6 +111,26 @@ function logToolCall(
       outcome,
     })
   );
+
+  if (!caller.client) return;
+
+  try {
+    await caller.client.from("ai_activity_log").insert({
+      user_id: caller.user.id,
+      client_id: caller.clientId,
+      tool: toolName,
+      event_id: log.eventId ?? null,
+      outcome,
+      note: log.note ?? null,
+    });
+  } catch {
+    // Best effort, as above.
+  }
+}
+
+/** A refusal the host can act on is not a fault; the difference is what the activity list shows. */
+function isDenial(error: unknown): boolean {
+  return error instanceof ToolError && error.denied;
 }
 
 export function errorMessage(error: unknown): string {
@@ -96,4 +142,15 @@ export function errorMessage(error: unknown): string {
   return "Something went wrong on Àríyá. Nothing was changed.";
 }
 
-export class ToolError extends Error {}
+export class ToolError extends Error {
+  /**
+   * True when the tool refused on purpose — the host asked for something the connection may not do
+   * — rather than something breaking. Logged as `denied` so the activity list can say so.
+   */
+  readonly denied: boolean;
+
+  constructor(message: string, options: { denied?: boolean } = {}) {
+    super(message);
+    this.denied = options.denied ?? false;
+  }
+}
