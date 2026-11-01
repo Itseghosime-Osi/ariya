@@ -74,14 +74,20 @@ those is a case in `src/features/mcp/app-trust.test.ts`.
 
 ## Limits
 
-| Limit                                       | Value                            | Where                             |
-| ------------------------------------------- | -------------------------------- | --------------------------------- |
-| Requests per host per minute                | 60 (`MCP_RATE_LIMIT_PER_MINUTE`) | `src/app/mcp/route.ts`            |
-| Retry hint on refusal                       | `429` with `Retry-After`         | `src/app/mcp/route.ts`            |
-| Celebrations a host may own within 24 hours | 10 (`MAX_EVENTS_PER_DAY`)        | `src/features/mcp/tools/write.ts` |
-| Rows in one guest import                    | 200 (`MAX_IMPORT_ROWS`)          | `src/features/mcp/schemas.ts`     |
-| Party size on one invitation                | 20                               | `src/features/mcp/schemas.ts`     |
-| Page size on list tools                     | 50 (`MAX_PAGE_SIZE`)             | `src/features/mcp/schemas.ts`     |
+| Limit                                       | Value                            | Where                               |
+| ------------------------------------------- | -------------------------------- | ----------------------------------- |
+| Requests per host per minute                | 60 (`MCP_RATE_LIMIT_PER_MINUTE`) | `src/app/mcp/route.ts`              |
+| Retry hint on refusal                       | `429` with `Retry-After`         | `src/app/mcp/route.ts`              |
+| Celebrations a host may own within 24 hours | 10 (`MAX_EVENTS_PER_DAY`)        | `src/features/mcp/tools/write.ts`   |
+| Celebrations one app token may create a day | 10                               | `public.create_event`               |
+| Guests one app token may add a day          | 500                              | trigger `tr_guests_app_token_quota` |
+| Rows in one guest import                    | 200 (`MAX_IMPORT_ROWS`)          | `src/features/mcp/schemas.ts`       |
+| Party size on one invitation                | 20                               | `src/features/mcp/schemas.ts`       |
+| Page size on list tools                     | 50 (`MAX_PAGE_SIZE`)             | `src/features/mcp/schemas.ts`       |
+
+The two per-day ceilings for app tokens are charged by the database, not by the tools, so they hold
+for a token pointed straight at PostgREST. They apply only to app tokens: a session without a
+`client_id` claim — the app's own forms — is never charged.
 
 The rate-limit key is per host (`mcp:<user id>`), shared by every app they have connected. Rate
 limiting fails closed: if the counter cannot be read, the request is refused rather than allowed.
@@ -95,6 +101,7 @@ owner or planner.
 
 | Tool                      | Returns                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------ |
+| `whoami`                  | The `clientId` behind the token and whether the database treats it as an app token.        |
 | `list_events`             | The host's celebrations with guest and RSVP counts. Start here to find an `eventId`.       |
 | `get_event_overview`      | One celebration's details, counts and what needs attention next.                           |
 | `list_guests`             | One page of a guest list, filterable by search, side, group, RSVP status, seating and VIP. |
@@ -114,9 +121,11 @@ owner or planner.
 
 ### Deliberately not exposed
 
-There is no tool that sends email or invitations, uses invitation quota, deletes anything, touches
-billing or payments, or changes team members or authentication. None of those should be added
-without a product decision — the consent card tells hosts that AI cannot do them.
+There is no tool that sends email or invitations, uses invitation quota, deletes anything, writes an
+RSVP, touches billing or payments, or changes team members or authentication. None of those should
+be added without a product decision — the consent card tells hosts that AI cannot do them, and
+restrictive policies in the database refuse them for an app token even if a tool is added by
+mistake.
 
 Guest names, notes, dietary needs and RSVP messages are written by guests, so every tool description
 tells the model to treat them as data, never as instructions.
@@ -177,6 +186,27 @@ opens. Useful first prompts:
 
 On a local stack, point it at `http://localhost:3000/mcp` and make sure `supabase start` is running.
 
+### Confirming the database treats the token as an app token
+
+The restrictions above are keyed off the token's `client_id` claim, so they are only in force when
+the token was minted by the OAuth server and the database functions in
+`20261101000000_mcp_token_lockdown` are applied. `whoami` reports both at once.
+
+After applying that migration, **reconnect Claude Code** so the connection carries a fresh token,
+then ask it to call `whoami`. The answer must be:
+
+```json
+{
+  "clientId": "…",
+  "databaseTreatsThisTokenAsApp": true
+}
+```
+
+If `databaseTreatsThisTokenAsApp` is `false`, the token in use has no `client_id` claim — the
+connector is being handed a password-grant or service token rather than one approved on
+`/oauth/consent` — and none of the app-token restrictions are being enforced. Disconnect and
+reconnect from `/connect-ai`.
+
 ## Revoking access
 
 A host revokes from **Connect your AI** (`/connect-ai`), reachable from the account menu. The page
@@ -189,13 +219,13 @@ Disconnecting an app does not delete data it created while connected.
 ## Tests
 
 - Unit: `src/app/mcp/route.test.ts`, `src/features/mcp/{guard,schemas,metadata,result}.test.ts`,
-  `src/features/mcp/tools/write.test.ts`, `src/lib/supabase/request-context.test.ts`, and the consent
+  `src/features/mcp/tools/{read,write}.test.ts`, `src/lib/supabase/request-context.test.ts`, and the consent
   safety suite: `src/features/mcp/app-trust.test.ts` (the classifier and every look-alike),
   `src/features/mcp/consent.test.ts` (the action refuses an unacknowledged unknown app) and
   `src/features/mcp/components/ConsentCard.test.tsx` (all three tiers).
-- End to end: `e2e/14-mcp.spec.ts` — real password-grant tokens, JSON-RPC over `/mcp`, a second host
-  refused, an oversized import rejected, both metadata paths, and the consent screen's signed-out
-  and incomplete-link states.
+- End to end: `e2e/14-mcp.spec.ts` — real password-grant tokens, JSON-RPC over `/mcp`, `whoami`
+  reporting such a token as an ordinary session, a second host refused, an oversized import
+  rejected, both metadata paths, and the consent screen's signed-out and incomplete-link states.
 
 The real OAuth approval step — a connector redirecting the host to `/oauth/consent` and getting a
 token back — needs a live Supabase Auth server and a real connector. It is not covered by the suite.

@@ -55,6 +55,9 @@ export const getRsvpSummaryInput = z.object({ eventId });
 
 export const listTablesAndSeatingInput = z.object({ eventId });
 
+/** Asks about the connection itself, so it takes nothing. */
+export const whoamiInput = z.object({});
+
 export const createEventInput = z.object({
   title: z.string().trim().min(3).max(120),
   couple: z
@@ -154,6 +157,7 @@ export type GetRsvpSummaryArgs = z.infer<typeof getRsvpSummaryInput>;
 export type ListTablesAndSeatingArgs = z.infer<
   typeof listTablesAndSeatingInput
 >;
+export type WhoamiArgs = z.infer<typeof whoamiInput>;
 export type CreateEventArgs = z.infer<typeof createEventInput>;
 export type UpdateEventArgs = z.infer<typeof updateEventInput>;
 export type AddGuestArgs = z.infer<typeof addGuestInput>;

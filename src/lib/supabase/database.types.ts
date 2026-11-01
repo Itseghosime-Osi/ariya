@@ -34,6 +34,121 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_activity_log: {
+        Row: {
+          client_id: string | null;
+          created_at: string;
+          error: string | null;
+          event_id: string | null;
+          id: string;
+          outcome: string;
+          tool: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event_id?: string | null;
+          id?: string;
+          outcome: string;
+          tool: string;
+          user_id: string;
+        };
+        Update: {
+          client_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          event_id?: string | null;
+          id?: string;
+          outcome?: string;
+          tool?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_activity_log_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_activity_log_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_connection_settings: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          event_ids: string[] | null;
+          read_only: boolean;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          event_ids?: string[] | null;
+          read_only?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          event_ids?: string[] | null;
+          read_only?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_connection_settings_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_quota_usage: {
+        Row: {
+          day: string;
+          key: string;
+          used: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          day: string;
+          key: string;
+          used?: number;
+          user_id: string;
+        };
+        Update: {
+          day?: string;
+          key?: string;
+          used?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_quota_usage_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       check_ins: {
         Row: {
           checked_in_at: string;
@@ -352,7 +467,7 @@ export type Database = {
           party_size?: number;
           phone?: string | null;
           plus_ones_allowed?: boolean;
-          rsvp_token?: string;
+          rsvp_token: string;
           seating_conflict_at?: string | null;
           side?: string | null;
           updated_at?: string;
@@ -795,6 +910,22 @@ export type Database = {
     };
     Functions: {
       accept_team_invite: { Args: { p_token: string }; Returns: Json };
+      ai_connection_event_allowed: {
+        Args: { p_event_id: string };
+        Returns: boolean;
+      };
+      ai_connection_read_only: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      assert_ai_cannot_manage_team: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      assert_ai_write_allowed: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       assign_seat: {
         Args: { p_guest_id: string; p_table_id?: string };
         Returns: Json;
@@ -806,6 +937,10 @@ export type Database = {
       check_invitation_quota: {
         Args: { p_event_id: string; p_recipient_count: number };
         Returns: boolean;
+      };
+      consume_quota: {
+        Args: { p_amount: number; p_daily_limit: number; p_key: string };
+        Returns: Json;
       };
       create_event: {
         Args: {
@@ -820,6 +955,10 @@ export type Database = {
           p_venue: string;
         };
         Returns: Json;
+      };
+      current_app_client_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
       };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
@@ -864,9 +1003,14 @@ export type Database = {
         Args: { p_email: string; p_event_id: string; p_role: string };
         Returns: Json;
       };
+      is_app_token: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_event_member:
         | { Args: { p_event_id: string }; Returns: boolean }
         | { Args: { p_event_id: string; p_user_id: string }; Returns: boolean };
+      is_first_party_session: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       record_successful_payment: {
         Args: { p_payment_reference: string; p_paystack_data: Json };
         Returns: Json;
@@ -916,6 +1060,7 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      shares_event_with: { Args: { p_user_id: string }; Returns: boolean };
       submit_rsvp: {
         Args: {
           p_attending_count: number;

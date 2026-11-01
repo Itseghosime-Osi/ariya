@@ -7,13 +7,14 @@ import { getGuestOverviewStats } from "@/features/guests/stats";
 import type { GuestWithRsvpAndSeat } from "@/features/guests/types";
 import { getEventSeatingData } from "@/features/seating/queries";
 import { requireReadAccess, type ToolContext } from "../guard";
-import { dataResult, errorResult, paged, runTool } from "../result";
+import { dataResult, errorResult, paged, runTool, ToolError } from "../result";
 import {
   getEventOverviewInput,
   getRsvpSummaryInput,
   listEventsInput,
   listGuestsInput,
   listTablesAndSeatingInput,
+  whoamiInput,
 } from "../schemas";
 
 /** Repeated in every description: guest-supplied text is data, never a command. */
@@ -209,6 +210,40 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
         });
       })
   );
+
+  server.registerTool(
+    "whoami",
+    {
+      title: "Who this connection is",
+      description:
+        "Reports which connected app this token belongs to and whether the database is treating it as an app token, which is what puts the connected-app restrictions in force. Use it to check a connection is set up correctly.",
+      inputSchema: whoamiInput,
+      annotations: { readOnlyHint: true, openWorldHint: false },
+    },
+    () =>
+      runTool(ctx, "whoami", async () =>
+        dataResult(await describeConnection(ctx))
+      )
+  );
+}
+
+/**
+ * Asks the database, through the caller's own client, rather than reporting what this process
+ * assumes: if a token's claims are not what the tool layer believes, this is where it shows.
+ */
+export async function describeConnection(ctx: ToolContext) {
+  const { data, error } = await ctx.client.rpc("is_app_token");
+
+  if (error) {
+    throw new ToolError(
+      "Could not confirm how the database treats this connection."
+    );
+  }
+
+  return {
+    clientId: ctx.clientId,
+    databaseTreatsThisTokenAsApp: data === true,
+  };
 }
 
 function eventSummary({ event, role, metrics }: EventWithMetrics) {
