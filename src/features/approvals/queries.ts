@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { sanitiseAppName } from "@/features/mcp/app-trust";
 import { listConnectedApps } from "@/features/mcp/grants";
+import {
+  normaliseLayout,
+  type HallLayout,
+} from "@/features/seating/hall/model";
+import type { PlanGuest, PlanTable } from "@/features/seating/plan-checks";
+import { previewFromStored } from "./previews";
 import { proposalPayloadSchema } from "./schemas";
 import type {
   ActionResult,
@@ -39,6 +45,9 @@ const ACTIVITY_LIMIT = 50;
  * nor done.
  */
 const APPLICATION_STALL_MS = 10 * 60 * 1000;
+
+/** How long "Restore previous" is offered. The database enforces the same seven days. */
+const RESTORE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface ProposalRow {
   id: string;
@@ -83,9 +92,8 @@ export async function listProposalFeed(): Promise<ActionResult<ProposalFeed>> {
 
   // One clock for every row, so two proposals on the same screen are judged against one instant.
   const now = Date.now();
-  const proposalList = ((data ?? []) as ProposalRow[]).map((row) =>
-    toProposal(row, connectedNames, now)
-  );
+  const rows = (data ?? []) as ProposalRow[];
+  const proposalList = rows.map((row) => toProposal(row, connectedNames, now));
 
   const pending = proposalList.filter(
     (proposal) => proposal.status === "pending"
@@ -94,7 +102,97 @@ export async function listProposalFeed(): Promise<ActionResult<ProposalFeed>> {
     .filter((proposal) => proposal.status !== "pending")
     .slice(0, HISTORY_LIMIT);
 
+  await attachPreviews(pending, new Map(rows.map((row) => [row.id, row])));
+
   return { ok: true, data: { pending, decided } };
+}
+
+/**
+ * Fills in what each waiting hall or seating proposal would do, read from the celebration as it is
+ * now rather than from what the app said when it asked. A proposal whose preview cannot be built
+ * keeps a null one and the card says so, rather than the desk failing to load at all.
+ */
+async function attachPreviews(
+  proposals: Proposal[],
+  rows: Map<string, ProposalRow>
+): Promise<void> {
+  const wanted = proposals.filter(
+    (proposal) =>
+      proposal.kind === "apply_hall_layout" ||
+      proposal.kind === "apply_seating_plan"
+  );
+  if (wanted.length === 0) return;
+
+  const contexts = new Map<string, EventContext | null>();
+
+  for (const proposal of wanted) {
+    if (!contexts.has(proposal.eventId)) {
+      contexts.set(proposal.eventId, await loadEventContext(proposal.eventId));
+    }
+
+    const context = contexts.get(proposal.eventId);
+    const row = rows.get(proposal.id);
+    if (!context || !row) continue;
+
+    proposal.preview = previewFromStored(proposal.kind, row.payload, context);
+  }
+}
+
+interface EventContext {
+  layout: HallLayout | null;
+  tables: (PlanTable & {
+    shape: string;
+    x: number;
+    y: number;
+  })[];
+  guests: PlanGuest[];
+}
+
+/** Everything a preview needs about one celebration, in three reads and never a fourth. */
+async function loadEventContext(eventId: string): Promise<EventContext | null> {
+  const supabase = await createClient();
+
+  const [event, tables, guests] = await Promise.all([
+    supabase
+      .from("events")
+      .select("hall_layout")
+      .eq("id", eventId)
+      .maybeSingle(),
+    supabase
+      .from("tables")
+      .select("id, name, capacity, shape, position_x, position_y")
+      .eq("event_id", eventId),
+    supabase
+      .from("guests")
+      .select("id, name, party_size, seat_assignments ( table_id )")
+      .eq("event_id", eventId),
+  ]);
+
+  if (event.error || tables.error || guests.error) return null;
+
+  return {
+    layout: normaliseLayout(event.data?.hall_layout ?? null),
+    tables: (tables.data ?? []).map((table) => ({
+      id: table.id,
+      name: table.name,
+      capacity: table.capacity,
+      shape: table.shape,
+      x: table.position_x,
+      y: table.position_y,
+    })),
+    guests: (guests.data ?? []).map((guest) => {
+      const seat = Array.isArray(guest.seat_assignments)
+        ? guest.seat_assignments[0]
+        : guest.seat_assignments;
+
+      return {
+        id: guest.id,
+        name: guest.name,
+        partySize: guest.party_size ?? 1,
+        tableId: seat?.table_id ?? null,
+      };
+    }),
+  };
 }
 
 /**
@@ -157,12 +255,13 @@ function toProposal(
 ): Proposal {
   const payload = proposalPayloadSchema.safeParse(row.payload);
   const guestIds = payload.success ? payload.data.guestIds : [];
-  const note = payload.success ? (payload.data.note ?? null) : null;
+  const note = noteOf(row.payload);
   const selfName = connectedNames?.get(row.client_id);
+  const kind = row.kind as ProposalKind;
 
   return {
     id: row.id,
-    kind: row.kind as ProposalKind,
+    kind,
     title: row.title,
     summary: row.summary,
     note,
@@ -180,24 +279,90 @@ function toProposal(
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     decidedAt: row.decided_at,
-    result: resultOf(row, guestIds.length),
+    result: resultOf(row, kind, guestIds.length),
+    // Filled in afterwards for the waiting ones, once the celebration has been read.
+    preview: null,
+    canRestore: canRestore(row, kind, now),
   };
 }
 
+/**
+ * The app's own note, whichever kind of proposal carries it. Every shape keeps it in the same
+ * place, so a card never has to guess.
+ */
+function noteOf(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return null;
+
+  const shape = payload as { note?: unknown; guestIds?: unknown };
+  if (typeof shape.note === "string") {
+    const note = shape.note.trim();
+    return note ? note.slice(0, 300) : null;
+  }
+  return null;
+}
+
 /** The recorded outcome, bounded to numbers and a short reason so nothing else can reach the card. */
-function resultOf(row: ProposalRow, totalCount: number): ProposalResult | null {
+function resultOf(
+  row: ProposalRow,
+  kind: ProposalKind,
+  guestCount: number
+): ProposalResult | null {
   if (row.status !== "applied" && row.status !== "failed") return null;
   if (!row.result || typeof row.result !== "object") return null;
 
   const result = row.result as Record<string, unknown>;
   const reason = typeof result.reason === "string" ? result.reason.trim() : "";
+  const restoredAt =
+    typeof result.restoredAt === "string" ? result.restoredAt : null;
 
   return {
     sentCount: countOf(result.sentCount),
     skippedCount: countOf(result.skippedCount),
-    totalCount,
+    // A send counts guests; a seating plan counts the guests it named; a room counts its tables.
+    totalCount:
+      kind === "send_invitations" || kind === "send_reminders"
+        ? guestCount
+        : kind === "apply_seating_plan"
+          ? countOf(result.seatedCount) +
+            countOf(result.movedCount) +
+            countOf(result.skippedCount)
+          : countOf(result.appliedCount) + countOf(result.skippedCount),
     reason: reason || null,
+    appliedCount: countOf(result.appliedCount),
+    movedCount: countOf(result.movedCount),
+    seatedCount: countOf(result.seatedCount),
+    tableCount: countOf(result.tableCount),
+    restoredAt,
+    restoredCount: countOf(result.restoredCount),
+    restoreUnavailable:
+      typeof result.restoreUnavailable === "string"
+        ? result.restoreUnavailable.slice(0, 300)
+        : null,
   };
+}
+
+/**
+ * Whether "Restore previous" is still on offer: the same 7 days the database enforces, and only
+ * while nothing has already been restored. The action checks all of this again.
+ */
+function canRestore(
+  row: ProposalRow,
+  kind: ProposalKind,
+  now: number
+): boolean {
+  if (row.status !== "applied") return false;
+  if (kind !== "apply_hall_layout" && kind !== "apply_seating_plan")
+    return false;
+  if (!row.decided_at) return false;
+  if (now - new Date(row.decided_at).getTime() > RESTORE_WINDOW_MS)
+    return false;
+
+  const result = row.result as Record<string, unknown> | null;
+  if (!result || typeof result !== "object") return false;
+  if (typeof result.restoredAt === "string") return false;
+  if (typeof result.restoreUnavailable === "string") return false;
+
+  return Boolean(result.snapshot);
 }
 
 function countOf(value: unknown): number {
