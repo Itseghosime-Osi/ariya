@@ -17,9 +17,14 @@ import { SignOutConfirmation } from "./SignOutConfirmation";
 interface TopBarProps {
   eventId?: string;
   userEmail?: string;
+  pendingProposals?: number;
 }
 
-export function TopBar({ eventId, userEmail }: TopBarProps) {
+export function TopBar({
+  eventId,
+  userEmail,
+  pendingProposals = 0,
+}: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
 
@@ -59,6 +64,27 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/approvals"
+            aria-label={
+              pendingProposals > 0
+                ? `Approvals, ${pendingProposals} waiting`
+                : "Approvals"
+            }
+            data-testid="approvals-link"
+            className="relative flex h-11 items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-3 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="pending" size={18} className="shrink-0" />
+            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] sm:inline">
+              Approvals
+            </span>
+            {pendingProposals > 0 ? (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-burgundy px-1 text-[11px] font-semibold leading-none text-champagne">
+                {pendingProposals > 9 ? "9+" : pendingProposals}
+              </span>
+            ) : null}
+          </Link>
+
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
