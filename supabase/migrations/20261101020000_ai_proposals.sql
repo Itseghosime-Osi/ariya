@@ -107,7 +107,9 @@ create policy "ai_proposals_select_own" on public.ai_proposals
   using ((select auth.uid()) = user_id);
 
 -- Only an app token inserts, and only as itself: no other host, no other client, no scope it was
--- not given, no read-only connection, no status other than pending.
+-- not given, no read-only connection, no status other than pending. The token acts as its host, so
+-- the row is also held to the host's own standing on the celebration: a celebration they do not own
+-- or plan is not one they may ask anyone to send to.
 create policy "ai_proposals_insert_app_token" on public.ai_proposals
   for insert to authenticated
   with check (
@@ -117,6 +119,7 @@ create policy "ai_proposals_insert_app_token" on public.ai_proposals
     and status = 'pending'
     and public.ai_connection_event_allowed(event_id)
     and not public.ai_connection_read_only()
+    and public.has_event_role(event_id, array['owner', 'planner'])
   );
 
 -- ============================================================================

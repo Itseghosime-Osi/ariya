@@ -1,12 +1,13 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(31);
+select plan(33);
 
 -- ============================================================================
 -- Fixture
 --
--- One host with two celebrations, one other account, and three connections:
+-- One host with two celebrations, one other account with a celebration of its own, and three
+-- connections:
 --   client-propose : no settings row (every celebration, read-write)
 --   client-scoped  : limited to celebration A
 --   client-ro      : read-only
@@ -19,7 +20,8 @@ create temp table lp (
   host uuid,
   other_user uuid,
   event_a uuid,
-  event_b uuid
+  event_b uuid,
+  event_other uuid
 );
 grant select on lp to authenticated, anon, service_role;
 
@@ -29,6 +31,7 @@ declare
   v_other uuid := gen_random_uuid();
   v_a uuid;
   v_b uuid;
+  v_other_event uuid;
 begin
   insert into auth.users (id, email, raw_user_meta_data, email_confirmed_at) values
     (v_host, 'proposal-host@approvals.test', '{"full_name": "Proposal Host"}'::jsonb, now()),
@@ -44,11 +47,20 @@ begin
     p_title := 'Proposal B', p_couple := 'C & D', p_date := now() + interval '30 days',
     p_venue := 'Hall B', p_area := 'Ikoyi')->>'id')::uuid;
 
+  -- A celebration the host has no role on at all.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', v_other, 'role', 'authenticated')::text, true);
+
+  v_other_event := (public.create_event(
+    p_title := 'Proposal Elsewhere', p_couple := 'E & F',
+    p_date := now() + interval '30 days',
+    p_venue := 'Hall C', p_area := 'Lekki')->>'id')::uuid;
+
   insert into public.ai_connection_settings (user_id, client_id, event_ids, read_only)
   values (v_host, 'client-scoped', array[v_a], false),
          (v_host, 'client-ro', null, true);
 
-  insert into lp values (v_host, v_other, v_a, v_b);
+  insert into lp values (v_host, v_other, v_a, v_b, v_other_event);
 end $$;
 
 -- ============================================================================
@@ -148,6 +160,62 @@ select throws_ok(
      select host, event_a, 'client-propose', 'send_invitations', 'First party', 'First party' from lp $$,
   '42501', null,
   'a first-party session cannot insert a proposal at all');
+
+-- ============================================================================
+-- 1b. THE PROPOSAL IS ALSO HELD TO THE HOST'S OWN STANDING ON THE CELEBRATION
+-- ============================================================================
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated',
+                    'client_id', 'client-propose')::text, true);
+set local role authenticated;
+
+select throws_ok(
+  $$ insert into public.ai_proposals (user_id, event_id, client_id, kind, title, summary)
+     select host, event_other, 'client-propose', 'send_reminders', 'Not mine', 'Not mine' from lp $$,
+  '42501', null,
+  'an app token cannot raise a proposal for a celebration its host has no role on');
+
+reset role;
+
+-- Give the same host a planner role there. Claims are cleared so the membership trigger treats the
+-- insert as a system one rather than as the host adding themselves. A planner holds a write role,
+-- so the same token may now raise a proposal on that celebration.
+select set_config('request.jwt.claims', '{}', true);
+
+insert into public.event_members (event_id, user_id, role)
+select event_other, host, 'planner' from lp;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated',
+                    'client_id', 'client-propose')::text, true);
+set local role authenticated;
+
+do $$
+declare
+  v_id uuid;
+begin
+  insert into public.ai_proposals (user_id, event_id, client_id, kind, title, summary)
+  select host, event_other, 'client-propose', 'send_reminders',
+         'Planned, not owned', 'Planned, not owned'
+  from lp
+  returning id into v_id;
+
+  perform set_config('lp.planner_proposal', v_id::text, true);
+end $$;
+
+select is(
+  (select count(*)::integer from public.ai_proposals
+   where id = current_setting('lp.planner_proposal')::uuid and status = 'pending'),
+  1,
+  'a planner can raise a proposal on a celebration they do not own');
+
+reset role;
+
+-- Back to the host's own session, which is what the next section starts from.
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated')::text, true);
+set local role authenticated;
 
 -- ============================================================================
 -- 2. NO UPDATE, NO DELETE, FOR ANYONE BUT THE OWNER ROLE
