@@ -35,13 +35,14 @@ export const MCP_INSTRUCTIONS = [
  */
 export function createAriyaMcpServer(
   client: SupabaseClient<Database>,
-  user: User
+  user: User,
+  clientId: string | null = null
 ): McpServer {
   const server = new McpServer(MCP_SERVER_INFO, {
     instructions: MCP_INSTRUCTIONS,
   });
 
-  const ctx = { client, user };
+  const ctx = { client, user, clientId };
   registerReadTools(server, ctx);
   registerWriteTools(server, ctx);
 

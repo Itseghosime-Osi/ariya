@@ -96,7 +96,8 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
         <p className="mt-5 rounded-2xl bg-ivory p-4 text-xs leading-relaxed text-on-surface-variant">
           If you approve, this app can read the celebrations you have access to
           and make changes to the ones you own or plan. It cannot see your
-          password, and you can revoke access later from your account settings.
+          password, and you can revoke access later from Connect your AI in your
+          account menu.
         </p>
 
         <p className="mt-4 flex flex-wrap items-center gap-2 text-xs text-label-2">

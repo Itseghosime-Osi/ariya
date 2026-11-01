@@ -11,7 +11,7 @@ import {
 import type { GuestUpdate } from "@/features/guests/types";
 import { updateInvitationDesignAction } from "@/features/invitations/actions";
 import { requireWriteAccess, type ToolContext } from "../guard";
-import { dataResult, errorResult, runTool } from "../result";
+import { dataResult, errorResult, runTool, ToolError } from "../result";
 import {
   addGuestInput,
   createEventInput,
@@ -20,6 +20,13 @@ import {
   updateGuestInput,
   updateInvitationDesignInput,
 } from "../schemas";
+
+/**
+ * A runaway model should not be able to fill a host's account with celebrations. Ownership is what
+ * counts, so being a planner on fifty events costs nothing.
+ */
+export const MAX_EVENTS_PER_DAY = 10;
+export const EVENT_CREATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
   server.registerTool(
@@ -36,7 +43,9 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "create_event", async () => {
+        await checkEventCreationBudget(ctx);
+
         const result = await createEventAction({
           title: args.title,
           couple: args.couple,
@@ -69,7 +78,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     ({ eventId, rsvpBy, ...changes }) =>
-      runTool(async () => {
+      runTool(ctx, "update_event", async () => {
         await requireWriteAccess(ctx, eventId);
 
         // The event schema takes strings only; an empty deadline is how it spells "clear this".
@@ -101,7 +110,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "add_guest", async () => {
         await requireWriteAccess(ctx, args.eventId);
 
         const result = await createGuestAction(args.eventId, guestRow(args));
@@ -129,7 +138,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "update_guest", async () => {
         await requireWriteAccess(ctx, args.eventId);
 
         const { data: existing, error } = await ctx.client
@@ -193,7 +202,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "import_guests", async () => {
         await requireWriteAccess(ctx, args.eventId);
 
         const rows = args.guests.map((guest) => guestRow(guest));
@@ -219,7 +228,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     ({ eventId, ...design }) =>
-      runTool(async () => {
+      runTool(ctx, "update_invitation_design", async () => {
         await requireWriteAccess(ctx, eventId);
 
         const { data: current, error } = await ctx.client
@@ -262,6 +271,53 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
 
         return dataResult({ eventId, theme: design.theme });
       })
+  );
+}
+
+/**
+ * Counts the celebrations this host owns and created inside the window. Ownership is read from
+ * event_members, because events itself carries no owner column.
+ */
+export async function checkEventCreationBudget(
+  ctx: ToolContext
+): Promise<void> {
+  const { data: owned, error: ownershipError } = await ctx.client
+    .from("event_members")
+    .select("event_id")
+    .eq("user_id", ctx.user.id)
+    .eq("role", "owner");
+
+  if (ownershipError) {
+    throw new ToolError(
+      "Could not check your recent celebrations. Nothing was created."
+    );
+  }
+  if (!owned?.length) return;
+
+  const since = new Date(Date.now() - EVENT_CREATION_WINDOW_MS).toISOString();
+  const { data: recent, error } = await ctx.client
+    .from("events")
+    .select("created_at")
+    .in(
+      "id",
+      owned.map((row) => row.event_id)
+    )
+    .gte("created_at", since)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new ToolError(
+      "Could not check your recent celebrations. Nothing was created."
+    );
+  }
+  if (!recent || recent.length < MAX_EVENTS_PER_DAY) return;
+
+  // The oldest of the ten is the first to fall out of the window, freeing a slot.
+  const resetAt = new Date(
+    new Date(recent[0].created_at).getTime() + EVENT_CREATION_WINDOW_MS
+  );
+  throw new ToolError(
+    `Daily limit reached: you have created ${MAX_EVENTS_PER_DAY} celebrations in the last 24 hours. You can create another after ${resetAt.toISOString()}.`
   );
 }
 
