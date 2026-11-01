@@ -4,7 +4,9 @@ import {
   importGuestsInput,
   MAX_IMPORT_ROWS,
   MAX_PAGE_SIZE,
+  MAX_PROPOSAL_GUESTS,
   listGuestsInput,
+  proposeSendInvitationsInput,
   updateGuestInput,
 } from "./schemas";
 
@@ -14,6 +16,14 @@ function rows(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     name: `Guest ${index + 1}`,
   }));
+}
+
+function guestIds(count: number) {
+  return Array.from(
+    { length: count },
+    (_, index) =>
+      `22222222-2222-4222-8222-${String(index + 1).padStart(12, "0")}`
+  );
 }
 
 describe("importGuestsInput", () => {
@@ -52,6 +62,37 @@ describe("importGuestsInput", () => {
     });
 
     expect(parsed.guests[0].partySize).toBe(1);
+  });
+});
+
+describe("proposeSendInvitationsInput", () => {
+  it("accepts a proposal naming the full 25 guests", () => {
+    const parsed = proposeSendInvitationsInput.safeParse({
+      eventId: EVENT_ID,
+      guestIds: guestIds(MAX_PROPOSAL_GUESTS),
+    });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.guestIds).toHaveLength(25);
+  });
+
+  it("rejects 26 named guests with a message the model can act on", () => {
+    const parsed = proposeSendInvitationsInput.safeParse({
+      eventId: EVENT_ID,
+      guestIds: guestIds(MAX_PROPOSAL_GUESTS + 1),
+    });
+
+    expect(parsed.success).toBe(false);
+    expect(parsed.success ? "" : parsed.error.issues[0].message).toBe(
+      "A single proposal may name at most 25 guests"
+    );
+  });
+
+  it("accepts a proposal that names no guests, meaning everyone eligible", () => {
+    const parsed = proposeSendInvitationsInput.safeParse({ eventId: EVENT_ID });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.guestIds).toBeUndefined();
   });
 });
 

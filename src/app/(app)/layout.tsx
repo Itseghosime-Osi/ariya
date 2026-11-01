@@ -1,6 +1,7 @@
 import React from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import type { SwitcherEvent } from "@/components/layout/nav-items";
+import { countPendingProposals } from "@/features/approvals/queries";
 import { getCurrentUser } from "@/features/auth/queries";
 import { getUserEvents } from "@/features/events/queries";
 import {
@@ -20,7 +21,11 @@ export default async function AppLayout({
 }) {
   // Both queries are wrapped in React cache(), so pages that need them too
   // share the same request-scoped result.
-  const [user, events] = await Promise.all([getCurrentUser(), getUserEvents()]);
+  const [user, events, pendingProposals] = await Promise.all([
+    getCurrentUser(),
+    getUserEvents(),
+    countPendingProposals(),
+  ]);
 
   const { upcoming, past } = partitionEvents(events);
   const primaryEvent = pickHeroEvent(upcoming) ?? past[0] ?? events[0] ?? null;
@@ -39,6 +44,7 @@ export default async function AppLayout({
       userEmail={user?.email}
       events={switcherEvents}
       primaryEventId={primaryEvent?.event.id}
+      pendingProposals={pendingProposals}
     >
       {children}
     </AppShell>

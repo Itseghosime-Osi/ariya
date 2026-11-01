@@ -5,6 +5,30 @@ import { invitationThemeEnum } from "@/features/invitations/schemas";
 export const MAX_PAGE_SIZE = 50;
 export const MAX_IMPORT_ROWS = 200;
 
+/**
+ * A send proposal is one decision by one person, and the desk shows what it would do to the whole
+ * list before it is approved, so it stays small enough to read. Kept in step with
+ * `MAX_APPLY_GUESTS` in `src/features/approvals/schemas.ts`.
+ */
+export const MAX_PROPOSAL_GUESTS = 25;
+
+/** The kinds a proposal may carry. Only the two sending kinds are applied today. */
+export const PROPOSAL_KINDS = [
+  "send_invitations",
+  "send_reminders",
+  "apply_hall_layout",
+  "apply_seating_plan",
+] as const;
+
+export const PROPOSAL_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "expired",
+  "applied",
+  "failed",
+] as const;
+
 const eventId = z.string().uuid("eventId must be a UUID");
 const guestId = z.string().uuid("guestId must be a UUID");
 
@@ -150,6 +174,50 @@ export const updateInvitationDesignInput = z.object({
   customMessage: z.string().max(500).optional(),
 });
 
+const proposalNote = z
+  .string()
+  .trim()
+  .max(300)
+  .optional()
+  .describe(
+    "A short note to the host explaining what you would send and why. Shown on the approval card."
+  );
+
+const proposedGuestIds = z
+  .array(guestId)
+  .min(1)
+  .max(
+    MAX_PROPOSAL_GUESTS,
+    `A single proposal may name at most ${MAX_PROPOSAL_GUESTS} guests`
+  )
+  .optional()
+  .describe(
+    "The guests to contact. Omit to propose everyone who is eligible for this kind."
+  );
+
+/**
+ * Both sending tools take the same arguments: what to send is the only difference, and it is in the
+ * tool's name rather than in a field a model could mistype.
+ */
+const proposeSendInput = z.object({
+  eventId,
+  guestIds: proposedGuestIds,
+  note: proposalNote,
+});
+
+export const proposeSendInvitationsInput = proposeSendInput;
+export const proposeSendRemindersInput = proposeSendInput;
+
+export const listMyProposalsInput = z.object({
+  eventId: eventId.optional().describe("Only proposals for this celebration."),
+  status: z
+    .enum(PROPOSAL_STATUSES)
+    .optional()
+    .describe("Only proposals in this state. Omit to see every state."),
+  page,
+  pageSize,
+});
+
 export type ListEventsArgs = z.infer<typeof listEventsInput>;
 export type GetEventOverviewArgs = z.infer<typeof getEventOverviewInput>;
 export type ListGuestsArgs = z.infer<typeof listGuestsInput>;
@@ -166,3 +234,10 @@ export type ImportGuestsArgs = z.infer<typeof importGuestsInput>;
 export type UpdateInvitationDesignArgs = z.infer<
   typeof updateInvitationDesignInput
 >;
+export type ProposeSendInvitationsArgs = z.infer<
+  typeof proposeSendInvitationsInput
+>;
+export type ProposeSendRemindersArgs = z.infer<
+  typeof proposeSendRemindersInput
+>;
+export type ListMyProposalsArgs = z.infer<typeof listMyProposalsInput>;

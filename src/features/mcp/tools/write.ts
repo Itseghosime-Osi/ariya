@@ -43,24 +43,29 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(ctx, "create_event", async () => {
-        await checkEventCreationBudget(ctx);
+      runTool(
+        ctx,
+        "create_event",
+        { note: "Created celebration" },
+        async () => {
+          await checkEventCreationBudget(ctx);
 
-        const result = await createEventAction({
-          title: args.title,
-          couple: args.couple,
-          date: args.date,
-          venue: args.venue,
-          area: args.area,
-          dressCode: args.dressCode,
-          rsvpBy: args.rsvpBy,
-          targetParties: 200,
-          intakeMethod: "skip",
-        });
+          const result = await createEventAction({
+            title: args.title,
+            couple: args.couple,
+            date: args.date,
+            venue: args.venue,
+            area: args.area,
+            dressCode: args.dressCode,
+            rsvpBy: args.rsvpBy,
+            targetParties: 200,
+            intakeMethod: "skip",
+          });
 
-        if (!result.ok) return errorResult(result.error);
-        return dataResult(result.data);
-      })
+          if (!result.ok) return errorResult(result.error);
+          return dataResult(result.data);
+        }
+      )
   );
 
   server.registerTool(
@@ -78,22 +83,29 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     ({ eventId, rsvpBy, ...changes }) =>
-      runTool(ctx, "update_event", async () => {
-        await requireWriteAccess(ctx, eventId);
+      runTool(
+        ctx,
+        "update_event",
+        { eventId, note: "Updated celebration" },
+        async () => {
+          await requireWriteAccess(ctx, eventId);
 
-        // The event schema takes strings only; an empty deadline is how it spells "clear this".
-        const input =
-          rsvpBy === undefined ? changes : { ...changes, rsvpBy: rsvpBy ?? "" };
+          // The event schema takes strings only; an empty deadline is how it spells "clear this".
+          const input =
+            rsvpBy === undefined
+              ? changes
+              : { ...changes, rsvpBy: rsvpBy ?? "" };
 
-        const result = await updateEventAction(eventId, input);
-        if (!result.ok) return errorResult(result.error);
+          const result = await updateEventAction(eventId, input);
+          if (!result.ok) return errorResult(result.error);
 
-        const updated =
-          rsvpBy === undefined
-            ? Object.keys(changes)
-            : [...Object.keys(changes), "rsvpBy"];
-        return dataResult({ eventId, updated });
-      })
+          const updated =
+            rsvpBy === undefined
+              ? Object.keys(changes)
+              : [...Object.keys(changes), "rsvpBy"];
+          return dataResult({ eventId, updated });
+        }
+      )
   );
 
   server.registerTool(
@@ -110,17 +122,22 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(ctx, "add_guest", async () => {
-        await requireWriteAccess(ctx, args.eventId);
+      runTool(
+        ctx,
+        "add_guest",
+        { eventId: args.eventId, note: "Added guest" },
+        async () => {
+          await requireWriteAccess(ctx, args.eventId);
 
-        const result = await createGuestAction(args.eventId, guestRow(args));
-        if (!result.ok) return errorResult(result.error);
+          const result = await createGuestAction(args.eventId, guestRow(args));
+          if (!result.ok) return errorResult(result.error);
 
-        return dataResult({
-          guestId: result.data?.id,
-          data: { name: result.data?.name },
-        });
-      })
+          return dataResult({
+            guestId: result.data?.id,
+            data: { name: result.data?.name },
+          });
+        }
+      )
   );
 
   server.registerTool(
@@ -138,54 +155,60 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(ctx, "update_guest", async () => {
-        await requireWriteAccess(ctx, args.eventId);
+      runTool(
+        ctx,
+        "update_guest",
+        { eventId: args.eventId, note: "Updated guest" },
+        async () => {
+          await requireWriteAccess(ctx, args.eventId);
 
-        const { data: existing, error } = await ctx.client
-          .from("guests")
-          .select(
-            "id, name, phone, email, side, group_name, party_size, plus_ones_allowed, is_vip, notes"
-          )
-          .eq("id", args.guestId)
-          .eq("event_id", args.eventId)
-          .maybeSingle();
+          const { data: existing, error } = await ctx.client
+            .from("guests")
+            .select(
+              "id, name, phone, email, side, group_name, party_size, plus_ones_allowed, is_vip, notes"
+            )
+            .eq("id", args.guestId)
+            .eq("event_id", args.eventId)
+            .maybeSingle();
 
-        if (error) {
-          throw new Error(
-            "Could not read that guest right now. Nothing was changed."
-          );
+          if (error) {
+            throw new Error(
+              "Could not read that guest right now. Nothing was changed."
+            );
+          }
+          if (!existing) {
+            return errorResult(
+              "That guest is not on this celebration, or you do not have access to it."
+            );
+          }
+
+          const merged: GuestUpdate = {
+            name: args.name ?? existing.name,
+            phone: pick(args.phone, existing.phone),
+            email: pick(args.email, existing.email),
+            // The guest schema rejects null and defaults a missing side to "mutual".
+            side: args.side ?? existing.side ?? undefined,
+            group_name: pick(args.groupName, existing.group_name),
+            party_size: args.partySize ?? existing.party_size,
+            plus_ones_allowed:
+              args.plusOnesAllowed ?? existing.plus_ones_allowed,
+            is_vip: args.isVip ?? existing.is_vip,
+            notes: pick(args.notes, existing.notes),
+          };
+
+          const result = await updateGuestAction(args.guestId, args.eventId, {
+            ...merged,
+          });
+          if (!result.ok) return errorResult(result.error);
+
+          return dataResult({
+            guestId: args.guestId,
+            updated: Object.keys(args).filter(
+              (key) => key !== "eventId" && key !== "guestId"
+            ),
+          });
         }
-        if (!existing) {
-          return errorResult(
-            "That guest is not on this celebration, or you do not have access to it."
-          );
-        }
-
-        const merged: GuestUpdate = {
-          name: args.name ?? existing.name,
-          phone: pick(args.phone, existing.phone),
-          email: pick(args.email, existing.email),
-          // The guest schema rejects null and defaults a missing side to "mutual".
-          side: args.side ?? existing.side ?? undefined,
-          group_name: pick(args.groupName, existing.group_name),
-          party_size: args.partySize ?? existing.party_size,
-          plus_ones_allowed: args.plusOnesAllowed ?? existing.plus_ones_allowed,
-          is_vip: args.isVip ?? existing.is_vip,
-          notes: pick(args.notes, existing.notes),
-        };
-
-        const result = await updateGuestAction(args.guestId, args.eventId, {
-          ...merged,
-        });
-        if (!result.ok) return errorResult(result.error);
-
-        return dataResult({
-          guestId: args.guestId,
-          updated: Object.keys(args).filter(
-            (key) => key !== "eventId" && key !== "guestId"
-          ),
-        });
-      })
+      )
   );
 
   server.registerTool(
@@ -202,15 +225,20 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     (args) =>
-      runTool(ctx, "import_guests", async () => {
-        await requireWriteAccess(ctx, args.eventId);
+      runTool(
+        ctx,
+        "import_guests",
+        { eventId: args.eventId, note: "Imported guests" },
+        async () => {
+          await requireWriteAccess(ctx, args.eventId);
 
-        const rows = args.guests.map((guest) => guestRow(guest));
-        const result = await importGuestsAction(args.eventId, rows);
-        if (!result.ok) return errorResult(result.error);
+          const rows = args.guests.map((guest) => guestRow(guest));
+          const result = await importGuestsAction(args.eventId, rows);
+          if (!result.ok) return errorResult(result.error);
 
-        return dataResult({ importedCount: result.data?.count ?? 0 });
-      })
+          return dataResult({ importedCount: result.data?.count ?? 0 });
+        }
+      )
   );
 
   server.registerTool(
@@ -228,49 +256,54 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     ({ eventId, ...design }) =>
-      runTool(ctx, "update_invitation_design", async () => {
-        await requireWriteAccess(ctx, eventId);
+      runTool(
+        ctx,
+        "update_invitation_design",
+        { eventId, note: "Adjusted invitation design" },
+        async () => {
+          await requireWriteAccess(ctx, eventId);
 
-        const { data: current, error } = await ctx.client
-          .from("events")
-          .select("dress_code, invitation_subheadline, invitation_message")
-          .eq("id", eventId)
-          .maybeSingle();
+          const { data: current, error } = await ctx.client
+            .from("events")
+            .select("dress_code, invitation_subheadline, invitation_message")
+            .eq("id", eventId)
+            .maybeSingle();
 
-        if (error) {
-          throw new Error(
-            "Could not read that invitation right now. Nothing was changed."
+          if (error) {
+            throw new Error(
+              "Could not read that invitation right now. Nothing was changed."
+            );
+          }
+          if (!current) {
+            return errorResult(
+              "That celebration does not exist, or you do not have access to it."
+            );
+          }
+
+          // The action reads every field off the form, and an absent key reads back as null, which
+          // its schema rejects. Omitted fields keep whatever is already stored.
+          const formData = new FormData();
+          formData.set("theme", design.theme);
+          formData.set("headline", design.headline);
+          formData.set(
+            "subheadline",
+            design.subheadline ?? current.invitation_subheadline ?? ""
           );
-        }
-        if (!current) {
-          return errorResult(
-            "That celebration does not exist, or you do not have access to it."
+          formData.set(
+            "attireNote",
+            design.attireNote ?? current.dress_code ?? ""
           );
+          formData.set(
+            "customMessage",
+            design.customMessage ?? current.invitation_message ?? ""
+          );
+
+          const result = await updateInvitationDesignAction(eventId, formData);
+          if (result.error) return errorResult(result.error);
+
+          return dataResult({ eventId, theme: design.theme });
         }
-
-        // The action reads every field off the form, and an absent key reads back as null, which
-        // its schema rejects. Omitted fields keep whatever is already stored.
-        const formData = new FormData();
-        formData.set("theme", design.theme);
-        formData.set("headline", design.headline);
-        formData.set(
-          "subheadline",
-          design.subheadline ?? current.invitation_subheadline ?? ""
-        );
-        formData.set(
-          "attireNote",
-          design.attireNote ?? current.dress_code ?? ""
-        );
-        formData.set(
-          "customMessage",
-          design.customMessage ?? current.invitation_message ?? ""
-        );
-
-        const result = await updateInvitationDesignAction(eventId, formData);
-        if (result.error) return errorResult(result.error);
-
-        return dataResult({ eventId, theme: design.theme });
-      })
+      )
   );
 }
 

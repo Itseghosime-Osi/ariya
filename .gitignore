@@ -54,3 +54,5 @@ AGENTS.md
 /screenshot*.jpeg
 /screenshot*.webp
 *.zip
+backup-*.sql
+*.dump

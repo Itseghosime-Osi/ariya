@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { listRecentActivity } from "@/features/approvals/queries";
 import { getCurrentUser } from "@/features/auth/queries";
 import {
   DeskItem,
   DeskMotion,
 } from "@/features/events/components/desk/DeskMotion";
+import { ActivityList } from "@/features/mcp/components/ActivityList";
 import { ConnectedApps } from "@/features/mcp/components/ConnectedApps";
 import { CopyButton } from "@/features/mcp/components/CopyButton";
 import { listConnectedApps } from "@/features/mcp/grants";
@@ -30,7 +32,10 @@ export default async function ConnectAiPage() {
   if (!user) redirect("/sign-in?next=%2Fconnect-ai");
 
   const address = mcpResourceUrl();
-  const connected = await listConnectedApps();
+  const [connected, activity] = await Promise.all([
+    listConnectedApps(),
+    listRecentActivity(),
+  ]);
 
   return (
     <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
@@ -187,6 +192,21 @@ export default async function ConnectAiPage() {
         ) : (
           <p className="rounded-[22px] border border-dashed border-outline-variant bg-ivory p-5 text-sm text-on-surface-variant">
             {connected.error}
+          </p>
+        )}
+      </DeskItem>
+
+      <DeskItem className={CARD} as="section">
+        <p className={EYEBROW}>Recent activity</p>
+        <p className="mb-4 mt-2 text-sm text-on-surface-variant">
+          What your connected apps have done, newest first. Refusals are listed
+          too, so a request that was blocked is never invisible.
+        </p>
+        {activity.ok ? (
+          <ActivityList entries={activity.data} />
+        ) : (
+          <p className="rounded-[22px] border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm text-on-surface-variant">
+            {activity.error}
           </p>
         )}
       </DeskItem>

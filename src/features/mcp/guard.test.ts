@@ -4,7 +4,6 @@ import {
   requireWriteAccess,
   type ToolContext,
 } from "./guard";
-import { ToolError } from "./result";
 
 const EVENT_ID = "11111111-1111-4111-8111-111111111111";
 const NO_ACCESS =
@@ -37,7 +36,7 @@ describe("requireWriteAccess", () => {
     const rpc = vi.fn().mockResolvedValue({ data: false, error: null });
 
     await expect(requireWriteAccess(context(rpc), EVENT_ID)).rejects.toThrow(
-      new ToolError(NO_ACCESS)
+      NO_ACCESS
     );
   });
 
@@ -74,7 +73,7 @@ describe("requireReadAccess", () => {
     });
 
     await expect(requireReadAccess(context(denied), EVENT_ID)).rejects.toThrow(
-      new ToolError(NO_ACCESS)
+      NO_ACCESS
     );
     // A failed check is not the same as "not yours" — it must not leak as one.
     await expect(requireReadAccess(context(errored), EVENT_ID)).rejects.toThrow(

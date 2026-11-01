@@ -41,6 +41,7 @@ export type Database = {
           error: string | null;
           event_id: string | null;
           id: string;
+          note: string | null;
           outcome: string;
           tool: string;
           user_id: string;
@@ -52,6 +53,7 @@ export type Database = {
           error?: string | null;
           event_id?: string | null;
           id?: string;
+          note?: string | null;
           outcome: string;
           tool: string;
           user_id: string;
@@ -62,6 +64,7 @@ export type Database = {
           error?: string | null;
           event_id?: string | null;
           id?: string;
+          note?: string | null;
           outcome?: string;
           tool?: string;
           user_id?: string;
@@ -112,6 +115,70 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_connection_settings_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_proposals: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          decided_at: string | null;
+          event_id: string;
+          expires_at: string;
+          id: string;
+          kind: string;
+          payload: NonNullable<Json>;
+          result: Json | null;
+          status: string;
+          summary: string;
+          title: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          decided_at?: string | null;
+          event_id: string;
+          expires_at?: string;
+          id?: string;
+          kind: string;
+          payload?: NonNullable<Json>;
+          result?: Json | null;
+          status?: string;
+          summary: string;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          decided_at?: string | null;
+          event_id?: string;
+          expires_at?: string;
+          id?: string;
+          kind?: string;
+          payload?: NonNullable<Json>;
+          result?: Json | null;
+          status?: string;
+          summary?: string;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_proposals_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_proposals_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -930,6 +997,15 @@ export type Database = {
         Args: { p_guest_id: string; p_table_id?: string };
         Returns: Json;
       };
+      charge_app_token_quota: {
+        Args: {
+          p_amount: number;
+          p_daily_limit: number;
+          p_key: string;
+          p_message: string;
+        };
+        Returns: undefined;
+      };
       check_in: {
         Args: { p_code: string; p_count?: number; p_event_id: string };
         Returns: Json;
@@ -959,6 +1035,10 @@ export type Database = {
       current_app_client_id: {
         Args: Record<PropertyKey, never>;
         Returns: string;
+      };
+      decide_ai_proposal: {
+        Args: { p_decision: string; p_id: string };
+        Returns: Json;
       };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
@@ -1010,6 +1090,10 @@ export type Database = {
       is_first_party_session: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
+      };
+      record_ai_proposal_result: {
+        Args: { p_id: string; p_result: Json; p_status: string };
+        Returns: Json;
       };
       record_successful_payment: {
         Args: { p_payment_reference: string; p_paystack_data: Json };

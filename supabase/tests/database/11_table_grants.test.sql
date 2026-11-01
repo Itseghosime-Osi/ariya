@@ -3,7 +3,7 @@ create extension if not exists pgtap;
 
 select plan(24);
 
--- 1. Verify anon has NO table privileges on any of the 17 public tables
+-- 1. Verify anon has NO table privileges on any of the 18 public tables
 select is_empty(
   $$
     select table_name, privilege_type
@@ -11,16 +11,16 @@ select is_empty(
     where table_schema = 'public'
       and grantee = 'anon'
       and table_name in (
-        'ai_activity_log', 'ai_connection_settings', 'ai_quota_usage',
+        'ai_activity_log', 'ai_connection_settings', 'ai_proposals', 'ai_quota_usage',
         'check_ins', 'email_log', 'event_invites', 'event_members',
         'events', 'guests', 'invoices', 'payments', 'profiles',
         'rsvps', 'seat_assignments', 'tables', 'vendor_tasks', 'vendors'
       )
   $$,
-  'anon has NO table privileges on any of the 17 public tables'
+  'anon has NO table privileges on any of the 18 public tables'
 );
 
--- 2. Verify authenticated has SELECT, INSERT on all 16 readable tables
+-- 2. Verify authenticated has SELECT, INSERT on all 17 readable tables
 --    ai_quota_usage is deliberately absent: only consume_quota() writes it.
 select set_eq(
   $$
@@ -32,12 +32,12 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
   $$,
-  'authenticated has SELECT privilege on all 16 readable tables'
+  'authenticated has SELECT privilege on all 17 readable tables'
 );
 
 select set_eq(
@@ -50,12 +50,12 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
   $$,
-  'authenticated has INSERT privilege on all 16 writable tables'
+  'authenticated has INSERT privilege on all 17 writable tables'
 );
 
 -- ai_activity_log is append-only for authenticated: no UPDATE or DELETE.
@@ -96,7 +96,7 @@ select set_eq(
   'authenticated has table-level UPDATE on 14 tables (guests handled via column grants)'
 );
 
--- 4. Verify service_role has SELECT, INSERT, UPDATE, DELETE on all 17 tables PLUS rate_limits
+-- 4. Verify service_role has SELECT, INSERT, UPDATE, DELETE on all 18 tables PLUS rate_limits
 select set_eq(
   $$
     select distinct table_name::text
@@ -107,13 +107,13 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'), ('ai_quota_usage'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has SELECT on all 17 tables plus rate_limits'
+  'service_role has SELECT on all 18 tables plus rate_limits'
 );
 
 select set_eq(
@@ -126,13 +126,13 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'), ('ai_quota_usage'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has INSERT on all 17 tables plus rate_limits'
+  'service_role has INSERT on all 18 tables plus rate_limits'
 );
 
 select set_eq(
@@ -145,13 +145,13 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'), ('ai_quota_usage'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has UPDATE on all 17 tables plus rate_limits'
+  'service_role has UPDATE on all 18 tables plus rate_limits'
 );
 
 select set_eq(
@@ -164,13 +164,13 @@ select set_eq(
   $$,
   $$
     values
-      ('ai_activity_log'), ('ai_connection_settings'), ('ai_quota_usage'),
+      ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has DELETE on all 17 tables plus rate_limits'
+  'service_role has DELETE on all 18 tables plus rate_limits'
 );
 
 -- 5. Verify nobody but the table owner has TRUNCATE

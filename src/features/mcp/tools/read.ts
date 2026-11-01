@@ -34,7 +34,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     (args) =>
-      runTool(ctx, "list_events", async () => {
+      runTool(ctx, "list_events", { note: "Listed celebrations" }, async () => {
         const events = await getUserEvents();
         const needle = args.search?.toLowerCase();
 
@@ -71,46 +71,51 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(ctx, "get_event_overview", async () => {
-        await requireReadAccess(ctx, eventId);
+      runTool(
+        ctx,
+        "get_event_overview",
+        { eventId, note: "Read celebration overview" },
+        async () => {
+          await requireReadAccess(ctx, eventId);
 
-        const [record, stats] = await Promise.all([
-          getEventById(eventId),
-          getGuestOverviewStats(eventId),
-        ]);
+          const [record, stats] = await Promise.all([
+            getEventById(eventId),
+            getGuestOverviewStats(eventId),
+          ]);
 
-        if (!record) {
-          return errorResult(
-            "That celebration does not exist, or you do not have access to it."
-          );
+          if (!record) {
+            return errorResult(
+              "That celebration does not exist, or you do not have access to it."
+            );
+          }
+
+          const nextSteps = buildNeedsAttention([record]).map((alert) => ({
+            kind: alert.kind,
+            message: alert.message,
+          }));
+
+          return dataResult({
+            ...eventSummary(record),
+            counts: {
+              invitedParties: stats.totalCount,
+              expectedGuests: stats.totalAttendees,
+              acceptedParties: stats.acceptedCount,
+              acceptedGuests: stats.acceptedGuests,
+              awaitingParties: stats.pendingCount,
+              declinedParties: stats.declinedCount,
+              seatedGuests: stats.seatedCount,
+              unseatedGuests: stats.unassignedCount,
+              vipParties: stats.vipCount,
+            },
+            nextSteps,
+            data: {
+              description: record.event.description,
+              dressCode: record.event.dress_code,
+              schedule: record.event.schedule,
+            },
+          });
         }
-
-        const nextSteps = buildNeedsAttention([record]).map((alert) => ({
-          kind: alert.kind,
-          message: alert.message,
-        }));
-
-        return dataResult({
-          ...eventSummary(record),
-          counts: {
-            invitedParties: stats.totalCount,
-            expectedGuests: stats.totalAttendees,
-            acceptedParties: stats.acceptedCount,
-            acceptedGuests: stats.acceptedGuests,
-            awaitingParties: stats.pendingCount,
-            declinedParties: stats.declinedCount,
-            seatedGuests: stats.seatedCount,
-            unseatedGuests: stats.unassignedCount,
-            vipParties: stats.vipCount,
-          },
-          nextSteps,
-          data: {
-            description: record.event.description,
-            dressCode: record.event.dress_code,
-            schedule: record.event.schedule,
-          },
-        });
-      })
+      )
   );
 
   server.registerTool(
@@ -122,28 +127,33 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     (args) =>
-      runTool(ctx, "list_guests", async () => {
-        await requireReadAccess(ctx, args.eventId);
+      runTool(
+        ctx,
+        "list_guests",
+        { eventId: args.eventId, note: "Listed guests" },
+        async () => {
+          await requireReadAccess(ctx, args.eventId);
 
-        const result = await getEventGuests(args.eventId, {
-          search: args.search,
-          side: args.side ?? "all",
-          group: args.group ?? "all",
-          rsvpStatus: args.rsvpStatus ?? "all",
-          seatedStatus: args.seatedStatus ?? "all",
-          isVip: typeof args.isVip === "boolean" ? args.isVip : null,
-          page: args.page,
-          pageSize: args.pageSize,
-        });
+          const result = await getEventGuests(args.eventId, {
+            search: args.search,
+            side: args.side ?? "all",
+            group: args.group ?? "all",
+            rsvpStatus: args.rsvpStatus ?? "all",
+            seatedStatus: args.seatedStatus ?? "all",
+            isVip: typeof args.isVip === "boolean" ? args.isVip : null,
+            page: args.page,
+            pageSize: args.pageSize,
+          });
 
-        return dataResult(
-          paged(result.guests.map(guestView), {
-            totalCount: result.totalCount,
-            page: result.page,
-            pageSize: result.pageSize,
-          })
-        );
-      })
+          return dataResult(
+            paged(result.guests.map(guestView), {
+              totalCount: result.totalCount,
+              page: result.page,
+              pageSize: result.pageSize,
+            })
+          );
+        }
+      )
   );
 
   server.registerTool(
@@ -156,11 +166,16 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(ctx, "get_rsvp_summary", async () => {
-        await requireReadAccess(ctx, eventId);
-        const stats = await getGuestOverviewStats(eventId);
-        return dataResult(stats);
-      })
+      runTool(
+        ctx,
+        "get_rsvp_summary",
+        { eventId, note: "Read RSVP summary" },
+        async () => {
+          await requireReadAccess(ctx, eventId);
+          const stats = await getGuestOverviewStats(eventId);
+          return dataResult(stats);
+        }
+      )
   );
 
   server.registerTool(
@@ -172,43 +187,48 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(ctx, "list_tables_and_seating", async () => {
-        await requireReadAccess(ctx, eventId);
-        const data = await getEventSeatingData(eventId);
+      runTool(
+        ctx,
+        "list_tables_and_seating",
+        { eventId, note: "Read seating" },
+        async () => {
+          await requireReadAccess(ctx, eventId);
+          const data = await getEventSeatingData(eventId);
 
-        const tables = data.tables.slice(0, TABLES_CAP).map((table) => ({
-          tableId: table.id,
-          name: table.name,
-          capacity: table.capacity,
-          shape: table.shape,
-          seatsTaken: table.occupiedSeats,
-          data: {
-            guests: table.guests.map((guest) => ({
-              guestId: guest.id,
-              attendingCount: guest.attending_count,
-              name: guest.name,
-            })),
-          },
-        }));
-
-        const unseated = data.unseatedGuests
-          .slice(0, UNSEATED_CAP)
-          .map((guest) => ({
-            guestId: guest.id,
-            attendingCount: guest.attending_count,
-            hasSeatingConflict: Boolean(guest.seating_conflict_at),
-            data: { name: guest.name },
+          const tables = data.tables.slice(0, TABLES_CAP).map((table) => ({
+            tableId: table.id,
+            name: table.name,
+            capacity: table.capacity,
+            shape: table.shape,
+            seatsTaken: table.occupiedSeats,
+            data: {
+              guests: table.guests.map((guest) => ({
+                guestId: guest.id,
+                attendingCount: guest.attending_count,
+                name: guest.name,
+              })),
+            },
           }));
 
-        return dataResult({
-          stats: data.stats,
-          tables,
-          unseated,
-          truncated:
-            data.tables.length > TABLES_CAP ||
-            data.unseatedGuests.length > UNSEATED_CAP,
-        });
-      })
+          const unseated = data.unseatedGuests
+            .slice(0, UNSEATED_CAP)
+            .map((guest) => ({
+              guestId: guest.id,
+              attendingCount: guest.attending_count,
+              hasSeatingConflict: Boolean(guest.seating_conflict_at),
+              data: { name: guest.name },
+            }));
+
+          return dataResult({
+            stats: data.stats,
+            tables,
+            unseated,
+            truncated:
+              data.tables.length > TABLES_CAP ||
+              data.unseatedGuests.length > UNSEATED_CAP,
+          });
+        }
+      )
   );
 
   server.registerTool(
@@ -221,7 +241,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     () =>
-      runTool(ctx, "whoami", async () =>
+      runTool(ctx, "whoami", { note: "Checked connection" }, async () =>
         dataResult(await describeConnection(ctx))
       )
   );
