@@ -25,6 +25,13 @@ export async function proxy(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
+  // The MCP endpoint authenticates with a bearer token and the well-known documents are public, so
+  // neither should cost a cookie round trip. /oauth/consent deliberately keeps the cookie session:
+  // that page is where a signed-in host approves the connection.
+  if (pathname === "/mcp" || pathname.startsWith("/.well-known/")) {
+    return NextResponse.next();
+  }
+
   const { supabaseResponse, user } = await updateSession(request);
 
   const isAuthPath = AUTH_PATHS.some(

@@ -99,6 +99,15 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
                 {userEmail || "Signed in"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="my-1 bg-hairline" />
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/connect-ai"
+                  className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-night"
+                >
+                  <Icon name="link" size={16} className="text-gold-ink" />
+                  <span>Connect your AI</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => setSignOutOpen(true)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-burgundy cursor-pointer"
