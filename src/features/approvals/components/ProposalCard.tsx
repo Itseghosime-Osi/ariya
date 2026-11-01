@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { HallPlan } from "./HallPlan";
 import { approveProposalAction, rejectProposalAction } from "../actions";
-import { APPLICABLE_KINDS, type Proposal, type ProposalKind } from "../types";
+import {
+  DESIGN_KINDS,
+  type Proposal,
+  type ProposalKind,
+  type ProposalPreview,
+  type SeatingPreview,
+} from "../types";
 
 // Fixed locale and zone so the server and client render the same string.
 const DATE = new Intl.DateTimeFormat("en-NG", {
@@ -41,7 +48,13 @@ export function ProposalCard({
   const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const applicable = APPLICABLE_KINDS.includes(proposal.kind);
+  const design = DESIGN_KINDS.includes(proposal.kind);
+  const preview = proposal.preview;
+  /*
+   * A room or seating change the desk could not work out against this celebration is never offered
+   * for approval: the host would be agreeing to a sentence rather than to a room they have seen.
+   */
+  const blind = design && preview === null;
   const guests = `${proposal.guestCount} ${
     proposal.guestCount === 1 ? "guest" : "guests"
   }`;
@@ -67,9 +80,21 @@ export function ProposalCard({
       result: {
         sentCount: outcome.sentCount,
         skippedCount: outcome.skippedCount,
-        totalCount: proposal.guestCount,
+        totalCount: totalCount(proposal.kind, outcome),
         reason: null,
+        appliedCount: outcome.appliedCount,
+        movedCount: outcome.movedCount,
+        seatedCount: outcome.seatedCount,
+        tableCount:
+          preview?.kind === "hall" ? preview.proposed.tables.length : 0,
+        restoredAt: null,
+        restoredCount: 0,
+        // Whether the previous room or seating was kept is only known once the row is read back,
+        // and the refresh that follows this replaces the whole entry.
+        restoreUnavailable: null,
       },
+      preview: null,
+      canRestore: false,
     });
   }
 
@@ -90,6 +115,8 @@ export function ProposalCard({
       status: "rejected",
       decidedAt: new Date().toISOString(),
       result: null,
+      preview: null,
+      canRestore: false,
     });
   }
 
@@ -137,73 +164,14 @@ export function ProposalCard({
         <span>Expires {DATE.format(new Date(proposal.expiresAt))}</span>
       </p>
 
-      {applicable ? (
-        confirming ? (
-          <div className="mt-4 rounded-2xl border border-gold/40 bg-gold/5 p-3 sm:p-4">
-            <p
-              role="status"
-              className="text-xs leading-relaxed text-on-surface"
-            >
-              Approving this will {VERB[proposal.kind]} to {guests} for{" "}
-              {proposal.eventTitle}. It uses your invitation quota, and it
-              cannot be undone.
-            </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <Button
-                type="button"
-                variant="gold"
-                disabled={busy !== null}
-                onClick={approve}
-                data-testid="confirm-approve-proposal"
-                className="rounded-full"
-              >
-                {busy === "approve" ? "Sending…" : `Yes, send to ${guests}`}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy !== null}
-                onClick={() => setConfirming(false)}
-                className="rounded-full border-gold/50 bg-transparent"
-              >
-                Not yet
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button
-              type="button"
-              variant="gold"
-              disabled={busy !== null}
-              onClick={() => {
-                setError(null);
-                setConfirming(true);
-              }}
-              data-testid="approve-proposal"
-              className="rounded-full"
-            >
-              <Icon name="check" size={15} className="mr-2" />
-              Approve and send
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy !== null}
-              onClick={reject}
-              data-testid="reject-proposal"
-              className="rounded-full border-gold/50 bg-transparent"
-            >
-              {busy === "reject" ? "Rejecting…" : "Reject"}
-            </Button>
-          </div>
-        )
-      ) : (
+      {preview ? <PreviewPanel preview={preview} /> : null}
+
+      {blind ? (
         <div className="mt-4">
           <p className="text-xs leading-relaxed text-on-surface-variant">
-            Àríyá cannot carry this out yet, so approving it would do nothing.
-            Reject it and ask your app for the invitations or reminders it can
-            send instead.
+            Àríyá could not work out what this would change in this celebration,
+            so there is nothing to show you and nothing to approve. Reject it
+            and ask your app to propose again.
           </p>
           <Button
             type="button"
@@ -211,6 +179,66 @@ export function ProposalCard({
             disabled={busy !== null}
             onClick={reject}
             className="mt-2 w-full rounded-full border-gold/50 bg-transparent sm:w-auto"
+          >
+            {busy === "reject" ? "Rejecting…" : "Reject"}
+          </Button>
+        </div>
+      ) : confirming ? (
+        <div className="mt-4 rounded-2xl border border-gold/40 bg-gold/5 p-3 sm:p-4">
+          <p role="status" className="text-xs leading-relaxed text-on-surface">
+            {confirmation(proposal, preview, guests)}
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="gold"
+              disabled={busy !== null}
+              onClick={approve}
+              data-testid="confirm-approve-proposal"
+              className="rounded-full"
+            >
+              {busy === "approve"
+                ? design
+                  ? "Applying…"
+                  : "Sending…"
+                : design
+                  ? `Yes, ${VERB[proposal.kind]}`
+                  : `Yes, send to ${guests}`}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy !== null}
+              onClick={() => setConfirming(false)}
+              className="rounded-full border-gold/50 bg-transparent"
+            >
+              Not yet
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <Button
+            type="button"
+            variant="gold"
+            disabled={busy !== null}
+            onClick={() => {
+              setError(null);
+              setConfirming(true);
+            }}
+            data-testid="approve-proposal"
+            className="rounded-full"
+          >
+            <Icon name="check" size={15} className="mr-2" />
+            {design ? "Approve and apply" : "Approve and send"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy !== null}
+            onClick={reject}
+            data-testid="reject-proposal"
+            className="rounded-full border-gold/50 bg-transparent"
           >
             {busy === "reject" ? "Rejecting…" : "Reject"}
           </Button>
@@ -226,5 +254,161 @@ export function ProposalCard({
         </p>
       ) : null}
     </li>
+  );
+}
+
+/** What approving will do, in the words the room itself uses. */
+function confirmation(
+  proposal: Proposal,
+  preview: ProposalPreview | null,
+  guests: string
+): string {
+  if (preview?.kind === "hall") {
+    const shared = preview.problems.length > 0;
+    return `Approving this will replace the room for ${proposal.eventTitle} with the plan above.${
+      shared
+        ? " The designer's own rules still object to part of it, so check the notes before you decide."
+        : ""
+    } It can be put back for 7 days from the decided list.`;
+  }
+
+  if (preview?.kind === "seating") {
+    const tables = preview.tables.length;
+    return `Approving this will seat ${preview.seatedCount} ${
+      preview.seatedCount === 1 ? "guest" : "guests"
+    } at ${tables} ${tables === 1 ? "table" : "tables"} for ${
+      proposal.eventTitle
+    }${preview.movedCount > 0 ? `, moving ${preview.movedCount} from where they sit now` : ""}. It can be put back for 7 days from the decided list.`;
+  }
+
+  return `Approving this will ${VERB[proposal.kind]} to ${guests} for ${proposal.eventTitle}. It uses your invitation quota, and it cannot be undone.`;
+}
+
+/** The counts a decided card needs, counted the way the room and the seating are counted. */
+function totalCount(
+  kind: ProposalKind,
+  outcome: {
+    sentCount: number;
+    skippedCount: number;
+    appliedCount: number;
+    seatedCount: number;
+    movedCount: number;
+  }
+): number {
+  if (kind === "apply_seating_plan") {
+    return outcome.seatedCount + outcome.movedCount + outcome.skippedCount;
+  }
+
+  if (kind === "apply_hall_layout") {
+    return outcome.appliedCount + outcome.skippedCount;
+  }
+
+  return outcome.sentCount + outcome.skippedCount;
+}
+
+function PreviewPanel({ preview }: { preview: ProposalPreview }) {
+  if (preview.kind === "seating") {
+    return <SeatingPlanView preview={preview} />;
+  }
+
+  return (
+    <>
+      <HallPlan preview={preview} />
+      {/*
+        The drawing is the room; these are the sentences about it, so a host who cannot read a plan
+        from above still knows what they are agreeing to.
+      */}
+      <ul
+        aria-label="What changes in the room"
+        className="mt-2.5 space-y-1 text-xs leading-relaxed text-on-surface-variant"
+      >
+        {preview.changes.map((change) => (
+          <li key={change}>{change}</li>
+        ))}
+      </ul>
+
+      {preview.problems.length > 0 ? (
+        <ul
+          aria-label="What the designer still objects to"
+          className="mt-2 space-y-1 text-xs leading-relaxed text-wine"
+        >
+          {preview.problems.map((problem) => (
+            <li key={problem}>{problem}</li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * Who would sit where. The hall gets a drawing because a room is a thing you can recognise; seating
+ * is a list of names, and the names are the part a host can actually check.
+ */
+function SeatingPlanView({ preview }: { preview: SeatingPreview }) {
+  const tables = preview.tables.filter((table) => table.guests.length > 0);
+  // Everyone who would be sitting at these tables afterwards, not only the guests this plan adds.
+  const guests = preview.tables.reduce(
+    (total, table) => total + table.guests.length,
+    0
+  );
+
+  return (
+    <div className="mt-3 rounded-2xl border border-wine/10 bg-surface-container-high/60 p-3 sm:p-4">
+      <p className="text-xs font-medium leading-relaxed text-on-surface">
+        {guests} {guests === 1 ? "guest" : "guests"} at {tables.length}{" "}
+        {tables.length === 1 ? "table" : "tables"}
+        {preview.seatedCount > 0
+          ? `, ${preview.seatedCount} of them seated for the first time`
+          : ""}
+        {preview.movedCount > 0
+          ? `, ${preview.movedCount} moving from another table`
+          : ""}
+        .
+      </p>
+
+      <ul className="mt-2.5 space-y-2">
+        {tables.map((table) => (
+          <li key={table.id} className="text-xs text-on-surface-variant">
+            <span className="font-medium text-on-surface">{table.name}</span>{" "}
+            <span className="text-on-surface-variant/70">
+              {table.occupied} of {table.capacity} seats
+            </span>
+            <span className="mt-0.5 block leading-relaxed">
+              {table.guests
+                .map((guest) =>
+                  guest.moved && guest.fromTable
+                    ? `${guest.name} (from ${guest.fromTable})`
+                    : guest.name
+                )
+                .join(", ")}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {preview.missing.length > 0 ? (
+        <p className="mt-2.5 text-xs leading-relaxed text-wine">
+          No longer on this celebration:{" "}
+          {preview.missing
+            .map((guest) => guest.name ?? "a guest who has since been removed")
+            .join(", ")}
+          .
+        </p>
+      ) : null}
+
+      {preview.warnings.length > 0 ? (
+        <ul className="mt-2.5 space-y-1">
+          {preview.warnings.map((warning) => (
+            <li
+              key={warning}
+              className="text-xs leading-relaxed text-on-surface-variant"
+            >
+              {warning}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
