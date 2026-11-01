@@ -24,7 +24,6 @@ function request(
   return {
     authorizationId: "auth-1",
     clientName: "Some App",
-    clientLogo: "https://example.com/logo.png",
     redirectHost: trust.host || redirectUri,
     accountEmail: "host@example.com",
     scopes: ["openid", "email"],
@@ -34,7 +33,7 @@ function request(
 }
 
 describe("a known app", () => {
-  it("gets the known badge, its own logo and an approvable form", () => {
+  it("is named after its vendor, not after what the client called itself", () => {
     const { container } = render(
       <ConsentCard
         request={request("https://claude.ai/api/mcp/auth_callback")}
@@ -42,20 +41,59 @@ describe("a known app", () => {
     );
 
     expect(screen.getByText("Known app")).toBeInTheDocument();
-    expect(container.querySelector("img")).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { level: 1, name: /Claude wants to connect/ })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Some App/)).not.toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
     expect(screen.getByRole("button", { name: "Approve" })).not.toBeDisabled();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
       screen.queryByText("This app has not been verified")
     ).not.toBeInTheDocument();
   });
+
+  it("gives each vendor its own name and monogram", () => {
+    render(
+      <ConsentCard
+        request={request(
+          "https://chatgpt.com/connector_platform_oauth_redirect"
+        )}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /ChatGPT wants to connect/,
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("G")).toBeInTheDocument();
+  });
+
+  it("shows the vendor monogram in place of a logo", () => {
+    render(
+      <ConsentCard
+        request={request("https://claude.ai/api/mcp/auth_callback")}
+      />
+    );
+
+    expect(screen.getByText("C")).toBeInTheDocument();
+  });
 });
 
 describe("an app on the host's computer", () => {
-  it("is labelled as local, never as verified", () => {
+  it("is labelled as local, never as verified, and hides the client name", () => {
     render(<ConsentCard request={request("http://localhost:3118/callback")} />);
 
     expect(screen.getByText("An app on your own computer")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /An app on your computer wants to connect/,
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Some App/)).not.toBeInTheDocument();
     expect(screen.queryByText("Known app")).not.toBeInTheDocument();
     expect(screen.queryByText(/verified/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Approve" })).not.toBeDisabled();
@@ -76,10 +114,11 @@ describe("an unknown app", () => {
     expect(screen.getByText("Not verified")).toBeInTheDocument();
   });
 
-  it("hides the logo the app supplied", () => {
+  it("renders no image, only the neutral tile", () => {
     const { container } = render(<ConsentCard request={request(stranger)} />);
 
     expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("Some App wants to connect")).toBeInTheDocument();
   });
 
   it("truncates the name", () => {

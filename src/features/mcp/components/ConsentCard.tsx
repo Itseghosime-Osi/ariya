@@ -7,19 +7,25 @@ import {
   UNKNOWN_APP_ACKNOWLEDGEMENT,
   sanitiseAppName,
   type AppTrust,
+  type AppVendor,
 } from "../app-trust";
 import { decideConsentAction } from "../consent";
 
 export interface ConsentRequest {
   authorizationId: string;
   clientName: string;
-  clientLogo: string;
   redirectHost: string;
   accountEmail: string;
   scopes: string[];
   /** Classified on the server from the redirect URI. The card only renders it. */
   trust: AppTrust;
 }
+
+/** What the card calls a vendor. The client's own name is never used for a recognised app. */
+const VENDORS: Record<AppVendor, { name: string; monogram: string }> = {
+  claude: { name: "Claude", monogram: "C" },
+  chatgpt: { name: "ChatGPT", monogram: "G" },
+};
 
 const SCOPE_COPY: Record<string, string> = {
   openid: "Confirm which Àríyá account is connecting",
@@ -57,29 +63,14 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
         </p>
 
         <div className="mt-5 flex items-start gap-4">
-          {request.trust.tier === "known" && request.clientLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={request.clientLogo}
-              alt=""
-              className="h-12 w-12 shrink-0 rounded-xl border border-outline-variant/60 object-cover"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className={
-                unverified
-                  ? "grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-error/10 text-error"
-                  : "grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-wine/10 font-display text-xl font-bold text-wine"
-              }
-            >
-              {unverified ? (
-                <Icon name="help" size={22} />
-              ) : (
-                displayName(request).slice(0, 1).toUpperCase()
-              )}
-            </span>
-          )}
+          <span aria-hidden="true" className={tileClassName(request.trust)}>
+            {monogramOf(request.trust) ?? (
+              <Icon
+                name={request.trust.tier === "unknown" ? "help" : "person"}
+                size={22}
+              />
+            )}
+          </span>
 
           <div className="min-w-0">
             <TrustBadge trust={request.trust} />
@@ -221,13 +212,33 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
 }
 
 /**
- * The name is chosen by the app, so an unverified one is cleaned and cut short rather than allowed
- * to fill the card with something that looks like a warning or a promise.
+ * A recognised app is named after its vendor, not after whatever it registered itself as. Only an
+ * unverified app's own name is shown, cleaned and cut short.
  */
 function displayName(request: ConsentRequest): string {
-  return request.trust.tier === "unknown"
-    ? sanitiseAppName(request.clientName)
-    : request.clientName;
+  const { trust } = request;
+
+  if (trust.tier === "known" && trust.vendor) return VENDORS[trust.vendor].name;
+  if (trust.tier === "local") return "An app on your computer";
+
+  return sanitiseAppName(request.clientName);
+}
+
+function monogramOf(trust: AppTrust): string | null {
+  return trust.tier === "known" && trust.vendor
+    ? VENDORS[trust.vendor].monogram
+    : null;
+}
+
+function tileClassName(trust: AppTrust): string {
+  const tile = "grid h-12 w-12 shrink-0 place-items-center rounded-xl";
+
+  if (trust.tier === "unknown") return `${tile} bg-error/10 text-error`;
+  if (trust.tier === "local") {
+    return `${tile} bg-surface-container text-on-surface-variant`;
+  }
+
+  return `${tile} bg-wine/10 font-display text-xl font-bold text-wine`;
 }
 
 function TrustBadge({ trust }: { trust: AppTrust }) {

@@ -47,6 +47,10 @@ const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export const UNKNOWN_APP_ACKNOWLEDGEMENT = "acknowledged";
 
+/** Shown when an app already granted access comes back pointing somewhere it did not before. */
+export const CHANGED_ADDRESS =
+  "This app was approved before but is now sending you to a different address. Disconnect it from Connect your AI and connect it again.";
+
 /**
  * Control and format characters: zero-widths, bidi overrides, the BOM. They make a name read as a
  * different name, and a bidi override can reverse the text around it.
@@ -65,6 +69,25 @@ export function sanitiseAppName(name: string, maxLength = 60): string {
   if (cleaned.length <= maxLength) return cleaned;
 
   return `${cleaned.slice(0, maxLength - 1)}…`;
+}
+
+/**
+ * The address a finished redirect points at, with the code and state removed. A granted request
+ * comes back as `<callback>?code=…&state=…`, which no allowlist entry matches as-is, so the query
+ * and fragment are dropped before the callback itself is judged.
+ */
+export function redirectTargetOf(redirectUrl: string): string {
+  let url: URL;
+  try {
+    url = new URL(redirectUrl.trim());
+  } catch {
+    return redirectUrl.trim();
+  }
+
+  url.search = "";
+  url.hash = "";
+
+  return url.href;
 }
 
 function unknown(redirectUri: string, host = ""): AppTrust {

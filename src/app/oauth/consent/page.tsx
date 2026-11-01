@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { createClient } from "@/lib/supabase/server";
-import { classifyApp } from "@/features/mcp/app-trust";
+import {
+  CHANGED_ADDRESS,
+  classifyApp,
+  redirectTargetOf,
+} from "@/features/mcp/app-trust";
 import {
   ConsentCard,
   type ConsentRequest,
@@ -70,15 +74,26 @@ export default async function OAuthConsentPage({
     );
   }
 
-  // Supabase answers with a finished redirect when this host has already granted these scopes.
+  // Supabase answers with a finished redirect when this host has already granted these scopes. The
+  // host is about to be handed a code at that address, so it gets classified first — with the code
+  // and state stripped, since no allowlist entry carries a query.
   if (!("authorization_id" in data)) {
+    const trust = classifyApp(redirectTargetOf(data.redirect_url));
+
+    if (trust.tier === "unknown") {
+      return (
+        <ConsentPage>
+          <Notice title="Connection stopped" body={CHANGED_ADDRESS} />
+        </ConsentPage>
+      );
+    }
+
     redirect(data.redirect_url);
   }
 
   const request: ConsentRequest = {
     authorizationId: data.authorization_id,
     clientName: data.client.name || "This app",
-    clientLogo: data.client.logo_uri,
     redirectHost: hostOf(data.redirect_uri),
     accountEmail: user.email ?? data.user.email,
     scopes: data.scope.split(/\s+/).filter(Boolean),

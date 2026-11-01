@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyApp, sanitiseAppName } from "./app-trust";
+import { classifyApp, redirectTargetOf, sanitiseAppName } from "./app-trust";
 
 const CYRILLIC_A = String.fromCharCode(0x430);
 const RLO = String.fromCharCode(0x202e);
@@ -34,6 +34,46 @@ describe("known apps", () => {
     const trust = classifyApp("HTTPS://CLAUDE.AI/api/mcp/auth_callback");
 
     expect(trust).toMatchObject({ tier: "known", vendor: "claude" });
+  });
+});
+
+describe("finished redirects", () => {
+  it("drops the code and state before the callback is judged", () => {
+    expect(
+      redirectTargetOf(
+        "https://claude.ai/api/mcp/auth_callback?code=abc&state=xyz"
+      )
+    ).toBe("https://claude.ai/api/mcp/auth_callback");
+  });
+
+  it("drops a fragment as well", () => {
+    expect(
+      redirectTargetOf("https://claude.ai/api/mcp/auth_callback#fragment")
+    ).toBe("https://claude.ai/api/mcp/auth_callback");
+  });
+
+  it("classifies a callback carrying its code as known", () => {
+    const trust = classifyApp(
+      redirectTargetOf(
+        "https://claude.ai/api/mcp/auth_callback?code=abc&state=xyz"
+      )
+    );
+
+    expect(trust).toMatchObject({ tier: "known", vendor: "claude" });
+  });
+
+  it("still refuses a look-alike that carries a code", () => {
+    const trust = classifyApp(
+      redirectTargetOf(
+        "https://claude.ai.evil.com/api/mcp/auth_callback?code=abc&state=xyz"
+      )
+    );
+
+    expect(trust.tier).toBe("unknown");
+  });
+
+  it("leaves an address it cannot parse alone", () => {
+    expect(redirectTargetOf("  not a url  ")).toBe("not a url");
   });
 });
 

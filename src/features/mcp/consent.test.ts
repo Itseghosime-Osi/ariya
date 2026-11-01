@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
-import { UNKNOWN_APP_ACKNOWLEDGEMENT } from "./app-trust";
+import { CHANGED_ADDRESS, UNKNOWN_APP_ACKNOWLEDGEMENT } from "./app-trust";
 import { decideConsentAction } from "./consent";
 
 const mockedCreateClient = vi.mocked(createClient);
@@ -211,6 +211,54 @@ describe("decideConsentAction", () => {
       ok: true,
       redirectUrl: "https://claude.ai/api/mcp/auth_callback?code=done",
     });
+    expect(oauth.approveAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("refuses that shortcut when the app now points somewhere unverified", async () => {
+    const oauth = installSupabase({
+      redirect_url:
+        "https://claude.ai.evil.com/api/mcp/auth_callback?code=done&state=s",
+    });
+
+    const state = await decideConsentAction(
+      null,
+      form({ authorization_id: "auth-1", decision: "approve" })
+    );
+
+    expect(state).toEqual({ ok: false, error: CHANGED_ADDRESS });
+    expect(oauth.approveAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("does not let an acknowledgement unlock that shortcut", async () => {
+    const oauth = installSupabase({
+      redirect_url:
+        "https://claude.ai.evil.com/api/mcp/auth_callback?code=done&state=s",
+    });
+
+    const state = await decideConsentAction(
+      null,
+      form({
+        authorization_id: "auth-1",
+        decision: "approve",
+        acknowledge_unknown_app: UNKNOWN_APP_ACKNOWLEDGEMENT,
+      })
+    );
+
+    expect(state).toEqual({ ok: false, error: CHANGED_ADDRESS });
+    expect(oauth.approveAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("still follows a finished redirect back to a local app", async () => {
+    const oauth = installSupabase({
+      redirect_url: "http://localhost:3118/callback?code=done&state=s",
+    });
+
+    const state = await decideConsentAction(
+      null,
+      form({ authorization_id: "auth-1", decision: "approve" })
+    );
+
+    expect(state.ok).toBe(true);
     expect(oauth.approveAuthorization).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { UNKNOWN_APP_ACKNOWLEDGEMENT, classifyApp } from "./app-trust";
+import {
+  CHANGED_ADDRESS,
+  UNKNOWN_APP_ACKNOWLEDGEMENT,
+  classifyApp,
+  redirectTargetOf,
+} from "./app-trust";
 
 export type ConsentDecisionState =
   { ok: true; redirectUrl: string } | { ok: false; error: string };
@@ -58,9 +63,17 @@ export async function decideConsentAction(
     };
   }
 
-  // Supabase answers with a finished redirect when this host has already granted these scopes.
+  // Supabase answers with a finished redirect when this host has already granted these scopes. That
+  // shortcut still has to be judged: the address it sends the host to is the address the code goes
+  // to, so it is classified with the code and state stripped off.
   if (!("authorization_id" in details)) {
     if (decision === "approve") {
+      const trust = classifyApp(redirectTargetOf(details.redirect_url));
+
+      if (trust.tier === "unknown") {
+        return { ok: false, error: CHANGED_ADDRESS };
+      }
+
       return { ok: true, redirectUrl: details.redirect_url };
     }
   } else if (decision === "approve") {

@@ -40,16 +40,23 @@ Every authorization request is classified on the server, from the **redirect URI
 name, logo and homepage are supplied by whoever registered the OAuth client, so an attacker picks
 them; the redirect URI is where the host's token actually goes.
 
-| Tier        | Rule                                                                 | What the host sees                                                                                  |
-| ----------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Known**   | Exact match against the vendors' documented callbacks, below.        | A "Known app" badge, the app's logo, and a normal Approve button.                                   |
-| **Local**   | `localhost`, `127.0.0.1` or `[::1]` on any port, over http or https. | "An app on your own computer" — never the word verified.                                            |
-| **Unknown** | Everything else, including anything that only looks like a vendor.   | A red warning, no logo, a cleaned and truncated name, the return address, and an approval checkbox. |
+| Tier        | Rule                                                                 | What the host sees                                                                                                              |
+| ----------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Known**   | Exact match against the vendors' documented callbacks, below.        | A "Known app" badge, the vendor's name and monogram — never the name or logo the client supplied — and a normal Approve button. |
+| **Local**   | `localhost`, `127.0.0.1` or `[::1]` on any port, over http or https. | "An app on your own computer", never the client's own name, and never the word verified.                                        |
+| **Unknown** | Everything else, including anything that only looks like a vendor.   | A red warning, no logo, the app's own name cleaned and truncated, the return address, and an approval checkbox.                 |
 
 An unknown app is **warned about, not blocked**. It can still connect, but only after the host ticks
 "I understand this app has not been verified by Àríyá…". The browser disables Approve until then, and
 `decideConsentAction` classifies again from `getAuthorizationDetails` before approving, so the posted
 flag cannot talk it into approving something the server considers unknown.
+
+When a host has already granted these scopes, Supabase hands back a finished redirect instead of an
+authorization to decide on, and the host would be sent straight to it. That shortcut is judged the
+same way: the code and state are stripped from the redirect, what remains is classified, and only a
+**known** or **local** address is followed. An app that was approved before and now points somewhere
+unverified stops there — the host is told the address changed and to disconnect it from Connect your
+AI and connect again — and approve is never called.
 
 The exact allowlist lives in `src/features/mcp/app-trust.ts`:
 
