@@ -17,6 +17,9 @@ const TOOL_NAMES = [
   "update_guest",
   "import_guests",
   "update_invitation_design",
+  "propose_send_invitations",
+  "propose_send_reminders",
+  "list_my_proposals",
 ];
 
 let nextRequestId = 1;
