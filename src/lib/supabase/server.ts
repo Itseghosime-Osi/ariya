@@ -4,8 +4,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { clientEnv } from "@/lib/env/client";
 import type { Database } from "./database.types";
+import { getOverrideClient } from "./request-context";
 
 export async function createClient(): Promise<SupabaseClient<Database>> {
+  // Requests that authenticate outside cookies (the MCP endpoint) install their own client.
+  const override = getOverrideClient();
+  if (override) return override;
+
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
