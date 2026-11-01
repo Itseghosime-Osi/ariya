@@ -1,4 +1,4 @@
-/* Àríyá's home page music. It loops assets/music.mp3 ("Yori Yori" by Abefe), which is copyrighted and
+/* Àríyá's home page music. It loops assets/music.mp3 ("Forever Sweet" by Dotti), which is copyrighted and
    served publicly by the owner's choice.
    Fallback: an original owambe groove generated live with the Web Audio API (no audio files). A juju and highlife feel in 12/8 at 104 BPM: agogo bell (the standard 12/8 bell), shekere, talking drum
    calls, conga and kick, a two-guitar highlife figure, walking bass, warm pads and a short horn hook.

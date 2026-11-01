@@ -15,7 +15,7 @@ The project consists of:
    - **Background & Webhooks**: Paystack webhooks (`/api/webhooks/paystack`) and Vercel Cron reminder triggers (`/api/cron/reminders`).
    - **Installable app**: `src/app/manifest.ts` and the icons in `public/icons/` let phones add Àríyá to the home screen, where it opens full screen (`display: standalone`) with no browser address bar. A small hint in the app shell (`src/components/layout/install-hint.tsx`) shows iPhone and iPad users the Share steps and offers Android and Chrome touch devices an Install button; laptops are left to their browser's own install button. There is deliberately no service worker, so nothing is cached offline.
 
-> **Note on `public/site/assets/music.mp3`**: "Yori Yori" by Abefe, a commercial song, is served publicly with the film and the About page by the owner's choice. It is copyrighted and anyone can download it from the live site; replace or remove it if a licence is not in place. Without the file, the film and About page fall back to their live Web Audio API groove.
+> **Note on `public/site/assets/music.mp3`**: "Forever Sweet" by Dotti, a commercial song, is served publicly with the film and the About page by the owner's choice. It is copyrighted and anyone can download it from the live site; replace or remove it if a licence is not in place. Without the file, the film and About page fall back to their live Web Audio API groove.
 
 > [!IMPORTANT]
 >

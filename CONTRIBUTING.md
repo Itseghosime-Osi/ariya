@@ -51,5 +51,5 @@ Add each new variable to `.env.example` (name only, no value) and to the Zod sch
 ## Never commit
 
 Secrets or keys, and `.env` files. The film's song, `public/site/assets/music.mp3`, is a
-commercial track ("Yori Yori" by Abefe) served publicly by the owner's choice; do not add
+commercial track ("Forever Sweet" by Dotti) served publicly by the owner's choice; do not add
 other copyrighted media to `public/`.

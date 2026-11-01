@@ -57,9 +57,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       ...[
-        "/assets/the-yes-controls.6317cb20d947.js",
+        "/assets/the-yes-controls.6bcb04374086.js",
         "/assets/the-yes-scene.83edb5453053.js",
-        "/site/assets/the-yes-controls.6317cb20d947.js",
+        "/site/assets/the-yes-controls.6bcb04374086.js",
         "/site/assets/the-yes-scene.83edb5453053.js",
       ].map((source) => ({
         source,
