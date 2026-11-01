@@ -1104,6 +1104,10 @@ export type Database = {
         Args: { p_event_id: string; p_target_user_id: string };
         Returns: boolean;
       };
+      restore_ai_proposal_result: {
+        Args: { p_id: string; p_result: Json };
+        Returns: Json;
+      };
       search_guests: {
         Args: {
           p_event_id: string;
