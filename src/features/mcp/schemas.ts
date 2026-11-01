@@ -79,6 +79,11 @@ export const getRsvpSummaryInput = z.object({ eventId });
 
 export const listTablesAndSeatingInput = z.object({ eventId });
 
+export const getHallLayoutInput = z.object({ eventId });
+
+/** Asks about the hall designer's rules themselves, so it takes nothing. */
+export const getHallRulesInput = z.object({});
+
 /** Asks about the connection itself, so it takes nothing. */
 export const whoamiInput = z.object({});
 
@@ -225,6 +230,8 @@ export type GetRsvpSummaryArgs = z.infer<typeof getRsvpSummaryInput>;
 export type ListTablesAndSeatingArgs = z.infer<
   typeof listTablesAndSeatingInput
 >;
+export type GetHallLayoutArgs = z.infer<typeof getHallLayoutInput>;
+export type GetHallRulesArgs = z.infer<typeof getHallRulesInput>;
 export type WhoamiArgs = z.infer<typeof whoamiInput>;
 export type CreateEventArgs = z.infer<typeof createEventInput>;
 export type UpdateEventArgs = z.infer<typeof updateEventInput>;
