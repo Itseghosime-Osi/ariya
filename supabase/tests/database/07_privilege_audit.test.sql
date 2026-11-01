@@ -60,6 +60,7 @@ select set_eq(
       ('record_ai_proposal_result'),
       ('regenerate_guest_token'),
       ('remove_team_member'),
+      ('restore_ai_proposal_result'),
       ('search_guests'),
       ('shares_event_with'),
       ('submit_rsvp'),

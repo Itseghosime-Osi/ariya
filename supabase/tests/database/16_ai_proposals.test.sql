@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(33);
+select plan(43);
 
 -- ============================================================================
 -- Fixture
@@ -367,6 +367,127 @@ select throws_ok(
   'an app token cannot record a result');
 
 reset role;
+
+-- ============================================================================
+-- 3c. RESTORING: FIRST-PARTY, APPLIED, ONCE, INSIDE SEVEN DAYS
+-- ============================================================================
+--
+-- lp.proposal was applied in section 3 and carries no restoredAt, so it is the row every case here
+-- reads except the stale one. The stale row is written straight in, because the window is measured
+-- on decided_at and no function will backdate it.
+
+select set_config('request.jwt.claims', '{}', true);
+
+do $$
+declare
+  v_id uuid;
+begin
+  insert into public.ai_proposals (
+    user_id, event_id, client_id, kind, title, summary, payload, status, result, decided_at
+  )
+  select host, event_a, 'client-propose', 'apply_seating_plan',
+         'Old seating', 'A seating plan applied eight days ago',
+         '{"assignments": []}'::jsonb, 'applied',
+         '{"snapshot": {"kind": "seating"}}'::jsonb,
+         now() - interval '8 days'
+  from lp
+  returning id into v_id;
+
+  perform set_config('lp.stale', v_id::text, true);
+end $$;
+
+-- Another account cannot undo the host's change, even though the row is otherwise restorable.
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select other_user from lp), 'role', 'authenticated')::text, true);
+set local role authenticated;
+
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L,
+              '{"restoredAt": "2026-11-01T00:00:00Z"}'::jsonb) $$,
+         current_setting('lp.proposal')),
+  'P0001', 'That change can no longer be restored: it was already restored, it was never applied, or it is more than 7 days old.',
+  'another account cannot undo the host''s change');
+
+reset role;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated')::text, true);
+set local role authenticated;
+
+-- The marker is what makes a second restore impossible, so a restore that omits it is refused.
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L, '{}'::jsonb) $$,
+         current_setting('lp.proposal')),
+  '22000', 'A restore must record when it happened.',
+  'a restore that does not say when it happened is refused');
+
+reset role;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated',
+                    'client_id', 'client-propose')::text, true);
+set local role authenticated;
+
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L,
+              '{"restoredAt": "2026-11-01T00:00:00Z"}'::jsonb) $$,
+         current_setting('lp.proposal')),
+  '42501', 'Connected AI apps cannot undo a change. Only you can, in Àríyá.',
+  'an app token cannot undo a change');
+
+reset role;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select host from lp), 'role', 'authenticated')::text, true);
+set local role authenticated;
+
+select is(
+  public.restore_ai_proposal_result(
+    current_setting('lp.proposal')::uuid,
+    '{"restoredAt": "2026-11-01T00:00:00Z", "restoredCount": 3}'::jsonb
+  ) -> 'result' ->> 'restoredAt',
+  '2026-11-01T00:00:00Z',
+  'the owner restores an applied change, and the row records when');
+
+select is(
+  (select status from public.ai_proposals where id = current_setting('lp.proposal')::uuid),
+  'applied',
+  'a restored change stays applied; the undo is recorded in its result, not in its status');
+
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L,
+              '{"restoredAt": "2026-11-02T00:00:00Z"}'::jsonb) $$,
+         current_setting('lp.proposal')),
+  'P0001', 'That change can no longer be restored: it was already restored, it was never applied, or it is more than 7 days old.',
+  'the same change cannot be restored twice');
+
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L,
+              '{"restoredAt": "2026-11-01T00:00:00Z"}'::jsonb) $$,
+         current_setting('lp.planner_proposal')),
+  'P0001', 'That change can no longer be restored: it was already restored, it was never applied, or it is more than 7 days old.',
+  'a proposal that was never applied cannot be restored');
+
+select throws_ok(
+  format($$ select public.restore_ai_proposal_result(%L,
+              '{"restoredAt": "2026-11-01T00:00:00Z"}'::jsonb) $$,
+         current_setting('lp.stale')),
+  'P0001', 'That change can no longer be restored: it was already restored, it was never applied, or it is more than 7 days old.',
+  'a change applied more than seven days ago can no longer be restored');
+
+reset role;
+
+select is(
+  has_function_privilege('authenticated',
+    'public.restore_ai_proposal_result(uuid, jsonb)', 'execute'),
+  true,
+  'authenticated may call the restore function');
+
+select is(
+  has_function_privilege('anon',
+    'public.restore_ai_proposal_result(uuid, jsonb)', 'execute'),
+  false,
+  'anon may not call the restore function');
 
 -- ============================================================================
 -- 4. QUOTA AND THE PENDING CEILING
