@@ -6,6 +6,7 @@ import type {
   ActionResult,
   ActivityEntry,
   Proposal,
+  ProposalDisplayStatus,
   ProposalFeed,
   ProposalKind,
   ProposalResult,
@@ -30,6 +31,14 @@ const UNKNOWN_LABEL = "An app acting as you";
 const HISTORY_LIMIT = 50;
 /** How much activity the Connect your AI page shows. */
 const ACTIVITY_LIMIT = 50;
+
+/**
+ * A proposal is applied in the same request that approves it, so an approved row is only ever a
+ * transient state. One still approved this long afterwards did not finish: the send may have
+ * stopped partway, and the desk says so instead of showing a decision that looks neither pending
+ * nor done.
+ */
+const APPLICATION_STALL_MS = 10 * 60 * 1000;
 
 interface ProposalRow {
   id: string;
@@ -72,8 +81,10 @@ export async function listProposalFeed(): Promise<ActionResult<ProposalFeed>> {
     ? new Map(connected.data.map((app) => [app.clientId, app.name]))
     : null;
 
+  // One clock for every row, so two proposals on the same screen are judged against one instant.
+  const now = Date.now();
   const proposalList = ((data ?? []) as ProposalRow[]).map((row) =>
-    toProposal(row, connectedNames)
+    toProposal(row, connectedNames, now)
   );
 
   const pending = proposalList.filter(
@@ -141,7 +152,8 @@ export async function listRecentActivity(): Promise<
 
 function toProposal(
   row: ProposalRow,
-  connectedNames: Map<string, string> | null
+  connectedNames: Map<string, string> | null,
+  now: number
 ): Proposal {
   const payload = proposalPayloadSchema.safeParse(row.payload);
   const guestIds = payload.success ? payload.data.guestIds : [];
@@ -155,7 +167,7 @@ function toProposal(
     summary: row.summary,
     note,
     guestCount: guestIds.length,
-    status: displayStatus(row),
+    status: displayStatus(row, now),
     eventId: row.event_id,
     eventTitle: eventTitleOf(row.events) ?? "A celebration",
     appLabel: !connectedNames
@@ -194,11 +206,23 @@ function countOf(value: unknown): number {
     : 0;
 }
 
-/** A pending row past its deadline is expired: nothing will apply it, so it must not look decidable. */
-function displayStatus(row: ProposalRow): ProposalStatus {
-  if (row.status === "pending" && new Date(row.expires_at) <= new Date()) {
+/**
+ * A pending row past its deadline is expired: nothing will apply it, so it must not look decidable.
+ * An approved row that has sat that way too long is interrupted: it stays decided, never pending.
+ */
+function displayStatus(row: ProposalRow, now: number): ProposalDisplayStatus {
+  if (row.status === "pending" && new Date(row.expires_at).getTime() <= now) {
     return "expired";
   }
+
+  if (
+    row.status === "approved" &&
+    row.decided_at !== null &&
+    now - new Date(row.decided_at).getTime() > APPLICATION_STALL_MS
+  ) {
+    return "interrupted";
+  }
+
   return row.status as ProposalStatus;
 }
 

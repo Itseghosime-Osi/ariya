@@ -9,6 +9,13 @@ export const CONNECT_AI_PATH = "/connect-ai";
 export type ProposalStatus =
   "pending" | "approved" | "rejected" | "expired" | "applied" | "failed";
 
+/**
+ * What the desk shows. `interrupted` is not a stored status: an approved proposal whose applying
+ * never finished is still `approved` in its row, and the desk says what that means rather than
+ * offering it again or pretending it is done.
+ */
+export type ProposalDisplayStatus = ProposalStatus | "interrupted";
+
 export type ProposalKind =
   | "send_invitations"
   | "send_reminders"
@@ -35,7 +42,7 @@ export interface Proposal {
   note: string | null;
   guestCount: number;
   /** A `pending` row past its deadline is shown as `expired`, which is what it is. */
-  status: ProposalStatus;
+  status: ProposalDisplayStatus;
   eventId: string;
   eventTitle: string;
   /** Never the client-supplied name: an app has no verified name outside the consent screen. */

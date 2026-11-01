@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProposalCard } from "./ProposalCard";
-import type { Proposal, ProposalFeed, ProposalStatus } from "../types";
+import type { Proposal, ProposalDisplayStatus, ProposalFeed } from "../types";
 
 // Fixed locale and zone so the server and client render the same string.
 const DATE = new Intl.DateTimeFormat("en-NG", {
@@ -15,9 +15,10 @@ const DATE = new Intl.DateTimeFormat("en-NG", {
   timeZone: "Africa/Lagos",
 });
 
-const STATUS_TONE: Record<ProposalStatus, string> = {
+const STATUS_TONE: Record<ProposalDisplayStatus, string> = {
   pending: "text-gold-ink",
   approved: "text-gold-ink",
+  interrupted: "text-wine",
   applied: "text-on-surface",
   rejected: "text-on-surface-variant",
   expired: "text-on-surface-variant",
@@ -132,6 +133,9 @@ function describe(proposal: Proposal): string {
   if (status === "rejected") return "You rejected it. Nothing was sent.";
   if (status === "expired")
     return "It expired before you decided. Nothing was sent.";
+  if (status === "interrupted") {
+    return "Interrupted. Some guests may have been contacted; check your invitations.";
+  }
   if (status === "approved") return "Approved, but not applied yet.";
 
   if (!result) {
@@ -178,6 +182,8 @@ function statusLabel(proposal: Proposal): string {
       return "Failed";
     case "approved":
       return "Approved";
+    case "interrupted":
+      return "Interrupted";
     default:
       return "Pending";
   }

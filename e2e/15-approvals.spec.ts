@@ -58,6 +58,9 @@ async function seedProposal(input: {
   note?: string;
   kind?: string;
   expiresInMs?: number;
+  /** Defaults to pending. A decided row needs `decidedAt` to satisfy the table's own constraint. */
+  status?: string;
+  decidedAt?: string;
 }): Promise<string> {
   const { data, error } = await admin()
     .from("ai_proposals")
@@ -73,7 +76,8 @@ async function seedProposal(input: {
         requestedCount: input.guestIds.length,
         ...(input.note ? { note: input.note } : {}),
       },
-      status: "pending",
+      status: input.status ?? "pending",
+      decided_at: input.decidedAt ?? null,
       expires_at: new Date(
         Date.now() + (input.expiresInMs ?? 7 * 24 * 60 * 60 * 1000)
       ).toISOString(),
@@ -241,6 +245,44 @@ test.describe("Approvals desk", () => {
       "aria-label",
       "Approvals"
     );
+  });
+
+  test("shows an approved request that never finished as interrupted, never as pending", async ({
+    page,
+    context,
+  }) => {
+    const user = await createAndLoginUser(
+      page,
+      context,
+      "approvals_interrupted"
+    );
+    const { eventId } = await createTestEvent(page);
+    const userId = await userIdFor(user.email);
+    const guestIds = await seedInvitedGuests(eventId, ["Ifeoma Obi"]);
+
+    // Approved eleven minutes ago and never applied: the send stopped partway, or never started.
+    await seedProposal({
+      userId,
+      eventId,
+      guestIds,
+      title: "Send invitations that stopped partway",
+      summary: "Send invitations by email to 1 guest.",
+      status: "approved",
+      decidedAt: new Date(Date.now() - 11 * 60 * 1000).toISOString(),
+    });
+
+    await page.goto("/approvals");
+
+    // It is decided, so it is never offered again.
+    await expect(page.getByText(/nothing is waiting/i)).toBeVisible();
+    await expect(page.getByTestId("approval-card")).toHaveCount(0);
+
+    await expect(page.getByText("Interrupted", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(
+        /Interrupted\. Some guests may have been contacted; check your invitations\./
+      )
+    ).toBeVisible();
   });
 
   test("offers only a rejection for a kind the app cannot carry out yet", async ({

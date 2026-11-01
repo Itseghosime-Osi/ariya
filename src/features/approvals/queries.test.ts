@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/features/mcp/grants", () => ({ listConnectedApps: vi.fn() }));
@@ -136,6 +136,10 @@ beforeEach(() => {
   connectedTo(CLIENT_ID, "Claude");
 });
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("listProposalFeed", () => {
   it("refuses a signed-out reader before loading anything", async () => {
     install(fakeClient({ user: null }));
@@ -228,6 +232,73 @@ describe("listProposalFeed", () => {
     expect(result.data.decided[0]).toMatchObject({
       id: "overdue",
       status: "expired",
+    });
+  });
+
+  it("shows an approved proposal that sat too long as interrupted, never as pending", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-01T12:00:00.000Z"));
+
+    install(
+      fakeClient({
+        tables: {
+          ai_proposals: {
+            data: [
+              proposalRow({
+                id: "stalled",
+                status: "approved",
+                decided_at: "2026-11-01T11:49:59.999Z",
+              }),
+            ],
+            error: null,
+          },
+        },
+      })
+    );
+
+    const result = await listProposalFeed();
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // One millisecond past ten minutes. The send may have stopped partway, so it is not pending.
+    expect(result.data.pending).toEqual([]);
+    expect(result.data.decided[0]).toMatchObject({
+      id: "stalled",
+      status: "interrupted",
+    });
+  });
+
+  it("leaves an approved proposal alone at exactly ten minutes", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-01T12:00:00.000Z"));
+
+    install(
+      fakeClient({
+        tables: {
+          ai_proposals: {
+            data: [
+              proposalRow({
+                id: "just-approved",
+                status: "approved",
+                decided_at: "2026-11-01T11:50:00.000Z",
+              }),
+            ],
+            error: null,
+          },
+        },
+      })
+    );
+
+    const result = await listProposalFeed();
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.data.pending).toEqual([]);
+    expect(result.data.decided[0]).toMatchObject({
+      id: "just-approved",
+      status: "approved",
     });
   });
 
