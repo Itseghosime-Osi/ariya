@@ -3,6 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolContext } from "../guard";
 import { registerProposalTools } from "./proposals";
+import { MAX_PROPOSAL_GUESTS } from "../schemas";
 import { sendGuestInvitationEmailAction } from "@/features/invitations/actions";
 import { sendBatchReminderAction } from "@/features/reminders/actions";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
@@ -344,6 +345,29 @@ describe("propose_send_invitations", () => {
     expect(textOf(refusedResult)).toBe(
       "Could not record that proposal. Nothing was sent."
     );
+  });
+
+  it("refuses to propose more than one card can hold, and writes nothing", async () => {
+    const everyone = Array.from(
+      { length: MAX_PROPOSAL_GUESTS + 1 },
+      (_, index) => ({
+        id: `22222222-2222-4222-8222-${String(index + 1).padStart(12, "0")}`,
+      })
+    );
+    const { client, logFor } = fakeClient({
+      tables: { guests: { data: everyone, error: null } },
+      rpc: ALLOWED_RPC,
+    });
+
+    const result = await call(context(client), "propose_send_invitations", {
+      eventId: EVENT_ID,
+    });
+
+    expect(result.isError).toBe(true);
+    expect(textOf(result)).toBe(
+      `That would email ${MAX_PROPOSAL_GUESTS + 1} guests, and one proposal may cover ${MAX_PROPOSAL_GUESTS}. Narrow it with guestIds and propose again. Nothing was sent.`
+    );
+    expect(logFor("ai_proposals").inserts).toEqual([]);
   });
 
   it("never reaches the sending code, whatever it proposes", async () => {

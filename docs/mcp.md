@@ -132,14 +132,20 @@ These ask the host a question. None of them sends, and none of them can approve 
 
 | Tool                       | Effect                                                                                                                     |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `propose_send_invitations` | Records a pending proposal to email invitations to the guests who have no invitation yet and have an email address.        |
-| `propose_send_reminders`   | Records a pending proposal to email a reminder to the guests who have an email address.                                    |
+| `propose_send_invitations` | Records a pending proposal to email invitations to up to 25 guests who have no invitation yet and have an email address.   |
+| `propose_send_reminders`   | Records a pending proposal to email a reminder to up to 25 guests who have an email address.                               |
 | `list_my_proposals`        | Lists what was proposed through this connection, newest first, with its status. Read-only: deciding happens only in Àríyá. |
 
 Both proposing tools answer with the proposal's id, the guest count, `approvalsUrl` (`/approvals`)
 and `awaitingApproval` — "Awaiting your approval in Àríyá. Nothing has been sent." A proposal that
 would reach nobody (everyone already invited, or no email address) is refused instead of being
 recorded, so an empty request never appears on the host's desk.
+
+One proposal covers at most 25 guests, whether they are named in `guestIds` or reached by omitting
+it. The desk shows a host what a proposal would do to every guest on it before they approve, so the
+list has to stay short enough to read as one decision. A larger send is several proposals, each
+narrowed with `guestIds`; a proposal that would exceed the cap is refused with the count it would
+have reached, and nothing is recorded.
 
 ### Deliberately not exposed
 

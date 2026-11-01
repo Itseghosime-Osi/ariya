@@ -5,8 +5,12 @@ import { invitationThemeEnum } from "@/features/invitations/schemas";
 export const MAX_PAGE_SIZE = 50;
 export const MAX_IMPORT_ROWS = 200;
 
-/** Matched to an import: a proposal that named more guests than an import could add is a mistake. */
-export const MAX_PROPOSAL_GUESTS = MAX_IMPORT_ROWS;
+/**
+ * A send proposal is one decision by one person, and the desk shows what it would do to the whole
+ * list before it is approved, so it stays small enough to read. Kept in step with
+ * `MAX_APPLY_GUESTS` in `src/features/approvals/schemas.ts`.
+ */
+export const MAX_PROPOSAL_GUESTS = 25;
 
 /** The kinds a proposal may carry. Only the two sending kinds are applied today. */
 export const PROPOSAL_KINDS = [

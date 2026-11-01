@@ -1,7 +1,10 @@
 import { z } from "zod";
 
-/** Matched to the tool side: a proposal may name no more guests than an import could add. */
-export const MAX_APPLY_GUESTS = 200;
+/**
+ * Matched to `MAX_PROPOSAL_GUESTS` on the tool side: the payload is re-checked here before anything
+ * is sent, so a proposal that somehow holds more than this cannot be applied halfway.
+ */
+export const MAX_APPLY_GUESTS = 25;
 
 export const proposalIdSchema = z.string().uuid("Proposal id must be a UUID");
 
