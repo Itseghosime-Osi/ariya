@@ -1,18 +1,31 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import {
+  UNKNOWN_APP_ACKNOWLEDGEMENT,
+  sanitiseAppName,
+  type AppTrust,
+  type AppVendor,
+} from "../app-trust";
 import { decideConsentAction } from "../consent";
 
 export interface ConsentRequest {
   authorizationId: string;
   clientName: string;
-  clientLogo: string;
   redirectHost: string;
   accountEmail: string;
   scopes: string[];
+  /** Classified on the server from the redirect URI. The card only renders it. */
+  trust: AppTrust;
 }
+
+/** What the card calls a vendor. The client's own name is never used for a recognised app. */
+const VENDORS: Record<AppVendor, { name: string; monogram: string }> = {
+  claude: { name: "Claude", monogram: "C" },
+  chatgpt: { name: "ChatGPT", monogram: "G" },
+};
 
 const SCOPE_COPY: Record<string, string> = {
   openid: "Confirm which Àríyá account is connecting",
@@ -21,11 +34,19 @@ const SCOPE_COPY: Record<string, string> = {
   phone: "See the phone number on your account",
 };
 
+const ACKNOWLEDGEMENT =
+  "I understand this app has not been verified by Àríyá. I am choosing to connect it at my own risk, and I accept responsibility for what it does with my account and my guests' information.";
+
 export function ConsentCard({ request }: { request: ConsentRequest }) {
   const [state, formAction, pending] = useActionState(
     decideConsentAction,
     null
   );
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  const unverified = request.trust.tier === "unknown";
+  // The server decides again; this only stops an accidental click.
+  const approveBlocked = pending || (unverified && !acknowledged);
 
   useEffect(() => {
     if (state?.ok) {
@@ -42,25 +63,19 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
         </p>
 
         <div className="mt-5 flex items-start gap-4">
-          {request.clientLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={request.clientLogo}
-              alt=""
-              className="h-12 w-12 shrink-0 rounded-xl border border-outline-variant/60 object-cover"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-wine/10 font-display text-xl font-bold text-wine"
-            >
-              {request.clientName.slice(0, 1).toUpperCase()}
-            </span>
-          )}
+          <span aria-hidden="true" className={tileClassName(request.trust)}>
+            {monogramOf(request.trust) ?? (
+              <Icon
+                name={request.trust.tier === "unknown" ? "help" : "person"}
+                size={22}
+              />
+            )}
+          </span>
 
           <div className="min-w-0">
-            <h1 className="font-display text-2xl leading-tight text-night">
-              {request.clientName} wants to connect
+            <TrustBadge trust={request.trust} />
+            <h1 className="mt-2 break-words font-display text-2xl leading-tight text-night">
+              {displayName(request)} wants to connect
             </h1>
             <p className="mt-1.5 text-sm text-on-surface-variant">
               Signed in as{" "}
@@ -71,6 +86,25 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
             </p>
           </div>
         </div>
+
+        {unverified ? (
+          <div className="mt-5 rounded-2xl border border-error/40 bg-error/5 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold text-error">
+              <Icon name="error" size={16} className="shrink-0" />
+              This app has not been verified
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-on-surface">
+              Anyone can register an app and choose its name and logo. What you
+              approve here will be handed to whoever controls this address:
+            </p>
+            <p className="mt-2.5 break-all rounded-xl border border-error/25 bg-surface-container-lowest px-3 py-2 font-mono text-xs text-night">
+              {request.trust.redirectUri}
+            </p>
+            <p className="mt-2.5 text-xs leading-relaxed text-on-surface-variant">
+              If that address is not a service you recognise, deny the request.
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-6 border-t border-wine/10 pt-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-label-2">
@@ -100,15 +134,17 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
           account menu.
         </p>
 
-        <p className="mt-4 flex flex-wrap items-center gap-2 text-xs text-label-2">
-          <Icon name="lock" size={13} className="shrink-0 text-gold-ink" />
-          <span>
-            You will be sent back to{" "}
-            <span className="font-medium text-night">
-              {request.redirectHost}
+        {unverified ? null : (
+          <p className="mt-4 flex flex-wrap items-center gap-2 text-xs text-label-2">
+            <Icon name="lock" size={13} className="shrink-0 text-gold-ink" />
+            <span>
+              You will be sent back to{" "}
+              <span className="font-medium text-night">
+                {request.redirectHost}
+              </span>
             </span>
-          </span>
-        </p>
+          </p>
+        )}
 
         {state && !state.ok ? (
           <p
@@ -119,34 +155,51 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
           </p>
         ) : null}
 
-        <form
-          action={formAction}
-          className="mt-6 flex flex-col gap-3 sm:flex-row-reverse sm:justify-start"
-        >
+        <form action={formAction} className="mt-6">
           <input
             type="hidden"
             name="authorization_id"
             value={request.authorizationId}
           />
-          <Button
-            type="submit"
-            name="decision"
-            value="approve"
-            disabled={pending}
-            className="w-full rounded-full shadow-[0_6px_18px_-6px_rgba(74,17,29,0.55)] sm:w-auto"
-          >
-            {pending ? "Saving…" : "Approve"}
-          </Button>
-          <Button
-            type="submit"
-            name="decision"
-            value="deny"
-            variant="outline"
-            disabled={pending}
-            className="w-full rounded-full sm:w-auto"
-          >
-            Deny
-          </Button>
+
+          {unverified ? (
+            <label className="mb-4 flex cursor-pointer select-none items-start gap-3 rounded-2xl border border-error/30 bg-error/5 p-3.5">
+              <input
+                type="checkbox"
+                name="acknowledge_unknown_app"
+                value={UNKNOWN_APP_ACKNOWLEDGEMENT}
+                checked={acknowledged}
+                onChange={(event) => setAcknowledged(event.target.checked)}
+                disabled={pending}
+                className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded accent-wine"
+              />
+              <span className="text-xs leading-relaxed text-on-surface">
+                {ACKNOWLEDGEMENT}
+              </span>
+            </label>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-start">
+            <Button
+              type="submit"
+              name="decision"
+              value="approve"
+              disabled={approveBlocked}
+              className="w-full rounded-full shadow-[0_6px_18px_-6px_rgba(74,17,29,0.55)] sm:w-auto"
+            >
+              {pending ? "Saving…" : "Approve"}
+            </Button>
+            <Button
+              type="submit"
+              name="decision"
+              value="deny"
+              variant="outline"
+              disabled={pending}
+              className="w-full rounded-full sm:w-auto"
+            >
+              Deny
+            </Button>
+          </div>
         </form>
       </div>
 
@@ -155,5 +208,62 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
         needs.
       </p>
     </div>
+  );
+}
+
+/**
+ * A recognised app is named after its vendor, not after whatever it registered itself as. Only an
+ * unverified app's own name is shown, cleaned and cut short.
+ */
+function displayName(request: ConsentRequest): string {
+  const { trust } = request;
+
+  if (trust.tier === "known" && trust.vendor) return VENDORS[trust.vendor].name;
+  if (trust.tier === "local") return "An app on your computer";
+
+  return sanitiseAppName(request.clientName);
+}
+
+function monogramOf(trust: AppTrust): string | null {
+  return trust.tier === "known" && trust.vendor
+    ? VENDORS[trust.vendor].monogram
+    : null;
+}
+
+function tileClassName(trust: AppTrust): string {
+  const tile = "grid h-12 w-12 shrink-0 place-items-center rounded-xl";
+
+  if (trust.tier === "unknown") return `${tile} bg-error/10 text-error`;
+  if (trust.tier === "local") {
+    return `${tile} bg-surface-container text-on-surface-variant`;
+  }
+
+  return `${tile} bg-wine/10 font-display text-xl font-bold text-wine`;
+}
+
+function TrustBadge({ trust }: { trust: AppTrust }) {
+  if (trust.tier === "known") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/60 bg-gold/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+        <Icon name="verified" size={12} />
+        Known app
+      </span>
+    );
+  }
+
+  if (trust.tier === "local") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/70 bg-surface-container px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-on-surface-variant">
+        <Icon name="person" size={12} />
+        An app on your own computer
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-error/40 bg-error/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-error">
+      <Icon name="error" size={12} />
+      Not verified
+    </span>
   );
 }
