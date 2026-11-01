@@ -161,7 +161,7 @@ export function CelebrationPass({
 
                   <PassStamp
                     dateLabel={stampDate}
-                    className="pointer-events-none absolute -bottom-14 right-10 h-[136px] w-[136px] -rotate-[35deg] text-burgundy mix-blend-multiply"
+                    className="pointer-events-none absolute -bottom-4 right-10 h-[136px] w-[136px] -rotate-[35deg] text-burgundy mix-blend-multiply"
                   />
                 </div>
               )}
