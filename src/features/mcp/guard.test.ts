@@ -50,6 +50,23 @@ describe("requireWriteAccess", () => {
       "Could not confirm your access to that celebration."
     );
   });
+
+  it("keeps the database's code and drops its message", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: {
+        code: "42P01",
+        message: 'relation "public.has_event_role" does not exist',
+      },
+    });
+
+    await expect(
+      requireWriteAccess(context(rpc), EVENT_ID)
+    ).rejects.toMatchObject({
+      message: "Could not confirm your access to that celebration.",
+      diagnostic: { code: "42P01" },
+    });
+  });
 });
 
 describe("requireReadAccess", () => {

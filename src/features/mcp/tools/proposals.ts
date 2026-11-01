@@ -4,6 +4,7 @@ import {
   requireWriteAccess,
   type ToolContext,
 } from "../guard";
+import { diagnosticOf } from "../diagnostics";
 import { dataResult, errorResult, paged, runTool, ToolError } from "../result";
 import {
   listMyProposalsInput,
@@ -233,7 +234,9 @@ function registerProposeTool(
             .single();
 
           if (error || !data) {
-            return errorResult(proposalRefusal(error));
+            throw new ToolError(proposalRefusal(error), {
+              diagnostic: diagnosticOf(error),
+            });
           }
 
           return dataResult({
@@ -279,7 +282,8 @@ async function resolveRecipients(
   const { data, error } = await query;
   if (error) {
     throw new ToolError(
-      "Could not read that celebration's guests right now. Nothing was proposed."
+      "Could not read that celebration's guests right now. Nothing was proposed.",
+      { diagnostic: diagnosticOf(error) }
     );
   }
 

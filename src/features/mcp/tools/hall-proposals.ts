@@ -11,8 +11,9 @@ import {
   type PlanGuest,
   type SeatingMode,
 } from "@/features/seating/plan-checks";
+import { diagnosticOf } from "../diagnostics";
 import { requireWriteAccess, type ToolContext } from "../guard";
-import { dataResult, errorResult, runTool } from "../result";
+import { dataResult, errorResult, runTool, ToolError } from "../result";
 import { proposeHallLayoutInput, proposeSeatingPlanInput } from "../schemas";
 import { APPROVALS_PATH, proposalRefusal } from "./proposals";
 
@@ -395,7 +396,9 @@ async function record(
     .single();
 
   if (error || !data) {
-    return errorResult(proposalRefusal(error, NOTHING_CHANGED));
+    throw new ToolError(proposalRefusal(error, NOTHING_CHANGED), {
+      diagnostic: diagnosticOf(error),
+    });
   }
 
   return dataResult({
