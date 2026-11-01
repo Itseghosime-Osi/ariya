@@ -5,6 +5,8 @@ import { ToolError } from "./result";
 export interface ToolContext {
   client: SupabaseClient<Database>;
   user: User;
+  /** The connected app behind the token, or null when the host called with their own session. */
+  clientId: string | null;
 }
 
 /** Who may change a celebration. */

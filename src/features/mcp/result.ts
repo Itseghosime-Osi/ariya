@@ -42,18 +42,49 @@ export function errorResult(message: string): CallToolResult {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 
+/** Who to attribute a call to. Structural, so `ToolContext` satisfies it without an import cycle. */
+export interface ToolCaller {
+  user: { id: string };
+  clientId: string | null;
+}
+
 /**
  * Runs a tool body and converts anything thrown into a safe tool error, so one bad call cannot take
- * down the request.
+ * down the request. Every call leaves one log line, success or failure.
  */
 export async function runTool(
+  caller: ToolCaller,
+  toolName: string,
   body: () => Promise<CallToolResult>
 ): Promise<CallToolResult> {
   try {
-    return await body();
+    const result = await body();
+    logToolCall(caller, toolName, result.isError ? "error" : "ok");
+    return result;
   } catch (error) {
+    logToolCall(caller, toolName, "error");
     return errorResult(errorMessage(error));
   }
+}
+
+/**
+ * Which host, through which connected app, which tool, and whether it worked — never the arguments
+ * and never anything a guest typed, so nothing sensitive reaches the logs.
+ */
+function logToolCall(
+  caller: ToolCaller,
+  toolName: string,
+  outcome: "ok" | "error"
+): void {
+  console.info(
+    JSON.stringify({
+      event: "mcp_tool_call",
+      userId: caller.user.id,
+      clientId: caller.clientId,
+      tool: toolName,
+      outcome,
+    })
+  );
 }
 
 export function errorMessage(error: unknown): string {

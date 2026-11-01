@@ -33,7 +33,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "list_events", async () => {
         const events = await getUserEvents();
         const needle = args.search?.toLowerCase();
 
@@ -70,7 +70,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(async () => {
+      runTool(ctx, "get_event_overview", async () => {
         await requireReadAccess(ctx, eventId);
 
         const [record, stats] = await Promise.all([
@@ -121,7 +121,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     (args) =>
-      runTool(async () => {
+      runTool(ctx, "list_guests", async () => {
         await requireReadAccess(ctx, args.eventId);
 
         const result = await getEventGuests(args.eventId, {
@@ -155,7 +155,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(async () => {
+      runTool(ctx, "get_rsvp_summary", async () => {
         await requireReadAccess(ctx, eventId);
         const stats = await getGuestOverviewStats(eventId);
         return dataResult(stats);
@@ -171,7 +171,7 @@ export function registerReadTools(server: McpServer, ctx: ToolContext): void {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     ({ eventId }) =>
-      runTool(async () => {
+      runTool(ctx, "list_tables_and_seating", async () => {
         await requireReadAccess(ctx, eventId);
         const data = await getEventSeatingData(eventId);
 
