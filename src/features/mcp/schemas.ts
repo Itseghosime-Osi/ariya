@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { GUEST_SIDE_ENUM } from "@/features/guests/schemas";
 import { invitationThemeEnum } from "@/features/invitations/schemas";
+import {
+  hallLayoutSchema,
+  tablePositionsSchema,
+} from "@/features/seating/schemas";
+import { MAX_SEATING_ASSIGNMENTS } from "@/features/seating/plan-checks";
 
 export const MAX_PAGE_SIZE = 50;
 export const MAX_IMPORT_ROWS = 200;
@@ -213,6 +218,54 @@ const proposeSendInput = z.object({
 export const proposeSendInvitationsInput = proposeSendInput;
 export const proposeSendRemindersInput = proposeSendInput;
 
+/**
+ * A hall proposal is the whole room, not a few sliders: the same document the designer saves, plus
+ * where every table stands. The app's own schemas do the first pass, so nothing reaches the host
+ * that the designer itself would have refused to store.
+ */
+export const proposeHallLayoutInput = z.object({
+  eventId,
+  layout: hallLayoutSchema.describe(
+    "The complete room, exactly as the hall designer stores it: dimensions, spacing, zones, decor, table styles, rotations, chairs, mood, ceiling."
+  ),
+  tablePositions: tablePositionsSchema
+    .optional()
+    .describe(
+      "Where every table stands: id, x and y in centimetres from the top-left corner, measured to the table's centre."
+    ),
+  note: proposalNote,
+});
+
+export const proposeSeatingPlanInput = z.object({
+  eventId,
+  assignments: z
+    .array(
+      z.object({
+        guestId,
+        tableId: z.string().uuid("tableId must be a UUID"),
+        seatNumber: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe("Optional seat at that table, 1 to its capacity."),
+      })
+    )
+    .min(1)
+    .max(
+      MAX_SEATING_ASSIGNMENTS,
+      `A single proposal may seat at most ${MAX_SEATING_ASSIGNMENTS} guests`
+    ),
+  mode: z
+    .enum(["fill_unseated", "rearrange"])
+    .default("fill_unseated")
+    .describe(
+      "fill_unseated seats guests who have no table yet and never moves anyone. rearrange may move guests who are already seated; use it only when the host asked for that."
+    ),
+  note: proposalNote,
+});
+
 export const listMyProposalsInput = z.object({
   eventId: eventId.optional().describe("Only proposals for this celebration."),
   status: z
@@ -247,4 +300,6 @@ export type ProposeSendInvitationsArgs = z.infer<
 export type ProposeSendRemindersArgs = z.infer<
   typeof proposeSendRemindersInput
 >;
+export type ProposeHallLayoutArgs = z.infer<typeof proposeHallLayoutInput>;
+export type ProposeSeatingPlanArgs = z.infer<typeof proposeSeatingPlanInput>;
 export type ListMyProposalsArgs = z.infer<typeof listMyProposalsInput>;

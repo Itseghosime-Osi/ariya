@@ -97,7 +97,7 @@ export function registerProposalTools(
           let query = ctx.client
             .from("ai_proposals")
             .select(
-              "id, kind, title, summary, payload, status, event_id, created_at, decided_at, expires_at",
+              "id, kind, title, summary, payload, status, result, event_id, created_at, decided_at, expires_at",
               { count: "exact" }
             )
             .order("created_at", { ascending: false });
@@ -130,6 +130,9 @@ export function registerProposalTools(
             status: row.status,
             eventId: row.event_id,
             guestCount: guestCountOf(row.payload),
+            ...(row.status === "applied" || row.status === "failed"
+              ? { outcome: outcomeOf(row.result) }
+              : {}),
             createdAt: row.created_at,
             decidedAt: row.decided_at,
             expiresAt: row.expires_at,
@@ -285,18 +288,48 @@ async function resolveRecipients(
 
 /**
  * The pending ceiling and the daily limit are written for the host to read, so they pass through. A
- * policy refusal is not, and is replaced.
+ * policy refusal is not, and is replaced. `consequence` is what the tool promised did not happen.
  */
-function proposalRefusal(
-  error: { message?: string; hint?: string } | null
+export function proposalRefusal(
+  error: { message?: string; hint?: string } | null,
+  consequence = "Nothing was sent."
 ): string {
-  if (!error) {
-    return "Could not record that proposal. Nothing was sent.";
+  if (
+    error &&
+    (error.hint === "PENDING_LIMIT" || error.hint === "DAILY_LIMIT")
+  ) {
+    return error.message ?? `You have reached a limit. ${consequence}`;
   }
-  if (error.hint === "PENDING_LIMIT" || error.hint === "DAILY_LIMIT") {
-    return error.message ?? "You have reached a limit. Nothing was sent.";
+  return `Could not record that proposal. ${consequence}`;
+}
+
+/**
+ * How a decided proposal finished, reduced to counts and a short reason: the same figures the host
+ * read on the card, and nothing else the payload may have grown since.
+ */
+function outcomeOf(result: unknown) {
+  if (!result || typeof result !== "object") return null;
+
+  const saved = result as Record<string, unknown>;
+  const counts: Record<string, number> = {};
+  for (const key of [
+    "sentCount",
+    "skippedCount",
+    "appliedCount",
+    "movedCount",
+    "seatedCount",
+    "tableCount",
+  ]) {
+    const value = saved[key];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      counts[key] = Math.floor(value);
+    }
   }
-  return "Could not record that proposal. Nothing was sent.";
+
+  const reason =
+    typeof saved.reason === "string" ? saved.reason.trim().slice(0, 300) : null;
+
+  return { ...counts, reason: reason || null };
 }
 
 function guestCountOf(payload: unknown): number {
