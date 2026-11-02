@@ -5,8 +5,9 @@ connects Claude Code, Claude.ai, ChatGPT or Codex to it, approves the connection
 assistant can then read their celebrations and make changes — running as that host, under the same
 row-level security as the app. There is no second permission model to keep in sync.
 
-The one thing an assistant cannot do is email anyone. It can only **propose** sending, and the host
-approves or rejects that proposal at `/approvals`. See [The approvals desk](#the-approvals-desk).
+An assistant cannot email anyone, write a hall or a seating plan, or get its own work applied. It can
+only **propose**, and the host approves or rejects each proposal at `/approvals`. See
+[The approvals desk](#the-approvals-desk).
 
 ## How it works
 
@@ -36,6 +37,27 @@ Supabase Auth still considers the token valid.
 | Register the tools               | `src/features/mcp/server.ts`                         |
 | Gate each call on event role     | `src/features/mcp/guard.ts`                          |
 | Wrap results and log the call    | `src/features/mcp/result.ts`                         |
+
+### Origin check
+
+`GET` and `POST /mcp` implement the MCP spec's DNS-rebinding protection. A browser can be pointed at
+a name that resolves to an internal address, but it cannot forge the `Origin` header it sends, so an
+Origin we do not recognise is refused before the bearer token is even read.
+
+| Request                                                | Answer                                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| No `Origin` header                                     | Allowed. Not a browser: CLI clients and server-to-server connectors send none. |
+| The app's own origin (`NEXT_PUBLIC_APP_URL`)           | Allowed.                                                                       |
+| `https://claude.ai` or `https://chatgpt.com`           | Allowed. Browser-hosted clients.                                               |
+| `localhost`, `127.0.0.1` or `[::1]`, any port, http(s) | Allowed. Local clients choose their own port.                                  |
+| Anything else, including an empty or malformed header  | `403` — "That Origin is not allowed to call this endpoint."                    |
+
+The request's own origin is deliberately not trusted. Under a rebinding attack the `Host` header
+carries the attacker's name, so "same origin as the request" would permit exactly what this check
+exists to refuse; the allowlist is the configured `NEXT_PUBLIC_APP_URL`, not the incoming host. The
+OAuth discovery endpoints are separate routes, are not subject to this check, and keep working for
+connectors that probe them. The implementation is `src/features/mcp/origin.ts`; each row above is a
+case in `src/features/mcp/origin.test.ts`.
 
 ## Which apps the consent screen trusts
 
@@ -77,19 +99,21 @@ those is a case in `src/features/mcp/app-trust.test.ts`.
 
 ## Limits
 
-| Limit                                       | Value                            | Where                               |
-| ------------------------------------------- | -------------------------------- | ----------------------------------- |
-| Requests per host per minute                | 60 (`MCP_RATE_LIMIT_PER_MINUTE`) | `src/app/mcp/route.ts`              |
-| Retry hint on refusal                       | `429` with `Retry-After`         | `src/app/mcp/route.ts`              |
-| Celebrations a host may own within 24 hours | 10 (`MAX_EVENTS_PER_DAY`)        | `src/features/mcp/tools/write.ts`   |
-| Celebrations one app token may create a day | 10                               | `public.create_event`               |
-| Guests one app token may add a day          | 500                              | trigger `tr_guests_app_token_quota` |
-| Proposals one app token may raise a day     | 50                               | trigger `tr_ai_proposals_quota`     |
-| Proposals waiting for approval at once      | 20                               | trigger `tr_ai_proposals_quota`     |
-| How long a proposal stays decidable         | 7 days                           | `ai_proposals.expires_at` default   |
-| Rows in one guest import                    | 200 (`MAX_IMPORT_ROWS`)          | `src/features/mcp/schemas.ts`       |
-| Party size on one invitation                | 20                               | `src/features/mcp/schemas.ts`       |
-| Page size on list tools                     | 50 (`MAX_PAGE_SIZE`)             | `src/features/mcp/schemas.ts`       |
+| Limit                                       | Value                            | Where                                 |
+| ------------------------------------------- | -------------------------------- | ------------------------------------- |
+| Requests per host per minute                | 60 (`MCP_RATE_LIMIT_PER_MINUTE`) | `src/app/mcp/route.ts`                |
+| Retry hint on refusal                       | `429` with `Retry-After`         | `src/app/mcp/route.ts`                |
+| Celebrations a host may own within 24 hours | 10 (`MAX_EVENTS_PER_DAY`)        | `src/features/mcp/tools/write.ts`     |
+| Celebrations one app token may create a day | 10                               | `public.create_event`                 |
+| Guests one app token may add a day          | 500                              | trigger `tr_guests_app_token_quota`   |
+| Proposals one app token may raise a day     | 50                               | trigger `tr_ai_proposals_quota`       |
+| Proposals waiting for approval at once      | 20                               | trigger `tr_ai_proposals_quota`       |
+| How long a proposal stays decidable         | 7 days                           | `ai_proposals.expires_at` default     |
+| Rows in one guest import                    | 200 (`MAX_IMPORT_ROWS`)          | `src/features/mcp/schemas.ts`         |
+| Party size on one invitation                | 20                               | `src/features/mcp/schemas.ts`         |
+| Page size on list tools                     | 50 (`MAX_PAGE_SIZE`)             | `src/features/mcp/schemas.ts`         |
+| Assignments in one seating proposal         | 300 (`MAX_SEATING_ASSIGNMENTS`)  | `src/features/seating/plan-checks.ts` |
+| Size of one hall layout payload             | 64 KB (`MAX_HALL_LAYOUT_BYTES`)  | `src/features/seating/schemas.ts`     |
 
 The per-day ceilings for app tokens are charged by the database, not by the tools, so they hold for
 a token pointed straight at PostgREST. They apply only to app tokens: a session without a
@@ -106,14 +130,16 @@ owner or planner.
 
 ### Read
 
-| Tool                      | Returns                                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------ |
-| `whoami`                  | The `clientId` behind the token and whether the database treats it as an app token.        |
-| `list_events`             | The host's celebrations with guest and RSVP counts. Start here to find an `eventId`.       |
-| `get_event_overview`      | One celebration's details, counts and what needs attention next.                           |
-| `list_guests`             | One page of a guest list, filterable by search, side, group, RSVP status, seating and VIP. |
-| `get_rsvp_summary`        | Headline reply counts only — no guest text.                                                |
-| `list_tables_and_seating` | Tables with seated guests, guests still unseated, capacity and readiness.                  |
+| Tool                      | Returns                                                                                                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `whoami`                  | The `clientId` behind the token and whether the database treats it as an app token.                                                                                                                                                                    |
+| `list_events`             | The host's celebrations with guest and RSVP counts. Start here to find an `eventId`.                                                                                                                                                                   |
+| `get_event_overview`      | One celebration's details, counts and what needs attention next.                                                                                                                                                                                       |
+| `list_guests`             | One page of a guest list, filterable by search, side, group, RSVP status, seating and VIP.                                                                                                                                                             |
+| `get_rsvp_summary`        | Headline reply counts only — no guest text.                                                                                                                                                                                                            |
+| `list_tables_and_seating` | Every table with its seated guests, the guests still unseated, capacity, party sizes, groups, sides and readiness. No email addresses or phone numbers.                                                                                                |
+| `get_hall_layout`         | The current hall — dimensions, spacing, zones, decor, table styles, rotations and chair settings — plus each table's id, name, capacity, shape and position.                                                                                           |
+| `get_hall_rules`          | The limits a proposal must respect, practical design guidance (aisles, exits, dance floor, spacing, accessibility) and named starting points — classic, garden, modern, intimate — generated from the same constants the hall designer validates with. |
 
 ### Write
 
@@ -130,16 +156,32 @@ owner or planner.
 
 These ask the host a question. None of them sends, and none of them can approve its own request.
 
-| Tool                       | Effect                                                                                                                     |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `propose_send_invitations` | Records a pending proposal to email invitations to up to 25 guests who have no invitation yet and have an email address.   |
-| `propose_send_reminders`   | Records a pending proposal to email a reminder to up to 25 guests who have an email address.                               |
-| `list_my_proposals`        | Lists what was proposed through this connection, newest first, with its status. Read-only: deciding happens only in Àríyá. |
+| Tool                       | Effect                                                                                                                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `propose_send_invitations` | Records a pending proposal to email invitations to up to 25 guests who have no invitation yet and have an email address.                                                                |
+| `propose_send_reminders`   | Records a pending proposal to email a reminder to up to 25 guests who have an email address.                                                                                            |
+| `propose_hall_layout`      | Records a pending proposal holding a complete room — dimensions, spacing, zones, decor, table styles, and every table's position and rotation — within 64 KB. Kind `apply_hall_layout`. |
+| `propose_seating_plan`     | Records a pending proposal seating up to 300 guests. `mode` is `fill_unseated` (the default, which never moves anyone already seated) or `rearrange`. Kind `apply_seating_plan`.        |
+| `list_my_proposals`        | Lists what was proposed through this connection, newest first, with its status. Read-only: deciding happens only in Àríyá.                                                              |
 
-Both proposing tools answer with the proposal's id, the guest count, `approvalsUrl` (`/approvals`)
+Both sending tools answer with the proposal's id, the guest count, `approvalsUrl` (`/approvals`)
 and `awaitingApproval` — "Awaiting your approval in Àríyá. Nothing has been sent." A proposal that
 would reach nobody (everyone already invited, or no email address) is refused instead of being
 recorded, so an empty request never appears on the host's desk.
+
+The two layout tools validate the whole document before inserting, and the desk validates it again
+when applying, so a stored payload that no longer fits is skipped rather than trusted. A layout is
+refused when a table overlaps another, falls outside the hall, blocks an aisle or an exit, or names
+a table belonging to another celebration. A seating plan is refused for a guest or table from
+another celebration, the same guest twice, a table over capacity counting party size, or a seat
+number the table does not have. Each refusal lists the first few problems so the model can correct
+itself, and nothing is recorded. `rearrange` is for a host who asked in as many words to move guests
+who are already seated; `fill_unseated` never changes one.
+
+The card's title and summary are written by the server from counts — how many guests are seated,
+moved or unchanged, and any capacity warning — so nothing in that text is supplied by the app.
+Both layout tools refuse an archived celebration outright: its hall and seating cannot be changed,
+and the refusal says so.
 
 One proposal covers at most 25 guests, whether they are named in `guestIds` or reached by omitting
 it. The desk shows a host what a proposal would do to every guest on it before they approve, so the
@@ -149,11 +191,12 @@ have reached, and nothing is recorded.
 
 ### Deliberately not exposed
 
-No tool sends email or invitations, uses invitation quota, deletes anything, writes an RSVP, touches
-billing or payments, or changes team members or authentication. The two proposing tools above stop
-at a pending row; the send itself happens only from the approvals desk, through the app's own
-actions, in the host's own session. None of the rest should be added without a product decision —
-the consent card tells hosts that AI cannot do them, and restrictive policies in the database refuse
+No tool sends email or invitations, writes the hall or the seating directly, applies or restores its
+own proposal, uses invitation quota, deletes anything, writes an RSVP, touches billing or payments,
+or changes team members or authentication. Every proposing tool above stops at a pending row;
+sending, applying and restoring happen only from the approvals desk, through the app's own actions,
+in the host's own session. None of the rest should be added without a product decision — the consent
+card and the guide tell hosts that AI cannot do them, and restrictive policies in the database refuse
 them for an app token even if a tool is added by mistake.
 
 Guest names, notes, dietary needs and RSVP messages are written by guests, so every tool description
@@ -183,6 +226,31 @@ model typed. **Connect your AI** (`/connect-ai`) lists those rows newest first, 
 what an app has actually done without reading a server log. A refusal the host can act on is
 recorded as `denied`, not as a fault.
 
+### Diagnostics
+
+When a propose or write tool fails because the database refused it, the call carries a short
+diagnostic: the Postgres SQLSTATE and, when the refusal came from one of our own RPCs, the hint token
+it raised. Only those two fields are kept. The message is dropped outright — it names tables and
+policies, and a constraint message can quote the row — and a hint is dropped unless it is one of our
+tokens, so guest data cannot ride along.
+
+| Code    | Hint             | Usually means                                                               |
+| ------- | ---------------- | --------------------------------------------------------------------------- |
+| `42501` | `NOT_PERMITTED`  | Row-level security, or a first-party-only function, refused the call.       |
+| `42501` | `READ_ONLY`      | The connection is switched to read-only.                                    |
+| `P0001` | `PENDING_LIMIT`  | 20 proposals are already waiting; decide some before asking for more.       |
+| `P0001` | `DAILY_LIMIT`    | The 50-proposals-a-day ceiling for this app token.                          |
+| `P0001` | `ROW_INVALID`    | A value failed a check inside the RPC.                                      |
+| `P0001` | `NOT_RESTORABLE` | Already restored, never applied, or more than seven days old.               |
+| `42P01` | —                | The function or table the tool used does not exist: a migration is missing. |
+| `23503` | —                | A foreign key no longer resolves (a guest or table was deleted).            |
+| `23505` | —                | A unique constraint: the row is already there.                              |
+
+The same pair goes into the `ai_activity_log` note the host reads on Connect your AI, appended to
+the fixed phrase — `Proposed a hall layout (42501 NOT_PERMITTED)` — so a missing migration and a
+refused policy no longer look identical. `src/features/mcp/diagnostics.ts` does the reduction;
+`src/features/mcp/diagnostics.test.ts` covers what it keeps and what it drops.
+
 ## The approvals desk
 
 A proposal is a row saying what an app would like to send, in its own words, with the guests it
@@ -208,9 +276,30 @@ Reminders go through the batch action, which keeps quota and the 24-hour cap exa
 already were. Both can therefore finish as `applied` with nothing sent, and the card says so in
 those words rather than "sent to 0 of 8".
 
-Two proposal kinds — `apply_hall_layout` and `apply_seating_plan` — can be raised but not carried
-out yet. The card says Àríyá cannot do this, offers only a rejection, and the action refuses an
-approval of either kind before anything is sent.
+A hall layout and a seating plan are applied through the same actions the designer and the seating
+page use — `saveHallLayoutAction`, `saveTablePositionsAction` and `bulkAssignSeatsAction` — so there
+is no second write path. Applying re-reads the stored payload and re-validates all of it: a table
+that has since been deleted, a guest who has left the list, or a room that no longer fits is
+dropped, and the card reports what was applied and what was skipped, with the reasons, instead of
+claiming everything landed. A `rearrange` plan moves guests who are already seated, so its card says
+how many at the top, lists every move and requires a second confirmation before Approve runs.
+
+Applying fails safely. A proposal that cannot finish is recorded as `failed` with a readable reason
+and the counts it reached, exactly as a send is.
+
+### Undo
+
+Before a layout or seating proposal is applied, the action writes a snapshot of what is about to
+change into the proposal's result: the previous layout and table positions, or the previous seat
+assignments of the guests the plan touches. The snapshot is capped at 96 KB; one too large to keep
+says so, and that card offers no restore.
+
+For seven days after the decision, the card offers **Restore previous**. It re-applies the snapshot
+through the same actions and the same validation, then records `restoredAt` in the result.
+`restore_ai_proposal_result(uuid, jsonb)` is the only way to record that: first-party only (an app
+token is refused with `42501`), `applied` only, inside the seven-day window, and only once. Every
+condition sits in one `UPDATE`'s `WHERE` clause, so a double click and a retry resolve to exactly
+one winner; the loser is told the change can no longer be restored.
 
 The app is never named as something it is not. A proposal outlives the redirect URI that could
 verify the client, so the card says only what it can prove: **A connected app**, **An app that is no
@@ -290,22 +379,30 @@ longer connected.
 
 ## Tests
 
-- Unit: `src/app/mcp/route.test.ts`, `src/features/mcp/{guard,schemas,metadata,result}.test.ts`,
-  `src/features/mcp/tools/{read,write}.test.ts`, `src/lib/supabase/request-context.test.ts`, and the consent
-  safety suite: `src/features/mcp/app-trust.test.ts` (the classifier and every look-alike),
+- Unit: `src/app/mcp/route.test.ts`, `src/features/mcp/{guard,schemas,metadata,result,origin,diagnostics}.test.ts`,
+  `src/features/mcp/tools/{read,hall-read,write,proposals,hall-proposals}.test.ts`,
+  `src/lib/supabase/request-context.test.ts`, and the consent safety suite:
+  `src/features/mcp/app-trust.test.ts` (the classifier and every look-alike),
   `src/features/mcp/consent.test.ts` (the action refuses an unacknowledged unknown app) and
-  `src/features/mcp/components/ConsentCard.test.tsx` (all three tiers).
+  `src/features/mcp/components/ConsentCard.test.tsx` (all three tiers). `origin.test.ts` covers the
+  allowed, blocked and absent `Origin`; `diagnostics.test.ts` covers what a refusal keeps.
 - Proposals: `src/features/mcp/tools/proposals.test.ts` mocks every sending path and fails if a
-  proposing tool ever reaches one. `src/features/approvals/actions.test.ts` covers both decisions,
-  the apply-and-record step, and each refusal; `src/features/approvals/queries.test.ts` covers the
-  feed, the expiry rule, the app labels, the badge count and the activity list.
+  proposing tool ever reaches one. `src/features/mcp/tools/hall-proposals.test.ts` covers the two
+  layout tools — archived, out-of-scope and read-only refusals, guests and tables from another
+  celebration, a duplicate guest, an over-capacity table, an oversized payload, overlapping tables,
+  tables outside the hall and a blocked aisle. `src/features/approvals/actions.test.ts` covers both
+  decisions, the apply-and-record step, the restore and its refusals (double restore included), and
+  each failure; `src/features/approvals/previews.test.ts` covers what the card draws, and
+  `src/features/approvals/queries.test.ts` covers the feed, the expiry rule, the app labels, the
+  badge count, the restore window and the activity list.
 - End to end: `e2e/14-mcp.spec.ts` — real password-grant tokens, JSON-RPC over `/mcp`, `whoami`
   reporting such a token as an ordinary session, a second host refused, an oversized import
   rejected, both metadata paths, and the consent screen's signed-out and incomplete-link states.
   `e2e/15-approvals.spec.ts` seeds proposals with the service role and drives the desk itself:
   rejecting without sending, approving once, an overdue proposal shown as expired and uncounted,
-  and a kind the app cannot carry out offering only a rejection. It seeds no OAuth grant, so the
-  card has to describe the app honestly.
+  previewing and applying a seating plan, previewing and applying a room and restoring it, a
+  rearrange demanding its extra confirmation, and a second restore being refused. It seeds no OAuth
+  grant, so the card has to describe the app honestly.
 
 The real OAuth approval step — a connector redirecting the host to `/oauth/consent` and getting a
 token back — needs a live Supabase Auth server and a real connector. It is not covered by the suite.

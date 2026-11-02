@@ -1,5 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
+import { diagnosticOf } from "./diagnostics";
 import { ToolError } from "./result";
 
 export interface ToolContext {
@@ -59,7 +60,9 @@ async function requireScope(ctx: ToolContext, eventId: string): Promise<void> {
   });
 
   if (error) {
-    throw new ToolError("Could not confirm your access to that celebration.");
+    throw new ToolError("Could not confirm your access to that celebration.", {
+      diagnostic: diagnosticOf(error),
+    });
   }
   if (!data) {
     throw new ToolError(OUT_OF_SCOPE, { denied: true });
@@ -73,7 +76,9 @@ async function requireNotReadOnly(ctx: ToolContext): Promise<void> {
   const { data, error } = await ctx.client.rpc("ai_connection_read_only");
 
   if (error) {
-    throw new ToolError("Could not confirm your access to that celebration.");
+    throw new ToolError("Could not confirm your access to that celebration.", {
+      diagnostic: diagnosticOf(error),
+    });
   }
   if (data) {
     throw new ToolError(READ_ONLY, { denied: true });
@@ -96,7 +101,9 @@ async function requireRole(
   });
 
   if (error) {
-    throw new ToolError("Could not confirm your access to that celebration.");
+    throw new ToolError("Could not confirm your access to that celebration.", {
+      diagnostic: diagnosticOf(error),
+    });
   }
   if (!data) {
     throw new ToolError(message, { denied: true });

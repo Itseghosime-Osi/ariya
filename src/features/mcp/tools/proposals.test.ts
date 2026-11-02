@@ -347,6 +347,38 @@ describe("propose_send_invitations", () => {
     );
   });
 
+  it("says the same thing when the database refuses, and logs why", async () => {
+    const { client, logFor } = fakeClient({
+      tables: {
+        guests: { data: [{ id: GUEST_A }], error: null },
+        ai_proposals: {
+          error: {
+            code: "42501",
+            hint: "NOT_PERMITTED",
+            message:
+              'new row violates row-level security policy for table "ai_proposals"',
+          },
+        },
+      },
+      rpc: ALLOWED_RPC,
+    });
+
+    const result = await call(context(client), "propose_send_invitations", {
+      eventId: EVENT_ID,
+    });
+
+    // The model gets the same sentence it always got: the code is for the host's log, not for it.
+    expect(textOf(result)).toBe(
+      "Could not record that proposal. Nothing was sent."
+    );
+    expect(textOf(result)).not.toContain("row-level");
+
+    expect(logFor("ai_activity_log").inserts[0]).toMatchObject({
+      outcome: "error",
+      note: "Proposed send invitations (42501 NOT_PERMITTED)",
+    });
+  });
+
   it("refuses to propose more than one card can hold, and writes nothing", async () => {
     const everyone = Array.from(
       { length: MAX_PROPOSAL_GUESTS + 1 },

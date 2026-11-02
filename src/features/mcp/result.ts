@@ -1,6 +1,7 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
+import { diagnosticNote, type ToolDiagnostic } from "./diagnostics";
 
 /**
  * Every list tool answers with the same envelope, so a model never has to guess whether it has seen
@@ -82,7 +83,8 @@ export async function runTool(
       caller,
       toolName,
       isDenial(error) ? "denied" : "error",
-      log
+      log,
+      error instanceof ToolError ? error.diagnostic : null
     );
     return errorResult(errorMessage(error));
   }
@@ -90,7 +92,9 @@ export async function runTool(
 
 /**
  * Which host, through which connected app, which tool, and whether it worked — never the arguments
- * and never anything a guest typed, so nothing sensitive reaches the logs.
+ * and never anything a guest typed, so nothing sensitive reaches the logs. When the database refused
+ * the call, the SQLSTATE and hint travel with it: a fixed pair, which is what tells a missing table
+ * from a refused policy without replaying the message that named them.
  *
  * The activity row is what the host reads back on the Connect your AI page. Writing it is best
  * effort: a tool that did its job must not be reported as failed because the audit row could not be
@@ -100,7 +104,8 @@ async function recordCall(
   caller: ToolCaller,
   toolName: string,
   outcome: ToolOutcome,
-  log: ToolLog
+  log: ToolLog,
+  diagnostic: ToolDiagnostic | null = null
 ): Promise<void> {
   console.info(
     JSON.stringify({
@@ -109,6 +114,12 @@ async function recordCall(
       clientId: caller.clientId,
       tool: toolName,
       outcome,
+      ...(diagnostic
+        ? {
+            code: diagnostic.code,
+            ...(diagnostic.hint ? { hint: diagnostic.hint } : {}),
+          }
+        : {}),
     })
   );
 
@@ -121,7 +132,7 @@ async function recordCall(
       tool: toolName,
       event_id: log.eventId ?? null,
       outcome,
-      note: log.note ?? null,
+      note: diagnosticNote(log.note, diagnostic),
     });
   } catch {
     // Best effort, as above.
@@ -149,8 +160,19 @@ export class ToolError extends Error {
    */
   readonly denied: boolean;
 
-  constructor(message: string, options: { denied?: boolean } = {}) {
+  /**
+   * The database's own reason, when a refusal came from there. Kept apart from the message so the
+   * code can reach the log without the message — which may name a table, a policy, or a row — ever
+   * leaving the tool.
+   */
+  readonly diagnostic: ToolDiagnostic | null;
+
+  constructor(
+    message: string,
+    options: { denied?: boolean; diagnostic?: ToolDiagnostic | null } = {}
+  ) {
     super(message);
     this.denied = options.denied ?? false;
+    this.diagnostic = options.diagnostic ?? null;
   }
 }
