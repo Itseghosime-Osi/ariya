@@ -31,7 +31,16 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       )
     ).toEqual([]);
 
-    // 2. Event Overview Desk
+    // 2. Profile
+    await page.goto("/profile");
+    results = await new AxeBuilder({ page }).analyze();
+    expect(
+      results.violations.filter(
+        (v) => v.impact === "serious" || v.impact === "critical"
+      )
+    ).toEqual([]);
+
+    // 3. Event Overview Desk
     await page.goto(`/events/${eventId}`);
     results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -47,7 +56,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       .analyze();
     expect(darkTileResults.violations).toEqual([]);
 
-    // 3. Guest Registry
+    // 4. Guest Registry
     await page.goto(`/events/${eventId}/guests`);
     results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -83,7 +92,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
     const rsvpLink = await page.evaluate(() => navigator.clipboard.readText());
     await page.getByRole("button", { name: /close drawer/i }).click();
 
-    // 4. RSVP Invitation Page
+    // 5. RSVP Invitation Page
     await page.goto(rsvpLink);
     results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -92,7 +101,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       )
     ).toEqual([]);
 
-    // 5. Seating Desk
+    // 6. Seating Desk
     await page.goto(`/events/${eventId}/seating`);
     results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -101,7 +110,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       )
     ).toEqual([]);
 
-    // 6. Billing Desk
+    // 7. Billing Desk
     await page.goto(`/events/${eventId}/billing`);
     results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -110,7 +119,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       )
     ).toEqual([]);
 
-    // 7. Public Celebration Page & Confirm Your Attendance panel
+    // 8. Public Celebration Page & Confirm Your Attendance panel
     await page.goto(`/events/${eventId}/page-editor`);
     const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
     if (!(await isPublicCheckbox.isChecked())) {

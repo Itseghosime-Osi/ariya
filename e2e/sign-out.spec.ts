@@ -32,8 +32,11 @@ test.describe("Sign-out confirmation", () => {
     await expect(page.getByTestId("sign-out-stay-toast")).toBeVisible();
     await expect(page).toHaveURL(/\/events/);
 
+    // On a phone the account icon opens the sheet, which carries sign-out.
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.getByTestId("user-avatar-menu").click();
-    await page.getByRole("menuitem", { name: /sign out/i }).click();
+    await expect(page.getByRole("dialog", { name: "Account" })).toBeVisible();
+    await page.getByTestId("account-sign-out").click();
     await page.getByTestId("confirm-sign-out").hover();
     await expect(page.getByTestId("sign-out-mood")).toHaveText(
       "We'll save your place for next time."
