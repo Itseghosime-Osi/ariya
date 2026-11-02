@@ -274,11 +274,20 @@ function confirmation(
 
   if (preview?.kind === "seating") {
     const tables = preview.tables.length;
+    const undo = "It can be put back for 7 days from the decided list.";
+
+    // A rearrange that only moves people seats nobody, so it must not promise to seat 0 guests.
+    if (preview.seatedCount === 0 && preview.movedCount > 0) {
+      const moving =
+        preview.movedCount === 1 ? "1 guest" : `${preview.movedCount} guests`;
+      return `Approving this will move ${moving} to a different table for ${proposal.eventTitle}. ${undo}`;
+    }
+
     return `Approving this will seat ${preview.seatedCount} ${
       preview.seatedCount === 1 ? "guest" : "guests"
     } at ${tables} ${tables === 1 ? "table" : "tables"} for ${
       proposal.eventTitle
-    }${preview.movedCount > 0 ? `, moving ${preview.movedCount} from where they sit now` : ""}. It can be put back for 7 days from the decided list.`;
+    }${preview.movedCount > 0 ? `, moving ${preview.movedCount} from where they sit now` : ""}. ${undo}`;
   }
 
   return `Approving this will ${VERB[proposal.kind]} to ${guests} for ${proposal.eventTitle}. It uses your invitation quota, and it cannot be undone.`;

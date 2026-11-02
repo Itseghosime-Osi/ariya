@@ -416,4 +416,61 @@ test.describe("Approvals desk", () => {
     await expect(page.getByText("Restored", { exact: true })).toBeVisible();
     await expect(page.getByTestId("restore-proposal")).toHaveCount(0);
   });
+
+  test("a rearrange plan names the move and waits for its own confirmation", async ({
+    page,
+    context,
+  }) => {
+    const user = await createAndLoginUser(page, context, "approvals_rearrange");
+    const { eventId } = await createTestEvent(page);
+    const userId = await userIdFor(user.email);
+    const from = await seedTable(eventId, "Top table", 4);
+    const to = await seedTable(eventId, "Window table", 4);
+    const [guestId] = await seedInvitedGuests(eventId, ["Ngozi Eze"]);
+
+    // Already seated: this is the guest the plan would move, and the whole reason for the extra step.
+    const seated = await admin()
+      .from("seat_assignments")
+      .insert({ guest_id: guestId, table_id: from });
+    expect(seated.error, JSON.stringify(seated.error)).toBeNull();
+
+    const proposalId = await seedProposal({
+      userId,
+      eventId,
+      guestIds: [guestId],
+      kind: "apply_seating_plan",
+      title: "Rearrange the seating",
+      summary: "Move 1 guest to the window table.",
+      payload: { assignments: [{ guestId, tableId: to }], mode: "rearrange" },
+    });
+
+    await page.goto("/approvals");
+
+    const card = page.getByTestId("approval-card");
+    await expect(card).toContainText("Rearrange the seating");
+    // The card says what would move before it offers to do it.
+    await expect(card).toContainText("Ngozi Eze (from Top table)");
+    await expect(card).toContainText("1 moving from another table");
+
+    await card.getByTestId("approve-proposal").click();
+
+    // The first click only opens the second confirmation; it does not apply anything.
+    await expect(card.getByTestId("confirm-approve-proposal")).toBeVisible();
+    await expect(card).toContainText(
+      "Approving this will move 1 guest to a different table for"
+    );
+    expect((await proposalRow(proposalId)).status).toBe("pending");
+
+    // Backing out leaves the desk as it was.
+    await card.getByRole("button", { name: "Not yet" }).click();
+    await expect(card.getByTestId("confirm-approve-proposal")).toHaveCount(0);
+    expect((await proposalRow(proposalId)).status).toBe("pending");
+
+    await card.getByTestId("approve-proposal").click();
+    await card.getByTestId("confirm-approve-proposal").click();
+
+    await expect(page.getByText(/nothing is waiting/i)).toBeVisible();
+    await expect(page.getByText(/1 guest was seated/i)).toBeVisible();
+    expect((await proposalRow(proposalId)).status).toBe("applied");
+  });
 });
