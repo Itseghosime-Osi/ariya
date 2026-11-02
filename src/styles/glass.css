@@ -156,6 +156,37 @@ select.desk-field {
   );
 }
 
+/* A phone sheet rises from the bottom edge and is pulled back down on close.
+   Radix Presence waits for these animations, so the panel is not torn away
+   mid-slide. */
+.account-sheet[data-state="open"] {
+  animation: account-sheet-in 360ms var(--ease-out);
+}
+.account-sheet[data-state="closed"] {
+  animation: account-sheet-out 200ms cubic-bezier(0.4, 0, 1, 1);
+  pointer-events: none;
+}
+@keyframes account-sheet-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0.55;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes account-sheet-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0.4;
+  }
+}
+
 .bento-tile-hover {
   transition:
     transform 150ms cubic-bezier(0.22, 1, 0.36, 1),

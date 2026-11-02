@@ -25,6 +25,16 @@ export interface SwitcherEvent {
   couple?: string | null;
 }
 
+/** Two initials for an avatar, from the local part of an email: "help@…" -> "HE". */
+export function accountInitials(email?: string | null): string {
+  const local = email?.split("@")[0]?.trim() ?? "";
+  if (!local) return "A";
+  const parts = local.split(/[\s._-]+/).filter(Boolean);
+  const letters =
+    parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : local.slice(0, 2);
+  return letters.toUpperCase();
+}
+
 export function isValidEventId(eventId?: string | null): eventId is string {
   const id = eventId?.trim();
   return Boolean(id && id !== "default");
@@ -124,8 +134,13 @@ export function getPhonePrimaryTabs(eventId?: string | null): NavItem[] {
   ];
 }
 
+/** The More sheet: every section the dock does not already carry. Settings
+ *  moved into the phone's account sheet, so it is left out here. */
 export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
   return getEventSections(eventId).filter(
-    (item) => item.name !== "Guests" && item.name !== "Check-in"
+    (item) =>
+      item.name !== "Guests" &&
+      item.name !== "Check-in" &&
+      item.name !== "Settings"
   );
 }
