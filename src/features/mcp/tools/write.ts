@@ -10,6 +10,7 @@ import {
 } from "@/features/guests/actions";
 import type { GuestUpdate } from "@/features/guests/types";
 import { updateInvitationDesignAction } from "@/features/invitations/actions";
+import { diagnosticOf } from "../diagnostics";
 import { requireWriteAccess, type ToolContext } from "../guard";
 import { dataResult, errorResult, runTool, ToolError } from "../result";
 import {
@@ -172,8 +173,9 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
             .maybeSingle();
 
           if (error) {
-            throw new Error(
-              "Could not read that guest right now. Nothing was changed."
+            throw new ToolError(
+              "Could not read that guest right now. Nothing was changed.",
+              { diagnostic: diagnosticOf(error) }
             );
           }
           if (!existing) {
@@ -270,8 +272,9 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
             .maybeSingle();
 
           if (error) {
-            throw new Error(
-              "Could not read that invitation right now. Nothing was changed."
+            throw new ToolError(
+              "Could not read that invitation right now. Nothing was changed.",
+              { diagnostic: diagnosticOf(error) }
             );
           }
           if (!current) {
@@ -322,7 +325,8 @@ export async function checkEventCreationBudget(
 
   if (ownershipError) {
     throw new ToolError(
-      "Could not check your recent celebrations. Nothing was created."
+      "Could not check your recent celebrations. Nothing was created.",
+      { diagnostic: diagnosticOf(ownershipError) }
     );
   }
   if (!owned?.length) return;
@@ -340,7 +344,8 @@ export async function checkEventCreationBudget(
 
   if (error) {
     throw new ToolError(
-      "Could not check your recent celebrations. Nothing was created."
+      "Could not check your recent celebrations. Nothing was created.",
+      { diagnostic: diagnosticOf(error) }
     );
   }
   if (!recent || recent.length < MAX_EVENTS_PER_DAY) return;
