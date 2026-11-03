@@ -53,6 +53,34 @@
   function sFromScene(mode, k) { for (var i = 0; i < CUTS.length; i++) if (CUTS[i].mode === mode) return CUTS[i].a + (CUTS[i].b - CUTS[i].a) * k; return 0; }
   function rawFromS(sv) { return PRO + sv * (1 - PRO); }
   window.OPmap = { sFromScene: sFromScene, sFromOld: sFromOld, rawFromS: rawFromS, tFromS: tFromS, seconds: TT };
+  // The map above is the fallback, and it runs at once: the gate, the chapter rail and the first frames never wait on a
+  // download. The Rust renderer holds the same map, pinned to the same numbers by its own tests, so handing the per-frame
+  // math over to it part-way through changes nothing on screen. If the engine never arrives — no WebAssembly, a stale
+  // ABI, a failed fetch — none of this runs and the film tells its story on the map it already has.
+  (function () {
+    if (!window.WebAssembly) return;
+    var here = (document.currentScript && document.currentScript.src) || location.pathname;
+    var dir = here.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
+    function takeOver(engine) {
+      mapStory = function (sv) { return engine.sceneAt(sv); };
+      sFromOld = function (p) { return engine.sFromOld(p); };
+      sFromScene = function (mode, k) { return engine.sFromScene(mode, k); };
+      rawFromS = function (sv) { return engine.rawFromS(sv); };
+      tFromS = function (sv) { return engine.tFromS(sv); };
+      sFromT = function (t) { return engine.sFromT(t); };
+      TT = engine.totalTime();
+      window.OPmap = { sFromScene: sFromScene, sFromOld: sFromOld, rawFromS: rawFromS, tFromS: tFromS, seconds: TT, sceneAt: mapStory };
+      OP.engine = "rust";
+    }
+    var script = document.createElement("script");
+    script.src = dir + "ariya-render.6d6d4c8adbfd.js";
+    script.async = true;
+    script.onload = function () {
+      if (window.AriyaRender) window.AriyaRender.load().then(takeOver, function () { /* the JavaScript map stands */ });
+    };
+    script.onerror = function () { /* the JavaScript map stands */ };
+    document.head.appendChild(script);
+  })();
   // A stable viewport height: the screen with the phone's address bar tucked away (100lvh). window.innerHeight changes
   // every time the address bar slides in or out, which on a top-level page (not in a frame) is on most scrolls; sizing
   // the film and its scroll progress by it made the picture flash and the story jump.
