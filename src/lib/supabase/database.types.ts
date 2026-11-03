@@ -429,6 +429,7 @@ export type Database = {
           dress_code: string | null;
           hall_layout: Json | null;
           id: string;
+          invitation_design: Json | null;
           invitation_headline: string | null;
           invitation_message: string | null;
           invitation_subheadline: string | null;
@@ -455,6 +456,7 @@ export type Database = {
           dress_code?: string | null;
           hall_layout?: Json | null;
           id?: string;
+          invitation_design?: Json | null;
           invitation_headline?: string | null;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;
@@ -480,6 +482,7 @@ export type Database = {
           dress_code?: string | null;
           hall_layout?: Json | null;
           id?: string;
+          invitation_design?: Json | null;
           invitation_headline?: string | null;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;

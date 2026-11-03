@@ -98,37 +98,45 @@ test.describe("RSVP & Email Dispatch", () => {
     ).toBeVisible();
 
     // Select emerald_regal theme
-    const emeraldThemeButton = page
-      .locator('button:has-text("Emerald Regal")')
-      .first();
-    await emeraldThemeButton.click();
+    await page.getByRole("tab", { name: "Design" }).click();
+    await page
+      .getByRole("button", { name: /Emerald Regal/i })
+      .first()
+      .click();
 
-    // Fill custom headline, subheadline, message
     const customHeadline = "Joyful Union & Celebration";
     const customSubheadline = "Together with our families and honored guests";
     const customMessage =
       "We warmly welcome you to share this sacred milestone with us.";
 
-    await page.locator("#headline").fill(customHeadline);
-    await page.locator("#subheadline").fill(customSubheadline);
-    await page.locator("#customMessage").fill(customMessage);
+    // The studio edits the card's own layers: names, eyebrow and message.
+    const setLayerText = async (kind: string, text: string) => {
+      await page.getByRole("tab", { name: "Layers" }).click();
+      await page.locator(`[data-layer-kind="${kind}"]`).click();
+      await page.getByRole("tab", { name: "Text" }).click();
+      await page.locator("#layer-text").fill(text);
+    };
 
-    // Save changes
-    await page.getByRole("button", { name: /save design/i }).click();
-    await expect(page.getByText(/saved successfully/i).first()).toBeVisible({
-      timeout: 10000,
+    await setLayerText("names", customHeadline);
+    await setLayerText("kicker", customSubheadline);
+    await setLayerText("message", customMessage);
+
+    // The studio saves itself once the typing settles.
+    await expect(page.getByText(/Design saved/i)).toBeVisible({
+      timeout: 15000,
     });
 
     // Reload page to verify persistence
     await page.reload();
-    await expect(page.locator("#headline")).toHaveValue(customHeadline);
-    await expect(page.locator("#subheadline")).toHaveValue(customSubheadline);
-    await expect(page.locator("#customMessage")).toHaveValue(customMessage);
+    await expect(page.getByTestId("invitation-card")).toContainText(
+      customHeadline
+    );
 
-    // Designer preview shows the custom headline
-    await expect(
-      page.locator("h2").filter({ hasText: customHeadline }).first()
-    ).toBeVisible();
+    // The overview desk shows the same saved card, not the house default.
+    await page.goto(`/events/${eventId}`);
+    const overviewCard = page.getByTestId("invitation-card").first();
+    await expect(overviewCard).toContainText(customHeadline);
+    await expect(overviewCard).toContainText(customMessage);
 
     // Visit guest invitation link and confirm custom text and emerald theme styling appear
     await page.goto(inviteUrl);

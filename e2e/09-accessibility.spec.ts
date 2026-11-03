@@ -51,7 +51,7 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
 
     // Contrast check on dark overview invitation tile
     const darkTileResults = await new AxeBuilder({ page })
-      .include('[data-testid="invitation-tile"]')
+      .include('[data-testid="invitation-card"]')
       .withRules(["color-contrast"])
       .analyze();
     expect(darkTileResults.violations).toEqual([]);

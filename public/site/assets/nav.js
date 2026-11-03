@@ -14,6 +14,7 @@
     ["about.html", "About Àríyá", "Invitations, RSVPs and seating, told on one page."],
     ["product.html", "What we do", "Guest lists, personal links, seating and vendors."],
     ["pricing.html", "Pricing", "Pay per event. Placeholder prices for the prototype."],
+    ["docs.html", "Docs", "Guides to guest lists, invitations, seating and vendors."],
     ["planner.html", "The demo planner", "Try it on a sample wedding. Nothing is sent."]
   ];
   function here(href) {
