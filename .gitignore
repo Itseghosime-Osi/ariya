@@ -2,6 +2,9 @@
 node_modules/
 .pnpm-store/
 
+# Rust
+target/
+
 # Next.js build
 .next/
 out/

@@ -1,0 +1,11 @@
+[package]
+name = "ariya-render-wasm"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ariya-render-core = { path = "../render-core" }

@@ -172,6 +172,9 @@ importers:
 
   .:
     dependencies:
+      '@ariya/render':
+        specifier: workspace:*
+        version: link:packages/render
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -374,6 +377,8 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.2.7(@types/node@22.20.5)(jiti@2.7.0)(jsdom@26.1.0(supports-color@7.2.0))(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
+
+  packages/render: {}
 
 packages:
 
