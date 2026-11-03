@@ -187,54 +187,6 @@ const nextConfig: NextConfig = {
         destination: "/i/:token",
       },
       {
-        source: "/about",
-        destination: "/site/about.html",
-      },
-      {
-        source: "/about.html",
-        destination: "/site/about.html",
-      },
-      {
-        source: "/product",
-        destination: "/site/product.html",
-      },
-      {
-        source: "/product.html",
-        destination: "/site/product.html",
-      },
-      {
-        source: "/pricing",
-        destination: "/site/pricing.html",
-      },
-      {
-        source: "/pricing.html",
-        destination: "/site/pricing.html",
-      },
-      {
-        source: "/docs",
-        destination: "/site/docs.html",
-      },
-      {
-        source: "/docs.html",
-        destination: "/site/docs.html",
-      },
-      {
-        source: "/story",
-        destination: "/site/story.html",
-      },
-      {
-        source: "/story.html",
-        destination: "/site/story.html",
-      },
-      {
-        source: "/film",
-        destination: "/site/film.html",
-      },
-      {
-        source: "/film.html",
-        destination: "/site/film.html",
-      },
-      {
         source: "/assets/:path*",
         destination: "/site/assets/:path*",
       },
