@@ -1,12 +1,18 @@
 import { chromium } from "@playwright/test";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "node:url";
 import {
   createAndLoginUser,
   createTestEvent,
 } from "../e2e/fixtures/test-helpers";
 
-const OUT_DIR = path.join(process.cwd(), "docs", "screenshots");
+const webRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+);
+const repoRoot = path.resolve(webRoot, "../..");
+const OUT_DIR = path.join(repoRoot, "docs", "screenshots");
 if (!fs.existsSync(OUT_DIR)) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 }
