@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import createMDX from "@next/mdx";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -50,6 +51,7 @@ const allowLocalIP = shouldAllowLocalIP(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   images: {
     remotePatterns: getRemotePatterns(),
     ...(allowLocalIP ? { dangerouslyAllowLocalIP: true } : {}),
@@ -241,4 +243,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(createMDX()(nextConfig));
