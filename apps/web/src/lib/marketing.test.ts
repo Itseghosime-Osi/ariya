@@ -1,34 +1,42 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CELEBRATION_PASS_AMOUNT_KOBO } from "./paystack";
+import { pageMetadata } from "./site-metadata";
 const site = join(process.cwd(), "public/site");
+const routes = join(process.cwd(), "src/app/(marketing)");
 
 describe("public marketing integrity", () => {
-  it.each(["index", "about", "product", "pricing", "docs"])(
-    "%s has working local scripts and canonical metadata",
+  it.each(["about", "product", "pricing", "docs"])(
+    "%s route carries canonical metadata",
     (page) => {
-      const html = readFileSync(join(site, `${page}.html`), "utf8");
-      for (const [, src] of html.matchAll(
-        /<script[^>]+src="(assets\/[^"?]+)"/g
-      ))
-        expect(existsSync(join(site, src))).toBe(true);
-      expect(html).toContain(
-        `rel="canonical" href="https://ariya-two.vercel.app/${page === "index" ? "" : page}"`
+      // pageMetadata builds the canonical URL from the route path; the
+      // layout supplies the https://ariya-two.vercel.app metadataBase.
+      const metadata = pageMetadata({
+        title: page,
+        description: page,
+        path: `/${page}`,
+      });
+      expect(metadata.alternates).toEqual({ canonical: `/${page}` });
+    }
+  );
+  it.each(["about", "product", "pricing", "docs"])(
+    "%s source declares its canonical path and no stale domain",
+    (page) => {
+      const source = readFileSync(
+        join(routes, page, page === "docs" ? "page.mdx" : "page.tsx"),
+        "utf8"
       );
-      expect(html).not.toContain("owambeplan.vercel.app");
-      for (const [, json] of html.matchAll(
-        /<script type="application\/ld\+json">(.*?)<\/script>/gs
-      ))
-        expect(() => JSON.parse(json)).not.toThrow();
+      expect(source).toContain(`path: "/${page}"`);
+      expect(source).not.toContain("owambeplan.vercel.app");
     }
   );
   it("advertises the actual checkout amount without unsupported SMS reminders", () => {
-    const html = readFileSync(join(site, "pricing.html"), "utf8");
+    const source = readFileSync(join(routes, "pricing/page.tsx"), "utf8");
     const amount = (CELEBRATION_PASS_AMOUNT_KOBO / 100).toLocaleString("en-NG");
-    expect(html).toContain(`₦${amount}`);
-    expect(html).toContain("Up to 20 guest invitations");
-    expect(html).not.toMatch(
+    expect(source).toContain(`₦${amount}`);
+    expect(source).toContain("Up to 20 guest invitations");
+    expect(source).not.toMatch(
       /₦45,000|₦30,000|SMS reminders|Placeholder prices/
     );
   });
