@@ -18,6 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "analyze": "ANALYZE=true next build",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "test:rust": "cargo test --workspace",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "test:db": "supabase test db",
     "db:seed": "tsx scripts/seed-demo.ts",
