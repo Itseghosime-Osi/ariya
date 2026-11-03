@@ -5,7 +5,9 @@
 //
 // Nothing plays until start() is called from a click or tap.
 
-const MUSIC_URL = "/site/assets/music.mp3";
+// Smallest first: the Opus encode is ~1.7MB, the AAC fallback ~2.5MB,
+// replacing a 7MB file that was AAC-in-ADTS all along.
+const MUSIC_URLS = ["/site/assets/music.opus", "/site/assets/music.m4a"];
 
 const BPM = 104;
 const STEP = 60 / BPM / 3; // 12 eighth-note triplet steps per bar
@@ -42,7 +44,8 @@ let step = 0;
 let on = false;
 let noiseBuf: AudioBuffer;
 let audioEl: HTMLAudioElement | null = null;
-let fileFailed = false;
+// Index into MUSIC_URLS; past the end means every file failed.
+let fileIndex = 0;
 let installed = false;
 
 const listeners = new Set<(on: boolean) => void>();
@@ -295,24 +298,24 @@ export function start(at = 0): boolean {
     return false;
   }
   on = true;
-  if (MUSIC_URL && !fileFailed) {
-    // Try the recording first; fall back to the generated groove if it is
-    // missing or won't play.
+  if (fileIndex < MUSIC_URLS.length) {
+    // Try each recording in turn (Opus, then AAC); fall back to the
+    // generated groove if none of them play.
     const fallback = () => {
-      if (fileFailed) return;
-      fileFailed = true;
+      fileIndex += 1;
       audioEl = null;
       if (on) start();
     };
+    const url = MUSIC_URLS[fileIndex];
     if (!audioEl) {
-      audioEl = new Audio(MUSIC_URL);
+      audioEl = new Audio(url);
       audioEl.loop = true;
       audioEl.volume = 0.55;
       audioEl.addEventListener("error", fallback);
       // A missing file does not always raise "error" (some browsers just keep
       // loading), so ask for it once and fall back if it is not there.
       try {
-        fetch(MUSIC_URL, { method: "HEAD" }).then((r) => {
+        fetch(url, { method: "HEAD" }).then((r) => {
           if (!r.ok || /text\/html/.test(r.headers.get("content-type") ?? "")) {
             fallback();
           }
