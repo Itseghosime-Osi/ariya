@@ -1,6 +1,6 @@
 import type { IconName } from "@/components/ui/icon";
 
-export type NavGroup = "home" | "plan" | "day" | "manage";
+export type NavGroup = "home" | "plan" | "day" | "manage" | "account";
 
 export interface NavItem {
   name: string;
@@ -16,6 +16,13 @@ export const NAV_GROUPS: { id: NavGroup; label: string; panel: boolean }[] = [
   { id: "plan", label: "Planning", panel: true },
   { id: "day", label: "On the day", panel: true },
   { id: "manage", label: "Manage", panel: false },
+  { id: "account", label: "Account", panel: false },
+];
+
+/** The host's own pages, the same whichever celebration is open. */
+export const ACCOUNT_SECTIONS: NavItem[] = [
+  { name: "Profile", href: "/profile", icon: "person", group: "account" },
+  { name: "Settings", href: "/settings", icon: "settings", group: "account" },
 ];
 
 export interface SwitcherEvent {
@@ -101,10 +108,10 @@ export function getEventSections(eventId?: string | null): NavItem[] {
       group: "manage",
     },
     {
-      name: "Settings",
+      name: "Event settings",
       href: `${baseUrl}/settings`,
-      icon: "settings",
-      group: "manage",
+      icon: "tune",
+      group: "plan",
     },
   ];
 }
@@ -134,13 +141,10 @@ export function getPhonePrimaryTabs(eventId?: string | null): NavItem[] {
   ];
 }
 
-/** The More sheet: every section the dock does not already carry. Settings
- *  moved into the phone's account sheet, so it is left out here. */
+/** The More sheet: every section the dock does not already carry. Account
+ *  settings live in the phone's account sheet; Event settings stay here. */
 export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
   return getEventSections(eventId).filter(
-    (item) =>
-      item.name !== "Guests" &&
-      item.name !== "Check-in" &&
-      item.name !== "Settings"
+    (item) => item.name !== "Guests" && item.name !== "Check-in"
   );
 }

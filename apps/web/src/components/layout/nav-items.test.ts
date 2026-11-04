@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getEventSections, getPhoneMoreSections } from "./nav-items";
+import {
+  ACCOUNT_SECTIONS,
+  getEventSections,
+  getPhoneMoreSections,
+} from "./nav-items";
 
 const EVENT_ID = "2f1a7c4e-0b6d-4c2a-9f3e-8d5b1a7c4e0b";
 
@@ -13,16 +17,27 @@ describe("getPhoneMoreSections", () => {
     expect(names).toContain("Invitations");
   });
 
-  it("leaves Settings to the account sheet", () => {
+  it("keeps Event settings in More, and account Settings out of it", () => {
     const names = getPhoneMoreSections(EVENT_ID).map((item) => item.name);
 
+    expect(names).toContain("Event settings");
     expect(names).not.toContain("Settings");
   });
 
-  it("keeps Settings in the desktop sections", () => {
-    const names = getEventSections(EVENT_ID).map((item) => item.name);
+  it("files Event settings under Planning", () => {
+    const item = getEventSections(EVENT_ID).find(
+      (i) => i.name === "Event settings"
+    );
 
-    expect(names).toContain("Settings");
+    expect(item?.group).toBe("plan");
+    expect(item?.href).toBe(`/events/${EVENT_ID}/settings`);
+  });
+
+  it("gives the account its own Profile and Settings", () => {
+    expect(ACCOUNT_SECTIONS.map((i) => [i.name, i.href])).toEqual([
+      ["Profile", "/profile"],
+      ["Settings", "/settings"],
+    ]);
   });
 
   it("has nothing to show without a real event", () => {

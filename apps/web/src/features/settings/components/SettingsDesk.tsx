@@ -90,27 +90,40 @@ export function SettingsDesk({
     null | "passcode" | "everywhere" | "shortcuts" | "install"
   >(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
+  // A section picked in the menu stays lit while the page scrolls to it.
+  const pickedUntil = useRef(0);
 
   // Highlight the section in view in the desktop rail.
   useEffect(() => {
-    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(
-      (el): el is HTMLElement => Boolean(el)
-    );
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-20% 0px -60% 0px" }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    // The section whose heading has passed a third of the way down the screen; at the very
+    // bottom of the page the last one, even when it is too short to reach that line.
+    const update = () => {
+      if (Date.now() < pickedUntil.current) return;
+      const doc = document.documentElement;
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 8) {
+        setActive(SECTIONS[SECTIONS.length - 1].id);
+        return;
+      }
+      let current = SECTIONS[0].id;
+      for (const { id } of SECTIONS) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= window.innerHeight / 3) {
+          current = id;
+        }
+      }
+      setActive(current);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   return (
-    <div className="settings-desk pb-24 lg:pb-16">
+    <div className="settings-desk">
       <ScreenHeader
         title="Settings"
         backHref="/events"
@@ -149,6 +162,10 @@ export function SettingsDesk({
                 <li key={s.id}>
                   <a
                     href={`#${s.id}`}
+                    onClick={() => {
+                      pickedUntil.current = Date.now() + 900;
+                      setActive(s.id);
+                    }}
                     aria-current={active === s.id ? "true" : undefined}
                     className={cn(
                       "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all",
