@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
-import { SCENE_IMPORT_MAP } from "@/lib/site/scene";
+import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),

@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InvitationCard } from "@/components/site/fine-card";
-import { SceneStage } from "@/components/site/scene-stage";
+
+// The 3D stage pulls the scene host, and that host is the only client code that
+// knows a `three` specifier exists. Loading it lazily keeps it off every route
+// that is not a marketing page.
+const SceneStage = dynamic(
+  () => import("@/components/site/scene-stage").then((m) => m.SceneStage),
+  { ssr: false }
+);
 
 const COTD = [
   ["burgundy", "Burgundy", "#5a1428"],

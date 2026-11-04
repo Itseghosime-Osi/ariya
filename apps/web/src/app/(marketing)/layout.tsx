@@ -3,7 +3,7 @@ import "@/styles/site/ariya.css";
 import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
-import { SCENE_IMPORT_MAP } from "@/lib/site/scene";
+import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),

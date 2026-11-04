@@ -1,7 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SceneStage } from "@/components/site/scene-stage";
+
+// Same reason as hero.tsx: the stage is the only path to the scene host, so it
+// loads on demand and never reaches a logged-in route.
+const SceneStage = dynamic(
+  () => import("@/components/site/scene-stage").then((m) => m.SceneStage),
+  { ssr: false }
+);
 
 function clamp(v: number, a: number, b: number) {
   return Math.max(a, Math.min(b, v));
