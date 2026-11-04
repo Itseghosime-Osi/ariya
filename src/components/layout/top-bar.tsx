@@ -1,27 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AccountSheet } from "./account-sheet";
 import { GlobalSearch } from "./global-search";
-import { SignOutConfirmation } from "./SignOutConfirmation";
+import { accountInitials } from "./nav-items";
 
 interface TopBarProps {
   eventId?: string;
   userEmail?: string;
+  pendingProposals?: number;
 }
 
-export function TopBar({ eventId, userEmail }: TopBarProps) {
+export function TopBar({
+  eventId,
+  userEmail,
+  pendingProposals = 0,
+}: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
@@ -59,6 +58,27 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/approvals"
+            aria-label={
+              pendingProposals > 0
+                ? `Approvals, ${pendingProposals} waiting`
+                : "Approvals"
+            }
+            data-testid="approvals-link"
+            className="relative flex h-11 items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-3 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="pending" size={18} className="shrink-0" />
+            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] sm:inline">
+              Approvals
+            </span>
+            {pendingProposals > 0 ? (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-burgundy px-1 text-[11px] font-semibold leading-none text-champagne">
+                {pendingProposals > 9 ? "9+" : pendingProposals}
+              </span>
+            ) : null}
+          </Link>
+
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
@@ -69,54 +89,35 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
             <Icon name="search" size={18} />
           </button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                title="Profile & Settings"
-                data-testid="user-avatar-menu"
-                className="flex min-h-[44px] items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 hover:bg-white hover:border-gold-ink/60 px-2.5 py-1.5 text-xs font-medium text-night transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-burgundy text-champagne shrink-0">
-                  <Icon name="person" size={16} />
-                </span>
-                <span className="hidden sm:inline max-w-[160px] truncate text-label-2">
-                  {userEmail || "Account"}
-                </span>
-                <Icon
-                  name="expand_more"
-                  size={15}
-                  className="text-label-2 shrink-0"
-                />
-              </button>
-            </DropdownMenuTrigger>
+          {/* Desktop: the one door for a connected app */}
+          <Link
+            href="/connect-ai"
+            data-testid="connect-ai-link"
+            className="group relative hidden h-11 items-center gap-2 overflow-hidden rounded-full border border-gold/45 bg-burgundy pl-3 pr-4 text-champagne transition-[transform,background-color,box-shadow] duration-200 hover:bg-wine hover:shadow-[0_12px_26px_-14px_rgba(107,30,46,0.9)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy motion-safe:hover:-translate-y-px md:flex"
+          >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 -left-full w-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[200%]"
+            />
+            <Icon name="styler" size={17} className="relative shrink-0" />
+            <span className="relative text-[11px] font-semibold uppercase tracking-[0.14em]">
+              Connect to an AI
+            </span>
+          </Link>
 
-            <DropdownMenuContent
-              align="end"
-              className="w-56 rounded-2xl border border-gold-ink/25 bg-surface p-1.5 shadow-lg"
-            >
-              <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-label-2 truncate">
-                {userEmail || "Signed in"}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="my-1 bg-hairline" />
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/connect-ai"
-                  className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-night"
-                >
-                  <Icon name="link" size={16} className="text-gold-ink" />
-                  <span>Connect your AI</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => setSignOutOpen(true)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-burgundy cursor-pointer"
-              >
-                <Icon name="logout" size={16} />
-                <span>Sign out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Phone: the account icon opens the sheet */}
+          <button
+            type="button"
+            ref={accountButtonRef}
+            onClick={() => setAccountOpen(true)}
+            aria-label={`${accountInitials(userEmail)}, Account menu`}
+            data-testid="user-avatar-menu"
+            className="md:hidden grid h-11 w-11 place-items-center rounded-full border border-gold-ink/25 bg-white/70 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-burgundy font-display text-[12px] font-bold leading-none text-champagne ring-1 ring-gold/40">
+              {accountInitials(userEmail)}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -125,7 +126,13 @@ export function TopBar({ eventId, userEmail }: TopBarProps) {
         onOpenChange={setSearchOpen}
         eventId={eventId}
       />
-      <SignOutConfirmation open={signOutOpen} onOpenChange={setSignOutOpen} />
+      <AccountSheet
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        userEmail={userEmail}
+        eventId={eventId}
+        returnFocusTo={accountButtonRef}
+      />
     </>
   );
 }

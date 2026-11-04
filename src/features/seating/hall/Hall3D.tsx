@@ -104,8 +104,17 @@ export interface Hall3DHandle {
  */
 export const Hall3D = forwardRef<
   Hall3DHandle,
-  { scene: Scene; onMessage: (m: HallMessage) => void; className?: string }
->(function Hall3D({ scene, onMessage, className }, ref) {
+  {
+    scene: Scene;
+    onMessage: (m: HallMessage) => void;
+    className?: string;
+    /**
+     * The camera to settle on once the room is drawn. `top` is a true plan view: the same hall,
+     * read from above, which is what a host comparing two designs needs.
+     */
+    initialView?: "top" | "3d";
+  }
+>(function Hall3D({ scene, onMessage, className, initialView }, ref) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -149,8 +158,11 @@ export const Hall3D = forwardRef<
   }, [send]);
 
   useEffect(() => {
-    if (ready) send({ t: "scene", ...scene });
-  }, [ready, scene, send]);
+    if (!ready) return;
+    send({ t: "scene", ...scene });
+    // The scene is applied before the next message is read, so the view lands on the room it names.
+    if (initialView === "top") send({ t: "cmd", cmd: "top" });
+  }, [ready, scene, initialView, send]);
 
   return (
     <div className={className}>
