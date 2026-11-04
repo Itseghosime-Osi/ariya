@@ -12,6 +12,7 @@ import { SignOutConfirmation } from "./SignOutConfirmation";
 import {
   NAV_GROUPS,
   accountInitials,
+  ACCOUNT_SECTIONS,
   getEventSections,
   type NavItem,
   type SwitcherEvent,
@@ -73,7 +74,10 @@ export function Sidebar({
   const accountRef = useRef<HTMLDivElement>(null);
 
   const sections = getEventSections(activeEvent?.id);
-  const activeItems = events.length > 0 ? [HOME, ...sections] : sections;
+  const activeItems = [
+    ...(events.length > 0 ? [HOME, ...sections] : sections),
+    ...ACCOUNT_SECTIONS,
+  ];
   const active = activeItems.find((item) => isActiveHref(pathname, item.href));
 
   // The gold pill glides to whichever item is active.
@@ -382,6 +386,17 @@ export function Sidebar({
                 })}
               </div>
             )}
+
+            {/* The host's own pages, whichever celebration is open. */}
+            <div data-testid="sidebar-account-sections">
+              <div className="sb-section" aria-hidden="true">
+                <span className="sb-section-text">Account</span>
+                <span className="sb-section-dot" />
+              </div>
+              <div className="flex flex-col gap-1">
+                {ACCOUNT_SECTIONS.map(renderItem)}
+              </div>
+            </div>
           </nav>
         </div>
 

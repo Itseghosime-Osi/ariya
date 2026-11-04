@@ -118,7 +118,7 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
       "Team",
       "Page editor",
       "Billing",
-      "Settings",
+      "Event settings",
     ]) {
       await expect(
         sectionsContainer.getByRole("link", { name: sectionName, exact: true })
@@ -272,13 +272,18 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
         name: "Seating",
       })
     ).toBeVisible();
-    // Settings moved into the account sheet, so More no longer carries it.
+    // Account Settings lives in the account sheet; More carries the event's own settings.
     await expect(
       page.getByTestId("phone-more-sections").getByRole("link", {
         name: "Settings",
         exact: true,
       })
     ).toHaveCount(0);
+    await expect(
+      page.getByTestId("phone-more-sections").getByRole("link", {
+        name: "Event settings",
+      })
+    ).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(moreSheet).toBeHidden();
