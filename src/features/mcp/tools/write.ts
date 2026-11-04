@@ -9,7 +9,15 @@ import {
   updateGuestAction,
 } from "@/features/guests/actions";
 import type { GuestUpdate } from "@/features/guests/types";
-import { updateInvitationDesignAction } from "@/features/invitations/actions";
+import { saveInvitationDesignAction } from "@/features/invitations/actions";
+import {
+  applyInvitationTheme,
+  designFromEvent,
+} from "@/features/invitations/design";
+import type {
+  InvitationDesign,
+  InvitationLayerKind,
+} from "@/features/invitations/types";
 import { diagnosticOf } from "../diagnostics";
 import { requireWriteAccess, type ToolContext } from "../guard";
 import { dataResult, errorResult, runTool, ToolError } from "../result";
@@ -257,7 +265,7 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
         openWorldHint: false,
       },
     },
-    ({ eventId, ...design }) =>
+    ({ eventId, ...changes }) =>
       runTool(
         ctx,
         "update_invitation_design",
@@ -267,7 +275,9 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
 
           const { data: current, error } = await ctx.client
             .from("events")
-            .select("dress_code, invitation_subheadline, invitation_message")
+            .select(
+              "title, couple, date, venue, area, dress_code, rsvp_by, invitation_theme, invitation_headline, invitation_subheadline, invitation_message, invitation_design"
+            )
             .eq("id", eventId)
             .maybeSingle();
 
@@ -283,31 +293,73 @@ export function registerWriteTools(server: McpServer, ctx: ToolContext): void {
             );
           }
 
-          // The action reads every field off the form, and an absent key reads back as null, which
-          // its schema rejects. Omitted fields keep whatever is already stored.
-          const formData = new FormData();
-          formData.set("theme", design.theme);
-          formData.set("headline", design.headline);
-          formData.set(
-            "subheadline",
-            design.subheadline ?? current.invitation_subheadline ?? ""
-          );
-          formData.set(
-            "attireNote",
-            design.attireNote ?? current.dress_code ?? ""
-          );
-          formData.set(
-            "customMessage",
-            design.customMessage ?? current.invitation_message ?? ""
+          // An omitted field keeps whatever the host already saved, so the tool only ever rewrites
+          // the words it was asked to change.
+          const design = withDesignProse(
+            applyInvitationTheme(
+              designFromEvent({
+                title: current.title,
+                couple: current.couple,
+                date: current.date,
+                venue: current.venue,
+                area: current.area,
+                dressCode: current.dress_code,
+                rsvpBy: current.rsvp_by,
+                theme: current.invitation_theme,
+                headline: current.invitation_headline,
+                subheadline: current.invitation_subheadline,
+                message: current.invitation_message,
+                design: current.invitation_design,
+              }),
+              changes.theme
+            ),
+            changes
           );
 
-          const result = await updateInvitationDesignAction(eventId, formData);
-          if (result.error) return errorResult(result.error);
+          const result = await saveInvitationDesignAction(eventId, design);
+          if (!result.ok) return errorResult(result.error);
 
-          return dataResult({ eventId, theme: design.theme });
+          return dataResult({ eventId, theme: changes.theme });
         }
       )
   );
+}
+
+/**
+ * The four pieces of prose this tool speaks are the card's own layers, so editing through the
+ * connection lands in the same document the studio edits.
+ */
+const DESIGN_PROSE_LAYERS = {
+  headline: "names",
+  subheadline: "kicker",
+  attireNote: "dressCode",
+  customMessage: "message",
+} as const satisfies Record<string, InvitationLayerKind>;
+
+function withDesignProse(
+  design: InvitationDesign,
+  changes: Partial<Record<keyof typeof DESIGN_PROSE_LAYERS, string>>
+): InvitationDesign {
+  const edits = Object.entries(changes).filter(
+    (entry): entry is [keyof typeof DESIGN_PROSE_LAYERS, string] =>
+      entry[1] !== undefined
+  );
+  if (!edits.length) return design;
+
+  return {
+    ...design,
+    layers: design.layers.map((layer) => {
+      const edit = edits.find(
+        ([key]) => DESIGN_PROSE_LAYERS[key] === layer.kind
+      );
+      if (!edit) return layer;
+      const [key, value] = edit;
+      const trimmed = value.trim();
+      const text =
+        key === "attireNote" && trimmed ? `Dress code: ${trimmed}` : trimmed;
+      return { ...layer, text, visible: text.length > 0 };
+    }),
+  };
 }
 
 /**

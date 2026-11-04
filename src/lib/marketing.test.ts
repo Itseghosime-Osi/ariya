@@ -5,7 +5,7 @@ import { CELEBRATION_PASS_AMOUNT_KOBO } from "./paystack";
 const site = join(process.cwd(), "public/site");
 
 describe("public marketing integrity", () => {
-  it.each(["index", "about", "product", "pricing"])(
+  it.each(["index", "about", "product", "pricing", "docs"])(
     "%s has working local scripts and canonical metadata",
     (page) => {
       const html = readFileSync(join(site, `${page}.html`), "utf8");

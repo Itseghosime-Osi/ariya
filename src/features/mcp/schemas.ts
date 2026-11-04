@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { GUEST_SIDE_ENUM } from "@/features/guests/schemas";
-import { invitationThemeEnum } from "@/features/invitations/schemas";
+import { INVITATION_THEMES } from "@/features/invitations/types";
 import {
   hallLayoutSchema,
   tablePositionsSchema,
@@ -177,8 +177,8 @@ export const importGuestsInput = z.object({
 
 export const updateInvitationDesignInput = z.object({
   eventId,
-  theme: invitationThemeEnum,
-  headline: z.string().min(1).max(100),
+  theme: z.enum(INVITATION_THEMES),
+  headline: z.string().min(1).max(100).optional(),
   subheadline: z.string().max(200).optional(),
   attireNote: z.string().max(150).optional(),
   customMessage: z.string().max(500).optional(),

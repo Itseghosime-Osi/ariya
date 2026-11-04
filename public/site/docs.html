@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en-NG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Docs · Àríyá by OwambePlan</title>
+<meta name="description" content="Àríyá guides: guest lists, personal invitations, live RSVPs, seating plans and vendor checklists for Nigerian weddings and owambes.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Àríyá by OwambePlan">
+<meta property="og:title" content="Docs · Àríyá">
+<meta property="og:description" content="Guides to guest lists, personal invitations, RSVPs, seating and vendors for Nigerian celebrations.">
+<meta property="og:url" content="https://ariya-two.vercel.app/docs">
+<meta property="og:image" content="https://ariya-two.vercel.app/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:locale" content="en_NG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#16040a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Cinzel:wght@400;500&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap">
+<link rel="stylesheet" href="assets/ariya.css">
+<link rel="stylesheet" href="assets/nav.css">
+<script>try{if(sessionStorage.getItem("ariya-curtain"))document.documentElement.classList.add("cur-in")}catch(e){}</script>
+<style>
+/* Docs: an ivory reading room between burgundy bands, the same foil type as the film. */
+.caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8125rem; color: var(--gold-ink); }
+.wineband .caps { color: var(--gold); }
+.foil-text { padding: 0.22em 0.24em 0.34em; margin: -0.22em -0.24em -0.34em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.foil-text { background: linear-gradient(105deg, #a47a34 0%, #f6e2ad 22%, #c39446 40%, #fff1c8 52%, #b48a3e 66%, #f1d9a0 82%, #9a7230 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wineband { background: radial-gradient(60% 90% at 80% 0%, rgba(196, 70, 100, 0.25), transparent 70%), var(--wine-900); color: var(--on-dark); }
+.docs-hero { padding-block: clamp(48px, 7vw, 88px) clamp(40px, 6vw, 72px); }
+.docs-hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.4rem, 5.4vw, 4.2rem); line-height: 1; letter-spacing: -0.02em; margin: 14px 0 18px; max-width: 14em; }
+.docs-hero h1 em { font-family: var(--font-hand); font-style: normal; font-size: 1.3em; }
+.docs-hero p { color: var(--on-dark-soft); font-size: 1.125rem; max-width: 36rem; }
+.doc-search { display: flex; align-items: center; gap: 10px; margin-top: 26px; max-width: 34rem; background: rgba(22, 4, 10, 0.35); border: 1px solid rgba(233, 201, 138, 0.45); border-radius: 999px; padding: 6px 6px 6px 18px; }
+.doc-search:focus-within { border-color: var(--gold); }
+.doc-search input { flex: 1; min-width: 0; background: none; border: 0; color: var(--on-dark); font: inherit; font-size: 1rem; min-height: 44px; }
+.doc-search input::placeholder { color: var(--on-dark-soft); }
+.doc-search input:focus { outline: none; }
+.doc-search kbd { border: 1px solid rgba(233, 201, 138, 0.45); border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; color: var(--on-dark-soft); white-space: nowrap; }
+section { scroll-margin-top: 84px; }
+
+/* ---------- Three-column reading room ---------- */
+.docs { display: grid; grid-template-columns: 248px minmax(0, 1fr) 224px; gap: clamp(24px, 3vw, 52px); padding-block: clamp(40px, 5vw, 72px); align-items: start; }
+.doc-side, .doc-toc { position: sticky; top: 88px; max-height: calc(100vh - 112px); overflow-y: auto; scrollbar-width: thin; }
+.doc-side h2, .doc-toc h2 { font-family: var(--font-caps); font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.75rem; color: var(--ink-soft); margin: 0 0 14px; }
+.doc-group { margin-bottom: 26px; }
+.doc-group:last-child { margin-bottom: 0; }
+.doc-group h3 { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); margin: 0 0 6px; padding: 0 12px; }
+.doc-side ul, .doc-toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-side li { margin: 0; }
+.doc-side a { display: flex; align-items: center; min-height: 40px; padding: 7px 12px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 0.9375rem; }
+.doc-side a:hover { background: rgba(127, 127, 127, 0.1); }
+.doc-side a[aria-current="true"] { background: var(--paper); box-shadow: inset 2px 0 0 var(--wine), 0 0 0 1px var(--line); font-weight: 600; color: var(--wine); }
+.doc-toc nav { border-left: 1px solid var(--line); }
+.doc-toc h3 { font-size: 0.8125rem; font-weight: 700; color: var(--ink); margin: 16px 0 2px; padding-left: 14px; }
+.doc-toc h3:first-of-type { margin-top: 0; }
+.doc-toc ul { margin-bottom: 4px; }
+.doc-toc a { display: flex; align-items: center; min-height: 36px; padding: 5px 6px 5px 14px; margin-left: -1px; border-left: 2px solid transparent; text-decoration: none; color: var(--ink-soft); font-size: 0.875rem; }
+.doc-toc a:hover { color: var(--ink); }
+.doc-toc a[aria-current="true"] { border-left-color: var(--wine); color: var(--wine); font-weight: 600; }
+
+/* ---------- Article ---------- */
+.crumbs { margin: 0 0 10px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.875rem; color: var(--ink-soft); }
+.crumbs a { color: inherit; text-decoration: none; }
+.crumbs a:hover { color: var(--wine); }
+.crumbs li + li::before { content: "›"; margin-right: 8px; color: var(--ink-soft); }
+.crumbs [aria-current="page"] { color: var(--ink); font-weight: 600; }
+.doc-main { min-width: 0; }
+.doc-lede { font-size: 1.125rem; color: var(--ink-soft); max-width: 40rem; margin: 0 0 8px; }
+.doc-main section { padding-block: clamp(28px, 4vw, 48px); border-bottom: 1px solid var(--line); }
+.doc-main section:first-of-type { padding-top: 20px; }
+.doc-main section:last-child { border-bottom: 0; }
+.doc-main h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.08; margin: 0 0 14px; }
+.doc-main h2 em { font-family: var(--font-hand); font-style: normal; font-size: 1.2em; color: var(--wine); }
+.doc-main h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: 26px 0 8px; }
+.doc-main p { margin: 0 0 14px; max-width: 44rem; }
+.doc-main ul.points, .doc-main ol.steps { margin: 0 0 14px; padding: 0; list-style: none; max-width: 44rem; border-top: 1px solid var(--line); }
+.doc-main ul.points li, .doc-main ol.steps li { padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+.doc-main ul.points b, .doc-main ol.steps b { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; }
+.doc-main ul.points span, .doc-main ol.steps span { color: var(--ink-soft); }
+.doc-main ol.steps { counter-reset: step; }
+.doc-main ol.steps li { grid-template-columns: auto minmax(0, 1fr); column-gap: 16px; }
+.doc-main ol.steps li::before { counter-increment: step; content: counter(step); font-family: var(--font-display); font-style: italic; font-size: 1.8rem; line-height: 1; color: var(--gold-ink); }
+.doc-main ol.steps li > div { display: grid; gap: 4px; }
+.note { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; background: #e9f1ea; border: 1px solid rgba(31, 107, 74, 0.25); border-radius: 12px; padding: 14px 16px; margin: 18px 0; max-width: 44rem; }
+.note i { width: 24px; height: 24px; border-radius: 50%; background: var(--ok, #1f6b4a); color: #fff; font-style: normal; font-weight: 700; font-size: 0.875rem; display: grid; place-items: center; }
+.note p { margin: 0; font-size: 0.9375rem; }
+.note a { color: var(--wine); font-weight: 600; }
+
+/* Sample boards, borrowed from the product page */
+.board { background: var(--paper); border-radius: 16px; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px var(--line), 0 20px 50px rgba(40, 28, 10, 0.08); padding: clamp(16px, 2.4vw, 24px); display: grid; gap: 14px; min-width: 0; margin: 18px 0; max-width: 44rem; }
+.board h3 { font-size: 1.125rem; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0; font-family: var(--font-ui); font-weight: 700; }
+.table-scroll { overflow-x: auto; }
+.gtable { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.gtable th { text-align: left; font-size: 0.8125rem; color: var(--ink-soft); font-weight: 600; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--line); }
+.gtable td { padding: 10px 8px 10px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.gtable td:last-child, .gtable th:last-child { text-align: right; padding-right: 0; }
+.codecard { background: var(--wine-950); color: var(--on-dark); border-radius: 14px; overflow: hidden; margin: 18px 0; max-width: 44rem; box-shadow: 0 20px 50px rgba(22, 4, 10, 0.25); }
+.codecard header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 12px 18px; border-bottom: 1px solid rgba(244, 239, 230, 0.14); }
+.codecard header b { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.875rem; font-weight: 600; }
+.codecard header span { display: block; font-family: var(--font-ui); font-weight: 400; font-size: 0.75rem; color: var(--on-dark-soft); }
+.codecard pre { margin: 0; padding: 18px; overflow-x: auto; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9375rem; line-height: 1.7; }
+.codecard .tok-dim { color: var(--on-dark-soft); }
+.codecard .tok-gold { color: var(--gold); }
+.copybtn { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(233, 201, 138, 0.45); background: transparent; color: var(--on-dark); font: 600 0.875rem var(--font-ui); cursor: pointer; }
+.copybtn:hover { border-color: var(--gold); color: var(--gold); }
+.tasks { list-style: none; margin: 18px 0; padding: 0; background: var(--paper); border-radius: 16px; box-shadow: 0 0 0 1px var(--line); max-width: 44rem; }
+.tasks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.tasks li:last-child { border-bottom: 0; }
+.tasks input { width: 22px; height: 22px; accent-color: var(--wine); }
+.tasks .t-name { font-weight: 600; }
+.tasks .t-meta { grid-column: 2 / 3; font-size: 0.875rem; color: var(--ink-soft); }
+.tasks li.done .t-name { text-decoration: line-through; color: var(--ink-soft); }
+.tasks .due { font-size: 0.875rem; text-align: right; grid-row: 1 / span 2; grid-column: 3; font-variant-numeric: tabular-nums; }
+.progressbar { height: 8px; border-radius: 999px; background: var(--linen-deep); overflow: hidden; margin-top: 4px; max-width: 44rem; }
+.progressbar b { display: block; height: 100%; width: 100%; background: var(--wine); transform-origin: left; transition: transform .25s var(--ease); }
+.faq { border-top: 1px solid var(--line); max-width: 44rem; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; padding: 16px 0; font-family: var(--font-display); font-size: 1.25rem; list-style: none; display: flex; justify-content: space-between; gap: 16px; min-height: 44px; }
+.faq summary::after { content: "+"; color: var(--wine); font-family: var(--font-ui); }
+.faq details[open] summary::after { content: "–"; }
+.faq p { padding: 0 0 16px; color: var(--ink-soft); }
+.next { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.btn-wine { background: var(--wine); color: #fff; } .btn-wine:hover { background: var(--wine-600); }
+.site-foot { background: var(--wine-950); }
+.close-band { text-align: center; padding-block: clamp(64px, 9vw, 112px); }
+.close-band h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1; margin: 0; }
+.close-band h2 em { font-family: var(--font-hand); font-style: normal; font-size: 1.3em; }
+.close-band .next { justify-content: center; margin-top: 28px; }
+.sr-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+
+@media (max-width: 1080px) {
+  .docs { grid-template-columns: 220px minmax(0, 1fr); }
+  .doc-toc { display: none; }
+}
+@media (max-width: 760px) {
+  .docs { grid-template-columns: minmax(0, 1fr); }
+  .doc-side { position: static; max-height: none; overflow: visible; }
+  .doc-side h2 { margin-bottom: 10px; }
+  .doc-group { margin-bottom: 14px; }
+  .doc-group h3 { padding: 0 4px; }
+  .doc-group ul { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+  .doc-group ul::-webkit-scrollbar { display: none; }
+  .doc-group li { flex-shrink: 0; }
+  .doc-side a { min-height: 44px; border: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
+  .doc-side a[aria-current="true"] { box-shadow: inset 0 -2px 0 var(--wine); border-color: var(--wine); }
+  .doc-search kbd { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .progressbar b { transition: none; }
+}
+</style>
+<link rel="canonical" href="https://ariya-two.vercel.app/docs">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Docs · Àríyá", "url": "https://ariya-two.vercel.app/docs", "description": "Guides to guest lists, personal invitations, RSVPs, seating and vendors for Nigerian celebrations.", "isPartOf": {"@type": "WebSite", "name": "Àríyá by OwambePlan", "url": "https://ariya-two.vercel.app/"}}</script>
+<meta name="twitter:title" content="Docs · Àríyá">
+<meta name="twitter:description" content="Guides to guest lists, personal invitations, RSVPs, seating and vendors for Nigerian celebrations.">
+<meta name="twitter:image" content="https://ariya-two.vercel.app/assets/og.jpg">
+<meta name="twitter:image:alt" content="A red velvet ring box, open in candlelight. The Yes, by Àríyá.">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head" id="top">
+  <div class="wrap">
+    <a class="lockup" href="./" aria-label="Àríyá by OwambePlan, the film"><b>Àríyá</b><span>by OwambePlan</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="./">The film</a>
+      <a href="about.html">About</a>
+      <a href="product.html">What we do</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="docs.html" aria-current="page">Docs</a>
+      <a class="btn btn-primary btn-small" href="planner.html">Start planning</a>
+    </nav>
+    <button class="btn btn-ghost btn-small cm-btn" type="button" data-cm-open data-cm-label>Menu</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wineband docs-hero" aria-labelledby="docsTitle">
+    <div class="wrap">
+      <span class="caps">Docs</span>
+      <h1 id="docsTitle">How Àríyá <em class="foil-text">works.</em></h1>
+      <p>Guides to your guest list, invitations, replies, seats and vendors. Start with the overview, or jump straight to what you need.</p>
+      <div class="doc-search">
+        <label class="sr-only" for="docSearch">Search the guides</label>
+        <input class="input" id="docSearch" type="search" placeholder="Search the guides — try “seating” or “plus-one”" autocomplete="off">
+        <kbd aria-hidden="true">⌘K</kbd>
+      </div>
+      <p class="sr-status" id="docSearchStatus" role="status"></p>
+    </div>
+  </section>
+
+  <div class="wrap docs">
+    <aside class="doc-side" aria-label="Guide sections">
+      <h2>Guides</h2>
+      <div class="doc-group" data-group>
+        <h3>Introduction</h3>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+        </ul>
+      </div>
+      <div class="doc-group" data-group>
+        <h3>Planning</h3>
+        <ul>
+          <li><a href="#guest-list">Guest list</a></li>
+          <li><a href="#invitations">Invitations &amp; RSVP</a></li>
+          <li><a href="#seating">Seating</a></li>
+          <li><a href="#vendors">Vendors</a></li>
+          <li><a href="#check-in">Check-in</a></li>
+        </ul>
+      </div>
+      <div class="doc-group" data-group>
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="#pricing">Pricing &amp; passes</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <article class="doc-main" aria-labelledby="articleTitle">
+      <ol class="crumbs" aria-label="Breadcrumb">
+        <li><a href="./">Home</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><span aria-current="page">How Àríyá works</span></li>
+      </ol>
+      <h2 id="articleTitle" class="sr-only">How Àríyá works</h2>
+      <p class="doc-lede">One place for every yes, every seat and every vendor — instead of fifty group chats. We will keep adding to these guides; this page lays out the shape.</p>
+
+      <section id="overview" aria-labelledby="overviewTitle" data-section="Overview">
+        <h2 id="overviewTitle">The calm behind <em>the party.</em></h2>
+        <p>Àríyá runs the logistics of a Nigerian celebration: who is invited, who replied, where they sit, and which vendors still owe you something. Hosts and planners see the same live headcount, and guests only ever see their own invitation.</p>
+        <div class="note">
+          <i aria-hidden="true">i</i>
+          <p>Nothing here is sent anywhere. The samples on this page use pretend guests — your dashboard uses your own events. See <a href="product.html">what Àríyá does</a> for the full tour.</p>
+        </div>
+      </section>
+
+      <section id="quick-start" aria-labelledby="quickStartTitle" data-section="Quick start">
+        <h2 id="quickStartTitle">From list to <em>last dance.</em></h2>
+        <ol class="steps">
+          <li><div><b>Upload your guest list</b><span>Import a spreadsheet or paste names and numbers. Missing details and duplicates are flagged before anything is saved.</span></div></li>
+          <li><div><b>Send personal links</b><span>Each guest gets their own link by WhatsApp, SMS or email, and a confirmation email when they reply.</span></div></li>
+          <li><div><b>Seat and check in</b><span>Confirmed guests fill your seating plan, vendors work from one checklist, and on the day you know exactly who is coming.</span></div></li>
+        </ol>
+        <div class="next"><a class="btn btn-wine" href="planner.html">Try the demo planner</a><a class="btn btn-ghost" href="pricing.html">See pricing</a></div>
+      </section>
+
+      <section id="guest-list" aria-labelledby="guestListTitle" data-section="Guest list">
+        <h2 id="guestListTitle">Know who is <em>coming.</em></h2>
+        <p>Your guest list is the source of truth. Every guest carries a status — confirmed, pending or declined — plus their party size and table, so the headcount is always people, not just names.</p>
+        <div class="board">
+          <h3>Guest list <span class="demo-flag">Sample</span></h3>
+          <div class="table-scroll"><table class="gtable"><thead><tr><th scope="col">Guest</th><th scope="col">Party</th><th scope="col">Status</th><th scope="col">Table</th></tr></thead><tbody>
+            <tr><td>Bisi Adebayo</td><td>5</td><td><span class="pill yes">Coming</span></td><td>Table 3</td></tr>
+            <tr><td>Emeka &amp; Ifeoma Okafor</td><td>2</td><td><span class="pill wait">Link sent</span></td><td>—</td></tr>
+            <tr><td>Dayo Ogunleye</td><td>1</td><td><span class="pill yes">Coming</span></td><td>Table 1</td></tr>
+          </tbody></table></div>
+        </div>
+        <ul class="points">
+          <li><b>Import once, fix fast</b><span>Spreadsheet import flags missing numbers and duplicates before anything is saved.</span></li>
+          <li><b>Statuses with words</b><span>Confirmed, pending and declined — colour plus a word, never colour alone.</span></li>
+          <li><b>Search everything</b><span>Find a guest by name, party or status in one search box.</span></li>
+        </ul>
+      </section>
+
+      <section id="invitations" aria-labelledby="invitationsTitle" data-section="Invitations & RSVP">
+        <h2 id="invitationsTitle">Every guest gets their <em>own link.</em></h2>
+        <p>Each invitation is personal: their name, your colours of the day, the date and venue. Guests open it in any phone browser — no app to install — and reply in one tap.</p>
+        <div class="codecard">
+          <header><div><b>adaeze-invitation</b><span>Personal link · shared by WhatsApp</span></div><button class="copybtn" type="button" data-copy="https://ariya-two.vercel.app/r/k7Q2x9mA">Copy</button></header>
+          <pre><span class="tok-dim">https://</span><span class="tok-gold">ariya-two.vercel.app/r/k7Q2x9mA</span></pre>
+        </div>
+        <ul class="points">
+          <li><b>One-tap replies</b><span>Accept or decline, with a plus-one only when you allow it.</span></li>
+          <li><b>A confirmation in writing</b><span>Guests get their reply, date, venue and table by email.</span></li>
+          <li><b>Resend with sense</b><span>Nudge only the guests who have not replied — never the whole list.</span></li>
+        </ul>
+      </section>
+
+      <section id="seating" aria-labelledby="seatingTitle" data-section="Seating">
+        <h2 id="seatingTitle">Every yes gets <em>a chair.</em></h2>
+        <p>Confirmed guests fill a plan of your hall, table by table. Pick a guest, choose a table, and Àríyá keeps the count.</p>
+        <div class="note">
+          <i aria-hidden="true">i</i>
+          <p>A table never takes more people than it has chairs. Full tables show as full before you assign anyone.</p>
+        </div>
+        <ul class="points">
+          <li><b>Seat the confirmed</b><span>Only guests who said yes can take a seat — pending guests wait.</span></li>
+          <li><b>See space at a glance</b><span>Each table shows seats used against seats available.</span></li>
+        </ul>
+      </section>
+
+      <section id="vendors" aria-labelledby="vendorsTitle" data-section="Vendors">
+        <h2 id="vendorsTitle">Caterer, gele, DJ, <em>cake.</em></h2>
+        <p>Every vendor gets tasks with due dates counted back from the day. Overdue ones rise to the top, and ticking one off is one tap. Try it — this sample list is yours to play with.</p>
+        <ul class="tasks" id="docTasks" aria-label="Sample vendor tasks">
+          <li><input type="checkbox" id="dt_cake"><label class="t-name" for="dt_cake">Taste and confirm the cake</label><span class="t-meta">Sweet Crumbs · Cake</span><span class="due">5 Dec<br><span class="pill wait">To do</span></span></li>
+          <li><input type="checkbox" id="dt_sound" checked><label class="t-name" for="dt_sound">Confirm sound and lights</label><span class="t-meta">Lagos Sound Co · Sound</span><span class="due">28 Nov<br><span class="pill yes">Done</span></span></li>
+          <li><input type="checkbox" id="dt_gele"><label class="t-name" for="dt_gele">Final gele fitting</label><span class="t-meta">Adire Studio · Styling</span><span class="due">8 Dec<br><span class="pill wait">To do</span></span></li>
+        </ul>
+        <div class="progressbar" aria-hidden="true"><b id="docTaskBar" style="transform: scaleX(0.333)"></b></div>
+        <p style="margin-top: 10px; font-weight: 600" id="docTaskCount" aria-live="polite">1 of 3 vendor tasks done</p>
+      </section>
+
+      <section id="check-in" aria-labelledby="checkInTitle" data-section="Check-in">
+        <h2 id="checkInTitle">On the day, <em>no queue.</em></h2>
+        <p>Ushers look guests up by name and see their table instantly. Arrivals tick off against the same list you planned with, so the headcount stays honest from first dance to last.</p>
+        <ul class="points">
+          <li><b>Find by name</b><span>Type the first few letters; the pass shows the table.</span></li>
+          <li><b>Plus-ones stay honest</b><span>Only approved plus-ones count toward the seats.</span></li>
+        </ul>
+      </section>
+
+      <section id="pricing" aria-labelledby="pricingTitle" data-section="Pricing & passes">
+        <h2 id="pricingTitle">Pay per event. <em>No subscription.</em></h2>
+        <p>Small gatherings of up to 20 guest invitations are free. Anything bigger takes one Celebration Pass of ₦50,000 per event — planners pay the same pass for each client event they run.</p>
+        <div class="next"><a class="btn btn-wine" href="pricing.html">See pricing</a><a class="btn btn-ghost" href="planner.html">Start planning</a></div>
+      </section>
+
+      <section id="faq" aria-labelledby="faqTitle" data-section="FAQ">
+        <h2 id="faqTitle">Before you <em>start.</em></h2>
+        <div class="faq">
+          <details><summary>Do guests need an app?</summary><p>No. Each guest opens their personal link in any phone browser and replies in a tap.</p></details>
+          <details><summary>Can planners use it for several clients?</summary><p>Yes. Planners use the same Celebration Pass, charged per client event, so you only pay for the events you run.</p></details>
+          <details><summary>What happens when a table is full?</summary><p>Àríyá will not seat more people than a table has chairs, and shows how many seats are left before you assign anyone.</p></details>
+          <details><summary>Is it ready to use today?</summary><p>You can create an account and plan your event. The examples on our public pages use sample data; your dashboard uses your own events. Check the payment mode shown at checkout before paying.</p></details>
+        </div>
+      </section>
+    </article>
+
+    <aside class="doc-toc" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav aria-label="Page sections">
+        <h3>Plan your celebration</h3>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+          <li><a href="#guest-list">Guest list</a></li>
+          <li><a href="#invitations">Invitations &amp; RSVP</a></li>
+          <li><a href="#seating">Seating</a></li>
+          <li><a href="#vendors">Vendors</a></li>
+          <li><a href="#check-in">Check-in</a></li>
+        </ul>
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="#pricing">Pricing &amp; passes</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+    </aside>
+  </div>
+
+  <section class="wineband close-band" aria-labelledby="closeTitle">
+    <div class="wrap">
+      <h2 id="closeTitle">Start with your <em class="foil-text">guest list.</em></h2>
+      <div class="next"><a class="btn btn-primary" href="planner.html">Start planning</a><a class="btn btn-ghost" href="product.html">What Àríyá does</a></div>
+    </div>
+  </section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <span><b style="font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 1.3rem; color: var(--on-dark)">Àríyá</b> by OwambePlan</span>
+    <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
+    <span><a href="./">The film</a> · <a href="about.html">About</a> · <a href="product.html">What we do</a> · <a href="pricing.html">Pricing</a> · <a href="docs.html">Docs</a></span>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="assets/nav.js"></script>
+<script>
+(function () {
+  "use strict";
+  AriyaNav.init();
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Toast ---------- */
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.hidden = true; }, 3200);
+  }
+
+  /* ---------- Copy buttons ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      function done() {
+        btn.textContent = "Copied";
+        toast("Copied to clipboard.");
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { toast("Copy this link: " + text); });
+      } else {
+        toast("Copy this link: " + text);
+      }
+    });
+  });
+
+  /* ---------- Sample vendor tasks (local only, nothing is saved) ---------- */
+  var list = document.getElementById("docTasks");
+  var bar = document.getElementById("docTaskBar");
+  var count = document.getElementById("docTaskCount");
+  function renderTasks() {
+    var boxes = list.querySelectorAll('input[type="checkbox"]');
+    var done = 0;
+    Array.prototype.forEach.call(boxes, function (box) {
+      var li = box.closest("li");
+      var pill = li.querySelector(".pill");
+      li.classList.toggle("done", box.checked);
+      pill.className = "pill " + (box.checked ? "yes" : "wait");
+      pill.textContent = box.checked ? "Done" : "To do";
+      if (box.checked) done += 1;
+    });
+    bar.style.transform = "scaleX(" + (done / boxes.length).toFixed(3) + ")";
+    count.textContent = done + " of " + boxes.length + " vendor tasks done";
+  }
+  list.addEventListener("change", function (e) {
+    if (e.target && e.target.type === "checkbox") renderTasks();
+  });
+  renderTasks();
+
+  /* ---------- Scrollspy: mark the section in view ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll(".doc-side a, .doc-toc a"));
+  var byId = {};
+  links.forEach(function (a) {
+    var id = a.getAttribute("href").slice(1);
+    (byId[id] = byId[id] || []).push(a);
+  });
+  var sections = Array.prototype.slice.call(document.querySelectorAll(".doc-main section[id]"));
+  function setCurrent(id) {
+    links.forEach(function (a) {
+      if (a.getAttribute("href") === "#" + id) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+  }
+  if ("IntersectionObserver" in window && !reduce) {
+    var current = null;
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) current = en.target.id;
+      });
+      if (current) setCurrent(current);
+    }, { rootMargin: "-30% 0px -55% 0px" });
+    sections.forEach(function (s) { spy.observe(s); });
+  }
+
+  /* ---------- Search: filter the sidebar, jump on Enter ---------- */
+  var search = document.getElementById("docSearch");
+  var status = document.getElementById("docSearchStatus");
+  function visibleLinks() {
+    return Array.prototype.filter.call(
+      document.querySelectorAll(".doc-side a"),
+      function (a) { return a.style.display !== "none"; }
+    );
+  }
+  search.addEventListener("input", function () {
+    var q = search.value.trim().toLowerCase();
+    Array.prototype.forEach.call(document.querySelectorAll(".doc-side [data-group]"), function (group) {
+      var shown = 0;
+      Array.prototype.forEach.call(group.querySelectorAll("a"), function (a) {
+        var hit = !q || a.textContent.toLowerCase().indexOf(q) >= 0;
+        a.style.display = hit ? "" : "none";
+        if (hit) shown += 1;
+      });
+      group.style.display = shown ? "" : "none";
+    });
+    var n = visibleLinks().length;
+    status.textContent = q ? (n + (n === 1 ? " section" : " sections") + " match.") : "";
+  });
+  search.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      var first = visibleLinks()[0];
+      if (first) {
+        e.preventDefault();
+        document.getElementById(first.getAttribute("href").slice(1)).scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      }
+    } else if (e.key === "Escape") {
+      search.value = "";
+      search.dispatchEvent(new Event("input"));
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      search.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

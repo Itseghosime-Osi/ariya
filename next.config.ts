@@ -114,11 +114,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      ...["about", "product", "pricing", "story", "film"].map((page) => ({
-        source: `/${page}.html`,
-        destination: page === "film" || page === "story" ? "/" : `/${page}`,
-        permanent: true,
-      })),
+      ...["about", "product", "pricing", "docs", "story", "film"].map(
+        (page) => ({
+          source: `/${page}.html`,
+          destination: page === "film" || page === "story" ? "/" : `/${page}`,
+          permanent: true,
+        })
+      ),
       {
         source: "/login",
         destination: "/sign-in",
@@ -203,6 +205,14 @@ const nextConfig: NextConfig = {
       {
         source: "/pricing.html",
         destination: "/site/pricing.html",
+      },
+      {
+        source: "/docs",
+        destination: "/site/docs.html",
+      },
+      {
+        source: "/docs.html",
+        destination: "/site/docs.html",
       },
       {
         source: "/story",

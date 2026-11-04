@@ -12,6 +12,8 @@ test.describe("Film & Marketing Site Integration", () => {
       "/product.html",
       "/pricing",
       "/pricing.html",
+      "/docs",
+      "/docs.html",
       "/story",
       "/story.html",
     ];

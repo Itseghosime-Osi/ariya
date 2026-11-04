@@ -1,11 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getPartyDisplaySeats } from "@/lib/metrics";
-import type {
-  InvitationDeskData,
-  InvitationGuest,
-  InvitationDesign,
-} from "./types";
+import { designFromEvent } from "./design";
+import type { InvitationDeskData, InvitationGuest } from "./types";
 
 export async function getInvitationDeskData(
   eventId: string
@@ -21,7 +18,7 @@ export async function getInvitationDeskData(
   const { data: event, error: eventErr } = await supabase
     .from("events")
     .select(
-      "id, title, couple, date, venue, dress_code, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message"
+      "id, title, couple, date, venue, area, dress_code, rsvp_by, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message, invitation_design"
     )
     .eq("id", cleanId)
     .maybeSingle();
@@ -98,26 +95,20 @@ export async function getInvitationDeskData(
   const invitedGuestsCount = guests.filter((g) => !!g.invitedAt).length;
   const uninvitedGuestsCount = guests.length - invitedGuestsCount;
 
-  const rawEvent = event as Record<string, unknown>;
-  const rawTheme = rawEvent.invitation_theme as string | null;
-  const themeKey =
-    (rawTheme?.replace("-", "_") as InvitationDesign["theme"]) || "royal_gold";
-
-  const design: InvitationDesign = {
-    theme: themeKey,
-    headline:
-      (rawEvent.invitation_headline as string | null) ||
-      `The Wedding Celebration of ${event.couple}`,
-    subheadline:
-      (rawEvent.invitation_subheadline as string | null) ||
-      "Joyfully request the honor of your presence",
-    attireNote:
-      event.dress_code ||
-      "Aso-Ebi Colour Code: Champagne Gold & Emerald Velvet",
-    customMessage:
-      (rawEvent.invitation_message as string | null) ||
-      "Dinner and dancing to follow ceremony.",
-  };
+  const design = designFromEvent({
+    title: event.title,
+    couple: event.couple,
+    date: event.date,
+    venue: event.venue,
+    area: event.area,
+    dressCode: event.dress_code,
+    rsvpBy: event.rsvp_by,
+    theme: event.invitation_theme,
+    headline: event.invitation_headline,
+    subheadline: event.invitation_subheadline,
+    message: event.invitation_message,
+    design: event.invitation_design,
+  });
 
   return {
     eventId: event.id,
@@ -125,6 +116,9 @@ export async function getInvitationDeskData(
     coupleName: event.couple,
     eventDate: event.date,
     venueName: event.venue,
+    area: event.area,
+    dressCode: event.dress_code,
+    rsvpBy: event.rsvp_by,
     isPaid: !!event.paid_at,
     totalGuests: guests.length,
     invitedGuestsCount,
