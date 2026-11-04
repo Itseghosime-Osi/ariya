@@ -49,6 +49,7 @@ AGENTS.md
 
 # Local screenshots and archives; curated docs/screenshots and site assets stay tracked
 /screenshots/
+/apps/web/.shots/
 /Screenshot*.png
 /Screenshot*.jpg
 /Screenshot*.jpeg
