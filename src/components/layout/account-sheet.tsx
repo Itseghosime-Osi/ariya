@@ -11,12 +11,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SignOutConfirmation } from "./SignOutConfirmation";
-import { accountInitials, isValidEventId } from "./nav-items";
+import { accountInitials } from "./nav-items";
 
 interface AccountSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userEmail?: string;
+  /** Kept for callers; the sheet's links no longer depend on the open event. */
   eventId?: string;
   /** Where focus goes when the sheet closes — the icon that opened it. */
   returnFocusTo?: React.RefObject<HTMLElement | null>;
@@ -39,14 +40,10 @@ export function AccountSheet({
   open,
   onOpenChange,
   userEmail,
-  eventId,
   returnFocusTo,
 }: AccountSheetProps) {
   const [signOutOpen, setSignOutOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
-  const settingsHref = isValidEventId(eventId)
-    ? `/events/${eventId}/settings`
-    : "/events";
 
   const actions: SheetAction[] = [
     {
@@ -58,9 +55,9 @@ export function AccountSheet({
     },
     {
       label: "Settings",
-      hint: "This celebration's setup",
+      hint: "Notifications, security & apps",
       icon: "settings",
-      href: settingsHref,
+      href: "/settings",
       testId: "account-settings",
     },
     {

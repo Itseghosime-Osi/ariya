@@ -291,10 +291,10 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
       "href",
       "/connect-ai"
     );
-    // Settings follows the event the switcher settled on, not the first one.
+    // Settings opens the account's settings; each celebration's own settings are listed there.
     await expect(page.getByTestId("account-settings")).toHaveAttribute(
       "href",
-      `/events/${event2.eventId}/settings`
+      "/settings"
     );
     await expect(page.getByTestId("account-profile")).toHaveAttribute(
       "href",

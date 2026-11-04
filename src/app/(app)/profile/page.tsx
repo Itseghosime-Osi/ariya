@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { accountInitials } from "@/components/layout/nav-items";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
-import { NotificationsCard } from "@/features/notifications/components/NotificationsCard";
-import { clientEnv } from "@/lib/env/client";
+import { EditProfileButton } from "@/features/auth/components/EditProfileButton";
+import { formatPhoneDisplay } from "@/lib/phone";
 import {
   DeskItem,
   DeskMotion,
@@ -50,7 +50,13 @@ export default async function ProfilePage() {
   const rows: DetailRow[] = [
     { label: "Email", value: email, icon: "mail" },
     ...(profile?.phone
-      ? [{ label: "Phone", value: profile.phone, icon: "phone" as IconName }]
+      ? [
+          {
+            label: "Phone",
+            value: formatPhoneDisplay(profile.phone),
+            icon: "phone" as IconName,
+          },
+        ]
       : []),
     { label: "Host since", value: since, icon: "schedule" },
   ];
@@ -63,11 +69,14 @@ export default async function ProfilePage() {
           Profile
         </h1>
         <p className="mt-2 max-w-xl text-sm text-on-surface-variant">
-          How Àríyá knows you — and the two places you may want next.
+          How Àríyá knows you. Tap the pencil to change your name or phone.
         </p>
       </DeskItem>
 
-      <DeskItem className="rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-6 sm:px-7">
+      <DeskItem className="relative rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-6 sm:px-7">
+        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+          <EditProfileButton name={name} phone={profile?.phone ?? null} />
+        </div>
         <div className="flex flex-col items-center gap-3 text-center">
           <span
             data-testid="profile-avatar"
@@ -100,29 +109,21 @@ export default async function ProfilePage() {
         </dl>
       </DeskItem>
 
-      {clientEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY && (
-        <DeskItem>
-          <NotificationsCard
-            publicKey={clientEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY}
-          />
-        </DeskItem>
-      )}
-
       <DeskItem className="flex flex-col gap-3 rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-5 sm:flex-row sm:items-center sm:gap-5 sm:px-7">
         <div className="min-w-0 flex-1">
           <p className={EYEBROW}>Next</p>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Connect an app to your celebration desk, or head back to your
-            celebrations.
+            Notifications, security and app preferences live in Settings.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link
-            href="/connect-ai"
+            href="/settings"
+            data-testid="profile-settings-link"
             className="desk-chip inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
-            <Icon name="styler" size={16} />
-            Connect to an AI
+            <Icon name="settings" size={16} />
+            Settings
           </Link>
           <Link
             href="/events"

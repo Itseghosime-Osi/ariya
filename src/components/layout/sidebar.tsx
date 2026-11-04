@@ -482,6 +482,23 @@ export function Sidebar({
             <div className="truncate text-xs font-medium text-ivory/80">
               {userEmail}
             </div>
+            {(
+              [
+                ["/profile", "person", "Profile"],
+                ["/settings", "settings", "Settings"],
+              ] as const
+            ).map(([href, icon, label]) => (
+              <Link
+                key={href}
+                href={href}
+                tabIndex={accountOpen ? 0 : -1}
+                onClick={() => setAccountOpen(false)}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold tracking-wide text-ivory/85 transition-colors hover:bg-ivory/[0.08] hover:text-gold"
+              >
+                <Icon name={icon} size={16} />
+                <span>{label}</span>
+              </Link>
+            ))}
             <button
               type="button"
               onClick={() => setSignOutOpen(true)}

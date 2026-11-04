@@ -61,3 +61,14 @@ export const resetPasswordSchema = z
   });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const updateProfileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Please enter your name")
+    .max(80, "Keep your name under 80 characters"),
+  phone: z.string().trim().max(32).optional(),
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

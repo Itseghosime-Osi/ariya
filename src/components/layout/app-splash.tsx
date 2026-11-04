@@ -14,9 +14,10 @@ const LEAVE_MS = 650;
 /**
  * Runs before the page paints. Opened from the home screen (or with ?splash in the address bar,
  * to preview it), it marks <html> so the splash shows from the very first frame. It plays once per
- * launch: sessionStorage starts empty each time the installed app opens.
+ * launch: sessionStorage starts empty each time the installed app opens. It can be switched off in
+ * Settings (ariya:pref:splash, see features/settings/prefs.ts).
  */
-export const splashScript = `try{var q=/[?&]splash\\b/.test(location.search),s=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;if(q||(s&&!sessionStorage.getItem("ariya:splash"))){sessionStorage.setItem("ariya:splash","1");document.documentElement.setAttribute("${FLAG}","")}}catch(e){}`;
+export const splashScript = `try{var q=/[?&]splash\\b/.test(location.search),s=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;if(q||(s&&localStorage.getItem("ariya:pref:splash")!=="off"&&!sessionStorage.getItem("ariya:splash"))){sessionStorage.setItem("ariya:splash","1");document.documentElement.setAttribute("${FLAG}","")}}catch(e){}`;
 
 /** A Yoruba greeting for the hour in Lagos, with its English. */
 function greeting(): [string, string] {
