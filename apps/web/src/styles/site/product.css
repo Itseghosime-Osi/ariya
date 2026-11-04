@@ -1,0 +1,420 @@
+/* Company pages: ivory reading surfaces between burgundy bands, the same foil type as the film. */
+.caps {
+  font-family: var(--font-caps);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.8125rem;
+  color: var(--gold-ink);
+}
+.dark .caps,
+.wineband .caps {
+  color: var(--gold);
+}
+/* Foil text paints its gradient only inside its own box, and script swashes overflow it.
+   Padding gives the paint room; equal negative margins keep the layout exactly where it was. */
+.foil-text {
+  padding: 0.22em 0.24em 0.34em;
+  margin: -0.22em -0.24em -0.34em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.foil-text {
+  background: linear-gradient(
+    105deg,
+    #a47a34 0%,
+    #f6e2ad 22%,
+    #c39446 40%,
+    #fff1c8 52%,
+    #b48a3e 66%,
+    #f1d9a0 82%,
+    #9a7230 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wineband {
+  background:
+    radial-gradient(
+      60% 90% at 80% 0%,
+      rgba(196, 70, 100, 0.25),
+      transparent 70%
+    ),
+    var(--wine-900);
+  color: var(--on-dark);
+}
+.page-hero {
+  padding-block: clamp(64px, 10vw, 120px) clamp(56px, 8vw, 96px);
+}
+.page-hero h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 14px 0 18px;
+  max-width: 14em;
+}
+.page-hero h1 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 1.3em;
+}
+.page-hero p {
+  color: var(--on-dark-soft);
+  font-size: 1.125rem;
+  max-width: 36rem;
+}
+.sec {
+  padding-block: clamp(64px, 9vw, 112px);
+}
+section {
+  scroll-margin-top: 72px;
+}
+.sec-head {
+  display: grid;
+  gap: 12px;
+  max-width: 44rem;
+  margin-bottom: clamp(30px, 4vw, 48px);
+}
+.sec-head h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+.sec-head h2 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 1.25em;
+  color: var(--wine);
+}
+.dark .sec-head h2 em,
+.wineband .sec-head h2 em {
+  color: var(--gold);
+}
+.btn-wine {
+  background: var(--wine);
+  color: #fff;
+}
+.btn-wine:hover {
+  background: var(--wine-600);
+}
+.site-foot {
+  background: var(--wine-950);
+}
+.wineband .muted {
+  color: var(--on-dark-soft);
+}
+.wineband .btn-primary,
+.wineband .btn-primary:hover {
+  background: var(--gold);
+  color: var(--wine-950);
+}
+/* ---------- Tools preview ---------- */
+.tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 40px);
+  align-items: start;
+}
+.board {
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 0 0 1px var(--line),
+    0 20px 50px rgba(40, 28, 10, 0.08);
+  padding: clamp(16px, 2.4vw, 24px);
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.board h3 {
+  font-size: 1.125rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.board h3 a {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--wine);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.stat {
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--ivory);
+}
+.stat b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.stat span {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.gtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.gtable th {
+  text-align: left;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding: 8px 8px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.gtable td {
+  padding: 10px 8px 10px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.gtable td:last-child,
+.gtable th:last-child {
+  text-align: right;
+  padding-right: 0;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.tables-mini {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.tmini {
+  border-radius: 12px;
+  background: var(--ivory);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+.tmini svg {
+  width: 62px;
+  height: 62px;
+}
+.tmini b {
+  font-size: 0.9375rem;
+}
+.tmini span {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.tmini.full span {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* ---------- Vendors ---------- */
+.vend {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+}
+.tasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.tasks li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 4px 14px;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.tasks li:last-child {
+  border-bottom: 0;
+}
+.tasks input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--wine);
+}
+.tasks .t-name {
+  font-weight: 600;
+}
+.tasks .t-meta {
+  grid-column: 2 / 3;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.tasks li.done .t-name {
+  text-decoration: line-through;
+  color: var(--ink-soft);
+}
+.tasks .due {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  grid-row: 1 / span 2;
+  grid-column: 3;
+}
+.progressbar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--linen-deep);
+  overflow: hidden;
+  margin-top: 18px;
+}
+.progressbar b {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--wine);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease);
+}
+
+/* ---------- Steps ---------- */
+.how {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 48px);
+  counter-reset: n;
+}
+.how li {
+  counter-increment: n;
+  border-top: 1px solid rgba(233, 201, 138, 0.3);
+  padding-top: 22px;
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.how li::before {
+  content: counter(n);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--gold);
+}
+.how h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.6rem;
+}
+
+/* ---------- Pricing ---------- */
+.price-rows {
+  border-top: 1px solid var(--line);
+}
+.price-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 12px 32px;
+  align-items: center;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--line);
+}
+.price-row h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+.price-row h3 small {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.price-row .amt {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--gold-ink);
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.price-row .amt small {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+.price-row.pick h3 {
+  color: var(--wine);
+}
+
+.invite-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+}
+.invite-feature .fc {
+  width: min(320px, 80vw);
+  margin: 0 auto;
+  transform: rotate(-3deg);
+}
+.points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.points li {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+}
+.points b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.4rem;
+}
+.points span {
+  color: var(--ink-soft);
+}
+.next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+@media (max-width: 960px) {
+  .tools,
+  .vend,
+  .invite-feature {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .how {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tables-mini {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .gtable .hide-sm {
+    display: none;
+  }
+}

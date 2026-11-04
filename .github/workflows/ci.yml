@@ -141,7 +141,9 @@ jobs:
 
           echo "PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}" >> "$GITHUB_ENV"
 
-          cat <<EOF > .env.local
+          # The app lives in apps/web, so both `pnpm dev` and Playwright's
+          # loadEnvFile(".env.local") resolve relative to that directory.
+          cat <<EOF > apps/web/.env.local
           NEXT_PUBLIC_APP_URL=http://localhost:3000
           NEXT_PUBLIC_SUPABASE_URL=${API_URL}
           NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}

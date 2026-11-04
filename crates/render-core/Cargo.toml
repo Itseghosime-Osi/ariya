@@ -1,0 +1,8 @@
+[package]
+name = "ariya-render-core"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+name = "ariya_render_core"
