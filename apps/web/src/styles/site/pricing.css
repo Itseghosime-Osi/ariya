@@ -1,0 +1,216 @@
+/* Company pages: ivory reading surfaces between burgundy bands, the same foil type as the film. */
+.caps {
+  font-family: var(--font-caps);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.8125rem;
+  color: var(--gold-ink);
+}
+.dark .caps,
+.wineband .caps {
+  color: var(--gold);
+}
+/* Foil text paints its gradient only inside its own box, and script swashes overflow it.
+   Padding gives the paint room; equal negative margins keep the layout exactly where it was. */
+.foil-text {
+  padding: 0.22em 0.24em 0.34em;
+  margin: -0.22em -0.24em -0.34em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.foil-text {
+  background: linear-gradient(
+    105deg,
+    #a47a34 0%,
+    #f6e2ad 22%,
+    #c39446 40%,
+    #fff1c8 52%,
+    #b48a3e 66%,
+    #f1d9a0 82%,
+    #9a7230 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wineband {
+  background:
+    radial-gradient(
+      60% 90% at 80% 0%,
+      rgba(196, 70, 100, 0.25),
+      transparent 70%
+    ),
+    var(--wine-900);
+  color: var(--on-dark);
+}
+.page-hero {
+  padding-block: clamp(64px, 10vw, 120px) clamp(56px, 8vw, 96px);
+}
+.page-hero h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 14px 0 18px;
+  max-width: 14em;
+}
+.page-hero h1 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 1.3em;
+}
+.page-hero p {
+  color: var(--on-dark-soft);
+  font-size: 1.125rem;
+  max-width: 36rem;
+}
+.sec {
+  padding-block: clamp(64px, 9vw, 112px);
+}
+section {
+  scroll-margin-top: 72px;
+}
+.sec-head {
+  display: grid;
+  gap: 12px;
+  max-width: 44rem;
+  margin-bottom: clamp(30px, 4vw, 48px);
+}
+.sec-head h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+.sec-head h2 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 1.25em;
+  color: var(--wine);
+}
+.dark .sec-head h2 em,
+.wineband .sec-head h2 em {
+  color: var(--gold);
+}
+.btn-wine {
+  background: var(--wine);
+  color: #fff;
+}
+.btn-wine:hover {
+  background: var(--wine-600);
+}
+.site-foot {
+  background: var(--wine-950);
+}
+.wineband .muted {
+  color: var(--on-dark-soft);
+}
+.wineband .btn-primary,
+.wineband .btn-primary:hover {
+  background: var(--gold);
+  color: var(--wine-950);
+}
+.price-rows {
+  border-top: 1px solid var(--line);
+}
+.price-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 12px 32px;
+  align-items: center;
+  padding: 30px 0;
+  border-bottom: 1px solid var(--line);
+}
+.price-row h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+.price-row h3 small {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.price-row .amt {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  color: var(--wine);
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.price-row .amt small {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+.price-row.pick h3 {
+  font-family: var(--font-hand);
+  font-size: clamp(2.4rem, 4vw, 3.2rem);
+  color: var(--wine);
+  line-height: 1;
+}
+.faq {
+  border-top: 1px solid var(--line);
+  max-width: 46rem;
+}
+.faq details {
+  border-bottom: 1px solid var(--line);
+}
+.faq summary {
+  cursor: pointer;
+  padding: 18px 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
+}
+.faq summary::after {
+  content: "+";
+  color: var(--wine);
+  font-family: var(--font-ui);
+}
+.faq details[open] summary::after {
+  content: "–";
+}
+.faq p {
+  padding: 0 0 18px;
+  color: var(--ink-soft);
+}
+.close-band {
+  text-align: center;
+}
+.close-band h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1;
+}
+.close-band h2 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 1.3em;
+}
+.close-band .next {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+@media (max-width: 640px) {
+  .price-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .price-row p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

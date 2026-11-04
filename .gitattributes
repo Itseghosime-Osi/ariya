@@ -11,6 +11,7 @@
 *.mp3 binary
 *.woff binary
 *.woff2 binary
+*.wasm binary
 
 # Generated files: collapsed in GitHub diffs, left out of language stats.
 pnpm-lock.yaml linguist-generated=true

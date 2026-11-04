@@ -1,6 +1,7 @@
-public/site/
+apps/web/public/site/
 .next/
 dist/
 coverage/
 node_modules/
 pnpm-lock.yaml
+supabase/.temp/
