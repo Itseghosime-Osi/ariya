@@ -144,7 +144,7 @@ export function SettingsDesk({
                       "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all",
                       active === s.id
                         ? "bg-burgundy text-champagne shadow-[0_10px_30px_-14px_rgba(74,15,28,0.8)]"
-                        : "text-label-2 hover:bg-white/70 hover:text-night"
+                        : "text-label-2 hover:bg-surface-container hover:text-night"
                     )}
                   >
                     <Icon
@@ -296,7 +296,7 @@ export function SettingsDesk({
           <button
             type="button"
             onClick={() => setSignOutOpen(true)}
-            className="wiz-rise flex min-h-[56px] w-full items-center justify-center gap-2 rounded-[22px] border border-[#9b2c44]/25 bg-white/70 text-sm font-semibold text-[#9b2c44] transition-colors hover:bg-[#9b2c44]/[0.06] lg:hidden"
+            className="wiz-rise flex min-h-[56px] w-full items-center justify-center gap-2 rounded-[22px] border border-[#9b2c44]/25 bg-surface-container text-sm font-semibold text-[#9b2c44] transition-colors hover:bg-[#9b2c44]/[0.06] lg:hidden"
             style={{ "--i": 7 } as React.CSSProperties}
           >
             <Icon name="logout" size={18} />
@@ -467,7 +467,7 @@ function Section({
       >
         {title}
       </h2>
-      <div className="overflow-hidden rounded-[24px] border border-gold-ink/[0.12] bg-white/75 shadow-[0_1px_2px_rgba(28,7,13,0.04),0_18px_40px_-28px_rgba(28,7,13,0.35)] backdrop-blur-sm divide-y divide-hairline">
+      <div className="overflow-hidden rounded-[24px] border border-gold-ink/[0.12] bg-surface-container shadow-[0_1px_2px_rgba(28,7,13,0.04),0_18px_40px_-28px_rgba(28,7,13,0.3)] divide-y divide-hairline">
         {children}
       </div>
       {note && <p className="mt-2 px-1 text-xs text-label-3">{note}</p>}
