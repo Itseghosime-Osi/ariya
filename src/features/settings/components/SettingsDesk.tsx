@@ -57,6 +57,15 @@ const TONES: Record<Tone, string> = {
   sage: "from-[#7fae8e] to-[#3f6b50] text-white",
 };
 
+// The thin bar at each row's left edge, as on the vendor list.
+const BARS: Record<Tone, string> = {
+  wine: "#8a1c36",
+  gold: "#c39446",
+  night: "#3a2a30",
+  rose: "#c9566e",
+  sage: "#5d8a6c",
+};
+
 const SECTIONS: { id: string; label: string; icon: IconName }[] = [
   { id: "notifications", label: "Notifications", icon: "notifications" },
   { id: "security", label: "Sign-in & security", icon: "lock" },
@@ -144,7 +153,7 @@ export function SettingsDesk({
                       "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all",
                       active === s.id
                         ? "bg-burgundy text-champagne shadow-[0_10px_30px_-14px_rgba(74,15,28,0.8)]"
-                        : "text-label-2 hover:bg-surface-container hover:text-night"
+                        : "text-label-2 hover:bg-white/55 hover:text-night"
                     )}
                   >
                     <Icon
@@ -296,7 +305,7 @@ export function SettingsDesk({
           <button
             type="button"
             onClick={() => setSignOutOpen(true)}
-            className="wiz-rise flex min-h-[56px] w-full items-center justify-center gap-2 rounded-[22px] border border-[#9b2c44]/25 bg-surface-container text-sm font-semibold text-[#9b2c44] transition-colors hover:bg-[#9b2c44]/[0.06] lg:hidden"
+            className="wiz-rise flex min-h-[56px] w-full items-center justify-center gap-2 rounded-[22px] border border-hairline bg-white/40 text-sm font-semibold text-[#9b2c44] transition-colors hover:bg-[#9b2c44]/[0.06] lg:hidden"
             style={{ "--i": 7 } as React.CSSProperties}
           >
             <Icon name="logout" size={18} />
@@ -467,7 +476,7 @@ function Section({
       >
         {title}
       </h2>
-      <div className="overflow-hidden rounded-[24px] border border-gold-ink/[0.12] bg-surface-container shadow-[0_1px_2px_rgba(28,7,13,0.04),0_18px_40px_-28px_rgba(28,7,13,0.3)] divide-y divide-hairline">
+      <div className="overflow-hidden rounded-3xl border border-hairline bg-white/40 backdrop-blur-sm divide-y divide-hairline">
         {children}
       </div>
       {note && <p className="mt-2 px-1 text-xs text-label-3">{note}</p>}
@@ -502,8 +511,16 @@ function Row({
   trailing,
   disabled,
 }: RowProps) {
+  const bar = (
+    <span
+      aria-hidden="true"
+      className="absolute inset-y-3 left-0 w-[3px] rounded-full"
+      style={{ background: BARS[tone] }}
+    />
+  );
   const body = (
     <>
+      {bar}
       <span
         aria-hidden="true"
         className={cn(
@@ -552,10 +569,10 @@ function Row({
     </>
   );
   const cls =
-    "group flex min-h-[64px] w-full items-center gap-3.5 px-4 py-3 text-left outline-none transition-colors focus-visible:bg-burgundy/[0.05] sm:px-5";
+    "group relative flex min-h-[64px] w-full items-center gap-3.5 py-3 pl-5 pr-4 text-left outline-none transition-colors focus-visible:bg-white/55 sm:pl-6 sm:pr-5";
   if (href) {
     return (
-      <Link href={href} className={cn(cls, "hover:bg-burgundy/[0.035]")}>
+      <Link href={href} className={cn(cls, "hover:bg-white/55")}>
         {body}
       </Link>
     );
@@ -566,7 +583,7 @@ function Row({
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className={cn(cls, "hover:bg-burgundy/[0.035] disabled:opacity-60")}
+        className={cn(cls, "hover:bg-white/55 disabled:opacity-60")}
       >
         {body}
       </button>

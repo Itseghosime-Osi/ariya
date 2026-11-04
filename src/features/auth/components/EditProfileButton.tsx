@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { updateProfileAction } from "../actions";
 
 const FIELD =
-  "min-h-[48px] w-full rounded-2xl border border-gold-ink/25 bg-surface-container px-4 text-[15px] text-night outline-none transition-colors placeholder:text-label-3 focus:border-burgundy focus:ring-2 focus:ring-burgundy/20";
+  "min-h-[48px] w-full rounded-2xl border border-hairline bg-white/45 px-4 text-[15px] text-night outline-none transition-colors placeholder:text-label-3 focus:border-burgundy focus:ring-2 focus:ring-burgundy/20";
 
 /** The pencil on the profile card: edits the host's name and phone number. */
 export function EditProfileButton({
@@ -45,7 +45,7 @@ export function EditProfileButton({
         }}
         aria-label="Edit profile"
         data-testid="profile-edit"
-        className="grid h-11 w-11 place-items-center rounded-full border border-gold-ink/25 bg-surface-container text-burgundy shadow-sm transition-all hover:scale-105 hover:border-gold-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        className="grid h-11 w-11 place-items-center rounded-full border border-hairline bg-white/45 text-burgundy shadow-sm transition-all hover:scale-105 hover:border-gold-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
         <Icon name="edit" size={17} />
       </button>
