@@ -56,6 +56,20 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // The service worker that shows app notifications: never cached, so updates land at once.
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
       ...[
         "/assets/the-yes-controls.6bcb04374086.js",
         "/assets/the-yes-scene.83edb5453053.js",

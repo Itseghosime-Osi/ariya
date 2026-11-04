@@ -2,6 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { render } from "@react-email/components";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +11,8 @@ import { checkRateLimitByKeyAndIp } from "@/lib/rate-limit";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
 import { formatLagosDate } from "@/lib/format";
 import { clientEnv } from "@/lib/env/client";
+import { sendPushToEventHosts } from "@/lib/push";
+import { rsvpPushMessage } from "./push-message";
 import { RsvpAcceptedEmail } from "@/emails/RsvpAcceptedEmail";
 import { RsvpDeclinedEmail } from "@/emails/RsvpDeclinedEmail";
 import { RsvpRevisedEmail } from "@/emails/RsvpRevisedEmail";
@@ -135,6 +138,17 @@ export async function submitRsvpAction(
       dietary,
       isRevision,
     });
+  }
+
+  // Tell the hosts on their phones, once the guest's page has already answered.
+  if (invitation.event.id) {
+    const eventId = invitation.event.id;
+    after(() =>
+      sendPushToEventHosts(
+        eventId,
+        rsvpPushMessage(invitation, status, attendingCount, isRevision)
+      )
+    );
   }
 
   revalidatePath(`/i/${token}`);

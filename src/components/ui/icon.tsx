@@ -8,6 +8,8 @@ import {
   User,
   BadgeCheck,
   Mail,
+  Bell,
+  BellOff,
   PlusCircle,
   Armchair,
   Clock,
@@ -71,6 +73,8 @@ import {
 
 export type IconName =
   | "space_dashboard"
+  | "notifications"
+  | "notifications_off"
   | "celebration"
   | "menu_book"
   | "table_restaurant"
@@ -179,6 +183,8 @@ const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
   copy: Copy,
   refresh: RefreshCw,
   mail: Mail,
+  notifications: Bell,
+  notifications_off: BellOff,
   phone: Phone,
   link: LinkIcon,
   error: AlertCircle,

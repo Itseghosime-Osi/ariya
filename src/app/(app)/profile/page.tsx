@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { accountInitials } from "@/components/layout/nav-items";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
+import { NotificationsCard } from "@/features/notifications/components/NotificationsCard";
+import { clientEnv } from "@/lib/env/client";
 import {
   DeskItem,
   DeskMotion,
@@ -97,6 +99,14 @@ export default async function ProfilePage() {
           ))}
         </dl>
       </DeskItem>
+
+      {clientEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY && (
+        <DeskItem>
+          <NotificationsCard
+            publicKey={clientEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+          />
+        </DeskItem>
+      )}
 
       <DeskItem className="flex flex-col gap-3 rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-5 sm:flex-row sm:items-center sm:gap-5 sm:px-7">
         <div className="min-w-0 flex-1">
