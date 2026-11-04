@@ -21,13 +21,16 @@ const FIELD =
 export function EditProfileButton({
   name,
   phone,
+  autoOpen = false,
 }: {
   name: string;
   phone: string | null;
+  /** Open straight away, for links that say "edit" (Settings' pencil). */
+  autoOpen?: boolean;
 }) {
   const router = useRouter();
   const phoneSize = useIsMobile();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
   const [fullName, setFullName] = useState(name);
   const [phoneValue, setPhoneValue] = useState(phone ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +53,14 @@ export function EditProfileButton({
         <Icon name="edit" size={17} />
       </button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          // Closing drops ?edit=1, so a refresh does not reopen it.
+          if (!next && autoOpen) router.replace("/profile", { scroll: false });
+        }}
+      >
         <DialogContent
           sheet={phoneSize}
           className={cn(!phoneSize && "rounded-[28px] p-7")}

@@ -237,6 +237,8 @@ export function AppShell({
 
       <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
         <TopBar
+          // Account screens bring their own phone bar with a Back button.
+          hideOnPhone={/^\/(settings|profile)$/.test(pathname)}
           eventId={activeEvent?.id}
           userEmail={userEmail}
           pendingProposals={pendingProposals}

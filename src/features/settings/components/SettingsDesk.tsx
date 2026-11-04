@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SignOutConfirmation } from "@/components/layout/SignOutConfirmation";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { cn } from "@/lib/utils";
 import {
@@ -55,15 +56,6 @@ const TONES: Record<Tone, string> = {
   night: "from-[#3a2a30] to-[#1c0f14] text-champagne",
   rose: "from-[#e58a9c] to-[#b0485f] text-white",
   sage: "from-[#7fae8e] to-[#3f6b50] text-white",
-};
-
-// The thin bar at each row's left edge, as on the vendor list.
-const BARS: Record<Tone, string> = {
-  wine: "#8a1c36",
-  gold: "#c39446",
-  night: "#3a2a30",
-  rose: "#c9566e",
-  sage: "#5d8a6c",
 };
 
 const SECTIONS: { id: string; label: string; icon: IconName }[] = [
@@ -119,8 +111,17 @@ export function SettingsDesk({
 
   return (
     <div className="settings-desk pb-24 lg:pb-16">
+      <ScreenHeader
+        title="Settings"
+        backHref="/events"
+        action={{
+          href: "/profile?edit=1",
+          icon: "edit",
+          label: "Edit profile",
+        }}
+      />
       <header
-        className="wiz-rise mb-6 lg:mb-10"
+        className="wiz-rise mb-6 hidden md:block lg:mb-10"
         style={{ "--i": 0 } as React.CSSProperties}
       >
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
@@ -511,16 +512,8 @@ function Row({
   trailing,
   disabled,
 }: RowProps) {
-  const bar = (
-    <span
-      aria-hidden="true"
-      className="absolute inset-y-3 left-0 w-[3px] rounded-full"
-      style={{ background: BARS[tone] }}
-    />
-  );
   const body = (
     <>
-      {bar}
       <span
         aria-hidden="true"
         className={cn(
@@ -569,7 +562,7 @@ function Row({
     </>
   );
   const cls =
-    "group relative flex min-h-[64px] w-full items-center gap-3.5 py-3 pl-5 pr-4 text-left outline-none transition-colors focus-visible:bg-white/55 sm:pl-6 sm:pr-5";
+    "group flex min-h-[64px] w-full items-center gap-3.5 px-4 py-3 text-left outline-none transition-colors focus-visible:bg-white/55 sm:px-5";
   if (href) {
     return (
       <Link href={href} className={cn(cls, "hover:bg-white/55")}>

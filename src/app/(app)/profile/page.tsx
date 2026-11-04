@@ -6,6 +6,7 @@ import { Icon, type IconName } from "@/components/ui/icon";
 import { accountInitials } from "@/components/layout/nav-items";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
 import { EditProfileButton } from "@/features/auth/components/EditProfileButton";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { formatPhoneDisplay } from "@/lib/phone";
 import {
   DeskItem,
@@ -26,7 +27,12 @@ interface DetailRow {
   icon: IconName;
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>;
+}) {
+  const { edit } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=%2Fprofile");
   const profile = await getCurrentProfile();
@@ -63,7 +69,12 @@ export default async function ProfilePage() {
 
   return (
     <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
-      <DeskItem>
+      <ScreenHeader
+        title="Profile"
+        backHref="/settings"
+        action={{ href: "/settings", icon: "settings", label: "Settings" }}
+      />
+      <DeskItem className="hidden md:block">
         <p className={EYEBROW}>Your account</p>
         <h1 className="mt-2 font-serif text-4xl font-bold leading-tight text-on-surface sm:text-5xl">
           Profile
@@ -75,7 +86,11 @@ export default async function ProfilePage() {
 
       <DeskItem className="relative rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-6 sm:px-7">
         <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
-          <EditProfileButton name={name} phone={profile?.phone ?? null} />
+          <EditProfileButton
+            name={name}
+            phone={profile?.phone ?? null}
+            autoOpen={edit === "1"}
+          />
         </div>
         <div className="flex flex-col items-center gap-3 text-center">
           <span
