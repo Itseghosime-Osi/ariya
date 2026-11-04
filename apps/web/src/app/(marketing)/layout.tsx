@@ -3,6 +3,7 @@ import "@/styles/site/ariya.css";
 import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { SCENE_IMPORT_MAP } from "@/lib/site/scene";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),
@@ -70,6 +71,11 @@ export default function MarketingLayout({
           crossOrigin="anonymous"
         />
         <link rel="stylesheet" href={FONTS} precedence="default" />
+        {/* /about mounts the film's 3D module directly; it imports three by bare specifier. */}
+        <script
+          type="importmap"
+          dangerouslySetInnerHTML={{ __html: SCENE_IMPORT_MAP }}
+        />
         <script dangerouslySetInnerHTML={{ __html: curtainBoot }} />
       </head>
       <body>
