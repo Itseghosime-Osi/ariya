@@ -20,7 +20,7 @@ The repository is partitioned into two distinct domains:
    - Authenticated shell layout (FINAL 01) with responsive mobile views (MOBILE 01–08).
 
 3. **Music (`public/site/assets/music.mp3`)**
-   - "Yori Yori" by Abefe, a commercial track, served publicly with the film and About page by the owner's choice (copyrighted: remove or replace it if no licence is in place).
+   - "Forever Sweet" by Dotti, a commercial track, served publicly with the film and About page by the owner's choice (copyrighted: remove or replace it if no licence is in place).
    - If the file is missing, both pages fall back to their generated Web Audio groove.
 
 ## 3. Legacy URL Resolution Matrix
