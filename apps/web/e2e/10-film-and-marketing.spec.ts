@@ -27,7 +27,7 @@ test.describe("Film & Marketing Site Integration", () => {
     }
   });
 
-  test("checks every legacy asset the film requests loads with zero 404s", async ({
+  test("renders the film as React markup, fetching no legacy entry assets and no 404s", async ({
     page,
   }) => {
     const failed404Urls: string[] = [];
@@ -41,8 +41,14 @@ test.describe("Film & Marketing Site Integration", () => {
       }
     });
 
-    const response = await page.goto("/", { waitUntil: "networkidle" });
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
+    await expect(page.locator(".film")).toBeVisible();
+
+    // Mount is the deterministic point; the scene module and the score are
+    // requested just after it. Give that wave a bounded window rather than
+    // blocking the test on a third-party CDN.
+    await page.waitForLoadState("load", { timeout: 5000 }).catch(() => {});
 
     // Verify 404 list is completely empty
     expect(
@@ -50,14 +56,18 @@ test.describe("Film & Marketing Site Integration", () => {
       `Found 404 responses: ${failed404Urls.join(", ")}`
     ).toEqual([]);
 
-    // Verify that key legacy film assets were loaded
-    const hasNavCss = loadedUrls.some((u) => u.includes("nav.css"));
-    const hasNavJs = loadedUrls.some((u) => u.includes("nav.js"));
-    const hasFineCard = loadedUrls.some((u) => u.includes("fine-card.js"));
+    // The film is React markup now, so the archive document's entry assets are
+    // gone: nav.js, fine-card.js and the score module must not be fetched, and
+    // nav.css arrives as a bundled stylesheet rather than an asset URL.
+    const legacy = ["nav.js", "fine-card.js", "demo.js", "score.js"];
+    const stillRequested = legacy.filter((name) =>
+      loadedUrls.some((url) => url.includes(`/site/assets/${name}`))
+    );
 
-    expect(hasNavCss, "nav.css was not loaded").toBe(true);
-    expect(hasNavJs, "nav.js was not loaded").toBe(true);
-    expect(hasFineCard, "fine-card.js was not loaded").toBe(true);
+    expect(
+      stillRequested,
+      `Legacy assets still requested: ${stillRequested.join(", ")}`
+    ).toEqual([]);
   });
 
   test("checks /planner.html and /rsvp.html redirect correctly", async ({
