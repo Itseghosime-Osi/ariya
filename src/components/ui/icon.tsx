@@ -55,6 +55,17 @@ import {
   ArrowLeft,
   DollarSign,
   Receipt,
+  Type,
+  Image as ImageIcon,
+  Undo2,
+  Redo2,
+  Layers,
+  Wand2,
+  Move,
+  EyeOff,
+  GripVertical,
+  Palette,
+  CloudUpload,
   type LucideProps,
 } from "lucide-react";
 
@@ -115,7 +126,18 @@ export type IconName =
   | "folder"
   | "arrow_back"
   | "payments"
-  | "receipt_long";
+  | "receipt_long"
+  | "text_fields"
+  | "image"
+  | "undo"
+  | "redo"
+  | "layers"
+  | "magic"
+  | "move"
+  | "visibility_off"
+  | "grip"
+  | "swatch"
+  | "cloud_upload";
 
 const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
   space_dashboard: LayoutDashboard,
@@ -175,6 +197,17 @@ const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
   arrow_back: ArrowLeft,
   payments: DollarSign,
   receipt_long: Receipt,
+  text_fields: Type,
+  image: ImageIcon,
+  undo: Undo2,
+  redo: Redo2,
+  layers: Layers,
+  magic: Wand2,
+  move: Move,
+  visibility_off: EyeOff,
+  grip: GripVertical,
+  swatch: Palette,
+  cloud_upload: CloudUpload,
 };
 
 export interface IconProps extends LucideProps {

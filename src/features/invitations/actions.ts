@@ -2,9 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 import { mapError } from "@/lib/errors";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
-import { trackInvitationsSchema, invitationDesignSchema } from "./schemas";
+import { isValidCoverImage } from "@/features/events/validate-cover";
+import { designColumns } from "./design";
+import { invitationDesignSchema, trackInvitationsSchema } from "./schemas";
+import type { InvitationDesign } from "./types";
+
+const ART_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_ART_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function trackGuestInvitationsAction(
   eventId: string,
@@ -39,20 +46,20 @@ export async function trackGuestInvitationsAction(
   return { success: true };
 }
 
-export async function updateInvitationDesignAction(
+/**
+ * Saves the whole design document and the legacy columns every other screen reads, so the overview,
+ * the studio and the guest pass can never disagree about the same invitation.
+ */
+export async function saveInvitationDesignAction(
   eventId: string,
-  formData: FormData
-): Promise<{ success?: boolean; error?: string }> {
-  const parsed = invitationDesignSchema.safeParse({
-    theme: formData.get("theme"),
-    headline: formData.get("headline"),
-    subheadline: formData.get("subheadline"),
-    attireNote: formData.get("attireNote"),
-    customMessage: formData.get("customMessage"),
-  });
-
+  design: unknown
+): Promise<
+  { ok: true; design: InvitationDesign } | { ok: false; error: string }
+> {
+  const parsed = invitationDesignSchema.safeParse(design);
   if (!parsed.success) {
     return {
+      ok: false,
       error: parsed.error.issues[0]?.message ?? "Invalid design options",
     };
   }
@@ -61,21 +68,84 @@ export async function updateInvitationDesignAction(
   const { error } = await supabase
     .from("events")
     .update({
-      dress_code: parsed.data.attireNote || null,
-      invitation_theme: parsed.data.theme,
-      invitation_headline: parsed.data.headline,
-      invitation_subheadline: parsed.data.subheadline || null,
-      invitation_message: parsed.data.customMessage || null,
+      invitation_design: parsed.data as unknown as Json,
+      ...designColumns(parsed.data),
     })
     .eq("id", eventId);
 
   if (error) {
-    return { error: mapError(error) };
+    return {
+      ok: false,
+      error: mapError(error, "Failed to save the invitation design"),
+    };
   }
 
   revalidatePath(`/events/${eventId}/invitations`);
   revalidatePath(`/events/${eventId}`);
-  return { success: true };
+  return { ok: true, design: parsed.data };
+}
+
+/**
+ * Stores an imported invitation image in the event's public art folder. The studio puts the
+ * returned URL on the design's background and saves the document separately.
+ */
+export async function uploadInvitationArtAction(
+  eventId: string,
+  formData: FormData
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const file = formData.get("file");
+  if (!file || !(file instanceof File)) {
+    return { ok: false, error: "Please choose an image to import" };
+  }
+  if (!ART_MIME_TYPES.includes(file.type)) {
+    return {
+      ok: false,
+      error: "Invitation art must be a JPEG, PNG or WebP image",
+    };
+  }
+  if (file.size > MAX_ART_FILE_SIZE) {
+    return { ok: false, error: "Invitation art must not exceed 5 MB" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "Authentication required to import art" };
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  if (!(await isValidCoverImage(buffer, file.type))) {
+    return {
+      ok: false,
+      error:
+        "Please import a valid JPEG, PNG or WebP image (up to 40 megapixels).",
+    };
+  }
+
+  const ext =
+    file.type === "image/png"
+      ? "png"
+      : file.type === "image/webp"
+        ? "webp"
+        : "jpg";
+  const path = `${eventId}/invitation-art.${ext}`;
+  const { data, error } = await supabase.storage
+    .from("event-covers")
+    .upload(path, buffer, { contentType: file.type, upsert: true });
+
+  if (error) {
+    return {
+      ok: false,
+      error: mapError(error, "Failed to import the invitation art"),
+    };
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("event-covers")
+    .getPublicUrl(data.path);
+  return { ok: true, url: publicUrlData.publicUrl };
 }
 
 export async function sendGuestInvitationEmailAction(

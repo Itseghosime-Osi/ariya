@@ -1,24 +1,28 @@
 import { describe, it, expect } from "vitest";
+import { createInvitationDesign } from "./design";
 import { invitationDesignSchema, trackInvitationsSchema } from "./schemas";
 
+const houseDesign = createInvitationDesign({
+  couple: "Ọlá & Adéṣọlá",
+  date: "2026-12-12T13:00:00Z",
+  venue: "Eko Hotel, Victoria Island",
+  theme: "emerald_regal",
+});
+
 describe("Invitation feature schemas", () => {
-  it("validates valid invitation design input", () => {
-    const res = invitationDesignSchema.safeParse({
-      theme: "emerald_regal",
-      headline: "The Royal Union",
-      subheadline: "Request your joyful presence",
-      attireNote: "Emerald Velvet",
-    });
+  it("accepts the design the studio saves", () => {
+    const res = invitationDesignSchema.safeParse(houseDesign);
     expect(res.success).toBe(true);
     if (res.success) {
       expect(res.data.theme).toBe("emerald_regal");
+      expect(res.data.layers.map((layer) => layer.kind)).toContain("names");
     }
   });
 
-  it("rejects missing headline", () => {
+  it("rejects a layer dragged outside the card", () => {
     const res = invitationDesignSchema.safeParse({
-      theme: "royal_gold",
-      headline: "",
+      ...houseDesign,
+      layers: houseDesign.layers.map((layer) => ({ ...layer, x: 140 })),
     });
     expect(res.success).toBe(false);
   });

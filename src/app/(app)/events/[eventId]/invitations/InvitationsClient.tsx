@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { InvitationQuotaBanner } from "@/features/invitations/components/InvitationQuotaBanner";
-import { InvitationCardPreview } from "@/features/invitations/components/InvitationCardPreview";
-import { InvitationDesignControls } from "@/features/invitations/components/InvitationDesignControls";
 import { InvitationGuestTracker } from "@/features/invitations/components/InvitationGuestTracker";
+import { InvitationStudio } from "@/features/invitations/components/studio/InvitationStudio";
 import type {
   InvitationDeskData,
-  InvitationDesign,
+  InvitationEventContent,
 } from "@/features/invitations/types";
 
 interface InvitationsClientProps {
@@ -16,7 +15,16 @@ interface InvitationsClientProps {
 }
 
 export function InvitationsClient({ eventId, data }: InvitationsClientProps) {
-  const [design, setDesign] = useState<InvitationDesign>(data.design);
+  const content: InvitationEventContent = {
+    title: data.eventTitle,
+    couple: data.coupleName,
+    date: data.eventDate,
+    venue: data.venueName,
+    area: data.area,
+    dressCode: data.dressCode,
+    rsvpBy: data.rsvpBy,
+    theme: data.design.theme,
+  };
 
   return (
     <div className="space-y-6">
@@ -26,35 +34,18 @@ export function InvitationsClient({ eventId, data }: InvitationsClientProps) {
         invitedCount={data.invitedGuestsCount}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Live Card Preview */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-wine">
-            Live Pass Preview
-          </div>
-          <InvitationCardPreview
-            coupleName={data.coupleName}
-            eventDate={data.eventDate}
-            venueName={data.venueName}
-            design={design}
-          />
-        </div>
+      <InvitationStudio
+        eventId={eventId}
+        content={content}
+        initialDesign={data.design}
+        coupleName={data.coupleName}
+      />
 
-        {/* Right Column: Controls & Delivery Tracker */}
-        <div className="lg:col-span-7 space-y-6">
-          <InvitationDesignControls
-            eventId={eventId}
-            design={design}
-            onDesignChange={setDesign}
-          />
-
-          <InvitationGuestTracker
-            eventId={eventId}
-            guests={data.guests}
-            eventTitle={data.eventTitle}
-          />
-        </div>
-      </div>
+      <InvitationGuestTracker
+        eventId={eventId}
+        guests={data.guests}
+        eventTitle={data.eventTitle}
+      />
     </div>
   );
 }

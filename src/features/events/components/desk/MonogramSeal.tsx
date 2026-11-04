@@ -22,7 +22,7 @@ export function MonogramSeal({
   className = "",
 }: {
   text: string;
-  size?: number;
+  size?: number | string;
   className?: string;
 }) {
   const id = React.useId().replace(/:/g, "");

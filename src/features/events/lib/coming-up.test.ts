@@ -30,6 +30,7 @@ function makeUpcomingEvent(
       invitation_message: null,
       invitation_subheadline: null,
       invitation_theme: null,
+      invitation_design: null,
       status: "active",
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-01T00:00:00Z",
