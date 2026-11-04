@@ -96,7 +96,8 @@ select set_eq(
   'authenticated has table-level UPDATE on 14 tables (guests handled via column grants)'
 );
 
--- 4. Verify service_role has SELECT, INSERT, UPDATE, DELETE on all 18 tables PLUS rate_limits
+-- 4. Verify service_role has SELECT, INSERT, UPDATE, DELETE on all 18 tables PLUS rate_limits and
+--    push_subscriptions (server-only tables: no client grants, see 17_push_subscriptions).
 select set_eq(
   $$
     select distinct table_name::text
@@ -110,10 +111,10 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
+      ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has SELECT on all 18 tables plus rate_limits'
+  'service_role has SELECT on all 18 tables plus rate_limits and push_subscriptions'
 );
 
 select set_eq(
@@ -129,10 +130,10 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
+      ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has INSERT on all 18 tables plus rate_limits'
+  'service_role has INSERT on all 18 tables plus rate_limits and push_subscriptions'
 );
 
 select set_eq(
@@ -148,10 +149,10 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
+      ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has UPDATE on all 18 tables plus rate_limits'
+  'service_role has UPDATE on all 18 tables plus rate_limits and push_subscriptions'
 );
 
 select set_eq(
@@ -167,10 +168,10 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
+      ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('vendor_tasks'), ('vendors')
   $$,
-  'service_role has DELETE on all 18 tables plus rate_limits'
+  'service_role has DELETE on all 18 tables plus rate_limits and push_subscriptions'
 );
 
 -- 5. Verify nobody but the table owner has TRUNCATE
