@@ -37,7 +37,7 @@ export function Hall() {
           0,
           1
         );
-        const p = 0.785 + f * 0.095;
+        const p = 0.775 + f * 0.105;
         if (Math.abs(p - last) <= 0.0004) return;
         last = p;
         progressRef.current = p;
