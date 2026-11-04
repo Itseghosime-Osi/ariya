@@ -441,3 +441,251 @@ export function installScoreHandlers() {
     installed = false;
   };
 }
+
+/* ---------- The film's clock, ambience and described sounds ----------
+   The home page's Watch mode keeps time by the song, so the picture never runs
+   ahead of it, and the score sits under the dialogue until the yes. Ported from
+   the archive's Score: clock, seek, level, ambience, sfx. */
+
+let lastSeek = 0;
+let levelNow = 1;
+let amb: {
+  src: AudioBufferSourceNode;
+  f: BiquadFilterNode;
+  g: GainNode;
+  kind: string;
+  nextTick: number;
+} | null = null;
+
+/** The song's position while it is really playing; null when it is not the clock. */
+export function clock(): number | null {
+  return audioEl && on && !audioEl.paused && audioEl.readyState >= 2
+    ? audioEl.currentTime
+    : null;
+}
+
+/** The song is playing but waiting for data: Watch holds rather than run ahead. */
+export function waiting(): boolean {
+  return !!(audioEl && on && !audioEl.paused && audioEl.readyState < 3);
+}
+
+export function time(): number {
+  return audioEl ? audioEl.currentTime : 0;
+}
+
+/** Moving the song makes it stutter, so it moves only for a real jump. */
+export function seek(t: number) {
+  if (!audioEl) return;
+  const now = performance.now();
+  if (Math.abs(audioEl.currentTime - t) < 0.4 || now - lastSeek < 350) return;
+  lastSeek = now;
+  try {
+    audioEl.currentTime = Math.max(0, t);
+  } catch {
+    /* not loaded yet */
+  }
+}
+
+/** In Watch the song plays once and ends with the film; scrolling, it loops. */
+export function loop(v: boolean) {
+  if (audioEl) audioEl.loop = v;
+}
+
+export function restart() {
+  if (audioEl) {
+    try {
+      audioEl.currentTime = 0;
+    } catch {
+      /* not loaded yet */
+    }
+  }
+  step = 0;
+}
+
+export function suspend(yes: boolean) {
+  if (audioEl) {
+    if (yes) audioEl.pause();
+    else if (on) void audioEl.play().catch(() => {});
+  }
+  if (ctx) {
+    if (yes) void ctx.suspend();
+    else if (on) void ctx.resume();
+  }
+}
+
+/**
+ * The score sits under the dialogue until the yes, then rises. `l` is the share
+ * of full volume, eased so a chapter change never jumps.
+ */
+export function level(l: number) {
+  levelNow += (l - levelNow) * (l > levelNow ? 0.015 : 0.08);
+  if (audioEl && on && !audioEl.paused) {
+    const v = Math.max(0, Math.min(1, 0.55 * levelNow));
+    if (Math.abs(audioEl.volume - v) > 0.01) audioEl.volume = v;
+  } else if (ctx && on && timer) {
+    master!.gain.setTargetAtTime(0.8 * levelNow, ctx.currentTime, 0.2);
+  }
+}
+
+/** Room tone: a clock for Tunde's room, the murmur of a party for the memory. */
+export function ambience(kind: string) {
+  if (!ctx || !on) kind = "";
+  if (!ctx) return;
+  if (!amb && kind) {
+    const src = ctx.createBufferSource();
+    const f = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i += 1) d[i] = Math.random() * 2 - 1;
+    src.buffer = buf;
+    src.loop = true;
+    src.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    g.gain.value = 0;
+    src.start();
+    amb = { src, f, g, kind: "", nextTick: 0 };
+  }
+  if (!amb) return;
+  if (kind !== amb.kind) {
+    amb.kind = kind;
+    const t = ctx.currentTime;
+    amb.f.type = kind === "M" ? "bandpass" : "lowpass";
+    amb.f.frequency.setTargetAtTime(kind === "M" ? 520 : 240, t, 0.2);
+    amb.f.Q.value = kind === "M" ? 0.6 : 0.5;
+    amb.g.gain.setTargetAtTime(kind === "M" ? 0.05 : kind ? 0.012 : 0, t, 0.4);
+  }
+  if (kind === "R" && ctx.currentTime > amb.nextTick) {
+    amb.nextTick = Math.ceil(ctx.currentTime) + 1;
+    tick(amb.nextTick);
+  }
+  if (kind === "M") {
+    amb.g.gain.setTargetAtTime(
+      0.045 +
+        0.02 *
+          Math.sin(ctx.currentTime * 1.7) *
+          Math.sin(ctx.currentTime * 0.6),
+      ctx.currentTime,
+      0.3
+    );
+  }
+}
+
+function filmNoise(
+  t: number,
+  dur: number,
+  type: BiquadFilterType,
+  f: number,
+  q: number,
+  peak: number,
+  a?: number
+) {
+  const src = ctx!.createBufferSource();
+  src.buffer = noiseBuf;
+  const fl = ctx!.createBiquadFilter();
+  fl.type = type;
+  fl.frequency.value = f;
+  fl.Q.value = q;
+  const g = ctx!.createGain();
+  src.connect(fl);
+  fl.connect(g);
+  g.connect(ctx!.destination);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + (a || 0.01));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.start(t, Math.random() * 0.3, dur + 0.05);
+}
+
+function tick(t: number) {
+  filmNoise(t, 0.02, "highpass", 3800, 0.7, 0.018, 0.001);
+}
+
+/** Described sounds for the opening; there is no recorded dialogue in the film. */
+const SFX: Record<string, (t: number) => void> = {
+  paper: (t) => {
+    for (let i = 0; i < 5; i += 1) {
+      filmNoise(
+        t + i * 0.07 + Math.random() * 0.04,
+        0.09 + Math.random() * 0.06,
+        "bandpass",
+        2600 + Math.random() * 1800,
+        0.9,
+        0.05,
+        0.005
+      );
+    }
+  },
+  breath: (t) => filmNoise(t, 0.9, "bandpass", 620, 0.7, 0.025, 0.35),
+  chair: (t) => {
+    filmNoise(t, 0.45, "lowpass", 380, 0.6, 0.06, 0.05);
+    filmNoise(t + 0.32, 0.12, "lowpass", 160, 0.8, 0.07, 0.005);
+  },
+  fabric: (t) => filmNoise(t, 0.5, "bandpass", 1500, 0.4, 0.03, 0.12),
+  set: (t) => {
+    const g = ctx!.createGain();
+    g.connect(ctx!.destination);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    const o = ctx!.createOscillator();
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(70, t + 0.12);
+    o.connect(g);
+    o.start(t);
+    o.stop(t + 0.2);
+    filmNoise(t, 0.03, "highpass", 2400, 0.7, 0.03, 0.002);
+  },
+  hinge: (t) => {
+    for (let i = 0; i < 7; i += 1) {
+      filmNoise(
+        t + i * 0.035,
+        0.03,
+        "bandpass",
+        3200 - i * 140,
+        6,
+        0.02,
+        0.003
+      );
+    }
+    const g = ctx!.createGain();
+    g.connect(ctx!.destination);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    const o = ctx!.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(820, t);
+    o.frequency.linearRampToValueAtTime(690, t + 0.28);
+    o.connect(g);
+    o.start(t);
+    o.stop(t + 0.32);
+  },
+  clink: (t) => {
+    [2350, 3120, 4180].forEach((f, k) => {
+      const g = ctx!.createGain();
+      g.connect(ctx!.destination);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.03 / (k + 1), t + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      const o = ctx!.createOscillator();
+      o.frequency.value = f;
+      o.connect(g);
+      o.start(t);
+      o.stop(t + 1);
+    });
+  },
+  tick,
+};
+
+/** Plays one described sound, if the visitor has turned sound on. */
+export function sfx(name: string) {
+  if (!on || !ctx) return;
+  const play = SFX[name];
+  if (!play) return;
+  try {
+    play(ctx.currentTime + 0.01);
+  } catch {
+    /* a missed sound is fine */
+  }
+}

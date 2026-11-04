@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
+import { SCENE_IMPORT_MAP } from "@/lib/site/scene";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),
@@ -47,29 +48,13 @@ export const viewport: Viewport = {
 const FONTS =
   "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Figtree:wght@400;500;600;700&family=Pinyon+Script&display=swap";
 
-// The film's 3D module imports three by bare specifier, exactly as the archive
-// did, so the import map has to be in the document before the module loads.
-const IMPORT_MAP = JSON.stringify({
-  imports: {
-    three: "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-  },
-});
-
 // Before paint: a page reached from another marketing page opens its velvet
 // curtain; a direct visit renders plainly.
 const curtainBoot =
   'try{if(sessionStorage.getItem("ariya-curtain")&&!/embed=/.test(location.search))document.documentElement.classList.add("cur-in")}catch(e){}';
 
-// The archive's own scripts, in index.html's order. Classic scripts keep their
-// order only if `async` is explicitly off when React inserts them.
-const FILM_SCRIPTS = [
-  "/site/assets/fine-card.js",
-  "/site/assets/scroll.js",
-  "/site/assets/nav.js",
-  "/site/assets/the-yes-controls.819e8d5cbcae.js",
-];
-
+// The film renders as React markup; the only thing left from the archive here
+// is the import map, because the scene module imports three by bare specifier.
 export default function FilmLayout({
   children,
 }: {
@@ -87,22 +72,11 @@ export default function FilmLayout({
         <link rel="stylesheet" href={FONTS} precedence="default" />
         <script
           type="importmap"
-          dangerouslySetInnerHTML={{ __html: IMPORT_MAP }}
+          dangerouslySetInnerHTML={{ __html: SCENE_IMPORT_MAP }}
         />
         <script dangerouslySetInnerHTML={{ __html: curtainBoot }} />
       </head>
-      <body>
-        {children}
-        {FILM_SCRIPTS.map((src) => (
-          <script key={src} src={src} async={false} />
-        ))}
-        {/* A module script is deferred by definition; the attribute only quiets the linter. */}
-        <script
-          type="module"
-          src="/site/assets/the-yes-scene.83edb5453053.js"
-          defer
-        />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
