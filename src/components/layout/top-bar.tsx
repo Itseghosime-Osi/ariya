@@ -11,7 +11,7 @@ interface TopBarProps {
   eventId?: string;
   userEmail?: string;
   pendingProposals?: number;
-  /** Phone only: leave the bar out, for screens with their own (see screen-header.tsx). */
+  /** Installed app on a phone: leave the bar out, for screens with their own (screen-header.tsx). */
   hideOnPhone?: boolean;
 }
 
@@ -29,7 +29,7 @@ export function TopBar({
     <>
       <header
         data-top-bar
-        className={`${hideOnPhone ? "max-md:hidden " : ""}sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-gold-ink/20 bg-[#f7f2e8]/94 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:px-6 lg:px-8 shadow-[0_1px_0_rgba(255,255,255,0.7)_inset] after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/60 after:to-transparent`}
+        className={`${hideOnPhone ? "standalone:max-md:hidden " : ""}sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-gold-ink/20 bg-[#f7f2e8]/94 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:px-6 lg:px-8 shadow-[0_1px_0_rgba(255,255,255,0.7)_inset] after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/60 after:to-transparent`}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link

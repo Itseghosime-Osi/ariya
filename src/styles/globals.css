@@ -1,4 +1,7 @@
 @import "tailwindcss";
+
+/* standalone: styles for the installed app only (opened from its icon, not in a browser tab). */
+@custom-variant standalone (@media (display-mode: standalone));
 @import "./glass.css";
 @import "./desk.css";
 

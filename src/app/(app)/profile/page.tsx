@@ -74,7 +74,7 @@ export default async function ProfilePage({
         backHref="/settings"
         action={{ href: "/settings", icon: "settings", label: "Settings" }}
       />
-      <DeskItem className="hidden md:block">
+      <DeskItem className="standalone:max-md:hidden">
         <p className={EYEBROW}>Your account</p>
         <h1 className="mt-2 font-serif text-4xl font-bold leading-tight text-on-surface sm:text-5xl">
           Profile

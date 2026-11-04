@@ -17,8 +17,9 @@ const CIRCLE =
 
 /**
  * A phone screen's own bar, as in a native app: Back on the left, the title in the middle and one
- * action on the right. It stands in for the app's top bar on account screens (Settings, Profile),
- * and is hidden from tablet width up, where the page keeps its large heading.
+ * action on the right. It shows only in the installed app on a phone, where it stands in for the
+ * app's top bar on account screens (Settings, Profile). In a browser, and from tablet width up,
+ * the page keeps the website's top bar and its large heading.
  */
 export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
   const router = useRouter();
@@ -34,7 +35,7 @@ export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
   return (
     <div
       data-screen-header
-      className="sticky top-0 z-30 -mx-4 -mt-6 mb-5 grid grid-cols-[44px_1fr_44px] items-center gap-3 border-b border-hairline bg-[#f7f2e8]/92 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:-mx-6 sm:px-6 md:hidden"
+      className="sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden grid-cols-[44px_1fr_44px] items-center gap-3 border-b border-hairline bg-[#f7f2e8]/92 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
     >
       <button type="button" onClick={back} aria-label="Back" className={CIRCLE}>
         <Icon name="chevron_left" size={20} />

@@ -121,7 +121,7 @@ export function SettingsDesk({
         }}
       />
       <header
-        className="wiz-rise mb-6 hidden md:block lg:mb-10"
+        className="wiz-rise mb-6 standalone:max-md:hidden lg:mb-10"
         style={{ "--i": 0 } as React.CSSProperties}
       >
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
