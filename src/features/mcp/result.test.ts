@@ -27,7 +27,7 @@ afterEach(() => {
 
 describe("runTool", () => {
   it("logs the host, the connected app, the tool and a success", async () => {
-    const result = await runTool(caller, "list_guests", async () =>
+    const result = await runTool(caller, "list_guests", {}, async () =>
       dataResult({ items: [] })
     );
 
@@ -44,7 +44,7 @@ describe("runTool", () => {
   });
 
   it("logs an error outcome for a tool that answered with one", async () => {
-    await runTool(caller, "add_guest", async () =>
+    await runTool(caller, "add_guest", {}, async () =>
       errorResult("That guest is already on this celebration.")
     );
 
@@ -57,7 +57,7 @@ describe("runTool", () => {
   });
 
   it("turns a thrown error into a safe result and still logs the call", async () => {
-    const result = await runTool(caller, "import_guests", async () => {
+    const result = await runTool(caller, "import_guests", {}, async () => {
       throw new ToolError("Nothing was written.");
     });
 
@@ -75,17 +75,82 @@ describe("runTool", () => {
   it("never logs guest text that a tool handled", async () => {
     const secret = "Ada Obi, allergic to peanuts, +234 801 234 5678";
 
-    await runTool(caller, "list_guests", async () =>
+    await runTool(caller, "list_guests", {}, async () =>
       dataResult({ items: [secret] })
     );
 
     expect(JSON.stringify(loggedLines())).not.toContain("Ada Obi");
   });
 
+  it("logs the database's code and hint rather than its message", async () => {
+    const inserted: Record<string, unknown>[] = [];
+    const client = {
+      from: () => ({
+        insert: async (row: Record<string, unknown>) => {
+          inserted.push(row);
+          return { error: null };
+        },
+      }),
+    };
+
+    const result = await runTool(
+      { ...caller, client: client as never },
+      "propose_hall_layout",
+      { note: "Proposed a hall layout" },
+      async () => {
+        throw new ToolError(
+          "Could not record that proposal. Nothing was changed.",
+          { diagnostic: { code: "42501", hint: "NOT_PERMITTED" } }
+        );
+      }
+    );
+
+    expect(result.isError).toBe(true);
+    expect(loggedLines()[0]).toMatchObject({
+      tool: "propose_hall_layout",
+      outcome: "error",
+      code: "42501",
+      hint: "NOT_PERMITTED",
+    });
+    expect(inserted[0]).toMatchObject({
+      note: "Proposed a hall layout (42501 NOT_PERMITTED)",
+    });
+
+    const everything = JSON.stringify([loggedLines(), inserted]);
+    expect(everything).not.toContain("row-level");
+    expect(everything).not.toContain("Could not record");
+  });
+
+  it("leaves the log line and the note alone when no code came back", async () => {
+    const inserted: Record<string, unknown>[] = [];
+    const client = {
+      from: () => ({
+        insert: async (row: Record<string, unknown>) => {
+          inserted.push(row);
+          return { error: null };
+        },
+      }),
+    };
+
+    await runTool(
+      { ...caller, client: client as never },
+      "propose_seating_plan",
+      { note: "Proposed a seating plan" },
+      async () => {
+        throw new ToolError("Could not record that proposal. Nothing changed.");
+      }
+    );
+
+    expect(loggedLines()[0]).not.toHaveProperty("code");
+    expect(loggedLines()[0]).not.toHaveProperty("hint");
+    expect(inserted[0]).toMatchObject({ note: "Proposed a seating plan" });
+  });
+
   it("records a null client id for a host calling with their own session", async () => {
     await runTool(
       { user: { id: "user-2" }, clientId: null },
       "list_events",
+      {},
       async () => dataResult([])
     );
 

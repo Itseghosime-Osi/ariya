@@ -25,17 +25,30 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+interface DialogContentProps extends React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> {
+  /**
+   * Anchors the panel to the bottom edge like a phone sheet instead of
+   * centring it, with room for the home indicator. It keeps the top bar's
+   * translucent ivory rather than a plain white block.
+   */
+  sheet?: boolean;
+}
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  DialogContentProps
+>(({ className, children, sheet, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl bg-surface-container-lowest p-6 shadow-[0_16px_48px_rgba(28,7,13,0.2)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
-        className
+        className,
+        sheet &&
+          "inset-x-0 bottom-0 left-0 top-auto max-h-[88dvh] translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-b-none rounded-t-[28px] border border-gold-ink/25 bg-ivory/97 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-24px_60px_-24px_rgba(28,7,13,0.55)] [-webkit-backdrop-filter:blur(14px)] backdrop-blur-md sm:max-w-md"
       )}
       {...props}
     >

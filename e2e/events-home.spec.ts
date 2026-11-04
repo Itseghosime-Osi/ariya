@@ -52,8 +52,17 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     await expect(createFirstEvent).toHaveText("Create your first event");
     await expect(createFirstEvent).toHaveAttribute("href", "/events/new");
 
+    // Desktop's top bar keeps one door to the connected app, not an account chip.
+    await expect(page.getByTestId("connect-ai-link")).toHaveAttribute(
+      "href",
+      "/connect-ai"
+    );
+    await expect(page.getByTestId("user-avatar-menu")).toBeHidden();
+
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByTestId("desktop-sidebar")).toBeHidden();
+    await expect(page.getByTestId("connect-ai-link")).toBeHidden();
+    await expect(page.getByTestId("user-avatar-menu")).toBeVisible();
     await expect(page.getByTestId("phone-tab-bar")).toHaveCount(0);
     await expect(page.getByTestId("phone-more-button")).toHaveCount(0);
     await expect(page.getByTestId("phone-create-button")).toBeVisible();
@@ -263,5 +272,39 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
         name: "Seating",
       })
     ).toBeVisible();
+    // Settings moved into the account sheet, so More no longer carries it.
+    await expect(
+      page.getByTestId("phone-more-sections").getByRole("link", {
+        name: "Settings",
+        exact: true,
+      })
+    ).toHaveCount(0);
+
+    await page.keyboard.press("Escape");
+    await expect(moreSheet).toBeHidden();
+
+    // The account icon opens the sheet with the four account actions.
+    await page.getByTestId("user-avatar-menu").click();
+    const accountSheet = page.getByRole("dialog", { name: "Account" });
+    await expect(accountSheet).toBeVisible();
+    await expect(page.getByTestId("account-connect-ai")).toHaveAttribute(
+      "href",
+      "/connect-ai"
+    );
+    // Settings follows the event the switcher settled on, not the first one.
+    await expect(page.getByTestId("account-settings")).toHaveAttribute(
+      "href",
+      `/events/${event2.eventId}/settings`
+    );
+    await expect(page.getByTestId("account-profile")).toHaveAttribute(
+      "href",
+      "/profile"
+    );
+    await expect(page.getByTestId("account-sign-out")).toBeVisible();
+
+    // Escape closes it and returns focus to the icon that opened it.
+    await page.keyboard.press("Escape");
+    await expect(accountSheet).toBeHidden();
+    await expect(page.getByTestId("user-avatar-menu")).toBeFocused();
   });
 });

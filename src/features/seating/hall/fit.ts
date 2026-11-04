@@ -47,7 +47,8 @@ export interface FitResult {
   arrangement: "rows" | "staggered";
 }
 
-function zoneClearance(z: Zone) {
+/** How much clear floor a zone needs around it before a table may sit beside it. */
+export function zoneClearance(z: Zone) {
   if (z.kind === "pillar") return 0.3;
   if (z.kind === "custom") return 0.6;
   if (z.kind === "entrance") return 1.6;

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { listRecentActivity } from "@/features/approvals/queries";
 import { getCurrentUser } from "@/features/auth/queries";
 import {
   DeskItem,
   DeskMotion,
 } from "@/features/events/components/desk/DeskMotion";
+import { ActivityList } from "@/features/mcp/components/ActivityList";
 import { ConnectedApps } from "@/features/mcp/components/ConnectedApps";
 import { CopyButton } from "@/features/mcp/components/CopyButton";
 import { listConnectedApps } from "@/features/mcp/grants";
@@ -30,7 +33,10 @@ export default async function ConnectAiPage() {
   if (!user) redirect("/sign-in?next=%2Fconnect-ai");
 
   const address = mcpResourceUrl();
-  const connected = await listConnectedApps();
+  const [connected, activity] = await Promise.all([
+    listConnectedApps(),
+    listRecentActivity(),
+  ]);
 
   return (
     <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
@@ -44,6 +50,22 @@ export default async function ConnectAiPage() {
           your guest list and make changes for you. It runs as you: same
           celebrations, same permissions.
         </p>
+      </DeskItem>
+
+      <DeskItem className={CARD}>
+        <p className={EYEBROW}>New to this?</p>
+        <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+          The guide shows how to connect an app, prompts that work well —
+          including designing a hall or a seating plan in your own words — what
+          waits for your approval, how to undo a change, and how to disconnect.
+        </p>
+        <Link
+          href="/connect-ai/guide"
+          className="desk-chip mt-4 inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          Read the guide
+          <Icon name="arrow_forward" size={16} />
+        </Link>
       </DeskItem>
 
       <DeskItem className={CARD}>
@@ -141,6 +163,17 @@ export default async function ConnectAiPage() {
                   invitation wording
                 </span>
               </li>
+              <li className="flex gap-2">
+                <Icon
+                  name="check"
+                  size={15}
+                  className="mt-0.5 shrink-0 text-gold-ink"
+                />
+                <span>
+                  Prepare an invitation send, a hall layout or a seating plan
+                  for you to approve
+                </span>
+              </li>
             </ul>
           </div>
           <div>
@@ -167,6 +200,17 @@ export default async function ConnectAiPage() {
                   members and sign-in
                 </span>
               </li>
+              <li className="flex gap-2">
+                <Icon
+                  name="lock"
+                  size={15}
+                  className="mt-0.5 shrink-0 text-gold-ink"
+                />
+                <span>
+                  Apply a hall or seating change, or approve its own request —
+                  those wait for you
+                </span>
+              </li>
             </ul>
           </div>
         </div>
@@ -187,6 +231,21 @@ export default async function ConnectAiPage() {
         ) : (
           <p className="rounded-[22px] border border-dashed border-outline-variant bg-ivory p-5 text-sm text-on-surface-variant">
             {connected.error}
+          </p>
+        )}
+      </DeskItem>
+
+      <DeskItem className={CARD} as="section">
+        <p className={EYEBROW}>Recent activity</p>
+        <p className="mb-4 mt-2 text-sm text-on-surface-variant">
+          What your connected apps have done, newest first. Refusals are listed
+          too, so a request that was blocked is never invisible.
+        </p>
+        {activity.ok ? (
+          <ActivityList entries={activity.data} />
+        ) : (
+          <p className="rounded-[22px] border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm text-on-surface-variant">
+            {activity.error}
           </p>
         )}
       </DeskItem>

@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolContext } from "../guard";
 import { ToolError } from "../result";
 import {
   checkEventCreationBudget,
   EVENT_CREATION_WINDOW_MS,
   MAX_EVENTS_PER_DAY,
+  registerWriteTools,
 } from "./write";
 
 const NOW = new Date("2026-11-01T12:00:00.000Z");
@@ -21,6 +24,7 @@ function chain(result: { data: unknown; error: unknown }) {
     in: () => query,
     gte: () => query,
     order: () => query,
+    maybeSingle: () => Promise.resolve(result),
     then: (resolve: (value: unknown) => unknown) =>
       Promise.resolve(result).then(resolve),
   };
@@ -119,6 +123,115 @@ describe("checkEventCreationBudget", () => {
 
     await expect(checkEventCreationBudget(ctx)).rejects.toThrow(
       "Could not check your recent celebrations. Nothing was created."
+    );
+  });
+});
+
+describe("a write tool the database refuses", () => {
+  const ALLOWED_RPC = {
+    ai_connection_event_allowed: { data: true, error: null },
+    ai_connection_read_only: { data: false, error: null },
+    has_event_role: { data: true, error: null },
+  };
+
+  /** The driver's error, with a message and details that must not survive the trip. */
+  const REFUSED = {
+    code: "42501",
+    hint: "NOT_PERMITTED",
+    message: 'new row violates row-level security policy for table "guests"',
+    details: "Failing row contains (Ngozi Eze, +2348030000000).",
+  };
+
+  function toolClient(rows: Record<string, { data: unknown; error: unknown }>) {
+    const inserts: unknown[] = [];
+    const client = {
+      from: (table: string) => {
+        const query = chain(rows[table] ?? { data: null, error: null });
+        return {
+          ...query,
+          insert: (payload: unknown) => {
+            inserts.push(payload);
+            return query;
+          },
+        };
+      },
+      rpc: (name: string) =>
+        Promise.resolve(
+          ALLOWED_RPC[name as keyof typeof ALLOWED_RPC] ?? {
+            data: null,
+            error: null,
+          }
+        ),
+    };
+
+    return { client, inserts };
+  }
+
+  async function callUpdateGuest(ctx: ToolContext): Promise<CallToolResult> {
+    let handler:
+      ((args: Record<string, unknown>) => Promise<CallToolResult>) | null =
+      null;
+    registerWriteTools(
+      {
+        registerTool: (
+          name: string,
+          _config: unknown,
+          body: (args: Record<string, unknown>) => Promise<CallToolResult>
+        ) => {
+          if (name === "update_guest") handler = body;
+          return { enabled: true };
+        },
+      } as unknown as McpServer,
+      ctx
+    );
+
+    if (!handler) throw new Error("update_guest was not registered");
+    return (
+      handler as (args: Record<string, unknown>) => Promise<CallToolResult>
+    )({
+      eventId: "11111111-1111-4111-8111-111111111111",
+      guestId: "22222222-2222-4222-8222-222222222222",
+      name: "Ngozi Eze",
+    });
+  }
+
+  it("logs the code and hint, and never the message or the row", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    const { client, inserts } = toolClient({
+      guests: { data: null, error: REFUSED },
+    });
+
+    const result = await callUpdateGuest({
+      client: client as unknown as ToolContext["client"],
+      user: { id: "user-1" } as unknown as ToolContext["user"],
+      clientId: "client-abc",
+    });
+
+    const text =
+      result.content?.[0]?.type === "text" ? result.content[0].text : "";
+    expect(text).toBe(
+      "Could not read that guest right now. Nothing was changed."
+    );
+    expect(text).not.toContain("policy");
+    expect(text).not.toContain("Ngozi");
+
+    const line = info.mock.calls
+      .map(([entry]) => JSON.parse(String(entry)))
+      .find((entry) => entry.event === "mcp_tool_call");
+    expect(line).toMatchObject({
+      tool: "update_guest",
+      outcome: "error",
+      code: "42501",
+      hint: "NOT_PERMITTED",
+    });
+    expect(JSON.stringify(line)).not.toContain("Ngozi");
+
+    expect(inserts).toContainEqual(
+      expect.objectContaining({
+        tool: "update_guest",
+        outcome: "error",
+        note: "Updated guest (42501 NOT_PERMITTED)",
+      })
     );
   });
 });

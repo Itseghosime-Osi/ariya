@@ -4,7 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
-import type { Json } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { MAX_IMPORT_ROWS } from "./csv-parser";
 import { guestRowSchema, type ValidatedGuestRow } from "./schemas";
 import type { Guest } from "./types";
@@ -24,20 +24,25 @@ export async function createGuestAction(
 
   const supabase = await createClient();
 
+  // rsvp_token is NOT NULL with no column default, so the generated Insert type demands it, but
+  // tr_guests_before_insert always overwrites it with a server-generated invitation token.
+  // Everything else is supplied here; the trigger owns that column.
+  const payload = {
+    event_id: eventId,
+    name: parsed.data.name.trim(),
+    phone: parsed.data.phone,
+    email: parsed.data.email,
+    side: parsed.data.side,
+    group_name: parsed.data.group_name,
+    party_size: parsed.data.party_size,
+    plus_ones_allowed: parsed.data.plus_ones_allowed,
+    is_vip: parsed.data.is_vip,
+    notes: parsed.data.notes,
+  } as Database["public"]["Tables"]["guests"]["Insert"];
+
   const { data, error } = await supabase
     .from("guests")
-    .insert({
-      event_id: eventId,
-      name: parsed.data.name.trim(),
-      phone: parsed.data.phone,
-      email: parsed.data.email,
-      side: parsed.data.side,
-      group_name: parsed.data.group_name,
-      party_size: parsed.data.party_size,
-      plus_ones_allowed: parsed.data.plus_ones_allowed,
-      is_vip: parsed.data.is_vip,
-      notes: parsed.data.notes,
-    })
+    .insert(payload)
     .select()
     .single();
 

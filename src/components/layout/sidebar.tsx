@@ -11,6 +11,7 @@ import { EventSwitcher } from "./EventSwitcher";
 import { SignOutConfirmation } from "./SignOutConfirmation";
 import {
   NAV_GROUPS,
+  accountInitials,
   getEventSections,
   type NavItem,
   type SwitcherEvent,
@@ -45,14 +46,6 @@ interface Spark {
 }
 
 const SPARK_COLOURS = ["#e9c98a", "#f6dca8", "#f4efe6", "#f57c8a", "#c1283d"];
-
-function initials(email: string) {
-  const name = email.split("@")[0] ?? "";
-  const parts = name.split(/[._-]+/).filter(Boolean);
-  const letters =
-    (parts.length > 1 ? parts[0][0] + parts[1][0] : name.slice(0, 2)) || "A";
-  return letters.toUpperCase();
-}
 
 export function Sidebar({
   events,
@@ -447,12 +440,12 @@ export function Sidebar({
             <button
               type="button"
               onClick={openAccount}
-              aria-label={`${initials(userEmail)}, Account Menu`}
+              aria-label={`${accountInitials(userEmail)}, Account Menu`}
               aria-expanded={accountOpen}
               className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-gold to-[#b8864b] text-[12px] font-bold text-night ring-2 ring-night">
-                {initials(userEmail)}
+                {accountInitials(userEmail)}
               </span>
               <span className="absolute bottom-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-[#5bd19a] ring-2 ring-night" />
             </button>

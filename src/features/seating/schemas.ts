@@ -35,21 +35,23 @@ export const assignSeatInputSchema = z.object({
 
 export type AssignSeatInput = z.infer<typeof assignSeatInputSchema>;
 
+export const zoneKindSchema = z.enum([
+  "stage",
+  "dance",
+  "buffet",
+  "bar",
+  "dj",
+  "entrance",
+  "gifts",
+  "photo",
+  "pillar",
+  "cake",
+  "custom",
+]);
+
 const zoneSchema = z.object({
   id: z.string().min(1).max(40),
-  kind: z.enum([
-    "stage",
-    "dance",
-    "buffet",
-    "bar",
-    "dj",
-    "entrance",
-    "gifts",
-    "photo",
-    "pillar",
-    "cake",
-    "custom",
-  ]),
+  kind: zoneKindSchema,
   label: z.string().trim().max(60),
   x: z.number().finite(),
   y: z.number().finite(),
@@ -71,7 +73,7 @@ const zoneSchema = z.object({
 });
 
 const hexColour = z.string().regex(/^#[0-9a-fA-F]{6}$/);
-const chairTypeSchema = z.enum([
+export const chairTypeSchema = z.enum([
   "chiavari-gold",
   "chiavari-silver",
   "chiavari-white",
@@ -79,20 +81,38 @@ const chairTypeSchema = z.enum([
   "crossback",
   "covered",
 ]);
-const centrepieceSchema = z.enum([
+export const centrepieceSchema = z.enum([
   "tall",
   "low",
   "candles",
   "lanterns",
   "none",
 ]);
+export const floorFinishSchema = z.enum(["marble", "wood", "dark", "carpet"]);
+
+/**
+ * The hall designer's bounds, named so the rules handed to a connected app are generated from the
+ * very same numbers the validator enforces. Anything that restates them would eventually drift.
+ */
+export const HALL_MIN_SIZE = 6;
+export const HALL_MAX_SIZE = 120;
+export const HALL_MAX_ZONES = 60;
+export const HALL_MAX_CHAIRS = 400;
+export const HALL_CEILING_MIN = 3;
+export const HALL_CEILING_MAX = 15;
+export const TABLE_POSITION_MIN = -1000;
+export const TABLE_POSITION_MAX = 13000;
+export const HALL_MAX_TABLE_POSITIONS = 300;
+
+/** `events.hall_layout` refuses anything larger, so a proposal beyond it could never be applied. */
+export const MAX_HALL_LAYOUT_BYTES = 64 * 1024;
 
 export const hallLayoutSchema = z.object({
   version: z.literal(1),
-  width: z.number().min(6).max(120),
-  length: z.number().min(6).max(120),
+  width: z.number().min(HALL_MIN_SIZE).max(HALL_MAX_SIZE),
+  length: z.number().min(HALL_MIN_SIZE).max(HALL_MAX_SIZE),
   spacing: z.enum(["snug", "comfortable", "spacious"]),
-  zones: z.array(zoneSchema).max(60),
+  zones: z.array(zoneSchema).max(HALL_MAX_ZONES),
   decor: z.object({
     linen: hexColour,
     sash: hexColour.nullable(),
@@ -102,7 +122,7 @@ export const hallLayoutSchema = z.object({
     flower: hexColour,
     uplight: hexColour.nullable(),
     drape: hexColour.nullable(),
-    floor: z.enum(["marble", "wood", "dark", "carpet"]),
+    floor: floorFinishSchema,
     wall: hexColour,
   }),
   rotations: z.record(z.string().uuid(), z.number().min(-360).max(360)),
@@ -127,21 +147,21 @@ export const hallLayoutSchema = z.object({
         chair: chairTypeSchema.optional(),
       })
     )
-    .max(400),
+    .max(HALL_MAX_CHAIRS),
   mood: z.enum(["day", "evening"]),
   chandeliers: z.boolean(),
-  ceiling: z.number().min(3).max(15),
+  ceiling: z.number().min(HALL_CEILING_MIN).max(HALL_CEILING_MAX),
 });
 
 export const tablePositionsSchema = z
   .array(
     z.object({
       id: z.string().uuid(),
-      x: z.number().int().min(-1000).max(13000),
-      y: z.number().int().min(-1000).max(13000),
+      x: z.number().int().min(TABLE_POSITION_MIN).max(TABLE_POSITION_MAX),
+      y: z.number().int().min(TABLE_POSITION_MIN).max(TABLE_POSITION_MAX),
     })
   )
-  .max(300);
+  .max(HALL_MAX_TABLE_POSITIONS);
 
 export const bulkTablesSchema = z.array(createTableSchema).min(1).max(200);
 

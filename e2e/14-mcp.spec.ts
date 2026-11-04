@@ -5,17 +5,25 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const TOOL_NAMES = [
+  "whoami",
   "list_events",
   "get_event_overview",
   "list_guests",
   "get_rsvp_summary",
   "list_tables_and_seating",
+  "get_hall_layout",
+  "get_hall_rules",
   "create_event",
   "update_event",
   "add_guest",
   "update_guest",
   "import_guests",
   "update_invitation_design",
+  "propose_hall_layout",
+  "propose_seating_plan",
+  "propose_send_invitations",
+  "propose_send_reminders",
+  "list_my_proposals",
 ];
 
 let nextRequestId = 1;
@@ -208,6 +216,24 @@ test.describe("MCP endpoint", () => {
       search: "Adaeze",
     });
     expect(listedEvents.isError).toBe(false);
+  });
+
+  test("whoami tells a password-grant token it is an ordinary session", async ({
+    page,
+    context,
+    request,
+  }) => {
+    const user = await createAndLoginUser(page, context, "mcp_whoami");
+    const token = await accessToken(request, user);
+
+    const reply = await callTool(request, token, "whoami", {});
+
+    expect(reply.isError).toBe(false);
+    // No client_id claim on a password grant, so the database treats it as the host's own session.
+    expect(payload(reply)).toEqual({
+      clientId: null,
+      databaseTreatsThisTokenAsApp: false,
+    });
   });
 
   test("refuses another host and writes nothing on the first host's celebration", async ({

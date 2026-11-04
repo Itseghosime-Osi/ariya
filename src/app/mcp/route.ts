@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { wwwAuthenticateHeader } from "@/features/mcp/metadata";
+import { isAllowedOrigin } from "@/features/mcp/origin";
 import { createAriyaMcpServer } from "@/features/mcp/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createBearerClient, verifyAccessToken } from "@/lib/supabase/bearer";
@@ -17,6 +18,30 @@ export const MCP_RATE_LIMIT_WINDOW = "1 minute";
 
 export function mcpRateLimitKey(userId: string): string {
   return `mcp:${userId}`;
+}
+
+/**
+ * DNS-rebinding protection, checked before anything else: a browser whose page is not on the
+ * allowlist is refused without its token ever being examined.
+ */
+function originRefused(): Response {
+  return new Response(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "That Origin is not allowed to call this endpoint.",
+      },
+      id: null,
+    }),
+    {
+      status: 403,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": NO_STORE,
+      },
+    }
+  );
 }
 
 function unauthorized(): Response {
@@ -92,6 +117,8 @@ function bearerToken(request: Request): string | null {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  if (!isAllowedOrigin(request.headers.get("origin"))) return originRefused();
+
   const token = bearerToken(request);
   if (!token) return unauthorized();
 
@@ -126,6 +153,8 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function GET(request: Request): Promise<Response> {
+  if (!isAllowedOrigin(request.headers.get("origin"))) return originRefused();
+
   const token = bearerToken(request);
   if (!token) return unauthorized();
 
