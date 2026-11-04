@@ -26,7 +26,7 @@ The project consists of:
 
 ### Prerequisites
 
-- Node.js 22, matching CI (the package engine requires at least 20.9)
+- Node.js 24, matching CI and Vercel (pinned by `engines` and `.nvmrc`)
 - pnpm 12.15.0, pinned by `packageManager` in `package.json`
 - Docker running and the Supabase CLI (CI uses 2.122.0)
 

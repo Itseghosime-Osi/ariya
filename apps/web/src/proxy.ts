@@ -22,6 +22,7 @@ export async function proxy(request: NextRequest) {
       "/film",
       "/robots.txt",
       "/sitemap.xml",
+      "/sw.js",
     ].includes(pathname)
   ) {
     return NextResponse.next();

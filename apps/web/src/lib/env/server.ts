@@ -19,6 +19,8 @@ export const serverEnvSchema = z
       })
       .min(32, "RATE_LIMIT_SECRET must be at least 32 characters"),
     CRON_SECRET: z.string().min(1),
+    // App notifications are switched off until this is set (with NEXT_PUBLIC_VAPID_PUBLIC_KEY).
+    VAPID_PRIVATE_KEY: z.string().min(1).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === "production") {
@@ -94,6 +96,7 @@ export function resolveServerEnv(
         rawEnv.RATE_LIMIT_SECRET ||
         "super-secret-rate-limit-salt-key-minimum-32-chars-long",
       CRON_SECRET: rawEnv.CRON_SECRET || "cron_placeholder",
+      VAPID_PRIVATE_KEY: rawEnv.VAPID_PRIVATE_KEY || undefined,
     };
   }
 

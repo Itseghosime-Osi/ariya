@@ -14,11 +14,15 @@ import {
   resetPasswordSchema,
   signInSchema,
   signUpSchema,
+  updateProfileSchema,
   type ForgotPasswordInput,
   type ResetPasswordInput,
   type SignInInput,
   type SignUpInput,
+  type UpdateProfileInput,
 } from "./schemas";
+import { normalizePhoneNumber } from "@/lib/phone";
+import { revalidatePath } from "next/cache";
 
 export type ActionResult<T = void> =
   { ok: true; data?: T; redirectTo?: string } | { ok: false; error: string };
@@ -264,5 +268,57 @@ export async function signOutAction(): Promise<ActionResult> {
     return { ok: false, error: mapError(error, "Failed to sign out") };
   }
 
+  return { ok: true };
+}
+
+/** Signs this account out on every device, this one included. */
+export async function signOutEverywhereAction(): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to sign out") };
+  }
+
+  return { ok: true };
+}
+
+/** Saves the signed-in host's name and phone number. */
+export async function updateProfileAction(
+  input: UpdateProfileInput
+): Promise<ActionResult> {
+  const parsed = updateProfileSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Check your details",
+    };
+  }
+  const rawPhone = parsed.data.phone ?? "";
+  const phone = rawPhone ? normalizePhoneNumber(rawPhone) : null;
+  if (rawPhone && !phone) {
+    return { ok: false, error: "That phone number doesn't look right" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: parsed.data.fullName, phone })
+    .eq("id", user.id);
+  if (error) {
+    return { ok: false, error: mapError(error, "Failed to save your profile") };
+  }
+  // Keep the sign-in record's name in step, so the app greets them by it everywhere.
+  await supabase.auth.updateUser({
+    data: { full_name: parsed.data.fullName },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/settings");
   return { ok: true };
 }

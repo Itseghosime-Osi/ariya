@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { accountInitials } from "@/components/layout/nav-items";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
+import { EditProfileButton } from "@/features/auth/components/EditProfileButton";
+import { ScreenHeader } from "@/components/layout/screen-header";
+import { formatPhoneDisplay } from "@/lib/phone";
 import {
   DeskItem,
   DeskMotion,
@@ -24,7 +27,12 @@ interface DetailRow {
   icon: IconName;
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>;
+}) {
+  const { edit } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=%2Fprofile");
   const profile = await getCurrentProfile();
@@ -48,24 +56,42 @@ export default async function ProfilePage() {
   const rows: DetailRow[] = [
     { label: "Email", value: email, icon: "mail" },
     ...(profile?.phone
-      ? [{ label: "Phone", value: profile.phone, icon: "phone" as IconName }]
+      ? [
+          {
+            label: "Phone",
+            value: formatPhoneDisplay(profile.phone),
+            icon: "phone" as IconName,
+          },
+        ]
       : []),
     { label: "Host since", value: since, icon: "schedule" },
   ];
 
   return (
     <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
-      <DeskItem>
+      <ScreenHeader
+        title="Profile"
+        backHref="/settings"
+        action={{ href: "/settings", icon: "settings", label: "Settings" }}
+      />
+      <DeskItem className="standalone:max-md:hidden">
         <p className={EYEBROW}>Your account</p>
         <h1 className="mt-2 font-serif text-4xl font-bold leading-tight text-on-surface sm:text-5xl">
           Profile
         </h1>
         <p className="mt-2 max-w-xl text-sm text-on-surface-variant">
-          How Àríyá knows you — and the two places you may want next.
+          How Àríyá knows you. Tap the pencil to change your name or phone.
         </p>
       </DeskItem>
 
-      <DeskItem className="rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-6 sm:px-7">
+      <DeskItem className="relative rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 py-6 sm:px-7">
+        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+          <EditProfileButton
+            name={name}
+            phone={profile?.phone ?? null}
+            autoOpen={edit === "1"}
+          />
+        </div>
         <div className="flex flex-col items-center gap-3 text-center">
           <span
             data-testid="profile-avatar"
@@ -102,17 +128,17 @@ export default async function ProfilePage() {
         <div className="min-w-0 flex-1">
           <p className={EYEBROW}>Next</p>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Connect an app to your celebration desk, or head back to your
-            celebrations.
+            Notifications, security and app preferences live in Settings.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link
-            href="/connect-ai"
+            href="/settings"
+            data-testid="profile-settings-link"
             className="desk-chip inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
-            <Icon name="styler" size={16} />
-            Connect to an AI
+            <Icon name="settings" size={16} />
+            Settings
           </Link>
           <Link
             href="/events"

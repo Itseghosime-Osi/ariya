@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { getLagosDateKey } from "@/lib/format";
 import type { SwitcherEvent } from "./nav-items";
+import { readDevicePref } from "@/features/settings/prefs";
 
 /**
  * The day itself. Open the app on the day of one of your celebrations and the sky lights up: the
@@ -12,6 +13,7 @@ import type { SwitcherEvent } from "./nav-items";
 export function EventDayCelebration({ events }: { events: SwitcherEvent[] }) {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has("created")) return;
+    if (!readDevicePref("fireworks")) return;
     const today = getLagosDateKey(new Date());
     const tonight = events.find((e) => getLagosDateKey(e.date) === today);
     if (!tonight || !today) return;

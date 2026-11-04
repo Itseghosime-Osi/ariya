@@ -57,9 +57,11 @@
     "server-only": "^0.0.1",
     "sharp": "^0.35.5",
     "tailwind-merge": "^3.0.2",
+    "web-push": "3.6.7",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/mdx": "^2.0.14"
+    "@types/mdx": "^2.0.14",
+    "@types/web-push": "3.6.4"
   }
 }

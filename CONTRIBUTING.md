@@ -17,7 +17,7 @@ cleanly: `feat(guests): …`, `fix(rsvp): …`, `refactor: …`, `test: …`, `d
 
 ## Setup
 
-Node 22 (see `.nvmrc`), pnpm (the version is pinned in `package.json`), and the Supabase CLI.
+Node 24 (see `.nvmrc`), pnpm (the version is pinned in `package.json`), and the Supabase CLI.
 
 ```bash
 pnpm install
