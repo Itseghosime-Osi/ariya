@@ -6,6 +6,9 @@ test.describe("Seating Chart & Capacity Conflict", () => {
     page,
     context,
   }) => {
+    // One journey that signs up, builds a seating chart and walks a conflict through: on main it already used most of the
+    // default 30 s on CI, so a slower runner tipped it over. Every check still runs.
+    test.setTimeout(90_000);
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await createAndLoginUser(page, context, "seating_host");
     const { eventId } = await createTestEvent(page);

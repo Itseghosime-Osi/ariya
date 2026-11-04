@@ -18,6 +18,9 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
     page,
     context,
   }) => {
+    // One journey that signs up, creates an event and audits eight pages: on main it already used most of the
+    // default 30 s on CI, so a slower runner tipped it over. Every check still runs.
+    test.setTimeout(90_000);
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await createAndLoginUser(page, context, "a11y_user");
     const { eventId } = await createTestEvent(page);
