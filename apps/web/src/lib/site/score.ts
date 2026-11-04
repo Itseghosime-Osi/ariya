@@ -1,13 +1,15 @@
-// Àríyá's home page music. It loops /site/assets/music.mp3, which is
-// copyrighted and served publicly by the owner's choice. Fallback: an original
-// owambe groove generated live with the Web Audio API — juju and highlife in
-// 12/8 at 104 BPM. Ported from public/site/assets/score.js.
+// Àríyá's home page music. It loops /site/assets/music.ogg — Ogg Opus, named
+// so the server sends audio/ogg (a .opus extension is served as
+// application/octet-stream, which some browsers refuse to play). Copyrighted
+// and served publicly by the owner's choice. Fallback: the same song as AAC in
+// .m4a, then an original owambe groove generated live with the Web Audio API —
+// juju and highlife in 12/8 at 104 BPM. Ported from public/site/assets/score.js.
 //
 // Nothing plays until start() is called from a click or tap.
 
-// Smallest first: the Opus encode is ~1.7MB, the AAC fallback ~2.5MB,
-// replacing a 7MB file that was AAC-in-ADTS all along.
-const MUSIC_URLS = ["/site/assets/music.opus", "/site/assets/music.m4a"];
+// Smallest first: Opus is ~1.75MB, the AAC fallback ~2.6MB, replacing a 7MB
+// file that was AAC-in-ADTS all along.
+const MUSIC_URLS = ["/site/assets/music.ogg", "/site/assets/music.m4a"];
 
 const BPM = 104;
 const STEP = 60 / BPM / 3; // 12 eighth-note triplet steps per bar
@@ -300,8 +302,13 @@ export function start(at = 0): boolean {
   on = true;
   if (fileIndex < MUSIC_URLS.length) {
     // Try each recording in turn (Opus, then AAC); fall back to the
-    // generated groove if none of them play.
+    // generated groove if none of them play. One bad source can announce
+    // itself three ways (error event, rejected play(), HEAD check), so only
+    // step forward once — otherwise the AAC file is skipped entirely.
+    let fellBack = false;
     const fallback = () => {
+      if (fellBack) return;
+      fellBack = true;
       fileIndex += 1;
       audioEl = null;
       if (on) start();
