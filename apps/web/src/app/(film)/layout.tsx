@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/site/archive.css";
-import "@/styles/site/archive-nav.css";
+import "@/styles/site/nav.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),

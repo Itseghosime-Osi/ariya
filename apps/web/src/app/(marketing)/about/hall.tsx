@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SceneStage } from "@/components/film/SceneStage";
+import { SceneStage } from "@/components/site/scene-stage";
 
 function clamp(v: number, a: number, b: number) {
   return Math.max(a, Math.min(b, v));

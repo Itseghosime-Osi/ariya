@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InvitationCard } from "@/components/site/fine-card";
-import { SceneStage } from "@/components/film/SceneStage";
+import { SceneStage } from "@/components/site/scene-stage";
 
 const COTD = [
   ["burgundy", "Burgundy", "#5a1428"],

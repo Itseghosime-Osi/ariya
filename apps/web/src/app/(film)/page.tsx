@@ -1,4 +1,4 @@
-import { MARKUP } from "@/components/film/archive/markup";
+import { MARKUP } from "./markup";
 
 // The archive's markup, rendered as-is so the film is the archive's film. The
 // layout loads the archive's scripts against this DOM after it is in the page.
