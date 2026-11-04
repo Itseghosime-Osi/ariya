@@ -991,3 +991,13 @@ html[data-splash] .app-splash {
     display: none;
   }
 }
+
+/* No rubber-band bounce past the top or bottom of the page: the bounce drags the whole window,
+   sticky top bar included, past the edge of the screen. Always off in the installed app, and in
+   browsers driven by a mouse or trackpad; phone browsers keep their pull-to-refresh. */
+@media (display-mode: standalone), (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+}
