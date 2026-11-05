@@ -66,7 +66,7 @@ export function ReminderRecipientsTable({
         </button>
       </div>
 
-      <ul className="max-h-[28rem] overflow-y-auto pr-1">
+      <ul className="max-h-[19rem] sm:max-h-[28rem] overflow-y-auto pr-1">
         {recipients.map((r, index) => {
           const checked = selectedIds.includes(r.guestId);
           const status = STATUS[r.rsvpStatus];
@@ -84,7 +84,7 @@ export function ReminderRecipientsTable({
               className="border-t border-outline-variant/60 first:border-t-0"
             >
               <label
-                className={`flex items-center gap-3 rounded-2xl px-2 py-3.5 transition-colors sm:gap-4 sm:px-3 ${
+                className={`flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors sm:py-3.5 sm:gap-4 sm:px-3 ${
                   r.isEligibleForEmail
                     ? "cursor-pointer hover:bg-ivory"
                     : "cursor-not-allowed opacity-80"
