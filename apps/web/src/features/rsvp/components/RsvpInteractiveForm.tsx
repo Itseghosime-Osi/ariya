@@ -6,18 +6,27 @@ import { Icon } from "@/components/ui/icon";
 import { submitRsvpAction } from "../actions";
 import type { InvitationData } from "../types";
 import { getGuestTheme } from "../themes";
+import type {
+  RsvpAnswers,
+  RsvpQuestion,
+} from "@/features/rsvp-questions/model";
 import { AcceptedGuestFields } from "./AcceptedGuestFields";
+import { RsvpQuestionFields } from "./RsvpQuestionFields";
 
 interface RsvpInteractiveFormProps {
   data: InvitationData;
   token: string;
   isRevise?: boolean;
+  questions?: RsvpQuestion[];
+  answers?: RsvpAnswers;
 }
 
 export function RsvpInteractiveForm({
   data,
   token,
   isRevise = false,
+  questions = [],
+  answers = {},
 }: RsvpInteractiveFormProps) {
   const { guest, rsvp, event } = data;
   const [state, formAction, isPending] = useActionState(submitRsvpAction, null);
@@ -139,6 +148,15 @@ export function RsvpInteractiveForm({
             maxParty={maxParty}
             attendingCount={attendingCount}
             onAttendingCountChange={setAttendingCount}
+          />
+        )}
+
+        {status === "accepted" && (
+          <RsvpQuestionFields
+            questions={questions}
+            answers={answers}
+            labelClass={theme.label}
+            focusRing={theme.focusRing}
           />
         )}
 

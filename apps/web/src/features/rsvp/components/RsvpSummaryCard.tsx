@@ -3,6 +3,10 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
+import type {
+  RsvpAnswers,
+  RsvpQuestion,
+} from "@/features/rsvp-questions/model";
 import type { InvitationData } from "../types";
 import { getGuestTheme } from "../themes";
 
@@ -11,6 +15,9 @@ interface RsvpSummaryCardProps {
   token: string;
   checkInCode?: string | null;
   qrCodeUrl?: string | null;
+  requireAccessCard?: boolean;
+  questions?: RsvpQuestion[];
+  answers?: RsvpAnswers;
 }
 
 export function RsvpSummaryCard({
@@ -18,6 +25,9 @@ export function RsvpSummaryCard({
   token,
   checkInCode,
   qrCodeUrl,
+  requireAccessCard = true,
+  questions = [],
+  answers = {},
 }: RsvpSummaryCardProps) {
   const { guest, rsvp, event, table_name } = data;
   const isAccepted = rsvp?.status === "accepted";
@@ -128,6 +138,22 @@ export function RsvpSummaryCard({
             <p className="text-night italic">{rsvp.dietary}</p>
           </div>
         )}
+        {isAccepted &&
+          questions
+            .filter((q) => answers[q.id])
+            .map((q) => (
+              <div
+                key={q.id}
+                className={`pt-2 border-t text-xs ${theme.passHeader}`}
+              >
+                <span
+                  className={`text-[10px] uppercase tracking-wider font-semibold block ${theme.label}`}
+                >
+                  {q.label}
+                </span>
+                <p className="text-night italic">{answers[q.id]}</p>
+              </div>
+            ))}
       </section>
 
       {/* Dress Code Note */}
@@ -177,8 +203,17 @@ export function RsvpSummaryCard({
             </span>
           </div>
           <p className={`text-[11px] max-w-xs mx-auto ${theme.subheadline}`}>
-            Present this digital QR pass or mention your personal code to the
-            usher or check-in team at the reception desk.
+            This card is yours alone. Show the QR or say your code at the
+            entrance; once you are admitted it cannot be used again.
+          </p>
+        </section>
+      )}
+
+      {isAccepted && !requireAccessCard && (
+        <section className={`rounded-xl p-4 border text-xs ${theme.noteBox}`}>
+          <p className="text-night">
+            No card is needed for this celebration. Give your name at the
+            entrance and the team will find you.
           </p>
         </section>
       )}

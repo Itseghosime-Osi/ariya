@@ -1,6 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
-import { getInvitationByToken, getCheckInCode } from "@/features/rsvp/queries";
+import {
+  getInvitationByToken,
+  getCheckInCode,
+  getRsvpForm,
+} from "@/features/rsvp/queries";
 import { generateQrDataUrl } from "@/lib/qrcode";
 import { getGuestTheme } from "@/features/rsvp/themes";
 import { InvalidLinkCard } from "@/features/rsvp/components/InvalidLinkCard";
@@ -40,6 +44,7 @@ export default async function GuestInvitationPage({
 
   const { data, state } = await getInvitationByToken(token, isRevise);
 
+  const rsvpForm = await getRsvpForm(token);
   let checkInCode: string | null = null;
   let qrCodeUrl: string | null = null;
 
@@ -159,6 +164,9 @@ export default async function GuestInvitationPage({
             token={token}
             checkInCode={checkInCode}
             qrCodeUrl={qrCodeUrl}
+            requireAccessCard={rsvpForm.requireAccessCard}
+            questions={rsvpForm.questions}
+            answers={rsvpForm.answers}
           />
         )}
 
@@ -167,6 +175,8 @@ export default async function GuestInvitationPage({
             data={data}
             token={token}
             isRevise={state === "revise"}
+            questions={rsvpForm.questions}
+            answers={rsvpForm.answers}
           />
         )}
       </main>

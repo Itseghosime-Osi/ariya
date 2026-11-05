@@ -22,6 +22,11 @@ import {
   invitationDataSchema,
   submitRsvpRpcResultSchema,
 } from "./schemas";
+import {
+  answersFromForm,
+  answersProblem,
+  readQuestions,
+} from "@/features/rsvp-questions/model";
 import type { InvitationData } from "./types";
 
 export interface SubmitRsvpActionResult {
@@ -105,6 +110,17 @@ export async function submitRsvpAction(
   }
   const isRevision = Boolean(invitation.rsvp?.responded_at);
 
+  // The host's own questions: checked before anything is stored, so a missed required one costs nothing.
+  const { data: formRow } = await supabase.rpc("get_rsvp_form", {
+    p_token: token,
+  });
+  const questions = readQuestions(
+    (formRow as { questions?: unknown } | null)?.questions
+  );
+  const answers = answersFromForm(questions, (name) => formData.get(name));
+  const answerError = answersProblem(questions, answers, status === "accepted");
+  if (answerError) return { ok: false, error: answerError };
+
   // When accepting with no selector (or missing attendingCount), default to allowed party size (minimum 1)
   const defaultAttending = Math.max(1, invitation.guest.party_size || 1);
   const attendingCount =
@@ -140,6 +156,16 @@ export async function submitRsvpAction(
     };
   }
   const delivery = parsedSubmit.data.email_delivery;
+
+  if (questions.length > 0) {
+    const { error: answersError } = await supabase.rpc("save_rsvp_answers", {
+      p_token: token,
+      p_answers: answers,
+    });
+    if (answersError) {
+      console.error("save_rsvp_answers failed:", answersError.message);
+    }
+  }
 
   // Dispatch confirmation email if permitted by DB cap and email exists
   if (delivery?.can_send && delivery.target_email) {

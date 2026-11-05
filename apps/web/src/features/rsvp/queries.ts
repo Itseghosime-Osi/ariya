@@ -4,6 +4,12 @@ import { checkRateLimitByKeyAndIp } from "@/lib/rate-limit";
 import { invitationDataSchema } from "./schemas";
 import type { InvitationData, RsvpViewMode } from "./types";
 import { isEventExpired } from "@/lib/event-expiry";
+import {
+  readAnswers,
+  readQuestions,
+  type RsvpAnswers,
+  type RsvpQuestion,
+} from "@/features/rsvp-questions/model";
 
 export interface GetInvitationResult {
   data: InvitationData | null;
@@ -89,4 +95,35 @@ export async function getCheckInCode(token: string): Promise<string | null> {
   }
 
   return typeof data === "string" ? data : null;
+}
+
+export interface RsvpForm {
+  questions: RsvpQuestion[];
+  requireAccessCard: boolean;
+  answers: RsvpAnswers;
+}
+
+/** The host's questions, the access-card setting, and this guest's saved answers. */
+export async function getRsvpForm(token: string): Promise<RsvpForm> {
+  const empty: RsvpForm = {
+    questions: [],
+    requireAccessCard: true,
+    answers: {},
+  };
+  const cleanToken = token.trim();
+  if (!cleanToken) return empty;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_rsvp_form", {
+    p_token: cleanToken,
+  });
+  if (error || !data || typeof data !== "object" || Array.isArray(data)) {
+    return empty;
+  }
+  const row = data as Record<string, unknown>;
+  return {
+    questions: readQuestions(row.questions),
+    requireAccessCard: row.require_access_card !== false,
+    answers: readAnswers(row.answers),
+  };
 }

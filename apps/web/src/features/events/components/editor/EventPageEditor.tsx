@@ -9,16 +9,22 @@ import type { Event } from "@/features/events/types";
 import { formatWatDatetimeLocal, parseWatDateToUtc } from "@/lib/format";
 import { FilmStudio } from "@/features/event-film/FilmStudio";
 import { readFilmDesign } from "@/features/event-film/design";
+import {
+  RsvpStudio,
+  type GuestAnswers,
+} from "@/features/rsvp-questions/RsvpStudio";
+import { readQuestions } from "@/features/rsvp-questions/model";
 import { EditorControlsForm } from "./EditorControlsForm";
 import { LivePagePreview, type LivePreviewData } from "./LivePagePreview";
 
 interface EventPageEditorProps {
   event: Event;
+  replies?: GuestAnswers[];
 }
 
-export function EventPageEditor({ event }: EventPageEditorProps) {
+export function EventPageEditor({ event, replies = [] }: EventPageEditorProps) {
   const router = useRouter();
-  const [tab, setTab] = useState<"page" | "film">("page");
+  const [tab, setTab] = useState<"page" | "film" | "rsvp">("page");
 
   // Local WAT datetime input state. Converted with parseWatDateToUtc only on save and for live preview.
   const [watDateInput, setWatDateInput] = useState<string>(() =>
@@ -162,6 +168,7 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
           [
             ["page", "Page"],
             ["film", "Invitation film"],
+            ["rsvp", "RSVP & card"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -200,6 +207,15 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             subheadline: event.invitation_subheadline,
             message: event.invitation_message,
           }}
+        />
+      )}
+
+      {tab === "rsvp" && (
+        <RsvpStudio
+          eventId={event.id}
+          initialQuestions={readQuestions(event.rsvp_questions)}
+          initialRequireCard={event.require_access_card}
+          replies={replies}
         />
       )}
 
