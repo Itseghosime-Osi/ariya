@@ -118,6 +118,19 @@ export function useHallLayout({
     [commit, persist]
   );
 
+  /**
+   * Swap the layout without recording a step. Flipping between two layouts to compare them is
+   * not an edit, so it must not fill the undo history with the same two states.
+   */
+  const replace = useCallback(
+    (next: HallLayout) => {
+      commit(next);
+      persist(next);
+      bump((n) => n + 1);
+    },
+    [commit, persist]
+  );
+
   const redo = useCallback(
     (positions: Positions): Snapshot | null => {
       const next = future.current.pop();
@@ -141,6 +154,7 @@ export function useHallLayout({
   return {
     layout,
     update,
+    replace,
     remember,
     undo,
     redo,

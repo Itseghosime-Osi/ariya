@@ -88,6 +88,7 @@ import {
   type SuggestTable,
 } from "./suggested-layouts";
 import { SuggestedLayouts } from "./SuggestedLayouts";
+import { LayoutComparison, type Compared } from "./LayoutComparison";
 import type { LayoutOption } from "@ariya/studio";
 import {
   Hall3D,
@@ -253,6 +254,13 @@ export function HallStudio({
   const [busy, setBusy] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
   const [suggestions, setSuggestions] = useState<LayoutOption[] | null>(null);
+  // The layout the host had, kept beside the one they just applied, so the two can be flipped
+  // between before either is settled on.
+  const [compare, setCompare] = useState<{
+    before: { layout: HallLayout; positions: Positions };
+    after: { layout: HallLayout; positions: Positions };
+    showing: Compared;
+  } | null>(null);
   const say = (msg: string) => setAnnounce(msg);
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
@@ -603,8 +611,11 @@ export function HallStudio({
   );
 
   // ---------- edits ----------
-  const updateLayout = (fn: (l: HallLayout) => HallLayout) =>
+  const updateLayout = (fn: (l: HallLayout) => HallLayout) => {
+    // Any edit makes the "new" side of a comparison stale, so stop comparing.
+    setCompare(null);
     hall.update(fn, positions);
+  };
 
   const restorePositions = (snap: Positions) => {
     const moves = Object.entries(snap)
@@ -618,6 +629,7 @@ export function HallStudio({
   const undo = () => {
     const snap = hall.undo(positions);
     if (snap) {
+      setCompare(null);
       restorePositions(snap.positions);
       say("Undone");
     }
@@ -625,6 +637,7 @@ export function HallStudio({
   const redo = () => {
     const snap = hall.redo(positions);
     if (snap) {
+      setCompare(null);
       restorePositions(snap.positions);
       say("Redone");
     }
@@ -1081,24 +1094,57 @@ export function HallStudio({
   const chooseSuggestion = (option: LayoutOption) => {
     const tableIds = data.tables.map((t) => t.id);
     const applied = applyOption(option, tableIds, layout);
-    hall.update(
-      (l) => ({
-        ...l,
-        zones: applied.zones,
-        rotations: {
-          ...l.rotations,
-          ...Object.fromEntries(applied.positions.map((p) => [p.id, p.rot])),
-        },
-      }),
-      positions
-    );
+    const next: HallLayout = {
+      ...layout,
+      zones: applied.zones,
+      rotations: {
+        ...layout.rotations,
+        ...Object.fromEntries(applied.positions.map((p) => [p.id, p.rot])),
+      },
+    };
+    const nextPositions: Positions = { ...positions };
+    for (const p of applied.positions) nextPositions[p.id] = { x: p.x, y: p.y };
+
+    hall.update(next, positions);
     void setTablePositions(
       applied.positions.map((p) => ({ id: p.id, x: toCm(p.x), y: toCm(p.y) }))
     );
+    setCompare({
+      before: { layout, positions },
+      after: { layout: next, positions: nextPositions },
+      showing: "new",
+    });
     setSelection([]);
     setSuggestions(null);
     view3d.current?.command("fit");
-    say(`${option.archetype_label} applied. Undo if you prefer how it was.`);
+    say(`${option.archetype_label} applied. Compare it with what you had.`);
+  };
+
+  /** Flip the hall between the layout the host had and the one just applied. */
+  const showCompared = (which: Compared) => {
+    if (!compare || compare.showing === which) return;
+    const target = which === "current" ? compare.before : compare.after;
+    hall.replace(target.layout);
+    restorePositions(target.positions);
+    setCompare({ ...compare, showing: which });
+    say(
+      which === "current"
+        ? "Showing the layout you had."
+        : "Showing the new layout."
+    );
+  };
+
+  /** Settle on whichever layout is showing, and stop comparing. */
+  const keepCompared = (which: Compared) => {
+    if (!compare) return;
+    if (which === "current") {
+      hall.replace(compare.before.layout);
+      restorePositions(compare.before.positions);
+      say("Kept the layout you had.");
+    } else {
+      say("Kept the new layout.");
+    }
+    setCompare(null);
   };
 
   const seatEveryone = async () => {
@@ -1340,6 +1386,15 @@ export function HallStudio({
             panelOpen && "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
           )}
         >
+          {compare && (
+            <div className="absolute left-1/2 top-3 -translate-x-1/2">
+              <LayoutComparison
+                showing={compare.showing}
+                onShow={showCompared}
+                onKeep={keepCompared}
+              />
+            </div>
+          )}
           {/* Hall size, live numbers and status */}
           <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-15rem)] flex-col items-start gap-1.5">
             <div
