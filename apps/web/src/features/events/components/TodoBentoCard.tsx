@@ -124,7 +124,7 @@ export function TodoBentoCard({ alerts }: TodoBentoCardProps) {
     <section
       aria-labelledby="todo-bento-heading"
       data-testid="todo-bento-card"
-      className="bento-card @container flex flex-col p-5 sm:p-6 lg:col-span-4"
+      className="bento-card @container flex flex-col p-4 sm:p-6 lg:col-span-4"
     >
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2

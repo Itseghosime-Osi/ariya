@@ -52,7 +52,7 @@ export function GuestRepliesBentoCard({
     <section
       aria-labelledby="guest-replies-heading"
       data-testid="guest-replies-card"
-      className="bento-card @container flex flex-col justify-between p-5 sm:p-6 lg:col-span-4"
+      className="bento-card @container flex flex-col justify-between p-4 sm:p-6 lg:col-span-4"
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
@@ -125,7 +125,7 @@ export function GuestRepliesBentoCard({
         )}
       </div>
 
-      <div className="mt-5 flex flex-col items-center gap-5 @[380px]:flex-row @[380px]:items-center">
+      <div className="mt-3 flex flex-col items-center gap-5 sm:mt-5 @[380px]:flex-row @[380px]:items-center">
         <ReplyWaffle
           accepted={activeMetrics.acceptedPartiesPct}
           awaiting={activeMetrics.awaitingPartiesPct}
@@ -210,7 +210,7 @@ function ReplyWaffle({
   return (
     <svg
       viewBox="0 0 100 100"
-      className="h-36 w-36 shrink-0"
+      className="h-36 w-36 shrink-0 max-sm:hidden"
       role="img"
       aria-label={
         empty

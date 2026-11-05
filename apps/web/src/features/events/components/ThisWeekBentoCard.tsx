@@ -77,7 +77,7 @@ export function ThisWeekBentoCard({ items }: ThisWeekBentoCardProps) {
     <section
       aria-labelledby="this-week-heading"
       data-testid="this-week-card"
-      className="bento-card @container flex flex-col justify-between p-5 sm:p-6 lg:col-span-4"
+      className="bento-card @container flex flex-col justify-between p-4 sm:p-6 lg:col-span-4"
     >
       <div>
         <div className="flex items-center justify-between gap-2 mb-3.5">

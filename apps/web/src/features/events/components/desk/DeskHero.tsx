@@ -172,13 +172,13 @@ export function DeskHero({
                   <Link
                     key={a.href}
                     href={a.href}
-                    className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-semibold transition-transform sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
+                    className={`inline-flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] font-semibold transition-transform sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a] ${
                       a.primary
                         ? "bg-[#e9c98a] text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)]"
                         : "bg-ivory/10 text-ivory ring-1 ring-ivory/20 hover:bg-ivory/15"
                     }`}
                   >
-                    <Icon name={a.icon} size={17} />
+                    <Icon name={a.icon} size={17} className="hidden sm:block" />
                     <span className="sm:hidden">{a.short}</span>
                     <span className="hidden sm:inline">{a.label}</span>
                   </Link>

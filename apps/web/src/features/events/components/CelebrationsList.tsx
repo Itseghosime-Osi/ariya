@@ -61,7 +61,7 @@ export function EventsHome({
     return (
       <LazyMotion features={domAnimation}>
         <MotionConfig reducedMotion="user">
-          <div className="space-y-6 pb-8">
+          <div className="space-y-4 sm:space-y-6 sm:pb-8">
             <EventsHeader firstName={firstName} />
             <EventsEmptyState />
           </div>
@@ -73,7 +73,10 @@ export function EventsHome({
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
-        <div className="space-y-6 pb-8" data-testid="bento-dashboard">
+        <div
+          className="space-y-3.5 sm:space-y-6 sm:pb-8"
+          data-testid="bento-dashboard"
+        >
           <EventsHeader
             firstName={firstName}
             showSearch={showSearch}
@@ -83,7 +86,7 @@ export function EventsHome({
 
           <CelebrationStage items={upcoming} now={now ?? 0} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 gap-3.5 sm:gap-6 lg:grid-cols-12">
             <UpcomingEventsBentoCard
               upcomingEvents={filteredUpcoming}
               totalEventsCount={events.length}

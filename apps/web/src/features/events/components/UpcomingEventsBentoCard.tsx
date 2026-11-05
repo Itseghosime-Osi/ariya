@@ -25,7 +25,7 @@ export function UpcomingEventsBentoCard({
     <section
       aria-labelledby="upcoming-events-heading"
       data-testid="upcoming-events-card"
-      className="bento-card @container flex flex-col justify-between p-5 sm:p-6 lg:col-span-8"
+      className="bento-card @container flex flex-col justify-between max-sm:hidden p-4 sm:p-6 lg:col-span-8"
     >
       <div className="flex items-center justify-between gap-3 mb-4">
         <h2

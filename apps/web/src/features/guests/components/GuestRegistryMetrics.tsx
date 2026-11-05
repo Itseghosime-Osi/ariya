@@ -89,36 +89,42 @@ export function GuestRegistryMetrics({
             <dt className="text-[9px] font-bold uppercase tracking-[0.18em] text-champagne/55">
               Awaiting reply
             </dt>
-            <dd className="font-display text-2xl text-[#fff6dc] tabular-nums">
-              {stats.pendingCount}
+            <dd className="flex flex-col items-center gap-0.5">
+              <span className="font-display text-2xl tabular-nums text-[#fff6dc]">
+                {stats.pendingCount}
+              </span>
+              {stats.pendingCount === 0 ? (
+                <span className="text-[11px] text-champagne/60">
+                  All replied
+                </span>
+              ) : (
+                <Link
+                  href={`/events/${eventId}/reminders`}
+                  className="inline-flex min-h-8 items-center text-[11px] font-semibold text-gold"
+                >
+                  Send reminders →
+                </Link>
+              )}
             </dd>
-            {stats.pendingCount === 0 ? (
-              <span className="text-[11px] text-champagne/60">All replied</span>
-            ) : (
-              <Link
-                href={`/events/${eventId}/reminders`}
-                className="inline-flex min-h-8 items-center text-[11px] font-semibold text-gold"
-              >
-                Send reminders →
-              </Link>
-            )}
           </div>
           <div className="flex flex-col items-center gap-0.5 px-2">
             <dt className="text-[9px] font-bold uppercase tracking-[0.18em] text-champagne/55">
               Seated
             </dt>
-            <dd className="font-display text-2xl text-[#fff6dc] tabular-nums">
-              {seated}
-              <span className="text-sm text-champagne/60">/{confirmed}</span>
+            <dd className="flex flex-col items-center gap-0.5">
+              <span className="font-display text-2xl tabular-nums text-[#fff6dc]">
+                {seated}
+                <span className="text-sm text-champagne/60">/{confirmed}</span>
+              </span>
+              <Link
+                href={`/events/${eventId}/seating`}
+                className="inline-flex min-h-8 items-center text-[11px] font-semibold text-gold"
+              >
+                {stats.unassignedCount > 0
+                  ? `${stats.unassignedCount} need a table →`
+                  : "Open seating →"}
+              </Link>
             </dd>
-            <Link
-              href={`/events/${eventId}/seating`}
-              className="inline-flex min-h-8 items-center text-[11px] font-semibold text-gold"
-            >
-              {stats.unassignedCount > 0
-                ? `${stats.unassignedCount} need a table →`
-                : "Open seating →"}
-            </Link>
           </div>
         </dl>
       </div>
