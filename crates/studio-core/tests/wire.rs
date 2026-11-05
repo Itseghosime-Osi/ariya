@@ -86,9 +86,31 @@ fn fit_envelope() {
 }
 
 #[test]
+fn arrange_envelope() {
+    let request = r#"{
+        "width": 30,
+        "length": 20,
+        "gap": 0.6,
+        "seed": 7,
+        "keep": 3,
+        "tables": [
+            { "id": "t0", "shape": "round", "capacity": 8 },
+            { "id": "t1", "shape": "round", "capacity": 8 },
+            { "id": "t2", "shape": "round", "capacity": 8 },
+            { "id": "t3", "shape": "round", "capacity": 8 }
+        ],
+        "zones": [
+            { "id": "z-stage", "kind": "stage", "label": "Stage", "x": 15, "y": 2.5, "w": 9, "h": 4 },
+            { "id": "z-entrance", "kind": "entrance", "label": "Entrance", "x": 15, "y": 19.5, "w": 3, "h": 1 },
+            { "id": "z-buffet", "kind": "buffet", "label": "Buffet", "x": 1.3, "y": 11, "w": 1.6, "h": 7 }
+        ]
+    }"#;
+    snapshot("arrange", OP_ARRANGE, request);
+}
+
+#[test]
 fn unbuilt_operations_share_one_envelope() {
     for (name, op) in [
-        ("arrange", OP_ARRANGE),
         ("score", OP_SCORE),
         ("thermal", OP_THERMAL),
         ("catering", OP_CATERING),

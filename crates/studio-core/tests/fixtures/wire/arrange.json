@@ -1,5 +1,424 @@
 {
-  "code": "not_implemented",
-  "message": "this operation is not built yet",
-  "ok": false
+  "data": {
+    "options": [
+      {
+        "archetype": "cabaret",
+        "archetype_label": "Cabaret",
+        "chairs": [],
+        "placements": [
+          {
+            "rot": 270.0,
+            "table": 0,
+            "x": 17.698888149108896,
+            "y": 10.894450005763543
+          },
+          {
+            "rot": 90.0,
+            "table": 1,
+            "x": 20.36185911000874,
+            "y": 12.60395790331414
+          },
+          {
+            "rot": 270.0,
+            "table": 2,
+            "x": 15.026200850814286,
+            "y": 10.948122030456974
+          },
+          {
+            "rot": 0.0,
+            "table": 3,
+            "x": 12.13272365144566,
+            "y": 11.044389233925887
+          }
+        ],
+        "score": {
+          "terms": [
+            {
+              "contribution": 0.3,
+              "detail": "32 of 32 seats placed.",
+              "id": "seats",
+              "label": "Seats placed",
+              "value": 1.0,
+              "weight": 0.3
+            },
+            {
+              "contribution": 0.1582946928143967,
+              "detail": "Every table has a clear view of the stage.",
+              "id": "sightline",
+              "label": "Sightlines",
+              "value": 0.7195213309745304,
+              "weight": 0.22
+            },
+            {
+              "contribution": 0.0,
+              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "id": "circulation",
+              "label": "Getting around",
+              "value": 0.0,
+              "weight": 0.16
+            },
+            {
+              "contribution": 0.06137279942712299,
+              "detail": "The furthest table is 14 m from the buffet or bar.",
+              "id": "service",
+              "label": "Service",
+              "value": 0.5114399952260249,
+              "weight": 0.12
+            },
+            {
+              "contribution": 0.025,
+              "detail": "1 of 4 tables have a partner across the middle.",
+              "id": "symmetry",
+              "label": "Symmetry",
+              "value": 0.25,
+              "weight": 0.1
+            },
+            {
+              "contribution": 0.1,
+              "detail": "The closest two tables are 0.6 m apart; you asked for 0.6 m.",
+              "id": "comfort",
+              "label": "Room between tables",
+              "value": 1.0,
+              "weight": 0.1
+            },
+            {
+              "contribution": -0.05366641345218182,
+              "detail": "The furthest table is 9 m from an exit; the limit is 24 m.",
+              "id": "egress",
+              "label": "Escape distance",
+              "value": 0.35777608968121216,
+              "weight": -0.15
+            },
+            {
+              "contribution": -0.0,
+              "detail": "No table overlaps another, crosses a wall or sits on an area.",
+              "id": "penalty",
+              "label": "Problems",
+              "value": 0.0,
+              "weight": -0.25
+            }
+          ],
+          "total": 0.5910010787893379
+        },
+        "strategy": "stage-short-wall-buffet-right",
+        "strategy_label": "Stage on the short wall, buffet on the right",
+        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "unplaced": [],
+        "zones": [
+          {
+            "h": 4.0,
+            "id": "z-stage",
+            "kind": "stage",
+            "label": "Stage",
+            "rot": 0.0,
+            "shape": null,
+            "w": 9.0,
+            "x": 15.00261837224146,
+            "y": 2.9271070163272217
+          },
+          {
+            "h": 1.0,
+            "id": "z-entrance",
+            "kind": "entrance",
+            "label": "Entrance",
+            "rot": 0.0,
+            "shape": null,
+            "w": 3.0,
+            "x": 15.18910734076525,
+            "y": 19.06864417901995
+          },
+          {
+            "h": 7.0,
+            "id": "z-buffet",
+            "kind": "buffet",
+            "label": "Buffet",
+            "rot": 0.0,
+            "shape": null,
+            "w": 1.6,
+            "x": 28.3890024384756,
+            "y": 11.336198396422528
+          }
+        ]
+      },
+      {
+        "archetype": "chevron",
+        "archetype_label": "Chevron",
+        "chairs": [],
+        "placements": [
+          {
+            "rot": 15.0,
+            "table": 0,
+            "x": 15.0,
+            "y": 11.62
+          },
+          {
+            "rot": -15.0,
+            "table": 1,
+            "x": 8.76,
+            "y": 10.17
+          },
+          {
+            "rot": 15.0,
+            "table": 2,
+            "x": 21.24,
+            "y": 10.17
+          },
+          {
+            "rot": -15.0,
+            "table": 3,
+            "x": 11.88,
+            "y": 12.46
+          }
+        ],
+        "score": {
+          "terms": [
+            {
+              "contribution": 0.3,
+              "detail": "32 of 32 seats placed.",
+              "id": "seats",
+              "label": "Seats placed",
+              "value": 1.0,
+              "weight": 0.3
+            },
+            {
+              "contribution": 0.09898116440920092,
+              "detail": "2 of 4 tables have a poor view of the stage.",
+              "id": "sightline",
+              "label": "Sightlines",
+              "value": 0.4499143836781861,
+              "weight": 0.22
+            },
+            {
+              "contribution": 0.0,
+              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "id": "circulation",
+              "label": "Getting around",
+              "value": 0.0,
+              "weight": 0.16
+            },
+            {
+              "contribution": 0.06030284157202922,
+              "detail": "The furthest table is 18 m from the buffet or bar.",
+              "id": "service",
+              "label": "Service",
+              "value": 0.5025236797669101,
+              "weight": 0.12
+            },
+            {
+              "contribution": 0.07500000000000001,
+              "detail": "3 of 4 tables have a partner across the middle.",
+              "id": "symmetry",
+              "label": "Symmetry",
+              "value": 0.75,
+              "weight": 0.1
+            },
+            {
+              "contribution": 0.1,
+              "detail": "The closest two tables are 1.4 m apart; you asked for 0.6 m.",
+              "id": "comfort",
+              "label": "Room between tables",
+              "value": 1.0,
+              "weight": 0.1
+            },
+            {
+              "contribution": -0.06757706827208472,
+              "detail": "The furthest table is 11 m from an exit; the limit is 24 m.",
+              "id": "egress",
+              "label": "Escape distance",
+              "value": 0.4505137884805648,
+              "weight": -0.15
+            },
+            {
+              "contribution": -0.0,
+              "detail": "No table overlaps another, crosses a wall or sits on an area.",
+              "id": "penalty",
+              "label": "Problems",
+              "value": 0.0,
+              "weight": -0.25
+            }
+          ],
+          "total": 0.5667069377091454
+        },
+        "strategy": "stage-pulled-forward",
+        "strategy_label": "Stage pulled forward into the room",
+        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "unplaced": [],
+        "zones": [
+          {
+            "h": 4.0,
+            "id": "z-stage",
+            "kind": "stage",
+            "label": "Stage",
+            "rot": 0.0,
+            "shape": null,
+            "w": 9.0,
+            "x": 15.0,
+            "y": 5.6
+          },
+          {
+            "h": 1.0,
+            "id": "z-entrance",
+            "kind": "entrance",
+            "label": "Entrance",
+            "rot": 0.0,
+            "shape": null,
+            "w": 3.0,
+            "x": 15.0,
+            "y": 19.0
+          },
+          {
+            "h": 7.0,
+            "id": "z-buffet",
+            "kind": "buffet",
+            "label": "Buffet",
+            "rot": 0.0,
+            "shape": null,
+            "w": 1.6,
+            "x": 1.3,
+            "y": 11.0
+          }
+        ]
+      },
+      {
+        "archetype": "chevron",
+        "archetype_label": "Chevron",
+        "chairs": [],
+        "placements": [
+          {
+            "rot": 15.0,
+            "table": 0,
+            "x": 14.961783636515117,
+            "y": 11.471702979665316
+          },
+          {
+            "rot": 165.0,
+            "table": 1,
+            "x": 12.34534142689891,
+            "y": 12.308792427124546
+          },
+          {
+            "rot": 285.0,
+            "table": 2,
+            "x": 21.233969451991207,
+            "y": 10.231561209333998
+          },
+          {
+            "rot": 165.0,
+            "table": 3,
+            "x": 8.76,
+            "y": 10.17
+          }
+        ],
+        "score": {
+          "terms": [
+            {
+              "contribution": 0.3,
+              "detail": "32 of 32 seats placed.",
+              "id": "seats",
+              "label": "Seats placed",
+              "value": 1.0,
+              "weight": 0.3
+            },
+            {
+              "contribution": 0.10162823200085988,
+              "detail": "2 of 4 tables have a poor view of the stage.",
+              "id": "sightline",
+              "label": "Sightlines",
+              "value": 0.46194650909481766,
+              "weight": 0.22
+            },
+            {
+              "contribution": 0.0,
+              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "id": "circulation",
+              "label": "Getting around",
+              "value": 0.0,
+              "weight": 0.16
+            },
+            {
+              "contribution": 0.056752494505507296,
+              "detail": "The furthest table is 18 m from the buffet or bar.",
+              "id": "service",
+              "label": "Service",
+              "value": 0.4729374542125608,
+              "weight": 0.12
+            },
+            {
+              "contribution": 0.07500000000000001,
+              "detail": "3 of 4 tables have a partner across the middle.",
+              "id": "symmetry",
+              "label": "Symmetry",
+              "value": 0.75,
+              "weight": 0.1
+            },
+            {
+              "contribution": 0.1,
+              "detail": "No two tables are close.",
+              "id": "comfort",
+              "label": "Room between tables",
+              "value": 1.0,
+              "weight": 0.1
+            },
+            {
+              "contribution": -0.06803757224241899,
+              "detail": "The furthest table is 11 m from an exit; the limit is 24 m.",
+              "id": "egress",
+              "label": "Escape distance",
+              "value": 0.45358381494946,
+              "weight": -0.15
+            },
+            {
+              "contribution": -0.0,
+              "detail": "No table overlaps another, crosses a wall or sits on an area.",
+              "id": "penalty",
+              "label": "Problems",
+              "value": 0.0,
+              "weight": -0.25
+            }
+          ],
+          "total": 0.5653431542639481
+        },
+        "strategy": "stage-pulled-forward-buffet-right",
+        "strategy_label": "Stage pulled forward, buffet on the right",
+        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "unplaced": [],
+        "zones": [
+          {
+            "h": 4.0,
+            "id": "z-stage",
+            "kind": "stage",
+            "label": "Stage",
+            "rot": 0.0,
+            "shape": null,
+            "w": 9.0,
+            "x": 15.0,
+            "y": 5.6
+          },
+          {
+            "h": 1.0,
+            "id": "z-entrance",
+            "kind": "entrance",
+            "label": "Entrance",
+            "rot": 0.0,
+            "shape": null,
+            "w": 3.0,
+            "x": 14.925831571736175,
+            "y": 19.10357587015014
+          },
+          {
+            "h": 7.0,
+            "id": "z-buffet",
+            "kind": "buffet",
+            "label": "Buffet",
+            "rot": 0.0,
+            "shape": null,
+            "w": 1.6,
+            "x": 28.582006305404015,
+            "y": 10.601794930018174
+          }
+        ]
+      }
+    ]
+  },
+  "ok": true
 }

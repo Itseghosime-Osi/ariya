@@ -8,10 +8,12 @@ use serde_json::{json, Value};
 #[cfg(feature = "ts")]
 use ts_rs::TS;
 
+use crate::archetype::ArrangeTable;
 use crate::fit::{fit_tables, FitOptions, FitResult};
 use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
 };
+use crate::search::{search, LayoutOption, SearchInput};
 use crate::venue::Zone;
 
 /// The ABI the crate and `packages/studio` agree on.
@@ -111,6 +113,39 @@ pub struct FitRequest {
     pub aisle: bool,
 }
 
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct ArrangeRequest {
+    pub width: f64,
+    pub length: f64,
+    #[serde(default)]
+    pub zones: Vec<Zone>,
+    pub tables: Vec<ArrangeTable>,
+    pub gap: f64,
+    #[serde(default)]
+    pub seed: u64,
+    #[serde(default = "default_keep")]
+    pub keep: usize,
+}
+
+fn default_keep() -> usize {
+    crate::search::DEFAULT_KEEP
+}
+
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Serialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct ArrangeResponse {
+    pub options: Vec<LayoutOption>,
+}
+
 fn ok(data: Value) -> String {
     json!({ "ok": true, "data": data }).to_string()
 }
@@ -148,7 +183,25 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             }
             Err(message) => err("bad_request", &message),
         },
-        OP_ARRANGE | OP_SCORE | OP_THERMAL | OP_CATERING | OP_RISK | OP_CHECKLIST => {
+        OP_ARRANGE => match parse::<ArrangeRequest>(payload) {
+            Ok(req) => {
+                let mut input = SearchInput::new(
+                    req.width,
+                    req.length,
+                    &req.zones,
+                    &req.tables,
+                    req.gap,
+                    req.seed,
+                );
+                input.keep = req.keep.max(1);
+                ok(serde_json::to_value(ArrangeResponse {
+                    options: search(&input),
+                })
+                .unwrap_or(Value::Null))
+            }
+            Err(message) => err("bad_request", &message),
+        },
+        OP_SCORE | OP_THERMAL | OP_CATERING | OP_RISK | OP_CHECKLIST => {
             err("not_implemented", "this operation is not built yet")
         }
         _ => err("unknown_op", "no such operation"),
