@@ -97,7 +97,7 @@ Goal: a Rust core that reproduces today's behaviour exactly, behind a loader tha
 
 - [x] **0.4.1** Define wire types once in Rust with `serde`; generate TS with `ts-rs` into `packages/studio/src/generated.ts`.
 - [x] **0.4.2** CI step fails if the generated file is stale (`cargo test` regenerates and `git diff --exit-code`).
-- [ ] **0.4.3** Lint rule or review checklist item: no hand-written wire types in `apps/web`.
+- [x] **0.4.3** Lint rule or review checklist item: no hand-written wire types in `apps/web`. _(Review item in `CONTRIBUTING.md`; the lint-rule route is blocked by the config-protection hook.)_
 
 ### 0.5 Loader and fallback
 
