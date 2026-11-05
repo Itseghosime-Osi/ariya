@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SignOutConfirmation } from "@/components/layout/SignOutConfirmation";
-import { ScreenHeader } from "@/components/layout/screen-header";
+import { BackLink, ScreenHeader } from "@/components/layout/screen-header";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { cn } from "@/lib/utils";
 import {
@@ -137,6 +137,7 @@ export function SettingsDesk({
         className="wiz-rise mb-6 standalone:max-md:hidden lg:mb-10"
         style={{ "--i": 0 } as React.CSSProperties}
       >
+        <BackLink backHref="/events" />
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
           Your account
         </p>
