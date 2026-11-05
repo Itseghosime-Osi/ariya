@@ -17,16 +17,28 @@ import { updateProfileAction } from "../actions";
 const FIELD =
   "min-h-[48px] w-full rounded-2xl border border-hairline bg-white/45 px-4 text-[15px] text-night outline-none transition-colors placeholder:text-label-3 focus:border-burgundy focus:ring-2 focus:ring-burgundy/20";
 
-/** The pencil on the profile card: edits the host's name and phone number. */
+/**
+ * Edits the host's name and phone number. By default a pencil; pass children to make any row a
+ * trigger for the same sheet.
+ */
 export function EditProfileButton({
   name,
   phone,
   autoOpen = false,
+  tone = "light",
+  children,
+  className,
+  label = "Edit profile",
 }: {
   name: string;
   phone: string | null;
   /** Open straight away, for links that say "edit" (Settings' pencil). */
   autoOpen?: boolean;
+  /** "dark" for a pencil sitting on the wine host card. */
+  tone?: "light" | "dark";
+  children?: React.ReactNode;
+  className?: string;
+  label?: string;
 }) {
   const router = useRouter();
   const phoneSize = useIsMobile();
@@ -46,11 +58,21 @@ export function EditProfileButton({
           setError(null);
           setOpen(true);
         }}
-        aria-label="Edit profile"
-        data-testid="profile-edit"
-        className="grid h-11 w-11 place-items-center rounded-full border border-hairline bg-white/45 text-burgundy shadow-sm transition-all hover:scale-105 hover:border-gold-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        aria-label={children ? undefined : label}
+        data-testid={children ? undefined : "profile-edit"}
+        className={
+          children
+            ? className
+            : cn(
+                "grid h-11 w-11 place-items-center rounded-full border shadow-sm transition-all hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2",
+                tone === "dark"
+                  ? "border-gold/30 bg-white/10 text-champagne hover:border-gold/60 hover:bg-white/15 focus-visible:outline-gold"
+                  : "border-hairline bg-white/45 text-burgundy hover:border-gold-ink/60 focus-visible:outline-burgundy",
+                className
+              )
+        }
       >
-        <Icon name="edit" size={17} />
+        {children ?? <Icon name="edit" size={17} />}
       </button>
 
       <Dialog
