@@ -31,6 +31,10 @@ export const invitationEventSchema = z.object({
   invitation_headline: z.string().nullable().optional(),
   invitation_subheadline: z.string().nullable().optional(),
   invitation_message: z.string().nullable().optional(),
+  /** False while the host is testing: only their team can open the invitation. */
+  invitation_live: z.boolean().optional(),
+  /** The host's film, validated where it is read. */
+  film_design: z.unknown().optional(),
 });
 
 export const invitationDataSchema = z.object({

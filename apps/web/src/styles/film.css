@@ -1,0 +1,532 @@
+/* ---------- The event film: a short 3D introduction, in the host's own colours ---------- */
+.efilm {
+  --bg: #2a0610;
+  --ac: #e9c98a;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff6dc;
+  background:
+    radial-gradient(
+      90% 70% at 50% 18%,
+      color-mix(in srgb, var(--ac) 22%, var(--bg)),
+      transparent 62%
+    ),
+    radial-gradient(
+      70% 60% at 100% 100%,
+      color-mix(in srgb, var(--ac) 12%, #000),
+      transparent 70%
+    ),
+    var(--bg);
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+  touch-action: manipulation;
+}
+.efilm[data-paused="true"] * {
+  animation-play-state: paused !important;
+}
+.efilm-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.efilm-dust i {
+  position: absolute;
+  bottom: -8px;
+  left: calc(var(--x) * 1%);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: var(--ac);
+  opacity: 0;
+  animation: efilm-rise var(--t) linear var(--d) infinite;
+}
+@keyframes efilm-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(calc(var(--w) * 1px), -108vh, 0);
+    opacity: 0;
+  }
+}
+
+.efilm-stage {
+  position: relative;
+  width: min(92vw, 640px);
+  height: min(70dvh, 560px);
+  transform-style: preserve-3d;
+}
+.efilm-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 0 10px;
+  text-align: center;
+  transform-style: preserve-3d;
+  /* in 0.9s, hold, out over the last 0.7s of the scene */
+  animation:
+    efilm-scene-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both,
+    efilm-scene-out 0.7s ease-in calc(var(--d) - 0.7s) forwards;
+}
+.efilm-scene[data-last="true"] {
+  animation: efilm-scene-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes efilm-scene-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, -220px) rotateX(14deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0);
+  }
+}
+@keyframes efilm-scene-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -20px, 160px) rotateX(-8deg);
+  }
+}
+.efilm-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ac);
+}
+.efilm-big {
+  font-family: var(--font-display), "Bodoni Moda", Georgia, serif;
+  font-weight: 700;
+  line-height: 1.04;
+  font-size: clamp(2.2rem, 9.5vw, 4.4rem);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  text-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+.efilm-mid {
+  font-family: var(--font-display), "Bodoni Moda", Georgia, serif;
+  font-size: clamp(1.4rem, 6vw, 2.2rem);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.efilm-line {
+  max-width: 28ch;
+  font-size: clamp(0.98rem, 3.6vw, 1.2rem);
+  line-height: 1.5;
+  color: color-mix(in srgb, #fff6dc 82%, transparent);
+  text-wrap: balance;
+  animation: efilm-fade 1s ease 0.7s both;
+}
+.efilm-rule {
+  height: 2px;
+  width: 0;
+  background: linear-gradient(90deg, transparent, var(--ac), transparent);
+  animation: efilm-draw 1.1s ease 0.6s forwards;
+}
+@keyframes efilm-draw {
+  to {
+    width: min(60%, 260px);
+  }
+}
+@keyframes efilm-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* names rising letter by letter in depth */
+.efilm-name span {
+  display: inline-block;
+  opacity: 0;
+  animation: efilm-letter 0.8s cubic-bezier(0.22, 1, 0.36, 1)
+    calc(var(--i) * 45ms + 0.2s) forwards;
+}
+@keyframes efilm-letter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, -120px) rotateX(-70deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the welcome plate turns slowly */
+.efilm-plate {
+  transform-style: preserve-3d;
+  animation: efilm-sway calc(var(--d) * 1s) ease-in-out both;
+}
+@keyframes efilm-sway {
+  from {
+    transform: rotateY(-16deg) rotateX(4deg);
+  }
+  to {
+    transform: rotateY(14deg) rotateX(-2deg);
+  }
+}
+
+/* photos float in depth */
+.efilm-photos {
+  display: flex;
+  gap: clamp(10px, 4vw, 28px);
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+.efilm-photo {
+  position: relative;
+  width: clamp(120px, 34vw, 190px);
+  aspect-ratio: 4 / 5;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 3px solid color-mix(in srgb, var(--ac) 80%, #fff);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  background: color-mix(in srgb, var(--ac) 24%, var(--bg));
+  animation:
+    efilm-float 4s ease-in-out infinite alternate,
+    efilm-photo-in 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 0.5s), calc(var(--i) * 0.25s + 0.2s);
+}
+.efilm-photo:nth-child(odd) {
+  transform: rotateY(12deg) translateZ(30px);
+}
+.efilm-photo:nth-child(even) {
+  transform: rotateY(-12deg) translateZ(-10px);
+  margin-top: 22px;
+}
+.efilm-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.efilm-photo figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 18px 10px 10px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.05rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+}
+@keyframes efilm-float {
+  from {
+    translate: 0 -6px;
+  }
+  to {
+    translate: 0 8px;
+  }
+}
+@keyframes efilm-photo-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* the calendar page */
+.efilm-cal {
+  width: clamp(190px, 52vw, 250px);
+  border-radius: 20px;
+  overflow: hidden;
+  color: #1c070d;
+  background: #fbf5e6;
+  box-shadow: 0 34px 70px -22px rgba(0, 0, 0, 0.75);
+  transform-origin: 50% 0;
+  animation: efilm-flip 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+.efilm-cal b {
+  display: block;
+  padding: 8px 0;
+  background: var(--ac);
+  color: #1c070d;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.efilm-cal strong {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(4rem, 18vw, 6rem);
+  line-height: 1;
+  padding: 10px 0 0;
+}
+.efilm-cal span {
+  display: block;
+  padding-bottom: 14px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+@keyframes efilm-flip {
+  from {
+    opacity: 0;
+    transform: rotateX(-88deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0);
+  }
+}
+
+/* the pin drops and rings ripple */
+.efilm-pin {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+}
+.efilm-pin i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ac);
+  opacity: 0;
+  animation: efilm-ripple 2s ease-out 0.5s infinite;
+}
+.efilm-pin i:nth-child(2) {
+  animation-delay: 1.1s;
+}
+.efilm-pin svg {
+  position: relative;
+  animation: efilm-drop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes efilm-ripple {
+  from {
+    transform: scale(0.4);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@keyframes efilm-drop {
+  from {
+    transform: translateY(-90px) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* the message */
+.efilm-quote {
+  max-width: 30ch;
+  padding: 22px 24px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--ac) 50%, transparent);
+  background: color-mix(in srgb, var(--ac) 10%, transparent);
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.2rem, 5vw, 1.7rem);
+  line-height: 1.4;
+  animation: efilm-tilt 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+@keyframes efilm-tilt {
+  from {
+    opacity: 0;
+    transform: rotateY(-40deg) translateZ(-120px);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0);
+  }
+}
+
+/* colour discs */
+.efilm-discs {
+  display: flex;
+  gap: 18px;
+  transform-style: preserve-3d;
+}
+.efilm-disc {
+  width: clamp(70px, 20vw, 100px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, #fff 70%, transparent);
+  box-shadow: 0 24px 44px -14px rgba(0, 0, 0, 0.7);
+  animation: efilm-spin 1.4s cubic-bezier(0.22, 1, 0.36, 1)
+    calc(var(--i) * 0.2s) both;
+}
+@keyframes efilm-spin {
+  from {
+    opacity: 0;
+    transform: rotateY(-180deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the guest's seal and the finale card */
+.efilm-seal {
+  animation: efilm-seal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes efilm-seal {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-30deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.efilm-card {
+  width: min(66vw, 280px);
+  transform-style: preserve-3d;
+  animation:
+    efilm-card-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both,
+    efilm-card-float 5s ease-in-out 1.4s infinite alternate;
+  filter: drop-shadow(0 40px 50px rgba(0, 0, 0, 0.6));
+}
+@keyframes efilm-card-in {
+  from {
+    opacity: 0;
+    transform: rotateY(160deg) translateZ(-200px);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0);
+  }
+}
+@keyframes efilm-card-float {
+  from {
+    transform: rotateY(-7deg) rotateX(2deg);
+  }
+  to {
+    transform: rotateY(7deg) rotateX(-2deg);
+  }
+}
+
+/* chrome: progress, sound, skip */
+.efilm-top {
+  position: absolute;
+  inset: calc(env(safe-area-inset-top) + 14px) 14px auto 14px;
+  display: flex;
+  gap: 6px;
+}
+.efilm-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  background: color-mix(in srgb, #fff 22%, transparent);
+  overflow: hidden;
+}
+.efilm-seg i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: var(--ac);
+}
+.efilm-seg[data-state="done"] i {
+  transform: scaleX(1);
+}
+.efilm-seg[data-state="now"] i {
+  animation: efilm-fill calc(var(--d) * 1s) linear forwards;
+}
+@keyframes efilm-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+.efilm-bar {
+  position: absolute;
+  inset: auto 14px calc(env(safe-area-inset-bottom) + 16px) 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.efilm-btn {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #fff 28%, transparent);
+  background: color-mix(in srgb, #000 28%, transparent);
+  color: #fff6dc;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+.efilm-btn:focus-visible,
+.efilm-cta:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 3px;
+}
+.efilm-cta {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 28px;
+  border-radius: 999px;
+  background: var(--ac);
+  color: #1c070d;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--ac) 80%, transparent);
+  animation: efilm-fade 0.8s ease 1.1s both;
+}
+
+/* the gate: one tap, because sound needs one */
+.efilm-gate {
+  display: grid;
+  place-items: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+  max-width: 420px;
+}
+
+/* a quiet chip to watch it again */
+.efilm-again {
+  position: fixed;
+  right: 16px;
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+  z-index: 40;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .efilm *,
+  .efilm *::before,
+  .efilm *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+  .efilm-seg[data-state="now"] i {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

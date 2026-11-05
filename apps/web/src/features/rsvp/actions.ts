@@ -90,6 +90,13 @@ export async function submitRsvpAction(
   }
 
   const invitation: InvitationData = parsedInv.data;
+  if (invitation.event.invitation_live === false) {
+    return {
+      ok: false,
+      error:
+        "This invitation is in test mode, so replies are switched off until the host makes it live.",
+    };
+  }
   if (isEventExpired(invitation.event.date)) {
     return {
       ok: false,
