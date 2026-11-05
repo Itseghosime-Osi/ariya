@@ -20,6 +20,8 @@ import {
 interface EventDangerZoneProps {
   event: Event;
   isOwner: boolean;
+  /** An ended celebration can only be deleted, not archived or changed. */
+  ended?: boolean;
   onError: (msg: string) => void;
 }
 
@@ -30,6 +32,7 @@ const GHOST =
 export function EventDangerZone({
   event,
   isOwner,
+  ended = false,
   onError,
 }: EventDangerZoneProps) {
   const router = useRouter();
@@ -70,26 +73,34 @@ export function EventDangerZone({
         Danger zone
       </h2>
       <div className="overflow-hidden rounded-3xl border border-error/25 bg-white/40 backdrop-blur-sm divide-y divide-hairline">
-        <div className={ROW}>
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
-            <Icon name="folder" size={18} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-semibold text-night">
-              Archive celebration
+        {!ended && (
+          <div className={ROW}>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
+              <Icon name="folder" size={18} />
             </span>
-            <span className="block text-[12.5px] leading-snug text-label-2">
-              Closes RSVPs. Nothing is deleted.
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-night">
+                Archive celebration
+              </span>
+              <span className="block text-[12.5px] leading-snug text-label-2">
+                Closes RSVPs. Nothing is deleted.
+              </span>
             </span>
-          </span>
-          <button
-            type="button"
-            onClick={() => setShowArchiveModal(true)}
-            className={`${GHOST} desk-chip text-night`}
-          >
-            Archive event
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setShowArchiveModal(true)}
+              className={`${GHOST} desk-chip text-night`}
+            >
+              Archive event
+            </button>
+          </div>
+        )}
+
+        {ended && !isOwner && (
+          <p className="px-4 py-4 text-sm text-label-2 sm:px-5">
+            This celebration has ended. Only its owner can delete it now.
+          </p>
+        )}
 
         {isOwner && (
           <div className={ROW}>

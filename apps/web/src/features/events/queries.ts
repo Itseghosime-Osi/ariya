@@ -17,6 +17,7 @@ import type {
   PlanningTask,
   PlanningVendor,
 } from "./lib/overview-insights";
+import { isEventExpired } from "@/lib/event-expiry";
 
 export interface ScheduleSlot {
   time: string;
@@ -36,6 +37,8 @@ export interface PublicCelebration {
   rsvpBy: string | null;
   status: string;
   isPublic?: boolean;
+  /** The celebration's day has passed: the page shows only that it has ended. */
+  expired?: boolean;
   description?: string | null;
   coverImageUrl?: string | null;
   schedule?: ScheduleSlot[];
@@ -67,6 +70,26 @@ export const getPublicEventBySlug = cache(
     const raw = data as Record<string, unknown>;
     if (!raw.id || !raw.slug) {
       return null;
+    }
+
+    // The database already withholds an ended celebration's details; the date check also covers a
+    // database that has not been migrated yet.
+    if (raw.expired === true || isEventExpired(String(raw.date))) {
+      return {
+        id: String(raw.id),
+        slug: String(raw.slug),
+        title: String(raw.title),
+        couple: String(raw.couple),
+        date: String(raw.date),
+        venue: "",
+        area: null,
+        dressCode: null,
+        rsvpBy: null,
+        status: String(raw.status),
+        isPublic: false,
+        expired: true,
+        schedule: [],
+      };
     }
 
     return {

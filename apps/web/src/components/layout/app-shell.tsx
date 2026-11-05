@@ -12,6 +12,8 @@ import {
   isValidEventId,
   type SwitcherEvent,
 } from "./nav-items";
+import { isEventExpired } from "@/lib/event-expiry";
+import { EventEndedBanner } from "./event-ended-banner";
 import { cn } from "@/lib/utils";
 import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 
@@ -185,6 +187,16 @@ export function AppShell({
     return availableEvents[0] ?? null;
   }, [availableEvents, primaryEventId, selectedId]);
 
+  // After the celebration's day every screen of it is read-only. Decided after mount, so the first
+  // paint matches the server's.
+  const [eventEnded, setEventEnded] = useState(false);
+  const viewedEventDate = isValidEventId(eventId)
+    ? availableEvents.find((ev) => ev.id === eventId)?.date
+    : undefined;
+  useEffect(() => {
+    setEventEnded(viewedEventDate ? isEventExpired(viewedEventDate) : false);
+  }, [viewedEventDate]);
+
   const handleSelectEvent = (nextId: string) => {
     setSelectedId(nextId);
     try {
@@ -259,6 +271,7 @@ export function AppShell({
               : "max-w-[1280px]"
           )}
         >
+          {eventEnded && <EventEndedBanner />}
           {children}
         </main>
       </div>

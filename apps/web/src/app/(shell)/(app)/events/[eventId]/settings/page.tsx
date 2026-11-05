@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ScreenHeader } from "@/components/layout/screen-header";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
 import { getEventById } from "@/features/events/queries";
+import { isEventExpired } from "@/lib/event-expiry";
 import { EventSettingsForm } from "@/features/events/components/EventSettingsForm";
 
 interface EventSettingsPageProps {
@@ -48,7 +49,11 @@ export default async function EventSettingsPage({
           description="Names, date, venue, guest link and lifecycle. Changes reach your guests as soon as you save."
         />
       </div>
-      <EventSettingsForm event={event} userRole={data.role} />
+      <EventSettingsForm
+        event={event}
+        userRole={data.role}
+        ended={isEventExpired(event.date)}
+      />
     </div>
   );
 }

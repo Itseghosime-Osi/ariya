@@ -12,6 +12,8 @@ import { EventDangerZone } from "./EventDangerZone";
 interface EventSettingsFormProps {
   event: Event;
   userRole?: string;
+  /** The celebration's day has passed: everything here is read-only. */
+  ended?: boolean;
 }
 
 type TabId = "details" | "link" | "danger";
@@ -28,7 +30,11 @@ const FIELD =
 const LABEL =
   "mb-1 block px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-label-2";
 
-export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
+export function EventSettingsForm({
+  event,
+  userRole,
+  ended = false,
+}: EventSettingsFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(event.title);
   const [couple, setCouple] = useState(event.couple);
@@ -102,6 +108,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
         id={id}
         type={opts.type ?? "text"}
         required={opts.required ?? true}
+        disabled={ended}
         value={value}
         onChange={(e) => set(e.target.value)}
         className={FIELD}
@@ -109,7 +116,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
     </div>
   );
 
-  const saveButton = (
+  const saveButton = ended ? null : (
     <button
       type="submit"
       disabled={saving}
@@ -148,7 +155,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
         </div>
         <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
           <span className="rounded-full bg-gold/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-night">
-            {isPublic ? "Public" : "Private"}
+            {ended ? "Ended" : isPublic ? "Public" : "Private"}
           </span>
           <span className="truncate rounded-full border border-gold/30 px-2.5 py-0.5 font-mono text-[10px] text-champagne/75">
             /e/{slug}
@@ -160,6 +167,24 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           )}
         </div>
       </section>
+
+      {ended && (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-night"
+        >
+          <Icon
+            name="lock"
+            size={16}
+            className="mt-0.5 shrink-0 text-gold-ink"
+          />
+          <span>
+            <b className="font-semibold">This celebration has ended.</b> Its
+            details, date and link are locked, and its public page is closed for
+            good.
+          </span>
+        </div>
+      )}
 
       {message && (
         <div
@@ -238,6 +263,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
                 <textarea
                   id="setting-dress-code"
                   rows={2}
+                  disabled={ended}
                   value={dressCode}
                   onChange={(e) => setDressCode(e.target.value)}
                   className={`${FIELD} resize-none py-2.5`}
@@ -257,6 +283,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
                   <input
                     id="setting-slug"
                     required
+                    disabled={ended}
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     className="min-h-[44px] w-full min-w-0 bg-transparent px-1 pr-4 font-mono text-base text-night focus-visible:outline-none sm:text-sm"
@@ -272,12 +299,15 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
                     Public event page
                   </span>
                   <span className="block text-[12.5px] leading-snug text-label-2">
-                    Guests can see directions and enter their passcode.
+                    {ended
+                      ? "Expired. This link cannot be opened or turned on again."
+                      : "Guests can see directions and enter their passcode."}
                   </span>
                 </span>
                 <Switch
-                  on={isPublic}
+                  on={ended ? false : isPublic}
                   onChange={setIsPublic}
+                  disabled={ended}
                   label="Public event page"
                 />
               </div>
@@ -296,6 +326,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
           <EventDangerZone
             event={event}
             isOwner={isOwner}
+            ended={ended}
             onError={(text) => setMessage({ type: "error", text })}
           />
         </div>

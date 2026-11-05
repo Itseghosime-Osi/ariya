@@ -25,7 +25,7 @@ test.describe("Seating Chart & Capacity Conflict", () => {
     await page
       .locator('input[placeholder="0803 123 4567"]')
       .fill("+2348021112233");
-    await page.getByLabel(/Allow \+1 Companion/i).check();
+    await page.getByRole("switch", { name: /allow a \+1 companion/i }).click();
     await page.getByRole("button", { name: /add to guestbook/i }).click();
     await expect(page.getByText("Eniola Adeleke").first()).toBeVisible({
       timeout: 5000,
