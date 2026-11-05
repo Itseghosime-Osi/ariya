@@ -8,6 +8,8 @@
 pub mod archetype;
 pub mod fit;
 pub mod geometry;
+pub mod grid;
+pub mod score;
 pub mod venue;
 pub mod wire;
 pub mod zones;
