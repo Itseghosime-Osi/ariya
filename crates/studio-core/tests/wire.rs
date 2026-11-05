@@ -37,9 +37,13 @@ fn snapshot(name: &str, op: u32, payload: &str) {
     let want = fs::read_to_string(&path).unwrap_or_else(|_| {
         panic!("no snapshot for `{name}`; run with UPDATE_WIRE_SNAPSHOTS=1 to write it")
     });
+    // Compare the parsed document, not the bytes: the repo's formatter rewrites JSON files, and a
+    // reformatted snapshot is not a wire change. A renamed field or a changed value still fails.
+    let want: Value = serde_json::from_str(&want)
+        .unwrap_or_else(|e| panic!("the snapshot for `{name}` is not JSON: {e}"));
+    let want = serde_json::to_string_pretty(&want).expect("the snapshot re-serialises");
     assert_eq!(
-        got,
-        want.trim_end(),
+        got, want,
         "the wire format for `{name}` changed; if that was intended, rerun with \
          UPDATE_WIRE_SNAPSHOTS=1 and review the diff"
     );
