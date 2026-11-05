@@ -53,6 +53,13 @@ test.describe("RSVP questions and the access card", () => {
     await expect(page.getByText("Fried rice")).toBeVisible();
     await expect(page.getByText(/Personal Entry Code/i)).toBeVisible();
 
+    // The guest can save their invitation, with the card on it.
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: /save my invitation/i }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe("invitation-Ngozi-Eze.png");
+
     // The host sees the answer.
     await page.goto(`/events/${eventId}/page-editor`);
     await page.getByRole("tab", { name: /rsvp & card/i }).click();

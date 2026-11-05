@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
+import { InvitationDownload } from "./InvitationDownload";
 import type {
   RsvpAnswers,
   RsvpQuestion,
@@ -216,6 +217,24 @@ export function RsvpSummaryCard({
             entrance and the team will find you.
           </p>
         </section>
+      )}
+
+      {isAccepted && (
+        <InvitationDownload
+          guestName={guest.display_name}
+          title={event.invitation_headline || event.title}
+          couple={event.couple}
+          dateLine={formattedEventDate}
+          venue={
+            event.area && !event.venue.includes(event.area)
+              ? `${event.venue}, ${event.area}`
+              : event.venue
+          }
+          dressCode={event.dress_code}
+          seats={rsvp?.attending_count ?? 1}
+          qrCodeUrl={requireAccessCard ? qrCodeUrl : null}
+          code={requireAccessCard ? checkInCode : null}
+        />
       )}
 
       {/* Revision Action */}
