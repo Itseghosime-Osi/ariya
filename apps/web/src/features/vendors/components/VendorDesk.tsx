@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { useDeskToast } from "@/components/ui/desk-toast";
 import { celebratedIfAllDone } from "../lib/celebrate-vendors";
 import {
@@ -181,12 +182,24 @@ export function VendorDesk({
   };
 
   return (
-    <div className="pb-16">
+    <div className="sm:pb-16">
       {toast}
 
-      <DeskMotion className="space-y-6 lg:space-y-8">
-        <DeskItem>
+      <ScreenHeader
+        title="Vendors"
+        subtitle={eventTitle}
+        backHref={`/events/${eventId}`}
+        action={{
+          icon: "add_circle",
+          label: "Add vendor",
+          onClick: openAddVendor,
+        }}
+      />
+
+      <DeskMotion className="space-y-4 sm:space-y-6 lg:space-y-8">
+        <DeskItem className="standalone:max-md:hidden">
           <DeskPageHeader
+            compact
             eyebrow={`Vendors · ${eventTitle}`}
             title="The vendor loom"
             description="Every supplier, contract and deliverable in one place. Tick the work off as the owambe comes together."
@@ -194,7 +207,7 @@ export function VendorDesk({
             <button
               type="button"
               onClick={openAddVendor}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-4 text-sm font-semibold text-ivory shadow-sm standalone:max-md:hidden sm:px-5 transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               <Icon name="add_circle" size={18} />
               Add vendor
@@ -228,7 +241,7 @@ export function VendorDesk({
 
         {vendors.length === 0 ? (
           <DeskItem>
-            <section className="bento-card flex flex-col items-center justify-center px-6 py-16 text-center">
+            <section className="bento-card flex flex-col items-center justify-center px-6 py-10 text-center sm:py-16">
               <div className="grid h-14 w-14 place-items-center rounded-full bg-tint-sand text-gold-ink">
                 <Icon name="table_restaurant" size={24} />
               </div>

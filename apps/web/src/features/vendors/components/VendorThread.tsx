@@ -58,7 +58,7 @@ export function VendorThread({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls={detailId}
-        className="flex w-full items-center gap-4 py-4 pl-5 pr-3 text-left transition-colors hover:bg-white/55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-burgundy sm:pl-6 sm:pr-5"
+        className="flex w-full items-center gap-3 py-3 pl-4 pr-3 sm:gap-4 sm:py-4 sm:pl-6 sm:pr-5 text-left transition-colors hover:bg-white/55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-burgundy"
       >
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink">
@@ -81,17 +81,17 @@ export function VendorThread({
             )}
           </span>
 
-          <span className="mt-1 block truncate font-display text-lg font-bold leading-tight text-night [overflow-wrap:anywhere]">
+          <span className="mt-0.5 block truncate font-display text-base font-bold sm:mt-1 sm:text-lg leading-tight text-night [overflow-wrap:anywhere]">
             {vendor.name}
           </span>
 
           {vendor.contact_name && (
-            <span className="mt-0.5 block truncate text-xs text-label-2">
+            <span className="mt-0.5 hidden truncate text-xs text-label-2 sm:block">
               {vendor.contact_name}
             </span>
           )}
 
-          <span className="mt-1.5 flex items-center gap-2 text-[11px] text-label-2 sm:hidden">
+          <span className="mt-1 flex items-center gap-2 text-[11px] text-label-2 sm:hidden">
             <span className="tabular-nums">
               {formatKobo(vendor.deposit_kobo)} of{" "}
               {formatKobo(vendor.cost_kobo)}
@@ -145,10 +145,18 @@ export function VendorThread({
       {open && (
         <div
           id={detailId}
-          className="border-t border-hairline bg-white/35 px-5 py-4 sm:px-6"
+          className="border-t border-hairline bg-white/35 px-4 py-3 sm:px-6 sm:py-4"
         >
-          {(vendor.contact_phone || vendor.contact_email) && (
+          {(vendor.contact_name ||
+            vendor.contact_phone ||
+            vendor.contact_email) && (
             <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              {vendor.contact_name && (
+                <span className="inline-flex items-center gap-1.5 font-semibold text-night sm:hidden">
+                  <Icon name="person" size={13} />
+                  {vendor.contact_name}
+                </span>
+              )}
               {vendor.contact_phone && (
                 <a
                   href={`tel:${vendor.contact_phone}`}

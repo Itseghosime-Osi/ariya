@@ -49,9 +49,9 @@ export function VendorFilters({
   ];
 
   return (
-    <div className="rounded-3xl border border-hairline bg-white/45 p-3 backdrop-blur-sm sm:p-4">
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <label className="relative xl:w-72 xl:shrink-0">
+    <div className="rounded-3xl border border-hairline bg-white/45 p-2.5 backdrop-blur-sm sm:p-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 xl:flex-nowrap">
+        <label className="relative min-w-0 flex-1 basis-40 xl:w-72 xl:flex-none xl:shrink-0">
           <span className="sr-only">Search vendors</span>
           <Icon
             name="search"
@@ -67,7 +67,7 @@ export function VendorFilters({
           />
         </label>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="order-last -mx-2.5 flex w-[calc(100%+1.25rem)] items-center gap-1.5 overflow-x-auto px-2.5 [scrollbar-width:none] sm:order-none sm:mx-0 sm:w-auto sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {chips.map((chip) => {
             const on = status === chip.value;
             return (
@@ -76,7 +76,7 @@ export function VendorFilters({
                 type="button"
                 aria-pressed={on}
                 onClick={() => onStatusChange(chip.value)}
-                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+                className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
                   on
                     ? "border border-burgundy bg-burgundy text-ivory"
                     : "desk-chip text-label-2 hover:text-night"
@@ -94,13 +94,13 @@ export function VendorFilters({
         </div>
 
         <label className="flex items-center gap-2 xl:ml-auto">
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-label-3">
+          <span className="hidden shrink-0 text-[10px] sm:inline font-semibold uppercase tracking-[0.18em] text-label-3">
             Sort
           </span>
           <select
             value={sort}
             onChange={(event) => onSortChange(event.target.value as VendorSort)}
-            className="desk-field min-h-[40px] cursor-pointer rounded-full pl-4 pr-9 text-xs font-semibold text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none"
+            className="desk-field min-h-[44px] max-w-[9.5rem] cursor-pointer rounded-full pl-3.5 pr-8 sm:max-w-none sm:min-h-[40px] sm:pl-4 sm:pr-9 text-xs font-semibold text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none"
           >
             {(Object.keys(VENDOR_SORT_LABELS) as VendorSort[]).map((value) => (
               <option key={value} value={value}>

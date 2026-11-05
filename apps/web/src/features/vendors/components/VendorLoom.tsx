@@ -40,25 +40,25 @@ export function VendorLoom({
   return (
     <section
       aria-labelledby="vendor-loom-title"
-      className="bento-card relative overflow-hidden p-6 sm:p-7"
+      className="bento-card relative overflow-hidden p-4 sm:p-7"
     >
-      <div className="flex flex-wrap items-start justify-between gap-5">
+      <div className="flex items-start justify-between gap-4 sm:flex-wrap sm:gap-5">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
             Money
           </div>
           <h2
             id="vendor-loom-title"
-            className="mt-1 font-display text-2xl font-bold text-night"
+            className="mt-0.5 font-display text-xl font-bold text-night sm:mt-1 sm:text-2xl"
           >
             The contracts, woven
           </h2>
-          <p className="mt-1 max-w-md text-sm text-label-2">
+          <p className="mt-1 hidden max-w-md text-sm text-label-2 sm:block">
             Solid cloth is paid; the hatched stretch is still owed.
           </p>
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex shrink-0 items-center gap-3 sm:gap-5">
           <div className="relative grid place-items-center">
             <svg
               width={RING}
@@ -120,13 +120,13 @@ export function VendorLoom({
         </div>
       </div>
 
-      <dl className="mt-6 grid grid-cols-3 gap-3 sm:gap-6">
+      <dl className="mt-4 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-6">
         <div>
           <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
             Contracted
           </dt>
           <dd
-            className="font-display text-2xl font-bold text-night tabular-nums sm:text-3xl"
+            className="font-display text-xl font-bold text-night tabular-nums sm:text-3xl"
             title={formatKobo(stats.contractedKobo)}
           >
             {formatNairaCompact(stats.contractedKobo)}
@@ -136,7 +136,7 @@ export function VendorLoom({
           <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
             Paid
           </dt>
-          <dd className="font-display text-2xl font-bold text-burgundy tabular-nums sm:text-3xl">
+          <dd className="font-display text-xl font-bold text-burgundy tabular-nums sm:text-3xl">
             <NumberFlow value={paidPct} suffix="%" respectMotionPreference />
           </dd>
         </div>
@@ -145,7 +145,7 @@ export function VendorLoom({
             To go
           </dt>
           <dd
-            className="font-display text-2xl font-bold text-night tabular-nums sm:text-3xl"
+            className="font-display text-xl font-bold text-night tabular-nums sm:text-3xl"
             title={formatKobo(stats.balanceDueKobo)}
           >
             {formatNairaCompact(stats.balanceDueKobo)}
@@ -154,13 +154,13 @@ export function VendorLoom({
       </dl>
 
       {vendors.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-hairline px-4 py-6 text-center text-sm text-label-2">
+        <p className="mt-4 rounded-2xl border border-dashed border-hairline px-4 py-6 text-center text-sm text-label-2">
           Add your first vendor and the cloth starts to weave itself here.
         </p>
       ) : (
         <>
           <div
-            className="mt-6 flex h-14 gap-1 overflow-hidden rounded-2xl"
+            className="mt-4 flex h-10 gap-1 sm:mt-6 sm:h-14 overflow-hidden rounded-2xl"
             onPointerLeave={() => setActiveId(null)}
           >
             {vendors.map((vendor) => {
@@ -202,7 +202,7 @@ export function VendorLoom({
           <p
             id={captionId}
             aria-live="polite"
-            className="mt-3 min-h-[1.25rem] text-sm text-label-2"
+            className="mt-2 min-h-[1.25rem] truncate text-xs text-label-2 sm:mt-3 sm:text-sm"
           >
             {active ? (
               <>
@@ -219,8 +219,13 @@ export function VendorLoom({
                   size={13}
                   className="mr-1 inline text-gold-ink"
                 />
-                Hover or tab through the bands to see each vendor&rsquo;s
-                numbers.
+                <span className="sm:hidden">
+                  Tap a band to read its numbers.
+                </span>
+                <span className="hidden sm:inline">
+                  Hover or tab through the bands to see each vendor&rsquo;s
+                  numbers.
+                </span>
               </>
             )}
           </p>
