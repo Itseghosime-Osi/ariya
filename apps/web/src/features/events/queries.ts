@@ -113,7 +113,7 @@ export const getPublicEventBySlug = cache(
   }
 );
 
-export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
+const getAllUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -489,3 +489,22 @@ export async function getEventPlanningSnapshot(
 
   return { vendors, tasks, guests, checkedInPeople };
 }
+
+/**
+ * Your celebrations: everything you have not filed away. Archived events live in the archive
+ * (`getArchivedEvents`) and nowhere else, so the lists, the switcher and the dashboard stay tidy.
+ */
+export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
+  const all = await getAllUserEvents();
+  return all.filter((item) => item.event.status !== "archived");
+});
+
+/** Archived celebrations, the most recent day first. */
+export const getArchivedEvents = cache(
+  async (): Promise<EventWithMetrics[]> => {
+    const all = await getAllUserEvents();
+    return all
+      .filter((item) => item.event.status === "archived")
+      .sort((a, b) => Date.parse(b.event.date) - Date.parse(a.event.date));
+  }
+);

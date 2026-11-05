@@ -326,7 +326,6 @@ export function EventSettingsForm({
           <EventDangerZone
             event={event}
             isOwner={isOwner}
-            ended={ended}
             onError={(text) => setMessage({ type: "error", text })}
           />
         </div>

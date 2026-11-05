@@ -11,17 +11,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/lib/use-is-mobile";
+import { DeleteEventDialog } from "./DeleteEventDialog";
 import type { Event } from "@/features/events/types";
-import {
-  archiveEventAction,
-  deleteEventAction,
-} from "@/features/events/settings-actions";
+import { archiveEventAction } from "@/features/events/settings-actions";
 
 interface EventDangerZoneProps {
   event: Event;
   isOwner: boolean;
-  /** An ended celebration can only be deleted, not archived or changed. */
-  ended?: boolean;
   onError: (msg: string) => void;
 }
 
@@ -32,14 +28,12 @@ const GHOST =
 export function EventDangerZone({
   event,
   isOwner,
-  ended = false,
   onError,
 }: EventDangerZoneProps) {
   const router = useRouter();
   const sheet = useIsMobile();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const [confirmSlug, setConfirmSlug] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
   const handleArchive = async () => {
@@ -54,26 +48,13 @@ export function EventDangerZone({
     }
   };
 
-  const handleDelete = async () => {
-    if (confirmSlug !== event.slug) return;
-    setActionLoading(true);
-    const res = await deleteEventAction(event.id);
-    setActionLoading(false);
-    if (!res.ok) {
-      onError(res.error || "Failed to delete celebration");
-      setShowDeleteModal(false);
-    } else {
-      router.push("/events");
-    }
-  };
-
   return (
     <section aria-labelledby="ev-danger">
       <h2 id="ev-danger" className="sr-only">
         Danger zone
       </h2>
       <div className="overflow-hidden rounded-3xl border border-error/25 bg-white/40 backdrop-blur-sm divide-y divide-hairline">
-        {!ended && (
+        {
           <div className={ROW}>
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
               <Icon name="folder" size={18} />
@@ -83,7 +64,7 @@ export function EventDangerZone({
                 Archive celebration
               </span>
               <span className="block text-[12.5px] leading-snug text-label-2">
-                Closes RSVPs. Nothing is deleted.
+                Moves it to your archive. Nothing is deleted.
               </span>
             </span>
             <button
@@ -94,13 +75,7 @@ export function EventDangerZone({
               Archive event
             </button>
           </div>
-        )}
-
-        {ended && !isOwner && (
-          <p className="px-4 py-4 text-sm text-label-2 sm:px-5">
-            This celebration has ended. Only its owner can delete it now.
-          </p>
-        )}
+        }
 
         {isOwner && (
           <div className={ROW}>
@@ -126,57 +101,21 @@ export function EventDangerZone({
         )}
       </div>
 
-      <Dialog
+      <DeleteEventDialog
+        event={event}
         open={showDeleteModal}
-        onOpenChange={(o) => {
-          setShowDeleteModal(o);
-          if (!o) setConfirmSlug("");
-        }}
-      >
-        <DialogContent sheet={sheet}>
-          <DialogHeader>
-            <DialogTitle className="text-error">
-              Confirm permanent deletion
-            </DialogTitle>
-            <DialogDescription>
-              This cannot be undone. To confirm, type the slug{" "}
-              <strong className="font-mono text-night">{event.slug}</strong>.
-            </DialogDescription>
-          </DialogHeader>
-          <input
-            type="text"
-            value={confirmSlug}
-            onChange={(e) => setConfirmSlug(e.target.value)}
-            placeholder={event.slug}
-            aria-label="Type the slug to confirm"
-            className="desk-field min-h-[44px] w-full rounded-2xl px-4 font-mono text-base text-night focus-visible:ring-2 focus-visible:ring-error/40 focus-visible:outline-none sm:text-sm"
-          />
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setShowDeleteModal(false)}
-              className={`${GHOST} text-label-2 hover:text-night`}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={confirmSlug !== event.slug || actionLoading}
-              onClick={handleDelete}
-              className={`${GHOST} bg-error px-5 text-white hover:bg-error/90 disabled:opacity-50`}
-            >
-              {actionLoading ? "Deleting…" : "Permanently Delete"}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowDeleteModal}
+        onDeleted={() => router.push("/events")}
+      />
 
       <Dialog open={showArchiveModal} onOpenChange={setShowArchiveModal}>
         <DialogContent sheet={sheet}>
           <DialogHeader>
             <DialogTitle>Archive Celebration?</DialogTitle>
             <DialogDescription>
-              Guests will no longer be able to submit or revise their RSVPs.
+              It leaves your celebrations and moves to the archive in your
+              profile, where you can restore it later. Guests can no longer
+              submit or revise their RSVPs.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-end gap-2">

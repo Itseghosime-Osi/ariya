@@ -80,12 +80,11 @@ export async function updateEventSettingsAction(
   return { ok: true };
 }
 
+/** Files a celebration away. It leaves your celebrations and appears only in the archive. */
 export async function archiveEventAction(
   eventId: string
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const ended = await eventEndedError(supabase, eventId);
-  if (ended) return { ok: false, error: ended };
   const { data, error } = await supabase
     .from("events")
     .update({ status: "archived" })
@@ -103,14 +102,71 @@ export async function archiveEventAction(
 
   revalidatePath(`/events/${eventId}`);
   revalidatePath("/events");
+  revalidatePath("/profile");
+  revalidatePath("/profile/archive");
   return { ok: true };
 }
 
-export async function deleteEventAction(
+/** Brings an archived celebration back to your celebrations. */
+export async function restoreEventAction(
   eventId: string
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  const { data, error } = await supabase
+    .from("events")
+    .update({ status: "active" })
+    .eq("id", eventId)
+    .eq("status", "archived")
+    .select("id");
+
+  if (error || !data || data.length === 0) {
+    return {
+      ok: false,
+      error: error
+        ? mapError(error, "Failed to restore the celebration")
+        : "Unauthorized",
+    };
+  }
+
+  revalidatePath(`/events/${eventId}`);
+  revalidatePath("/events");
+  revalidatePath("/profile");
+  revalidatePath("/profile/archive");
+  return { ok: true };
+}
+
+/**
+ * Deletes a celebration for good, with everything in it. The caller must type the celebration's name
+ * exactly; it is checked here too, so a doctored request cannot skip the confirmation. Only owners can
+ * delete (the database refuses anyone else).
+ */
+export async function deleteEventAction(
+  eventId: string,
+  confirmName: string
+): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("title")
+    .eq("id", eventId)
+    .maybeSingle();
+
+  if (!event) {
+    return { ok: false, error: "Celebration not found." };
+  }
+  if (confirmName.trim() !== event.title.trim()) {
+    return {
+      ok: false,
+      error: "The name you typed does not match this celebration.",
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", eventId)
+    .select("id");
 
   if (error) {
     return {
@@ -121,7 +177,15 @@ export async function deleteEventAction(
       ),
     };
   }
+  if (!data || data.length === 0) {
+    return {
+      ok: false,
+      error: "Only the owner of a celebration can delete it.",
+    };
+  }
 
   revalidatePath("/events");
+  revalidatePath("/profile");
+  revalidatePath("/profile/archive");
   return { ok: true };
 }
