@@ -427,10 +427,12 @@ export type Database = {
           date: string;
           description: string | null;
           dress_code: string | null;
+          film_design: Json | null;
           hall_layout: Json | null;
           id: string;
           invitation_design: Json | null;
           invitation_headline: string | null;
+          invitation_live: boolean;
           invitation_message: string | null;
           invitation_subheadline: string | null;
           invitation_theme: string | null;
@@ -454,10 +456,12 @@ export type Database = {
           date: string;
           description?: string | null;
           dress_code?: string | null;
+          film_design?: Json | null;
           hall_layout?: Json | null;
           id?: string;
           invitation_design?: Json | null;
           invitation_headline?: string | null;
+          invitation_live?: boolean;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;
           invitation_theme?: string | null;
@@ -480,10 +484,12 @@ export type Database = {
           date?: string;
           description?: string | null;
           dress_code?: string | null;
+          film_design?: Json | null;
           hall_layout?: Json | null;
           id?: string;
           invitation_design?: Json | null;
           invitation_headline?: string | null;
+          invitation_live?: boolean;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;
           invitation_theme?: string | null;
@@ -1085,6 +1091,7 @@ export type Database = {
         Args: { p_decision: string; p_id: string };
         Returns: Json;
       };
+      event_is_expired: { Args: { p_date: string }; Returns: boolean };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
         Returns: {
