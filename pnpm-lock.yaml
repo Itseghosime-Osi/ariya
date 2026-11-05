@@ -268,6 +268,9 @@ importers:
       '@ariya/render':
         specifier: workspace:*
         version: link:../../packages/render
+      '@ariya/studio':
+        specifier: workspace:*
+        version: link:../../packages/studio
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -397,6 +400,8 @@ importers:
         version: 3.6.4
 
   packages/render: {}
+
+  packages/studio: {}
 
 packages:
 
