@@ -137,11 +137,11 @@ Goal: the studio can describe a marquee, garden, field, beach, rooftop, church �
 
 ### 1.3 Renderer
 
-- [ ] **1.3.1** Venue shells in `hall3d.js`: marquee (leg grid + fabric), garden (grass, trees, sky), field, beach, rooftop, church.
-- [ ] **1.3.2** Marquee leg-grid snapping: tables snap to the 3 m / 5 m module.
-- [ ] **1.3.3** Environment: sun position from date/time/location, sky gradient, wind direction indicator, rain toggle.
-- [ ] **1.3.4** Pass the same JSON document to the iframe — the renderer must not become a second model.
-- [ ] **1.3.5** Non-visual equivalent: table list + text summary of the layout (research §I.5).
+- [x] **1.3.1** Venue shells in `hall3d.js`: marquee (leg grid + fabric), garden (grass, trees, sky), field, beach, rooftop, church. _(The shell branches on the venue the layout already carries. A tent gets legs on its module and a fabric roof that fades as the camera rises over the eaves; a garden gets grass and trees; a rooftop a parapet; a church a sanctuary step, altar, chancel rail and aisle runner. Pews are not drawn — the seating is what the host is arranging.)_
+- [x] **1.3.2** Marquee leg-grid snapping: tables snap to the 3 m / 5 m module. _(Legs sit at half-module offsets, so snapping to module multiples puts a table between legs rather than on one. Alt still turns snapping off.)_
+- [x] **1.3.3** Environment: sun position from date/time/location, sky gradient, wind direction indicator, rain toggle. _(The host's sun wins; without one a seasonal arc from the month keeps an unanswered venue from being lit from a direction that could never happen. Rain is drawn as streaks and offered only where there is sky above the tables.)_
+- [x] **1.3.4** Pass the same JSON document to the iframe — the renderer must not become a second model. _(The renderer reads `state.layout` and derives venue, ground, sun and snapping from it; it stores nothing the app does not send.)_
+- [x] **1.3.5** Non-visual equivalent: table list + text summary of the layout (research §I.5). _(`LayoutSummary` in the Room deck: venue, size, every table with seats and position, every area, in plan order. Each table focuses the view.)_
 
 **Phase 1 exit:** a user can pick "marquee", answer six questions, and see a marquee with a leg grid and a sun position.
 
