@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
+import { eventEndedError } from "./expiry";
 import { isValidCoverImage } from "./validate-cover";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -32,6 +33,8 @@ export async function uploadEventCoverAction(
   }
 
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -99,6 +102,8 @@ export async function removeEventCoverAction(
   eventId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const {
     data: { user },
   } = await supabase.auth.getUser();

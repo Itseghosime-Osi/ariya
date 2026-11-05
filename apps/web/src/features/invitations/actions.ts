@@ -1,5 +1,6 @@
 "use server";
 
+import { eventEndedError } from "@/features/events/expiry";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
@@ -65,6 +66,8 @@ export async function saveInvitationDesignAction(
   }
 
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const { error } = await supabase
     .from("events")
     .update({
@@ -108,6 +111,8 @@ export async function uploadInvitationArtAction(
   }
 
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const {
     data: { user },
   } = await supabase.auth.getUser();

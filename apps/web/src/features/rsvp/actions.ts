@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { render } from "@react-email/components";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
+import { isEventExpired } from "@/lib/event-expiry";
 import { checkRateLimitByKeyAndIp } from "@/lib/rate-limit";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
 import { formatLagosDate } from "@/lib/format";
@@ -89,6 +90,12 @@ export async function submitRsvpAction(
   }
 
   const invitation: InvitationData = parsedInv.data;
+  if (isEventExpired(invitation.event.date)) {
+    return {
+      ok: false,
+      error: "This celebration has ended, so replies are closed.",
+    };
+  }
   const isRevision = Boolean(invitation.rsvp?.responded_at);
 
   // When accepting with no selector (or missing attendingCount), default to allowed party size (minimum 1)

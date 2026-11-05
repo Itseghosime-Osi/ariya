@@ -232,6 +232,13 @@ describe("Events Domain", () => {
           },
           from: vi.fn().mockReturnValue({
             update: mockUpdate,
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi
+                  .fn()
+                  .mockResolvedValue({ data: null, error: null }),
+              }),
+            }),
           }),
         })
       );
@@ -246,6 +253,40 @@ describe("Events Domain", () => {
           "Celebration not found or you do not have permission to modify it."
         );
       }
+    });
+  });
+
+  describe("an ended celebration", () => {
+    it("refuses every change once its day has passed", async () => {
+      const mockUpdate = vi.fn();
+      vi.mocked(serverClient.createClient).mockResolvedValue(
+        mockSupabase({
+          auth: {
+            getUser: vi.fn().mockResolvedValue({
+              data: { user: { id: "user-123" } },
+            }),
+          },
+          from: vi.fn().mockReturnValue({
+            update: mockUpdate,
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({
+                  data: { date: "2020-01-01T13:00:00Z" },
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+
+      const res = await updateEventAction("evt-old", {
+        date: "2030-01-01T14:00",
+      });
+
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.error).toMatch(/has ended/i);
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 

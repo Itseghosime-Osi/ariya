@@ -48,6 +48,8 @@ export function mapError(
         return "You do not have permission to perform this action.";
       case "ROW_INVALID":
         return "The provided information does not meet the required format or criteria.";
+      case "EVENT_EXPIRED":
+        return "This celebration has ended, so it can no longer be changed.";
       case "RSVP_CLOSED":
         return "This celebration is no longer accepting RSVP responses.";
       case "RSVP_DEADLINE_PASSED":

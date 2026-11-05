@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { checkRateLimitByKeyAndIp } from "@/lib/rate-limit";
 import { invitationDataSchema } from "./schemas";
 import type { InvitationData, RsvpViewMode } from "./types";
+import { isEventExpired } from "@/lib/event-expiry";
 
 export interface GetInvitationResult {
   data: InvitationData | null;
@@ -49,6 +50,11 @@ export async function getInvitationByToken(
   }
 
   const inv = parsed.data;
+
+  // An ended celebration's links no longer open; nothing about it is shown.
+  if (isEventExpired(inv.event.date)) {
+    return { data: inv, state: "expired" };
+  }
 
   // Determine ceremonial RSVP state
   if (inv.event.status !== "active") {

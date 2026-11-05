@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { parseWatDateToUtc } from "@/lib/format";
 import { mapError } from "@/lib/errors";
+import { eventEndedError } from "./expiry";
 
 export interface ActionResult<T = void> {
   ok: boolean;
@@ -27,6 +28,8 @@ export async function updateEventSettingsAction(
   input: UpdateSettingsInput
 ): Promise<ActionResult> {
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const cleanSlug = input.slug
     .trim()
     .toLowerCase()
@@ -81,6 +84,8 @@ export async function archiveEventAction(
   eventId: string
 ): Promise<ActionResult> {
   const supabase = await createClient();
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
   const { data, error } = await supabase
     .from("events")
     .update({ status: "archived" })
