@@ -66,7 +66,7 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
+    <div className="max-w-3xl space-y-4 sm:space-y-6">
       {message && (
         <div
           role={message.type === "error" ? "alert" : "status"}

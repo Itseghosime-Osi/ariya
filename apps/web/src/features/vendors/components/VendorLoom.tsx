@@ -43,7 +43,7 @@ export function VendorLoom({
       className="bento-card relative overflow-hidden p-4 sm:p-7"
     >
       <div className="flex items-start justify-between gap-4 sm:flex-wrap sm:gap-5">
-        <div>
+        <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
             Money
           </div>
@@ -59,7 +59,7 @@ export function VendorLoom({
         </div>
 
         <div className="flex shrink-0 items-center gap-3 sm:gap-5">
-          <div className="relative grid place-items-center">
+          <div className="relative hidden place-items-center sm:grid">
             <svg
               width={RING}
               height={RING}

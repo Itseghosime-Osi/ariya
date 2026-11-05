@@ -62,7 +62,7 @@ export function VendorFilters({
             type="search"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Name, category or contact"
+            placeholder="Search"
             className="desk-field min-h-[44px] w-full rounded-full pl-12 pr-5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none"
           />
         </label>
