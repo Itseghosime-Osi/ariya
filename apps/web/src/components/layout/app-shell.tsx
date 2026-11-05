@@ -7,7 +7,11 @@ import { TopBar } from "./top-bar";
 import { PhoneDock } from "./phone-dock";
 import { EventDayCelebration } from "./event-day-celebration";
 import { InstallHint } from "./install-hint";
-import { isValidEventId, type SwitcherEvent } from "./nav-items";
+import {
+  hasOwnPhoneHeader,
+  isValidEventId,
+  type SwitcherEvent,
+} from "./nav-items";
 import { cn } from "@/lib/utils";
 import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 
@@ -238,7 +242,7 @@ export function AppShell({
       <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
         <TopBar
           // Account screens bring their own bar with a Back button in the installed app on phones.
-          hideOnPhone={/^\/(settings|profile)$/.test(pathname)}
+          hideOnPhone={hasOwnPhoneHeader(pathname)}
           eventId={activeEvent?.id}
           userEmail={userEmail}
           pendingProposals={pendingProposals}

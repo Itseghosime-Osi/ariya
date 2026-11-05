@@ -148,3 +148,15 @@ export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
     (item) => item.name !== "Guests" && item.name !== "Check-in"
   );
 }
+
+/**
+ * Pages that carry their own phone header (Back, title, action) in the installed app, so the app's
+ * top bar steps aside for them there. See screen-header.tsx.
+ */
+export function hasOwnPhoneHeader(pathname: string): boolean {
+  return (
+    pathname === "/settings" ||
+    pathname === "/profile" ||
+    /^\/events\/[^/]+\/(billing|team)$/.test(pathname)
+  );
+}

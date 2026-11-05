@@ -3,6 +3,7 @@ import {
   ACCOUNT_SECTIONS,
   getEventSections,
   getPhoneMoreSections,
+  hasOwnPhoneHeader,
 } from "./nav-items";
 
 const EVENT_ID = "2f1a7c4e-0b6d-4c2a-9f3e-8d5b1a7c4e0b";
@@ -43,5 +44,24 @@ describe("getPhoneMoreSections", () => {
   it("has nothing to show without a real event", () => {
     expect(getPhoneMoreSections(undefined)).toEqual([]);
     expect(getPhoneMoreSections("default")).toEqual([]);
+  });
+});
+
+describe("hasOwnPhoneHeader", () => {
+  it("is true for the account pages and an event's Billing and Team", () => {
+    expect(hasOwnPhoneHeader("/settings")).toBe(true);
+    expect(hasOwnPhoneHeader("/profile")).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
+  });
+
+  it("is false everywhere else, including billing's callback", () => {
+    expect(hasOwnPhoneHeader("/events")).toBe(false);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}`)).toBe(false);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/guests`)).toBe(false);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing/callback`)).toBe(
+      false
+    );
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/settings`)).toBe(false);
   });
 });
