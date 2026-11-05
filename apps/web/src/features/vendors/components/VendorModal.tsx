@@ -1,14 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FORM_DIALOG, ModalHeader } from "@/components/ui/modal-header";
 import { Button } from "@/components/ui/button";
 import { VENDOR_CATEGORIES, type CreateVendorInput } from "../schemas";
 import { VendorContactFields } from "./VendorContactFields";
@@ -24,7 +18,7 @@ interface VendorModalProps {
 
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
 const FIELD =
-  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
+  "desk-field mt-1.5 w-full rounded-2xl px-4 py-2.5 text-base text-night sm:text-sm focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function VendorModal({
   isOpen,
@@ -56,28 +50,21 @@ export function VendorModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
-        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
-            Vendor loom
-          </p>
-          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
-            {initialVendor ? "Edit vendor contract" : "Register a vendor"}
-          </DialogTitle>
-          <DialogDescription>
-            {initialVendor
+      <DialogContent className={`${FORM_DIALOG} max-w-xl`}>
+        <ModalHeader
+          icon="restaurant_menu"
+          eyebrow="Vendor loom"
+          title={initialVendor ? "Edit vendor contract" : "Register a vendor"}
+          description={
+            initialVendor
               ? "Change the terms, contact or what has been paid so far."
-              : "Add a supplier with their contract value and the deposit already paid."}
-          </DialogDescription>
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
-          />
-        </DialogHeader>
+              : "Add a supplier with their contract value and the deposit already paid."
+          }
+        />
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8"
+          className="flex flex-col gap-3.5 px-5 pb-5 pt-4 sm:gap-4 sm:px-7"
         >
           {error && (
             <div
@@ -180,7 +167,7 @@ export function VendorModal({
             onEmailChange={setContactEmail}
           />
 
-          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+          <DialogFooter className="mt-1 flex flex-row justify-end gap-2 border-t border-hairline pt-4 sm:space-x-0">
             <Button
               type="button"
               variant="outline"
