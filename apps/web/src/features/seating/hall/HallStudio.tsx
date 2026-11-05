@@ -44,7 +44,7 @@ import type { CreateTableInput } from "../schemas";
 import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import {
-  AREA_PER_DINER,
+  areaPerDiner,
   SPACING_GAP,
   ZONE_DEFAULTS,
   chairPositions,
@@ -69,7 +69,15 @@ import {
   type ZoneKind,
   type ZoneShape,
 } from "./model";
-import { findFreeSpot, fitTables, frontOf, nearestToFront } from "./fit";
+import {
+  findFreeSpot,
+  fitTables,
+  frontOf,
+  nearestToFront,
+  type FitOptions,
+  type FitResult,
+} from "./fit";
+import { useStudioEngine } from "./useStudioEngine";
 import { planSeating } from "./autoseat";
 import { autoArrange } from "./arrange";
 import {
@@ -217,6 +225,7 @@ export function HallStudio({
     available: layoutAvailable,
   });
   const { layout } = hall;
+  const { engine: studioEngine, status: studioStatus } = useStudioEngine();
   const view3d = useRef<Hall3DHandle>(null);
   const studio = useRef<HTMLElement>(null);
   const [tool, setTool] = useState<"select" | "hand">("select");
@@ -418,7 +427,9 @@ export function HallStudio({
   const seats = data.tables.reduce((a, t) => a + t.capacity, 0);
   const area = layout.width * layout.length;
   const zoneArea = layout.zones.reduce((a, z) => a + z.w * z.h, 0);
-  const fireGuide = Math.floor(Math.max(0, area - zoneArea) / AREA_PER_DINER);
+  const fireGuide = Math.floor(
+    Math.max(0, area - zoneArea) / areaPerDiner(layout.venue)
+  );
   const [fitPreset, setFitPreset] = useState("r10");
   const [aisle, setAisle] = useState(true);
   const [buffer, setBuffer] = useState(10);
@@ -426,9 +437,37 @@ export function HallStudio({
     (p) => p.shape !== "head" && p.key !== "s4"
   );
   const preset = fitPresets.find((p) => p.key === fitPreset) ?? fitPresets[0];
+  // The Rust core does the packing once it has loaded; the TypeScript path is the fallback.
+  const fitWith = useCallback(
+    (opts: FitOptions): FitResult => {
+      if (studioEngine) {
+        try {
+          return studioEngine.fit({
+            width: opts.width,
+            length: opts.length,
+            zones: opts.zones.map((z) => ({
+              ...z,
+              shape: z.shape ?? null,
+              rot: z.rot ?? null,
+            })),
+            obstacles: opts.obstacles ?? [],
+            shape: opts.shape,
+            capacity: opts.capacity,
+            rotation: opts.rotation ?? 0,
+            gap: opts.gap,
+            aisle: opts.aisle ?? false,
+          });
+        } catch {
+          /* fall back to the TypeScript packing */
+        }
+      }
+      return fitTables(opts);
+    },
+    [studioEngine]
+  );
   const fitEmpty = useMemo(
     () =>
-      fitTables({
+      fitWith({
         width: layout.width,
         length: layout.length,
         zones: layout.zones,
@@ -437,11 +476,11 @@ export function HallStudio({
         gap,
         aisle,
       }),
-    [layout.width, layout.length, layout.zones, preset, gap, aisle]
+    [fitWith, layout.width, layout.length, layout.zones, preset, gap, aisle]
   );
   const fitAround = useMemo(
     () =>
-      fitTables({
+      fitWith({
         width: layout.width,
         length: layout.length,
         zones: layout.zones,
@@ -452,6 +491,7 @@ export function HallStudio({
         aisle,
       }),
     [
+      fitWith,
       layout.width,
       layout.length,
       layout.zones,
@@ -1294,6 +1334,11 @@ export function HallStudio({
               </dl>
             </div>
             <div className="flex flex-wrap gap-1.5">
+              {studioStatus === "unavailable" && (
+                <span className="pointer-events-auto inline-flex items-center rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-label-2 shadow-sm">
+                  Running the built-in layout engine.
+                </span>
+              )}
               {assigning && (
                 <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-burgundy py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white shadow-lg">
                   Click a table for{" "}
