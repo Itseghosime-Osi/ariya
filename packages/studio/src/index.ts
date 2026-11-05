@@ -31,8 +31,13 @@ export const OP = {
 export type Op = (typeof OP)[keyof typeof OP];
 
 export type {
+  Archetype,
+  ArrangeRequest,
+  ArrangeResponse,
+  ArrangeTable,
   Arrangement,
   Capacity,
+  ChairPlacement,
   Climate,
   Environment,
   FitPlacement,
@@ -41,7 +46,13 @@ export type {
   Footprint,
   GeometryRequest,
   GeometryResponse,
+  LayoutOption,
+  Placement,
+  ScoreBreakdown,
+  ScoreTerm,
   Services,
+  Side,
+  StageWall,
   Structure,
   TableGeometry,
   TableSpec,
@@ -55,6 +66,8 @@ export type {
 } from "./generated";
 
 import type {
+  ArrangeRequest,
+  ArrangeResponse,
   FitRequest,
   FitResult,
   GeometryRequest,
@@ -68,6 +81,8 @@ export interface StudioEngine {
   geometry(request: GeometryRequest): GeometryResponse;
   /** How many tables fit, and where. */
   fit(request: FitRequest): FitResult;
+  /** Three ranked, explained arrangements of the whole hall. */
+  arrange(request: ArrangeRequest): ArrangeResponse;
 }
 
 export interface LoadStudioOptions {
@@ -140,7 +155,12 @@ export async function loadStudio(
   const decoder = new TextDecoder();
 
   function call<T>(op: Op, payload: unknown): T {
-    const bytes = encoder.encode(JSON.stringify(payload ?? {}));
+    // u64 fields arrive as bigint from the generated types, which JSON.stringify rejects; a
+    // seed stays well inside 2^53, so a number round-trips exactly.
+    const json = JSON.stringify(payload ?? {}, (_, value) =>
+      typeof value === "bigint" ? Number(value) : value
+    );
+    const bytes = encoder.encode(json);
     const inPtr = wasm.ariya_studio_alloc(Math.max(bytes.length, 1));
     if (!inPtr) throw new Error("The studio core is out of memory.");
     try {
@@ -174,5 +194,6 @@ export async function loadStudio(
     version: () => call<{ abi: number }>(OP.VERSION, {}).abi,
     geometry: (request) => call<GeometryResponse>(OP.GEOMETRY, request),
     fit: (request) => call<FitResult>(OP.FIT, request),
+    arrange: (request) => call<ArrangeResponse>(OP.ARRANGE, request),
   };
 }
