@@ -37,7 +37,7 @@ alter table public.rsvp_answers enable row level security;
 
 drop policy if exists "Members can view RSVP answers" on public.rsvp_answers;
 create policy "Members can view RSVP answers" on public.rsvp_answers
-  for select using (public.is_event_member(event_id, auth.uid()));
+  for select using (public.is_event_member(event_id));
 
 -- Answers are written only by save_rsvp_answers (security definer); nobody writes the table directly.
 revoke all on public.rsvp_answers from public, anon, authenticated;
