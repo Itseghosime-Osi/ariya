@@ -333,7 +333,10 @@ pub struct Climate {
 /// Where the sun is at the hour the plan is drawn for. Degrees, clockwise from north.
 #[cfg_attr(feature = "ts", derive(TS))]
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
-#[cfg_attr(feature = "ts", ts(export, export_to = "../../../packages/studio/src/generated/"))]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
 pub struct Sun {
     #[serde(default)]
     pub azimuth: Option<f64>,
@@ -344,7 +347,10 @@ pub struct Sun {
 /// The prevailing wind, which decides where the generator and the open sides go.
 #[cfg_attr(feature = "ts", derive(TS))]
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
-#[cfg_attr(feature = "ts", ts(export, export_to = "../../../packages/studio/src/generated/"))]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
 pub struct Wind {
     /// Degrees, clockwise from north: the direction the wind blows *from*.
     #[serde(default)]
