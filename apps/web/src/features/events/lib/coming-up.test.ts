@@ -20,6 +20,8 @@ function makeUpcomingEvent(
       area: "VI",
       dress_code: null,
       hall_layout: null,
+      film_design: null,
+      invitation_live: true,
       description: null,
       cover_image_url: null,
       is_public: false,

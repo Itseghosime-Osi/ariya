@@ -17,6 +17,8 @@ function makeEvent(
       area: overrides.area ?? "Victoria Island, Lagos",
       dress_code: overrides.dress_code ?? null,
       hall_layout: null,
+      film_design: null,
+      invitation_live: true,
       description: overrides.description ?? null,
       cover_image_url: overrides.cover_image_url ?? null,
       is_public: overrides.is_public ?? false,

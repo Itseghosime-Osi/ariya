@@ -131,3 +131,29 @@ describe("a guest's first name", () => {
     expect(guestFirstName(null)).toBe("");
   });
 });
+
+import { inviteAccess } from "./visibility";
+import { looksLikeMp3 } from "./actions";
+
+describe("who may open an invitation", () => {
+  it("opens for everyone once it is live", () => {
+    expect(inviteAccess({ live: true, isTeamMember: false })).toBe("open");
+  });
+  it("keeps test mode to the celebration's own team", () => {
+    expect(inviteAccess({ live: false, isTeamMember: true })).toBe(
+      "test-preview"
+    );
+    expect(inviteAccess({ live: false, isTeamMember: false })).toBe("not-live");
+  });
+});
+
+describe("recognising an MP3", () => {
+  it("accepts an ID3 tag and an audio frame", () => {
+    expect(looksLikeMp3(new Uint8Array([0x49, 0x44, 0x33, 0x04]))).toBe(true);
+    expect(looksLikeMp3(new Uint8Array([0xff, 0xfb, 0x90, 0x00]))).toBe(true);
+  });
+  it("refuses anything else", () => {
+    expect(looksLikeMp3(new Uint8Array([0x4d, 0x5a, 0x90, 0x00]))).toBe(false);
+    expect(looksLikeMp3(new Uint8Array([1, 2]))).toBe(false);
+  });
+});
