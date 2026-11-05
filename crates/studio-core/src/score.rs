@@ -21,11 +21,17 @@ use crate::venue::{Zone, ZoneKind};
 
 /// The 24 m MUTA limit on the longest escape route.
 pub const EGRESS_LIMIT: f64 = 24.0;
-/// Beyond this angle from the stage axis a guest is looking sideways at the performance.
+/// Inside this angle from the stage axis a guest is looking at the performance, not past it.
 const SIGHT_ANGLE: f64 = 60.0;
+/// Square-on to the stage: there is nothing to see, so the view is gone by here.
+const SIGHT_SIDEWAYS: f64 = 90.0;
 /// Closer than this and guests crane; further than the far band and they are in the back.
 const SIGHT_NEAR: f64 = 3.0;
 const SIGHT_FAR: f64 = 20.0;
+/// A buffet queue needs this much clear floor in front of it, or guests queue into the tables.
+const QUEUE_CLEARANCE: f64 = 1.2;
+/// NFPA 101 main aisle where it serves more than 50 people. Mirrors `MAIN_AISLE` in the hall.
+const MAIN_AISLE: f64 = 1.12;
 
 /// How much each term counts. The positive terms sum to 1; the penalties are subtracted.
 #[derive(Clone, Copy, Debug)]
@@ -96,6 +102,8 @@ pub struct ScoreInput<'a> {
     pub placements: &'a [Placement],
     pub chairs: &'a [ChairPlacement],
     pub gap: f64,
+    /// What the venue is certified for, when the host has said. More seats than this is a problem.
+    pub capacity: Option<i32>,
 }
 
 /// Score one layout.
@@ -103,33 +111,66 @@ pub fn score(input: &ScoreInput, weights: &Weights) -> ScoreBreakdown {
     let grid = build_grid(input);
     let mut terms = Vec::with_capacity(8);
 
+    // A table that did not fit is a table with no view, no way to reach it and no service. The
+    // per-table terms are measured over the tables that were placed, so without this a layout that
+    // leaves half the room empty would score best on every axis but seats. Scale them by the share
+    // of the request that was placed, so leaving tables out costs on every term.
+    let coverage = if input.tables.is_empty() {
+        1.0
+    } else {
+        input.placements.len() as f64 / input.tables.len() as f64
+    };
+
     let (v, d) = seats_term(input);
     terms.push(term("seats", "Seats placed", v, weights.seats, d));
 
     let (v, d) = sightline_term(input);
-    terms.push(term("sightline", "Sightlines", v, weights.sightline, d));
+    terms.push(term_scaled(
+        "sightline",
+        "Sightlines",
+        v,
+        weights.sightline,
+        coverage,
+        d,
+    ));
 
     let (v, d) = circulation_term(input);
-    terms.push(term(
+    terms.push(term_scaled(
         "circulation",
         "Getting around",
         v,
         weights.circulation,
+        coverage,
         d,
     ));
 
     let (v, d) = service_term(input);
-    terms.push(term("service", "Service", v, weights.service, d));
+    terms.push(term_scaled(
+        "service",
+        "Service",
+        v,
+        weights.service,
+        coverage,
+        d,
+    ));
 
     let (v, d) = symmetry_term(input);
-    terms.push(term("symmetry", "Symmetry", v, weights.symmetry, d));
+    terms.push(term_scaled(
+        "symmetry",
+        "Symmetry",
+        v,
+        weights.symmetry,
+        coverage,
+        d,
+    ));
 
     let (v, d) = comfort_term(input, &grid);
-    terms.push(term(
+    terms.push(term_scaled(
         "comfort",
         "Room between tables",
         v,
         weights.comfort,
+        coverage,
         d,
     ));
 
@@ -150,6 +191,27 @@ fn term(id: &str, label: &str, value: f64, weight: f64, detail: String) -> Score
         value,
         weight,
         contribution: value * weight,
+        detail,
+    }
+}
+
+/// A per-table term whose contribution is scaled by how much of the request was placed. The value
+/// stays the raw measure, so the bar still shows the quality of the tables that are there; only the
+/// score it earns is reduced by the tables that are not.
+fn term_scaled(
+    id: &str,
+    label: &str,
+    value: f64,
+    weight: f64,
+    coverage: f64,
+    detail: String,
+) -> ScoreTerm {
+    ScoreTerm {
+        id: id.into(),
+        label: label.into(),
+        value,
+        weight,
+        contribution: value * weight * coverage,
         detail,
     }
 }
@@ -233,7 +295,13 @@ fn sightline(centre: (f64, f64), stage: (f64, f64), pillars: &[Footprint]) -> f6
         return 0.0;
     }
     let angle = dx.abs().atan2(dy).to_degrees();
-    let angle_score = (1.0 - angle / SIGHT_ANGLE).clamp(0.0, 1.0);
+    // Inside the cone the guest is looking at the stage, so there is nothing to penalise; past it
+    // they are looking sideways, and the view is gone by the time they are square-on.
+    let angle_score = if angle <= SIGHT_ANGLE {
+        1.0
+    } else {
+        (1.0 - (angle - SIGHT_ANGLE) / (SIGHT_SIDEWAYS - SIGHT_ANGLE)).clamp(0.0, 1.0)
+    };
 
     let dist = dx.hypot(dy);
     let dist_score = if dist < SIGHT_NEAR {
@@ -317,29 +385,54 @@ fn circulation_term(input: &ScoreInput) -> (f64, String) {
     }
     let fraction = reached as f64 / input.placements.len() as f64;
 
-    // The centre aisle, from the entrance to the stage, has to stay open.
-    let stage_row = input
+    // The centre aisle has to stay open. A table only blocks it when there are tables on both
+    // sides: with nothing on one side there is no route to interrupt. Measured as a band rather
+    // than a grid column, because a cell is three metres wide and a real aisle is not. Mirrors
+    // `aisleProblems` in the hall's own checks.
+    let centre = input.width / 2.0;
+    let half = MAIN_AISLE / 2.0;
+    let span = |p: &Placement| {
+        let f = footprint_of(input, p);
+        let (ex, _) = extents(&f);
+        let (cx, _) = f.centre();
+        (cx - ex, cx + ex)
+    };
+    let in_aisle = input
+        .placements
+        .iter()
+        .any(|p| span(p).0 < centre + half && span(p).1 > centre - half);
+    let left = input.placements.iter().any(|p| span(p).1 <= centre - half);
+    let right = input.placements.iter().any(|p| span(p).0 >= centre + half);
+    let aisle_clear = !(in_aisle && left && right);
+
+    // The queue in front of a buffet needs clear floor. A table pressed up against it turns the
+    // queue into the aisle, so this is measured as a gap rather than read off the coarse grid.
+    let queue_clear = input
         .zones
         .iter()
-        .find(|z| z.kind == ZoneKind::Stage)
-        .map(|z| cell_of(z.x, z.y, cell, cols, rows).1);
-    let entrance_row = entrance.map(|z| cell_of(z.x, z.y, cell, cols, rows).1);
-    let (lo, hi) = match (stage_row, entrance_row) {
-        (Some(s), Some(e)) => (s.min(e), s.max(e)),
-        _ => (0, rows - 1),
-    };
-    let mid = (cols / 2).min(cols - 1);
-    let aisle_clear = (lo..=hi).all(|cy| reachable[cy * cols + mid]);
+        .filter(|z| z.kind == ZoneKind::Buffet)
+        .all(|z| {
+            let zf = zone_footprint(z);
+            input
+                .placements
+                .iter()
+                .all(|p| gap_between(&footprint_of(input, p), &zf) >= QUEUE_CLEARANCE)
+        });
 
-    let value = fraction * if aisle_clear { 1.0 } else { 0.85 };
-    let detail = if reached == input.placements.len() {
-        "Every table can be reached from the entrance.".to_string()
-    } else {
+    let value =
+        fraction * if aisle_clear { 1.0 } else { 0.85 } * if queue_clear { 1.0 } else { 0.85 };
+    let detail = if reached < input.placements.len() {
         format!(
             "{} of {} tables cannot be reached from the entrance.",
             input.placements.len() - reached,
             input.placements.len()
         )
+    } else if !aisle_clear {
+        "The centre aisle to the stage is blocked.".to_string()
+    } else if !queue_clear {
+        "A table is too close to the buffet to leave room to queue.".to_string()
+    } else {
+        "Every table can be reached from the entrance.".to_string()
     };
     (value, detail)
 }
@@ -395,9 +488,11 @@ fn symmetry_term(input: &ScoreInput) -> (f64, String) {
     let value = mirrored as f64 / input.placements.len() as f64;
     let detail = if mirrored == input.placements.len() {
         "The room is balanced left to right.".to_string()
+    } else if mirrored == 0 {
+        "No table has a partner across the middle.".to_string()
     } else {
         format!(
-            "{} of {} tables have a partner across the middle.",
+            "Only {} of {} tables have a partner across the middle.",
             mirrored,
             input.placements.len()
         )
@@ -485,9 +580,22 @@ fn penalty_term(input: &ScoreInput, grid: &Grid) -> (f64, String) {
             violations += 1;
         }
     }
+    // More seats than the venue is certified for is a problem with the plan, not with one table.
+    let overrun = input.capacity.filter(|cap| {
+        let placed: i64 = input
+            .placements
+            .iter()
+            .map(|p| input.tables[p.table].capacity.max(0) as i64)
+            .sum::<i64>()
+            + input.chairs.len() as i64;
+        placed > *cap as i64
+    });
+
     let n = input.placements.len().max(1);
-    let value = (violations as f64 / n as f64).clamp(0.0, 1.0);
-    let detail = if violations == 0 {
+    let value = ((violations + overrun.is_some() as usize) as f64 / n as f64).clamp(0.0, 1.0);
+    let detail = if let Some(cap) = overrun {
+        format!("More seats than the venue is certified for ({cap}).")
+    } else if violations == 0 {
         "No table overlaps another, crosses a wall or sits on an area.".to_string()
     } else {
         format!("{violations} problems: tables overlapping, through a wall, or on an area.")
@@ -639,6 +747,7 @@ mod tests {
             tables: &t,
             gap: 0.6,
             front: (15.0, 2.5),
+            offset: (0.0, 0.0),
         };
         let g = Archetype::RoundsRows.generate(&ctx);
         (t, placed.room, g.placements)
@@ -653,6 +762,7 @@ mod tests {
             placements: p,
             chairs: &[],
             gap: 0.6,
+            capacity: None,
         }
     }
 
@@ -724,6 +834,120 @@ mod tests {
         let sideways = sightline((28.0, 10.0), stage, &[]);
         assert!(straight > sideways);
         assert!((straight - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_table_inside_the_cone_keeps_its_view() {
+        let stage = (15.0, 2.5);
+        // 45° off the axis is well inside the ±60° cone, so there is nothing to penalise.
+        let s = sightline((22.5, 10.0), stage, &[]);
+        assert!(
+            (s - 1.0).abs() < 1e-9,
+            "45° should be a clear view, got {s}"
+        );
+    }
+
+    #[test]
+    fn a_table_past_the_cone_loses_its_view() {
+        let stage = (15.0, 2.5);
+        // 75° off the axis is halfway from the cone to square-on, so half the view.
+        let dx = 5.0 * 75f64.to_radians().tan();
+        let s = sightline((15.0 + dx, 7.5), stage, &[]);
+        assert!((s - 0.5).abs() < 1e-9, "75° should be half a view, got {s}");
+    }
+
+    #[test]
+    fn a_table_in_the_middle_with_tables_either_side_blocks_the_aisle() {
+        let t = tables(3);
+        let z = room();
+        let p = vec![
+            Placement {
+                table: 0,
+                x: 15.0,
+                y: 11.0,
+                rot: 0.0,
+            },
+            Placement {
+                table: 1,
+                x: 8.0,
+                y: 11.0,
+                rot: 0.0,
+            },
+            Placement {
+                table: 2,
+                x: 22.0,
+                y: 11.0,
+                rot: 0.0,
+            },
+        ];
+        let s = score(&input(&t, &z, &p), &Weights::default());
+        let circ = s
+            .terms
+            .iter()
+            .find(|t| t.id == "circulation")
+            .expect("term");
+        assert_eq!(circ.detail, "The centre aisle to the stage is blocked.");
+    }
+
+    #[test]
+    fn a_table_in_the_middle_alone_does_not_block_the_aisle() {
+        let t = tables(1);
+        let z = room();
+        // Nothing on either side, so there is no route to interrupt.
+        let p = vec![Placement {
+            table: 0,
+            x: 15.0,
+            y: 11.0,
+            rot: 0.0,
+        }];
+        let s = score(&input(&t, &z, &p), &Weights::default());
+        let circ = s
+            .terms
+            .iter()
+            .find(|t| t.id == "circulation")
+            .expect("term");
+        assert!(
+            !circ.detail.contains("aisle"),
+            "a lone table is not an aisle, got {}",
+            circ.detail
+        );
+    }
+
+    #[test]
+    fn a_table_pressed_against_the_buffet_blocks_the_queue() {
+        let t = tables(1);
+        let z = room();
+        // The buffet runs from x 0.5 to 2.1; a table 0.6 m off it leaves no room to queue.
+        let p = vec![Placement {
+            table: 0,
+            x: 4.0,
+            y: 11.0,
+            rot: 0.0,
+        }];
+        let s = score(&input(&t, &z, &p), &Weights::default());
+        let circ = s
+            .terms
+            .iter()
+            .find(|t| t.id == "circulation")
+            .expect("term");
+        assert_eq!(
+            circ.detail, "A table is too close to the buffet to leave room to queue.",
+            "a table on the buffet should be called out"
+        );
+    }
+
+    #[test]
+    fn more_seats_than_the_venue_is_certified_for_is_a_problem() {
+        let (t, z, p) = layout(4);
+        let mut over = input(&t, &z, &p);
+        over.capacity = Some(8);
+        let s = score(&over, &Weights::default());
+        let pen = s.terms.iter().find(|t| t.id == "penalty").expect("term");
+        assert!(
+            pen.detail.contains("certified"),
+            "32 seats in a room certified for 8 should be called out, got {}",
+            pen.detail
+        );
     }
 
     #[test]
@@ -804,10 +1028,15 @@ mod tests {
     fn a_clear_layout_reaches_every_table() {
         let (t, z, p) = layout(20);
         let s = score(&input(&t, &z, &p), &Weights::default());
-        let circ = s.terms.iter().find(|t| t.id == "circulation").expect("term");
-        assert_eq!(
-            circ.detail, "Every table can be reached from the entrance.",
-            "a clear layout should reach every table"
+        let circ = s
+            .terms
+            .iter()
+            .find(|t| t.id == "circulation")
+            .expect("term");
+        assert!(
+            !circ.detail.contains("cannot be reached"),
+            "a clear layout should reach every table, got {}",
+            circ.detail
         );
     }
 

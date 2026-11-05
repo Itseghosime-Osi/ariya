@@ -8,6 +8,10 @@ export type ArrangeRequest = {
   zones: Array<Zone>;
   tables: Array<ArrangeTable>;
   gap: number;
+  /**
+   * What the venue is certified for, when the host has said.
+   */
+  capacity: number | null;
   seed: bigint;
   keep: number;
 };

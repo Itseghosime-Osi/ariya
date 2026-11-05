@@ -64,6 +64,7 @@ export function toArrangeRequest(
     width: layout.width,
     length: layout.length,
     gap,
+    capacity: layout.venue?.capacity?.certified ?? null,
     seed: BigInt(seed),
     keep,
     tables: arrangeTables,

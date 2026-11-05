@@ -126,6 +126,9 @@ pub struct ArrangeRequest {
     pub zones: Vec<Zone>,
     pub tables: Vec<ArrangeTable>,
     pub gap: f64,
+    /// What the venue is certified for, when the host has said.
+    #[serde(default)]
+    pub capacity: Option<i32>,
     #[serde(default)]
     pub seed: u64,
     #[serde(default = "default_keep")]
@@ -191,6 +194,7 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
                     &req.zones,
                     &req.tables,
                     req.gap,
+                    req.capacity,
                     req.seed,
                 );
                 input.keep = req.keep.max(1);

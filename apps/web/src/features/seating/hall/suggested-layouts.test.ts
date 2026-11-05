@@ -66,6 +66,20 @@ describe("toArrangeRequest", () => {
     ]);
   });
 
+  it("passes the venue's certified capacity, or null when it is unknown", () => {
+    const layout = defaultLayout();
+    expect(toArrangeRequest(layout, tables, 0.6, 1).capacity).toBeNull();
+
+    const certified = {
+      ...layout,
+      venue: {
+        ...layout.venue,
+        capacity: { certified: 240, source: "Venue licence" },
+      },
+    };
+    expect(toArrangeRequest(certified, tables, 0.6, 1).capacity).toBe(240);
+  });
+
   it("sends zones with null shape and rotation when the hall leaves them out", () => {
     const layout = defaultLayout();
     const req = toArrangeRequest(layout, tables, 0.6, 1);

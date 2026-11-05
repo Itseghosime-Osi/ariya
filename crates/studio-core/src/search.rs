@@ -54,6 +54,8 @@ pub struct SearchInput<'a> {
     pub zones: &'a [Zone],
     pub tables: &'a [ArrangeTable],
     pub gap: f64,
+    /// What the venue is certified for, when the host has said.
+    pub capacity: Option<i32>,
     /// Same seed, same options. Derived from the event and layout version by the caller.
     pub seed: u64,
     pub keep: usize,
@@ -68,6 +70,7 @@ impl<'a> SearchInput<'a> {
         zones: &'a [Zone],
         tables: &'a [ArrangeTable],
         gap: f64,
+        capacity: Option<i32>,
         seed: u64,
     ) -> Self {
         Self {
@@ -76,6 +79,7 @@ impl<'a> SearchInput<'a> {
             zones,
             tables,
             gap,
+            capacity,
             seed,
             keep: DEFAULT_KEEP,
             anneal_iters: DEFAULT_ANNEAL_ITERS,
@@ -84,25 +88,49 @@ impl<'a> SearchInput<'a> {
     }
 }
 
+/// Lattice offsets to try, as fractions of the pitch. A rigid grid loses whole rows to a dance
+/// floor or a stage; sliding it finds the offset that keeps the most tables. Mirrors the offsets
+/// the hall's own fit tries.
+const OFFSETS: [(f64, f64); 4] = [(0.0, 0.0), (0.5, 0.0), (0.0, 0.5), (0.5, 0.5)];
+
 /// The best `keep` arrangements, best first.
 pub fn search(input: &SearchInput) -> Vec<LayoutOption> {
     let mut candidates: Vec<LayoutOption> =
-        Vec::with_capacity(Archetype::ALL.len() * STRATEGIES.len());
+        Vec::with_capacity(Archetype::ALL.len() * STRATEGIES.len() * OFFSETS.len());
     for &archetype in Archetype::ALL.iter() {
         for strategy in STRATEGIES.iter() {
-            candidates.push(candidate(archetype, strategy, input));
+            // Keep the best offset for this archetype × strategy, so the search still returns one
+            // candidate per pair and the diversity step below sees every archetype.
+            let best = OFFSETS
+                .iter()
+                .map(|&offset| candidate(archetype, strategy, input, offset))
+                .max_by(|a, b| a.score.total.total_cmp(&b.score.total))
+                .expect("there is at least one offset");
+            candidates.push(best);
         }
     }
     sort_by_score(&mut candidates);
 
-    let refine = input.keep.max(1).min(candidates.len());
-    let mut top: Vec<LayoutOption> = candidates.into_iter().take(refine).collect();
+    // One option per archetype. Three cards that are three different shapes are what the host is
+    // choosing between; three variations of the same shape are not a choice. The best strategy for
+    // each archetype is the one that survives the sort.
+    let keep = input.keep.max(1);
+    let mut seen = std::collections::HashSet::new();
+    let mut top: Vec<LayoutOption> = Vec::with_capacity(keep);
+    for opt in candidates {
+        if top.len() >= keep {
+            break;
+        }
+        if seen.insert(opt.archetype.clone()) {
+            top.push(opt);
+        }
+    }
     for (i, opt) in top.iter_mut().enumerate() {
         let mut rng = Rng::new(input.seed ^ (i as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15));
         anneal(opt, input, input.anneal_iters, &mut rng);
     }
     sort_by_score(&mut top);
-    top.truncate(input.keep.max(1));
+    top.truncate(keep);
     top
 }
 
@@ -116,8 +144,13 @@ fn sort_by_score(options: &mut [LayoutOption]) {
     });
 }
 
-/// Build and score one archetype × strategy.
-fn candidate(archetype: Archetype, strategy: &ZoneStrategy, input: &SearchInput) -> LayoutOption {
+/// Build and score one archetype × strategy at one lattice offset.
+fn candidate(
+    archetype: Archetype,
+    strategy: &ZoneStrategy,
+    input: &SearchInput,
+    offset: (f64, f64),
+) -> LayoutOption {
     let placed = place_zones(input.width, input.length, input.zones, strategy);
     let frame = strategy.frame();
     let (w, l) = frame.extents(input.width, input.length);
@@ -135,6 +168,7 @@ fn candidate(archetype: Archetype, strategy: &ZoneStrategy, input: &SearchInput)
         tables: input.tables,
         gap: input.gap,
         front,
+        offset,
     };
     let generated = archetype.generate(&ctx);
 
@@ -173,6 +207,7 @@ fn candidate(archetype: Archetype, strategy: &ZoneStrategy, input: &SearchInput)
             placements: &placements,
             chairs: &chairs,
             gap: input.gap,
+            capacity: input.capacity,
         },
         &input.weights,
     );
@@ -191,8 +226,14 @@ fn candidate(archetype: Archetype, strategy: &ZoneStrategy, input: &SearchInput)
     }
 }
 
-/// The weakest term, in the host's words, for the card's one-line trade-off.
+/// The weakest term, in the host's words, for the card's one-line trade-off. A table that did not
+/// fit is the first thing the host needs to know, so the seat shortfall outranks every other term.
 fn tradeoff(score: &ScoreBreakdown) -> String {
+    if let Some(seats) = score.terms.iter().find(|t| t.id == "seats") {
+        if seats.value < 0.999 {
+            return seats.detail.clone();
+        }
+    }
     let weakest = score
         .terms
         .iter()
@@ -266,6 +307,7 @@ fn anneal(opt: &mut LayoutOption, input: &SearchInput, iters: usize, rng: &mut R
                 placements: &trial_p,
                 chairs: &opt.chairs,
                 gap: input.gap,
+                capacity: input.capacity,
             },
             &input.weights,
         );
@@ -378,14 +420,67 @@ mod tests {
     fn run(n: usize, seed: u64) -> Vec<LayoutOption> {
         let t = tables(n);
         let z = room();
-        let input = SearchInput::new(30.0, 20.0, &z, &t, 0.6, seed);
+        let input = SearchInput::new(30.0, 20.0, &z, &t, 0.6, None, seed);
         search(&input)
+    }
+
+    #[test]
+    fn probe_mix() {
+        let mut t: Vec<ArrangeTable> = Vec::new();
+        t.push(ArrangeTable {
+            id: "head".into(),
+            shape: "head".into(),
+            capacity: 10,
+            occupied: 0,
+        });
+        for i in 0..12 {
+            t.push(ArrangeTable {
+                id: format!("r10-{i}"),
+                shape: "round".into(),
+                capacity: 10,
+                occupied: 0,
+            });
+        }
+        for i in 0..12 {
+            t.push(ArrangeTable {
+                id: format!("r8-{i}"),
+                shape: "round".into(),
+                capacity: 8,
+                occupied: 0,
+            });
+        }
+        let z = room();
+        let input = SearchInput::new(30.0, 20.0, &z, &t, 0.6, None, 1);
+        let opts = search(&input);
+        for o in &opts {
+            println!(
+                "{} / {} -> placed {} unplaced {} total {:.3}",
+                o.archetype,
+                o.strategy,
+                o.placements.len(),
+                o.unplaced.len(),
+                o.score.total
+            );
+        }
     }
 
     #[test]
     fn the_search_returns_the_requested_number_of_options() {
         let opts = run(20, 1);
         assert_eq!(opts.len(), DEFAULT_KEEP);
+    }
+
+    #[test]
+    fn the_options_are_three_different_shapes() {
+        let opts = run(20, 1);
+        let shapes: std::collections::HashSet<&str> =
+            opts.iter().map(|o| o.archetype.as_str()).collect();
+        assert_eq!(
+            shapes.len(),
+            opts.len(),
+            "the cards should be different archetypes, got {:?}",
+            opts.iter().map(|o| &o.archetype).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -464,7 +559,7 @@ mod tests {
     fn three_hundred_tables_finish_inside_the_budget() {
         let t = tables(300);
         let z = room();
-        let input = SearchInput::new(60.0, 40.0, &z, &t, 0.6, 9);
+        let input = SearchInput::new(60.0, 40.0, &z, &t, 0.6, None, 9);
         let start = std::time::Instant::now();
         let opts = search(&input);
         let elapsed = start.elapsed();

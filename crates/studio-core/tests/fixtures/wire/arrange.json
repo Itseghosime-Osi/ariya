@@ -2,145 +2,6 @@
   "data": {
     "options": [
       {
-        "archetype": "cabaret",
-        "archetype_label": "Cabaret",
-        "chairs": [],
-        "placements": [
-          {
-            "rot": 270.0,
-            "table": 0,
-            "x": 17.698888149108896,
-            "y": 10.894450005763543
-          },
-          {
-            "rot": 90.0,
-            "table": 1,
-            "x": 20.36185911000874,
-            "y": 12.60395790331414
-          },
-          {
-            "rot": 270.0,
-            "table": 2,
-            "x": 15.026200850814286,
-            "y": 10.948122030456974
-          },
-          {
-            "rot": 0.0,
-            "table": 3,
-            "x": 12.13272365144566,
-            "y": 11.044389233925887
-          }
-        ],
-        "score": {
-          "terms": [
-            {
-              "contribution": 0.3,
-              "detail": "32 of 32 seats placed.",
-              "id": "seats",
-              "label": "Seats placed",
-              "value": 1.0,
-              "weight": 0.3
-            },
-            {
-              "contribution": 0.1582946928143967,
-              "detail": "Every table has a clear view of the stage.",
-              "id": "sightline",
-              "label": "Sightlines",
-              "value": 0.7195213309745304,
-              "weight": 0.22
-            },
-            {
-              "contribution": 0.136,
-              "detail": "Every table can be reached from the entrance.",
-              "id": "circulation",
-              "label": "Getting around",
-              "value": 0.85,
-              "weight": 0.16
-            },
-            {
-              "contribution": 0.06137279942712299,
-              "detail": "The furthest table is 14 m from the buffet or bar.",
-              "id": "service",
-              "label": "Service",
-              "value": 0.5114399952260249,
-              "weight": 0.12
-            },
-            {
-              "contribution": 0.025,
-              "detail": "1 of 4 tables have a partner across the middle.",
-              "id": "symmetry",
-              "label": "Symmetry",
-              "value": 0.25,
-              "weight": 0.1
-            },
-            {
-              "contribution": 0.1,
-              "detail": "The closest two tables are 0.6 m apart; you asked for 0.6 m.",
-              "id": "comfort",
-              "label": "Room between tables",
-              "value": 1.0,
-              "weight": 0.1
-            },
-            {
-              "contribution": -0.05366641345218182,
-              "detail": "The furthest table is 9 m from an exit; the limit is 24 m.",
-              "id": "egress",
-              "label": "Escape distance",
-              "value": 0.35777608968121216,
-              "weight": -0.15
-            },
-            {
-              "contribution": -0.0,
-              "detail": "No table overlaps another, crosses a wall or sits on an area.",
-              "id": "penalty",
-              "label": "Problems",
-              "value": 0.0,
-              "weight": -0.25
-            }
-          ],
-          "total": 0.727001078789338
-        },
-        "strategy": "stage-short-wall-buffet-right",
-        "strategy_label": "Stage on the short wall, buffet on the right",
-        "tradeoff": "1 of 4 tables have a partner across the middle.",
-        "unplaced": [],
-        "zones": [
-          {
-            "h": 4.0,
-            "id": "z-stage",
-            "kind": "stage",
-            "label": "Stage",
-            "rot": 0.0,
-            "shape": null,
-            "w": 9.0,
-            "x": 15.00261837224146,
-            "y": 2.9271070163272217
-          },
-          {
-            "h": 1.0,
-            "id": "z-entrance",
-            "kind": "entrance",
-            "label": "Entrance",
-            "rot": 0.0,
-            "shape": null,
-            "w": 3.0,
-            "x": 15.18910734076525,
-            "y": 19.06864417901995
-          },
-          {
-            "h": 7.0,
-            "id": "z-buffet",
-            "kind": "buffet",
-            "label": "Buffet",
-            "rot": 0.0,
-            "shape": null,
-            "w": 1.6,
-            "x": 28.3890024384756,
-            "y": 11.336198396422528
-          }
-        ]
-      },
-      {
         "archetype": "chevron",
         "archetype_label": "Chevron",
         "chairs": [],
@@ -149,25 +10,25 @@
             "rot": 15.0,
             "table": 0,
             "x": 15.0,
-            "y": 11.62
+            "y": 10.06
           },
           {
             "rot": -15.0,
             "table": 1,
-            "x": 8.76,
-            "y": 10.17
+            "x": 11.88,
+            "y": 10.9
           },
           {
             "rot": 15.0,
             "table": 2,
-            "x": 21.24,
-            "y": 10.17
+            "x": 18.12,
+            "y": 10.9
           },
           {
-            "rot": -15.0,
+            "rot": 15.0,
             "table": 3,
-            "x": 11.88,
-            "y": 12.46
+            "x": 15.0,
+            "y": 13.18
           }
         ],
         "score": {
@@ -181,51 +42,51 @@
               "weight": 0.3
             },
             {
-              "contribution": 0.09898116440920092,
-              "detail": "2 of 4 tables have a poor view of the stage.",
+              "contribution": 0.22,
+              "detail": "Every table has a clear view of the stage.",
               "id": "sightline",
               "label": "Sightlines",
-              "value": 0.4499143836781861,
+              "value": 1.0,
               "weight": 0.22
             },
             {
               "contribution": 0.136,
-              "detail": "Every table can be reached from the entrance.",
+              "detail": "The centre aisle to the stage is blocked.",
               "id": "circulation",
               "label": "Getting around",
               "value": 0.85,
               "weight": 0.16
             },
             {
-              "contribution": 0.06030284157202922,
-              "detail": "The furthest table is 18 m from the buffet or bar.",
+              "contribution": 0.05604145327576073,
+              "detail": "The furthest table is 15 m from the buffet or bar.",
               "id": "service",
               "label": "Service",
-              "value": 0.5025236797669101,
+              "value": 0.46701211063133946,
               "weight": 0.12
             },
             {
-              "contribution": 0.07500000000000001,
-              "detail": "3 of 4 tables have a partner across the middle.",
+              "contribution": 0.1,
+              "detail": "The room is balanced left to right.",
               "id": "symmetry",
               "label": "Symmetry",
-              "value": 0.75,
+              "value": 1.0,
               "weight": 0.1
             },
             {
               "contribution": 0.1,
-              "detail": "The closest two tables are 1.4 m apart; you asked for 0.6 m.",
+              "detail": "The closest two tables are 0.7 m apart; you asked for 0.6 m.",
               "id": "comfort",
               "label": "Room between tables",
               "value": 1.0,
               "weight": 0.1
             },
             {
-              "contribution": -0.06757706827208472,
-              "detail": "The furthest table is 11 m from an exit; the limit is 24 m.",
+              "contribution": -0.055875,
+              "detail": "The furthest table is 9 m from an exit; the limit is 24 m.",
               "id": "egress",
               "label": "Escape distance",
-              "value": 0.4505137884805648,
+              "value": 0.3725,
               "weight": -0.15
             },
             {
@@ -237,11 +98,11 @@
               "weight": -0.25
             }
           ],
-          "total": 0.7027069377091455
+          "total": 0.8561664532757607
         },
         "strategy": "stage-pulled-forward",
         "strategy_label": "Stage pulled forward into the room",
-        "tradeoff": "2 of 4 tables have a poor view of the stage.",
+        "tradeoff": "The furthest table is 15 m from the buffet or bar.",
         "unplaced": [],
         "zones": [
           {
@@ -280,33 +141,33 @@
         ]
       },
       {
-        "archetype": "chevron",
-        "archetype_label": "Chevron",
+        "archetype": "perimeter",
+        "archetype_label": "Perimeter",
         "chairs": [],
         "placements": [
           {
-            "rot": 15.0,
+            "rot": 90.0,
             "table": 0,
-            "x": 14.961783636515117,
-            "y": 11.471702979665316
+            "x": 21.01841586304664,
+            "y": 17.3810372599424
           },
           {
-            "rot": 165.0,
+            "rot": 90.0,
             "table": 1,
-            "x": 12.34534142689891,
-            "y": 12.308792427124546
+            "x": 8.591285938051373,
+            "y": 17.430229473079958
           },
           {
-            "rot": 285.0,
+            "rot": 90.0,
             "table": 2,
-            "x": 21.233969451991207,
-            "y": 10.231561209333998
+            "x": 24.380526540350456,
+            "y": 17.79676370096892
           },
           {
-            "rot": 165.0,
+            "rot": 90.0,
             "table": 3,
-            "x": 8.76,
-            "y": 10.17
+            "x": 5.62165882914353,
+            "y": 17.788719636033733
           }
         ],
         "score": {
@@ -320,51 +181,51 @@
               "weight": 0.3
             },
             {
-              "contribution": 0.10162823200085988,
-              "detail": "2 of 4 tables have a poor view of the stage.",
+              "contribution": 0.22,
+              "detail": "Every table has a clear view of the stage.",
               "id": "sightline",
               "label": "Sightlines",
-              "value": 0.46194650909481766,
+              "value": 1.0,
               "weight": 0.22
             },
             {
-              "contribution": 0.136,
+              "contribution": 0.16,
               "detail": "Every table can be reached from the entrance.",
               "id": "circulation",
               "label": "Getting around",
-              "value": 0.85,
+              "value": 1.0,
               "weight": 0.16
             },
             {
-              "contribution": 0.056752494505507296,
-              "detail": "The furthest table is 18 m from the buffet or bar.",
+              "contribution": 0.06064410666385456,
+              "detail": "The furthest table is 21 m from the buffet or bar.",
               "id": "service",
               "label": "Service",
-              "value": 0.4729374542125608,
+              "value": 0.5053675555321213,
               "weight": 0.12
             },
             {
-              "contribution": 0.07500000000000001,
-              "detail": "3 of 4 tables have a partner across the middle.",
+              "contribution": 0.05,
+              "detail": "Only 2 of 4 tables have a partner across the middle.",
               "id": "symmetry",
               "label": "Symmetry",
-              "value": 0.75,
+              "value": 0.5,
               "weight": 0.1
             },
             {
               "contribution": 0.1,
-              "detail": "No two tables are close.",
+              "detail": "The closest two tables are 0.9 m apart; you asked for 0.6 m.",
               "id": "comfort",
               "label": "Room between tables",
               "value": 1.0,
               "weight": 0.1
             },
             {
-              "contribution": -0.06803757224241899,
-              "detail": "The furthest table is 11 m from an exit; the limit is 24 m.",
+              "contribution": -0.06035686650732888,
+              "detail": "The furthest table is 10 m from an exit; the limit is 24 m.",
               "id": "egress",
               "label": "Escape distance",
-              "value": 0.45358381494946,
+              "value": 0.4023791100488592,
               "weight": -0.15
             },
             {
@@ -376,11 +237,150 @@
               "weight": -0.25
             }
           ],
-          "total": 0.7013431542639481
+          "total": 0.8302872401565258
         },
         "strategy": "stage-pulled-forward-buffet-right",
         "strategy_label": "Stage pulled forward, buffet on the right",
-        "tradeoff": "2 of 4 tables have a poor view of the stage.",
+        "tradeoff": "Only 2 of 4 tables have a partner across the middle.",
+        "unplaced": [],
+        "zones": [
+          {
+            "h": 4.0,
+            "id": "z-stage",
+            "kind": "stage",
+            "label": "Stage",
+            "rot": 0.0,
+            "shape": null,
+            "w": 9.0,
+            "x": 15.071907375812575,
+            "y": 6.025903543916329
+          },
+          {
+            "h": 1.0,
+            "id": "z-entrance",
+            "kind": "entrance",
+            "label": "Entrance",
+            "rot": 0.0,
+            "shape": null,
+            "w": 3.0,
+            "x": 14.808844630680989,
+            "y": 19.078348495449696
+          },
+          {
+            "h": 7.0,
+            "id": "z-buffet",
+            "kind": "buffet",
+            "label": "Buffet",
+            "rot": 0.0,
+            "shape": null,
+            "w": 1.6,
+            "x": 28.66801520267453,
+            "y": 10.824340671577708
+          }
+        ]
+      },
+      {
+        "archetype": "theatre",
+        "archetype_label": "Theatre rows",
+        "chairs": [],
+        "placements": [
+          {
+            "rot": 0.0,
+            "table": 0,
+            "x": 17.670467154267254,
+            "y": 11.13060914738034
+          },
+          {
+            "rot": 0.0,
+            "table": 1,
+            "x": 20.798013118253778,
+            "y": 11.407592775951342
+          },
+          {
+            "rot": 90.0,
+            "table": 2,
+            "x": 11.323617271166778,
+            "y": 11.041186698581033
+          },
+          {
+            "rot": 0.0,
+            "table": 3,
+            "x": 8.625759302333837,
+            "y": 11.537341527694595
+          }
+        ],
+        "score": {
+          "terms": [
+            {
+              "contribution": 0.3,
+              "detail": "32 of 32 seats placed.",
+              "id": "seats",
+              "label": "Seats placed",
+              "value": 1.0,
+              "weight": 0.3
+            },
+            {
+              "contribution": 0.22,
+              "detail": "Every table has a clear view of the stage.",
+              "id": "sightline",
+              "label": "Sightlines",
+              "value": 1.0,
+              "weight": 0.22
+            },
+            {
+              "contribution": 0.16,
+              "detail": "Every table can be reached from the entrance.",
+              "id": "circulation",
+              "label": "Getting around",
+              "value": 1.0,
+              "weight": 0.16
+            },
+            {
+              "contribution": 0.05914614466060883,
+              "detail": "The furthest table is 18 m from the buffet or bar.",
+              "id": "service",
+              "label": "Service",
+              "value": 0.492884538838407,
+              "weight": 0.12
+            },
+            {
+              "contribution": 0.0,
+              "detail": "No table has a partner across the middle.",
+              "id": "symmetry",
+              "label": "Symmetry",
+              "value": 0.0,
+              "weight": 0.1
+            },
+            {
+              "contribution": 0.1,
+              "detail": "The closest two tables are 0.6 m apart; you asked for 0.6 m.",
+              "id": "comfort",
+              "label": "Room between tables",
+              "value": 1.0,
+              "weight": 0.1
+            },
+            {
+              "contribution": -0.061339926315514784,
+              "detail": "The furthest table is 10 m from an exit; the limit is 24 m.",
+              "id": "egress",
+              "label": "Escape distance",
+              "value": 0.4089328421034319,
+              "weight": -0.15
+            },
+            {
+              "contribution": -0.0,
+              "detail": "No table overlaps another, crosses a wall or sits on an area.",
+              "id": "penalty",
+              "label": "Problems",
+              "value": 0.0,
+              "weight": -0.25
+            }
+          ],
+          "total": 0.7778062183450941
+        },
+        "strategy": "stage-pulled-forward",
+        "strategy_label": "Stage pulled forward into the room",
+        "tradeoff": "No table has a partner across the middle.",
         "unplaced": [],
         "zones": [
           {
@@ -402,8 +402,8 @@
             "rot": 0.0,
             "shape": null,
             "w": 3.0,
-            "x": 14.925831571736175,
-            "y": 19.10357587015014
+            "x": 15.0,
+            "y": 19.0
           },
           {
             "h": 7.0,
@@ -413,8 +413,8 @@
             "rot": 0.0,
             "shape": null,
             "w": 1.6,
-            "x": 28.582006305404015,
-            "y": 10.601794930018174
+            "x": 1.144933477778878,
+            "y": 11.152915440971592
           }
         ]
       }

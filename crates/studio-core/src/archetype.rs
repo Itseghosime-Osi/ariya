@@ -183,6 +183,10 @@ pub struct GenContext<'a> {
     pub gap: f64,
     /// The stage centre, which the seating faces.
     pub front: (f64, f64),
+    /// How far to shift the lattice, as a fraction of its pitch in x and y. A rigid grid loses
+    /// whole rows to a dance floor or a stage; sliding it lets the search find the offset that
+    /// keeps the most tables.
+    pub offset: (f64, f64),
 }
 
 /// A candidate position, before a table is put in it.
@@ -236,10 +240,10 @@ struct Grid {
 fn lattice(ctx: &GenContext, g: Grid) -> Vec<Slot> {
     let mut slots = Vec::new();
     let mut row = 0usize;
-    let mut y = g.oy;
+    let mut y = g.oy + ctx.offset.1 * g.pitch_y;
     while y <= ctx.length - g.oy + 1e-6 {
         let shift = if g.stagger && row % 2 == 1 { 0.5 } else { 0.0 };
-        let mut x = g.ox + shift * g.pitch_x;
+        let mut x = g.ox + (shift + ctx.offset.0) * g.pitch_x;
         while x <= ctx.width - g.ox + 1e-6 {
             slots.push(Slot {
                 x,
@@ -418,7 +422,8 @@ fn chevron(ctx: &GenContext) -> Generated {
     let py = 2.0 * ey + ctx.gap;
     let angle = 15.0_f64.to_radians();
     let mut slots = Vec::new();
-    let mut y = WALL_MARGIN + ey;
+    let cx = ctx.width / 2.0 + ctx.offset.0 * px;
+    let mut y = WALL_MARGIN + ey + ctx.offset.1 * py;
     while y <= ctx.length - WALL_MARGIN - ey + 1e-6 {
         let n = ((ctx.width / 2.0 - WALL_MARGIN - ex) / px).floor() as i64;
         for i in -n..=n {
@@ -429,7 +434,7 @@ fn chevron(ctx: &GenContext) -> Generated {
                 continue;
             }
             slots.push(Slot {
-                x: ctx.width / 2.0 + dx,
+                x: cx + dx,
                 y: yy,
                 rot: if i < 0 { -15.0 } else { 15.0 },
                 shape: None,
@@ -676,6 +681,7 @@ mod tests {
             tables,
             gap: 0.6,
             front: (15.0, 2.5),
+            offset: (0.0, 0.0),
         }
     }
 
@@ -858,6 +864,7 @@ mod tests {
             tables: &t,
             gap: 0.6,
             front: (1.0, 1.0),
+            offset: (0.0, 0.0),
         };
         let g = Archetype::RoundsRows.generate(&c);
         assert!(g.placements.is_empty());
