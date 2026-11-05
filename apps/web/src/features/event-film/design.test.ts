@@ -11,6 +11,7 @@ import {
   filmDesignSchema,
   filmSeconds,
   guestFirstName,
+  looksLikeMp3,
   makeScene,
   readFilmDesign,
   scenesSeconds,
@@ -133,7 +134,6 @@ describe("a guest's first name", () => {
 });
 
 import { inviteAccess } from "./visibility";
-import { looksLikeMp3 } from "./actions";
 
 describe("who may open an invitation", () => {
   it("opens for everyone once it is live", () => {

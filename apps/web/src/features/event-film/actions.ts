@@ -6,7 +6,7 @@ import { mapError } from "@/lib/errors";
 import { eventEndedError } from "@/features/events/expiry";
 import { isValidCoverImage } from "@/features/events/validate-cover";
 import type { Json } from "@/lib/supabase/database.types";
-import { filmDesignSchema, SONG_MAX_BYTES } from "./design";
+import { filmDesignSchema, looksLikeMp3, SONG_MAX_BYTES } from "./design";
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -85,14 +85,6 @@ export async function setInvitationLiveAction(
 
   refresh(eventId, data[0].slug);
   return { ok: true };
-}
-
-/** MP3 starts with an ID3 tag or an MPEG audio frame sync; anything else is not a song. */
-export function looksLikeMp3(bytes: Uint8Array): boolean {
-  if (bytes.length < 4) return false;
-  const id3 = bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33;
-  const frame = bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0;
-  return id3 || frame;
 }
 
 export async function uploadFilmSongAction(

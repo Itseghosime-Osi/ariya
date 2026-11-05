@@ -339,3 +339,11 @@ export function stepAt(
 export function guestFirstName(name: string | null | undefined): string {
   return (name ?? "").trim().split(/\s+/)[0] ?? "";
 }
+
+/** MP3 starts with an ID3 tag or an MPEG audio frame sync; anything else is not a song. */
+export function looksLikeMp3(bytes: Uint8Array): boolean {
+  if (bytes.length < 4) return false;
+  const id3 = bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33;
+  const frame = bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0;
+  return id3 || frame;
+}
