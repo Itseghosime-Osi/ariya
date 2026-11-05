@@ -54,9 +54,13 @@ export function ScreenHeader({
         <Icon name="chevron_left" size={20} />
       </button>
       <div className="min-w-0 text-center">
-        <h1 className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night">
+        <div
+          role="heading"
+          aria-level={1}
+          className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night"
+        >
           {title}
-        </h1>
+        </div>
         {subtitle && (
           <p className="-mt-0.5 truncate text-[11px] leading-tight text-label-2">
             {subtitle}

@@ -48,11 +48,13 @@ describe("getPhoneMoreSections", () => {
 });
 
 describe("hasOwnPhoneHeader", () => {
-  it("is true for the account pages and an event's Billing and Team", () => {
+  it("is true for the account pages and an event's Billing, Team, Vendors and Settings", () => {
     expect(hasOwnPhoneHeader("/settings")).toBe(true);
     expect(hasOwnPhoneHeader("/profile")).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/vendors`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/settings`)).toBe(true);
   });
 
   it("is false everywhere else, including billing's callback", () => {
@@ -62,6 +64,5 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing/callback`)).toBe(
       false
     );
-    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/settings`)).toBe(false);
   });
 });
