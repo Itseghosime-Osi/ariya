@@ -153,26 +153,26 @@ Goal: three explainable options instead of one.
 
 ### 2.1 Generators
 
-- [ ] **2.1.1** `archetype.rs`: the ten generators from research §B.2 (`rounds-rows`, `rounds-staggered`, `long-tables`, `u-shape`, `theatre`, `cocktail`, `cabaret`, `chevron`, `perimeter`, `long-banquet`).
-- [ ] **2.1.2** `zones.rs`: candidate zone strategies per archetype (stage on short wall / long wall / centred, etc.), not a single hardcoded point.
-- [ ] **2.1.3** Each generator returns placements + the zone strategy it used, so the UI can explain the option.
+- [x] **2.1.1** `archetype.rs`: the ten generators from research §B.2 (`rounds-rows`, `rounds-staggered`, `long-tables`, `u-shape`, `theatre`, `cocktail`, `cabaret`, `chevron`, `perimeter`, `long-banquet`).
+- [x] **2.1.2** `zones.rs`: candidate zone strategies per archetype (stage on short wall / long wall / centred, etc.), not a single hardcoded point.
+- [x] **2.1.3** Each generator returns placements + the zone strategy it used, so the UI can explain the option.
 
 ### 2.2 Scoring
 
-- [ ] **2.2.1** `score.rs`: the weighted objective from research §B.2, with every term individually computable.
-- [ ] **2.2.2** Sightline: angle from stage axis, distance band, pillar occlusion by raycast.
-- [ ] **2.2.3** Circulation: grid flood-fill from the entrance; every table reachable; centre aisle and buffet corridor checked.
-- [ ] **2.2.4** Service: distance to nearest buffet and bar, weighted by table size.
-- [ ] **2.2.5** Symmetry, comfort, egress (24 m), penalties (overlap, wall breach, zone clearance, capacity overrun).
-- [ ] **2.2.6** Score breakdown is serialisable — the UI shows it verbatim.
+- [x] **2.2.1** `score.rs`: the weighted objective from research §B.2, with every term individually computable.
+- [x] **2.2.2** Sightline: angle from stage axis, distance band, pillar occlusion by raycast.
+- [x] **2.2.3** Circulation: grid flood-fill from the entrance; every table reachable; centre aisle and buffet corridor checked.
+- [x] **2.2.4** Service: distance to nearest buffet and bar, weighted by table size.
+- [x] **2.2.5** Symmetry, comfort, egress (24 m), penalties (overlap, wall breach, zone clearance, capacity overrun).
+- [x] **2.2.6** Score breakdown is serialisable — the UI shows it verbatim.
 
 ### 2.3 Search
 
-- [ ] **2.3.1** `search.rs`: enumerate archetypes × zone strategies × lattice offsets (100–300 seeds), score, keep top K.
-- [ ] **2.3.2** Annealing per seed: translate 0.25 m, swap, rotate 90°, move zone. 5,000–20,000 iterations.
-- [ ] **2.3.3** Seed from `hash(eventId + layoutVersion)`; same inputs → same three options on every device.
-- [ ] **2.3.4** Property tests: no overlaps, all tables inside walls, deterministic for a given seed.
-- [ ] **2.3.5** Performance: 300 tables, 3 options, < 150 ms. If over, cut iterations before archetypes.
+- [x] **2.3.1** `search.rs`: enumerate archetypes × zone strategies × lattice offsets (100–300 seeds), score, keep top K.
+- [x] **2.3.2** Annealing per seed: translate 0.25 m, swap, rotate 90°, move zone. 5,000–20,000 iterations.
+- [x] **2.3.3** Seed from `hash(eventId + layoutVersion)`; same inputs → same three options on every device.
+- [x] **2.3.4** Property tests: no overlaps, all tables inside walls, deterministic for a given seed.
+- [x] **2.3.5** Performance: 300 tables, 3 options, < 150 ms. If over, cut iterations before archetypes.
 
 ### 2.4 UI
 
