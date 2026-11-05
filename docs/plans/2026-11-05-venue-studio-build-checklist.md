@@ -105,7 +105,7 @@ Goal: a Rust core that reproduces today's behaviour exactly, behind a loader tha
 - [x] **0.5.2** Lazy-load only on the seating route; never in the root layout.
 - [x] **0.5.3** On load failure: fall back to the existing TS geometry and checks, hide auto-layout options / thermal / catering, show a quiet notice. Never a broken page.
 - [x] **0.5.4** Extend `build-wasm.mjs` to build both crates and emit `public/wasm/ariya_studio.wasm`; commit the artifact.
-- [ ] **0.5.5** Extend `check-bundle.ts` so the studio wasm is not pulled into app chunks.
+- [x] **0.5.5** Extend `check-bundle.ts` so the studio wasm is not pulled into app chunks. _(Fails if the artifact is missing from `public/wasm`, emitted into `.next/static/chunks`, or inlined as base64 in any chunk.)_
 
 ### 0.6 CI
 
