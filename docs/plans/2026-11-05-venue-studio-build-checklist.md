@@ -176,10 +176,10 @@ Goal: three explainable options instead of one.
 
 ### 2.4 UI
 
-- [ ] **2.4.1** `ARRANGE` returns ranked options; UI renders the top three as cards with seats, table count and the one-line trade-off.
-- [ ] **2.4.2** "Why is A better?" opens the score breakdown.
-- [ ] **2.4.3** Choosing an option is one tap and one undo step.
-- [ ] **2.4.4** Flag: switch between "current" and "new" layouts for comparison during rollout.
+- [x] **2.4.1** `ARRANGE` returns ranked options; UI renders the top three as cards with seats, table count and the one-line trade-off. _(The fit deck asks the engine for three options and renders each as a card: seats, table count, and the trade-off the score chose to name. Wiring it up exposed two engine bugs — circulation marked every table unreachable, and one head table sized the whole lattice — both fixed in `score.rs` and `archetype.rs`.)_
+- [x] **2.4.2** "Why is A better?" opens the score breakdown. _(Each card's "Why?" opens the full breakdown term by term, with the raw measure, its contribution and the sentence the engine wrote for it.)_
+- [x] **2.4.3** Choosing an option is one tap and one undo step. _(Applying is a single `hall.update`, so one undo returns the hall exactly as it was; verified in the browser.)_
+- [x] **2.4.4** Flag: switch between "current" and "new" layouts for comparison during rollout. _(After applying, a Compare bar flips the hall between the layout you had and the new one. Flipping uses a history-free `replace`, so comparing never fills the undo stack; "Keep this" settles on whichever is showing, and any edit or undo ends the comparison.)_
 
 **Phase 2 exit:** the studio offers three ranked, explainable layouts and the user can pick one.
 
