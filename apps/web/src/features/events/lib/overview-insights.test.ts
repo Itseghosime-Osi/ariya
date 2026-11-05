@@ -315,3 +315,79 @@ describe("pickNextActions", () => {
     ).toEqual(["a", "b"]);
   });
 });
+
+describe("accuracy of the desk's derived numbers", () => {
+  it("leaves unmeasurable segments out of the readiness average", () => {
+    const r = computeReadiness(
+      metrics({
+        totalParties: 10,
+        acceptedParties: 10,
+        declinedParties: 0,
+        acceptedGuests: 0,
+        seatedGuests: 0,
+      }),
+      [vendor({ status: "confirmed" })],
+      []
+    );
+    const byKey = Object.fromEntries(r.segments.map((s) => [s.key, s]));
+    expect(byKey.seating.measured).toBe(false);
+    expect(byKey.tasks.measured).toBe(false);
+    // guests 100%, vendors 100%, budget 40% -> average of the three measured ones
+    expect(r.overall).toBe(Math.round(((1 + 1 + 0.4) / 3) * 100));
+  });
+
+  it("groups guests by a lower-case side as stored in the database", () => {
+    const layout = layoutConstellation([
+      { id: "a", name: "A", side: "bride", partySize: 1, status: "accepted" },
+      { id: "b", name: "B", side: "groom", partySize: 1, status: "pending" },
+      { id: "c", name: "C", side: "family", partySize: 1, status: "pending" },
+    ]);
+    expect(layout.groups.map((g) => g.label)).toEqual([
+      "Bride",
+      "Family",
+      "Groom",
+    ]);
+  });
+
+  it("never counts a deposit above its contract in the budget", () => {
+    const b = summariseBudget([
+      vendor({ costKobo: 100_00, depositKobo: 500_00 }),
+    ]);
+    expect(b.paidKobo).toBe(100_00);
+    expect(b.outstandingKobo).toBe(0);
+  });
+
+  it("flags a past phase that still has open tasks as late", () => {
+    const phases = buildPlanningPhases(
+      "2027-01-16",
+      [task({ id: "t", dueDate: "2026-06-01", isDone: false })],
+      "2026-11-05"
+    );
+    const late = phases.filter((p) => p.late);
+    expect(late).toHaveLength(1);
+    expect(late[0].state).toBe("done");
+  });
+
+  it("points reminders at the reminders desk and wraps up after the day", () => {
+    const [nudge] = pickNextActions({
+      eventId: "e",
+      metrics: metrics({ daysAway: 10, awaitingParties: 3 }),
+      vendors: [vendor({ status: "confirmed" })],
+      tasks: [],
+      todayKey: "2026-11-05",
+    });
+    expect(nudge.href).toBe("/events/e/reminders");
+
+    const past = pickNextActions({
+      eventId: "e",
+      metrics: metrics({ daysAway: -3, awaitingParties: 3 }),
+      vendors: [vendor({ costKobo: 100_00, depositKobo: 40_00 })],
+      tasks: [task({ dueDate: "2020-01-01" })],
+      todayKey: "2026-11-05",
+    });
+    expect(past.map((a) => a.title)).not.toContain(
+      expect.stringMatching(/Nudge|Overdue/)
+    );
+    expect(past[past.length - 1].tone).toBe("celebrate");
+  });
+});

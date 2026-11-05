@@ -44,11 +44,13 @@ export interface ReadinessSegment {
   ratio: number;
   /** A short "18/20 replied" style summary. */
   summary: string;
+  /** False when there is nothing to measure yet (no seats to fill, no costs, no tasks). */
+  measured: boolean;
 }
 
 export interface Readiness {
   segments: ReadinessSegment[];
-  /** Whole percent, the plain average of the five segments. */
+  /** Whole percent: the average of the segments that have something to measure. */
   overall: number;
 }
 
@@ -80,6 +82,7 @@ export function computeReadiness(
       total: metrics.totalParties,
       ratio: ratioOf(responded, metrics.totalParties),
       summary: `${responded}/${metrics.totalParties} replied`,
+      measured: true,
     },
     {
       key: "seating",
@@ -87,7 +90,11 @@ export function computeReadiness(
       done: Math.min(metrics.seatedGuests, seatTotal),
       total: seatTotal,
       ratio: ratioOf(metrics.seatedGuests, seatTotal),
-      summary: `${Math.min(metrics.seatedGuests, seatTotal)}/${seatTotal} seated`,
+      summary:
+        seatTotal > 0
+          ? `${Math.min(metrics.seatedGuests, seatTotal)}/${seatTotal} seated`
+          : "No confirmed guests yet",
+      measured: seatTotal > 0,
     },
     {
       key: "vendors",
@@ -96,6 +103,7 @@ export function computeReadiness(
       total: vendors.length,
       ratio: ratioOf(bookedVendors, vendors.length),
       summary: `${bookedVendors}/${vendors.length} confirmed`,
+      measured: true,
     },
     {
       key: "budget",
@@ -107,6 +115,7 @@ export function computeReadiness(
         committed > 0
           ? `${Math.round(ratioOf(paid, committed) * 100)}% paid`
           : "No costs yet",
+      measured: committed > 0,
     },
     {
       key: "tasks",
@@ -114,12 +123,19 @@ export function computeReadiness(
       done: doneTasks,
       total: tasks.length,
       ratio: ratioOf(doneTasks, tasks.length),
-      summary: `${doneTasks}/${tasks.length} done`,
+      summary:
+        tasks.length > 0 ? `${doneTasks}/${tasks.length} done` : "No tasks yet",
+      measured: tasks.length > 0,
     },
   ];
 
+  // A segment with nothing to measure (no confirmed guests to seat, no costs, no tasks) is left out of
+  // the average rather than dragging it to zero.
+  const counted = segments.filter((seg) => seg.measured);
   const overall = Math.round(
-    (segments.reduce((s, seg) => s + seg.ratio, 0) / segments.length) * 100
+    (counted.reduce((s, seg) => s + seg.ratio, 0) /
+      Math.max(1, counted.length)) *
+      100
   );
   return { segments, overall };
 }
@@ -140,6 +156,8 @@ export interface PlanningPhase {
   state: PhaseState;
   /** The tasks filed in this phase, earliest due first. */
   tasks: PlanningTask[];
+  /** The phase's dates have passed but some of its tasks are still open. */
+  late: boolean;
 }
 
 const DAY_MS = 86_400_000;
@@ -219,6 +237,7 @@ export function buildPlanningPhases(
       tasksTotal: 0,
       state,
       tasks: [] as PlanningTask[],
+      late: false,
     };
   });
 
@@ -239,6 +258,7 @@ export function buildPlanningPhases(
     home.tasks.push(t);
   }
   for (const p of phases) {
+    p.late = p.state === "done" && p.tasksDone < p.tasksTotal;
     p.tasks.sort((a, b) =>
       (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999")
     );
@@ -273,7 +293,8 @@ export function summariseBudget(vendors: PlanningVendor[]): BudgetSummary {
       vendors: 0,
     };
     row.costKobo += Math.max(0, v.costKobo);
-    row.paidKobo += Math.max(0, v.depositKobo);
+    // A deposit can never count for more than the contract it belongs to.
+    row.paidKobo += Math.max(0, Math.min(v.depositKobo, v.costKobo));
     row.vendors++;
     byCat.set(category, row);
   }
@@ -322,6 +343,31 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
   const days = metrics.daysAway;
   const out: NextAction[] = [];
 
+  // Once the day has passed, planning nudges no longer make sense: wrap up instead.
+  if (days < 0) {
+    const owed = vendors.reduce(
+      (s, v) => s + Math.max(0, v.costKobo - Math.max(0, v.depositKobo)),
+      0
+    );
+    if (owed > 0) {
+      out.push({
+        title: "Settle what vendors are still owed",
+        reason: "The celebration is over. Close out the balances you owe.",
+        href: `${base}/vendors`,
+        cta: "Open vendors",
+        tone: "steady",
+      });
+    }
+    out.push({
+      title: "Your celebration has happened",
+      reason: "See who made it through the door on the day.",
+      href: `${base}/check-in`,
+      cta: "See check-in",
+      tone: "celebrate",
+    });
+    return out;
+  }
+
   if (metrics.totalParties === 0) {
     out.push({
       title: "Start the guest list",
@@ -357,7 +403,7 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
     out.push({
       title: `Nudge ${metrics.awaitingParties} ${metrics.awaitingParties === 1 ? "party" : "parties"} still to reply`,
       reason: `The caterer needs a headcount soon and the day is ${days === 0 ? "today" : `${days} days away`}. A gentle reminder now saves guesswork later.`,
-      href: `${base}/guests`,
+      href: `${base}/reminders`,
       cta: "Send reminders",
       tone: days <= 7 ? "urgent" : "steady",
     });
@@ -399,8 +445,8 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
     out.push({
       title: `${metrics.awaitingParties} ${metrics.awaitingParties === 1 ? "party hasn't" : "parties haven't"} replied yet`,
       reason: "Plenty of time, but a reminder keeps the count honest.",
-      href: `${base}/guests`,
-      cta: "View guests",
+      href: `${base}/reminders`,
+      cta: "Send a reminder",
       tone: "steady",
     });
   }
@@ -454,8 +500,12 @@ export const CONSTELLATION_H = 200;
 export function layoutConstellation(
   guests: ConstellationGuest[]
 ): ConstellationLayout {
-  const groupOf = (side: string | null) =>
-    side === "Bride" ? "Bride" : side === "Groom" ? "Groom" : "Family";
+  // Guests are stored with a lower-case side ("bride"); anything that is not the couple's own side is
+  // grouped with the family.
+  const groupOf = (side: string | null) => {
+    const s = side?.trim().toLowerCase();
+    return s === "bride" ? "Bride" : s === "groom" ? "Groom" : "Family";
+  };
   const order = ["Bride", "Family", "Groom"];
   const groups = order
     .map((label) => ({
