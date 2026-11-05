@@ -88,7 +88,7 @@ export function EventOverviewDesk({
   });
 
   return (
-    <div className="pb-16">
+    <div className="sm:pb-16">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-night text-gold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-gold/30">
@@ -97,7 +97,7 @@ export function EventOverviewDesk({
         </div>
       )}
 
-      <DeskMotion className="space-y-6 lg:space-y-8">
+      <DeskMotion className="space-y-3.5 sm:space-y-6 lg:space-y-8">
         <DeskItem>
           <DeskHero
             event={event}
@@ -111,11 +111,11 @@ export function EventOverviewDesk({
           <NextUpStrip actions={nextActions} />
         </DeskItem>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 gap-3.5 sm:gap-6 lg:grid-cols-12 lg:gap-8">
           <DeskItem className="lg:col-span-5">
             <ReadinessRings eventId={event.id} readiness={readiness} />
           </DeskItem>
-          <DeskItem className="lg:col-span-7">
+          <DeskItem className="hidden md:block lg:col-span-7">
             <GuestConstellation
               eventId={event.id}
               guests={planning.guests}
@@ -129,23 +129,27 @@ export function EventOverviewDesk({
         </DeskItem>
 
         <DeskItem>
-          <PlanningRibbon eventId={event.id} phases={phases} />
+          <PlanningRibbon
+            eventId={event.id}
+            phases={phases}
+            todayKey={todayKey}
+          />
         </DeskItem>
 
-        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 items-stretch gap-3.5 sm:gap-6 lg:grid-cols-12 lg:gap-8">
           <DeskItem className="lg:col-span-7">
             <section
               aria-labelledby="guestbook-title"
-              className="bento-card flex h-full flex-col p-6 sm:p-7"
+              className="bento-card flex h-full flex-col p-4 sm:p-7"
             >
-              <div className="mb-5 flex items-end justify-between gap-3">
+              <div className="mb-3 flex sm:mb-5 items-end justify-between gap-3">
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
                     Guestbook
                   </div>
                   <h2
                     id="guestbook-title"
-                    className="mt-1 font-display text-2xl font-bold text-night"
+                    className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
                   >
                     Latest replies
                   </h2>

@@ -47,10 +47,12 @@ html {
 }
 
 .bento-card {
-  background-color: var(--surface-container-low);
+  /* The same translucent card as the vendor list: a wash over the page, never a white block. */
+  background-color: color-mix(in srgb, var(--surface) 40%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   border-radius: 24px;
-  border: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
-  box-shadow: 0 1px 2px rgba(28, 7, 13, 0.04);
+  border: 1px solid var(--hairline);
 }
 
 /* Controls wear the same material as the top bar: a wash of translucent ivory over the page, hairlined

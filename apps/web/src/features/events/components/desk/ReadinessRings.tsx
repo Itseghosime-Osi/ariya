@@ -66,25 +66,34 @@ export function ReadinessRings({
   const captionId = `rings-caption-${eventId}`;
 
   return (
-    <figure className="bento-card relative flex h-full flex-col overflow-hidden p-6 sm:p-7">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
-        Readiness
-      </div>
-      <h2 className="mt-1 font-display text-2xl font-bold text-night">
-        Five rings to close
-      </h2>
+    <figure className="bento-card relative flex h-full flex-col overflow-hidden p-4 sm:p-7">
+      {/* On a phone the ring sits beside the heading, so the card does not stand a ring's height taller. */}
+      <div className="flex flex-1 flex-col gap-3 max-sm:flex-row max-sm:items-center max-sm:gap-4 sm:gap-0">
+        <div className="min-w-0 flex-1 sm:flex-none">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
+            Readiness
+          </div>
+          <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">
+            Five rings to close
+          </h2>
+          <p className="mt-1 text-xs text-label-2 sm:hidden">
+            {
+              readiness.segments.filter((s) => s.measured && s.ratio >= 1)
+                .length
+            }{" "}
+            of {readiness.segments.filter((s) => s.measured).length} closed
+          </p>
+        </div>
 
-      <div className="mt-5 flex flex-1 flex-col items-center gap-5">
         <div
-          className="relative shrink-0"
-          style={{ width: SIZE, height: SIZE }}
+          className="relative aspect-square w-[148px] shrink-0 max-sm:order-first sm:mx-auto sm:mt-5 sm:w-[240px]"
           onPointerLeave={() => setActive(null)}
         >
           <svg
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
             aria-labelledby={captionId}
-            className="-rotate-90"
+            className="h-full w-full -rotate-90"
           >
             {readiness.segments.map((s, i) => {
               const r = SIZE / 2 - STROKE / 2 - i * (STROKE + GAP);
@@ -140,18 +149,20 @@ export function ReadinessRings({
                 <NumberFlow
                   value={drawn ? centreValue : 0}
                   respectMotionPreference
-                  className="text-3xl tabular-nums"
+                  className="text-lg tabular-nums sm:text-3xl"
                 />
-                <span className="text-lg text-gold-ink">%</span>
+                <span className="text-sm text-gold-ink sm:text-lg">%</span>
               </div>
-              <div className="mt-0.5 max-w-[5rem] text-[9px] leading-tight font-semibold uppercase tracking-[0.16em] text-label-2">
+              <div className="mt-0.5 hidden max-w-[5rem] text-[9px] leading-tight font-semibold uppercase tracking-[0.16em] text-label-2 sm:block">
                 {activeSeg ? activeSeg.label : "ready"}
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <ul className="w-full space-y-1">
+      <div className="mt-3 flex flex-col items-center sm:mt-5">
+        <ul className="w-full space-y-0.5 sm:space-y-1">
           {readiness.segments.map((s) => {
             const ring = RING[s.key];
             const done = s.total > 0 && s.ratio >= 1;
@@ -164,7 +175,7 @@ export function ReadinessRings({
                   onPointerLeave={() => setActive(null)}
                   onFocus={() => setActive(s.key)}
                   onBlur={() => setActive(null)}
-                  className={`flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy ${
+                  className={`flex min-h-9 items-center gap-3 rounded-xl px-2.5 py-1 text-[13px] transition-colors sm:min-h-[40px] sm:px-3 sm:py-1.5 sm:text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy ${
                     on ? "bg-surface-container" : "hover:bg-surface-container"
                   }`}
                 >
@@ -183,7 +194,9 @@ export function ReadinessRings({
                     )}
                   </span>
                   <span className="flex-1 text-night">{s.label}</span>
-                  <span className="font-semibold tabular-nums text-label-2">
+                  <span
+                    className={`font-semibold tabular-nums ${s.measured ? "text-label-2" : "text-label-3"}`}
+                  >
                     {s.summary}
                   </span>
                 </Link>

@@ -34,9 +34,11 @@ const range = (p: PlanningPhase, i: number) => {
 export function PlanningRibbon({
   eventId,
   phases,
+  todayKey,
 }: {
   eventId: string;
   phases: PlanningPhase[];
+  todayKey: string;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -48,14 +50,19 @@ export function PlanningRibbon({
   // Optimistic ticks: task id -> done, until the server confirms.
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const view = useMemo(
     () =>
       phases.map((p) => {
-        const tasks = p.tasks.map((t) => ({
-          ...t,
-          isDone: ticks[t.id] ?? t.isDone,
-        }));
+        // Open work first, earliest due first; finished tasks sink to the bottom.
+        const tasks = p.tasks
+          .map((t) => ({ ...t, isDone: ticks[t.id] ?? t.isDone }))
+          .sort(
+            (a, b) =>
+              Number(a.isDone) - Number(b.isDone) ||
+              (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999")
+          );
         return { ...p, tasks, tasksDone: tasks.filter((t) => t.isDone).length };
       }),
     [phases, ticks]
@@ -89,7 +96,7 @@ export function PlanningRibbon({
   return (
     <section
       aria-labelledby="ribbon-title"
-      className="bento-card relative overflow-hidden p-6 sm:p-7"
+      className="bento-card relative overflow-hidden p-4 sm:p-7"
     >
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
@@ -98,18 +105,18 @@ export function PlanningRibbon({
           </div>
           <h2
             id="ribbon-title"
-            className="mt-1 font-display text-2xl font-bold text-night"
+            className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
           >
             Planning season
           </h2>
         </div>
-        <p className="text-xs text-label-2">
+        <p className="hidden text-xs text-label-2 sm:block">
           Choose a phase to see its tasks. Tick them off as you go.
         </p>
       </div>
 
       {/* The track */}
-      <div className="relative mt-7">
+      <div className="relative mt-4 sm:mt-7">
         <div
           className="absolute left-6 right-6 top-[22px] hidden h-1 rounded-full bg-surface-container md:block"
           aria-hidden="true"
@@ -138,19 +145,25 @@ export function PlanningRibbon({
                 id={`phase-tab-${p.key}`}
                 aria-selected={on}
                 aria-controls="phase-panel"
-                onClick={() => setSelected(i)}
+                onClick={() => {
+                  setSelected(i);
+                  setShowAll(false);
+                }}
                 className="group flex flex-col items-center gap-2 rounded-2xl px-1 pb-2 text-center outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
               >
                 <span
-                  className={`relative z-10 grid h-11 w-11 place-items-center rounded-full ring-4 ring-surface transition-transform duration-300 group-hover:scale-110 ${
-                    p.state === "done"
-                      ? "bg-[#1c070d] text-[#e9c98a]"
-                      : p.state === "current"
-                        ? "desk-here bg-[#e9c98a] text-[#1c070d]"
-                        : "bg-surface-container text-label-2"
+                  className={`relative z-10 grid h-10 w-10 place-items-center rounded-full ring-4 ring-surface sm:h-11 sm:w-11 transition-transform duration-300 group-hover:scale-110 ${
+                    p.late
+                      ? "bg-[#f3d9b1] text-[#7a4b12]"
+                      : p.state === "done"
+                        ? "bg-[#1c070d] text-[#e9c98a]"
+                        : p.state === "current"
+                          ? "desk-here bg-[#e9c98a] text-[#1c070d]"
+                          : "bg-surface-container text-label-2"
                   } ${on ? "scale-110 shadow-[0_10px_24px_-10px_rgba(28,7,13,0.6)]" : ""}`}
                 >
-                  {p.state === "done" || (p.tasksTotal > 0 && pct === 100) ? (
+                  {!p.late &&
+                  (p.state === "done" || (p.tasksTotal > 0 && pct === 100)) ? (
                     <Icon name="check" size={18} />
                   ) : (
                     <span className="font-display text-base font-bold">
@@ -190,7 +203,7 @@ export function PlanningRibbon({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className={`rounded-3xl p-5 sm:p-6 ${phase.state === "current" ? "bg-[#1c070d] text-ivory" : "bg-surface-container"}`}
+            className={`rounded-3xl p-4 sm:p-6 ${phase.state === "current" ? "bg-[#1c070d] text-ivory" : "bg-white/45 ring-1 ring-hairline"}`}
           >
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-display text-xl font-bold">{phase.title}</h3>
@@ -199,7 +212,12 @@ export function PlanningRibbon({
                   You are here
                 </span>
               )}
-              {phase.state === "done" && (
+              {phase.late && (
+                <span className="rounded-full bg-[#f3d9b1] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#7a4b12]">
+                  {phase.tasksTotal - phase.tasksDone} still open
+                </span>
+              )}
+              {phase.state === "done" && !phase.late && (
                 <span className="rounded-full bg-[#dcebe2] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#1f4d36]">
                   Behind you
                 </span>
@@ -230,16 +248,18 @@ export function PlanningRibbon({
                 </Link>
               </div>
             ) : (
-              <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                {phase.tasks.map((t) => {
+              <ul className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2">
+                {phase.tasks.slice(0, showAll ? undefined : 3).map((t) => {
                   const dark = phase.state === "current";
+                  const overdue =
+                    !t.isDone && !!t.dueDate && t.dueDate < todayKey;
                   return (
                     <li key={t.id}>
                       <label
-                        className={`flex min-h-[52px] cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-2.5 transition-colors ${
+                        className={`flex min-h-[48px] cursor-pointer items-center gap-3 rounded-2xl px-3 py-2 transition-colors sm:min-h-[52px] sm:px-3.5 sm:py-2.5 ${
                           dark
                             ? "bg-ivory/[0.07] hover:bg-ivory/[0.12]"
-                            : "bg-ivory ring-1 ring-hairline hover:bg-surface-container-high"
+                            : "bg-white/50 ring-1 ring-hairline hover:bg-white/70"
                         }`}
                       >
                         <input
@@ -267,12 +287,12 @@ export function PlanningRibbon({
                             {t.task}
                           </span>
                           <span
-                            className={`block truncate text-xs ${dark ? "text-ivory/70" : "text-label-2"}`}
+                            className={`block truncate text-xs ${overdue ? (dark ? "font-semibold text-[#ffb4ab]" : "font-semibold text-error") : dark ? "text-ivory/70" : "text-label-2"}`}
                           >
                             {[
                               t.vendorName,
                               t.dueDate
-                                ? `due ${dayMonth.format(new Date(`${t.dueDate}T00:00:00Z`))}`
+                                ? `${overdue ? "overdue since" : "due"} ${dayMonth.format(new Date(`${t.dueDate}T00:00:00Z`))}`
                                 : null,
                             ]
                               .filter(Boolean)
@@ -284,6 +304,15 @@ export function PlanningRibbon({
                   );
                 })}
               </ul>
+            )}
+            {phase.tasks.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAll((v) => !v)}
+                className={`mt-2 inline-flex min-h-9 items-center text-xs font-semibold sm:hidden ${phase.state === "current" ? "text-[#e9c98a]" : "text-burgundy"}`}
+              >
+                {showAll ? "Show fewer" : `Show all ${phase.tasks.length}`}
+              </button>
             )}
             {error && (
               <p

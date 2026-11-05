@@ -45,22 +45,22 @@ export function BudgetWeave({
   return (
     <section
       aria-labelledby="budget-title"
-      className="bento-card relative overflow-hidden p-6 sm:p-7"
+      className="bento-card relative overflow-hidden p-4 sm:p-7"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex items-end justify-between gap-3 sm:flex-wrap sm:gap-4">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
             Budget
           </div>
           <h2
             id="budget-title"
-            className="mt-1 font-display text-2xl font-bold text-night"
+            className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
           >
             The money, woven
           </h2>
         </div>
         {cats.length > 0 && (
-          <dl className="flex gap-4 text-right sm:gap-6">
+          <dl className="hidden gap-4 text-right sm:flex sm:gap-6">
             <div>
               <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
                 Committed
@@ -113,9 +113,9 @@ export function BudgetWeave({
       ) : (
         <>
           {/* The cloth */}
-          <div className="relative mt-6">
+          <div className="relative mt-4 sm:mt-6">
             <div
-              className="flex h-16 gap-1 overflow-hidden rounded-2xl"
+              className="flex h-12 gap-1 overflow-hidden rounded-2xl sm:h-16"
               onPointerLeave={() => setActive(null)}
             >
               {cats.map((c, i) => {
@@ -153,9 +153,9 @@ export function BudgetWeave({
               })}
             </div>
             <div
-              className={`pointer-events-none mt-3 flex min-h-[44px] flex-wrap items-baseline gap-x-4 gap-y-1 rounded-xl bg-surface-container px-4 py-2.5 text-sm transition-opacity ${
+              className={`pointer-events-none mt-3 hidden min-h-[44px] flex-wrap items-baseline gap-x-4 gap-y-1 rounded-xl bg-surface-container px-4 py-2.5 text-sm transition-opacity ${
                 shown ? "opacity-100" : "opacity-0"
-              }`}
+              } sm:flex`}
               aria-hidden="true"
             >
               {shown && (
@@ -183,7 +183,24 @@ export function BudgetWeave({
             </div>
           </div>
 
-          <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+          <dl className="mt-3 grid grid-cols-3 divide-x divide-hairline text-center sm:hidden">
+            {[
+              ["Committed", formatNairaCompact(budget.committedKobo)],
+              ["Paid", `${paidPct}%`],
+              ["To go", formatNairaCompact(budget.outstandingKobo)],
+            ].map(([label, value]) => (
+              <div key={label} className="px-1">
+                <dt className="text-[10px] uppercase tracking-[0.14em] text-label-2">
+                  {label}
+                </dt>
+                <dd className="font-display text-lg font-bold tabular-nums text-night">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <ul className="mt-2 hidden flex-wrap gap-x-5 gap-y-2 text-xs sm:flex">
             {cats.map((c, i) => (
               <li
                 key={c.category}
