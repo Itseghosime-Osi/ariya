@@ -74,6 +74,7 @@ export type HallCommand =
   | "rotateRight"
   | "tiltUp"
   | "tiltDown"
+  | "rain"
   | "snapshot";
 
 export interface HallMessage {
@@ -91,6 +92,8 @@ export interface HallMessage {
   dy?: number;
   pct?: number;
   view?: "top" | "3d";
+  /** Whether the rain is falling, reported back after a `rain` command. */
+  on?: boolean;
 }
 
 export interface Hall3DHandle {

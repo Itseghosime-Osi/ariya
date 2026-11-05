@@ -618,6 +618,8 @@ const shell = new THREE.Group();
 scene.add(shell);
 let shellSig = "";
 const walls = [];
+/** Roofs that hide the plan from above, and the height at which they start to. */
+const roofs = [];
 
 function disposeGroup(g) {
   g.traverse((o) => {
@@ -657,8 +659,53 @@ function floorMaterial(finish, W, L) {
   return m;
 }
 
+// ---------------------------------------------------------------- venue
+
+/** The venue facts the app sends with the layout. Absent means a plain indoor hall. */
+function venueOf(L) {
+  return L.venue ?? { type: "hall", environment: "indoor" };
+}
+
+/** Venues with no roof over the tables. */
+const OPEN_TYPES = new Set(["garden", "field", "beach", "rooftop"]);
+/** Venues roofed by fabric on legs rather than walls. */
+const TENT_TYPES = new Set(["marquee", "pole-tent", "stretch-tent"]);
+
+function isOpen(venue) {
+  return OPEN_TYPES.has(venue.type) || venue.environment === "outdoor";
+}
+
+function isTent(venue) {
+  return TENT_TYPES.has(venue.type);
+}
+
+/**
+ * The ground the venue stands on, or null to use the decor floor.
+ *
+ * The answer the host gave wins over the venue type, so a marquee on gravel draws gravel.
+ */
+function groundTexture(venue) {
+  const floor = venue.structure?.floor;
+  if (floor === "grass") return T.grass();
+  if (floor === "sand") return T.sand();
+  if (floor === "gravel") return T.sand("#8f8a7e");
+  if (floor === "soil") return T.grass("#6b5a44");
+  if (floor === "deck") return T.wood();
+  if (venue.type === "beach") return T.sand();
+  if (venue.type === "garden" || venue.type === "field") return T.grass();
+  return null;
+}
+
+/** The leg module a tent snaps to, in metres, or 0 when the venue has no leg grid. */
+function legModule(venue) {
+  if (!isTent(venue)) return 0;
+  const m = venue.structure?.legModule;
+  return m === 3 || m === 5 ? m : 0;
+}
+
 function buildShell(L) {
   const { width: W, length: Ln, ceiling: H, decor, mood } = L;
+  const venue = venueOf(L);
   const sig = JSON.stringify([
     W,
     Ln,
@@ -669,18 +716,37 @@ function buildShell(L) {
     decor.uplight,
     mood,
     L.chandeliers,
+    venue.type,
+    venue.environment,
+    venue.structure?.floor,
+    venue.structure?.legModule,
   ]);
   if (sig === shellSig) return;
   shellSig = sig;
   disposeGroup(shell);
   walls.length = 0;
+  roofs.length = 0;
   const evening = mood === "evening";
+  const open = isOpen(venue);
+  const tent = isTent(venue);
 
-  // Floor slab.
+  // Floor slab. An open-air venue stands on its own ground rather than a polished floor.
+  const ground = groundTexture(venue);
+  const top = ground
+    ? (() => {
+        const m = new THREE.MeshStandardMaterial({
+          map: ground.clone(),
+          roughness: 0.95,
+        });
+        m.map.needsUpdate = true;
+        m.map.repeat.set((W + 0.6) / 2, (Ln + 0.6) / 2);
+        return m;
+      })()
+    : floorMaterial(decor.floor, W + 0.6, Ln + 0.6);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(W + 0.6, 0.2, Ln + 0.6), [
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
-    floorMaterial(decor.floor, W + 0.6, Ln + 0.6),
+    top,
     new THREE.MeshStandardMaterial({ color: "#d9d2c6" }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
@@ -689,7 +755,233 @@ function buildShell(L) {
   slab.receiveShadow = true;
   shell.add(slab);
 
-  // Walls with panelling, skirting and a gold cornice.
+  if (open) {
+    buildOpenVenue(venue, W, Ln, evening);
+  } else if (tent) {
+    buildTent(venue, W, Ln, H, evening);
+  } else {
+    buildWalls(decor, W, Ln, H, evening);
+  }
+
+  // Chandeliers.
+  if (L.chandeliers && !open) {
+    buildChandeliers(W, Ln, H, evening);
+  }
+
+  // Key light and shadow camera over the hall.
+  key.position.set(
+    W / 2 + W * 0.25,
+    Math.max(W, Ln) * 0.9 + 10,
+    Ln / 2 + Ln * 0.35
+  );
+  key.target.position.set(W / 2, 0, Ln / 2);
+  const ext = Math.max(W, Ln) * 0.8 + 4;
+  Object.assign(key.shadow.camera, {
+    left: -ext,
+    right: ext,
+    top: ext,
+    bottom: -ext,
+    near: 1,
+    far: Math.max(W, Ln) * 3 + 40,
+  });
+  key.shadow.camera.updateProjectionMatrix();
+}
+
+/** A terrace, garden, field or beach: a parapet or nothing, and the sky above. */
+function buildOpenVenue(venue, W, Ln, evening) {
+  if (venue.type === "rooftop") {
+    // A low parapet, so the terrace reads as a roof rather than a floating floor.
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#cfc7ba",
+      roughness: 0.9,
+    });
+    const h = 1.05;
+    const t = 0.18;
+    for (const d of [
+      { len: W + 2 * t, x: W / 2, z: -t / 2, ry: 0 },
+      { len: W + 2 * t, x: W / 2, z: Ln + t / 2, ry: 0 },
+      { len: Ln, x: -t / 2, z: Ln / 2, ry: Math.PI / 2 },
+      { len: Ln, x: W + t / 2, z: Ln / 2, ry: Math.PI / 2 },
+    ]) {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(d.len, h, t), mat);
+      wall.position.set(d.x, h / 2, d.z);
+      wall.rotation.y = d.ry;
+      wall.castShadow = true;
+      wall.receiveShadow = true;
+      shell.add(wall);
+    }
+    return;
+  }
+
+  if (venue.type === "garden") {
+    // A few trees around the edge, so the ground reads as a garden and not a lawn.
+    const trunk = new THREE.MeshStandardMaterial({
+      color: "#5a4632",
+      roughness: 1,
+    });
+    const leaf = new THREE.MeshStandardMaterial({
+      color: evening ? "#2f4a2c" : "#3f6b38",
+      roughness: 1,
+    });
+    const spots = [
+      [1.6, 1.6],
+      [W - 1.6, 1.6],
+      [1.6, Ln - 1.6],
+      [W - 1.6, Ln - 1.6],
+      [W / 2, -1.4],
+    ];
+    for (const [x, z] of spots) {
+      const g = new THREE.Group();
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.22, 2.6, 8),
+        trunk
+      );
+      stem.position.y = 1.3;
+      stem.castShadow = true;
+      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 1), leaf);
+      crown.position.y = 3.4;
+      crown.castShadow = true;
+      g.add(stem, crown);
+      g.position.set(x, 0, z);
+      shell.add(g);
+    }
+  }
+}
+
+/** A marquee, pole tent or stretch tent: legs on the module, and a fabric roof. */
+function buildTent(venue, W, Ln, H, evening) {
+  const module = legModule(venue) || 5;
+  const legMat = new THREE.MeshStandardMaterial({
+    color: "#b9b3a6",
+    metalness: 0.4,
+    roughness: 0.5,
+  });
+  const legH = Math.max(2.4, Math.min(H, 4.2));
+  const legR = 0.07;
+
+  // Legs on the module, inset half a module from each edge so the roof overhangs.
+  const xs = [];
+  for (let x = module / 2; x <= W; x += module) xs.push(x);
+  const zs = [];
+  for (let z = module / 2; z <= Ln; z += module) zs.push(z);
+  for (const x of xs)
+    for (const z of zs) {
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(legR, legR, legH, 8),
+        legMat
+      );
+      leg.position.set(x, legH / 2, z);
+      leg.castShadow = true;
+      shell.add(leg);
+    }
+
+  // The fabric roof: a shallow hip that rises to a ridge along the long axis.
+  const fabric = new THREE.MeshStandardMaterial({
+    color: evening ? "#e8e2d6" : "#f4efe6",
+    roughness: 0.95,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  const overhang = 0.6;
+  const ridge = legH + Math.min(1.6, Math.max(W, Ln) * 0.06);
+  const roof = new THREE.BufferGeometry();
+  const x0 = -overhang;
+  const x1 = W + overhang;
+  const z0 = -overhang;
+  const z1 = Ln + overhang;
+  const zm = Ln / 2;
+  const verts = new Float32Array([
+    // long side A
+    x0,
+    legH,
+    z0,
+    x1,
+    legH,
+    z0,
+    x1,
+    ridge,
+    zm,
+    x0,
+    legH,
+    z0,
+    x1,
+    ridge,
+    zm,
+    x0,
+    ridge,
+    zm,
+    // long side B
+    x1,
+    legH,
+    z1,
+    x0,
+    legH,
+    z1,
+    x0,
+    ridge,
+    zm,
+    x1,
+    legH,
+    z1,
+    x0,
+    ridge,
+    zm,
+    x1,
+    ridge,
+    zm,
+    // gable A
+    x0,
+    legH,
+    z1,
+    x0,
+    legH,
+    z0,
+    x0,
+    ridge,
+    zm,
+    // gable B
+    x1,
+    legH,
+    z0,
+    x1,
+    legH,
+    z1,
+    x1,
+    ridge,
+    zm,
+  ]);
+  roof.setAttribute("position", new THREE.BufferAttribute(verts, 3));
+  roof.computeVertexNormals();
+  const roofMesh = new THREE.Mesh(roof, fabric);
+  roofMesh.castShadow = true;
+  roofMesh.receiveShadow = true;
+  shell.add(roofMesh);
+  // The fabric hides the plan from above, so it fades out when the camera rises over the eaves.
+  roofs.push({ mats: [fabric], y: legH });
+
+  // A valance along the eaves, so the roof edge is not a bare line.
+  const valance = new THREE.MeshStandardMaterial({
+    color: evening ? "#d8d1c4" : "#ece6db",
+    roughness: 1,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  roofs[roofs.length - 1].mats.push(valance);
+  for (const d of [
+    { len: W + 2 * overhang, x: W / 2, z: z0, ry: 0 },
+    { len: W + 2 * overhang, x: W / 2, z: z1, ry: 0 },
+    { len: Ln + 2 * overhang, x: x0, z: Ln / 2, ry: Math.PI / 2 },
+    { len: Ln + 2 * overhang, x: x1, z: Ln / 2, ry: Math.PI / 2 },
+  ]) {
+    const v = new THREE.Mesh(new THREE.PlaneGeometry(d.len, 0.35), valance);
+    v.position.set(d.x, legH - 0.175, d.z);
+    v.rotation.y = d.ry;
+    shell.add(v);
+  }
+}
+
+/** The indoor shell: panelled walls, skirting, a gold cornice, drapes and uplights. */
+function buildWalls(decor, W, Ln, H, evening) {
   const t = 0.25;
   const wallTex = (len) => {
     const m = T.panels(decor.wall).clone();
@@ -818,9 +1110,11 @@ function buildShell(L) {
       mats,
     });
   }
+}
 
-  // Chandeliers.
-  if (L.chandeliers) {
+/** Crystal chandeliers on a grid, hung from the ceiling. */
+function buildChandeliers(W, Ln, H, evening) {
+  {
     const nx = Math.max(1, Math.round(W / 9));
     const nz = Math.max(1, Math.round(Ln / 9));
     const crystals = new THREE.OctahedronGeometry(0.035, 0);
@@ -892,24 +1186,6 @@ function buildShell(L) {
     inst.count = k;
     shell.add(inst);
   }
-
-  // Key light and shadow camera over the hall.
-  key.position.set(
-    W / 2 + W * 0.25,
-    Math.max(W, Ln) * 0.9 + 10,
-    Ln / 2 + Ln * 0.35
-  );
-  key.target.position.set(W / 2, 0, Ln / 2);
-  const ext = Math.max(W, Ln) * 0.8 + 4;
-  Object.assign(key.shadow.camera, {
-    left: -ext,
-    right: ext,
-    top: ext,
-    bottom: -ext,
-    near: 1,
-    far: Math.max(W, Ln) * 3 + 40,
-  });
-  key.shadow.camera.updateProjectionMatrix();
 }
 
 // ---------------------------------------------------------------- zones
@@ -1906,6 +2182,17 @@ function applyCamera() {
       m.depthWrite = !near && m.blending !== THREE.AdditiveBlending;
     }
   }
+  // A roof over the tables fades as soon as the camera rises above its eaves, so the plan stays
+  // readable from above. Unlike a wall this does not depend on the polar angle: looking straight
+  // down is exactly when the roof is most in the way.
+  for (const r of roofs) {
+    const above = camera.position.y > r.y;
+    for (const m of r.mats) {
+      m.userData.base ??= m.opacity;
+      m.opacity = above ? 0.06 : m.userData.base;
+      m.depthWrite = !above;
+    }
+  }
   // Glow sprites face the camera.
   shell.traverse(
     (o) => o.userData.billboard && o.quaternion.copy(camera.quaternion)
@@ -2013,8 +2300,15 @@ function loop() {
   looping = true;
   requestAnimationFrame(frame);
 }
+let lastFrame = 0;
 function frame(now) {
   looping = false;
+  const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
+  lastFrame = now;
+  if (rainOn && stepRain(dt)) {
+    dirty = true;
+    loop();
+  }
   if (offset.x !== offset.tx || offset.y !== offset.ty) {
     const k = Math.min(1, (now - offset.t0) / OFFSET_MS);
     const e = 1 - Math.pow(1 - k, 3);
@@ -2125,6 +2419,176 @@ function applyMood() {
   M.flame.color.set(evening ? "#ffd690" : "#ffe7bf");
 }
 
+// ---------------------------------------------------------------- environment
+
+const envGroup = new THREE.Group();
+scene.add(envGroup);
+let envSig = "";
+let rainOn = false;
+let rain = null;
+
+/**
+ * Where the sun is, in degrees: azimuth clockwise from north, elevation above the horizon.
+ *
+ * The host's answer wins. Without one, a seasonal arc from the month keeps an unanswered venue
+ * from being lit from a direction that could never happen.
+ */
+function sunAngles(venue) {
+  const az = venue.sun?.azimuth;
+  const el = venue.sun?.elevation;
+  if (typeof az === "number" && typeof el === "number") {
+    return { az, el: Math.max(2, Math.min(88, el)) };
+  }
+  const month = venue.climate?.month ?? 6;
+  return {
+    az: 135,
+    el: Math.max(8, 35 + 25 * Math.sin(((month - 3) / 12) * Math.PI * 2)),
+  };
+}
+
+/** A bearing in degrees to a direction on the floor, with north along -Z. */
+function bearing(deg) {
+  const r = (deg * Math.PI) / 180;
+  return { x: Math.sin(r), z: -Math.cos(r) };
+}
+
+function applyEnvironment() {
+  const L = state.layout;
+  if (!L) return;
+  const venue = venueOf(L);
+  const open = isOpen(venue);
+  const evening = L.mood === "evening";
+  // Sky: an open venue gets a gradient behind it instead of the page board. This is set on every
+  // pass, not behind the signature guard, because the mood pass just before it resets the
+  // background to the board colour. The texture is cached, so re-setting it costs nothing.
+  if (open) scene.background = T.sky(evening);
+
+  const sig = JSON.stringify([
+    venue.type,
+    venue.environment,
+    venue.sun,
+    venue.wind,
+    venue.climate?.month,
+    evening,
+    L.width,
+    L.length,
+  ]);
+  if (sig === envSig) return;
+  envSig = sig;
+  disposeGroup(envGroup);
+
+  const W = L.width;
+  const Ln = L.length;
+
+  // Sun: the key light is placed on the arc the host described.
+  const { az, el } = sunAngles(venue);
+  const dir = bearing(az);
+  const reach = Math.max(W, Ln) * 1.4 + 14;
+  const flat = Math.cos((el * Math.PI) / 180) * reach;
+  key.position.set(
+    W / 2 + dir.x * flat,
+    Math.max(3, Math.sin((el * Math.PI) / 180) * reach),
+    Ln / 2 + dir.z * flat
+  );
+  key.target.position.set(W / 2, 0, Ln / 2);
+  key.target.updateMatrixWorld();
+
+  // Wind: an arrow on the upwind edge, pointing the way the wind blows.
+  const wind = venue.wind;
+  if (wind && typeof wind.direction === "number") {
+    const from = bearing(wind.direction);
+    const mat = new THREE.MeshBasicMaterial({
+      color: evening ? "#9fc4e8" : "#3f6f9e",
+      toneMapped: false,
+    });
+    const arrow = new THREE.Group();
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 2.2, 8),
+      mat
+    );
+    shaft.rotation.z = Math.PI / 2;
+    shaft.position.x = 1.1;
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.6, 12), mat);
+    head.rotation.z = -Math.PI / 2;
+    head.position.x = 2.5;
+    arrow.add(shaft, head);
+    const rad = Math.min(W, Ln) / 2 + 1.6;
+    arrow.position.set(W / 2 + from.x * rad, 0.08, Ln / 2 + from.z * rad);
+    // The arrow is modelled along +X; turn it to point back across the room.
+    arrow.rotation.y = Math.PI / 2 - ((wind.direction + 180) * Math.PI) / 180;
+    envGroup.add(arrow);
+  }
+
+  requestRender();
+}
+
+/** Rain: a column of falling streaks over the room, toggled from the studio. */
+function setRain(on) {
+  rainOn = on;
+  if (rain) {
+    scene.remove(rain);
+    rain.geometry.dispose();
+    rain.material.dispose();
+    rain = null;
+  }
+  if (!on || !state.layout) {
+    requestRender();
+    return;
+  }
+  const W = state.layout.width;
+  const Ln = state.layout.length;
+  const count = 900;
+  const streak = 0.45;
+  // Two vertices a drop: the head and the tail above it, so the rain reads as streaks rather
+  // than as dots falling.
+  const pos = new Float32Array(count * 6);
+  const speed = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * (W + 8) - 4;
+    const y = Math.random() * 14;
+    const z = Math.random() * (Ln + 8) - 4;
+    pos[i * 6] = x;
+    pos[i * 6 + 1] = y;
+    pos[i * 6 + 2] = z;
+    pos[i * 6 + 3] = x;
+    pos[i * 6 + 4] = y + streak;
+    pos[i * 6 + 5] = z;
+    speed[i] = 9 + Math.random() * 7;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.LineBasicMaterial({
+    color: "#7fa8cc",
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  rain = new THREE.LineSegments(geo, mat);
+  rain.userData.speed = speed;
+  rain.userData.streak = streak;
+  rain.frustumCulled = false;
+  scene.add(rain);
+  requestRender();
+}
+
+/** Fall the rain one frame. Returns true while it is still moving. */
+function stepRain(dt) {
+  if (!rain) return false;
+  const p = rain.geometry.attributes.position;
+  const speed = rain.userData.speed;
+  const streak = rain.userData.streak;
+  for (let i = 0; i < speed.length; i++) {
+    const head = i * 2;
+    let y = p.getY(head) - speed[i] * dt;
+    if (y < 0) y += 14;
+    p.setY(head, y);
+    p.setY(head + 1, y + streak);
+  }
+  p.needsUpdate = true;
+  return true;
+}
+
 // ---------------------------------------------------------------- pointer
 
 const ray = new THREE.Raycaster();
@@ -2164,7 +2628,19 @@ function pick(e) {
   return null;
 }
 
-const snap = (v, e) => (e.altKey ? v : Math.round(v / 0.05) * 0.05);
+/**
+ * Snap a dragged coordinate. A tent snaps to its leg module, so a table never lands on a leg;
+ * every other venue snaps to 5 cm. Holding Alt turns snapping off.
+ *
+ * This is the input transform, not a second model: the app stores the value the renderer reports,
+ * so what is drawn and what is saved stay the same number.
+ */
+function snap(v, e) {
+  if (e.altKey) return v;
+  const module = state.layout ? legModule(venueOf(state.layout)) : 0;
+  const step = module || 0.05;
+  return Math.round(v / step) * step;
+}
 
 renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
 
@@ -2545,11 +3021,14 @@ function snapshot() {
   resize();
   if (state.layout.mood === "evening") composer.render();
   else {
-    // The picture gets the page colour behind it rather than a see-through background.
-    scene.background = new THREE.Color(state.board || "#f7f2ea");
+    // The picture gets the page colour behind it rather than a see-through background. An open
+    // venue already has a sky, so it keeps it.
+    const open = isOpen(venueOf(state.layout));
+    const prevBg = scene.background;
+    if (!open) scene.background = new THREE.Color(state.board || "#f7f2ea");
     boardMat.uniforms.uOpaque.value = 1;
     renderer.render(scene, camera);
-    scene.background = null;
+    scene.background = prevBg;
     boardMat.uniforms.uOpaque.value = 0;
   }
   const url = renderer.domElement.toDataURL("image/png");
@@ -2589,6 +3068,8 @@ function applyScene(s) {
   // New walls start opaque; fade the ones in front of the camera again.
   applyCamera();
   applyMood();
+  // After the mood, which sets the board colour the sky replaces for an open venue.
+  applyEnvironment();
   if (moodChanged) zoneCache.forEach((e) => (e.sig = ""));
   syncZones();
   syncTables();
@@ -2674,6 +3155,10 @@ window.addEventListener("message", (e) => {
           });
         break;
       }
+      case "rain":
+        setRain(!rainOn);
+        post({ t: "rain", on: rainOn });
+        break;
       case "snapshot":
         snapshot();
         break;

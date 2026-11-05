@@ -52,6 +52,7 @@ export const SHORTCUTS = (
       [[["P"]], "Décor palette"],
       [[["L"]], "Show table names"],
       [[["N"]], "Day or evening light"],
+      [[["W"]], "Rain, at an open-air venue"],
     ],
   },
   {
