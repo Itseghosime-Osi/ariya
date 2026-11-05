@@ -1277,6 +1277,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      verify_check_in: {
+        Args: { p_code: string; p_event_id: string };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

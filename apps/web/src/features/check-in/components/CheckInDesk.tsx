@@ -7,8 +7,9 @@ import { CheckInHeader } from "./CheckInHeader";
 import { CheckInCameraScanner } from "./CheckInCameraScanner";
 import { ManualCheckInForm } from "./ManualCheckInForm";
 import { CheckInResultCard } from "./CheckInResultCard";
+import { CheckInVerifyCard } from "./CheckInVerifyCard";
 import { RecentCheckInsList } from "./RecentCheckInsList";
-import { performCheckInAction } from "../actions";
+import { performCheckInAction, verifyCheckInAction } from "../actions";
 import type {
   CheckInDeskData,
   CheckInResult,
@@ -28,6 +29,11 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
     initialData.recentCheckIns
   );
   const [result, setResult] = useState<CheckInResult | null>(null);
+  const [pending, setPending] = useState<{
+    code: string;
+    result: CheckInResult;
+  } | null>(null);
+  const [admittedAt, setAdmittedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isRealtimeActive, setIsRealtimeActive] = useState(false);
 
@@ -81,9 +87,32 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
     };
   }, [eventId]);
 
+  // Step one: look the pass up. Nobody is admitted until the door staff taps Admit.
+  const handleVerify = async (code: string) => {
+    setLoading(true);
+    setResult(null);
+    setPending(null);
+    const res = await verifyCheckInAction(eventId, code);
+    setLoading(false);
+
+    if (!res.ok || !res.result) {
+      setResult({
+        status: "unknown_code",
+        message: res.error || "Could not verify that pass",
+      });
+      return;
+    }
+    if (res.result.status === "verified") {
+      setPending({ code, result: res.result });
+      return;
+    }
+    setResult(res.result);
+  };
+
   const handleProcessCheckIn = async (code: string, count: number) => {
     setLoading(true);
     setResult(null);
+    setPending(null);
 
     const res = await performCheckInAction(eventId, { code, count });
     setLoading(false);
@@ -99,6 +128,7 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
     setResult(res.result);
 
     if (res.result.status === "checked_in") {
+      setAdmittedAt(new Date().toISOString());
       const admittedCount = res.result.admitted_now || count;
       setStats((prev) => {
         const nextChecked = prev.checkedIn + admittedCount;
@@ -139,18 +169,31 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
         isRealtimeActive={isRealtimeActive}
       />
 
-      <CheckInResultCard result={result} onDismiss={() => setResult(null)} />
+      {pending && (
+        <CheckInVerifyCard
+          result={pending.result}
+          loading={loading}
+          onAdmit={(count) => handleProcessCheckIn(pending.code, count)}
+          onCancel={() => setPending(null)}
+        />
+      )}
+
+      <CheckInResultCard
+        result={result}
+        admittedAt={admittedAt}
+        onDismiss={() => setResult(null)}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-7 space-y-6">
           <ManualCheckInForm
             loading={loading}
-            onCheckIn={(code, count) => handleProcessCheckIn(code, count)}
+            onCheckIn={(code) => handleVerify(code)}
           />
 
           <CheckInCameraScanner
             disabled={loading}
-            onScan={(code) => handleProcessCheckIn(code, 1)}
+            onScan={(code) => handleVerify(code)}
           />
         </div>
 

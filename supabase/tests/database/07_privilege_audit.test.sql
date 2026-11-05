@@ -69,7 +69,8 @@ select set_eq(
       ('save_rsvp_answers'),
       ('submit_rsvp'),
       ('track_invitations_sent'),
-      ('update_team_member_role')
+      ('update_team_member_role'),
+      ('verify_check_in')
   $$,
   'Privilege audit: Only explicitly allowed functions are executable by authenticated'
 );

@@ -54,3 +54,37 @@ export async function performCheckInAction(
   revalidatePath(`/events/${eventId}/check-in`);
   return { ok: true, result };
 }
+
+/** Looks a pass up without admitting anyone: the desk shows who it is, then the door staff taps Admit. */
+export async function verifyCheckInAction(
+  eventId: string,
+  code: string
+): Promise<CheckInActionResult> {
+  const parsed = checkInInputSchema.safeParse({ code, count: 1 });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message || "Invalid check-in input",
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      error: "Authentication required to access check-in desk",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("verify_check_in", {
+    p_event_id: eventId,
+    p_code: parsed.data.code,
+  });
+  if (error || !data) {
+    return { ok: false, error: error?.message || "Could not verify that pass" };
+  }
+  return { ok: true, result: data as unknown as CheckInResult };
+}
