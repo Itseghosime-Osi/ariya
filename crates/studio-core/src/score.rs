@@ -281,8 +281,10 @@ fn circulation_term(input: &ScoreInput) -> (f64, String) {
     let mut blocked = vec![false; cols * rows];
 
     for p in input.placements {
+        // Mark only the footprint: padding by half the gap would close the very corridors the
+        // gap is meant to leave open, and no table would ever be reachable.
         let f = footprint_of(input, p);
-        mark(&mut blocked, cols, rows, cell, &f, input.gap / 2.0);
+        mark(&mut blocked, cols, rows, cell, &f, 0.0);
     }
     for z in input.zones {
         if z.kind == ZoneKind::Entrance {
@@ -303,8 +305,13 @@ fn circulation_term(input: &ScoreInput) -> (f64, String) {
 
     let mut reached = 0;
     for p in input.placements {
-        let (cx, cy) = cell_of(p.x, p.y, cell, cols, rows);
-        if reachable[cy * cols + cx] {
+        // A table's own centre is inside its footprint, so it is always blocked; a table is
+        // reachable when the nearest free cell beside it is.
+        let centre = cell_of(p.x, p.y, cell, cols, rows);
+        let Some(beside) = free_near(&blocked, cols, rows, centre) else {
+            continue;
+        };
+        if reachable[beside.1 * cols + beside.0] {
             reached += 1;
         }
     }
@@ -791,6 +798,17 @@ mod tests {
         let s = score(&input(&t, &z, &p), &Weights::default());
         let sym = s.terms.iter().find(|t| t.id == "symmetry").expect("term");
         assert!((sym.value - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_clear_layout_reaches_every_table() {
+        let (t, z, p) = layout(20);
+        let s = score(&input(&t, &z, &p), &Weights::default());
+        let circ = s.terms.iter().find(|t| t.id == "circulation").expect("term");
+        assert_eq!(
+            circ.detail, "Every table can be reached from the entrance.",
+            "a clear layout should reach every table"
+        );
     }
 
     #[test]

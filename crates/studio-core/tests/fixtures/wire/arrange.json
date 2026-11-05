@@ -50,11 +50,11 @@
               "weight": 0.22
             },
             {
-              "contribution": 0.0,
-              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "contribution": 0.136,
+              "detail": "Every table can be reached from the entrance.",
               "id": "circulation",
               "label": "Getting around",
-              "value": 0.0,
+              "value": 0.85,
               "weight": 0.16
             },
             {
@@ -98,11 +98,11 @@
               "weight": -0.25
             }
           ],
-          "total": 0.5910010787893379
+          "total": 0.727001078789338
         },
         "strategy": "stage-short-wall-buffet-right",
         "strategy_label": "Stage on the short wall, buffet on the right",
-        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "tradeoff": "1 of 4 tables have a partner across the middle.",
         "unplaced": [],
         "zones": [
           {
@@ -189,11 +189,11 @@
               "weight": 0.22
             },
             {
-              "contribution": 0.0,
-              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "contribution": 0.136,
+              "detail": "Every table can be reached from the entrance.",
               "id": "circulation",
               "label": "Getting around",
-              "value": 0.0,
+              "value": 0.85,
               "weight": 0.16
             },
             {
@@ -237,11 +237,11 @@
               "weight": -0.25
             }
           ],
-          "total": 0.5667069377091454
+          "total": 0.7027069377091455
         },
         "strategy": "stage-pulled-forward",
         "strategy_label": "Stage pulled forward into the room",
-        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "tradeoff": "2 of 4 tables have a poor view of the stage.",
         "unplaced": [],
         "zones": [
           {
@@ -328,11 +328,11 @@
               "weight": 0.22
             },
             {
-              "contribution": 0.0,
-              "detail": "4 of 4 tables cannot be reached from the entrance.",
+              "contribution": 0.136,
+              "detail": "Every table can be reached from the entrance.",
               "id": "circulation",
               "label": "Getting around",
-              "value": 0.0,
+              "value": 0.85,
               "weight": 0.16
             },
             {
@@ -376,11 +376,11 @@
               "weight": -0.25
             }
           ],
-          "total": 0.5653431542639481
+          "total": 0.7013431542639481
         },
         "strategy": "stage-pulled-forward-buffet-right",
         "strategy_label": "Stage pulled forward, buffet on the right",
-        "tradeoff": "4 of 4 tables cannot be reached from the entrance.",
+        "tradeoff": "2 of 4 tables have a poor view of the stage.",
         "unplaced": [],
         "zones": [
           {

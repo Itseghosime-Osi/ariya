@@ -203,11 +203,22 @@ fn accepts(slot: Option<&str>, table: &str) -> bool {
 }
 
 /// The largest footprint in the inventory at a given rotation.
+///
+/// A head table is one long table for the couple; sizing the whole lattice to it would space
+/// every slot for a four-metre table and leave the room almost empty. Size to the ordinary
+/// tables instead, falling back to all of them when the inventory is only head tables.
 fn max_extent(tables: &[ArrangeTable], rot: f64) -> (f64, f64) {
-    tables
-        .iter()
-        .map(|t| extents(&footprint(&t.shape, t.capacity, 0.0, 0.0, rot)))
-        .fold((0.0, 0.0), |a, b| (a.0.max(b.0), a.1.max(b.1)))
+    let extent = |t: &ArrangeTable| extents(&footprint(&t.shape, t.capacity, 0.0, 0.0, rot));
+    let fold = |it: &mut dyn Iterator<Item = &ArrangeTable>| {
+        it.map(extent)
+            .fold((0.0_f64, 0.0_f64), |a, b| (a.0.max(b.0), a.1.max(b.1)))
+    };
+    let ordinary: Vec<&ArrangeTable> = tables.iter().filter(|t| t.shape != "head").collect();
+    if ordinary.is_empty() {
+        fold(&mut tables.iter())
+    } else {
+        fold(&mut ordinary.into_iter())
+    }
 }
 
 /// A rectangular lattice of slots, first centre at `(ox, oy)`.
