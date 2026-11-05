@@ -7,6 +7,7 @@ import {
   GuestFilterState,
   GuestOverviewStats,
 } from "../types";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { GuestRegistryHeader } from "./GuestRegistryHeader";
 import { GuestRegistryMetrics } from "./GuestRegistryMetrics";
 import { GuestRegistryFilters } from "./GuestRegistryFilters";
@@ -143,71 +144,85 @@ export function GuestRegistryView({
   };
 
   return (
-    <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
-      <DeskItem>
-        <GuestRegistryHeader
-          eventName={eventName}
-          onOpenImport={() => setIsImportOpen(true)}
-          onOpenAdd={() => setIsAddOpen(true)}
-        />
-      </DeskItem>
-      <GuestRegistryMetrics eventId={eventId} stats={stats} />
-      <DeskItem className="flex flex-col gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 pt-4 pb-5 sm:px-7 sm:pt-5">
-        <GuestRegistryFilters
-          filters={initialFilters}
-          stats={stats}
-          availableGroups={availableGroups}
-          onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
-          onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
-        />
-        <GuestLedger
-          guests={initialGuests}
-          totalCount={totalGuests}
-          hasFilters={hasFilters}
-          page={initialPage}
-          pageSize={initialPageSize}
-          onPageChange={(p) =>
-            updateQueryParams(initialFilters, p, initialPageSize)
-          }
-          onPageSizeChange={(ps) => updateQueryParams(initialFilters, 1, ps)}
-          onSelectGuest={(g) => setSelectedGuest(g)}
-          onCopyLink={handleCopyLink}
-          onShareWhatsApp={handleShareWhatsApp}
-          onOpenAdd={() => setIsAddOpen(true)}
-          onOpenImport={() => setIsImportOpen(true)}
-        />
-      </DeskItem>
-      <GuestDetailDrawer
-        eventId={eventId}
-        eventName={eventName}
-        guest={selectedGuest}
-        isOpen={Boolean(selectedGuest)}
-        onClose={() => setSelectedGuest(null)}
-        onGuestUpdated={(updated) => {
-          setSelectedGuest(updated);
-          router.refresh();
+    <div className="sm:pb-16">
+      <ScreenHeader
+        title="Guests"
+        subtitle={eventName}
+        backHref={`/events/${eventId}`}
+        action={{
+          icon: "add_circle",
+          label: "Add guest",
+          onClick: () => setIsAddOpen(true),
         }}
-        onRequestDelete={(g) => setGuestToDelete(g)}
       />
-      <GuestFormModal
-        eventId={eventId}
-        isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        onSuccess={() => router.refresh()}
-      />
-      <DeleteGuestDialog
-        guest={guestToDelete}
-        isOpen={Boolean(guestToDelete)}
-        isDeleting={isDeleting}
-        onClose={() => setGuestToDelete(null)}
-        onConfirm={handleDeleteConfirm}
-      />
-      <CsvImportModal
-        eventId={eventId}
-        isOpen={isImportOpen}
-        onClose={() => setIsImportOpen(false)}
-        onImportComplete={() => router.refresh()}
-      />
-    </DeskMotion>
+      <DeskMotion className="flex flex-col gap-4 sm:gap-6 lg:gap-8">
+        <DeskItem>
+          <GuestRegistryHeader
+            eventName={eventName}
+            onOpenImport={() => setIsImportOpen(true)}
+            onOpenAdd={() => setIsAddOpen(true)}
+          />
+        </DeskItem>
+        <DeskItem>
+          <GuestRegistryMetrics eventId={eventId} stats={stats} />
+        </DeskItem>
+        <DeskItem className="flex flex-col gap-2 rounded-3xl border border-hairline bg-white/40 px-3 pt-3 pb-4 backdrop-blur-sm sm:px-7 sm:pt-5 sm:pb-5">
+          <GuestRegistryFilters
+            filters={initialFilters}
+            stats={stats}
+            availableGroups={availableGroups}
+            onChange={(f) => updateQueryParams(f, 1, initialPageSize)}
+            onReset={() => updateQueryParams(resetFilters, 1, initialPageSize)}
+          />
+          <GuestLedger
+            guests={initialGuests}
+            totalCount={totalGuests}
+            hasFilters={hasFilters}
+            page={initialPage}
+            pageSize={initialPageSize}
+            onPageChange={(p) =>
+              updateQueryParams(initialFilters, p, initialPageSize)
+            }
+            onPageSizeChange={(ps) => updateQueryParams(initialFilters, 1, ps)}
+            onSelectGuest={(g) => setSelectedGuest(g)}
+            onCopyLink={handleCopyLink}
+            onShareWhatsApp={handleShareWhatsApp}
+            onOpenAdd={() => setIsAddOpen(true)}
+            onOpenImport={() => setIsImportOpen(true)}
+          />
+        </DeskItem>
+        <GuestDetailDrawer
+          eventId={eventId}
+          eventName={eventName}
+          guest={selectedGuest}
+          isOpen={Boolean(selectedGuest)}
+          onClose={() => setSelectedGuest(null)}
+          onGuestUpdated={(updated) => {
+            setSelectedGuest(updated);
+            router.refresh();
+          }}
+          onRequestDelete={(g) => setGuestToDelete(g)}
+        />
+        <GuestFormModal
+          eventId={eventId}
+          isOpen={isAddOpen}
+          onClose={() => setIsAddOpen(false)}
+          onSuccess={() => router.refresh()}
+        />
+        <DeleteGuestDialog
+          guest={guestToDelete}
+          isOpen={Boolean(guestToDelete)}
+          isDeleting={isDeleting}
+          onClose={() => setGuestToDelete(null)}
+          onConfirm={handleDeleteConfirm}
+        />
+        <CsvImportModal
+          eventId={eventId}
+          isOpen={isImportOpen}
+          onClose={() => setIsImportOpen(false)}
+          onImportComplete={() => router.refresh()}
+        />
+      </DeskMotion>
+    </div>
   );
 }

@@ -112,7 +112,7 @@ export function GuestLedger({
                 <button
                   type="button"
                   onClick={() => onSelectGuest(guest)}
-                  className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 rounded-2xl px-2 py-4 text-left transition-colors hover:bg-ivory sm:grid-cols-[auto_minmax(0,1fr)_5.5rem_9rem] sm:px-3"
+                  className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 sm:gap-x-4 rounded-2xl px-1.5 py-3 text-left sm:py-4 transition-colors hover:bg-ivory sm:grid-cols-[auto_minmax(0,1fr)_5.5rem_9rem] sm:px-3"
                 >
                   <span
                     aria-hidden="true"
