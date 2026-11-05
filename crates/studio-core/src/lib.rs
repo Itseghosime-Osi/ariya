@@ -10,6 +10,7 @@ pub mod fit;
 pub mod geometry;
 pub mod grid;
 pub mod score;
+pub mod search;
 pub mod venue;
 pub mod wire;
 pub mod zones;
