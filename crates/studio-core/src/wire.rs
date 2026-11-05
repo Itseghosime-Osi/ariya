@@ -13,7 +13,10 @@ use crate::fit::{fit_tables, FitOptions, FitResult};
 use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
 };
+use crate::load::{assess, LoadInput};
 use crate::search::{search, LayoutOption, SearchInput};
+use crate::units;
+use crate::venue::VenueType;
 use crate::venue::Zone;
 
 /// The ABI the crate and `packages/studio` agree on.
@@ -149,6 +152,70 @@ pub struct ArrangeResponse {
     pub options: Vec<LayoutOption>,
 }
 
+/// What the studio knows about the room and the crowd. Everything the host has not answered is
+/// left out and filled from the venue's own defaults, so a half-answered plan still gets a verdict.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct ThermalRequest {
+    pub width: f64,
+    pub length: f64,
+    pub height: f64,
+    pub venue: VenueType,
+    pub headcount: u32,
+    #[serde(default)]
+    pub dancing: u32,
+    /// Air changes per hour. The dominant uncertainty, so the host can move it.
+    #[serde(default)]
+    pub ach: Option<f64>,
+    #[serde(default, rename = "outdoorC")]
+    pub outdoor_c: Option<f64>,
+    #[serde(default, rename = "outdoorRh")]
+    pub outdoor_rh: Option<f64>,
+    #[serde(default, rename = "targetC")]
+    pub target_c: Option<f64>,
+    #[serde(default, rename = "glazingM2")]
+    pub glazing_m2: Option<f64>,
+    /// The size of split under consideration, in "HP".
+    #[serde(default, rename = "unitHp")]
+    pub unit_hp: Option<f64>,
+    #[serde(default)]
+    pub derate: Option<f64>,
+}
+
+impl ThermalRequest {
+    fn into_input(self) -> LoadInput {
+        let mut input = LoadInput::new(self.width, self.length, self.height, self.venue);
+        input.headcount = self.headcount;
+        input.dancing = self.dancing;
+        if let Some(v) = self.ach {
+            input.ach = v;
+        }
+        if let Some(v) = self.outdoor_c {
+            input.outdoor_c = v;
+        }
+        if let Some(v) = self.outdoor_rh {
+            input.outdoor_rh = v;
+        }
+        if let Some(v) = self.target_c {
+            input.target_c = v;
+        }
+        if let Some(v) = self.glazing_m2 {
+            input.glazing_m2 = v;
+        }
+        if let Some(v) = self.unit_hp {
+            input.unit = units::for_hp(v);
+        }
+        if let Some(v) = self.derate {
+            input.derate = v;
+        }
+        input
+    }
+}
+
 fn ok(data: Value) -> String {
     json!({ "ok": true, "data": data }).to_string()
 }
@@ -205,7 +272,11 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             }
             Err(message) => err("bad_request", &message),
         },
-        OP_SCORE | OP_THERMAL | OP_CATERING | OP_RISK | OP_CHECKLIST => {
+        OP_THERMAL => match parse::<ThermalRequest>(payload) {
+            Ok(req) => ok(serde_json::to_value(assess(&req.into_input())).unwrap_or(Value::Null)),
+            Err(message) => err("bad_request", &message),
+        },
+        OP_SCORE | OP_CATERING | OP_RISK | OP_CHECKLIST => {
             err("not_implemented", "this operation is not built yet")
         }
         _ => err("unknown_op", "no such operation"),
@@ -314,8 +385,34 @@ mod tests {
 
     #[test]
     fn an_unbuilt_op_says_so() {
-        let out = dispatch(OP_THERMAL, b"{}");
+        let out = dispatch(OP_CATERING, b"{}");
         let value: Value = serde_json::from_str(&out).expect("json");
         assert_eq!(value["code"], "not_implemented");
+    }
+
+    #[test]
+    fn thermal_answers_a_half_answered_plan() {
+        let payload = br#"{
+            "width": 30, "length": 20, "height": 5,
+            "venue": "hall", "headcount": 300, "dancing": 100
+        }"#;
+        let out = dispatch(OP_THERMAL, payload);
+        let value: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(value["ok"], true);
+        assert_eq!(value["data"]["advice"]["level"], "damp");
+        assert_eq!(value["data"]["sizing"]["count"], 19);
+        assert!(value["data"]["loads"]["totalKw"].as_f64().unwrap() > 120.0);
+    }
+
+    #[test]
+    fn thermal_refuses_to_size_a_marquee() {
+        let payload = br#"{
+            "width": 30, "length": 20, "height": 5,
+            "venue": "marquee", "headcount": 300
+        }"#;
+        let out = dispatch(OP_THERMAL, payload);
+        let value: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(value["data"]["advice"]["level"], "not-viable");
+        assert!(value["data"]["sizing"].is_null());
     }
 }

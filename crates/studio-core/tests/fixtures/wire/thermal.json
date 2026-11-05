@@ -1,5 +1,63 @@
 {
-  "code": "not_implemented",
-  "message": "this operation is not built yet",
-  "ok": false
+  "data": {
+    "advice": {
+      "evaporative": false,
+      "headline": "19 splits would bring the room to 23.7 °C and 90.4 % humidity. They chill the air but cannot dry it.",
+      "level": "damp",
+      "reasons": [
+        "132.3 kW of load: 26 kW through the walls, roof and glass, 49 kW from people, 45.1 kW through the air that leaks in.",
+        "It needs a sensible heat ratio of 0.57, and a 2.5 HP split delivers 0.65.",
+        "The room takes on 56.4 kW of moisture; the splits can take out 41.1. The rest stays in the air, so it gets cold and stays damp.",
+        "The answer is a packaged unit or a chiller with outdoor air and a reheat or desiccant coil, not more splits.",
+        "19 units running together draw 41.8 kW, and starting them all draws 146.3 kW. Stagger the starts or specify inverter units."
+      ],
+      "wetBulbC": 30.00978663917898
+    },
+    "loads": {
+      "equipmentKw": 5.0,
+      "glazingKw": 3.132,
+      "infiltrationLatentKw": 36.4224072436979,
+      "infiltrationSensibleKw": 8.690647252999625,
+      "internalSensibleKw": 57.400000000000006,
+      "latentKw": 56.4224072436979,
+      "lightingKw": 7.2,
+      "massFlowKgS": 0.9608233557766308,
+      "peopleLatentKw": 20.0,
+      "peopleSensibleKw": 29.0,
+      "roofKw": 2.7,
+      "sensibleKw": 75.88264725299962,
+      "shr": 0.5735430709103689,
+      "solarKw": 16.2,
+      "totalKw": 132.30505449669752,
+      "uaWPerK": 1088.0,
+      "wInTarget": 0.01021963510084907,
+      "wOut": 0.025692082332193403,
+      "wallKw": 3.96
+    },
+    "prediction": {
+      "damp": true,
+      "rhIn": 90.38984034478057,
+      "roomC": 23.74708521679736,
+      "wIn": 0.016711876152920847
+    },
+    "sizing": {
+      "count": 19,
+      "deliveredLatentKw": 41.13956,
+      "deliveredSensibleKw": 76.40204,
+      "inputKw": 41.8,
+      "installedKw": 117.5416,
+      "surgeKw": 146.3,
+      "unit": {
+        "amps": 10.0,
+        "btu": 24000.0,
+        "coolingKw": 7.03,
+        "hp": 2.5,
+        "inputKw": 2.2,
+        "shrHumid": 0.65,
+        "shrRated": 0.75,
+        "surgeFactor": 3.5
+      }
+    }
+  },
+  "ok": true
 }

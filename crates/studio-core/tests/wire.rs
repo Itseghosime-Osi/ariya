@@ -109,10 +109,22 @@ fn arrange_envelope() {
 }
 
 #[test]
+fn thermal_envelope() {
+    let request = r#"{
+        "width": 30,
+        "length": 20,
+        "height": 5,
+        "venue": "hall",
+        "headcount": 300,
+        "dancing": 100
+    }"#;
+    snapshot("thermal", OP_THERMAL, request);
+}
+
+#[test]
 fn unbuilt_operations_share_one_envelope() {
     for (name, op) in [
         ("score", OP_SCORE),
-        ("thermal", OP_THERMAL),
         ("catering", OP_CATERING),
         ("risk", OP_RISK),
         ("checklist", OP_CHECKLIST),

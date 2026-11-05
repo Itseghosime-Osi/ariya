@@ -425,46 +425,6 @@ mod tests {
     }
 
     #[test]
-    fn probe_mix() {
-        let mut t: Vec<ArrangeTable> = Vec::new();
-        t.push(ArrangeTable {
-            id: "head".into(),
-            shape: "head".into(),
-            capacity: 10,
-            occupied: 0,
-        });
-        for i in 0..12 {
-            t.push(ArrangeTable {
-                id: format!("r10-{i}"),
-                shape: "round".into(),
-                capacity: 10,
-                occupied: 0,
-            });
-        }
-        for i in 0..12 {
-            t.push(ArrangeTable {
-                id: format!("r8-{i}"),
-                shape: "round".into(),
-                capacity: 8,
-                occupied: 0,
-            });
-        }
-        let z = room();
-        let input = SearchInput::new(30.0, 20.0, &z, &t, 0.6, None, 1);
-        let opts = search(&input);
-        for o in &opts {
-            println!(
-                "{} / {} -> placed {} unplaced {} total {:.3}",
-                o.archetype,
-                o.strategy,
-                o.placements.len(),
-                o.unplaced.len(),
-                o.score.total
-            );
-        }
-    }
-
-    #[test]
     fn the_search_returns_the_requested_number_of_options() {
         let opts = run(20, 1);
         assert_eq!(opts.len(), DEFAULT_KEEP);
