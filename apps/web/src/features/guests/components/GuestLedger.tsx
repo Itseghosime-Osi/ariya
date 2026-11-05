@@ -44,6 +44,7 @@ interface GuestLedgerProps {
   onShareWhatsApp: GuestAction;
   onOpenAdd: () => void;
   onOpenImport: () => void;
+  ended?: boolean;
 }
 
 const STATUS = {
@@ -66,6 +67,7 @@ export function GuestLedger({
   onShareWhatsApp,
   onOpenAdd,
   onOpenImport,
+  ended = false,
 }: GuestLedgerProps) {
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
   const startRow = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -80,6 +82,7 @@ export function GuestLedger({
       ) : guests.length === 0 ? (
         <EmptyState
           hasFilters={hasFilters}
+          ended={ended}
           onOpenAdd={onOpenAdd}
           onOpenImport={onOpenImport}
         />
@@ -167,11 +170,17 @@ export function GuestLedger({
                       <DropdownMenuItem onClick={() => onSelectGuest(guest)}>
                         View details and edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onCopyLink(guest)}>
+                      <DropdownMenuItem
+                        disabled={ended}
+                        onClick={() => onCopyLink(guest)}
+                      >
                         <Copy className="mr-2 h-4 w-4" />
                         Copy RSVP link
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onShareWhatsApp(guest)}>
+                      <DropdownMenuItem
+                        disabled={ended}
+                        onClick={() => onShareWhatsApp(guest)}
+                      >
                         <MessageCircle className="mr-2 h-4 w-4 text-emerald-600" />
                         Share on WhatsApp
                       </DropdownMenuItem>
@@ -241,10 +250,12 @@ export function GuestLedger({
 
 function EmptyState({
   hasFilters,
+  ended,
   onOpenAdd,
   onOpenImport,
 }: {
   hasFilters: boolean;
+  ended: boolean;
   onOpenAdd: () => void;
   onOpenImport: () => void;
 }) {
@@ -273,13 +284,18 @@ function EmptyState({
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-3">
-        <Button onClick={onOpenAdd} className="rounded-full px-6">
+        <Button
+          onClick={onOpenAdd}
+          disabled={ended}
+          className="rounded-full px-6"
+        >
           <UserPlus className="mr-2 h-4 w-4" />
           Add the first guest
         </Button>
         <Button
           variant="outline"
           onClick={onOpenImport}
+          disabled={ended}
           className="rounded-full border-gold/50 px-5"
         >
           <Upload className="mr-2 h-4 w-4 text-gold-ink" />

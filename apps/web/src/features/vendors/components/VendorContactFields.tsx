@@ -9,6 +9,7 @@ interface VendorContactFieldsProps {
   onNameChange: (val: string) => void;
   onPhoneChange: (val: string) => void;
   onEmailChange: (val: string) => void;
+  disabled?: boolean;
 }
 
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
@@ -22,6 +23,7 @@ export function VendorContactFields({
   onNameChange,
   onPhoneChange,
   onEmailChange,
+  disabled = false,
 }: VendorContactFieldsProps) {
   return (
     <div className="space-y-3 border-t border-hairline pt-3.5">
@@ -39,6 +41,7 @@ export function VendorContactFields({
             value={contactName}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Chef Femi"
+            disabled={disabled}
             className={FIELD}
           />
         </div>
@@ -52,6 +55,7 @@ export function VendorContactFields({
             value={contactPhone}
             onChange={(e) => onPhoneChange(e.target.value)}
             placeholder="0803 123 4567"
+            disabled={disabled}
             className={`${FIELD} tabular-nums`}
           />
         </div>

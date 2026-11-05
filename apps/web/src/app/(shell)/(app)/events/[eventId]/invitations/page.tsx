@@ -1,3 +1,6 @@
+import { getEventById } from "@/features/events/queries";
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -17,7 +20,10 @@ export default async function InvitationsPage({
   params,
 }: InvitationsPageProps) {
   const { eventId } = await params;
-  const data = await getInvitationDeskData(eventId);
+  const [data, eventData] = await Promise.all([
+    getInvitationDeskData(eventId),
+    getEventById(eventId),
+  ]);
 
   if (!data) {
     notFound();
@@ -38,7 +44,9 @@ export default async function InvitationsPage({
         </p>
       </div>
 
-      <InvitationsClient eventId={eventId} data={data} />
+      <EndedLock ended={isEventExpired(eventData?.event.date)}>
+        <InvitationsClient eventId={eventId} data={data} />
+      </EndedLock>
     </div>
   );
 }

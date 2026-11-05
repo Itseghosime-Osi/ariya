@@ -1,3 +1,6 @@
+import { getEventById } from "@/features/events/queries";
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -15,11 +18,18 @@ interface RemindersPageProps {
 
 export default async function RemindersPage({ params }: RemindersPageProps) {
   const { eventId } = await params;
-  const data = await getReminderDeskData(eventId);
+  const [data, eventData] = await Promise.all([
+    getReminderDeskData(eventId),
+    getEventById(eventId),
+  ]);
 
   if (!data) {
     notFound();
   }
 
-  return <RemindersClient eventId={eventId} data={data} />;
+  return (
+    <EndedLock ended={isEventExpired(eventData?.event.date)}>
+      <RemindersClient eventId={eventId} data={data} />
+    </EndedLock>
+  );
 }

@@ -14,6 +14,8 @@ interface VendorModalProps {
   initialVendor: Vendor | null;
   onClose: () => void;
   onSubmit: (input: CreateVendorInput) => Promise<void>;
+  /** The celebration has ended: only the paid amount can still be changed. */
+  paymentOnly?: boolean;
 }
 
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
@@ -25,6 +27,7 @@ export function VendorModal({
   initialVendor,
   onClose,
   onSubmit,
+  paymentOnly = false,
 }: VendorModalProps) {
   const {
     name,
@@ -54,11 +57,19 @@ export function VendorModal({
         <ModalHeader
           icon="restaurant_menu"
           eyebrow="Vendor loom"
-          title={initialVendor ? "Edit vendor contract" : "Register a vendor"}
+          title={
+            paymentOnly
+              ? "Record a payment"
+              : initialVendor
+                ? "Edit vendor contract"
+                : "Register a vendor"
+          }
           description={
-            initialVendor
-              ? "Change the terms, contact or what has been paid so far."
-              : "Add a supplier with their contract value and the deposit already paid."
+            paymentOnly
+              ? "This celebration has ended, so the contract is locked. You can still update what has been paid."
+              : initialVendor
+                ? "Change the terms, contact or what has been paid so far."
+                : "Add a supplier with their contract value and the deposit already paid."
           }
         />
 
@@ -81,6 +92,7 @@ export function VendorModal({
             </label>
             <input
               id="vendor-name"
+              disabled={paymentOnly}
               type="text"
               required
               value={name}
@@ -97,6 +109,7 @@ export function VendorModal({
               </label>
               <select
                 id="vendor-category"
+                disabled={paymentOnly}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className={`${FIELD} cursor-pointer`}
@@ -115,6 +128,7 @@ export function VendorModal({
               </label>
               <select
                 id="vendor-status"
+                disabled={paymentOnly}
                 value={status}
                 onChange={(e) => setStatus(e.target.value as VendorStatus)}
                 className={`${FIELD} cursor-pointer`}
@@ -134,6 +148,7 @@ export function VendorModal({
               </label>
               <input
                 id="vendor-cost"
+                disabled={paymentOnly}
                 type="number"
                 min="0"
                 step="1000"
@@ -150,6 +165,7 @@ export function VendorModal({
                 id="vendor-deposit"
                 type="number"
                 min="0"
+                max={paymentOnly ? costNaira : undefined}
                 step="1000"
                 value={depositNaira}
                 onChange={(e) => setDepositNaira(e.target.value)}
@@ -165,6 +181,7 @@ export function VendorModal({
             onNameChange={setContactName}
             onPhoneChange={setContactPhone}
             onEmailChange={setContactEmail}
+            disabled={paymentOnly}
           />
 
           <DialogFooter className="sticky bottom-0 -mx-5 mt-1 flex flex-row justify-end gap-2 border-t border-hairline bg-ivory px-5 py-3 sm:-mx-7 sm:space-x-0 sm:px-7">
@@ -184,9 +201,11 @@ export function VendorModal({
             >
               {loading
                 ? "Saving..."
-                : initialVendor
-                  ? "Save Changes"
-                  : "Create Vendor"}
+                : paymentOnly
+                  ? "Save payment"
+                  : initialVendor
+                    ? "Save Changes"
+                    : "Create Vendor"}
             </Button>
           </DialogFooter>
         </form>

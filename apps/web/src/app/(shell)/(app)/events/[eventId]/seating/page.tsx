@@ -1,3 +1,5 @@
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
@@ -30,12 +32,14 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
 
   return (
     <>
-      <SeatingDesk
-        eventId={eventId}
-        initialData={seatingData}
-        hallLayout={hall.layout}
-        hallLayoutAvailable={hall.available}
-      />
+      <EndedLock ended={isEventExpired(eventData.event.date)}>
+        <SeatingDesk
+          eventId={eventId}
+          initialData={seatingData}
+          hallLayout={hall.layout}
+          hallLayoutAvailable={hall.available}
+        />
+      </EndedLock>
     </>
   );
 }

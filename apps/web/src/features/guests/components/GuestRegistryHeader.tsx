@@ -7,12 +7,14 @@ interface GuestRegistryHeaderProps {
   eventName: string;
   onOpenImport: () => void;
   onOpenAdd: () => void;
+  ended?: boolean;
 }
 
 export function GuestRegistryHeader({
   eventName,
   onOpenImport,
   onOpenAdd,
+  ended = false,
 }: GuestRegistryHeaderProps) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-5">
@@ -32,6 +34,7 @@ export function GuestRegistryHeader({
         <Button
           variant="outline"
           onClick={onOpenImport}
+          disabled={ended}
           className="flex-1 rounded-full border-gold/50 bg-transparent px-5 standalone:max-md:flex-none hover:border-gold hover:bg-gold/10 sm:flex-none"
         >
           <Upload className="mr-2 h-4 w-4 text-gold-ink" />
@@ -39,6 +42,7 @@ export function GuestRegistryHeader({
         </Button>
         <Button
           onClick={onOpenAdd}
+          disabled={ended}
           className="flex-1 rounded-full px-6 standalone:max-md:hidden shadow-[0_6px_18px_-6px_rgba(74,17,29,0.55)] transition-transform hover:-translate-y-0.5 sm:flex-none"
         >
           <UserPlus className="mr-2 h-4 w-4" />

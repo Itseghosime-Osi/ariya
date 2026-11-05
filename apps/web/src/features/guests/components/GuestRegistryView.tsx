@@ -32,6 +32,8 @@ interface GuestRegistryViewProps {
   initialPage: number;
   initialPageSize: number;
   initialFilters: GuestFilterState;
+  /** The celebration has ended: the registry is read-only. */
+  ended?: boolean;
 }
 
 export function GuestRegistryView({
@@ -44,6 +46,7 @@ export function GuestRegistryView({
   initialPage,
   initialPageSize,
   initialFilters,
+  ended = false,
 }: GuestRegistryViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -149,15 +152,20 @@ export function GuestRegistryView({
         title="Guests"
         subtitle={eventName}
         backHref={`/events/${eventId}`}
-        action={{
-          icon: "add_circle",
-          label: "Add guest",
-          onClick: () => setIsAddOpen(true),
-        }}
+        action={
+          ended
+            ? undefined
+            : {
+                icon: "add_circle",
+                label: "Add guest",
+                onClick: () => setIsAddOpen(true),
+              }
+        }
       />
       <DeskMotion className="flex flex-col gap-4 sm:gap-6 lg:gap-8">
         <DeskItem>
           <GuestRegistryHeader
+            ended={ended}
             eventName={eventName}
             onOpenImport={() => setIsImportOpen(true)}
             onOpenAdd={() => setIsAddOpen(true)}
@@ -189,9 +197,11 @@ export function GuestRegistryView({
             onShareWhatsApp={handleShareWhatsApp}
             onOpenAdd={() => setIsAddOpen(true)}
             onOpenImport={() => setIsImportOpen(true)}
+            ended={ended}
           />
         </DeskItem>
         <GuestDetailDrawer
+          ended={ended}
           eventId={eventId}
           eventName={eventName}
           guest={selectedGuest}

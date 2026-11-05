@@ -202,3 +202,11 @@ select.desk-field {
       0 12px 28px rgba(28, 7, 13, 0.09);
   }
 }
+
+/* A field that cannot be changed reads as greyed out, not as an empty box. */
+.desk-field:disabled,
+.desk-field[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.3);
+}

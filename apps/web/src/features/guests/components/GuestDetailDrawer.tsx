@@ -16,6 +16,8 @@ interface GuestDetailDrawerProps {
   onClose: () => void;
   onGuestUpdated: (guest: GuestWithDetails) => void;
   onRequestDelete: (guest: GuestWithDetails) => void;
+  /** The celebration has ended: nothing here can be changed. */
+  ended?: boolean;
 }
 
 export function GuestDetailDrawer({
@@ -26,6 +28,7 @@ export function GuestDetailDrawer({
   onClose,
   onGuestUpdated,
   onRequestDelete,
+  ended = false,
 }: GuestDetailDrawerProps) {
   const [isEditing, setIsEditing] = React.useState(false);
 
@@ -120,17 +123,24 @@ export function GuestDetailDrawer({
               </div>
             </div>
 
-            <GuestDetailTokenCard
-              eventId={eventId}
-              eventName={eventName}
-              guestId={guest.id}
-              guestName={guest.name}
-              guestPhone={guest.phone}
-              rsvpToken={guest.rsvp_token}
-              onTokenUpdated={(newToken) =>
-                onGuestUpdated({ ...guest, rsvp_token: newToken })
-              }
-            />
+            {ended ? (
+              <p className="rounded-xl border border-hairline bg-white/40 p-3 text-xs text-label-2">
+                This celebration has ended, so this guest&rsquo;s invitation
+                link has expired.
+              </p>
+            ) : (
+              <GuestDetailTokenCard
+                eventId={eventId}
+                eventName={eventName}
+                guestId={guest.id}
+                guestName={guest.name}
+                guestPhone={guest.phone}
+                rsvpToken={guest.rsvp_token}
+                onTokenUpdated={(newToken) =>
+                  onGuestUpdated({ ...guest, rsvp_token: newToken })
+                }
+              />
+            )}
 
             {guest.notes && (
               <div className="rounded-xl bg-surface-container/30 p-3 text-xs">
@@ -145,11 +155,16 @@ export function GuestDetailDrawer({
               <Button
                 variant="destructive"
                 size="sm"
+                disabled={ended}
                 onClick={() => onRequestDelete(guest)}
               >
                 <Trash2 className="h-4 w-4 mr-1.5" /> Remove
               </Button>
-              <Button size="sm" onClick={() => setIsEditing(true)}>
+              <Button
+                size="sm"
+                disabled={ended}
+                onClick={() => setIsEditing(true)}
+              >
                 <Edit2 className="h-4 w-4 mr-1.5" /> Edit Guest
               </Button>
             </div>

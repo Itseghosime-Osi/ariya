@@ -21,6 +21,8 @@ interface VendorThreadProps {
   onAddTask: (vendor: VendorWithTasks) => void;
   onToggleTask: (taskId: string, isDone: boolean) => void;
   onDeleteTask: (taskId: string) => void;
+  /** The celebration has ended: only payments and ticking deliverables remain. */
+  ended?: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ export function VendorThread({
   onAddTask,
   onToggleTask,
   onDeleteTask,
+  ended = false,
 }: VendorThreadProps) {
   const [open, setOpen] = useState(false);
   const status = VENDOR_STATUS_META[vendor.status];
@@ -211,7 +214,8 @@ export function VendorThread({
             <button
               type="button"
               onClick={() => onAddTask(vendor)}
-              className="desk-chip inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-[11px] font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              disabled={ended}
+              className="desk-chip inline-flex min-h-[32px] disabled:cursor-not-allowed disabled:opacity-45 items-center gap-1 rounded-full px-3 text-[11px] font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               <Icon name="add_circle" size={13} />
               Add deliverable
@@ -265,6 +269,7 @@ export function VendorThread({
                     <button
                       type="button"
                       onClick={() => onDeleteTask(task.id)}
+                      disabled={ended}
                       aria-label={`Delete deliverable: ${task.task}`}
                       className="shrink-0 rounded p-0.5 text-label-3 opacity-50 transition-opacity hover:text-error focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy group-hover/task:opacity-100"
                     >
@@ -282,14 +287,15 @@ export function VendorThread({
               onClick={() => onEdit(vendor)}
               className="desk-chip inline-flex min-h-[34px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-label-2 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
-              <Icon name="edit" size={14} />
-              Edit contract
+              <Icon name={ended ? "payments" : "edit"} size={14} />
+              {ended ? "Record payment" : "Edit contract"}
             </button>
             <button
               type="button"
               onClick={() => onDelete(vendor.id)}
+              disabled={ended}
               aria-label={`Delete ${vendor.name}`}
-              className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-label-3 transition-colors hover:bg-error-container hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-label-3 transition-colors disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent disabled:hover:text-label-3 hover:bg-error-container hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               <Icon name="delete" size={14} />
               Delete

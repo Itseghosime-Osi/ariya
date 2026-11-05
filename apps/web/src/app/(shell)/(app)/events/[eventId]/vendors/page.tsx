@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
 import { getVendorsWithTasks } from "@/features/vendors/queries";
 import { VendorDesk } from "@/features/vendors/components/VendorDesk";
+import { isEventExpired } from "@/lib/event-expiry";
 import { getLagosDateKey } from "@/lib/format";
 
 interface VendorsPageProps {
@@ -37,6 +38,7 @@ export default async function VendorsPageRoute({ params }: VendorsPageProps) {
       eventTitle={eventTitle}
       todayKey={getLagosDateKey(Date.now()) ?? ""}
       initialData={vendorsData}
+      ended={isEventExpired(eventData.event.date)}
     />
   );
 }

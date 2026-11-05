@@ -36,6 +36,14 @@ test.describe("An event ends with its day", () => {
     // The database issues its own token; use the one it kept.
     const token = invited!.rsvp_token as string;
 
+    await db.from("vendors").insert({
+      event_id: eventId,
+      name: "Mama Put Catering",
+      category: "Catering",
+      cost_kobo: 100_000_00,
+      deposit_kobo: 20_000_00,
+    });
+
     const guest = await browser.newContext();
     const guestPage = await guest.newPage();
     await guestPage.goto(`/e/${slug}`);
@@ -85,5 +93,29 @@ test.describe("An event ends with its day", () => {
     await expect(
       page.getByRole("button", { name: /save settings/i })
     ).toHaveCount(0);
+
+    // Vendors: nothing can be added or removed, but a payment can still be recorded.
+    await page.goto(`/events/${eventId}/vendors`);
+    await expect(
+      page.getByRole("button", { name: /add vendor/i })
+    ).toBeDisabled();
+    await page
+      .locator("button[aria-expanded]")
+      .filter({ hasText: "Mama Put Catering" })
+      .click();
+    await expect(
+      page.getByRole("button", { name: /^delete mama put/i })
+    ).toBeDisabled();
+    await page.getByRole("button", { name: /record payment/i }).click();
+    await expect(page.locator("#vendor-name")).toBeDisabled();
+    await page.locator("#vendor-deposit").fill("50000");
+    await page.getByRole("button", { name: /save payment/i }).click();
+    await expect(page.getByText(/payment|updated/i).first()).toBeVisible();
+
+    // Guests: the registry is read-only.
+    await page.goto(`/events/${eventId}/guests`);
+    await expect(
+      page.getByRole("button", { name: /add guest/i })
+    ).toBeDisabled();
   });
 });

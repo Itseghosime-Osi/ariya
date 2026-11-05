@@ -1,3 +1,5 @@
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -29,5 +31,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const eventTitle =
     eventData?.event.couple?.trim() || eventData?.event.title || "Celebration";
 
-  return <TeamDesk eventId={eventId} eventTitle={eventTitle} data={data} />;
+  return (
+    <EndedLock ended={isEventExpired(eventData?.event.date)}>
+      <TeamDesk eventId={eventId} eventTitle={eventTitle} data={data} />
+    </EndedLock>
+  );
 }

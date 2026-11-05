@@ -94,6 +94,7 @@ export function ArchiveDesk({ items }: { items: ArchivedItem[] }) {
                 <span className="block truncate text-[12.5px] text-label-2">
                   {formatEventDate(item.date)} · {item.guests}{" "}
                   {item.guests === 1 ? "guest" : "guests"}
+                  {item.ended && <span className="sm:hidden"> · Ended</span>}
                 </span>
               </Link>
               <span

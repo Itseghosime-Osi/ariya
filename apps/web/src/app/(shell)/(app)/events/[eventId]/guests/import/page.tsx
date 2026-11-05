@@ -1,3 +1,5 @@
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -37,7 +39,9 @@ export default async function ImportGuestsPage({
           title="Import Guest Registry"
           description="Upload CSV spreadsheets, map columns, detect duplicates, and import guests."
         />
-        <CsvImportPageFlow eventId={data.event.id} />
+        <EndedLock ended={isEventExpired(data.event.date)}>
+          <CsvImportPageFlow eventId={data.event.id} />
+        </EndedLock>
       </div>
     </>
   );

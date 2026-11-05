@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { isEventExpired } from "@/lib/event-expiry";
 import { GuestRegistryView } from "@/features/guests/components/GuestRegistryView";
 import { getEventById } from "@/features/events/queries";
 import {
@@ -79,6 +80,7 @@ export default async function GuestRegistryPage({
         initialPage={page}
         initialPageSize={pageSize}
         initialFilters={filterState}
+        ended={isEventExpired(eventData.event.date)}
       />
     </>
   );
