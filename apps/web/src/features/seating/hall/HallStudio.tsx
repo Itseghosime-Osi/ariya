@@ -17,6 +17,7 @@ import {
   ChevronUp,
   CirclePlus,
   Hand,
+  CloudRain,
   LayoutGrid,
   Maximize,
   Minus,
@@ -94,6 +95,7 @@ import {
   RoomPanel,
   SeatPanel,
 } from "./StudioPanels";
+import { LayoutSummary } from "./LayoutSummary";
 import {
   ChairInspector,
   MultiInspector,
@@ -233,6 +235,7 @@ export function HallStudio({
   const [deck, setDeck] = useState<Deck>("guests");
   const [flyout, setFlyout] = useState<Flyout>(null);
   const [labels, setLabels] = useState(true);
+  const [rain, setRain] = useState(false);
   const [keysOpen, setKeysOpen] = useState(false);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [cam, setCam] = useState<{ pct: number; view: "top" | "3d" }>({
@@ -1092,7 +1095,11 @@ export function HallStudio({
     else if (k === "p") openDecor();
     else if (k === "l") setLabels((v) => !v);
     else if (k === "n") toggleMood();
-    else if (k === "f") view3d.current?.command("fit");
+    else if (k === "w") {
+      if (!openVenue) return false;
+      view3d.current?.command("rain");
+      setRain((v) => !v);
+    } else if (k === "f") view3d.current?.command("fit");
     else if (key === "\\") togglePanel();
     else if (key === "Delete" || key === "Backspace") remove();
     else if (k === "r") rotateBy(shift ? -15 : 15);
@@ -1153,6 +1160,7 @@ export function HallStudio({
       });
     else if (m.t === "camera")
       setCam({ pct: m.pct ?? 100, view: m.view ?? "3d" });
+    else if (m.t === "rain") setRain(!!m.on);
   };
 
   const layers = [
@@ -1179,6 +1187,10 @@ export function HallStudio({
     0
   );
   const evening = layout.mood === "evening";
+  // Rain only makes sense where there is sky above the tables.
+  const openVenue =
+    layout.venue.environment === "outdoor" ||
+    ["garden", "field", "beach", "rooftop"].includes(layout.venue.type);
 
   const rail =
     "group/rail relative grid h-11 w-11 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] aria-pressed:bg-night aria-pressed:text-white aria-expanded:bg-night aria-expanded:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
@@ -1595,6 +1607,21 @@ export function HallStudio({
                 keys={["N"]}
               />
             </button>
+            {openVenue && (
+              <button
+                type="button"
+                className={rail}
+                aria-pressed={rain}
+                onClick={() => {
+                  view3d.current?.command("rain");
+                  setRain((v) => !v);
+                }}
+                aria-label={rain ? "Stop the rain" : "Show rain"}
+              >
+                <CloudRain size={18} />
+                <RailTip label={rain ? "Stop the rain" : "Rain"} keys={["W"]} />
+              </button>
+            )}
             <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
             <button
               type="button"
@@ -1990,22 +2017,34 @@ export function HallStudio({
                 }}
               />
             ) : deck === "room" ? (
-              <RoomPanel
-                layout={layout}
-                onChange={(patch) => updateLayout((l) => ({ ...l, ...patch }))}
-                onResetZones={() =>
-                  updateLayout((l) => ({
-                    ...l,
-                    zones: defaultZones(l.width, l.length),
-                  }))
-                }
-                layers={layers}
-                selection={selection}
-                onSelectLayer={(p) => {
-                  setSelection([p]);
-                  view3d.current?.focus(`${p.type}:${p.id}`);
-                }}
-              />
+              <>
+                <RoomPanel
+                  layout={layout}
+                  onChange={(patch) =>
+                    updateLayout((l) => ({ ...l, ...patch }))
+                  }
+                  onResetZones={() =>
+                    updateLayout((l) => ({
+                      ...l,
+                      zones: defaultZones(l.width, l.length),
+                    }))
+                  }
+                  layers={layers}
+                  selection={selection}
+                  onSelectLayer={(p) => {
+                    setSelection([p]);
+                    view3d.current?.focus(`${p.type}:${p.id}`);
+                  }}
+                />
+                <LayoutSummary
+                  layout={layout}
+                  tables={scene.tables}
+                  onFocus={(id) => {
+                    setSelection([{ type: "table", id }]);
+                    view3d.current?.focus(`table:${id}`);
+                  }}
+                />
+              </>
             ) : deck === "fit" ? (
               <FitPanel
                 presets={fitPresets}
