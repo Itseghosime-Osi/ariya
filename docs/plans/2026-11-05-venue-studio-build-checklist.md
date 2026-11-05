@@ -176,7 +176,7 @@ Goal: three explainable options instead of one.
 
 ### 2.4 UI
 
-- [x] **2.4.1** `ARRANGE` returns ranked options; UI renders the top three as cards with seats, table count and the one-line trade-off. _(The fit deck asks the engine for three options and renders each as a card: seats, table count, and the trade-off the score chose to name. Wiring it up exposed two engine bugs — circulation marked every table unreachable, and one head table sized the whole lattice — both fixed in `score.rs` and `archetype.rs`.)_
+- [x] **2.4.1** `ARRANGE` returns ranked options; UI renders the top three as cards with seats, table count and the one-line trade-off. _(The fit deck asks the engine for three options and renders each as a card: seats, table count, and the trade-off the score chose to name. Wiring it up exposed two engine bugs — circulation marked every table unreachable, and one head table sized the whole lattice — both fixed in `score.rs` and `archetype.rs`. The seeded hall then placed 18 of 25; a staggered grid that kept the square row pitch, and a wall-margin comparison that lost the first row and column to the last bit of a float, were costing it three more. It now places 21, and the four that do not fit are the dance floor and the stage.)_
 - [x] **2.4.2** "Why is A better?" opens the score breakdown. _(Each card's "Why?" opens the full breakdown term by term, with the raw measure, its contribution and the sentence the engine wrote for it.)_
 - [x] **2.4.3** Choosing an option is one tap and one undo step. _(Applying is a single `hall.update`, so one undo returns the hall exactly as it was; verified in the browser.)_
 - [x] **2.4.4** Flag: switch between "current" and "new" layouts for comparison during rollout. _(After applying, a Compare bar flips the hall between the layout you had and the new one. Flipping uses a history-free `replace`, so comparing never fills the undo stack; "Keep this" settles on whichever is showing, and any edit or undo ends the comparison.)_
@@ -191,11 +191,11 @@ Goal: "it will be 29 °C and damp; splits won't fix it" — with the arithmetic 
 
 ### 3.1 Model
 
-- [ ] **3.1.1** `load.rs`: sensible and latent balances, SHR, room temperature given installed capacity (research §C.4).
-- [ ] **3.1.2** `units.rs`: split AC catalogue (1.0–2.5 HP), nameplate derate, starting surge, SHR at rating and in humid air.
-- [ ] **3.1.3** Infiltration ACH as a **visible, adjustable input** with plain-language labels — it is the dominant uncertainty.
-- [ ] **3.1.4** Marquees: ACH 5–10, and the "mechanical cooling is not viable here" verdict instead of a fantasy number.
-- [ ] **3.1.5** Evaporative cooling: recommend only where outdoor wet-bulb < ~22 °C; Lagos never qualifies.
+- [x] **3.1.1** `load.rs`: sensible and latent balances, SHR, room temperature given installed capacity (research §C.4). _(Magnus for the moisture content, Stull for the wet-bulb. The worked example reproduces at 132 kW and SHR 0.57; two rows of the research table do not survive the arithmetic and are noted where they are asserted.)_
+- [x] **3.1.2** `units.rs`: split AC catalogue (1.0–2.5 HP), nameplate derate, starting surge, SHR at rating and in humid air. _(The count is on the sticker, because that is what a supplier quotes; the derate shows up in the room temperature the model then predicts, not in a hidden oversize.)_
+- [ ] **3.1.3** Infiltration ACH as a **visible, adjustable input** with plain-language labels — it is the dominant uncertainty. _(The engine field and the `THERMAL` request both carry it; the control lands with the thermal panel in 3.3.)_
+- [x] **3.1.4** Marquees: ACH 5–10, and the "mechanical cooling is not viable here" verdict instead of a fantasy number. _(A marquee gets no sizing and no prediction at all — there is no honest number to give.)_
+- [x] **3.1.5** Evaporative cooling: recommend only where outdoor wet-bulb < ~22 °C; Lagos never qualifies. _(Lagos sits at 30 °C wet-bulb, so the advice says evaporative cooling would add moisture rather than cool.)_
 
 ### 3.2 Field and placement
 
