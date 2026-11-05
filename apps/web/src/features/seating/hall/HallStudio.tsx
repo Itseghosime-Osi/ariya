@@ -82,6 +82,14 @@ import { useStudioEngine } from "./useStudioEngine";
 import { planSeating } from "./autoseat";
 import { autoArrange } from "./arrange";
 import {
+  applyOption,
+  seedFrom,
+  toArrangeRequest,
+  type SuggestTable,
+} from "./suggested-layouts";
+import { SuggestedLayouts } from "./SuggestedLayouts";
+import type { LayoutOption } from "@ariya/studio";
+import {
   Hall3D,
   type Hall3DHandle,
   type HallMessage,
@@ -103,7 +111,7 @@ import {
   ZoneInspector,
   type Align,
 } from "./Inspector";
-import { ChairGlyph, ShapeGlyph, TableGlyph } from "./studio-ui";
+import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
 import { Keys, SHORTCUTS } from "./shortcuts";
 
 type Positions = Record<string, { x: number; y: number }>;
@@ -244,6 +252,7 @@ export function HallStudio({
   });
   const [busy, setBusy] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
+  const [suggestions, setSuggestions] = useState<LayoutOption[] | null>(null);
   const say = (msg: string) => setAnnounce(msg);
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
@@ -1039,6 +1048,57 @@ export function HallStudio({
         `Hall arranged and ${removed} empty ${removed === 1 ? "table" : "tables"} without room removed.`
       );
     }
+  };
+
+  /** Ask the Rust engine for three ranked layouts of the whole hall. */
+  const suggestLayouts = () => {
+    if (!studioEngine) {
+      say("The layout engine is still loading.");
+      return;
+    }
+    const tables: SuggestTable[] = data.tables.map((t) => ({
+      id: t.id,
+      shape: t.shape,
+      capacity: t.capacity,
+      occupied: t.occupiedSeats,
+    }));
+    try {
+      const res = studioEngine.arrange(
+        toArrangeRequest(layout, tables, gap, seedFrom(eventId, layout.version))
+      );
+      setSuggestions(res.options);
+      say(
+        res.options.length
+          ? `${res.options.length} layouts to choose from.`
+          : "No layouts could be worked out for this hall."
+      );
+    } catch {
+      say("Could not work out layouts just now.");
+    }
+  };
+
+  /** Apply one of the suggested layouts, as a single undoable step. */
+  const chooseSuggestion = (option: LayoutOption) => {
+    const tableIds = data.tables.map((t) => t.id);
+    const applied = applyOption(option, tableIds, layout);
+    hall.update(
+      (l) => ({
+        ...l,
+        zones: applied.zones,
+        rotations: {
+          ...l.rotations,
+          ...Object.fromEntries(applied.positions.map((p) => [p.id, p.rot])),
+        },
+      }),
+      positions
+    );
+    void setTablePositions(
+      applied.positions.map((p) => ({ id: p.id, x: toCm(p.x), y: toCm(p.y) }))
+    );
+    setSelection([]);
+    setSuggestions(null);
+    view3d.current?.command("fit");
+    say(`${option.archetype_label} applied. Undo if you prefer how it was.`);
   };
 
   const seatEveryone = async () => {
@@ -2046,34 +2106,69 @@ export function HallStudio({
                 />
               </>
             ) : deck === "fit" ? (
-              <FitPanel
-                presets={fitPresets}
-                preset={preset}
-                onPreset={setFitPreset}
-                fitEmpty={fitEmpty}
-                fitAround={fitAround}
-                aisle={aisle}
-                onAisle={setAisle}
-                buffer={buffer}
-                onBuffer={setBuffer}
-                target={target}
-                shortBy={shortBy}
-                tablesNeeded={tablesNeeded}
-                gap={gap}
-                busy={busy}
-                onFill={fill}
-                tableCount={data.tables.length}
-                emptyCount={
-                  data.tables.filter((t) => t.occupiedSeats === 0).length
-                }
-                crowded={warnCount}
-                onAddOne={() =>
-                  void placeNew(preset.shape, preset.capacity, undefined, false)
-                }
-                onRemove={(n) => void removeTables(n)}
-                onFixCrowding={() => void fixCrowding()}
-                onAutoLayout={autoLayout}
-              />
+              <>
+                {studioStatus === "ready" && (
+                  <Section title="Three ways to lay out the hall">
+                    <button
+                      type="button"
+                      onClick={suggestLayouts}
+                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                    >
+                      <Sparkles size={15} /> Suggest three layouts
+                    </button>
+                    <p className="mt-2 text-[11px] text-label-2">
+                      Ranked by seats, sightlines, circulation and service. Each
+                      option explains its trade-off.
+                    </p>
+                  </Section>
+                )}
+                {suggestions && (
+                  <SuggestedLayouts
+                    options={suggestions}
+                    tables={data.tables.map((t) => ({
+                      id: t.id,
+                      shape: t.shape,
+                      capacity: t.capacity,
+                      occupied: t.occupiedSeats,
+                    }))}
+                    onChoose={chooseSuggestion}
+                    onClose={() => setSuggestions(null)}
+                  />
+                )}
+                <FitPanel
+                  presets={fitPresets}
+                  preset={preset}
+                  onPreset={setFitPreset}
+                  fitEmpty={fitEmpty}
+                  fitAround={fitAround}
+                  aisle={aisle}
+                  onAisle={setAisle}
+                  buffer={buffer}
+                  onBuffer={setBuffer}
+                  target={target}
+                  shortBy={shortBy}
+                  tablesNeeded={tablesNeeded}
+                  gap={gap}
+                  busy={busy}
+                  onFill={fill}
+                  tableCount={data.tables.length}
+                  emptyCount={
+                    data.tables.filter((t) => t.occupiedSeats === 0).length
+                  }
+                  crowded={warnCount}
+                  onAddOne={() =>
+                    void placeNew(
+                      preset.shape,
+                      preset.capacity,
+                      undefined,
+                      false
+                    )
+                  }
+                  onRemove={(n) => void removeTables(n)}
+                  onFixCrowding={() => void fixCrowding()}
+                  onAutoLayout={autoLayout}
+                />
+              </>
             ) : deck === "seat" ? (
               <SeatPanel
                 plan={seatPlan.plan}
