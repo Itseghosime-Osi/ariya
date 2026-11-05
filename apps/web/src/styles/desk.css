@@ -480,3 +480,70 @@
     display: none;
   }
 }
+
+/* Profile: the host card. Wine with a faint gold aso-oke weave, a glow, and a slowly turning
+   dashed ring round the seal (app/(shell)/(app)/profile/page.tsx). */
+.profile-card {
+  background:
+    radial-gradient(120% 80% at 50% 0%, #7a1530 0%, transparent 62%),
+    radial-gradient(90% 70% at 100% 100%, #3a0a16 0%, transparent 70%),
+    linear-gradient(160deg, #4a0f1c 0%, #2a0610 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(246, 226, 173, 0.22),
+    inset 0 1px 0 rgba(255, 246, 220, 0.16),
+    0 30px 70px -34px rgba(42, 6, 16, 0.9);
+}
+.profile-card__weave {
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  background:
+    repeating-linear-gradient(45deg, #e9c98a 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(-45deg, #e9c98a 0 1px, transparent 1px 14px);
+  mask-image: radial-gradient(80% 70% at 50% 30%, #000 0%, transparent 75%);
+  pointer-events: none;
+}
+.profile-card__glow {
+  position: absolute;
+  left: 50%;
+  top: -30%;
+  width: 90%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(226, 187, 108, 0.32),
+    transparent 62%
+  );
+  pointer-events: none;
+}
+.profile-card__seal {
+  width: 132px;
+  height: 132px;
+  flex-shrink: 0;
+}
+.profile-card__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(233, 201, 138, 0.55);
+  animation: profile-ring 40s linear infinite;
+}
+.profile-card__ring::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 201, 138, 0.22);
+}
+@keyframes profile-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-card__ring {
+    animation: none;
+  }
+}

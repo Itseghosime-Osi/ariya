@@ -7,9 +7,17 @@ import { Icon, type IconName } from "@/components/ui/icon";
 
 interface ScreenHeaderProps {
   title: string;
+  /** A small line under the title, such as the celebration's name. */
+  subtitle?: string;
   /** Where Back goes when there is no earlier page in this tab to return to. */
   backHref: string;
-  action?: { href: string; icon: IconName; label: string };
+  /** One action on the right: a link, or a button that opens something. */
+  action?: {
+    icon: IconName;
+    label: string;
+    href?: string;
+    onClick?: () => void;
+  };
 }
 
 const CIRCLE =
@@ -21,7 +29,12 @@ const CIRCLE =
  * app's top bar on account screens (Settings, Profile). In a browser, and from tablet width up,
  * the page keeps the website's top bar and its large heading.
  */
-export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  backHref,
+  action,
+}: ScreenHeaderProps) {
   const router = useRouter();
   const back = () => {
     // Return to wherever they came from inside the app; a fresh tab goes to backHref.
@@ -35,18 +48,38 @@ export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
   return (
     <div
       data-screen-header
-      className="sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden grid-cols-[44px_1fr_44px] items-center gap-3 border-b border-hairline bg-[#f7f2e8]/92 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
+      className="app-bar sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden min-h-16 grid-cols-[44px_1fr_44px] items-center gap-3 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
     >
       <button type="button" onClick={back} aria-label="Back" className={CIRCLE}>
         <Icon name="chevron_left" size={20} />
       </button>
-      <h1 className="truncate text-center font-display text-[1.35rem] font-semibold leading-none text-night">
-        {title}
-      </h1>
-      {action ? (
+      <div className="min-w-0 text-center">
+        <div
+          role="heading"
+          aria-level={1}
+          className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night"
+        >
+          {title}
+        </div>
+        {subtitle && (
+          <p className="-mt-0.5 truncate text-[11px] leading-tight text-label-2">
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {action?.href ? (
         <Link href={action.href} aria-label={action.label} className={CIRCLE}>
           <Icon name={action.icon} size={17} />
         </Link>
+      ) : action?.onClick ? (
+        <button
+          type="button"
+          onClick={action.onClick}
+          aria-label={action.label}
+          className={CIRCLE}
+        >
+          <Icon name={action.icon} size={17} />
+        </button>
       ) : (
         <span aria-hidden="true" />
       )}

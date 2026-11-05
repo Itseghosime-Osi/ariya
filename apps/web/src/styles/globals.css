@@ -7,6 +7,7 @@
 
 :root {
   --ivory: #f7f2ea;
+  --chrome: #f7f2ea;
   --surface: #ffffff;
   --night: #1c0f14;
   --label-2: #5a474e;
@@ -267,6 +268,8 @@ body:has([data-auth-shell]) {
   transition: background-color 300ms ease;
 }
 .sb[data-collapsed="false"] .sb-count {
+  /* Room around the ring and the words, so the chip never crowds its own border. */
+  padding: 10px 16px 10px 12px;
   background: rgba(233, 201, 138, 0.07);
   box-shadow: inset 0 0 0 1px rgba(233, 201, 138, 0.14);
 }
@@ -333,7 +336,8 @@ body:has([data-auth-shell]) {
 /* Hover: a soft gold light follows the cursor down the list, and the icon gives a little shimmy. */
 .sb-glow {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto 0;
+  height: var(--sb-h, 100%);
   pointer-events: none;
   background: radial-gradient(
     160px 90px at 50% var(--my, -200px),

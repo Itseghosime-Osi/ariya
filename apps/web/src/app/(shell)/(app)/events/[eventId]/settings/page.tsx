@@ -1,8 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/components/layout/page-header";
+import { ScreenHeader } from "@/components/layout/screen-header";
+import { DeskPageHeader } from "@/components/ui/desk-page-header";
 import { getEventById } from "@/features/events/queries";
+import { isEventExpired } from "@/lib/event-expiry";
 import { EventSettingsForm } from "@/features/events/components/EventSettingsForm";
 
 interface EventSettingsPageProps {
@@ -30,15 +32,28 @@ export default async function EventSettingsPage({
     notFound();
   }
 
+  const { event } = data;
+
   return (
-    <>
-      <div className="space-y-6">
-        <PageHeader
+    <div className="space-y-4 sm:space-y-6 sm:pb-16 lg:space-y-8">
+      <ScreenHeader
+        title="Event settings"
+        subtitle={event.couple || event.title}
+        backHref={`/events/${eventId}`}
+      />
+      <div className="standalone:max-md:hidden">
+        <DeskPageHeader
+          compact
+          eyebrow={`Settings · ${event.couple || event.title}`}
           title="Celebration Settings"
-          description="Configure core ceremonial parameters, URL routing, visibility, and lifecycle options."
+          description="Names, date, venue, guest link and lifecycle. Changes reach your guests as soon as you save."
         />
-        <EventSettingsForm event={data.event} userRole={data.role} />
       </div>
-    </>
+      <EventSettingsForm
+        event={event}
+        userRole={data.role}
+        ended={isEventExpired(event.date)}
+      />
+    </div>
   );
 }

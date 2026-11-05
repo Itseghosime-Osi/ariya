@@ -9,11 +9,12 @@ interface VendorContactFieldsProps {
   onNameChange: (val: string) => void;
   onPhoneChange: (val: string) => void;
   onEmailChange: (val: string) => void;
+  disabled?: boolean;
 }
 
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
 const FIELD =
-  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
+  "desk-field mt-1.5 w-full rounded-2xl px-4 py-2.5 text-base text-night sm:text-sm focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function VendorContactFields({
   contactName,
@@ -22,9 +23,10 @@ export function VendorContactFields({
   onNameChange,
   onPhoneChange,
   onEmailChange,
+  disabled = false,
 }: VendorContactFieldsProps) {
   return (
-    <div className="space-y-3 border-t border-outline-variant/40 pt-4">
+    <div className="space-y-3 border-t border-hairline pt-3.5">
       <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-label-3">
         Contact details (optional)
       </span>
@@ -39,6 +41,7 @@ export function VendorContactFields({
             value={contactName}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Chef Femi"
+            disabled={disabled}
             className={FIELD}
           />
         </div>
@@ -52,6 +55,7 @@ export function VendorContactFields({
             value={contactPhone}
             onChange={(e) => onPhoneChange(e.target.value)}
             placeholder="0803 123 4567"
+            disabled={disabled}
             className={`${FIELD} tabular-nums`}
           />
         </div>

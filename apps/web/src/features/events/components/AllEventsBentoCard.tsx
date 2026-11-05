@@ -122,7 +122,7 @@ export function AllEventsBentoCard({
       id="all-events-card"
       aria-labelledby="all-events-heading"
       data-testid="all-events-card"
-      className="bento-card p-5 sm:p-6 lg:col-span-12"
+      className="bento-card p-4 sm:p-6 lg:col-span-12"
     >
       <Tabs.Root
         value={activeTab}

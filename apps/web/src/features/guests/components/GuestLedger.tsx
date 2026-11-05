@@ -44,12 +44,13 @@ interface GuestLedgerProps {
   onShareWhatsApp: GuestAction;
   onOpenAdd: () => void;
   onOpenImport: () => void;
+  ended?: boolean;
 }
 
 const STATUS = {
   accepted: { label: "Attending", className: "text-success" },
   declined: { label: "Declined", className: "text-error" },
-  pending: { label: "Awaiting reply", className: "text-gold-ink" },
+  pending: { label: "Awaiting", className: "text-gold-ink" },
 } as const;
 
 export function GuestLedger({
@@ -66,6 +67,7 @@ export function GuestLedger({
   onShareWhatsApp,
   onOpenAdd,
   onOpenImport,
+  ended = false,
 }: GuestLedgerProps) {
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
   const startRow = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -80,6 +82,7 @@ export function GuestLedger({
       ) : guests.length === 0 ? (
         <EmptyState
           hasFilters={hasFilters}
+          ended={ended}
           onOpenAdd={onOpenAdd}
           onOpenImport={onOpenImport}
         />
@@ -112,11 +115,11 @@ export function GuestLedger({
                 <button
                   type="button"
                   onClick={() => onSelectGuest(guest)}
-                  className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 rounded-2xl px-2 py-4 text-left transition-colors hover:bg-ivory sm:grid-cols-[auto_minmax(0,1fr)_5.5rem_9rem] sm:px-3"
+                  className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 sm:gap-x-4 rounded-2xl px-1.5 py-3 text-left sm:py-4 transition-colors hover:bg-ivory sm:grid-cols-[auto_minmax(0,1fr)_5.5rem_9rem] sm:px-3"
                 >
                   <span
                     aria-hidden="true"
-                    className="row-span-2 flex h-11 w-11 items-center justify-center rounded-full bg-wine/10 font-serif text-base font-bold text-wine transition-colors group-hover:bg-wine group-hover:text-ivory sm:row-span-1"
+                    className="row-span-1 flex h-11 w-11 items-center justify-center rounded-full bg-wine/10 font-serif text-base font-bold text-wine transition-colors group-hover:bg-wine group-hover:text-ivory sm:row-span-1"
                   >
                     {initials(guest.name)}
                   </span>
@@ -131,6 +134,10 @@ export function GuestLedger({
                     </span>
                     <span className="block truncate text-xs text-on-surface-variant">
                       {detail || "No group"}
+                      <span className="sm:hidden">
+                        {" · "}
+                        {seats} {seats === 1 ? "seat" : "seats"}
+                      </span>
                     </span>
                   </span>
                   <span
@@ -142,7 +149,7 @@ export function GuestLedger({
                     />
                     {status.label}
                   </span>
-                  <span className="text-xs tabular-nums text-on-surface-variant sm:order-3 sm:text-sm">
+                  <span className="hidden text-xs tabular-nums text-on-surface-variant sm:order-3 sm:block sm:text-sm">
                     {seats} {seats === 1 ? "seat" : "seats"}
                   </span>
                 </button>
@@ -163,11 +170,17 @@ export function GuestLedger({
                       <DropdownMenuItem onClick={() => onSelectGuest(guest)}>
                         View details and edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onCopyLink(guest)}>
+                      <DropdownMenuItem
+                        disabled={ended}
+                        onClick={() => onCopyLink(guest)}
+                      >
                         <Copy className="mr-2 h-4 w-4" />
                         Copy RSVP link
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onShareWhatsApp(guest)}>
+                      <DropdownMenuItem
+                        disabled={ended}
+                        onClick={() => onShareWhatsApp(guest)}
+                      >
                         <MessageCircle className="mr-2 h-4 w-4 text-emerald-600" />
                         Share on WhatsApp
                       </DropdownMenuItem>
@@ -237,10 +250,12 @@ export function GuestLedger({
 
 function EmptyState({
   hasFilters,
+  ended,
   onOpenAdd,
   onOpenImport,
 }: {
   hasFilters: boolean;
+  ended: boolean;
   onOpenAdd: () => void;
   onOpenImport: () => void;
 }) {
@@ -269,13 +284,18 @@ function EmptyState({
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-3">
-        <Button onClick={onOpenAdd} className="rounded-full px-6">
+        <Button
+          onClick={onOpenAdd}
+          disabled={ended}
+          className="rounded-full px-6"
+        >
           <UserPlus className="mr-2 h-4 w-4" />
           Add the first guest
         </Button>
         <Button
           variant="outline"
           onClick={onOpenImport}
+          disabled={ended}
           className="rounded-full border-gold/50 px-5"
         >
           <Upload className="mr-2 h-4 w-4 text-gold-ink" />

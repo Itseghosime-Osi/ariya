@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getPublicEventBySlug } from "@/features/events/queries";
+import { ExpiredEventCard } from "@/features/events/components/ExpiredEventCard";
 import { PublicHero } from "./PublicHero";
 import { PublicDetails } from "./PublicDetails";
 import { PublicPassLookup } from "./PublicPassLookup";
@@ -19,6 +20,13 @@ export async function generateMetadata({
 
   if (!event) {
     return { title: "Celebration Not Found • Àríyá" };
+  }
+
+  if (event.expired) {
+    return {
+      title: "This celebration has ended • Àríyá",
+      robots: { index: false, follow: false },
+    };
   }
 
   return {
@@ -44,6 +52,16 @@ export default async function PublicCelebrationPage({
   const event = await getPublicEventBySlug(slug);
   if (!event) {
     notFound();
+  }
+
+  if (event.expired) {
+    return (
+      <div className="flex min-h-screen flex-col justify-center bg-surface px-4 py-8 sm:px-6">
+        <main className="mx-auto w-full max-w-xl">
+          <ExpiredEventCard title={event.title} couple={event.couple} />
+        </main>
+      </div>
+    );
   }
 
   return (

@@ -41,6 +41,7 @@ export interface InvitationData {
 export type RsvpViewMode =
   | "invalid_link"
   | "closed"
+  | "expired"
   | "deadline_passed"
   | "already_replied"
   | "active"

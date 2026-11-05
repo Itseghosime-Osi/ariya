@@ -2,13 +2,8 @@
 
 import * as React from "react";
 import Papa from "papaparse";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FORM_DIALOG, ModalHeader } from "@/components/ui/modal-header";
 import { CsvUploadDropzone } from "./CsvUploadDropzone";
 import { CsvColumnMappingDesk } from "./CsvColumnMappingDesk";
 import { CsvValidationPreview } from "./CsvValidationPreview";
@@ -162,18 +157,15 @@ export function CsvImportModal({
         }
       }}
     >
-      <DialogContent className="max-h-[92vh] max-w-2xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
-        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
-            Guest registry
-          </p>
-          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
-            {step === "summary" ? "Import Summary" : "Import Guests from CSV"}
-          </DialogTitle>
-          <DialogDescription>
-            Bring in a whole spreadsheet at once. You can review everything
-            before it is added.
-          </DialogDescription>
+      <DialogContent className={`${FORM_DIALOG} max-w-2xl`}>
+        <ModalHeader
+          icon="upload"
+          eyebrow="Guest registry"
+          title={
+            step === "summary" ? "Import Summary" : "Import Guests from CSV"
+          }
+          description="Bring in a whole spreadsheet at once. You can review everything before it is added."
+        >
           <ol
             aria-label="Import progress"
             className="mt-3 flex items-center gap-2 text-xs font-semibold"
@@ -195,10 +187,10 @@ export function CsvImportModal({
                     aria-hidden="true"
                     className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] transition-colors ${
                       state === "todo"
-                        ? "border border-outline-variant text-on-surface-variant"
+                        ? "border border-champagne/30 text-champagne/60"
                         : state === "current"
-                          ? "bg-wine text-ivory"
-                          : "bg-gold text-night"
+                          ? "bg-gold text-night"
+                          : "bg-[#6fd3a0] text-night"
                     }`}
                   >
                     {state === "done" ? "✓" : index + 1}
@@ -206,8 +198,8 @@ export function CsvImportModal({
                   <span
                     className={`hidden sm:inline ${
                       state === "current"
-                        ? "text-on-surface"
-                        : "text-on-surface-variant"
+                        ? "text-[#fff6dc]"
+                        : "text-champagne/60"
                     }`}
                   >
                     {item.label}
@@ -216,7 +208,7 @@ export function CsvImportModal({
                     <span
                       aria-hidden="true"
                       className={`h-px w-5 sm:w-8 ${
-                        index < stepIndex ? "bg-gold" : "bg-outline-variant"
+                        index < stepIndex ? "bg-gold" : "bg-champagne/25"
                       }`}
                     />
                   )}
@@ -224,15 +216,14 @@ export function CsvImportModal({
               );
             })}
           </ol>
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
-          />
-        </DialogHeader>
+        </ModalHeader>
 
-        <div className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8">
+        <div className="flex flex-col gap-4 px-5 pb-5 pt-4 sm:px-7">
           {errorMsg && (
-            <div className="rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+            <div
+              role="alert"
+              className="rounded-xl border border-error/30 bg-error-container px-3 py-2 text-xs text-error"
+            >
               {errorMsg}
             </div>
           )}

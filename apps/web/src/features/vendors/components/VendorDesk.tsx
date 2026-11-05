@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { useDeskToast } from "@/components/ui/desk-toast";
 import { celebratedIfAllDone } from "../lib/celebrate-vendors";
 import {
@@ -37,6 +38,8 @@ interface VendorDeskProps {
   eventTitle: string;
   todayKey: string;
   initialData: VendorsData;
+  /** The celebration has ended: no vendors can be added or removed. */
+  ended?: boolean;
 }
 
 export function VendorDesk({
@@ -44,6 +47,7 @@ export function VendorDesk({
   eventTitle,
   todayKey,
   initialData,
+  ended = false,
 }: VendorDeskProps) {
   const [vendors, setVendors] = useState<VendorWithTasks[]>(
     initialData.vendors
@@ -79,7 +83,12 @@ export function VendorDesk({
 
   const handleSaveVendor = async (input: CreateVendorInput) => {
     if (editingVendor) {
-      const res = await updateVendorAction(eventId, editingVendor.id, input);
+      // After the day only the paid amount may change, so send nothing else.
+      const res = await updateVendorAction(
+        eventId,
+        editingVendor.id,
+        ended ? { deposit_kobo: input.deposit_kobo } : input
+      );
       if (!res.ok || !res.data)
         throw new Error(res.error || "Failed to update vendor");
       setVendors((prev) =>
@@ -181,12 +190,28 @@ export function VendorDesk({
   };
 
   return (
-    <div className="pb-16">
+    <div className="sm:pb-16">
       {toast}
 
-      <DeskMotion className="space-y-6 lg:space-y-8">
-        <DeskItem>
+      <ScreenHeader
+        title="Vendors"
+        subtitle={eventTitle}
+        backHref={`/events/${eventId}`}
+        action={
+          ended
+            ? undefined
+            : {
+                icon: "add_circle",
+                label: "Add vendor",
+                onClick: openAddVendor,
+              }
+        }
+      />
+
+      <DeskMotion className="space-y-4 sm:space-y-6 lg:space-y-8">
+        <DeskItem className="standalone:max-md:hidden">
           <DeskPageHeader
+            compact
             eyebrow={`Vendors · ${eventTitle}`}
             title="The vendor loom"
             description="Every supplier, contract and deliverable in one place. Tick the work off as the owambe comes together."
@@ -194,7 +219,8 @@ export function VendorDesk({
             <button
               type="button"
               onClick={openAddVendor}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              disabled={ended}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-4 text-sm font-semibold text-ivory shadow-sm disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-burgundy standalone:max-md:hidden sm:px-5 transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               <Icon name="add_circle" size={18} />
               Add vendor
@@ -228,7 +254,7 @@ export function VendorDesk({
 
         {vendors.length === 0 ? (
           <DeskItem>
-            <section className="bento-card flex flex-col items-center justify-center px-6 py-16 text-center">
+            <section className="bento-card flex flex-col items-center justify-center px-6 py-10 text-center sm:py-16">
               <div className="grid h-14 w-14 place-items-center rounded-full bg-tint-sand text-gold-ink">
                 <Icon name="table_restaurant" size={24} />
               </div>
@@ -242,7 +268,8 @@ export function VendorDesk({
               <button
                 type="button"
                 onClick={openAddVendor}
-                className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-wine"
+                disabled={ended}
+                className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-wine disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <Icon name="add_circle" size={18} />
                 Add your first vendor
@@ -305,6 +332,7 @@ export function VendorDesk({
                       }}
                       onToggleTask={handleToggleTask}
                       onDeleteTask={handleDeleteTask}
+                      ended={ended}
                     />
                   ))}
                 </ul>
@@ -319,6 +347,7 @@ export function VendorDesk({
         initialVendor={editingVendor}
         onClose={() => setIsVendorModalOpen(false)}
         onSubmit={handleSaveVendor}
+        paymentOnly={ended}
       />
 
       <VendorTaskModal

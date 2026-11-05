@@ -17,6 +17,7 @@ import type {
   PlanningTask,
   PlanningVendor,
 } from "./lib/overview-insights";
+import { isEventExpired } from "@/lib/event-expiry";
 
 export interface ScheduleSlot {
   time: string;
@@ -36,6 +37,8 @@ export interface PublicCelebration {
   rsvpBy: string | null;
   status: string;
   isPublic?: boolean;
+  /** The celebration's day has passed: the page shows only that it has ended. */
+  expired?: boolean;
   description?: string | null;
   coverImageUrl?: string | null;
   schedule?: ScheduleSlot[];
@@ -69,6 +72,26 @@ export const getPublicEventBySlug = cache(
       return null;
     }
 
+    // The database already withholds an ended celebration's details; the date check also covers a
+    // database that has not been migrated yet.
+    if (raw.expired === true || isEventExpired(String(raw.date))) {
+      return {
+        id: String(raw.id),
+        slug: String(raw.slug),
+        title: String(raw.title),
+        couple: String(raw.couple),
+        date: String(raw.date),
+        venue: "",
+        area: null,
+        dressCode: null,
+        rsvpBy: null,
+        status: String(raw.status),
+        isPublic: false,
+        expired: true,
+        schedule: [],
+      };
+    }
+
     return {
       id: String(raw.id),
       slug: String(raw.slug),
@@ -90,7 +113,7 @@ export const getPublicEventBySlug = cache(
   }
 );
 
-export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
+const getAllUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -466,3 +489,22 @@ export async function getEventPlanningSnapshot(
 
   return { vendors, tasks, guests, checkedInPeople };
 }
+
+/**
+ * Your celebrations: everything you have not filed away. Archived events live in the archive
+ * (`getArchivedEvents`) and nowhere else, so the lists, the switcher and the dashboard stay tidy.
+ */
+export const getUserEvents = cache(async (): Promise<EventWithMetrics[]> => {
+  const all = await getAllUserEvents();
+  return all.filter((item) => item.event.status !== "archived");
+});
+
+/** Archived celebrations, the most recent day first. */
+export const getArchivedEvents = cache(
+  async (): Promise<EventWithMetrics[]> => {
+    const all = await getAllUserEvents();
+    return all
+      .filter((item) => item.event.status === "archived")
+      .sort((a, b) => Date.parse(b.event.date) - Date.parse(a.event.date));
+  }
+);

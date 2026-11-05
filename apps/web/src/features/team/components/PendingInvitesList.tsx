@@ -34,14 +34,14 @@ export function PendingInvitesList({
 
   return (
     <section aria-labelledby="pending-invites-title">
-      <div className="mb-3 flex items-end justify-between gap-3">
+      <div className="mb-2 flex items-end justify-between gap-3 sm:mb-3">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
             Waiting
           </div>
           <h2
             id="pending-invites-title"
-            className="mt-1 font-display text-2xl font-bold text-night"
+            className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
           >
             Pending invitations
           </h2>
@@ -52,7 +52,7 @@ export function PendingInvitesList({
       </div>
 
       {invites.length === 0 ? (
-        <div className="bento-card flex items-center gap-3 px-5 py-6">
+        <div className="bento-card flex items-center gap-3 px-4 py-4 sm:px-5 sm:py-6">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tint-sage text-rsvp-accepted">
             <Icon name="check_circle" size={18} />
           </div>
@@ -62,14 +62,14 @@ export function PendingInvitesList({
           </p>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-2 sm:gap-3 lg:grid-cols-2">
           {invites.map((invite) => (
             <li
               key={invite.id}
-              className="flex flex-col gap-3 rounded-2xl border border-dashed border-hairline bg-surface-container-low p-4"
+              className="flex items-center gap-2 rounded-2xl border border-dashed border-hairline bg-surface-container-low p-3 sm:flex-col sm:items-stretch sm:gap-3 sm:p-4"
             >
-              <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-tint-sky text-[#3b5b8a]">
+              <div className="flex min-w-0 flex-1 items-start gap-3 sm:flex-none">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-tint-sky text-[#3b5b8a] sm:h-10 sm:w-10">
                   <Icon name="mail" size={17} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -96,7 +96,7 @@ export function PendingInvitesList({
               </div>
 
               {canManageMembers && (
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -106,10 +106,11 @@ export function PendingInvitesList({
                         .then(() => onCopied?.("Invite link copied"))
                         .catch(() => onCopied?.("Could not copy the link"));
                     }}
-                    className="desk-chip inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                    aria-label="Copy invite link"
+                    className="desk-chip inline-flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy sm:w-auto sm:flex-1 sm:gap-1.5 sm:px-3"
                   >
                     <Icon name="copy" size={14} />
-                    Copy invite link
+                    <span className="hidden sm:inline">Copy invite link</span>
                   </button>
 
                   <button
@@ -126,14 +127,15 @@ export function PendingInvitesList({
                         );
                       });
                     }}
-                    className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-label-2 transition-colors hover:bg-error-container hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-50"
+                    aria-label="Revoke invitation"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold text-label-2 transition-colors hover:bg-error-container hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-50 sm:w-auto sm:gap-1.5 sm:px-3"
                   >
                     {isPending ? (
                       <Icon name="refresh" size={14} className="animate-spin" />
                     ) : (
                       <Icon name="close" size={14} />
                     )}
-                    Revoke
+                    <span className="hidden sm:inline">Revoke</span>
                   </button>
                 </div>
               )}

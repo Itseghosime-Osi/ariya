@@ -41,14 +41,14 @@ export function Guestbook({
     );
   }
   return (
-    <ol className="relative space-y-2.5">
+    <ol className="relative space-y-2 max-sm:[&>li:nth-child(n+4)]:hidden sm:space-y-2.5">
       {entries.slice(0, limit).map((e, i) => {
         const coming = e.status === "accepted";
         const body = (
           <div className="flex items-center gap-3">
             <MonogramSeal
               text={e.name}
-              size={42}
+              size={38}
               className="shrink-0 drop-shadow-sm"
             />
             <div className="min-w-0 flex-1">
@@ -113,12 +113,12 @@ export function Guestbook({
             {e.href ? (
               <Link
                 href={e.href}
-                className="block rounded-2xl bg-ivory p-3 ring-1 ring-hairline transition-shadow hover:shadow-[0_10px_24px_-14px_rgba(28,7,13,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                className="block rounded-2xl bg-white/45 p-2.5 ring-1 ring-hairline transition-shadow sm:p-3 hover:shadow-[0_10px_24px_-14px_rgba(28,7,13,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
               >
                 {body}
               </Link>
             ) : (
-              <div className="rounded-2xl bg-ivory p-3 ring-1 ring-hairline">
+              <div className="rounded-2xl bg-white/45 p-2.5 ring-1 ring-hairline sm:p-3">
                 {body}
               </div>
             )}

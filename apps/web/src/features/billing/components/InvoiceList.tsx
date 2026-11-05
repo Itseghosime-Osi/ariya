@@ -34,24 +34,24 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
   if (invoices.length === 0) return null;
 
   return (
-    <section aria-labelledby="invoices-title" className="bento-card p-6 sm:p-7">
+    <section aria-labelledby="invoices-title" className="bento-card p-4 sm:p-7">
       <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
         Tax paper
       </div>
       <h2
         id="invoices-title"
-        className="mt-1 font-display text-2xl font-bold text-night"
+        className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
       >
         Invoices & receipts
       </h2>
 
-      <ul className="mt-4 divide-y divide-hairline">
+      <ul className="mt-3 divide-y divide-hairline sm:mt-4">
         {invoices.map((invoice) => {
           const meta = STATUS_META[invoice.status];
           return (
             <li
               key={invoice.id}
-              className="flex flex-col gap-2 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+              className="flex items-center justify-between gap-3 py-3 sm:py-3.5"
             >
               <div className="flex min-w-0 items-start gap-3">
                 <span
@@ -74,15 +74,24 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] text-label-2">
-                    Issued {formatLagosDate(invoice.issuedAt, SHORT_DATE)}
-                    {invoice.paidAt
-                      ? ` · settled ${formatLagosDate(invoice.paidAt, SHORT_DATE)}`
-                      : ""}
+                    <span className="sm:hidden">
+                      Issued{" "}
+                      {formatLagosDate(invoice.issuedAt, {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                    <span className="hidden sm:inline">
+                      Issued {formatLagosDate(invoice.issuedAt, SHORT_DATE)}
+                      {invoice.paidAt
+                        ? ` · settled ${formatLagosDate(invoice.paidAt, SHORT_DATE)}`
+                        : ""}
+                    </span>
                   </p>
                 </div>
               </div>
 
-              <div className="font-display text-lg font-bold text-night tabular-nums sm:text-right">
+              <div className="shrink-0 text-right font-display text-base font-bold text-night tabular-nums sm:text-lg">
                 {formatKobo(invoice.amountKobo)}
               </div>
             </li>

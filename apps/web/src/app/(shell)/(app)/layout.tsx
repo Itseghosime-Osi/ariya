@@ -3,7 +3,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import type { SwitcherEvent } from "@/components/layout/nav-items";
 import { countPendingProposals } from "@/features/approvals/queries";
 import { getCurrentUser } from "@/features/auth/queries";
-import { getUserEvents } from "@/features/events/queries";
+import { getArchivedEvents, getUserEvents } from "@/features/events/queries";
 import {
   partitionEvents,
   pickHeroEvent,
@@ -21,9 +21,10 @@ export default async function AppLayout({
 }) {
   // Both queries are wrapped in React cache(), so pages that need them too
   // share the same request-scoped result.
-  const [user, events, pendingProposals] = await Promise.all([
+  const [user, events, archived, pendingProposals] = await Promise.all([
     getCurrentUser(),
     getUserEvents(),
+    getArchivedEvents(),
     countPendingProposals(),
   ]);
 
@@ -39,10 +40,18 @@ export default async function AppLayout({
     })
   );
 
+  const archivedEvents: SwitcherEvent[] = archived.map((item) => ({
+    id: item.event.id,
+    title: item.event.title,
+    date: item.event.date,
+    couple: item.event.couple,
+  }));
+
   return (
     <AppShell
       userEmail={user?.email}
       events={switcherEvents}
+      archivedEvents={archivedEvents}
       primaryEventId={primaryEvent?.event.id}
       pendingProposals={pendingProposals}
     >

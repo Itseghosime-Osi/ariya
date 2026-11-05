@@ -11,6 +11,7 @@ import React, {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { cn } from "@/lib/utils";
 import { createEventAction } from "../actions";
 import { Eyebrow } from "./wizard/Chips";
@@ -204,8 +205,13 @@ export function CreateEventWizard() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl pb-10">
-      <header className="mb-6 sm:mb-8">
+    <div className="mx-auto max-w-6xl sm:pb-10">
+      <ScreenHeader
+        title="New celebration"
+        subtitle={`Step ${step + 1} of ${STEPS.length} · ${current.label}`}
+        backHref="/events"
+      />
+      <header className="mb-4 standalone:max-md:hidden sm:mb-8">
         <Link
           href="/events"
           className="inline-flex min-h-11 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
@@ -213,12 +219,12 @@ export function CreateEventWizard() {
           <Icon name="arrow_back" size={14} />
           Back to your events
         </Link>
-        <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-night sm:text-4xl">
+        <h1 className="mt-1 font-display text-2xl font-bold leading-tight text-night sm:text-4xl">
           Plan your celebration
         </h1>
       </header>
 
-      <nav aria-label="Setup steps" className="mb-6">
+      <nav aria-label="Setup steps" className="mb-4 sm:mb-6">
         <ol className="grid grid-cols-4 gap-2 sm:gap-3">
           {STEPS.map((s, i) => {
             const done = i < step && valid[i];
@@ -277,7 +283,7 @@ export function CreateEventWizard() {
       </nav>
 
       {/* Phones: the invitation folds away until you want to peek at it. */}
-      <div className="mb-5 lg:hidden">
+      <div className="mb-4 lg:hidden">
         <button
           type="button"
           onClick={() => setPeek((p) => !p)}
@@ -314,7 +320,7 @@ export function CreateEventWizard() {
         <form
           onSubmit={onSubmit}
           noValidate
-          className="bento-card p-5 sm:p-8"
+          className="bento-card p-4 sm:p-8"
           aria-labelledby="wizard-heading"
         >
           <Eyebrow>{`Step ${step + 1} of ${STEPS.length}`}</Eyebrow>
@@ -322,15 +328,17 @@ export function CreateEventWizard() {
             id="wizard-heading"
             ref={headingRef}
             tabIndex={-1}
-            className="mt-1 font-display text-2xl font-bold text-night outline-none sm:text-3xl"
+            className="mt-1 font-display text-xl font-bold text-night outline-none sm:text-3xl"
           >
             {current.heading}
           </h2>
-          <p className="mb-6 mt-1 text-sm text-label-2">{current.blurb}</p>
+          <p className="mb-4 mt-1 text-[13px] text-label-2 sm:mb-6 sm:text-sm">
+            {current.blurb}
+          </p>
 
           {errorMessage && (
             <div
-              className="mb-6 flex items-start gap-3 rounded-2xl bg-error-container/80 p-4"
+              className="mb-4 flex items-start gap-3 rounded-2xl bg-error-container/80 p-4 sm:mb-6"
               role="alert"
             >
               <Icon
@@ -353,12 +361,12 @@ export function CreateEventWizard() {
             {step === 3 && <StepGuests draft={draft} set={set} />}
           </div>
 
-          <div className="mt-8 flex items-center justify-between gap-3">
+          <div className="mt-6 flex items-center justify-between gap-3 sm:mt-8">
             {step > 0 ? (
               <button
                 type="button"
                 onClick={() => goTo(step - 1)}
-                className="min-h-11 rounded-full border border-gold-ink/25 bg-white/70 px-5 text-xs font-semibold uppercase tracking-[0.14em] text-night transition-colors hover:border-gold-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                className="min-h-12 shrink-0 rounded-full border border-gold-ink/25 bg-white/45 px-5 text-xs font-semibold uppercase tracking-[0.14em] text-night transition-colors hover:border-gold-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
               >
                 Back
               </button>
@@ -370,7 +378,7 @@ export function CreateEventWizard() {
               key={`${step}-${valid[step]}`}
               disabled={!valid[step] || isPending}
               data-testid={last ? "wizard-launch" : "wizard-next"}
-              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-burgundy px-6 text-xs font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] enabled:animate-[wiz-ready_900ms_var(--ease-out)] motion-reduce:animate-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="group inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-burgundy px-6 text-xs sm:flex-none font-semibold uppercase tracking-[0.14em] text-ivory shadow-[0_12px_28px_-14px_rgba(110,20,38,0.9)] transition-[transform,background-color,opacity] duration-150 hover:bg-wine active:scale-[0.97] enabled:animate-[wiz-ready_900ms_var(--ease-out)] motion-reduce:animate-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               {last ? (
                 isPending ? (
@@ -379,7 +387,10 @@ export function CreateEventWizard() {
                   </span>
                 ) : (
                   <>
-                    Create celebration workspace
+                    <span className="sm:hidden">Create celebration</span>
+                    <span className="hidden sm:inline">
+                      Create celebration workspace
+                    </span>
                     <Icon name="celebration" size={16} />
                   </>
                 )

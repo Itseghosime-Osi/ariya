@@ -59,7 +59,7 @@ export function CelebrationStage({
       }}
     >
       <SparkleSurface
-        className="overflow-hidden rounded-[32px] bg-[#1c070d] text-ivory shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]"
+        className="overflow-hidden rounded-[28px] bg-[#1c070d] text-ivory sm:rounded-[32px] shadow-[0_30px_60px_-30px_rgba(28,7,13,0.65)]"
         onPointerDown={(e) => {
           drag.current = { x: e.clientX, id: e.pointerId };
         }}
@@ -87,7 +87,7 @@ export function CelebrationStage({
         <GoldDust density={56} />
         <div className="desk-grain absolute inset-0" aria-hidden="true" />
 
-        <div className="relative p-6 sm:p-8 lg:p-10">
+        <div className="relative p-4 sm:p-8 lg:p-10">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#e9c98a]">
               {many
@@ -106,9 +106,10 @@ export function CelebrationStage({
                   y: (r.top + r.height / 2) / window.innerHeight,
                 });
               }}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-ivory/10 px-4 text-xs font-semibold text-ivory ring-1 ring-ivory/20 transition-transform hover:-translate-y-0.5 hover:bg-ivory/15 active:scale-95"
+              className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-ivory/10 px-3 text-xs font-semibold text-ivory ring-1 ring-ivory/20 sm:min-h-[40px] sm:px-4 transition-transform hover:-translate-y-0.5 hover:bg-ivory/15 active:scale-95"
             >
-              <span aria-hidden="true">🎉</span> Throw confetti
+              <span aria-hidden="true">🎉</span>
+              <span className="max-sm:sr-only">Throw confetti</span>
             </button>
           </div>
 
@@ -120,12 +121,15 @@ export function CelebrationStage({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: dir * -40 }}
               transition={{ type: "spring", visualDuration: 0.35, bounce: 0.1 }}
-              className="mt-6 grid items-center gap-8 md:grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto]"
+              className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3.5 sm:mt-6 sm:gap-8 md:grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto]"
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${slides.length}: ${names}`}
             >
-              <TiltCard max={14} className="mx-auto w-fit rounded-full md:mx-0">
-                <div className="relative grid h-32 w-32 place-items-center rounded-full sm:h-40 sm:w-40">
+              <TiltCard
+                max={14}
+                className="w-fit rounded-full sm:mx-auto md:mx-0"
+              >
+                <div className="relative grid h-[84px] w-[84px] place-items-center rounded-full sm:h-40 sm:w-40">
                   <span
                     className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(233,201,138,0.35),transparent_68%)] blur-md"
                     aria-hidden="true"
@@ -142,23 +146,26 @@ export function CelebrationStage({
                 </div>
               </TiltCard>
 
-              <div className="min-w-0 text-center md:text-left">
-                <div className="font-display text-3xl font-bold leading-[1.05] sm:text-5xl">
+              <div className="min-w-0 sm:text-center md:text-left">
+                <div className="font-display text-[1.65rem] font-bold leading-[1.05] sm:text-5xl">
                   {names}
                 </div>
                 {event.couple && event.title !== event.couple && (
-                  <div className="mt-1 font-display text-base italic text-ivory/75 sm:text-lg">
+                  <div className="mt-1 hidden font-display text-base italic text-ivory/75 sm:block sm:text-lg">
                     {event.title}
                   </div>
                 )}
-                <p className="mt-3 text-sm text-ivory/80">
+                <p className="mt-1 text-xs text-ivory/80 sm:mt-3 sm:text-sm">
                   {hasDate ? formatEventDate(event.date) : "Date to be set"}
                   {venue && (
                     <>
-                      <span className="px-2 text-[#e9c98a]" aria-hidden="true">
+                      <span
+                        className="hidden px-2 text-[#e9c98a] sm:inline"
+                        aria-hidden="true"
+                      >
                         ✦
                       </span>
-                      {venue}
+                      <span className="block truncate sm:inline">{venue}</span>
                     </>
                   )}
                 </p>
@@ -171,9 +178,12 @@ export function CelebrationStage({
                     href={`/events/${event.id}`}
                     data-testid="featured-celebration"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[#e9c98a] px-5 text-sm font-semibold text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a]"
+                    className="mt-2.5 inline-flex min-h-[40px] items-center gap-2 rounded-full bg-[#e9c98a] px-4 text-sm font-semibold sm:mt-5 sm:min-h-[44px] sm:px-5 text-[#1c070d] shadow-[0_10px_30px_-12px_rgba(233,201,138,0.9)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9c98a]"
                   >
-                    Open the celebration desk
+                    <span className="sm:hidden">Open desk</span>
+                    <span className="hidden sm:inline">
+                      Open the celebration desk
+                    </span>
                     <Icon name="arrow_forward" size={16} />
                   </Link>
                 </ViewTransition>
@@ -229,7 +239,7 @@ export function CelebrationStage({
           </AnimatePresence>
 
           {many && (
-            <div className="mt-8 flex items-center justify-center gap-3 md:justify-start">
+            <div className="mt-3 flex items-center justify-center gap-3 sm:mt-8 md:justify-start">
               <button
                 type="button"
                 onClick={() => go(index - 1)}
@@ -269,36 +279,33 @@ export function CelebrationStage({
             </div>
           )}
         </div>
-      </SparkleSurface>
-      <section
-        aria-label="Countdown and RSVP status"
-        className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-[#e9c98a]/20 bg-[#1c070d] px-4 py-3 text-ivory shadow-[0_12px_30px_-20px_rgba(28,7,13,0.8)] md:hidden"
-      >
-        <div className="min-w-0">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e9c98a]">
-            Countdown
-          </p>
-          {hasDate ? (
-            <Countdown dateIso={event.date} initialNow={now} compact />
-          ) : (
-            <p className="text-sm text-ivory/75">
-              Set a date to start the countdown
-            </p>
-          )}
-        </div>
-        <div
-          className="border-l border-ivory/15 pl-4 text-right"
-          role="img"
-          aria-label={`${replied}% of guests have replied`}
+        <section
+          aria-label="Countdown and RSVP status"
+          className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-t border-[#e9c98a]/15 bg-black/20 px-4 py-2.5 md:hidden"
         >
-          <div className="font-display text-2xl font-bold tabular-nums">
-            {replied}%
+          <div className="min-w-0">
+            {hasDate ? (
+              <Countdown dateIso={event.date} initialNow={now} compact />
+            ) : (
+              <p className="text-xs text-ivory/75">
+                Set a date to start the countdown
+              </p>
+            )}
           </div>
-          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-ivory/70">
-            replied
+          <div
+            className="border-l border-ivory/15 pl-4 text-right"
+            role="img"
+            aria-label={`${replied}% of guests have replied`}
+          >
+            <span className="font-display text-xl font-bold tabular-nums">
+              {replied}%
+            </span>{" "}
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-ivory/70">
+              replied
+            </span>
           </div>
-        </div>
-      </section>
+        </section>
+      </SparkleSurface>
     </section>
   );
 }

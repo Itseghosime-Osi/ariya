@@ -1,3 +1,5 @@
+import { EndedLock } from "@/components/layout/ended-lock";
+import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
@@ -25,7 +27,9 @@ export default async function PageEditorRoute({ params }: PageEditorProps) {
 
   return (
     <>
-      <EventPageEditor event={data.event} />
+      <EndedLock ended={isEventExpired(data.event.date)}>
+        <EventPageEditor event={data.event} />
+      </EndedLock>
     </>
   );
 }

@@ -4,6 +4,7 @@ import { getInvitationByToken, getCheckInCode } from "@/features/rsvp/queries";
 import { generateQrDataUrl } from "@/lib/qrcode";
 import { getGuestTheme } from "@/features/rsvp/themes";
 import { InvalidLinkCard } from "@/features/rsvp/components/InvalidLinkCard";
+import { ExpiredEventCard } from "@/features/events/components/ExpiredEventCard";
 import { ClosedEventCard } from "@/features/rsvp/components/ClosedEventCard";
 import { DeadlinePassedCard } from "@/features/rsvp/components/DeadlinePassedCard";
 import { RsvpSummaryCard } from "@/features/rsvp/components/RsvpSummaryCard";
@@ -65,6 +66,13 @@ export default async function GuestInvitationPage({
 
         {/* State Selection */}
         {state === "invalid_link" && <InvalidLinkCard />}
+
+        {state === "expired" && data && (
+          <ExpiredEventCard
+            title={data.event.title}
+            couple={data.event.couple}
+          />
+        )}
 
         {state === "closed" && data && <ClosedEventCard event={data.event} />}
 

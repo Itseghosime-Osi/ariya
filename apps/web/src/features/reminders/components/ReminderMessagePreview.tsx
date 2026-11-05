@@ -16,7 +16,7 @@ export function ReminderMessagePreview({
   return (
     <section
       aria-label="Email preview"
-      className="flex flex-col gap-4 rounded-3xl border border-outline-variant/60 bg-surface-container-low p-5 sm:p-6"
+      className="flex flex-col gap-4 rounded-3xl border border-hairline bg-white/40 backdrop-blur-sm p-5 sm:p-6"
     >
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-ink">

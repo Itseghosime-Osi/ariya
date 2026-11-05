@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useTransition } from "react";
 import { Icon } from "@/components/ui/icon";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { useDeskToast } from "@/components/ui/desk-toast";
 import {
   DeskItem,
@@ -79,12 +80,28 @@ export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
   };
 
   return (
-    <div className="pb-16">
+    <div className="sm:pb-16">
       {toast}
 
-      <DeskMotion className="space-y-6 lg:space-y-8">
-        <DeskItem>
+      <ScreenHeader
+        title="Team"
+        subtitle={eventTitle}
+        backHref={`/events/${eventId}`}
+        action={
+          data.canManageMembers
+            ? {
+                icon: "add_circle",
+                label: "Invite member",
+                onClick: () => setIsInviteModalOpen(true),
+              }
+            : undefined
+        }
+      />
+
+      <DeskMotion className="space-y-4 sm:space-y-6 lg:space-y-8">
+        <DeskItem className="standalone:max-md:hidden">
           <DeskPageHeader
+            compact
             eyebrow={`Team · ${eventTitle}`}
             title="The people behind the day"
             description="Bring in co-planners, the couple and the door staff, and give each of them only what they need."
@@ -134,14 +151,14 @@ export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
 
         <DeskItem>
           <section aria-labelledby="team-members-title">
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+            <div className="mb-2 flex flex-wrap items-end justify-between gap-2 sm:mb-3 sm:gap-3">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
                   Everyone
                 </div>
                 <h2
                   id="team-members-title"
-                  className="mt-1 font-display text-2xl font-bold text-night"
+                  className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
                 >
                   {roleFilter === "all"
                     ? "Members"

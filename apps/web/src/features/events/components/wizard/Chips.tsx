@@ -29,7 +29,7 @@ export function Chip({
 }) {
   return (
     <label
-      className="wiz-rise relative inline-flex"
+      className="wiz-rise relative inline-flex shrink-0"
       style={{ "--i": index } as React.CSSProperties}
     >
       <input
@@ -43,7 +43,7 @@ export function Chip({
       />
       <span
         className={cn(
-          "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-4 py-2 text-sm font-semibold text-night transition-[background-color,border-color,color,transform] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-checked:border-burgundy peer-checked:bg-burgundy peer-checked:text-ivory peer-checked:animate-[wiz-pop_320ms_var(--ease-out)] motion-reduce:peer-checked:animate-none peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
+          "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-gold-ink/25 bg-white/45 px-4 py-2 text-sm font-semibold text-night transition-[background-color,border-color,color,transform] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-checked:border-burgundy peer-checked:bg-burgundy peer-checked:text-ivory peer-checked:animate-[wiz-pop_320ms_var(--ease-out)] motion-reduce:peer-checked:animate-none peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
           className
         )}
       >
@@ -73,4 +73,4 @@ export function Eyebrow({
 }
 
 export const fieldClass =
-  "w-full min-h-12 rounded-2xl border border-gold-ink/25 bg-white/80 px-4 py-3 text-base text-night shadow-inner outline-none transition-colors placeholder:text-label-3 hover:border-gold-ink/50 focus:border-burgundy focus:bg-white focus:shadow-[0_0_0_4px_rgba(184,134,75,0.2)] focus-visible:ring-2 focus-visible:ring-burgundy/30";
+  "w-full min-h-12 rounded-2xl border border-gold-ink/25 bg-white/55 px-4 py-3 text-base text-night outline-none transition-colors placeholder:text-label-3 hover:border-gold-ink/50 focus:border-burgundy focus:bg-white/80 focus:shadow-[0_0_0_4px_rgba(184,134,75,0.2)] focus-visible:ring-2 focus-visible:ring-burgundy/30";

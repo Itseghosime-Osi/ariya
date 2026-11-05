@@ -1,9 +1,6 @@
 import type { MetadataRoute } from "next";
 
-// Brand colours, matching --ivory in styles/globals.css.
-const IVORY = "#f7f2ea";
-// The wine of the app's splash screen (components/layout/app-splash.tsx).
-const WINE = "#2a0610";
+import { BRAND_IVORY as IVORY, BRAND_WINE as WINE } from "@/lib/brand";
 
 /**
  * Makes Àríyá installable ("Add to Home Screen"). Opened from the home screen

@@ -1,14 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FORM_DIALOG, ModalHeader } from "@/components/ui/modal-header";
 import { Button } from "@/components/ui/button";
 import { VENDOR_CATEGORIES, type CreateVendorInput } from "../schemas";
 import { VendorContactFields } from "./VendorContactFields";
@@ -20,17 +14,20 @@ interface VendorModalProps {
   initialVendor: Vendor | null;
   onClose: () => void;
   onSubmit: (input: CreateVendorInput) => Promise<void>;
+  /** The celebration has ended: only the paid amount can still be changed. */
+  paymentOnly?: boolean;
 }
 
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.12em] text-gold-ink";
 const FIELD =
-  "desk-field mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
+  "desk-field mt-1.5 w-full rounded-2xl px-4 py-2.5 text-base text-night sm:text-sm focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none";
 
 export function VendorModal({
   isOpen,
   initialVendor,
   onClose,
   onSubmit,
+  paymentOnly = false,
 }: VendorModalProps) {
   const {
     name,
@@ -56,28 +53,29 @@ export function VendorModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
-        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
-            Vendor loom
-          </p>
-          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
-            {initialVendor ? "Edit vendor contract" : "Register a vendor"}
-          </DialogTitle>
-          <DialogDescription>
-            {initialVendor
-              ? "Change the terms, contact or what has been paid so far."
-              : "Add a supplier with their contract value and the deposit already paid."}
-          </DialogDescription>
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
-          />
-        </DialogHeader>
+      <DialogContent className={`${FORM_DIALOG} max-w-xl`}>
+        <ModalHeader
+          icon="restaurant_menu"
+          eyebrow="Vendor loom"
+          title={
+            paymentOnly
+              ? "Record a payment"
+              : initialVendor
+                ? "Edit vendor contract"
+                : "Register a vendor"
+          }
+          description={
+            paymentOnly
+              ? "This celebration has ended, so the contract is locked. You can still update what has been paid."
+              : initialVendor
+                ? "Change the terms, contact or what has been paid so far."
+                : "Add a supplier with their contract value and the deposit already paid."
+          }
+        />
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 px-6 pb-6 pt-5 sm:px-8"
+          className="flex flex-col gap-3.5 px-5 pb-0 pt-4 sm:gap-4 sm:px-7"
         >
           {error && (
             <div
@@ -94,6 +92,7 @@ export function VendorModal({
             </label>
             <input
               id="vendor-name"
+              disabled={paymentOnly}
               type="text"
               required
               value={name}
@@ -110,6 +109,7 @@ export function VendorModal({
               </label>
               <select
                 id="vendor-category"
+                disabled={paymentOnly}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className={`${FIELD} cursor-pointer`}
@@ -128,6 +128,7 @@ export function VendorModal({
               </label>
               <select
                 id="vendor-status"
+                disabled={paymentOnly}
                 value={status}
                 onChange={(e) => setStatus(e.target.value as VendorStatus)}
                 className={`${FIELD} cursor-pointer`}
@@ -147,6 +148,7 @@ export function VendorModal({
               </label>
               <input
                 id="vendor-cost"
+                disabled={paymentOnly}
                 type="number"
                 min="0"
                 step="1000"
@@ -163,6 +165,7 @@ export function VendorModal({
                 id="vendor-deposit"
                 type="number"
                 min="0"
+                max={paymentOnly ? costNaira : undefined}
                 step="1000"
                 value={depositNaira}
                 onChange={(e) => setDepositNaira(e.target.value)}
@@ -178,9 +181,10 @@ export function VendorModal({
             onNameChange={setContactName}
             onPhoneChange={setContactPhone}
             onEmailChange={setContactEmail}
+            disabled={paymentOnly}
           />
 
-          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+          <DialogFooter className="sticky bottom-0 -mx-5 mt-1 flex flex-row justify-end gap-2 border-t border-hairline bg-ivory px-5 py-3 sm:-mx-7 sm:space-x-0 sm:px-7">
             <Button
               type="button"
               variant="outline"
@@ -197,9 +201,11 @@ export function VendorModal({
             >
               {loading
                 ? "Saving..."
-                : initialVendor
-                  ? "Save Changes"
-                  : "Create Vendor"}
+                : paymentOnly
+                  ? "Save payment"
+                  : initialVendor
+                    ? "Save Changes"
+                    : "Create Vendor"}
             </Button>
           </DialogFooter>
         </form>

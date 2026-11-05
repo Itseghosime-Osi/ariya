@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateToken } from "@/lib/tokens";
 import { mapError } from "@/lib/errors";
+import { eventEndedError } from "./expiry";
 import { parseWatDateToUtc } from "@/lib/format";
 import {
   createEventSchema,
@@ -117,6 +118,9 @@ export async function updateEventAction(
   if (!user) {
     return { ok: false, error: "Authentication required to modify event" };
   }
+
+  const ended = await eventEndedError(supabase, eventId);
+  if (ended) return { ok: false, error: ended };
 
   const updateData: EventUpdate = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;

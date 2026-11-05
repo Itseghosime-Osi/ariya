@@ -1,14 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FORM_DIALOG, ModalHeader } from "@/components/ui/modal-header";
 import { Button } from "@/components/ui/button";
 import { createGuestAction } from "../actions";
 import { GuestFormFields, type GuestFormState } from "./GuestFormFields";
@@ -84,29 +78,23 @@ export function GuestFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-xl gap-0 overflow-y-auto border border-gold/30 bg-ivory p-0">
-        <DialogHeader className="relative gap-1.5 px-6 pb-5 pt-7 sm:px-8">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
-            Guest registry
-          </p>
-          <DialogTitle className="font-serif text-3xl font-bold leading-tight">
-            Add New Guest
-          </DialogTitle>
-          <DialogDescription>
-            Each party gets a personal RSVP link to share on WhatsApp.
-          </DialogDescription>
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-gold/70 via-gold/20 to-transparent sm:inset-x-8"
-          />
-        </DialogHeader>
+      <DialogContent className={`${FORM_DIALOG} max-w-xl`}>
+        <ModalHeader
+          icon="person"
+          eyebrow="Guest registry"
+          title="Add New Guest"
+          description="Each party gets a personal RSVP link to share on WhatsApp."
+        />
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 px-6 pb-6 pt-5 text-sm sm:px-8"
+          className="flex flex-col gap-4 px-5 pb-0 pt-4 text-sm sm:px-7"
         >
           {error && (
-            <div className="rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+            <div
+              role="alert"
+              className="rounded-xl border border-error/30 bg-error-container px-3 py-2 text-xs text-error"
+            >
               {error}
             </div>
           )}
@@ -118,7 +106,7 @@ export function GuestFormModal({
             }
           />
 
-          <DialogFooter className="mt-2 flex flex-col-reverse gap-2 border-t border-outline-variant/60 pt-5 sm:flex-row sm:justify-end sm:space-x-0">
+          <DialogFooter className="sticky bottom-0 -mx-5 mt-1 flex flex-row justify-end gap-2 border-t border-hairline bg-ivory px-5 py-3 sm:-mx-7 sm:space-x-0 sm:px-7">
             <Button
               type="button"
               variant="outline"

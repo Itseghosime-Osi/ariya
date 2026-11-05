@@ -46,7 +46,7 @@ export interface StepProps {
   set: (patch: Partial<Draft>) => void;
 }
 
-const legend = "mb-3 block";
+const legend = "mb-2 block sm:mb-3";
 const sr = "sr-only";
 
 /** A text field that ticks itself green the moment it is good to go. */
@@ -75,12 +75,12 @@ export function StepWho({
   const occasion = occasionOf(draft.occasion);
   const twoNames = occasion.names === 2;
   return (
-    <div className="space-y-8">
-      <fieldset>
+    <div className="space-y-6 sm:space-y-8">
+      <fieldset className="min-w-0">
         <legend className={legend}>
           <Eyebrow>The occasion</Eyebrow>
         </legend>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {OCCASIONS.map((o, i) => (
             <Chip
               key={o.key}
@@ -172,7 +172,7 @@ export function StepWho({
               set({ title: suggestions[(at + 1) % suggestions.length] });
             }}
             aria-label="Suggest another title"
-            className="group grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/70 text-burgundy transition-[transform,border-color] hover:border-gold-ink/60 active:scale-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="group grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/45 text-burgundy transition-[transform,border-color] hover:border-gold-ink/60 active:scale-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <Icon
               name="refresh"
@@ -204,7 +204,7 @@ export function StepWhen({
       ]
     : [];
   return (
-    <div className="grid gap-8 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-10">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-10">
       {now ? (
         <Calendar
           value={draft.ymd}
@@ -219,11 +219,11 @@ export function StepWhen({
       )}
 
       <div className="space-y-7">
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className={legend}>
             <Eyebrow>Jump to</Eyebrow>
           </legend>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
             {quick.map((q, i) => (
               <button
                 key={q.label}
@@ -231,10 +231,10 @@ export function StepWhen({
                 onClick={() => set({ ymd: q.ymd })}
                 style={{ "--i": i } as React.CSSProperties}
                 className={cn(
-                  "wiz-rise min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition-[transform,background-color,border-color] duration-150 hover:border-gold-ink/60 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink",
+                  "wiz-rise min-h-11 shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-[transform,background-color,border-color] duration-150 hover:border-gold-ink/60 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink",
                   draft.ymd === q.ymd
                     ? "border-burgundy bg-burgundy/10 text-burgundy"
-                    : "border-gold-ink/25 bg-white/70 text-night"
+                    : "border-gold-ink/25 bg-white/45 text-night"
                 )}
               >
                 {q.label}
@@ -243,11 +243,11 @@ export function StepWhen({
           </div>
         </fieldset>
 
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className={legend}>
             <Eyebrow>Time of day (Lagos time)</Eyebrow>
           </legend>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
             {TIME_SLOTS.map((s, i) => (
               <Chip
                 key={s.key}
@@ -301,12 +301,12 @@ export function StepWhere({ draft, set }: StepProps) {
     venueRef.current?.focus();
   };
   return (
-    <div className="space-y-8">
-      <fieldset>
+    <div className="space-y-6 sm:space-y-8">
+      <fieldset className="min-w-0">
         <legend className={legend}>
           <Eyebrow>City</Eyebrow>
         </legend>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {AREAS.map((a, i) => (
             <Chip
               key={a}
@@ -334,11 +334,11 @@ export function StepWhere({ draft, set }: StepProps) {
         />
       </fieldset>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={legend}>
           <Eyebrow>Venue</Eyebrow>
         </legend>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {VENUE_STARTERS.map((v, i) => (
             <Chip
               key={v}
@@ -370,7 +370,7 @@ export function StepWhere({ draft, set }: StepProps) {
         </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={legend}>
           <Eyebrow>Aṣọ-Ẹbí colours</Eyebrow>
         </legend>
@@ -395,7 +395,7 @@ export function StepWhere({ draft, set }: StepProps) {
                 />
                 <span
                   className={cn(
-                    "flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border bg-white/80 px-3 py-2 text-sm font-semibold text-night transition-[transform,border-color,box-shadow] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
+                    "flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border bg-white/55 px-3 py-2 text-sm font-semibold text-night transition-[transform,border-color,box-shadow] duration-150 hover:border-gold-ink/60 active:scale-[0.97] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
                     on
                       ? "wiz-pop border-burgundy shadow-[0_10px_24px_-16px_rgba(110,20,38,0.7)]"
                       : "border-gold-ink/25"
@@ -471,8 +471,8 @@ export function StepGuests({ draft, set }: StepProps) {
       parties: Math.min(PARTY_MAX, Math.max(PARTY_MIN, draft.parties + by)),
     });
   return (
-    <div className="space-y-8">
-      <fieldset>
+    <div className="space-y-6 sm:space-y-8">
+      <fieldset className="min-w-0">
         <legend className={legend}>
           <Eyebrow>How will guests come in?</Eyebrow>
         </legend>
@@ -496,7 +496,7 @@ export function StepGuests({ draft, set }: StepProps) {
                 />
                 <span
                   className={cn(
-                    "flex h-full min-h-[112px] cursor-pointer flex-col gap-1.5 rounded-2xl border bg-white/80 p-4 transition-[transform,border-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:border-gold-ink/60 active:scale-[0.98] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
+                    "flex h-full min-h-[112px] cursor-pointer flex-col gap-1.5 rounded-2xl border bg-white/55 p-4 transition-[transform,border-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:border-gold-ink/60 active:scale-[0.98] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold-ink",
                     on
                       ? "border-burgundy shadow-[0_12px_28px_-18px_rgba(110,20,38,0.7)]"
                       : "border-gold-ink/25"
@@ -550,7 +550,7 @@ export function StepGuests({ draft, set }: StepProps) {
             type="button"
             onClick={() => nudge(-10)}
             aria-label="Fewer invitations"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/80 text-xl font-bold text-night transition-transform hover:border-gold-ink/60 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/55 text-xl font-bold text-night transition-transform hover:border-gold-ink/60 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
           >
             <span aria-hidden="true">−</span>
           </button>
@@ -569,7 +569,7 @@ export function StepGuests({ draft, set }: StepProps) {
             type="button"
             onClick={() => nudge(10)}
             aria-label="More invitations"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/80 text-xl font-bold text-night transition-transform hover:border-gold-ink/60 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/55 text-xl font-bold text-night transition-transform hover:border-gold-ink/60 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
           >
             <span aria-hidden="true">+</span>
           </button>
