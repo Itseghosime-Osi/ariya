@@ -342,3 +342,84 @@ export function panels(wall = "#efe7da") {
     )
   );
 }
+
+/** Mown grass, 2 m per repeat: a green base with short blades and a few clover flecks. */
+export function grass(base = "#4f7a3a") {
+  return cached("grass" + base, () =>
+    tex(
+      canvas(512, 512, (g, w, h) => {
+        const r = rng(23);
+        g.fillStyle = base;
+        g.fillRect(0, 0, w, h);
+        for (let i = 0; i < 9000; i++) {
+          const x = r() * w;
+          const y = r() * h;
+          const shade = 0.55 + r() * 0.5;
+          g.strokeStyle = `rgba(${Math.round(70 * shade)},${Math.round(120 * shade)},${Math.round(55 * shade)},0.5)`;
+          g.lineWidth = 1;
+          g.beginPath();
+          g.moveTo(x, y);
+          g.lineTo(x + (r() - 0.5) * 3, y - 2 - r() * 4);
+          g.stroke();
+        }
+        for (let i = 0; i < 120; i++) {
+          g.fillStyle = `rgba(210,220,150,${0.15 + r() * 0.2})`;
+          g.beginPath();
+          g.arc(r() * w, r() * h, 1 + r() * 1.6, 0, Math.PI * 2);
+          g.fill();
+        }
+      })
+    )
+  );
+}
+
+/** Sand, 2 m per repeat: warm base with wind ripples and darker grains. */
+export function sand(base = "#d9c39a") {
+  return cached("sand" + base, () =>
+    tex(
+      canvas(512, 512, (g, w, h) => {
+        const r = rng(31);
+        g.fillStyle = base;
+        g.fillRect(0, 0, w, h);
+        for (let i = 0; i < 40; i++) {
+          g.strokeStyle = `rgba(180,155,115,${0.08 + r() * 0.12})`;
+          g.lineWidth = 2 + r() * 5;
+          g.beginPath();
+          const y = r() * h;
+          g.moveTo(0, y);
+          for (let x = 0; x <= w; x += 32) {
+            g.lineTo(x, y + Math.sin((x / w) * Math.PI * 4 + i) * 6);
+          }
+          g.stroke();
+        }
+        for (let i = 0; i < 4000; i++) {
+          g.fillStyle = `rgba(${150 + r() * 60},${130 + r() * 50},${95 + r() * 40},${0.2 + r() * 0.3})`;
+          g.fillRect(r() * w, r() * h, 1.4, 1.4);
+        }
+      })
+    )
+  );
+}
+
+/** A vertical sky gradient, used as the scene background for open-air venues. */
+export function sky(evening = false) {
+  return cached("sky" + evening, () =>
+    tex(
+      canvas(4, 256, (g, w, h) => {
+        const grad = g.createLinearGradient(0, 0, 0, h);
+        if (evening) {
+          grad.addColorStop(0, "#0b1020");
+          grad.addColorStop(0.55, "#2a2030");
+          grad.addColorStop(1, "#6b4a3a");
+        } else {
+          grad.addColorStop(0, "#6fa8dc");
+          grad.addColorStop(0.6, "#bcd7ee");
+          grad.addColorStop(1, "#eef4f8");
+        }
+        g.fillStyle = grad;
+        g.fillRect(0, 0, w, h);
+      }),
+      { repeat: false }
+    )
+  );
+}
