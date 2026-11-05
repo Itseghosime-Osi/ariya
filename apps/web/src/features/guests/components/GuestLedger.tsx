@@ -49,7 +49,7 @@ interface GuestLedgerProps {
 const STATUS = {
   accepted: { label: "Attending", className: "text-success" },
   declined: { label: "Declined", className: "text-error" },
-  pending: { label: "Awaiting reply", className: "text-gold-ink" },
+  pending: { label: "Awaiting", className: "text-gold-ink" },
 } as const;
 
 export function GuestLedger({
@@ -116,7 +116,7 @@ export function GuestLedger({
                 >
                   <span
                     aria-hidden="true"
-                    className="row-span-2 flex h-11 w-11 items-center justify-center rounded-full bg-wine/10 font-serif text-base font-bold text-wine transition-colors group-hover:bg-wine group-hover:text-ivory sm:row-span-1"
+                    className="row-span-1 flex h-11 w-11 items-center justify-center rounded-full bg-wine/10 font-serif text-base font-bold text-wine transition-colors group-hover:bg-wine group-hover:text-ivory sm:row-span-1"
                   >
                     {initials(guest.name)}
                   </span>
@@ -131,6 +131,10 @@ export function GuestLedger({
                     </span>
                     <span className="block truncate text-xs text-on-surface-variant">
                       {detail || "No group"}
+                      <span className="sm:hidden">
+                        {" · "}
+                        {seats} {seats === 1 ? "seat" : "seats"}
+                      </span>
                     </span>
                   </span>
                   <span
@@ -142,7 +146,7 @@ export function GuestLedger({
                     />
                     {status.label}
                   </span>
-                  <span className="text-xs tabular-nums text-on-surface-variant sm:order-3 sm:text-sm">
+                  <span className="hidden text-xs tabular-nums text-on-surface-variant sm:order-3 sm:block sm:text-sm">
                     {seats} {seats === 1 ? "seat" : "seats"}
                   </span>
                 </button>

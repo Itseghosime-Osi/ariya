@@ -13,7 +13,7 @@ interface ReminderRecipientsTableProps {
 const STATUS = {
   accepted: { label: "Attending", className: "text-success" },
   declined: { label: "Declined", className: "text-error" },
-  pending: { label: "Awaiting reply", className: "text-gold-ink" },
+  pending: { label: "Awaiting", className: "text-gold-ink" },
 } as const;
 
 const shortDate = new Intl.DateTimeFormat("en-GB", {

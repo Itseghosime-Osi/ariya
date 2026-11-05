@@ -88,7 +88,7 @@ export function GuestFormModal({
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 px-5 pb-5 pt-4 text-sm sm:px-7"
+          className="flex flex-col gap-4 px-5 pb-0 pt-4 text-sm sm:px-7"
         >
           {error && (
             <div
@@ -106,7 +106,7 @@ export function GuestFormModal({
             }
           />
 
-          <DialogFooter className="mt-1 flex flex-row justify-end gap-2 border-t border-hairline pt-4 sm:space-x-0">
+          <DialogFooter className="sticky bottom-0 -mx-5 mt-1 flex flex-row justify-end gap-2 border-t border-hairline bg-ivory px-5 py-3 sm:-mx-7 sm:space-x-0 sm:px-7">
             <Button
               type="button"
               variant="outline"

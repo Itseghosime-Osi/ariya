@@ -131,14 +131,14 @@ export function CsvUploadDropzone({
         </div>
       )}
 
-      <div className="flex items-center justify-between text-xs text-mist px-2 pt-2 border-t border-outline-variant/30">
+      <div className="flex flex-col items-center justify-between gap-1 border-t border-hairline px-2 pt-3 text-xs text-label-2 sm:flex-row">
         <span>Need a sample file to get started?</span>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={handleDownloadTemplate}
-          className="h-7 text-xs text-wine hover:text-wine hover:bg-wine/10"
+          className="h-9 text-xs text-wine hover:bg-wine/10 hover:text-wine"
         >
           <Download className="h-3.5 w-3.5 mr-1" />
           Download Sample Template (.csv)

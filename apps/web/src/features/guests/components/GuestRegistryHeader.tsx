@@ -28,11 +28,11 @@ export function GuestRegistryHeader({
         </p>
       </div>
 
-      <div className="flex w-full items-center gap-3 sm:w-auto">
+      <div className="flex w-full items-center gap-3 standalone:max-md:w-auto sm:w-auto">
         <Button
           variant="outline"
           onClick={onOpenImport}
-          className="flex-1 rounded-full border-gold/50 bg-transparent px-5 hover:border-gold hover:bg-gold/10 sm:flex-none"
+          className="flex-1 rounded-full border-gold/50 bg-transparent px-5 standalone:max-md:flex-none hover:border-gold hover:bg-gold/10 sm:flex-none"
         >
           <Upload className="mr-2 h-4 w-4 text-gold-ink" />
           Import CSV
