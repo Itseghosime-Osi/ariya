@@ -5,6 +5,7 @@ import {
   BookOpen,
   UtensilsCrossed,
   Sparkles,
+  LayoutTemplate,
   User,
   BadgeCheck,
   Mail,
@@ -79,6 +80,7 @@ export type IconName =
   | "menu_book"
   | "table_restaurant"
   | "styler"
+  | "layout_template"
   | "person"
   | "verified"
   | "drafts"
@@ -149,6 +151,7 @@ const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
   menu_book: BookOpen,
   table_restaurant: UtensilsCrossed,
   styler: Sparkles,
+  layout_template: LayoutTemplate,
   person: User,
   verified: BadgeCheck,
   drafts: Mail,

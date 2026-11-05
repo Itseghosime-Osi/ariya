@@ -98,7 +98,7 @@ export function getEventSections(eventId?: string | null): NavItem[] {
     {
       name: "Page editor",
       href: `${baseUrl}/page-editor`,
-      icon: "styler",
+      icon: "layout_template",
       group: "plan",
     },
     {
@@ -157,6 +157,8 @@ export function hasOwnPhoneHeader(pathname: string): boolean {
   return (
     pathname === "/settings" ||
     pathname === "/profile" ||
-    /^\/events\/[^/]+\/(billing|team|vendors|settings)$/.test(pathname)
+    /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders)$/.test(
+      pathname
+    )
   );
 }

@@ -55,12 +55,14 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/vendors`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/settings`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/guests`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/reminders`)).toBe(true);
   });
 
   it("is false everywhere else, including billing's callback", () => {
     expect(hasOwnPhoneHeader("/events")).toBe(false);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}`)).toBe(false);
-    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/guests`)).toBe(false);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/seating`)).toBe(false);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing/callback`)).toBe(
       false
     );
