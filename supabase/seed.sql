@@ -1,6 +1,42 @@
 -- Àríyá Seed Data
 -- Mirrors demo.js & FINAL 01-06 specifications
 
+-- 0. Test User
+insert into auth.users (
+  id,
+  instance_id,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  role,
+  aud,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change
+) values (
+  'aaaaaaaa-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000000',
+  'dev@ariya.local',
+  crypt('DevAriya2026!', gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Dev Tester"}',
+  now(),
+  now(),
+  'authenticated',
+  'authenticated',
+  '', '', '', ''
+) on conflict (id) do nothing;
+
+insert into public.profiles (id, email, full_name, updated_at)
+values ('aaaaaaaa-0000-0000-0000-000000000001', 'dev@ariya.local', 'Dev Tester', now())
+on conflict (id) do nothing;
+
 -- 1. Insert Event
 insert into public.events (
   id, title, couple, date, venue, area, dress_code, slug, status, registry_code, rsvp_by, paid_at
@@ -90,3 +126,8 @@ insert into public.vendor_tasks (vendor_id, event_id, task, due_date, is_done) v
   ('30000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Send finalized table chart for floor layout', '2026-12-05', false),
   ('30000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Share entrance fanfare and couple processional songs', '2026-11-30', false)
 on conflict do nothing;
+
+-- 7. Link test user as owner of the seed event
+insert into public.event_members (event_id, user_id, role)
+values ('00000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001', 'owner')
+on conflict (event_id, user_id) do nothing;
