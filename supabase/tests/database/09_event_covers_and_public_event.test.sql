@@ -93,9 +93,12 @@ begin
     p_slug := v_slug_arch
   )->>'id')::uuid;
 
+  -- This fixture is an old (expired) celebration; the expiry guard would refuse the edit.
+  alter table public.events disable trigger tr_guard_expired_event;
   update public.events
   set status = 'archived', is_public = true
   where id = v_e_arch;
+  alter table public.events enable trigger tr_guard_expired_event;
 
   insert into _test_p9_data
   values (
