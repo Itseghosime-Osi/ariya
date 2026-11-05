@@ -1,7 +1,12 @@
 // Barrel for the ts-rs output. Regenerated types land beside this file; re-export them here so
 // callers import from one place. Do not add hand-written types to this directory.
+export type { Archetype } from "./Archetype";
+export type { ArrangeRequest } from "./ArrangeRequest";
+export type { ArrangeResponse } from "./ArrangeResponse";
+export type { ArrangeTable } from "./ArrangeTable";
 export type { Arrangement } from "./Arrangement";
 export type { Capacity } from "./Capacity";
+export type { ChairPlacement } from "./ChairPlacement";
 export type { Climate } from "./Climate";
 export type { Environment } from "./Environment";
 export type { FitPlacement } from "./FitPlacement";
@@ -10,7 +15,13 @@ export type { FitResult } from "./FitResult";
 export type { Footprint } from "./Footprint";
 export type { GeometryRequest } from "./GeometryRequest";
 export type { GeometryResponse } from "./GeometryResponse";
+export type { LayoutOption } from "./LayoutOption";
+export type { Placement } from "./Placement";
+export type { ScoreBreakdown } from "./ScoreBreakdown";
+export type { ScoreTerm } from "./ScoreTerm";
 export type { Services } from "./Services";
+export type { Side } from "./Side";
+export type { StageWall } from "./StageWall";
 export type { Structure } from "./Structure";
 export type { Sun } from "./Sun";
 export type { TableGeometry } from "./TableGeometry";
