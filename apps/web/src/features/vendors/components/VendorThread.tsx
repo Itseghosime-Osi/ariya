@@ -47,19 +47,45 @@ export function VendorThread({
 
   return (
     <li className="relative">
-      <span
-        className="absolute inset-y-3 left-0 w-[3px] rounded-full"
-        style={{ backgroundColor: tone }}
-        aria-hidden="true"
-      />
-
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls={detailId}
-        className="flex w-full items-center gap-3 py-3 pl-4 pr-3 sm:gap-4 sm:py-4 sm:pl-6 sm:pr-5 text-left transition-colors hover:bg-white/55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-burgundy"
+        className="flex w-full items-center gap-3 py-3 pl-3.5 pr-3 sm:gap-4 sm:py-4 sm:pl-5 sm:pr-5 text-left transition-colors hover:bg-white/55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-burgundy"
       >
+        <span
+          className="relative grid h-12 w-12 shrink-0 place-items-center"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90">
+            <circle
+              cx="24"
+              cy="24"
+              r="21"
+              fill="none"
+              stroke={tone}
+              strokeOpacity="0.18"
+              strokeWidth="4"
+            />
+            <circle
+              cx="24"
+              cy="24"
+              r="21"
+              fill="none"
+              stroke={tone}
+              strokeWidth="4"
+              strokeLinecap="round"
+              pathLength={1}
+              strokeDasharray={`${Math.max(paid, 0.001)} 1`}
+              className="transition-[stroke-dasharray] duration-700"
+            />
+          </svg>
+          <span className="font-display text-sm font-bold text-night">
+            {Array.from(vendor.name.trim())[0]?.toUpperCase()}
+          </span>
+        </span>
+
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink">
             <span className="truncate">{vendor.category}</span>

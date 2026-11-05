@@ -40,20 +40,21 @@ export function VendorLoom({
   return (
     <section
       aria-labelledby="vendor-loom-title"
-      className="bento-card relative overflow-hidden p-4 sm:p-7"
+      className="profile-card relative overflow-hidden rounded-[28px] p-4 text-champagne sm:p-7"
     >
-      <div className="flex items-start justify-between gap-4 sm:flex-wrap sm:gap-5">
+      <span aria-hidden="true" className="profile-card__weave" />
+      <div className="relative flex items-start justify-between gap-4 sm:flex-wrap sm:gap-5">
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold">
             Money
           </div>
           <h2
             id="vendor-loom-title"
-            className="mt-0.5 font-display text-xl font-bold text-night sm:mt-1 sm:text-2xl"
+            className="mt-0.5 font-display text-xl font-bold text-[#fff6dc] sm:mt-1 sm:text-2xl"
           >
             The contracts, woven
           </h2>
-          <p className="mt-1 hidden max-w-md text-sm text-label-2 sm:block">
+          <p className="mt-1 hidden max-w-md text-sm text-champagne/65 sm:block">
             Solid cloth is paid; the hatched stretch is still owed.
           </p>
         </div>
@@ -72,7 +73,7 @@ export function VendorLoom({
                 cy={RING / 2}
                 r={RING / 2 - RING_STROKE / 2}
                 fill="none"
-                stroke="#dfe6f1"
+                stroke="rgba(255,246,220,0.14)"
                 strokeWidth={RING_STROKE}
               />
               <circle
@@ -80,7 +81,7 @@ export function VendorLoom({
                 cy={RING / 2}
                 r={RING / 2 - RING_STROKE / 2}
                 fill="none"
-                stroke="#3b5b8a"
+                stroke="#e9c98a"
                 strokeWidth={RING_STROKE}
                 strokeLinecap="round"
                 pathLength={1}
@@ -91,23 +92,23 @@ export function VendorLoom({
                 }}
               />
             </svg>
-            <span className="absolute font-display text-sm font-bold text-night tabular-nums">
+            <span className="absolute font-display text-sm font-bold text-[#fff6dc] tabular-nums">
               {Math.round(deliverables.ratio * 100)}%
             </span>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-label-2">
+            <div className="text-[11px] uppercase tracking-[0.16em] text-champagne/65">
               Deliverables
             </div>
-            <div className="font-display text-xl font-bold text-night tabular-nums">
+            <div className="font-display text-xl font-bold text-[#fff6dc] tabular-nums">
               {deliverables.done}
-              <span className="text-base font-normal text-label-2">
+              <span className="text-base font-normal text-champagne/65">
                 /{deliverables.total}
               </span>
             </div>
-            <div className="text-xs text-label-2">
+            <div className="text-xs text-champagne/65">
               {stats.overdueTasksCount > 0 ? (
-                <span className="font-semibold text-error">
+                <span className="font-semibold text-[#ff9aa8]">
                   {stats.overdueTasksCount} overdue
                 </span>
               ) : deliverables.total === 0 ? (
@@ -120,32 +121,32 @@ export function VendorLoom({
         </div>
       </div>
 
-      <dl className="mt-4 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-6">
+      <dl className="relative mt-4 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-6">
         <div>
-          <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
+          <dt className="text-[11px] uppercase tracking-[0.16em] text-champagne/65">
             Contracted
           </dt>
           <dd
-            className="font-display text-xl font-bold text-night tabular-nums sm:text-3xl"
+            className="font-display text-xl font-bold text-[#fff6dc] tabular-nums sm:text-3xl"
             title={formatKobo(stats.contractedKobo)}
           >
             {formatNairaCompact(stats.contractedKobo)}
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
+          <dt className="text-[11px] uppercase tracking-[0.16em] text-champagne/65">
             Paid
           </dt>
-          <dd className="font-display text-xl font-bold text-burgundy tabular-nums sm:text-3xl">
+          <dd className="font-display text-xl font-bold text-gold tabular-nums sm:text-3xl">
             <NumberFlow value={paidPct} suffix="%" respectMotionPreference />
           </dd>
         </div>
         <div>
-          <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
+          <dt className="text-[11px] uppercase tracking-[0.16em] text-champagne/65">
             To go
           </dt>
           <dd
-            className="font-display text-xl font-bold text-night tabular-nums sm:text-3xl"
+            className="font-display text-xl font-bold text-[#fff6dc] tabular-nums sm:text-3xl"
             title={formatKobo(stats.balanceDueKobo)}
           >
             {formatNairaCompact(stats.balanceDueKobo)}
@@ -154,13 +155,13 @@ export function VendorLoom({
       </dl>
 
       {vendors.length === 0 ? (
-        <p className="mt-4 rounded-2xl border border-dashed border-hairline px-4 py-6 text-center text-sm text-label-2">
+        <p className="relative mt-4 rounded-2xl border border-dashed border-gold/25 px-4 py-6 text-center text-sm text-champagne/65">
           Add your first vendor and the cloth starts to weave itself here.
         </p>
       ) : (
         <>
           <div
-            className="mt-4 flex h-10 gap-1 sm:mt-6 sm:h-14 overflow-hidden rounded-2xl"
+            className="relative mt-4 flex h-10 gap-1 sm:mt-6 sm:h-14 overflow-hidden rounded-2xl"
             onPointerLeave={() => setActiveId(null)}
           >
             {vendors.map((vendor) => {
@@ -180,9 +181,9 @@ export function VendorLoom({
                   style={{
                     flexGrow: Math.max(vendor.cost_kobo, 1),
                     flexBasis: 0,
-                    backgroundColor: `${tone}22`,
+                    backgroundColor: `${tone}44`,
                     backgroundImage:
-                      "repeating-linear-gradient(45deg, rgba(28,7,13,0.10) 0 3px, transparent 3px 7px)",
+                      "repeating-linear-gradient(45deg, rgba(255,246,220,0.16) 0 3px, transparent 3px 7px)",
                     transform: on ? "scaleY(1.06)" : undefined,
                   }}
                 >
@@ -202,11 +203,13 @@ export function VendorLoom({
           <p
             id={captionId}
             aria-live="polite"
-            className="mt-2 min-h-[1.25rem] truncate text-xs text-label-2 sm:mt-3 sm:text-sm"
+            className="mt-2 min-h-[1.25rem] truncate text-xs text-champagne/65 sm:mt-3 sm:text-sm"
           >
             {active ? (
               <>
-                <span className="font-semibold text-night">{active.name}</span>
+                <span className="font-semibold text-[#fff6dc]">
+                  {active.name}
+                </span>
                 {" · "}
                 {formatKobo(active.cost_kobo)} contract ·{" "}
                 {formatKobo(active.deposit_kobo)} paid ·{" "}
@@ -214,11 +217,7 @@ export function VendorLoom({
               </>
             ) : (
               <>
-                <Icon
-                  name="info"
-                  size={13}
-                  className="mr-1 inline text-gold-ink"
-                />
+                <Icon name="info" size={13} className="mr-1 inline text-gold" />
                 <span className="sm:hidden">
                   Tap a band to read its numbers.
                 </span>

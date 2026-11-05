@@ -66,10 +66,7 @@ export function EventDangerZone({
 
   return (
     <section aria-labelledby="ev-danger">
-      <h2
-        id="ev-danger"
-        className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-error"
-      >
+      <h2 id="ev-danger" className="sr-only">
         Danger zone
       </h2>
       <div className="overflow-hidden rounded-3xl border border-error/25 bg-white/40 backdrop-blur-sm divide-y divide-hairline">

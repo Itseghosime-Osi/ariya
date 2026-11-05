@@ -67,7 +67,8 @@ test.describe("Events Creation & Overview", () => {
       timeout: 10000,
     });
 
-    // Open Archive Confirmation Modal
+    // Open Archive Confirmation Modal (it lives under the Danger zone tab)
+    await page.getByRole("tab", { name: /danger zone/i }).click();
     await page.getByRole("button", { name: /archive event/i }).click();
     await expect(page.getByText(/Archive Celebration\?/i)).toBeVisible();
 
