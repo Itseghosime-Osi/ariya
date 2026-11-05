@@ -177,19 +177,26 @@ export function VendorLoom({
                   onBlur={() => setActiveId(null)}
                   aria-describedby={captionId}
                   aria-label={`${vendor.name}: ${formatKobo(vendor.cost_kobo)} contract, ${Math.round(paid * 100)}% paid`}
-                  className="relative min-w-[10px] overflow-hidden rounded-md transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                  className="relative min-w-[10px] overflow-hidden rounded-md ring-1 ring-inset ring-[#e9c98a]/35 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
                   style={{
                     flexGrow: Math.max(vendor.cost_kobo, 1),
                     flexBasis: 0,
-                    backgroundColor: `${tone}44`,
+                    backgroundColor: "rgba(255,246,220,0.08)",
                     backgroundImage:
-                      "repeating-linear-gradient(45deg, rgba(255,246,220,0.16) 0 3px, transparent 3px 7px)",
+                      "repeating-linear-gradient(45deg, rgba(255,246,220,0.30) 0 2px, transparent 2px 7px)",
                     transform: on ? "scaleY(1.06)" : undefined,
                   }}
                 >
                   <span
                     className="absolute inset-y-0 left-0"
-                    style={{ width: `${paid * 100}%`, backgroundColor: tone }}
+                    style={{
+                      width: `${paid * 100}%`,
+                      backgroundColor: tone,
+                      backgroundImage:
+                        "linear-gradient(180deg, rgba(255,255,255,0.38), rgba(255,255,255,0) 55%)",
+                      filter: "brightness(1.18) saturate(1.05)",
+                      boxShadow: "inset -2px 0 0 rgba(255,246,220,0.55)",
+                    }}
                   />
                   <span
                     className={`absolute inset-0 transition-colors ${on ? "bg-white/20" : ""}`}
