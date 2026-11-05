@@ -83,7 +83,7 @@ Goal: a Rust core that reproduces today's behaviour exactly, behind a loader tha
 
 - [x] **0.2.1** Port `footprint`, `gapBetween`, `extents`, `gapToZone`, `gapToWalls` from `model.ts` to `geometry.rs`.
 - [x] **0.2.2** Port `fitTables` and `checkHallPlacement` from `fit.ts` / `checks.ts`.
-- [ ] **0.2.3** Build a generated corpus (≥ 500 layouts: random room sizes, table mixes, rotations, zones) committed as a fixture. _(448 cases today — 240 tables, 200 pairs, 8 fits.)_
+- [x] **0.2.3** Build a generated corpus (≥ 500 layouts: random room sizes, table mixes, rotations, zones) committed as a fixture. _(693 cases — 320 tables in rooms from 8 m to 60 m, 200 pairs, 160 zone gaps, 13 fits.)_
 - [x] **0.2.4** Parity test: Rust output equals TS output on the corpus, to 1e-9. This is the gate for retiring TS geometry later.
 
 ### 0.3 Wasm ABI

@@ -16,8 +16,6 @@ const CORPUS: &str = include_str!("fixtures/geometry-corpus.json");
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Corpus {
-    width: f64,
-    length: f64,
     tables: Vec<TableCase>,
     pairs: Vec<PairCase>,
     zones: Vec<Zone>,
@@ -28,6 +26,8 @@ struct Corpus {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct TableCase {
+    width: f64,
+    length: f64,
     shape: String,
     capacity: i32,
     x: f64,
@@ -149,7 +149,7 @@ fn extents_and_wall_gaps_match() {
         close(ex, t.ex, &format!("table {i} ex"));
         close(ey, t.ey, &format!("table {i} ey"));
         close(
-            gap_to_walls(&f, c.width, c.length),
+            gap_to_walls(&f, t.width, t.length),
             t.wall_gap,
             &format!("table {i} wall gap"),
         );

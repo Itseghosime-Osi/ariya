@@ -45,19 +45,25 @@ const next = rng(20261105);
 const pick = <T>(items: readonly T[]): T =>
   items[Math.floor(next() * items.length)];
 
-const WIDTH = 30;
-const LENGTH = 20;
+/** Rooms run from a snug 8 m square to a 60 m field, so wall gaps are not all the same shape. */
+const ROOM_MIN = 8;
+const ROOM_MAX = 60;
+const half = (n: number) => Math.round(n * 2) / 2;
 
-const tables = Array.from({ length: 240 }, () => {
+const tables = Array.from({ length: 320 }, () => {
+  const width = half(ROOM_MIN + next() * (ROOM_MAX - ROOM_MIN));
+  const length = half(ROOM_MIN + next() * (ROOM_MAX - ROOM_MIN));
   const shape = pick(SHAPES);
   const capacity = pick(CAPACITIES);
-  const x = Math.round(next() * WIDTH * 100) / 100;
-  const y = Math.round(next() * LENGTH * 100) / 100;
-  const rot = shape === "round" ? 0 : pick([0, 90]);
+  const x = Math.round(next() * width * 100) / 100;
+  const y = Math.round(next() * length * 100) / 100;
+  const rot = shape === "round" ? 0 : pick([0, 90, 180, 270]);
   const top = tableTop(shape, capacity);
   const f = footprint(shape, capacity, x, y, rot);
   const { ex, ey } = extents(f);
   return {
+    width,
+    length,
     shape,
     capacity,
     x,
@@ -67,7 +73,7 @@ const tables = Array.from({ length: 240 }, () => {
     footprint: f,
     ex,
     ey,
-    wallGap: gapToWalls(f, WIDTH, LENGTH),
+    wallGap: gapToWalls(f, width, length),
   };
 });
 
@@ -122,7 +128,7 @@ const zones: Zone[] = [
   },
 ];
 
-const zonePairs = Array.from({ length: 120 }, () => {
+const zonePairs = Array.from({ length: 160 }, () => {
   const table = Math.floor(next() * tables.length);
   const zone = Math.floor(next() * zones.length);
   return {
@@ -196,6 +202,51 @@ const fitCases = [
     gap: 0.6,
     aisle: true,
   },
+  {
+    width: 12,
+    length: 9,
+    shape: "round",
+    capacity: 6,
+    rotation: 0,
+    gap: 0.45,
+    aisle: false,
+  },
+  {
+    width: 24,
+    length: 24,
+    shape: "oval",
+    capacity: 8,
+    rotation: 0,
+    gap: 0.6,
+    aisle: true,
+  },
+  {
+    width: 36,
+    length: 18,
+    shape: "head",
+    capacity: 10,
+    rotation: 0,
+    gap: 0.6,
+    aisle: true,
+  },
+  {
+    width: 48,
+    length: 30,
+    shape: "rectangular",
+    capacity: 8,
+    rotation: 90,
+    gap: 0.9,
+    aisle: true,
+  },
+  {
+    width: 20,
+    length: 16,
+    shape: "round",
+    capacity: 12,
+    rotation: 0,
+    gap: 0.3,
+    aisle: false,
+  },
 ].map((c) => {
   const result = fitTables({ ...c, zones: [] });
   return { ...c, zones: [] as Zone[], ...result };
@@ -225,8 +276,6 @@ fitCases.push({
 
 const corpus = {
   generatedBy: "apps/web/scripts/gen-geometry-corpus.ts",
-  width: WIDTH,
-  length: LENGTH,
   tables,
   pairs,
   zones,
@@ -236,6 +285,7 @@ const corpus = {
 
 mkdirSync(path.dirname(outFile), { recursive: true });
 writeFileSync(outFile, `${JSON.stringify(corpus, null, 2)}\n`);
+const total = tables.length + pairs.length + zonePairs.length + fitCases.length;
 console.log(
-  `geometry corpus: ${tables.length} tables, ${pairs.length} pairs, ${zonePairs.length} zone gaps, ${fitCases.length} fits`
+  `geometry corpus: ${tables.length} tables, ${pairs.length} pairs, ${zonePairs.length} zone gaps, ${fitCases.length} fits (${total} cases)`
 );
