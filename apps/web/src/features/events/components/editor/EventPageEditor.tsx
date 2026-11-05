@@ -7,6 +7,8 @@ import { Icon } from "@/components/ui/icon";
 import { updateEventAction } from "@/features/events/actions";
 import type { Event } from "@/features/events/types";
 import { formatWatDatetimeLocal, parseWatDateToUtc } from "@/lib/format";
+import { FilmStudio } from "@/features/event-film/FilmStudio";
+import { readFilmDesign } from "@/features/event-film/design";
 import { EditorControlsForm } from "./EditorControlsForm";
 import { LivePagePreview, type LivePreviewData } from "./LivePagePreview";
 
@@ -16,6 +18,7 @@ interface EventPageEditorProps {
 
 export function EventPageEditor({ event }: EventPageEditorProps) {
   const router = useRouter();
+  const [tab, setTab] = useState<"page" | "film">("page");
 
   // Local WAT datetime input state. Converted with parseWatDateToUtc only on save and for live preview.
   const [watDateInput, setWatDateInput] = useState<string>(() =>
@@ -133,29 +136,81 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
             <span>View Public Page</span>
             <Icon name="arrow_forward" className="text-sm" />
           </Link>
-          <button
-            type="button"
-            disabled={isSaving}
-            onClick={handleSave}
-            className="px-5 py-2 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold flex items-center gap-2 transition-all shadow-sm disabled:opacity-50"
-          >
-            <Icon
-              name={isSaving ? "refresh" : "check"}
-              className={`text-sm ${isSaving ? "animate-spin" : ""}`}
-            />
-            <span>{isSaving ? "Saving..." : "Save Changes"}</span>
-          </button>
+          {tab === "page" && (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={handleSave}
+              className="px-5 py-2 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold flex items-center gap-2 transition-all shadow-sm disabled:opacity-50"
+            >
+              <Icon
+                name={isSaving ? "refresh" : "check"}
+                className={`text-sm ${isSaving ? "animate-spin" : ""}`}
+              />
+              <span>{isSaving ? "Saving..." : "Save Changes"}</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {saveSuccess && (
+      <div
+        role="tablist"
+        aria-label="Editor sections"
+        className="inline-flex gap-1 rounded-full border border-hairline bg-white/40 p-1 backdrop-blur-sm"
+      >
+        {(
+          [
+            ["page", "Page"],
+            ["film", "Invitation film"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`min-h-[40px] rounded-full px-4 text-xs font-semibold transition-colors ${
+              tab === id
+                ? "bg-burgundy text-ivory"
+                : "text-label-2 hover:text-burgundy"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "film" && (
+        <FilmStudio
+          eventId={event.id}
+          initial={readFilmDesign(event.film_design)}
+          initialLive={event.invitation_live}
+          slug={event.slug}
+          event={{
+            couple: event.couple,
+            title: event.title,
+            date: event.date,
+            venue: event.venue,
+            area: event.area,
+            dressCode: event.dress_code,
+            rsvpBy: event.rsvp_by,
+            theme: event.invitation_theme,
+            headline: event.invitation_headline,
+            subheadline: event.invitation_subheadline,
+            message: event.invitation_message,
+          }}
+        />
+      )}
+
+      {tab === "page" && saveSuccess && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
           <Icon name="check_circle" className="text-sm text-emerald-600" />
           <span>Celebration page updates saved successfully.</span>
         </div>
       )}
 
-      {errorMsg && (
+      {tab === "page" && errorMsg && (
         <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl flex items-center gap-2">
           <Icon name="error" className="text-sm text-red-600" />
           <span>{errorMsg}</span>
@@ -163,23 +218,25 @@ export function EventPageEditor({ event }: EventPageEditorProps) {
       )}
 
       {/* Editor Grid: Controls on Left, Live Viewport on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-5">
-          <EditorControlsForm
-            eventId={event.id}
-            data={formData}
-            onChange={handleFieldChange}
-            watDate={watDateInput}
-            onChangeWatDate={handleWatDateChange}
-            watRsvpBy={watRsvpByInput}
-            onChangeWatRsvpBy={handleWatRsvpByChange}
-            disabled={isSaving}
-          />
+      {tab === "page" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-5">
+            <EditorControlsForm
+              eventId={event.id}
+              data={formData}
+              onChange={handleFieldChange}
+              watDate={watDateInput}
+              onChangeWatDate={handleWatDateChange}
+              watRsvpBy={watRsvpByInput}
+              onChangeWatRsvpBy={handleWatRsvpByChange}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="lg:col-span-7">
+            <LivePagePreview data={previewData} />
+          </div>
         </div>
-        <div className="lg:col-span-7">
-          <LivePagePreview data={previewData} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
