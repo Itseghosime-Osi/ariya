@@ -1,0 +1,11 @@
+//! The venue studio's computational core: room geometry, table packing, and the venue facts the
+//! rest of the studio reads.
+//!
+//! Pure and deterministic. The same functions run natively in tests and compiled to
+//! `wasm32-unknown-unknown` behind `crates/studio-wasm`. Nothing here touches the DOM, the
+//! database or the clock.
+
+pub mod fit;
+pub mod geometry;
+pub mod venue;
+pub mod wire;

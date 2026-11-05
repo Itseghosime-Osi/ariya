@@ -1,0 +1,11 @@
+[package]
+name = "ariya-studio-wasm"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ariya-studio-core = { path = "../studio-core" }
