@@ -267,6 +267,8 @@ body:has([data-auth-shell]) {
   transition: background-color 300ms ease;
 }
 .sb[data-collapsed="false"] .sb-count {
+  /* Room around the ring and the words, so the chip never crowds its own border. */
+  padding: 10px 16px 10px 12px;
   background: rgba(233, 201, 138, 0.07);
   box-shadow: inset 0 0 0 1px rgba(233, 201, 138, 0.14);
 }
