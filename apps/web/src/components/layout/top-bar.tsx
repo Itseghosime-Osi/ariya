@@ -27,9 +27,14 @@ export function TopBar({
 
   return (
     <>
+      {/*
+        Fixed to the top of the screen on every device, so only the page beneath it scrolls. It sits
+        beside the sidebar on wide screens (and slides with it), and the spacer after it keeps the
+        page from starting underneath.
+      */}
       <header
         data-top-bar
-        className={`${hideOnPhone ? "standalone:max-md:hidden " : ""}app-bar sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)] sm:px-6 lg:px-8`}
+        className={`${hideOnPhone ? "standalone:max-md:hidden " : ""}app-bar sb-offset fixed inset-x-0 top-0 z-30 flex h-[calc(env(safe-area-inset-top)+4rem)] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)] sm:px-6 md:left-[var(--sb-offset)] lg:px-8`}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1 max-w-md">
           <Link
@@ -123,6 +128,10 @@ export function TopBar({
           </button>
         </div>
       </header>
+      <div
+        aria-hidden="true"
+        className={`${hideOnPhone ? "standalone:max-md:hidden " : ""}h-[calc(env(safe-area-inset-top)+4rem)] shrink-0`}
+      />
 
       <GlobalSearch
         open={searchOpen}

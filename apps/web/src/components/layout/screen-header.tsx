@@ -46,43 +46,55 @@ export function ScreenHeader({
   };
 
   return (
-    <div
-      data-screen-header
-      className="app-bar sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden min-h-16 grid-cols-[44px_1fr_44px] items-center gap-3 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
-    >
-      <button type="button" onClick={back} aria-label="Back" className={CIRCLE}>
-        <Icon name="chevron_left" size={20} />
-      </button>
-      <div className="min-w-0 text-center">
-        <div
-          role="heading"
-          aria-level={1}
-          className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night"
-        >
-          {title}
-        </div>
-        {subtitle && (
-          <p className="-mt-0.5 truncate text-[11px] leading-tight text-label-2">
-            {subtitle}
-          </p>
-        )}
-      </div>
-      {action?.href ? (
-        <Link href={action.href} aria-label={action.label} className={CIRCLE}>
-          <Icon name={action.icon} size={17} />
-        </Link>
-      ) : action?.onClick ? (
+    <>
+      {/* Fixed like the top bar it stands in for; the spacer holds its place in the page. */}
+      <div
+        aria-hidden="true"
+        className="-mt-6 mb-5 hidden h-[calc(env(safe-area-inset-top)+4rem)] standalone:max-md:block"
+      />
+      <div
+        data-screen-header
+        className="app-bar fixed inset-x-0 top-0 z-30 hidden h-[calc(env(safe-area-inset-top)+4rem)] grid-cols-[44px_1fr_44px] items-center gap-3 px-4 pt-[env(safe-area-inset-top)] sm:px-6 standalone:max-md:grid"
+      >
         <button
           type="button"
-          onClick={action.onClick}
-          aria-label={action.label}
+          onClick={back}
+          aria-label="Back"
           className={CIRCLE}
         >
-          <Icon name={action.icon} size={17} />
+          <Icon name="chevron_left" size={20} />
         </button>
-      ) : (
-        <span aria-hidden="true" />
-      )}
-    </div>
+        <div className="min-w-0 text-center">
+          <div
+            role="heading"
+            aria-level={1}
+            className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night"
+          >
+            {title}
+          </div>
+          {subtitle && (
+            <p className="-mt-0.5 truncate text-[11px] leading-tight text-label-2">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {action?.href ? (
+          <Link href={action.href} aria-label={action.label} className={CIRCLE}>
+            <Icon name={action.icon} size={17} />
+          </Link>
+        ) : action?.onClick ? (
+          <button
+            type="button"
+            onClick={action.onClick}
+            aria-label={action.label}
+            className={CIRCLE}
+          >
+            <Icon name={action.icon} size={17} />
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+      </div>
+    </>
   );
 }
