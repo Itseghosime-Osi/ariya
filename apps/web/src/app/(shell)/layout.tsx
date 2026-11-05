@@ -1,3 +1,4 @@
+import { BRAND_IVORY, BRAND_NIGHT } from "@/lib/brand";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Great_Vibes, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
@@ -55,8 +56,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   // Tints the phone's status bar and browser chrome to match the page.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f2ea" },
-    { media: "(prefers-color-scheme: dark)", color: "#140c10" },
+    { media: "(prefers-color-scheme: light)", color: BRAND_IVORY },
+    { media: "(prefers-color-scheme: dark)", color: BRAND_NIGHT },
   ],
 };
 

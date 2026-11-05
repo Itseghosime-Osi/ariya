@@ -210,3 +210,29 @@ select.desk-field {
   cursor: not-allowed;
   background-color: rgba(255, 255, 255, 0.3);
 }
+
+/* The app bar: one material for the top bar and a screen's own header, so moving between a screen with
+   a Back button and one without never changes the chrome. Its colour matches the manifest and the
+   phone's status bar (theme-color), so an installed app reads as one piece with the system. */
+.app-bar {
+  position: relative;
+  background-color: color-mix(in srgb, var(--chrome, #f7f2ea) 94%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold-ink) 20%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.app-bar::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--gold) 60%, transparent),
+    transparent
+  );
+}

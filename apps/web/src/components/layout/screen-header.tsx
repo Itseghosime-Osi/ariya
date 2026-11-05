@@ -48,7 +48,7 @@ export function ScreenHeader({
   return (
     <div
       data-screen-header
-      className="sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden grid-cols-[44px_1fr_44px] items-center gap-3 border-b border-hairline bg-[#f7f2e8]/92 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md [-webkit-backdrop-filter:blur(10px)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
+      className="app-bar sticky top-0 z-30 -mx-4 -mt-6 mb-5 hidden min-h-16 grid-cols-[44px_1fr_44px] items-center gap-3 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:-mx-6 sm:px-6 standalone:max-md:grid"
     >
       <button type="button" onClick={back} aria-label="Back" className={CIRCLE}>
         <Icon name="chevron_left" size={20} />

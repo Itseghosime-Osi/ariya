@@ -123,7 +123,7 @@ export function ProposalCard({
   return (
     <li
       data-testid="approval-card"
-      className="rounded-[22px] border border-wine/10 bg-surface-container-low p-4 sm:p-5"
+      className="rounded-3xl border border-hairline bg-white/40 p-4 backdrop-blur-sm sm:p-5"
     >
       <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
         {KIND_LABEL[proposal.kind]} · {proposal.eventTitle}
@@ -363,7 +363,7 @@ function SeatingPlanView({ preview }: { preview: SeatingPreview }) {
   );
 
   return (
-    <div className="mt-3 rounded-2xl border border-wine/10 bg-surface-container-high/60 p-3 sm:p-4">
+    <div className="mt-3 rounded-2xl border border-hairline bg-white/40 p-3 sm:p-4">
       <p className="text-xs font-medium leading-relaxed text-on-surface">
         {guests} {guests === 1 ? "guest" : "guests"} at {tables.length}{" "}
         {tables.length === 1 ? "table" : "tables"}

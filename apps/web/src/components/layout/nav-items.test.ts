@@ -53,6 +53,7 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader("/profile")).toBe(true);
     expect(hasOwnPhoneHeader("/profile/archive")).toBe(true);
     expect(hasOwnPhoneHeader("/events/new")).toBe(true);
+    expect(hasOwnPhoneHeader("/approvals")).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/vendors`)).toBe(true);

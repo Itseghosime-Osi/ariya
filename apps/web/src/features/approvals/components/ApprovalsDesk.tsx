@@ -49,7 +49,7 @@ export function ApprovalsDesk({ initialFeed }: { initialFeed: ProposalFeed }) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-5 sm:gap-8">
       <section>
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
@@ -63,7 +63,7 @@ export function ApprovalsDesk({ initialFeed }: { initialFeed: ProposalFeed }) {
         </div>
 
         {pending.length === 0 ? (
-          <p className="mt-3 rounded-[22px] border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm text-on-surface-variant">
+          <p className="mt-3 rounded-3xl border border-dashed border-hairline bg-white/40 p-4 text-[13px] leading-relaxed text-on-surface-variant backdrop-blur-sm sm:p-5 sm:text-sm">
             Nothing is waiting. When a connected app wants to send invitations
             or reminders, its request appears here and nothing leaves your desk
             until you approve it.
@@ -87,12 +87,12 @@ export function ApprovalsDesk({ initialFeed }: { initialFeed: ProposalFeed }) {
         </p>
 
         {decided.length === 0 ? (
-          <p className="mt-3 rounded-[22px] border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm text-on-surface-variant">
+          <p className="mt-3 rounded-3xl border border-dashed border-hairline bg-white/40 p-4 text-[13px] leading-relaxed text-on-surface-variant backdrop-blur-sm sm:p-5 sm:text-sm">
             Nothing decided yet. Approvals and rejections are listed here, so
             you can always see what an app asked for and what you did about it.
           </p>
         ) : (
-          <ul className="mt-3 divide-y divide-hairline">
+          <ul className="mt-3 divide-y divide-hairline overflow-hidden rounded-3xl border border-hairline bg-white/40 backdrop-blur-sm">
             {decided.map((proposal) => (
               <DecidedRow key={proposal.id} proposal={proposal} />
             ))}
@@ -128,7 +128,7 @@ function DecidedRow({ proposal }: { proposal: Proposal }) {
   }
 
   return (
-    <li className="py-3.5">
+    <li className="px-4 py-3.5 sm:px-5">
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
         <div className="min-w-0">
           <p className="text-sm font-medium text-on-surface">
