@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  areaPerDiner,
   chairPositions,
   footprint,
   defaultLayout,
   gapBetween,
   gapToWalls,
   normaliseLayout,
+  normaliseVenue,
   tableTop,
   styleOf,
   type Zone,
@@ -234,6 +236,38 @@ describe("normaliseLayout for the 3D studio", () => {
     expect(styleOf(l, "t1").cloth).toBe("#000000");
     expect(styleOf(l, "t1").chair).toBe("chiavari-gold");
     expect(styleOf(l, "t2").cloth).toBe(l.decor.linen);
+  });
+});
+
+describe("venue profile", () => {
+  it("gives a first-version layout a plain hall", () => {
+    const l = normaliseLayout({ version: 1, width: 30, length: 20 })!;
+    expect(l.version).toBe(2);
+    expect(l.venue.type).toBe("hall");
+    expect(l.venue.environment).toBe("indoor");
+    expect(l.venue.structure).toBeNull();
+  });
+
+  it("keeps a venue it already knows", () => {
+    const l = normaliseLayout({
+      width: 30,
+      length: 20,
+      venue: { type: "marquee", environment: "covered" },
+    })!;
+    expect(l.venue.type).toBe("marquee");
+    expect(l.venue.environment).toBe("covered");
+  });
+
+  it("falls back to a hall for an unknown type", () => {
+    expect(normaliseVenue({ type: "spaceship" }).type).toBe("hall");
+    expect(normaliseVenue(null).type).toBe("hall");
+  });
+
+  it("gives each venue its own floor area per guest", () => {
+    expect(areaPerDiner({ type: "church" })).toBeCloseTo(0.65);
+    expect(areaPerDiner({ type: "field" })).toBeCloseTo(1.5);
+    expect(areaPerDiner({ type: "hall" })).toBeCloseTo(1.4);
+    expect(areaPerDiner(undefined)).toBeCloseTo(1.4);
   });
 });
 

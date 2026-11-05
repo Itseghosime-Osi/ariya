@@ -6,6 +6,7 @@
  * in centimetres in `position_x` / `position_y`; everything else about the hall lives in one
  * `hall_layout` JSON document per event.
  */
+import type { Environment, VenueProfile, VenueType } from "@ariya/studio";
 
 export type ZoneKind =
   | "stage"
@@ -95,7 +96,9 @@ export interface FreeChair {
 export type Spacing = "snug" | "comfortable" | "spacious";
 
 export interface HallLayout {
-  version: 1;
+  version: 2;
+  /** What kind of place this is, and the facts that follow from it. */
+  venue: VenueProfile;
   width: number;
   length: number;
   zones: Zone[];
@@ -278,8 +281,91 @@ export const WALL_MARGIN = 1.0;
 export const ZONE_CLEARANCE = 1.0;
 /** NFPA 101 main aisle where it serves more than 50 people. */
 export const MAIN_AISLE = 1.12;
-/** Floor area per seated guest used for the fire-safety guidance (UK and NFPA both ~1.4 m²). */
-export const AREA_PER_DINER = 1.4;
+
+/**
+ * Floor area one seated guest needs, in square metres, by venue type.
+ *
+ * A banquet round needs 1.4 m² for comfort; open ground needs more because circulation is less
+ * tidy; pews are the one place a guest needs less than a square metre. Mirrors
+ * `VenueType::area_per_diner` in `crates/studio-core/src/venue.rs`.
+ */
+export const AREA_PER_DINER: Record<VenueType, number> = {
+  hall: 1.4,
+  "pillared-hall": 1.4,
+  marquee: 1.4,
+  "pole-tent": 1.4,
+  "stretch-tent": 1.4,
+  garden: 1.5,
+  field: 1.5,
+  beach: 1.5,
+  rooftop: 1.4,
+  church: 0.65,
+  hybrid: 1.4,
+};
+
+/** The floor area per guest for a venue type, defaulting to a hall. */
+export function areaPerDiner(venue: { type: VenueType } | undefined): number {
+  return AREA_PER_DINER[venue?.type ?? "hall"] ?? 1.4;
+}
+
+/** The environment a venue type starts in, which the host can then override. */
+export const VENUE_ENVIRONMENT: Record<VenueType, Environment> = {
+  hall: "indoor",
+  "pillared-hall": "indoor",
+  church: "indoor",
+  marquee: "covered",
+  "pole-tent": "covered",
+  "stretch-tent": "covered",
+  rooftop: "covered",
+  hybrid: "covered",
+  garden: "outdoor",
+  field: "outdoor",
+  beach: "outdoor",
+};
+
+/** The name a host would use for each venue type. */
+export const VENUE_LABEL: Record<VenueType, string> = {
+  hall: "Pillar-free hall",
+  "pillared-hall": "Pillared hall",
+  marquee: "Marquee",
+  "pole-tent": "Pole tent",
+  "stretch-tent": "Stretch tent",
+  garden: "Garden",
+  field: "Open field",
+  beach: "Beach",
+  rooftop: "Rooftop",
+  church: "Church",
+  hybrid: "Two venues",
+};
+
+/** A one-line description for the venue picker. */
+export const VENUE_BLURB: Record<VenueType, string> = {
+  hall: "Walls, a roof and no pillars in the way.",
+  "pillared-hall": "Columns you have to plan around.",
+  marquee: "A tent on a leg grid, open to the air.",
+  "pole-tent": "Poles down the middle, fabric over.",
+  "stretch-tent": "Fabric pulled over irregular ground.",
+  garden: "Lawn, trees and a house behind you.",
+  field: "Open ground with nothing to fix to.",
+  beach: "Sand, wind and a tide line.",
+  rooftop: "A terrace with a parapet and a view.",
+  church: "Pews, an aisle and a raised altar.",
+  hybrid: "Ceremony in one place, reception in another.",
+};
+
+/** A fresh venue profile for a type, with the environment it starts in. */
+export function defaultVenue(type: VenueType = "hall"): VenueProfile {
+  return {
+    type,
+    environment: VENUE_ENVIRONMENT[type],
+    structure: null,
+    services: null,
+    capacity: null,
+    climate: null,
+    sun: null,
+    wind: null,
+  };
+}
 
 let idCounter = 0;
 export function zoneId(): string {
@@ -289,7 +375,8 @@ export function zoneId(): string {
 
 export function defaultLayout(width = 30, length = 20): HallLayout {
   return {
-    version: 1,
+    version: 2,
+    venue: defaultVenue("hall"),
     width,
     length,
     spacing: "comfortable",
@@ -338,7 +425,8 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
   const length = clamp(Number(r.length) || 20, 6, 120);
   const base = defaultLayout(width, length);
   return {
-    version: 1,
+    version: 2,
+    venue: normaliseVenue(r.venue),
     width,
     length,
     spacing:
@@ -378,6 +466,35 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
             label: z.label || ZONE_DEFAULTS[z.kind]?.label || "Zone",
           }))
       : base.zones,
+  };
+}
+
+const VENUE_TYPES = Object.keys(VENUE_LABEL) as VenueType[];
+
+/** Read a stored venue profile, defaulting to a plain hall when it is missing or unknown. */
+export function normaliseVenue(raw: unknown): VenueProfile {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return defaultVenue("hall");
+  }
+  const r = raw as Partial<VenueProfile>;
+  const type: VenueType = VENUE_TYPES.includes(r.type as VenueType)
+    ? (r.type as VenueType)
+    : "hall";
+  const environment: Environment =
+    r.environment === "indoor" ||
+    r.environment === "covered" ||
+    r.environment === "outdoor"
+      ? r.environment
+      : VENUE_ENVIRONMENT[type];
+  return {
+    type,
+    environment,
+    structure: r.structure ?? null,
+    services: r.services ?? null,
+    capacity: r.capacity ?? null,
+    climate: r.climate ?? null,
+    sun: r.sun ?? null,
+    wind: r.wind ?? null,
   };
 }
 

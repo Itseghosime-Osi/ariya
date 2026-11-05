@@ -107,8 +107,80 @@ export const HALL_MAX_TABLE_POSITIONS = 300;
 /** `events.hall_layout` refuses anything larger, so a proposal beyond it could never be applied. */
 export const MAX_HALL_LAYOUT_BYTES = 64 * 1024;
 
+export const venueTypeSchema = z.enum([
+  "hall",
+  "pillared-hall",
+  "marquee",
+  "pole-tent",
+  "stretch-tent",
+  "garden",
+  "field",
+  "beach",
+  "rooftop",
+  "church",
+  "hybrid",
+]);
+
+// Every field defaults to null so a proposal may omit it, while the parsed output always matches
+// the generated `VenueProfile` shape (which has no optional members).
+export const venueProfileSchema = z.object({
+  type: venueTypeSchema,
+  environment: z.enum(["indoor", "covered", "outdoor"]),
+  structure: z
+    .object({
+      clearspan: z.number().nullable().default(null),
+      legModule: z.number().nullable().default(null),
+      designWindMph: z.number().nullable().default(null),
+      anchoring: z.string().max(120).nullable().default(null),
+      floor: z.string().max(120).nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  services: z
+    .object({
+      power: z.string().max(120).nullable().default(null),
+      generatorKva: z.number().nullable().default(null),
+      water: z.string().max(120).nullable().default(null),
+      toilets: z.number().int().nullable().default(null),
+      parking: z.number().int().nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  capacity: z
+    .object({
+      certified: z.number().int().nullable().default(null),
+      source: z.string().max(120).nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  climate: z
+    .object({
+      city: z.string().max(120).nullable().default(null),
+      month: z.number().int().min(1).max(12).nullable().default(null),
+      outdoorC: z.number().nullable().default(null),
+      rh: z.number().nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  sun: z
+    .object({
+      azimuth: z.number().nullable().default(null),
+      elevation: z.number().nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  wind: z
+    .object({
+      direction: z.number().nullable().default(null),
+      speedMph: z.number().nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+});
+
 export const hallLayoutSchema = z.object({
-  version: z.literal(1),
+  version: z.literal(2),
+  venue: venueProfileSchema,
   width: z.number().min(HALL_MIN_SIZE).max(HALL_MAX_SIZE),
   length: z.number().min(HALL_MIN_SIZE).max(HALL_MAX_SIZE),
   spacing: z.enum(["snug", "comfortable", "spacious"]),

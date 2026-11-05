@@ -130,7 +130,8 @@ export function hallRules() {
       zoneClearanceMetres: ZONE_CLEARANCE,
       mainAisleMetres: MAIN_AISLE,
       chairDepthMetres: CHAIR_DEPTH,
-      areaPerDinerSqm: AREA_PER_DINER,
+      areaPerDinerSqm: AREA_PER_DINER.hall,
+      areaPerDinerByVenue: AREA_PER_DINER,
     },
     guidance: [
       "Keep a clear aisle at least as wide as the main aisle between blocks of tables, and never block an entrance.",
