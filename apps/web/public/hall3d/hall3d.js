@@ -761,6 +761,7 @@ function buildShell(L) {
     buildTent(venue, W, Ln, H, evening);
   } else {
     buildWalls(decor, W, Ln, H, evening);
+    if (venue.type === "church") buildChurch(W, Ln, evening);
   }
 
   // Chandeliers.
@@ -1110,6 +1111,72 @@ function buildWalls(decor, W, Ln, H, evening) {
       mats,
     });
   }
+}
+
+/**
+ * A church: a raised altar at the far end, a chancel rail, and a runner down the aisle.
+ *
+ * The pews are not drawn. In this venue the seating is what the host is arranging, so drawing
+ * fixed pews underneath the tables would show two seatings at once. The architecture is what the
+ * shell owes the plan: where the altar is, and where the aisle runs.
+ */
+function buildChurch(W, Ln, evening) {
+  const stone = new THREE.MeshStandardMaterial({
+    color: "#e6e0d4",
+    roughness: 0.9,
+  });
+  const wood = new THREE.MeshStandardMaterial({
+    color: "#6b4f36",
+    roughness: 0.8,
+  });
+  const runner = new THREE.MeshStandardMaterial({
+    color: evening ? "#5a1f2a" : "#7d2b3a",
+    roughness: 1,
+  });
+
+  const altarW = Math.min(W * 0.42, 6);
+  const altarD = 2.6;
+  const stepZ = altarD / 2 + 0.4;
+
+  // The sanctuary step, and the altar standing on it.
+  const step = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW, 0.45, altarD),
+    stone
+  );
+  step.position.set(W / 2, 0.225, stepZ);
+  step.castShadow = true;
+  step.receiveShadow = true;
+  shell.add(step);
+
+  const altar = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW * 0.55, 0.9, 0.7),
+    wood
+  );
+  altar.position.set(W / 2, 0.9, stepZ);
+  altar.castShadow = true;
+  shell.add(altar);
+
+  // A low rail across the chancel, so the sanctuary reads as set apart.
+  const rail = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW + 1.2, 0.08, 0.1),
+    wood
+  );
+  rail.position.set(W / 2, 0.72, altarD + 0.4);
+  shell.add(rail);
+  for (const x of [-1, 1]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.72, 0.1), wood);
+    post.position.set(W / 2 + (x * (altarW + 1.2)) / 2, 0.36, altarD + 0.4);
+    shell.add(post);
+  }
+
+  // The runner, from the chancel to the back of the room.
+  const aisle = 1.6;
+  const runLen = Math.max(1, Ln - altarD - 0.8);
+  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(aisle, runLen), runner);
+  carpet.rotation.x = -Math.PI / 2;
+  carpet.position.set(W / 2, 0.012, altarD + 0.4 + runLen / 2);
+  carpet.receiveShadow = true;
+  shell.add(carpet);
 }
 
 /** Crystal chandeliers on a grid, hung from the ceiling. */
