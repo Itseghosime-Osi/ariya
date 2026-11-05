@@ -1,0 +1,91 @@
+{
+  "crossTenantRead": {
+    "success": true,
+    "error": null,
+    "data": [],
+    "count": null,
+    "status": 200,
+    "statusText": "OK"
+  },
+  "crossTenantUpdate": {
+    "success": true,
+    "error": null,
+    "data": [],
+    "count": null,
+    "status": 200,
+    "statusText": "OK"
+  },
+  "staffSend": {
+    "status": 200,
+    "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+  },
+  "ownerSendAttempts": [
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    },
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    },
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    },
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    },
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    },
+    {
+      "status": 200,
+      "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"error\":\"Failed to dispatch email. Please retry.\"}\n"
+    }
+  ],
+  "emailLogs": [
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    },
+    {
+      "status": "failed",
+      "error_class": "MailpitHttpError_400"
+    }
+  ],
+  "crossOriginAction": {
+    "status": 500,
+    "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:E{\"digest\":\"3399330503\",\"name\":\"Error\",\"message\":\"Invalid Server Actions request.\",\"stack\":[],\"env\":\"Server\",\"owner\":null}\n"
+  },
+  "pushSave": {
+    "status": 200,
+    "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"ok\":true}\n"
+  },
+  "pushSend": {
+    "status": 200,
+    "body": "0:{\"a\":\"$@1\",\"q\":\"\",\"i\":true,\"b\":\"development\"}\n1:D\"$2\"\n1:{\"ok\":false,\"error\":\"No notification could be delivered. Turn them off and on again.\"}\n"
+  },
+  "pushReachedLoopback": false
+}
