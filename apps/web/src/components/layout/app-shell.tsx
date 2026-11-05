@@ -13,7 +13,7 @@ import {
   type SwitcherEvent,
 } from "./nav-items";
 import { isEventExpired } from "@/lib/event-expiry";
-import { EventEndedBanner } from "./event-ended-banner";
+import { EventArchivedBanner, EventEndedBanner } from "./event-ended-banner";
 import { cn } from "@/lib/utils";
 import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 
@@ -23,6 +23,8 @@ interface AppShellProps {
   children: React.ReactNode;
   userEmail?: string;
   events: SwitcherEvent[];
+  /** Filed-away celebrations: not in the switcher, but still openable from the archive. */
+  archivedEvents?: SwitcherEvent[];
   primaryEventId?: string;
   /** How many proposals are waiting at the approvals desk, for the top bar's badge. */
   pendingProposals?: number;
@@ -36,6 +38,7 @@ export function AppShell({
   children,
   userEmail,
   events,
+  archivedEvents = [],
   primaryEventId,
   pendingProposals,
 }: AppShellProps) {
@@ -174,7 +177,13 @@ export function AppShell({
     }
   }, [availableEvents, eventId, primaryEventId, selectedKey]);
 
+  const archivedMatch = isValidEventId(eventId)
+    ? archivedEvents.find((ev) => ev.id === eventId)
+    : undefined;
+
   const activeEvent = useMemo<SwitcherEvent | null>(() => {
+    // An archived celebration opened from the archive is the one in view.
+    if (archivedMatch) return archivedMatch;
     if (availableEvents.length === 0) return null;
     if (selectedId) {
       const found = availableEvents.find((ev) => ev.id === selectedId);
@@ -185,13 +194,13 @@ export function AppShell({
       if (primary) return primary;
     }
     return availableEvents[0] ?? null;
-  }, [availableEvents, primaryEventId, selectedId]);
+  }, [archivedMatch, availableEvents, primaryEventId, selectedId]);
 
   // After the celebration's day every screen of it is read-only. Decided after mount, so the first
   // paint matches the server's.
   const [eventEnded, setEventEnded] = useState(false);
   const viewedEventDate = isValidEventId(eventId)
-    ? availableEvents.find((ev) => ev.id === eventId)?.date
+    ? (availableEvents.find((ev) => ev.id === eventId) ?? archivedMatch)?.date
     : undefined;
   useEffect(() => {
     setEventEnded(viewedEventDate ? isEventExpired(viewedEventDate) : false);
@@ -271,6 +280,7 @@ export function AppShell({
               : "max-w-[1280px]"
           )}
         >
+          {archivedMatch && <EventArchivedBanner />}
           {eventEnded && <EventEndedBanner />}
           {children}
         </main>

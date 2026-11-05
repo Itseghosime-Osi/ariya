@@ -6,7 +6,7 @@ import { Icon, type IconName } from "@/components/ui/icon";
 import { ScreenHeader } from "@/components/layout/screen-header";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
 import { EditProfileButton } from "@/features/auth/components/EditProfileButton";
-import { getUserEvents } from "@/features/events/queries";
+import { getArchivedEvents, getUserEvents } from "@/features/events/queries";
 import { partitionEvents } from "@/features/events/lib/select-events";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import {
@@ -41,9 +41,10 @@ export default async function ProfilePage({
   const { edit } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=%2Fprofile");
-  const [profile, events] = await Promise.all([
+  const [profile, events, archived] = await Promise.all([
     getCurrentProfile(),
     getUserEvents(),
+    getArchivedEvents(),
   ]);
 
   const email = profile?.email ?? user.email ?? "";
@@ -257,6 +258,34 @@ export default async function ProfilePage({
                 ))
               )}
             </div>
+          </DeskItem>
+
+          {/* Filed-away celebrations */}
+          <DeskItem>
+            <Link
+              href="/profile/archive"
+              data-testid="profile-archive-link"
+              className={`${CARD} ${ROW}`}
+            >
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
+                <Icon name="folder" size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-night">
+                  Archive
+                </span>
+                <span className="block text-[12.5px] text-label-2">
+                  {archived.length === 0
+                    ? "Celebrations you file away appear here"
+                    : `${archived.length} ${archived.length === 1 ? "celebration" : "celebrations"} filed away`}
+                </span>
+              </span>
+              <Icon
+                name="chevron_right"
+                size={18}
+                className="shrink-0 text-label-3 transition-transform group-hover:translate-x-0.5 group-hover:text-burgundy"
+              />
+            </Link>
           </DeskItem>
 
           {/* Where everything else lives */}

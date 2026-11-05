@@ -51,6 +51,7 @@ describe("hasOwnPhoneHeader", () => {
   it("is true for the account pages and an event's Billing, Team, Vendors and Settings", () => {
     expect(hasOwnPhoneHeader("/settings")).toBe(true);
     expect(hasOwnPhoneHeader("/profile")).toBe(true);
+    expect(hasOwnPhoneHeader("/profile/archive")).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/vendors`)).toBe(true);
