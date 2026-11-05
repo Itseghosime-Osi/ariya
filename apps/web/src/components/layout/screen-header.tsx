@@ -21,20 +21,16 @@ const CIRCLE =
  * app's top bar on account screens (Settings, Profile). In a browser, and from tablet width up,
  * the page keeps the website's top bar and its large heading.
  */
-/** Back to wherever they came from inside the app; a fresh tab goes to backHref. */
-function useBack(backHref: string) {
+export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
   const router = useRouter();
-  return () => {
+  const back = () => {
+    // Return to wherever they came from inside the app; a fresh tab goes to backHref.
     const cameFromApp =
       typeof document !== "undefined" &&
       document.referrer.startsWith(window.location.origin);
     if (cameFromApp && window.history.length > 1) router.back();
     else router.push(backHref);
   };
-}
-
-export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
-  const back = useBack(backHref);
 
   return (
     <div
@@ -55,30 +51,5 @@ export function ScreenHeader({ title, backHref, action }: ScreenHeaderProps) {
         <span aria-hidden="true" />
       )}
     </div>
-  );
-}
-
-/**
- * The installed app's Back on tablets and computers, where the page keeps its large heading:
- * a small pill above it. Browsers have their own Back, so it never shows in a browser tab.
- */
-export function BackLink({
-  backHref,
-  label = "Back",
-}: {
-  backHref: string;
-  label?: string;
-}) {
-  const back = useBack(backHref);
-  return (
-    <button
-      type="button"
-      onClick={back}
-      data-back-link
-      className="mb-4 hidden h-9 items-center gap-1 rounded-full border border-hairline bg-white/40 pl-2 pr-3.5 text-[13px] font-semibold text-night transition-colors hover:bg-white/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy standalone:md:inline-flex"
-    >
-      <Icon name="chevron_left" size={18} />
-      {label}
-    </button>
   );
 }
