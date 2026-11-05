@@ -269,10 +269,17 @@ fn by_front(mut slots: Vec<Slot>, front: (f64, f64)) -> Vec<Slot> {
     slots
 }
 
+/// The row pitch of a staggered lattice: rows sit √3/2 of a column pitch apart, so each table is
+/// still a full pitch from its diagonal neighbours. Keeping the square pitch would leave the room
+/// a row short for no gain — the stagger only buys anything if the rows close up.
+fn stagger_pitch(px: f64) -> f64 {
+    px * 3.0_f64.sqrt() / 2.0 + 1e-6
+}
+
 fn rounds(ctx: &GenContext, stagger: bool) -> Generated {
     let (ex, ey) = max_extent(ctx.tables, 0.0);
     let px = 2.0 * ex + ctx.gap;
-    let py = 2.0 * ey + ctx.gap;
+    let py = if stagger { stagger_pitch(px) } else { px };
     let slots = lattice(
         ctx,
         Grid {
@@ -537,11 +544,14 @@ fn assign(ctx: &GenContext, slots: &[Slot]) -> Generated {
                 hh: ey,
                 rot: 0.0,
             };
-            gap_to_walls(&box_, ctx.width, ctx.length) >= WALL_MARGIN
+            // The margin is a lattice coordinate, not a measurement: `WALL_MARGIN + extent - extent`
+            // lands a hair under the margin in binary, and a strict comparison would throw away the
+            // whole first row and column of every layout.
+            gap_to_walls(&box_, ctx.width, ctx.length) >= WALL_MARGIN - 1e-9
                 && ctx
                     .zones
                     .iter()
-                    .all(|z| gap_to_zone(&box_, z) >= zone_clearance(z))
+                    .all(|z| gap_to_zone(&box_, z) >= zone_clearance(z) - 1e-9)
         })
         .collect();
 
@@ -749,6 +759,31 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// The first row and column sit exactly on the wall margin, so a strict `>=` loses them to
+    /// the last bit of a float and quietly costs the room an entire row of tables.
+    #[test]
+    fn the_edge_row_survives_the_wall_margin() {
+        let t = tables(45, "round", 8);
+        let c = ctx(&t, &[]);
+        let g = Archetype::RoundsRows.generate(&c);
+        assert_eq!(
+            g.placements.len(),
+            45,
+            "a zone-free 30 × 20 room holds a 9 × 5 grid of eights"
+        );
+    }
+
+    /// The same room holds a sixth row once the rows close up to √3/2 of the column pitch.
+    #[test]
+    fn a_staggered_rounds_grid_is_denser_than_a_square_one() {
+        let t = tables(80, "round", 8);
+        let c = ctx(&t, &[]);
+        let square = Archetype::RoundsRows.generate(&c);
+        let stagger = Archetype::RoundsStaggered.generate(&c);
+        assert_eq!(square.placements.len(), 45);
+        assert_eq!(stagger.placements.len(), 51);
     }
 
     #[test]

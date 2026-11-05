@@ -105,7 +105,7 @@ fn a_dance_floor_does_not_cost_the_lattice_most_of_the_room() {
     let opts = search(&input);
     let best = opts.first().expect("at least one option");
     assert!(
-        best.placements.len() >= 16,
+        best.placements.len() >= 20,
         "the best option should seat most of the room, placed {} of {}",
         best.placements.len(),
         t.len()
@@ -138,4 +138,28 @@ fn the_sparsest_layout_is_not_ranked_first() {
         placed[0] >= *placed.iter().max().expect("options"),
         "the first card should place at least as many tables as any other, got {placed:?}"
     );
+}
+
+/// The seeded hall holds 21 of the 25 tables once the rows close up and the edge row stops being
+/// thrown away. The other four are a real shortfall — a 6 m dance floor and a stage in a 30 × 20
+/// room — so the number is pinned rather than pushed: if a change moves it, the cards move with it.
+#[test]
+fn the_hall_fits_twenty_one_of_the_twenty_five() {
+    let t = tables();
+    let z = hall();
+    let input = SearchInput::new(30.0, 20.0, &z, &t, 0.6, None, 1);
+    let best = search(&input)
+        .into_iter()
+        .next()
+        .expect("at least one option");
+    assert_eq!(
+        best.placements.len(),
+        21,
+        "best option {} / {} placed {} of {}",
+        best.archetype,
+        best.strategy,
+        best.placements.len(),
+        t.len()
+    );
+    assert_eq!(best.unplaced.len(), 4, "every table is placed or reported");
 }
