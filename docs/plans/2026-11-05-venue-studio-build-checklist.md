@@ -130,10 +130,10 @@ Goal: the studio can describe a marquee, garden, field, beach, rooftop, church �
 
 ### 1.2 Questions
 
-- [ ] **1.2.1** Encode the per-type question sets from research §A.2 as a form schema (one schema per type, shared fields factored out).
-- [ ] **1.2.2** Only ask what changes the design — no field without a consumer in the solver, thermal, risk or checklist.
+- [x] **1.2.1** Encode the per-type question sets from research §A.2 as a form schema (one schema per type, shared fields factored out). _(`venueFormSchema(type)` derives each field's validator from the question itself, so the bounds shown and the bounds enforced are the same numbers.)_
+- [x] **1.2.2** Only ask what changes the design — no field without a consumer in the solver, thermal, risk or checklist. _(Every question carries `feeds`; a test proves each names a real consumer and that all four systems are fed.)_
 - [x] **1.2.3** Venue picker in Simple mode: picture cards, not a dropdown. _(Lives in the Room deck of the studio; Simple mode itself is Phase 7.)_
-- [ ] **1.2.4** Studio mode: venue facts panel, editable, with the same schema.
+- [x] **1.2.4** Studio mode: venue facts panel, editable, with the same schema. _(`VenueFacts` renders `questionsFor(type)` and reports `venueFormIssues` inline; numeric selects now store numbers, which fixed a `"3"` written where `Structure.legModule` expects `3`.)_
 
 ### 1.3 Renderer
 

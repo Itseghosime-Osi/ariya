@@ -34,6 +34,7 @@ import type { VenueProfile, VenueType } from "@ariya/studio";
 import {
   questionsFor,
   readVenueValue,
+  venueFormIssues,
   writeVenueValue,
   type VenueQuestion,
 } from "./venue-questions";
@@ -426,9 +427,13 @@ function QuestionField({
   const raw = readVenueValue(venue, question.key);
   const [text, setText] = useState(raw == null ? "" : String(raw));
   useEffect(() => setText(raw == null ? "" : String(raw)), [raw]);
+  const issue = venueFormIssues(venue)[question.key];
 
   const commit = (value: string) => {
-    if (question.kind === "number") {
+    if (
+      question.kind === "number" ||
+      (question.kind === "select" && question.numeric)
+    ) {
       const n = Number(value.replace(",", "."));
       onChange(
         writeVenueValue(
@@ -478,6 +483,11 @@ function QuestionField({
             <span className="text-xs text-label-2">{question.unit}</span>
           )}
         </div>
+      )}
+      {issue && (
+        <p role="alert" className="mt-1 text-[11px] leading-snug text-burgundy">
+          {issue}
+        </p>
       )}
       <span className="sr-only">{question.consumer}</span>
     </div>

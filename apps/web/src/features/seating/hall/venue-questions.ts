@@ -6,9 +6,22 @@
  * asked. The answers live in `HallLayout.venue`, so the renderer, the solver and the checklist
  * all read one document.
  */
+import { z } from "zod";
+
 import type { VenueProfile, VenueType } from "@ariya/studio";
 
 export type QuestionKind = "number" | "text" | "select";
+
+/** The parts of the studio an answer can change. A question that feeds none of them is not asked. */
+export type Consumer = "solver" | "thermal" | "risk" | "checklist" | "renderer";
+
+export const CONSUMERS: readonly Consumer[] = [
+  "solver",
+  "thermal",
+  "risk",
+  "checklist",
+  "renderer",
+];
 
 export interface VenueQuestion {
   /** Dotted path into `VenueProfile`, for example `structure.legModule`. */
@@ -21,8 +34,12 @@ export interface VenueQuestion {
   max?: number;
   step?: number;
   placeholder?: string;
+  /** A select whose stored value is a number, so `"3"` is written as `3`. */
+  numeric?: boolean;
   /** What this answer changes. Shown under the field as "why we ask". */
   consumer: string;
+  /** The same thing, structured, so a test can prove every question has a consumer. */
+  feeds: Consumer[];
 }
 
 export interface QuestionGroup {
@@ -40,6 +57,7 @@ const POWER: VenueQuestion = {
     { value: "solar", label: "Solar & battery" },
   ],
   consumer: "Decides the generator, fuel and changeover tasks.",
+  feeds: ["checklist"],
 };
 
 const GENERATOR: VenueQuestion = {
@@ -51,6 +69,7 @@ const GENERATOR: VenueQuestion = {
   max: 2000,
   step: 5,
   consumer: "Sizes the generator hire and the fuel estimate.",
+  feeds: ["checklist"],
 };
 
 const TOILETS: VenueQuestion = {
@@ -62,6 +81,7 @@ const TOILETS: VenueQuestion = {
   max: 500,
   step: 1,
   consumer: "Sets the toilet and attendant tasks.",
+  feeds: ["checklist"],
 };
 
 const PARKING: VenueQuestion = {
@@ -73,6 +93,7 @@ const PARKING: VenueQuestion = {
   max: 5000,
   step: 10,
   consumer: "Sets the parking, shuttle and marshal tasks.",
+  feeds: ["checklist"],
 };
 
 const CERTIFIED: VenueQuestion = {
@@ -84,6 +105,7 @@ const CERTIFIED: VenueQuestion = {
   max: 20000,
   step: 10,
   consumer: "Caps the plan at what the venue is certified for.",
+  feeds: ["solver"],
 };
 
 const CLEARSPAN: VenueQuestion = {
@@ -95,6 +117,7 @@ const CLEARSPAN: VenueQuestion = {
   max: 60,
   step: 0.5,
   consumer: "Sets the widest span a table row can cross.",
+  feeds: ["solver"],
 };
 
 const LEG_MODULE: VenueQuestion = {
@@ -105,7 +128,9 @@ const LEG_MODULE: VenueQuestion = {
     { value: "3", label: "3 m" },
     { value: "5", label: "5 m" },
   ],
+  numeric: true,
   consumer: "Tables snap to the leg grid so nothing lands on a leg.",
+  feeds: ["solver"],
 };
 
 const WIND_RATING: VenueQuestion = {
@@ -117,6 +142,7 @@ const WIND_RATING: VenueQuestion = {
   max: 150,
   step: 5,
   consumer: "Sets the wind speed at which the plan is evacuated.",
+  feeds: ["risk"],
 };
 
 const ANCHORING: VenueQuestion = {
@@ -130,6 +156,7 @@ const ANCHORING: VenueQuestion = {
     { value: "sand-anchors", label: "Sand anchors" },
   ],
   consumer: "Decides the anchoring and ground-test tasks.",
+  feeds: ["checklist"],
 };
 
 const FLOOR: VenueQuestion = {
@@ -144,6 +171,7 @@ const FLOOR: VenueQuestion = {
     { value: "sand", label: "Sand" },
   ],
   consumer: "Changes the ground the renderer draws and the mud risk.",
+  feeds: ["renderer", "risk"],
 };
 
 const WATER: VenueQuestion = {
@@ -155,6 +183,7 @@ const WATER: VenueQuestion = {
     { value: "tanker", label: "Tanker" },
   ],
   consumer: "Sets the water delivery task.",
+  feeds: ["checklist"],
 };
 
 /** Weather is asked for every venue: it drives the sun, the wind and the thermal model. */
@@ -167,6 +196,7 @@ const WEATHER: QuestionGroup = {
       kind: "text",
       placeholder: "Lagos",
       consumer: "Sets the sun position and the design temperature.",
+      feeds: ["renderer", "thermal"],
     },
     {
       key: "climate.month",
@@ -176,6 +206,7 @@ const WEATHER: QuestionGroup = {
       max: 12,
       step: 1,
       consumer: "Moves the sun and the seasonal temperature.",
+      feeds: ["renderer", "thermal"],
     },
     {
       key: "climate.outdoorC",
@@ -186,6 +217,7 @@ const WEATHER: QuestionGroup = {
       max: 55,
       step: 1,
       consumer: "The starting point for the cooling load.",
+      feeds: ["thermal"],
     },
     {
       key: "climate.rh",
@@ -196,6 +228,7 @@ const WEATHER: QuestionGroup = {
       max: 100,
       step: 5,
       consumer: "Decides how much of the load is latent.",
+      feeds: ["thermal"],
     },
     {
       key: "wind.direction",
@@ -206,6 +239,7 @@ const WEATHER: QuestionGroup = {
       max: 360,
       step: 15,
       consumer: "Places the wind indicator and the generator downwind.",
+      feeds: ["renderer", "checklist"],
     },
     {
       key: "wind.speedMph",
@@ -216,6 +250,7 @@ const WEATHER: QuestionGroup = {
       max: 100,
       step: 1,
       consumer: "Compared with the design wind to raise a warning.",
+      feeds: ["risk"],
     },
   ],
 };
@@ -349,4 +384,72 @@ export function writeVenueValue(
     ...venue,
     [group]: { ...bag, [field]: value === "" ? null : value },
   } as VenueProfile;
+}
+
+/**
+ * The validator for one question, derived from the question itself.
+ *
+ * Deriving it means the bounds a field shows and the bounds it enforces are the same numbers, so
+ * they cannot drift. A select whose stored value is a number validates as that number, which is
+ * what catches a `"3"` written where `Structure.legModule` expects `3`.
+ */
+function schemaFor(question: VenueQuestion): z.ZodType {
+  if (question.kind === "select") {
+    const values = (question.options ?? []).map((option) =>
+      question.numeric ? Number(option.value) : option.value
+    );
+    const [first, second, ...rest] = values.map((value) => z.literal(value));
+    if (first === undefined || second === undefined) {
+      throw new Error(
+        `the select for ${question.key} needs at least two options`
+      );
+    }
+    return z.union([first, second, ...rest]).nullable();
+  }
+  if (question.kind === "number") {
+    let schema = z.number();
+    if (question.min != null) schema = schema.min(question.min);
+    if (question.max != null) schema = schema.max(question.max);
+    return schema.nullable();
+  }
+  return z.string().max(120).nullable();
+}
+
+/**
+ * The form schema for a venue type: one object per group the type asks about, built from the
+ * shared field definitions. The shape mirrors `VenueProfile`, so a validated form is a profile.
+ */
+export function venueFormSchema(type: VenueType) {
+  const groups: Record<string, Record<string, z.ZodType>> = {};
+  for (const group of questionsFor(type)) {
+    for (const question of group.questions) {
+      const [name, field] = question.key.split(".");
+      (groups[name] ??= {})[field] = schemaFor(question);
+    }
+  }
+  return z.object(
+    Object.fromEntries(
+      Object.entries(groups).map(([name, fields]) => [
+        name,
+        z.object(fields).nullable(),
+      ])
+    )
+  );
+}
+
+/**
+ * The questions whose answer the profile does not satisfy, keyed by dotted path.
+ *
+ * Only the fields the type actually asks about are checked, so a value left over from a previous
+ * venue type is not reported as an error the host cannot see.
+ */
+export function venueFormIssues(venue: VenueProfile): Record<string, string> {
+  const parsed = venueFormSchema(venue.type).safeParse(venue);
+  if (parsed.success) return {};
+  const issues: Record<string, string> = {};
+  for (const issue of parsed.error.issues) {
+    const key = issue.path.join(".");
+    issues[key] ??= issue.message;
+  }
+  return issues;
 }
