@@ -11,6 +11,9 @@ import { optionSeats, type SuggestTable } from "./suggested-layouts";
 function TermRow({ term }: { term: ScoreTerm }) {
   const penalty = term.weight < 0;
   const pct = Math.round(Math.max(0, Math.min(1, term.value)) * 100);
+  // A term that rounds to zero is neither a gain nor a cost, so it gets no sign.
+  const amount = Math.abs(term.contribution);
+  const sign = amount < 0.005 ? "" : penalty ? "−" : "+";
   return (
     <li className="py-1.5">
       <div className="flex items-baseline justify-between gap-2">
@@ -23,8 +26,8 @@ function TermRow({ term }: { term: ScoreTerm }) {
             penalty ? "text-[#7a1f20]" : "text-label-2"
           )}
         >
-          {penalty ? "−" : "+"}
-          {Math.abs(term.contribution).toFixed(2)}
+          {sign}
+          {amount.toFixed(2)}
         </span>
       </div>
       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#efe7d8]">
