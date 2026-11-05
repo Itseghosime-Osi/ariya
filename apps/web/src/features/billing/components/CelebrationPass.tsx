@@ -79,10 +79,19 @@ export function CelebrationPass({
           aria-hidden="true"
         />
 
+        {isPaid && (
+          <PassStamp
+            dateLabel={stampDate}
+            className="pointer-events-none absolute right-2 top-2 h-[92px] w-[92px] rotate-[14deg] text-burgundy mix-blend-multiply sm:hidden"
+          />
+        )}
+
         <div className="relative grid gap-4 p-4 sm:gap-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:gap-10">
           <div className="min-w-0">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div
+                className={`flex min-w-0 items-center gap-3 ${isPaid ? "pr-24 sm:pr-0" : ""}`}
+              >
                 <MonogramSeal text={eventTitle} size={40} />
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-ink">
@@ -174,7 +183,14 @@ export function CelebrationPass({
           >
             <div className="relative">
               <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-ink">
-                {isPaid ? "Admit one · Perpetual" : "One-time"}
+                {isPaid ? (
+                  <>
+                    Admit one
+                    <span className="hidden sm:inline"> · Perpetual</span>
+                  </>
+                ) : (
+                  "One-time"
+                )}
               </div>
               <div className="mt-0.5 font-display text-2xl font-bold tabular-nums sm:mt-1 sm:text-3xl">
                 {formatKobo(passAmountKobo)}
