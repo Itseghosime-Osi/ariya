@@ -18,6 +18,8 @@ function makeEvent(
       dress_code: overrides.dress_code ?? null,
       hall_layout: null,
       film_design: null,
+      rsvp_questions: [],
+      require_access_card: true,
       invitation_live: true,
       description: overrides.description ?? null,
       cover_image_url: overrides.cover_image_url ?? null,

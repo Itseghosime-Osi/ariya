@@ -29,6 +29,8 @@ function makeEventItem(overrides: {
       dress_code: null,
       hall_layout: null,
       film_design: null,
+      rsvp_questions: [],
+      require_access_card: true,
       invitation_live: true,
       description: null,
       cover_image_url: null,
