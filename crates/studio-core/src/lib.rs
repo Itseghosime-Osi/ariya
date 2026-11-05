@@ -5,7 +5,9 @@
 //! `wasm32-unknown-unknown` behind `crates/studio-wasm`. Nothing here touches the DOM, the
 //! database or the clock.
 
+pub mod archetype;
 pub mod fit;
 pub mod geometry;
 pub mod venue;
 pub mod wire;
+pub mod zones;
