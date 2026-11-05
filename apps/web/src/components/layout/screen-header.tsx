@@ -54,11 +54,11 @@ export function ScreenHeader({
         <Icon name="chevron_left" size={20} />
       </button>
       <div className="min-w-0 text-center">
-        <h1 className="truncate font-display text-[1.35rem] font-semibold leading-none text-night">
+        <h1 className="truncate font-display text-[1.35rem] font-semibold leading-[1.25] text-night">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 truncate text-[11px] leading-none text-label-2">
+          <p className="-mt-0.5 truncate text-[11px] leading-tight text-label-2">
             {subtitle}
           </p>
         )}

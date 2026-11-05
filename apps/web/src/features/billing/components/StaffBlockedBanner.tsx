@@ -8,7 +8,7 @@ interface StaffBlockedBannerProps {
 
 export function StaffBlockedBanner({ eventId }: StaffBlockedBannerProps) {
   return (
-    <div className="max-w-xl mx-auto my-12 bg-[var(--surface-container-low)] border border-gold-ink/25 rounded-3xl p-8 text-center space-y-4 shadow-lg">
+    <div className="max-w-xl mx-auto my-4 sm:my-12 bg-[var(--surface-container-low)] border border-gold-ink/25 rounded-3xl p-5 sm:p-8 text-center space-y-3 sm:space-y-4 shadow-lg">
       <div className="w-14 h-14 mx-auto rounded-full bg-amber-100 text-amber-800 flex items-center justify-center">
         <Icon name="lock" className="text-2xl" />
       </div>

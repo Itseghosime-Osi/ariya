@@ -2,6 +2,7 @@
 
 import React from "react";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
+import { ScreenHeader } from "@/components/layout/screen-header";
 import { useDeskToast } from "@/components/ui/desk-toast";
 import {
   DeskItem,
@@ -21,12 +22,19 @@ export function BillingDesk({ data, passAmountKobo }: BillingDeskProps) {
   const { showToast, toast } = useDeskToast();
 
   return (
-    <div className="pb-16">
+    <div className="sm:pb-16">
       {toast}
 
-      <DeskMotion className="space-y-6 lg:space-y-8">
-        <DeskItem>
+      <ScreenHeader
+        title="Billing"
+        subtitle={data.eventTitle}
+        backHref={`/events/${data.eventId}`}
+      />
+
+      <DeskMotion className="space-y-4 sm:space-y-6 lg:space-y-8">
+        <DeskItem className="standalone:max-md:hidden">
           <DeskPageHeader
+            compact
             eyebrow={`Billing · ${data.eventTitle}`}
             title="The pass and the paper trail"
             description="Unlock the celebration pass once, then keep every checkout attempt and tax invoice together in one place."

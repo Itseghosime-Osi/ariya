@@ -40,6 +40,9 @@ const STATUS_META: Record<
 
 const FILTERS: Filter[] = ["all", "success", "pending", "failed", "refunded"];
 
+/** The trail starts with the latest few; the rest open on request. */
+const FIRST_ROWS = 4;
+
 function formatStamp(value: string | null): string {
   if (!value) return "—";
   return formatLagosDate(value, {
@@ -51,6 +54,10 @@ function formatStamp(value: string | null): string {
   });
 }
 
+function formatDay(value: string): string {
+  return formatLagosDate(value, { day: "numeric", month: "short" });
+}
+
 /** Every checkout attempt, newest first, as a receipt trail. Filter it to see just the failures. */
 export function PaymentTimeline({
   payments,
@@ -60,6 +67,7 @@ export function PaymentTimeline({
   onCopied?: (message: string) => void;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
+  const [showAll, setShowAll] = useState(false);
 
   const counts = useMemo(() => {
     return payments.reduce(
@@ -81,17 +89,18 @@ export function PaymentTimeline({
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
+  const shown = showAll ? visible : visible.slice(0, FIRST_ROWS);
 
   return (
-    <section aria-labelledby="payments-title" className="bento-card p-6 sm:p-7">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <section aria-labelledby="payments-title" className="bento-card p-4 sm:p-7">
+      <div className="flex items-end justify-between gap-3">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
             Receipts
           </div>
           <h2
             id="payments-title"
-            className="mt-1 font-display text-2xl font-bold text-night"
+            className="mt-1 font-display text-xl font-bold text-night sm:text-2xl"
           >
             Payment trail
           </h2>
@@ -100,7 +109,7 @@ export function PaymentTimeline({
           <dt className="text-[11px] uppercase tracking-[0.16em] text-label-2">
             Settled
           </dt>
-          <dd className="font-display text-xl font-bold text-night tabular-nums">
+          <dd className="font-display text-lg font-bold text-night tabular-nums sm:text-xl">
             {formatKobo(
               payments
                 .filter((p) => p.status === "success")
@@ -110,7 +119,7 @@ export function PaymentTimeline({
         </dl>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:mt-4 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
         {FILTERS.filter(
           (value) => value === "all" || counts[value] > 0 || filter === value
         ).map((value) => {
@@ -122,8 +131,11 @@ export function PaymentTimeline({
               key={value}
               type="button"
               aria-pressed={on}
-              onClick={() => setFilter(value)}
-              className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+              onClick={() => {
+                setFilter(value);
+                setShowAll(false);
+              }}
+              className={`inline-flex min-h-[34px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
                 on
                   ? "border border-burgundy bg-burgundy text-ivory"
                   : "desk-chip text-label-2 hover:text-night"
@@ -147,13 +159,13 @@ export function PaymentTimeline({
             : `Nothing ${filter === "all" ? "" : STATUS_META[filter as PaymentStatus].label.toLowerCase()} in the trail.`}
         </p>
       ) : (
-        <ol className="mt-5 divide-y divide-hairline border-t border-hairline">
-          {visible.map((payment) => {
+        <ol className="mt-4 divide-y divide-hairline border-t border-hairline sm:mt-5">
+          {shown.map((payment) => {
             const meta = STATUS_META[payment.status];
             return (
               <li
                 key={payment.id}
-                className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+                className="flex items-center justify-between gap-3 py-3 sm:py-3.5"
               >
                 <div className="flex min-w-0 items-start gap-3">
                   <span
@@ -164,43 +176,57 @@ export function PaymentTimeline({
                     <Icon name={meta.icon} size={16} />
                   </span>
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void navigator.clipboard
-                            .writeText(payment.paystackReference)
-                            .then(() => onCopied?.("Reference copied"))
-                            .catch(() => onCopied?.("Could not copy"));
-                        }}
-                        className="inline-flex items-center gap-1 rounded font-mono text-xs font-semibold text-night hover:text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-                        title="Copy reference"
-                      >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard
+                          .writeText(payment.paystackReference)
+                          .then(() => onCopied?.("Reference copied"))
+                          .catch(() => onCopied?.("Could not copy"));
+                      }}
+                      className="inline-flex max-w-full items-center gap-1 rounded font-mono text-xs font-semibold text-night hover:text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      title="Copy reference"
+                    >
+                      <span className="truncate">
                         {payment.paystackReference}
-                        <Icon name="copy" size={11} className="text-label-3" />
-                      </button>
+                      </span>
+                      <Icon
+                        name="copy"
+                        size={11}
+                        className="shrink-0 text-label-3"
+                      />
+                    </button>
+                    <div className="mt-1 flex items-center gap-2">
                       <span
-                        className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                         style={{ backgroundColor: meta.wash, color: meta.ink }}
                       >
                         {meta.label}
                       </span>
+                      <p className="truncate text-[11px] text-label-2">
+                        <span className="sm:hidden">
+                          {payment.channel
+                            ? `${payment.channel.replace(/_/g, " ")} · `
+                            : ""}
+                          {formatDay(payment.createdAt)}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {payment.channel
+                            ? `via ${payment.channel.replace(/_/g, " ")} · `
+                            : ""}
+                          {"started "}
+                          {formatStamp(payment.createdAt)}
+                        </span>
+                      </p>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-label-2">
-                      {payment.channel
-                        ? `via ${payment.channel.replace(/_/g, " ")} · `
-                        : ""}
-                      {"started "}
-                      {formatStamp(payment.createdAt)}
-                    </p>
                   </div>
                 </div>
 
-                <div className="text-left sm:text-right">
-                  <div className="font-display text-lg font-bold text-night tabular-nums">
+                <div className="shrink-0 text-right">
+                  <div className="font-display text-base font-bold text-night tabular-nums sm:text-lg">
                     {formatKobo(payment.amountKobo)}
                   </div>
-                  <div className="text-[11px] text-label-2">
+                  <div className="hidden text-[11px] text-label-2 sm:block">
                     {payment.paidAt
                       ? `Paid ${formatStamp(payment.paidAt)}`
                       : "Not settled"}
@@ -210,6 +236,18 @@ export function PaymentTimeline({
             );
           })}
         </ol>
+      )}
+
+      {visible.length > FIRST_ROWS && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          aria-expanded={showAll}
+          className="desk-chip mt-3 inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          <Icon name={showAll ? "expand_less" : "expand_more"} size={16} />
+          {showAll ? "Show fewer" : `Show all ${visible.length}`}
+        </button>
       )}
     </section>
   );
