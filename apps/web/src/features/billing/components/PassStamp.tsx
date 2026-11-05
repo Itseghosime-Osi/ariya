@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface PassStampProps {
   /** Printed around the lower ring, the way a dated hand stamp records when it was pressed. */
   dateLabel: string;
@@ -54,6 +56,8 @@ const BAND = `${scallopedEdge(85, 28, 5)} ${circle(80)}`;
  * contour is machine-straight.
  */
 export function PassStamp({ dateLabel, className }: PassStampProps) {
+  // Each stamp on the page keeps its own filter, mask and arc ids, so two of them never collide.
+  const uid = useId().replace(/:/g, "");
   return (
     <svg
       viewBox={`0 0 ${VIEW} ${VIEW}`}
@@ -63,7 +67,7 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
     >
       <defs>
         <filter
-          id="pass-stamp-warp"
+          id={`pass-stamp-warp-${uid}`}
           x="-12%"
           y="-12%"
           width="124%"
@@ -89,7 +93,7 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
         {/* Ink squeezed into the paper fibres creeps a little past the rubber's edge. A blurred
             copy underneath the impression supplies that halo. */}
         <filter
-          id="pass-stamp-bleed"
+          id={`pass-stamp-bleed-${uid}`}
           x="-10%"
           y="-10%"
           width="120%"
@@ -103,7 +107,7 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
             broad dry patches where the pad never touched; high-frequency noise becomes the paper
             tooth granulating the areas that did take. One scale alone reads as digital static. */}
         <filter
-          id="pass-stamp-worn"
+          id={`pass-stamp-worn-${uid}`}
           x="-5%"
           y="-5%"
           width="110%"
@@ -159,14 +163,19 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
             on purpose: a visible falloff reads as a gradient overlay rather than ink on paper, so
             the unevenness is left almost entirely to the noise. Stops are grey, not translucent, so
             the values multiply cleanly into the wear. */}
-        <radialGradient id="pass-stamp-pressure" cx="42%" cy="36%" r="86%">
+        <radialGradient
+          id={`pass-stamp-pressure-${uid}`}
+          cx="42%"
+          cy="36%"
+          r="86%"
+        >
           <stop offset="0%" stopColor="#ffffff" />
           <stop offset="72%" stopColor="#fbfbfb" />
           <stop offset="100%" stopColor="#f2f2f2" />
         </radialGradient>
 
         <mask
-          id="pass-stamp-ink"
+          id={`pass-stamp-ink-${uid}`}
           maskUnits="userSpaceOnUse"
           x="0"
           y="0"
@@ -176,8 +185,8 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
           <rect
             width={VIEW}
             height={VIEW}
-            fill="url(#pass-stamp-pressure)"
-            filter="url(#pass-stamp-worn)"
+            fill={`url(#pass-stamp-pressure-${uid})`}
+            filter={`url(#pass-stamp-worn-${uid})`}
           />
         </mask>
 
@@ -185,7 +194,7 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
             a fuller charge of ink and survives a dry pad that leaves the broad band patchy. A second
             mask at a lower threshold keeps the fine type legible while the plate around it breaks. */}
         <filter
-          id="pass-stamp-worn-light"
+          id={`pass-stamp-worn-light-${uid}`}
           x="-5%"
           y="-5%"
           width="110%"
@@ -238,7 +247,7 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
         </filter>
 
         <mask
-          id="pass-stamp-ink-text"
+          id={`pass-stamp-ink-text-${uid}`}
           maskUnits="userSpaceOnUse"
           x="0"
           y="0"
@@ -248,20 +257,20 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
           <rect
             width={VIEW}
             height={VIEW}
-            fill="url(#pass-stamp-pressure)"
-            filter="url(#pass-stamp-worn-light)"
+            fill={`url(#pass-stamp-pressure-${uid})`}
+            filter={`url(#pass-stamp-worn-light-${uid})`}
           />
         </mask>
 
         {/* Both arcs sit on the midline of the ring channel (r 60→80) so the lettering is spaced
             evenly between the inner rule and the band. */}
         <path
-          id="pass-stamp-arc-top"
+          id={`pass-stamp-arc-top-${uid}`}
           d="M 32 100 A 68 68 0 0 1 168 100"
           fill="none"
         />
         <path
-          id="pass-stamp-arc-bottom"
+          id={`pass-stamp-arc-bottom-${uid}`}
           d="M 24 100 A 76 76 0 0 0 176 100"
           fill="none"
         />
@@ -273,8 +282,15 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
         fill="currentColor"
         strokeLinecap="round"
       >
-        <g mask="url(#pass-stamp-ink)" filter="url(#pass-stamp-warp)">
-          <g opacity="0.1" filter="url(#pass-stamp-bleed)" stroke="none">
+        <g
+          mask={`url(#pass-stamp-ink-${uid})`}
+          filter={`url(#pass-stamp-warp-${uid})`}
+        >
+          <g
+            opacity="0.1"
+            filter={`url(#pass-stamp-bleed-${uid})`}
+            stroke="none"
+          >
             <path d={BAND} fillRule="evenodd" />
             <circle cx="100" cy="100" r="59" fill="none" strokeWidth="2.4" />
           </g>
@@ -293,8 +309,8 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
         </g>
 
         <g
-          mask="url(#pass-stamp-ink-text)"
-          filter="url(#pass-stamp-warp)"
+          mask={`url(#pass-stamp-ink-text-${uid})`}
+          filter={`url(#pass-stamp-warp-${uid})`}
           stroke="none"
           textAnchor="middle"
         >
@@ -309,12 +325,12 @@ export function PassStamp({ dateLabel, className }: PassStampProps) {
           />
 
           <text fontSize="11" fontWeight="800" letterSpacing="2">
-            <textPath href="#pass-stamp-arc-top" startOffset="50%">
+            <textPath href={`#pass-stamp-arc-top-${uid}`} startOffset="50%">
               CELEBRATION PASS
             </textPath>
           </text>
           <text fontSize="9" fontWeight="800" letterSpacing="1.6">
-            <textPath href="#pass-stamp-arc-bottom" startOffset="50%">
+            <textPath href={`#pass-stamp-arc-bottom-${uid}`} startOffset="50%">
               {dateLabel}
             </textPath>
           </text>
