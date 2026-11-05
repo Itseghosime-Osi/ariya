@@ -31,7 +31,7 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
   return (
     <div className="space-y-4">
       {/* Viewport Toolbar */}
-      <div className="flex items-center justify-between bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant/30">
+      <div className="flex items-center justify-between rounded-2xl border border-hairline bg-white/40 px-4 py-2.5 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <span
             className={`w-2 h-2 rounded-full ${

@@ -359,7 +359,7 @@ export function FilmStudio({
                     <span className="block truncate text-[15px] font-semibold text-night">
                       {info.label}
                     </span>
-                    <span className="block truncate text-[12px] text-label-2">
+                    <span className="block text-[12px] leading-snug text-label-2">
                       {info.blurb}
                     </span>
                   </span>
@@ -396,11 +396,11 @@ export function FilmStudio({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                   <div
                     role="group"
                     aria-label={`${info.label} length`}
-                    className="desk-field flex min-h-[44px] items-center rounded-full p-1"
+                    className="desk-field flex min-h-[44px] items-center self-start rounded-full p-1"
                   >
                     <button
                       type="button"

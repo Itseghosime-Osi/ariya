@@ -343,7 +343,7 @@ export function RsvpStudio({
         )}
       </section>
 
-      <div className="sticky bottom-3 z-10 rounded-full border border-hairline bg-surface/90 px-4 py-2.5 backdrop-blur-md">
+      <div className="profile-card sticky bottom-24 z-10 rounded-full px-4 py-2.5 sm:bottom-4">
         <div className="flex items-center gap-3">
           <p
             role="status"
@@ -361,7 +361,7 @@ export function RsvpStudio({
             type="button"
             onClick={save}
             disabled={busy || !dirty}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-5 text-[13px] font-semibold text-ivory disabled:opacity-40"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-5 text-[13px] font-semibold text-night disabled:opacity-40"
           >
             <Icon name={busy ? "refresh" : "check"} size={16} />
             {busy ? "Saving" : "Save"}
