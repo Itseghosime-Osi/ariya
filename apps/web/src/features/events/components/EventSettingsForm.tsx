@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { Switch } from "@/components/ui/switch";
 import type { Event } from "@/features/events/types";
 import { updateEventSettingsAction } from "@/features/events/settings-actions";
 import { EventDangerZone } from "./EventDangerZone";
@@ -11,6 +12,15 @@ interface EventSettingsFormProps {
   event: Event;
   userRole?: string;
 }
+
+const EYEBROW =
+  "text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink";
+const CARD =
+  "overflow-hidden rounded-3xl border border-hairline bg-white/40 backdrop-blur-sm";
+const FIELD =
+  "desk-field min-h-[44px] w-full rounded-2xl px-4 text-base text-night focus-visible:ring-2 focus-visible:ring-burgundy/30 focus-visible:outline-none sm:text-sm";
+const LABEL =
+  "mb-1 block px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-label-2";
 
 export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
   const router = useRouter();
@@ -56,131 +66,165 @@ export function EventSettingsForm({ event, userRole }: EventSettingsFormProps) {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
       {message && (
         <div
-          className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+          role={message.type === "error" ? "alert" : "status"}
+          className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold ${
             message.type === "success"
               ? "bg-secondary-container text-on-secondary-container"
-              : "bg-error-container text-on-error-container"
+              : "bg-error-container text-error"
           }`}
         >
           <Icon
             name={message.type === "success" ? "check_circle" : "error"}
-            className="text-base"
+            size={16}
           />
           <span>{message.text}</span>
         </div>
       )}
 
-      {/* General Settings */}
-      <form
-        onSubmit={handleSave}
-        className="bg-surface-container-low p-6 sm:p-8 rounded-2xl border border-outline-variant/30 space-y-6 shadow-sm"
-      >
-        <div className="space-y-1">
-          <h2 className="font-serif text-xl text-wine font-medium">
-            Event Details &amp; Logistics
+      <form onSubmit={handleSave} className="space-y-4 sm:space-y-6">
+        <section aria-labelledby="ev-details">
+          <h2 id="ev-details" className={`${EYEBROW} mb-2 px-1`}>
+            The celebration
           </h2>
-          <p className="text-xs text-on-surface-variant">
-            Update core metadata, ceremonial naming, and live URL routing.
-          </p>
-        </div>
+          <div className={`${CARD} space-y-3 p-4 sm:space-y-4 sm:p-5`}>
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+              <div>
+                <label htmlFor="setting-title" className={LABEL}>
+                  Celebration title
+                </label>
+                <input
+                  id="setting-title"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="setting-couple" className={LABEL}>
+                  Couple names
+                </label>
+                <input
+                  id="setting-couple"
+                  required
+                  value={couple}
+                  onChange={(e) => setCouple(e.target.value)}
+                  className={FIELD}
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {(
-            [
-              ["setting-title", "Celebration Title", title, setTitle, true],
-              ["setting-couple", "Couple Names", couple, setCouple, true],
-              [
-                "setting-slug",
-                "URL Slug (/e/slug)",
-                slug,
-                setSlug,
-                true,
-                "text",
-                true,
-              ],
-              [
-                "setting-date",
-                "Celebration Date & Time",
-                date,
-                setDate,
-                true,
-                "datetime-local",
-              ],
-              ["setting-venue", "Venue Location", venue, setVenue, true],
-              ["setting-area", "City / State", area, setArea, false],
-            ] as const
-          ).map(([id, label, val, set, req, type, mono]) => (
-            <div key={id} className="space-y-1.5">
-              <label htmlFor={id} className="text-xs font-semibold text-wine">
-                {label}
+            <div>
+              <label htmlFor="setting-date" className={LABEL}>
+                Date &amp; time
               </label>
               <input
-                id={id}
-                type={type || "text"}
-                required={req}
-                value={val}
-                onChange={(e) => set(e.target.value)}
-                className={`w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 ${mono ? "font-mono" : ""}`}
+                id="setting-date"
+                type="datetime-local"
+                required
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className={FIELD}
               />
             </div>
-          ))}
-        </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="setting-dress-code"
-            className="text-xs font-semibold text-wine"
-          >
-            Dress Code &amp; Aṣọ-Ẹbí Instructions
-          </label>
-          <textarea
-            id="setting-dress-code"
-            rows={2}
-            value={dressCode}
-            onChange={(e) => setDressCode(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
-          />
-        </div>
+            <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3 sm:gap-4">
+              <div>
+                <label htmlFor="setting-venue" className={LABEL}>
+                  Venue
+                </label>
+                <input
+                  id="setting-venue"
+                  required
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="setting-area" className={LABEL}>
+                  City / state
+                </label>
+                <input
+                  id="setting-area"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  className={FIELD}
+                />
+              </div>
+            </div>
 
-        {/* Visibility Toggle */}
-        <div className="flex items-center justify-between p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest">
-          <div className="space-y-0.5">
-            <label
-              htmlFor="setting-is-public"
-              className="text-xs font-semibold text-wine"
-            >
-              Public Event Page (/e/{slug})
-            </label>
-            <p className="text-[11px] text-on-surface-variant">
-              Allow unauthenticated guests to discover venue directions and
-              enter passcodes.
-            </p>
+            <div>
+              <label htmlFor="setting-dress-code" className={LABEL}>
+                Dress code &amp; aṣọ-ẹbí
+              </label>
+              <textarea
+                id="setting-dress-code"
+                rows={2}
+                value={dressCode}
+                onChange={(e) => setDressCode(e.target.value)}
+                className={`${FIELD} resize-none rounded-2xl py-2.5`}
+              />
+            </div>
           </div>
-          <input
-            id="setting-is-public"
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-            className="h-4 w-4 rounded border-outline-variant text-wine focus:ring-wine/40"
-          />
-        </div>
+        </section>
 
-        <div className="flex justify-end pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 rounded-xl bg-wine hover:bg-wine/90 text-ivory text-xs font-semibold shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
-          >
-            <Icon name="check" className="text-base" />
-            <span>{saving ? "Saving Changes..." : "Save Settings"}</span>
-          </button>
-        </div>
+        <section aria-labelledby="ev-link">
+          <h2 id="ev-link" className={`${EYEBROW} mb-2 px-1`}>
+            Guest link
+          </h2>
+          <div className={`${CARD} divide-y divide-hairline`}>
+            <div className="p-4 sm:p-5">
+              <label htmlFor="setting-slug" className={LABEL}>
+                Page address
+              </label>
+              <div className="desk-field flex min-h-[44px] items-center rounded-2xl pl-4 focus-within:ring-2 focus-within:ring-burgundy/30">
+                <span className="shrink-0 font-mono text-sm text-label-3">
+                  /e/
+                </span>
+                <input
+                  id="setting-slug"
+                  required
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  className="min-h-[44px] w-full min-w-0 bg-transparent px-1 pr-4 font-mono text-base text-night focus-visible:outline-none sm:text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 sm:px-5">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
+                <Icon name="visibility" size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-night">
+                  Public event page
+                </span>
+                <span className="block text-[12.5px] leading-snug text-label-2">
+                  Guests can see directions and enter their passcode.
+                </span>
+              </span>
+              <Switch
+                on={isPublic}
+                onChange={setIsPublic}
+                label="Public event page"
+              />
+            </div>
+          </div>
+        </section>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-burgundy px-6 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-50 sm:ml-auto sm:w-auto"
+        >
+          <Icon name="check" size={18} />
+          <span>{saving ? "Saving changes…" : "Save settings"}</span>
+        </button>
       </form>
 
-      {/* Danger Zone */}
       <EventDangerZone
         event={event}
         isOwner={isOwner}

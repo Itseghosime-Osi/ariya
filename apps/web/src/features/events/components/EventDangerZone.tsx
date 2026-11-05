@@ -2,6 +2,15 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Icon } from "@/components/ui/icon";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useIsMobile } from "@/lib/use-is-mobile";
 import type { Event } from "@/features/events/types";
 import {
   archiveEventAction,
@@ -14,12 +23,17 @@ interface EventDangerZoneProps {
   onError: (msg: string) => void;
 }
 
+const ROW = "flex min-h-[64px] items-center gap-3.5 px-4 py-3 sm:px-5";
+const GHOST =
+  "inline-flex min-h-[40px] shrink-0 items-center rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
+
 export function EventDangerZone({
   event,
   isOwner,
   onError,
 }: EventDangerZoneProps) {
   const router = useRouter();
+  const sheet = useIsMobile();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [confirmSlug, setConfirmSlug] = useState("");
@@ -51,129 +65,131 @@ export function EventDangerZone({
   };
 
   return (
-    <>
-      <div className="bg-surface-container-low p-6 sm:p-8 rounded-2xl border border-error/30 space-y-6 shadow-sm">
-        <div className="space-y-1">
-          <h2 className="font-serif text-xl text-wine font-medium">
-            Danger Zone
-          </h2>
-          <p className="text-xs text-on-surface-variant">
-            Archiving closes RSVP access. Deleting removes all guests, seating,
-            and records.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest">
-          <div>
-            <h3 className="text-xs font-semibold text-night">
-              Archive Celebration
-            </h3>
-            <p className="text-[11px] text-on-surface-variant">
-              Sets status to archived and closes active RSVP submissions.
-            </p>
-          </div>
+    <section aria-labelledby="ev-danger">
+      <h2
+        id="ev-danger"
+        className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-error"
+      >
+        Danger zone
+      </h2>
+      <div className="overflow-hidden rounded-3xl border border-error/25 bg-white/40 backdrop-blur-sm divide-y divide-hairline">
+        <div className={ROW}>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-burgundy/[0.07] text-gold-ink">
+            <Icon name="folder" size={18} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold text-night">
+              Archive celebration
+            </span>
+            <span className="block text-[12.5px] leading-snug text-label-2">
+              Closes RSVPs. Nothing is deleted.
+            </span>
+          </span>
           <button
             type="button"
             onClick={() => setShowArchiveModal(true)}
-            className="px-4 py-2 rounded-xl border border-outline-variant text-on-surface hover:bg-surface-container text-xs font-semibold transition-colors"
+            className={`${GHOST} desk-chip text-night`}
           >
-            Archive Event
+            Archive event
           </button>
         </div>
 
         {isOwner && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-error/20 bg-error-container/20">
-            <div>
-              <h3 className="text-xs font-semibold text-night">
-                Permanently Delete Celebration
-              </h3>
-              <p className="text-[11px] text-on-surface-variant">
-                Irrevocably deletes this celebration, along with guest lists and
-                table layouts.
-              </p>
-            </div>
+          <div className={ROW}>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-error-container text-error">
+              <Icon name="delete" size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-night">
+                Delete celebration
+              </span>
+              <span className="block text-[12.5px] leading-snug text-label-2">
+                Removes guests, seating and records for good.
+              </span>
+            </span>
             <button
               type="button"
               onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 rounded-xl bg-error text-white text-xs font-semibold hover:bg-error/90 transition-colors shadow-sm"
+              className={`${GHOST} bg-error text-white hover:bg-error/90`}
             >
-              Delete Event
+              Delete event
             </button>
           </div>
         )}
       </div>
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-night/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl max-w-md w-full space-y-5 border border-outline-variant/40 shadow-2xl">
-            <div className="space-y-1">
-              <h3 className="font-serif text-xl text-error font-medium">
-                Confirm Permanent Deletion
-              </h3>
-              <p className="text-xs text-on-surface-variant">
-                This action cannot be undone. To confirm, type the slug{" "}
-                <strong className="font-mono text-night">{event.slug}</strong>:
-              </p>
-            </div>
-            <input
-              type="text"
-              value={confirmSlug}
-              onChange={(e) => setConfirmSlug(e.target.value)}
-              placeholder={event.slug}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-error/40 text-sm font-mono text-night focus:outline-none focus:ring-2 focus:ring-error/40"
-            />
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={confirmSlug !== event.slug || actionLoading}
-                onClick={handleDelete}
-                className="px-5 py-2 rounded-xl bg-error text-white text-xs font-semibold hover:bg-error/90 disabled:opacity-50 transition-all"
-              >
-                {actionLoading ? "Deleting..." : "Permanently Delete"}
-              </button>
-            </div>
+      <Dialog
+        open={showDeleteModal}
+        onOpenChange={(o) => {
+          setShowDeleteModal(o);
+          if (!o) setConfirmSlug("");
+        }}
+      >
+        <DialogContent sheet={sheet}>
+          <DialogHeader>
+            <DialogTitle className="text-error">
+              Confirm permanent deletion
+            </DialogTitle>
+            <DialogDescription>
+              This cannot be undone. To confirm, type the slug{" "}
+              <strong className="font-mono text-night">{event.slug}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <input
+            type="text"
+            value={confirmSlug}
+            onChange={(e) => setConfirmSlug(e.target.value)}
+            placeholder={event.slug}
+            aria-label="Type the slug to confirm"
+            className="desk-field min-h-[44px] w-full rounded-2xl px-4 font-mono text-base text-night focus-visible:ring-2 focus-visible:ring-error/40 focus-visible:outline-none sm:text-sm"
+          />
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(false)}
+              className={`${GHOST} text-label-2 hover:text-night`}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={confirmSlug !== event.slug || actionLoading}
+              onClick={handleDelete}
+              className={`${GHOST} bg-error px-5 text-white hover:bg-error/90 disabled:opacity-50`}
+            >
+              {actionLoading ? "Deleting…" : "Permanently Delete"}
+            </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
-      {showArchiveModal && (
-        <div className="fixed inset-0 z-50 bg-night/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl max-w-md w-full space-y-5 border border-outline-variant/40 shadow-2xl">
-            <div className="space-y-1">
-              <h3 className="font-serif text-xl text-wine font-medium">
-                Archive Celebration?
-              </h3>
-              <p className="text-xs text-on-surface-variant">
-                Guests will no longer be able to submit or revise their RSVPs.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowArchiveModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={actionLoading}
-                onClick={handleArchive}
-                className="px-5 py-2 rounded-xl bg-wine text-ivory text-xs font-semibold hover:bg-wine/90 disabled:opacity-50 transition-all"
-              >
-                {actionLoading ? "Archiving..." : "Confirm Archive"}
-              </button>
-            </div>
+      <Dialog open={showArchiveModal} onOpenChange={setShowArchiveModal}>
+        <DialogContent sheet={sheet}>
+          <DialogHeader>
+            <DialogTitle>Archive Celebration?</DialogTitle>
+            <DialogDescription>
+              Guests will no longer be able to submit or revise their RSVPs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowArchiveModal(false)}
+              className={`${GHOST} text-label-2 hover:text-night`}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={handleArchive}
+              className={`${GHOST} bg-burgundy px-5 text-ivory hover:bg-wine disabled:opacity-50`}
+            >
+              {actionLoading ? "Archiving…" : "Confirm Archive"}
+            </button>
           </div>
-        </div>
-      )}
-    </>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 }
