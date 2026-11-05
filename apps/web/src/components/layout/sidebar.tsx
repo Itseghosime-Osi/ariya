@@ -180,6 +180,12 @@ export function Sidebar({
 
   const onNavMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const box = e.currentTarget.getBoundingClientRect();
+    // The glow is absolutely placed in a scrolling box, so it must span the whole list, not just the
+    // visible part, or the light stops dead where the first screenful ends.
+    e.currentTarget.style.setProperty(
+      "--sb-h",
+      `${e.currentTarget.scrollHeight}px`
+    );
     e.currentTarget.style.setProperty(
       "--my",
       `${e.clientY - box.top + e.currentTarget.scrollTop}px`

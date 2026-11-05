@@ -333,7 +333,8 @@ body:has([data-auth-shell]) {
 /* Hover: a soft gold light follows the cursor down the list, and the icon gives a little shimmy. */
 .sb-glow {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto 0;
+  height: var(--sb-h, 100%);
   pointer-events: none;
   background: radial-gradient(
     160px 90px at 50% var(--my, -200px),
