@@ -91,7 +91,7 @@ Goal: a Rust core that reproduces today's behaviour exactly, behind a loader tha
 - [x] **0.3.1** Implement `ariya_studio_call(op, ptr, len) -> u64` returning `(ptr << 32) | len`, plus `ariya_free`.
 - [x] **0.3.2** Ops: `VERSION`, `ARRANGE`, `SCORE`, `THERMAL`, `CATERING`, `RISK`, `CHECKLIST`. One call per user action. _(VERSION, GEOMETRY and FIT are live; the rest are declared in the loader.)_
 - [x] **0.3.3** Errors return a JSON envelope (`{ ok: false, code, message }`), never a panic across the boundary. Add a `catch_unwind` wrapper.
-- [ ] **0.3.4** Snapshot test the wire format so a schema change is a visible diff.
+- [x] **0.3.4** Snapshot test the wire format so a schema change is a visible diff. _(`crates/studio-core/tests/wire.rs` compares every envelope against `tests/fixtures/wire/`; `UPDATE_WIRE_SNAPSHOTS=1` rewrites them.)_
 
 ### 0.4 Type generation
 
