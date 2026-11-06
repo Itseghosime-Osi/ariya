@@ -3,15 +3,18 @@
 import React from "react";
 import { Icon } from "@/components/ui/icon";
 import { pluralise } from "@/lib/metrics";
+import { formatArrival } from "../format";
 import type { CheckInResult } from "../types";
 
 interface CheckInResultCardProps {
   result: CheckInResult | null;
+  admittedAt?: string | null;
   onDismiss: () => void;
 }
 
 export function CheckInResultCard({
   result,
+  admittedAt,
   onDismiss,
 }: CheckInResultCardProps) {
   if (!result) return null;
@@ -71,6 +74,16 @@ export function CheckInResultCard({
               <span>{result.table_name || "Open / Unassigned"}</span>
             </span>
           </div>
+          {admittedAt && (
+            <div className="col-span-2 sm:col-span-3">
+              <span className="text-[10px] text-emerald-800/80 font-bold uppercase block">
+                Arrived at
+              </span>
+              <span className="font-bold text-emerald-950 text-sm">
+                {formatArrival(admittedAt)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -97,7 +110,11 @@ export function CheckInResultCard({
         </div>
         <p className="text-xs text-amber-900">
           This party has already been fully checked in (
-          {result.checked_in_count} of {result.attending_count} admitted).
+          {result.checked_in_count} of {result.attending_count} admitted
+          {result.first_checked_in_at
+            ? `, first arrived at ${formatArrival(result.first_checked_in_at)}`
+            : ""}
+          ). The pass cannot be used again.
         </p>
       </div>
     );

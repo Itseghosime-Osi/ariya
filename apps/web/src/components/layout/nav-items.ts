@@ -160,7 +160,7 @@ export function hasOwnPhoneHeader(pathname: string): boolean {
     pathname === "/profile/archive" ||
     pathname === "/events/new" ||
     pathname === "/approvals" ||
-    /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders)$/.test(
+    /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders|page-editor)$/.test(
       pathname
     )
   );

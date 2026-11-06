@@ -29,6 +29,8 @@ export interface InvitationEvent {
   invitation_headline?: string | null;
   invitation_subheadline?: string | null;
   invitation_message?: string | null;
+  invitation_live?: boolean;
+  film_design?: unknown;
 }
 
 export interface InvitationData {

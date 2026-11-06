@@ -26,7 +26,7 @@ export function EditorControlsForm({
   disabled = false,
 }: EditorControlsFormProps) {
   return (
-    <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-5">
+    <div className="rounded-3xl border border-hairline bg-white/40 p-4 backdrop-blur-sm sm:p-6 space-y-5">
       <div className="space-y-1">
         <h3 className="font-serif text-lg text-wine font-medium">
           Event details
@@ -38,7 +38,7 @@ export function EditorControlsForm({
 
       <div className="space-y-4">
         {/* Public Discovery Toggle */}
-        <div className="flex items-center justify-between p-3.5 rounded-xl border border-outline-variant/60 bg-white">
+        <div className="flex items-center justify-between p-3.5 rounded-2xl desk-field">
           <div className="space-y-0.5">
             <label className="text-xs font-semibold text-wine block">
               Public Event Page (/e/{data.slug || "..."})
@@ -68,7 +68,7 @@ export function EditorControlsForm({
             value={data.title}
             onChange={(e) => onChange("title", e.target.value)}
             placeholder="e.g. Adebayo & Folashade's Wedding"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className="w-full px-3.5 py-2.5 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           />
         </div>
 
@@ -83,7 +83,7 @@ export function EditorControlsForm({
             value={data.couple}
             onChange={(e) => onChange("couple", e.target.value)}
             placeholder="e.g. Folashade & Adebayo"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className="w-full px-3.5 py-2.5 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           />
         </div>
 
@@ -98,7 +98,7 @@ export function EditorControlsForm({
               disabled={disabled}
               value={watDate}
               onChange={(e) => onChangeWatDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
           <div className="space-y-1.5">
@@ -110,7 +110,7 @@ export function EditorControlsForm({
               disabled={disabled}
               value={watRsvpBy}
               onChange={(e) => onChangeWatRsvpBy(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
         </div>
@@ -127,7 +127,7 @@ export function EditorControlsForm({
               value={data.venue}
               onChange={(e) => onChange("venue", e.target.value)}
               placeholder="e.g. The Grand Ballroom, Eko Hotel"
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
           <div className="space-y-1.5">
@@ -140,7 +140,7 @@ export function EditorControlsForm({
               value={data.area}
               onChange={(e) => onChange("area", e.target.value)}
               placeholder="e.g. Victoria Island, Lagos"
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
         </div>
@@ -156,7 +156,7 @@ export function EditorControlsForm({
             value={data.description || ""}
             onChange={(e) => onChange("description", e.target.value)}
             placeholder="Share your story or a welcome message for your guests..."
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+            className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>
 
@@ -179,7 +179,7 @@ export function EditorControlsForm({
             value={data.dressCode}
             onChange={(e) => onChange("dressCode", e.target.value)}
             placeholder="e.g. Wine Velvet & Champagne Gold."
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+            className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>
 
@@ -192,7 +192,7 @@ export function EditorControlsForm({
             disabled={disabled}
             value={data.status}
             onChange={(e) => onChange("status", e.target.value)}
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           >
             <option value="draft">Draft (Private)</option>
             <option value="active">Active (Published to Guests)</option>

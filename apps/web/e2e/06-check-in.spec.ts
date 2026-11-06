@@ -60,7 +60,9 @@ test.describe("Reception Check-in Desk", () => {
 
     // Perform check-in via security code
     await page.locator('input[placeholder*="ARY-"]').fill(checkInCode!);
-    await page.getByRole("button", { name: /admit guest/i }).click();
+    await page.getByRole("button", { name: /verify pass/i }).click();
+    await expect(page.getByText(/Verified invitation/i)).toBeVisible();
+    await page.getByRole("button", { name: /^admit/i }).click();
 
     // Verify Admission Approved
     await expect(page.getByText(/Admission Approved/i)).toBeVisible({

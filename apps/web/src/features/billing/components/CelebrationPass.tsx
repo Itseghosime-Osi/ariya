@@ -226,7 +226,7 @@ export function CelebrationPass({
                 type="button"
                 disabled={isPending}
                 onClick={handleCheckout}
-                className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-wine px-5 text-sm font-semibold text-ivory shadow-md transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wine disabled:opacity-60 sm:flex-none lg:flex-auto"
+                className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-wine px-5 text-sm font-semibold text-ivory shadow-md transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wine disabled:opacity-60 sm:flex-none lg:w-full lg:flex-none"
               >
                 {isPending ? (
                   <>

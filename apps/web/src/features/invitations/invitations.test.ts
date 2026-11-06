@@ -42,3 +42,27 @@ describe("Invitation feature schemas", () => {
     expect(empty.success).toBe(false);
   });
 });
+
+describe("entry seal", () => {
+  it("is a layer a host adds, and guests only get an invitation when it is placed", async () => {
+    const { createLayerOfKind, createInvitationDesign, hasEntrySeal } =
+      await import("./design");
+    const design = createInvitationDesign({ couple: "A & B" });
+    expect(hasEntrySeal(design)).toBe(false);
+    expect(hasEntrySeal(null)).toBe(false);
+
+    const seal = createLayerOfKind("code", design.layers.length);
+    expect(seal.kind).toBe("code");
+    expect(seal.width).toBeGreaterThanOrEqual(16);
+    const withSeal = { ...design, layers: [...design.layers, seal] };
+    expect(hasEntrySeal(withSeal)).toBe(true);
+    expect(
+      hasEntrySeal({
+        ...withSeal,
+        layers: withSeal.layers.map((l) =>
+          l.kind === "code" ? { ...l, visible: false } : l
+        ),
+      })
+    ).toBe(false);
+  });
+});

@@ -1,9 +1,21 @@
 import React from "react";
 import type { Metadata } from "next";
-import { getInvitationByToken, getCheckInCode } from "@/features/rsvp/queries";
+import {
+  getInvitationByToken,
+  getCheckInCode,
+  getRsvpForm,
+} from "@/features/rsvp/queries";
 import { generateQrDataUrl } from "@/lib/qrcode";
 import { getGuestTheme } from "@/features/rsvp/themes";
 import { InvalidLinkCard } from "@/features/rsvp/components/InvalidLinkCard";
+import { FilmGate } from "@/features/event-film/FilmGate";
+import { FilmFinale } from "@/features/event-film/components/FilmFinale";
+import { NotLiveCard } from "@/features/event-film/components/NotLiveCard";
+import { TestModeBanner } from "@/features/event-film/components/TestModeBanner";
+import { designFromEvent, hasEntrySeal } from "@/features/invitations/design";
+import { readFilmDesign } from "@/features/event-film/design";
+import { isEventTeamMember } from "@/features/event-film/queries";
+import { inviteAccess } from "@/features/event-film/visibility";
 import { ExpiredEventCard } from "@/features/events/components/ExpiredEventCard";
 import { ClosedEventCard } from "@/features/rsvp/components/ClosedEventCard";
 import { DeadlinePassedCard } from "@/features/rsvp/components/DeadlinePassedCard";
@@ -33,6 +45,7 @@ export default async function GuestInvitationPage({
 
   const { data, state } = await getInvitationByToken(token, isRevise);
 
+  const rsvpForm = await getRsvpForm(token);
   let checkInCode: string | null = null;
   let qrCodeUrl: string | null = null;
 
@@ -43,10 +56,89 @@ export default async function GuestInvitationPage({
     }
   }
 
+  const savedDesign = data
+    ? designFromEvent({
+        title: data.event.title,
+        couple: data.event.couple,
+        date: data.event.date,
+        venue: data.event.venue,
+        area: data.event.area,
+        dressCode: data.event.dress_code,
+        rsvpBy: data.event.rsvp_by,
+        theme: data.event.invitation_theme ?? null,
+        headline: data.event.invitation_headline ?? null,
+        subheadline: data.event.invitation_subheadline ?? null,
+        message: data.event.invitation_message ?? null,
+        design: rsvpForm.invitationDesign,
+      })
+    : null;
+  const sealedDesign =
+    rsvpForm.requireAccessCard && checkInCode && hasEntrySeal(savedDesign)
+      ? savedDesign
+      : null;
+
   const theme = getGuestTheme(data?.event?.invitation_theme);
+
+  // In test mode only the celebration's own team can open a personal link, and only to look.
+  const live = data?.event.invitation_live !== false;
+  const access = data
+    ? inviteAccess({
+        live,
+        isTeamMember: live ? false : await isEventTeamMember(data.event.id),
+      })
+    : "open";
+  const hidden =
+    Boolean(data) &&
+    access === "not-live" &&
+    state !== "expired" &&
+    state !== "invalid_link";
+  const film = data ? readFilmDesign(data.event.film_design) : null;
+  const showFilm =
+    Boolean(film?.enabled) &&
+    !hidden &&
+    (state === "active" || state === "revise" || state === "already_replied");
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-between py-10 px-4 sm:px-6">
+      {showFilm && data && film && (
+        <FilmGate
+          design={film}
+          storageKey={`film:${data.event.id}:${token}`}
+          guestName={data.guest.display_name}
+          event={{
+            couple: data.event.couple,
+            title: data.event.title,
+            date: data.event.date,
+            venue: data.event.venue,
+            area: data.event.area,
+            dressCode: data.event.dress_code,
+          }}
+          ctaLabel={
+            state === "already_replied"
+              ? "See your reply"
+              : "Reply to the invitation"
+          }
+          finale={
+            <FilmFinale
+              design={rsvpForm.invitationDesign}
+              entryCode={rsvpForm.requireAccessCard ? checkInCode : null}
+              event={{
+                title: data.event.title,
+                couple: data.event.couple,
+                date: data.event.date,
+                venue: data.event.venue,
+                area: data.event.area,
+                dressCode: data.event.dress_code,
+                rsvpBy: data.event.rsvp_by,
+                theme: data.event.invitation_theme,
+                headline: data.event.invitation_headline,
+                subheadline: data.event.invitation_subheadline,
+                message: data.event.invitation_message,
+              }}
+            />
+          }
+        />
+      )}
       <main className="max-w-xl mx-auto w-full space-y-6">
         {/* Monogram Seal Header */}
         <header className="text-center space-y-2">
@@ -64,6 +156,14 @@ export default async function GuestInvitationPage({
           </p>
         </header>
 
+        {access === "test-preview" && data && (
+          <TestModeBanner eventId={data.event.id} />
+        )}
+
+        {hidden && data && (
+          <NotLiveCard couple={data.event.couple} title={data.event.title} />
+        )}
+
         {/* State Selection */}
         {state === "invalid_link" && <InvalidLinkCard />}
 
@@ -74,26 +174,34 @@ export default async function GuestInvitationPage({
           />
         )}
 
-        {state === "closed" && data && <ClosedEventCard event={data.event} />}
+        {state === "closed" && data && !hidden && (
+          <ClosedEventCard event={data.event} />
+        )}
 
-        {state === "deadline_passed" && data && (
+        {state === "deadline_passed" && data && !hidden && (
           <DeadlinePassedCard event={data.event} guest={data.guest} />
         )}
 
-        {state === "already_replied" && data && (
+        {state === "already_replied" && data && !hidden && (
           <RsvpSummaryCard
             data={data}
             token={token}
             checkInCode={checkInCode}
             qrCodeUrl={qrCodeUrl}
+            requireAccessCard={rsvpForm.requireAccessCard}
+            design={sealedDesign}
+            questions={rsvpForm.questions}
+            answers={rsvpForm.answers}
           />
         )}
 
-        {(state === "active" || state === "revise") && data && (
+        {(state === "active" || state === "revise") && data && !hidden && (
           <RsvpInteractiveForm
             data={data}
             token={token}
             isRevise={state === "revise"}
+            questions={rsvpForm.questions}
+            answers={rsvpForm.answers}
           />
         )}
       </main>

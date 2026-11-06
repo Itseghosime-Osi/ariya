@@ -26,7 +26,7 @@ export interface StudioApi {
     patch: Partial<InvitationLayer>,
     options?: { commit?: boolean }
   ): void;
-  addLayer(kind: "text" | "seal" | "divider"): void;
+  addLayer(kind: "text" | "seal" | "divider" | "code"): void;
   deleteLayer(id: string): void;
   moveLayer(id: string, direction: -1 | 1): void;
   applyTheme(theme: InvitationTheme): void;

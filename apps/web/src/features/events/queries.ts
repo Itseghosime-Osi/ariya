@@ -39,6 +39,14 @@ export interface PublicCelebration {
   isPublic?: boolean;
   /** The celebration's day has passed: the page shows only that it has ended. */
   expired?: boolean;
+  /** False while the host is testing: only their team can open the page. */
+  invitationLive?: boolean;
+  /** The host's film, as stored; read it with readFilmDesign. */
+  filmDesign?: unknown;
+  invitationTheme?: string | null;
+  invitationHeadline?: string | null;
+  invitationSubheadline?: string | null;
+  invitationMessage?: string | null;
   description?: string | null;
   coverImageUrl?: string | null;
   schedule?: ScheduleSlot[];
@@ -104,6 +112,20 @@ export const getPublicEventBySlug = cache(
       rsvpBy: raw.rsvp_by ? String(raw.rsvp_by) : null,
       status: String(raw.status),
       isPublic: Boolean(raw.is_public),
+      invitationLive: raw.invitation_live !== false,
+      filmDesign: raw.film_design ?? null,
+      invitationTheme: raw.invitation_theme
+        ? String(raw.invitation_theme)
+        : null,
+      invitationHeadline: raw.invitation_headline
+        ? String(raw.invitation_headline)
+        : null,
+      invitationSubheadline: raw.invitation_subheadline
+        ? String(raw.invitation_subheadline)
+        : null,
+      invitationMessage: raw.invitation_message
+        ? String(raw.invitation_message)
+        : null,
       description: raw.description ? String(raw.description) : null,
       coverImageUrl: raw.cover_image_url ? String(raw.cover_image_url) : null,
       schedule: Array.isArray(raw.schedule)
