@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(11);
+select plan(12);
 
 select has_column('public', 'events', 'rsvp_questions', 'events has rsvp_questions');
 select col_default_is('public', 'events', 'require_access_card', 'true', 'access cards are on by default');
@@ -37,6 +37,10 @@ select is(
   'the form returns the host questions'
 );
 select is(public.get_rsvp_form('nope-nope-nope'), null, 'an unknown token gets nothing');
+select ok(
+  (public.get_rsvp_form((select token from q))) ? 'invitation_design',
+  'the form carries the host''s invitation design'
+);
 
 select is(
   public.save_rsvp_answers(
