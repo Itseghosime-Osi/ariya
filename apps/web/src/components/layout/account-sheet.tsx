@@ -48,7 +48,7 @@ export function AccountSheet({
   const actions: SheetAction[] = [
     {
       label: "Connect to an AI",
-      hint: "Claude, ChatGPT or Codex",
+      hint: "Claude, ChatGPT or Gemini",
       icon: "styler",
       href: "/connect-ai",
       testId: "account-connect-ai",
@@ -129,7 +129,7 @@ export function AccountSheet({
                   href={action.href}
                   onClick={() => onOpenChange(false)}
                   data-testid={action.testId}
-                  className="group flex min-h-[56px] items-center gap-3 rounded-2xl border border-gold-ink/15 bg-white/65 px-3 py-2 outline-none transition-colors hover:border-gold-ink/50 hover:bg-white focus-visible:ring-2 focus-visible:ring-burgundy"
+                  className="group flex min-h-[56px] items-center gap-3 rounded-2xl border border-hairline bg-white/40 px-3 py-2 outline-none backdrop-blur-sm transition-colors hover:border-gold/60 hover:bg-white/60 focus-visible:ring-2 focus-visible:ring-burgundy"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-burgundy/[0.07] text-gold-ink transition-colors group-hover:bg-burgundy group-hover:text-champagne group-focus-visible:bg-burgundy group-focus-visible:text-champagne">
                     <Icon name={action.icon} size={18} />
@@ -159,7 +159,7 @@ export function AccountSheet({
                 type="button"
                 onClick={() => setSignOutOpen(true)}
                 data-testid="account-sign-out"
-                className="group flex min-h-[56px] w-full items-center gap-3 rounded-2xl border border-gold-ink/15 bg-white/65 px-3 py-2 text-left outline-none transition-colors hover:border-burgundy/40 hover:bg-burgundy/[0.07] focus-visible:ring-2 focus-visible:ring-burgundy"
+                className="group flex min-h-[56px] w-full items-center gap-3 rounded-2xl border border-hairline bg-white/40 px-3 py-2 text-left outline-none backdrop-blur-sm transition-colors hover:border-burgundy/40 hover:bg-burgundy/[0.07] focus-visible:ring-2 focus-visible:ring-burgundy"
               >
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-burgundy/[0.07] text-burgundy transition-colors group-hover:bg-burgundy group-hover:text-champagne">
                   <Icon name="logout" size={18} />
@@ -185,7 +185,11 @@ export function AccountSheet({
         </DialogContent>
       </Dialog>
 
-      <SignOutConfirmation open={signOutOpen} onOpenChange={setSignOutOpen} />
+      <SignOutConfirmation
+        open={signOutOpen}
+        onOpenChange={setSignOutOpen}
+        onStay={() => onOpenChange(false)}
+      />
     </>
   );
 }
