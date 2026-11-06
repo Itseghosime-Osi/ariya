@@ -60,12 +60,17 @@ export type {
   GeometryRequest,
   GeometryResponse,
   LayoutOption,
+  Level,
   Loads,
   Mount,
   Placement,
   Plant,
   Prediction,
   PurchaseUnit,
+  RiskCategory,
+  RiskInput,
+  RiskItem,
+  RiskReport,
   ScoreBreakdown,
   ScoreTerm,
   Services,
@@ -98,6 +103,8 @@ import type {
   FitResult,
   GeometryRequest,
   GeometryResponse,
+  RiskInput,
+  RiskReport,
   ThermalReport,
   ThermalRequest,
 } from "./generated";
@@ -115,6 +122,8 @@ export interface StudioEngine {
   thermal(request: ThermalRequest): ThermalReport;
   /** The shopping list: what to buy, in the units a caterer quotes. */
   catering(request: CateringInput): CateringReport;
+  /** The risk register, filtered to the plan, with a number and a date on every row. */
+  risk(request: RiskInput): RiskReport;
 }
 
 export interface LoadStudioOptions {
@@ -229,5 +238,6 @@ export async function loadStudio(
     arrange: (request) => call<ArrangeResponse>(OP.ARRANGE, request),
     thermal: (request) => call<ThermalReport>(OP.THERMAL, request),
     catering: (request) => call<CateringReport>(OP.CATERING, request),
+    risk: (request) => call<RiskReport>(OP.RISK, request),
   };
 }
