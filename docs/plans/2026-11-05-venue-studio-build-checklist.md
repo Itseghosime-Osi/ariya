@@ -251,16 +251,18 @@ Goal: specific, dated advice — not "ensure adequate fuel".
 
 ### 5.1 Engine
 
-- [ ] **5.1.1** `risk.rs`: rule engine over the plan; each rule has a trigger, a mitigation with a number, and a "when to act".
-- [ ] **5.1.2** Encode the register from research §D.1 **minus the "Missing permits" row**.
-- [ ] **5.1.3** "When to act" resolves to a real due date from the event date.
-- [ ] **5.1.4** Likelihood and impact labelled as practitioner judgement, not actuarial.
+- [x] **5.1.1** `risk.rs`: rule engine over the plan; each rule has a trigger, a mitigation with a number, and a "when to act".
+- [x] **5.1.2** Encode the register from research §D.1 **minus the "Missing permits" row**.
+- [x] **5.1.3** "When to act" resolves to a real due date from the event date.
+- [x] **5.1.4** Likelihood and impact labelled as practitioner judgement, not actuarial.
 
 ### 5.2 UI
 
-- [ ] **5.2.1** Risk panel grouped by category, safety-critical visually distinct from experiential.
-- [ ] **5.2.2** Each row expands to the mitigation text and its source.
+- [x] **5.2.1** Risk panel grouped by category, safety-critical visually distinct from experiential.
+- [x] **5.2.2** Each row expands to the mitigation text and its source.
 - [ ] **5.2.3** "Add to checklist" creates a task with the derivation attached.
+      Blocked on 6.1.1: there is no `tasks` table to add to yet. `RiskItem.id` and `derivation` are
+      already on the wire for it — a stable key and the "because your hall has 30 tables" line.
 
 **Phase 5 exit:** every risk shown carries a number and a date.
 
