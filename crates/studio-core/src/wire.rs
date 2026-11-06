@@ -9,6 +9,7 @@ use serde_json::{json, Value};
 use ts_rs::TS;
 
 use crate::archetype::ArrangeTable;
+use crate::catering::{self, CateringInput};
 use crate::fit::{fit_tables, FitOptions, FitResult};
 use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
@@ -289,7 +290,11 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             }
             Err(message) => err("bad_request", &message),
         },
-        OP_SCORE | OP_CATERING | OP_RISK | OP_CHECKLIST => {
+        OP_CATERING => match parse::<CateringInput>(payload) {
+            Ok(req) => ok(serde_json::to_value(catering::plan(&req)).unwrap_or(Value::Null)),
+            Err(message) => err("bad_request", &message),
+        },
+        OP_SCORE | OP_RISK | OP_CHECKLIST => {
             err("not_implemented", "this operation is not built yet")
         }
         _ => err("unknown_op", "no such operation"),
@@ -398,7 +403,7 @@ mod tests {
 
     #[test]
     fn an_unbuilt_op_says_so() {
-        let out = dispatch(OP_CATERING, b"{}");
+        let out = dispatch(OP_RISK, b"{}");
         let value: Value = serde_json::from_str(&out).expect("json");
         assert_eq!(value["code"], "not_implemented");
     }

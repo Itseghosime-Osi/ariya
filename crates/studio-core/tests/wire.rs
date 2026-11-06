@@ -149,12 +149,40 @@ fn thermal_with_units_envelope() {
 fn unbuilt_operations_share_one_envelope() {
     for (name, op) in [
         ("score", OP_SCORE),
-        ("catering", OP_CATERING),
         ("risk", OP_RISK),
         ("checklist", OP_CHECKLIST),
     ] {
         snapshot(name, op, "{}");
     }
+}
+
+/// The 300-guest Nigerian reception from research §E.10.
+#[test]
+fn catering_envelope() {
+    let request = r#"{
+        "guests": 300,
+        "style": "buffet",
+        "hours": 6,
+        "alcohol": "beer-wine",
+        "cake": "dessert",
+        "takeaway": true,
+        "plusOnes": 0.10,
+        "hotWeather": true
+    }"#;
+    snapshot("catering", OP_CATERING, request);
+}
+
+/// The question that hides a whole section: no alcohol means no bar lines at all.
+#[test]
+fn catering_envelope_without_alcohol() {
+    let request = r#"{
+        "guests": 120,
+        "style": "plated",
+        "alcohol": "none",
+        "cake": "decoration",
+        "takeaway": false
+    }"#;
+    snapshot("catering-dry", OP_CATERING, request);
 }
 
 #[test]

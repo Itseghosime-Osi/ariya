@@ -281,6 +281,37 @@ pub struct Cooling {
     pub target_c: Option<f64>,
 }
 
+/// What the host has decided about the meal. Everything is optional: the plan is the host's, and
+/// `catering::plan` fills in what they have not answered. Research §E.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct CateringPlan {
+    #[serde(default)]
+    pub style: Option<crate::catering::CateringStyle>,
+    #[serde(default)]
+    pub hours: Option<f64>,
+    #[serde(default)]
+    pub alcohol: Option<crate::catering::AlcoholAnswer>,
+    #[serde(default)]
+    pub cake: Option<crate::catering::CakeAnswer>,
+    #[serde(default)]
+    pub takeaway: Option<bool>,
+    #[serde(default, rename = "plusOnes")]
+    pub plus_ones: Option<f64>,
+    #[serde(default)]
+    pub vendors: Option<u32>,
+    #[serde(default)]
+    pub overage: Option<f64>,
+    #[serde(default, rename = "coldDisplay")]
+    pub cold_display: Option<bool>,
+    #[serde(default, rename = "hotWeather")]
+    pub hot_weather: Option<bool>,
+}
+
 /// The venue facts a plan carries. Everything is optional except the type, so a document written
 /// before the studio knew about venues still reads.
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -304,6 +335,8 @@ pub struct VenueProfile {
     #[serde(default)]
     pub cooling: Option<Cooling>,
     #[serde(default)]
+    pub catering: Option<CateringPlan>,
+    #[serde(default)]
     pub sun: Option<Sun>,
     #[serde(default)]
     pub wind: Option<Wind>,
@@ -319,6 +352,7 @@ impl Default for VenueProfile {
             capacity: None,
             climate: None,
             cooling: None,
+            catering: None,
             sun: None,
             wind: None,
         }

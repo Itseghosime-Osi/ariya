@@ -1,0 +1,347 @@
+{
+  "data": {
+    "effectiveGuests": 142,
+    "groups": [
+      {
+        "label": "weight",
+        "lines": [
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 54.9,
+            "label": "Jollof rice",
+            "likely": 45.7,
+            "low": 36.6,
+            "perBasis": "to cook for",
+            "perGuest": 0.322,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "65 % of 142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 28.0,
+            "label": "Fried rice",
+            "likely": 23.4,
+            "low": 18.7,
+            "perBasis": "to cook for",
+            "perGuest": 0.165,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 35.3,
+            "label": "Chicken",
+            "likely": 29.4,
+            "low": 23.5,
+            "perBasis": "to cook for",
+            "perGuest": 0.207,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 23.5,
+            "label": "Beef",
+            "likely": 19.6,
+            "low": 15.7,
+            "perBasis": "to cook for",
+            "perGuest": 0.138,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 43.1,
+            "label": "Pounded yam",
+            "likely": 35.9,
+            "low": 28.7,
+            "perBasis": "to cook for",
+            "perGuest": 0.253,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 17.6,
+            "label": "Salad",
+            "likely": 14.7,
+            "low": 11.8,
+            "perBasis": "to cook for",
+            "perGuest": 0.104,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, ÷3 for raw",
+            "confidence": "high",
+            "high": 18.3,
+            "label": "Jollof rice, raw",
+            "likely": 15.2,
+            "low": 12.2,
+            "perBasis": "to cook for",
+            "perGuest": 0.107,
+            "perGuests": 142,
+            "unit": "kg"
+          },
+          {
+            "basis": "142 guests, ÷3 for raw",
+            "confidence": "high",
+            "high": 9.3,
+            "label": "Fried rice, raw",
+            "likely": 7.8,
+            "low": 6.2,
+            "perBasis": "to cook for",
+            "perGuest": 0.055,
+            "perGuests": 142,
+            "unit": "kg"
+          }
+        ],
+        "unit": "kg"
+      },
+      {
+        "label": "volume",
+        "lines": [
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 49.0,
+            "label": "Egusi soup",
+            "likely": 40.8,
+            "low": 32.7,
+            "perBasis": "to cook for",
+            "perGuest": 0.287,
+            "perGuests": 142,
+            "unit": "litre"
+          }
+        ],
+        "unit": "litre"
+      },
+      {
+        "label": "crates",
+        "lines": [
+          {
+            "basis": "300 × 35 cl, 12 a crate",
+            "confidence": "high",
+            "high": 30.0,
+            "label": "Soft drinks",
+            "likely": 25.0,
+            "low": 20.0,
+            "perBasis": "invited",
+            "perGuest": 0.208,
+            "perGuests": 120,
+            "unit": "crate"
+          }
+        ],
+        "unit": "crate"
+      },
+      {
+        "label": "cases",
+        "lines": [
+          {
+            "basis": "300 × 50 cl, 24 a case",
+            "confidence": "high",
+            "high": 15.0,
+            "label": "Bottled water",
+            "likely": 13.0,
+            "low": 10.0,
+            "perBasis": "invited",
+            "perGuest": 0.108,
+            "perGuests": 120,
+            "unit": "case"
+          }
+        ],
+        "unit": "case"
+      },
+      {
+        "label": "bags",
+        "lines": [
+          {
+            "basis": "108 kg, 25 kg a bag",
+            "confidence": "high",
+            "high": 6.0,
+            "label": "Ice",
+            "likely": 5.0,
+            "low": 4.0,
+            "perBasis": "invited",
+            "perGuest": 0.042,
+            "perGuests": 120,
+            "unit": "bag"
+          }
+        ],
+        "unit": "bag"
+      },
+      {
+        "label": "pans",
+        "lines": [
+          {
+            "basis": "120 guests ÷ 50 × 6 hot items",
+            "confidence": "high",
+            "high": 22.0,
+            "label": "Chafing dishes",
+            "likely": 18.0,
+            "low": 15.0,
+            "perBasis": "invited",
+            "perGuest": 0.15,
+            "perGuests": 120,
+            "unit": "pan"
+          }
+        ],
+        "unit": "pan"
+      },
+      {
+        "label": "pieces",
+        "lines": [
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 1568.0,
+            "label": "Small chops",
+            "likely": 1307.0,
+            "low": 1046.0,
+            "perBasis": "to cook for",
+            "perGuest": 9.0,
+            "perGuests": 142,
+            "unit": "piece"
+          },
+          {
+            "basis": "142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 196.0,
+            "label": "Moi moi",
+            "likely": 164.0,
+            "low": 131.0,
+            "perBasis": "to cook for",
+            "perGuest": 1.0,
+            "perGuests": 142,
+            "unit": "piece"
+          },
+          {
+            "basis": "70 % of 142 guests, +15 % spare",
+            "confidence": "medium",
+            "high": 343.0,
+            "label": "Suya",
+            "likely": 286.0,
+            "low": 229.0,
+            "perBasis": "to cook for",
+            "perGuest": 2.0,
+            "perGuests": 142,
+            "unit": "piece"
+          },
+          {
+            "basis": "1.8 a guest",
+            "confidence": "high",
+            "high": 260.0,
+            "label": "Plates",
+            "likely": 216.0,
+            "low": 173.0,
+            "perBasis": "invited",
+            "perGuest": 2.0,
+            "perGuests": 120,
+            "unit": "piece"
+          },
+          {
+            "basis": "1.5 a guest",
+            "confidence": "high",
+            "high": 216.0,
+            "label": "Cutlery sets",
+            "likely": 180.0,
+            "low": 144.0,
+            "perBasis": "invited",
+            "perGuest": 2.0,
+            "perGuests": 120,
+            "unit": "piece"
+          },
+          {
+            "basis": "2.5 a guest",
+            "confidence": "high",
+            "high": 360.0,
+            "label": "Napkins",
+            "likely": 300.0,
+            "low": 240.0,
+            "perBasis": "invited",
+            "perGuest": 3.0,
+            "perGuests": 120,
+            "unit": "piece"
+          },
+          {
+            "basis": "1 a guest + 5 % spare",
+            "confidence": "high",
+            "high": 152.0,
+            "label": "Chairs",
+            "likely": 126.0,
+            "low": 101.0,
+            "perBasis": "invited",
+            "perGuest": 1.0,
+            "perGuests": 120,
+            "unit": "piece"
+          }
+        ],
+        "unit": "piece"
+      },
+      {
+        "label": "people",
+        "lines": [
+          {
+            "basis": "120 guests ÷ 10 a server",
+            "confidence": "high",
+            "high": 15.0,
+            "label": "Servers",
+            "likely": 12.0,
+            "low": 10.0,
+            "perBasis": "invited",
+            "perGuest": 0.1,
+            "perGuests": 120,
+            "unit": "person"
+          },
+          {
+            "basis": "12 servers ÷ 10",
+            "confidence": "high",
+            "high": 3.0,
+            "label": "Captains",
+            "likely": 2.0,
+            "low": 2.0,
+            "perBasis": "invited",
+            "perGuest": 0.017,
+            "perGuests": 120,
+            "unit": "person"
+          }
+        ],
+        "unit": "person"
+      },
+      {
+        "label": "stations",
+        "lines": [
+          {
+            "basis": "120 guests ÷ 75",
+            "confidence": "high",
+            "high": 3.0,
+            "label": "Buffet stations",
+            "likely": 2.0,
+            "low": 2.0,
+            "perBasis": "invited",
+            "perGuest": 0.017,
+            "perGuests": 120,
+            "unit": "station"
+          }
+        ],
+        "unit": "station"
+      }
+    ],
+    "multiplier": 1.0,
+    "notes": [
+      "These are defensible estimates, not a standard: published guidance disagrees by 20–40 % on the same item. Take the Likely column to your caterer and expect to adjust it.",
+      "Your 120 guests are cooked for as 142 — plus-ones and 10 vendors — and 15 % spare food on top makes 163 portions.",
+      "No alcohol is planned, so there is no bar line to buy.",
+      "The cake is treated as a photograph, so it is not on the food list — plan a dessert course separately, or people will go home hungry."
+    ],
+    "overage": 0.15,
+    "portions": 163
+  },
+  "ok": true
+}
