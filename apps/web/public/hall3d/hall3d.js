@@ -3614,6 +3614,16 @@ window.addEventListener("message", (e) => {
       case "tiltDown":
         tweenTo({ pol: Math.min(maxPolar(cam.dist), cam.pol + 0.2) }, 360);
         break;
+      case "hover": {
+        // The layers panel pointing at something lights it up in the hall, the way a design
+        // program does, so a row is never a name with no place.
+        const key = m.key || null;
+        if (key !== hover) {
+          hover = key;
+          syncSelection();
+        }
+        break;
+      }
       case "focus": {
         const item = items.get(m.key);
         if (item)

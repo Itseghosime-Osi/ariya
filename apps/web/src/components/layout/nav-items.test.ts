@@ -4,6 +4,7 @@ import {
   getEventSections,
   getPhoneMoreSections,
   hasOwnPhoneHeader,
+  isWorkspaceRoute,
 } from "./nav-items";
 
 const EVENT_ID = "2f1a7c4e-0b6d-4c2a-9f3e-8d5b1a7c4e0b";
@@ -75,5 +76,15 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing/callback`)).toBe(
       false
     );
+  });
+});
+
+describe("isWorkspaceRoute", () => {
+  it("is the seating studio and nothing else", () => {
+    expect(isWorkspaceRoute("/events/abc/seating")).toBe(true);
+    expect(isWorkspaceRoute("/events/abc/seating/print")).toBe(false);
+    expect(isWorkspaceRoute("/events/abc/guests")).toBe(false);
+    expect(isWorkspaceRoute("/events/abc")).toBe(false);
+    expect(isWorkspaceRoute("/settings")).toBe(false);
   });
 });

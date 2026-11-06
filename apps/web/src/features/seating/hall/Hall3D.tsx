@@ -141,6 +141,8 @@ export interface HallMessage {
 export interface Hall3DHandle {
   command: (cmd: HallCommand) => void;
   focus: (key: string) => void;
+  /** Light up one object (or none) as if the pointer were over it. */
+  hover: (key: string | null) => void;
   /** Frame an area of the hall at its own height, so a stage's top is what you look at. */
   frame: (at: {
     x: number;
@@ -186,6 +188,7 @@ export const Hall3D = forwardRef<
     () => ({
       command: (cmd) => send({ t: "cmd", cmd }),
       focus: (key) => send({ t: "cmd", cmd: "focus", key }),
+      hover: (key) => send({ t: "cmd", cmd: "hover", key }),
       frame: (at) => send({ t: "cmd", cmd: "frame", at }),
     }),
     [send]

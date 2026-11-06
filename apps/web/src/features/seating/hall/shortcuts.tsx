@@ -50,6 +50,7 @@ export const SHORTCUTS = (
       [[["C"]], "Add chairs"],
       [[["S"]], "Stage, dance floor or area"],
       [[["P"]], "Décor palette"],
+      [[["Y"]], "Layers and tables"],
       [[["L"]], "Show table names"],
       [[["N"]], "Day or evening light"],
       [[["W"]], "Rain, at an open-air venue"],

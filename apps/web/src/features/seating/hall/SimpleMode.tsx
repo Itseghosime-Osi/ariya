@@ -41,6 +41,8 @@ export interface SimpleModeProps {
   totalCapacity: number;
   /** The event's own guest count, so question 2 opens on the real number, not a placeholder. */
   guestCount: number;
+  /** In a side panel beside the live hall, rather than a page of its own. */
+  docked?: boolean;
 }
 
 export function SimpleMode({
@@ -48,6 +50,7 @@ export function SimpleMode({
   onLayoutChange,
   totalCapacity,
   guestCount,
+  docked = false,
 }: SimpleModeProps) {
   const [answers, setAnswers] = useState<SimpleAnswers>(() =>
     answersFromLayout(layout, guestCount)
@@ -78,7 +81,13 @@ export function SimpleMode({
   }, [engine, showResults, layout, answers, guests]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl overflow-y-auto px-4 pb-24 pt-2">
+    <div
+      className={
+        docked
+          ? "w-full px-4 pb-8 pt-4"
+          : "mx-auto w-full max-w-3xl overflow-y-auto px-4 pb-24 pt-2"
+      }
+    >
       <p className="text-xs font-semibold uppercase tracking-wide text-label-2">
         Six questions
       </p>

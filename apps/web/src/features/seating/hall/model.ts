@@ -101,6 +101,8 @@ export interface FreeChair {
   seat?: SeatKind;
   /** How many people it holds: two on a couple's seat or a couch, one otherwise. */
   seats?: number;
+  /** A name the host gave it in the layers panel. Absent means the panel numbers it. */
+  label?: string;
   /** Its own fabric colour, overriding the room's. Absent means follow the décor. */
   cover?: string;
   /** Its own sash colour, overriding the room's. Absent means follow the décor. */
