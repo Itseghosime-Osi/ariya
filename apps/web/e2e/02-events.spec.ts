@@ -18,7 +18,9 @@ test.describe("Events Creation & Overview", () => {
 
     // Verify public page unpublished initially
     await page.goto(`/events/${eventId}/page-editor`);
-    await expect(page.getByText(/Event Page Editor/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /page editor/i })
+    ).toBeVisible();
 
     const publicPageLink = page.getByRole("link", {
       name: /view public page/i,
@@ -123,7 +125,9 @@ test.describe("Events Creation & Overview", () => {
         const { eventId } = await createTestEvent(page);
 
         await page.goto(`/events/${eventId}/page-editor`);
-        await expect(page.getByText(/Event Page Editor/i)).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: /page editor/i })
+        ).toBeVisible();
 
         // Enable public access so we can view /e/[slug]
         const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
@@ -185,7 +189,9 @@ test.describe("Events Creation & Overview", () => {
       const { eventId } = await createTestEvent(page);
 
       await page.goto(`/events/${eventId}/page-editor`);
-      await expect(page.getByText(/Event Page Editor/i)).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: /page editor/i })
+      ).toBeVisible();
 
       const ceremonyInput = page
         .locator('input[type="datetime-local"]')
@@ -249,7 +255,9 @@ test.describe("Events Creation & Overview", () => {
       const { eventId, title } = await createTestEvent(ownerPage);
 
       await ownerPage.goto(`/events/${eventId}/page-editor`);
-      await expect(ownerPage.getByText(/Event Page Editor/i)).toBeVisible();
+      await expect(
+        ownerPage.getByRole("heading", { name: /page editor/i })
+      ).toBeVisible();
 
       // Ensure public event discovery is checked
       const publicCheckbox = ownerPage
