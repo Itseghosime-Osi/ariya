@@ -5,20 +5,12 @@ import type { ZoneShape } from "./ZoneShape";
 /**
  * An area in the room: a stage, a dance floor, a buffet, a pillar.
  */
-export type Zone = {
-  id: string;
-  kind: ZoneKind;
-  label: string;
-  /**
-   * Centre, in metres from the top-left corner of the room.
-   */
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  shape: ZoneShape | null;
-  /**
-   * Rotation in degrees.
-   */
-  rot: number | null;
-};
+export type Zone = { id: string, kind: ZoneKind, label: string, 
+/**
+ * Centre, in metres from the top-left corner of the room.
+ */
+x: number, y: number, w: number, h: number, shape: ZoneShape | null, 
+/**
+ * Rotation in degrees.
+ */
+rot: number | null, };

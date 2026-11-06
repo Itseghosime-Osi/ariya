@@ -3,10 +3,4 @@
 /**
  * One table, as the studio describes it.
  */
-export type TableSpec = {
-  shape: string;
-  capacity: number;
-  x: number;
-  y: number;
-  rot: number;
-};
+export type TableSpec = { shape: string, capacity: number, x: number, y: number, rot: number, };

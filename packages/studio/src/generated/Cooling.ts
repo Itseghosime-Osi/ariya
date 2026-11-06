@@ -4,11 +4,8 @@ import type { AcUnit } from "./AcUnit";
 /**
  * The cooling the host has planned: the units, and the two numbers they can move.
  */
-export type Cooling = {
-  units: Array<AcUnit>;
-  /**
-   * Air changes per hour. The dominant uncertainty in the load, so it is the host's to move.
-   */
-  ach: number | null;
-  targetC: number | null;
-};
+export type Cooling = { units: Array<AcUnit>, 
+/**
+ * Air changes per hour. The dominant uncertainty in the load, so it is the host's to move.
+ */
+ach: number | null, targetC: number | null, };

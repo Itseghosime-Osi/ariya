@@ -3,4 +3,4 @@
 /**
  * A chair standing on its own, for the archetypes that seat people without a table.
  */
-export type ChairPlacement = { x: number; y: number; rot: number };
+export type ChairPlacement = { x: number, y: number, rot: number, };

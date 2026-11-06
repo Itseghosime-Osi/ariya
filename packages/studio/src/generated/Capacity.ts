@@ -3,4 +3,4 @@
 /**
  * The certified capacity, and where the number came from.
  */
-export type Capacity = { certified: number | null; source: string | null };
+export type Capacity = { certified: number | null, source: string | null, };

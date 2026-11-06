@@ -2,9 +2,4 @@
 import type { Arrangement } from "./Arrangement";
 import type { FitPlacement } from "./FitPlacement";
 
-export type FitResult = {
-  placements: Array<FitPlacement>;
-  count: number;
-  seats: number;
-  arrangement: Arrangement;
-};
+export type FitResult = { placements: Array<FitPlacement>, count: number, seats: number, arrangement: Arrangement, };

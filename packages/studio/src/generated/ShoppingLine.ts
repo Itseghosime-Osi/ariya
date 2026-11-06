@@ -5,41 +5,36 @@ import type { PurchaseUnit } from "./PurchaseUnit";
 /**
  * One line of the shopping list.
  */
-export type ShoppingLine = {
-  label: string;
-  /**
-   * The band below the estimate.
-   */
-  low: number;
-  /**
-   * The number to take to the caterer. Never a decimal: §E.11.
-   */
-  likely: number;
-  high: number;
-  unit: PurchaseUnit;
-  /**
-   * The same quantity as a share of one person, in the line's own unit: `0.45` for a jollof
-   * line bought in kg, `2.5` for napkins bought in pieces.
-   *
-   * Most hosts have no feel for "160 kg of rice" and every caterer does, so the list carries
-   * both. It is divided by `divisor` — the headcount this line's rate was actually built from —
-   * so `per_guest × divisor` reconciles to `likely`. A host who checks the figures with a
-   * calculator must find them agreeing, or the sheet has lost their trust at line one.
-   */
-  perGuest: number;
-  /**
-   * The headcount `per_guest` was divided by, and the noun to show beside it: the effective
-   * guest count for food, the RSVP count for drinks and service.
-   */
-  perGuests: number;
-  /**
-   * What `per_guests` counts, so the UI can say "0.45 kg per guest to cook for" rather than
-   * leaving the host to guess which of their two headcounts the figure is against.
-   */
-  perBasis: string;
-  /**
-   * Where the number came from, in plain language.
-   */
-  basis: string;
-  confidence: Confidence;
-};
+export type ShoppingLine = { label: string, 
+/**
+ * The band below the estimate.
+ */
+low: number, 
+/**
+ * The number to take to the caterer. Never a decimal: §E.11.
+ */
+likely: number, high: number, unit: PurchaseUnit, 
+/**
+ * The same quantity as a share of one person, in the line's own unit: `0.45` for a jollof
+ * line bought in kg, `2.5` for napkins bought in pieces.
+ *
+ * Most hosts have no feel for "160 kg of rice" and every caterer does, so the list carries
+ * both. It is divided by `divisor` — the headcount this line's rate was actually built from —
+ * so `per_guest × divisor` reconciles to `likely`. A host who checks the figures with a
+ * calculator must find them agreeing, or the sheet has lost their trust at line one.
+ */
+perGuest: number, 
+/**
+ * The headcount `per_guest` was divided by, and the noun to show beside it: the effective
+ * guest count for food, the RSVP count for drinks and service.
+ */
+perGuests: number, 
+/**
+ * What `per_guests` counts, so the UI can say "0.45 kg per guest to cook for" rather than
+ * leaving the host to guess which of their two headcounts the figure is against.
+ */
+perBasis: string, 
+/**
+ * Where the number came from, in plain language.
+ */
+basis: string, confidence: Confidence, };

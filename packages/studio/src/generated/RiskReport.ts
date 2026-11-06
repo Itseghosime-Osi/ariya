@@ -4,11 +4,8 @@ import type { RiskItem } from "./RiskItem";
 /**
  * The register, filtered to the plan.
  */
-export type RiskReport = {
-  items: Array<RiskItem>;
-  /**
-   * The judgement caveat, and anything the plan left unanswered.
-   */
-  notes: Array<string>;
-  eventDate: string | null;
-};
+export type RiskReport = { items: Array<RiskItem>, 
+/**
+ * The judgement caveat, and anything the plan left unanswered.
+ */
+notes: Array<string>, eventDate: string | null, };

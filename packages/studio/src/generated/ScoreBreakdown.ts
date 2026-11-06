@@ -4,4 +4,4 @@ import type { ScoreTerm } from "./ScoreTerm";
 /**
  * The whole objective, with every term still visible.
  */
-export type ScoreBreakdown = { total: number; terms: Array<ScoreTerm> };
+export type ScoreBreakdown = { total: number, terms: Array<ScoreTerm>, };

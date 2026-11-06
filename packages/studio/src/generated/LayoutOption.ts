@@ -7,30 +7,24 @@ import type { Zone } from "./Zone";
 /**
  * One ranked arrangement, with everything the studio needs to explain it.
  */
-export type LayoutOption = {
-  /**
-   * The archetype's id, e.g. `rounds-rows`.
-   */
-  archetype: string;
-  archetype_label: string;
-  /**
-   * The zone strategy's id, e.g. `stage-short-wall`.
-   */
-  strategy: string;
-  strategy_label: string;
-  placements: Array<Placement>;
-  chairs: Array<ChairPlacement>;
-  /**
-   * The areas in room coordinates, after the strategy placed them.
-   */
-  zones: Array<Zone>;
-  /**
-   * Indices into the request's table list that found no room.
-   */
-  unplaced: Array<number>;
-  score: ScoreBreakdown;
-  /**
-   * One line naming what this option gives up, for the card.
-   */
-  tradeoff: string;
-};
+export type LayoutOption = { 
+/**
+ * The archetype's id, e.g. `rounds-rows`.
+ */
+archetype: string, archetype_label: string, 
+/**
+ * The zone strategy's id, e.g. `stage-short-wall`.
+ */
+strategy: string, strategy_label: string, placements: Array<Placement>, chairs: Array<ChairPlacement>, 
+/**
+ * The areas in room coordinates, after the strategy placed them.
+ */
+zones: Array<Zone>, 
+/**
+ * Indices into the request's table list that found no room.
+ */
+unplaced: Array<number>, score: ScoreBreakdown, 
+/**
+ * One line naming what this option gives up, for the card.
+ */
+tradeoff: string, };

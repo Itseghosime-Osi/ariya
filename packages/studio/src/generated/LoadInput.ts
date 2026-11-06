@@ -6,36 +6,17 @@ import type { VenueType } from "./VenueType";
  * Everything the model reads. The defaults are the worked example in research §C.5: a Lagos
  * afternoon, single-glazed, uninsulated roof, lighting and AV on.
  */
-export type LoadInput = {
-  width: number;
-  length: number;
-  height: number;
-  venue: VenueType;
-  headcount: number;
-  /**
-   * How many of them are on the dance floor. The rest are seated.
-   */
-  dancing: number;
-  outdoorC: number;
-  outdoorRh: number;
-  targetC: number;
-  targetRh: number;
-  /**
-   * Air changes per hour. The dominant uncertainty in the whole model: a factor of three here
-   * swings the load by about 40 %, so it is a visible input rather than a hidden constant.
-   */
-  ach: number;
-  glazingM2: number;
-  glazingU: number;
-  shgc: number;
-  incidentWm2: number;
-  wallU: number;
-  roofU: number;
-  lightingWm2: number;
-  equipmentKw: number;
-  /**
-   * The size of split the host is considering. The model never picks one for them.
-   */
-  unit: SplitUnit;
-  derate: number;
-};
+export type LoadInput = { width: number, length: number, height: number, venue: VenueType, headcount: number, 
+/**
+ * How many of them are on the dance floor. The rest are seated.
+ */
+dancing: number, outdoorC: number, outdoorRh: number, targetC: number, targetRh: number, 
+/**
+ * Air changes per hour. The dominant uncertainty in the whole model: a factor of three here
+ * swings the load by about 40 %, so it is a visible input rather than a hidden constant.
+ */
+ach: number, glazingM2: number, glazingU: number, shgc: number, incidentWm2: number, wallU: number, roofU: number, lightingWm2: number, equipmentKw: number, 
+/**
+ * The size of split the host is considering. The model never picks one for them.
+ */
+unit: SplitUnit, derate: number, };

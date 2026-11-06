@@ -4,15 +4,12 @@ import type { TemplateTask } from "./TemplateTask";
 /**
  * What the plan holds today, and what is due.
  */
-export type ChecklistPlan = {
-  /**
-   * The template version these rows were written by.
-   */
-  templateVersion: number;
-  tasks: Array<TemplateTask>;
-  notes: Array<string>;
-  /**
-   * The first row worth doing now, when one can be named from the plan alone.
-   */
-  nextBest: string | null;
-};
+export type ChecklistPlan = { 
+/**
+ * The template version these rows were written by.
+ */
+templateVersion: number, tasks: Array<TemplateTask>, notes: Array<string>, 
+/**
+ * The first row worth doing now, when one can be named from the plan alone.
+ */
+nextBest: string | null, };

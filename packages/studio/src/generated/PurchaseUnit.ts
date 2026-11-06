@@ -3,15 +3,4 @@
 /**
  * Which purchase unit a caterer quotes in. §E.11: kilograms, crates, cases, bags, pans, pieces.
  */
-export type PurchaseUnit =
-  | "kg"
-  | "litre"
-  | "piece"
-  | "bottle"
-  | "crate"
-  | "case"
-  | "bag"
-  | "pan"
-  | "pack"
-  | "person"
-  | "station";
+export type PurchaseUnit = "kg" | "litre" | "piece" | "bottle" | "crate" | "case" | "bag" | "pan" | "pack" | "person" | "station";

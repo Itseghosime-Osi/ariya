@@ -3,9 +3,4 @@
 /**
  * The weather the plan is designed for.
  */
-export type Climate = {
-  city: string | null;
-  month: number | null;
-  outdoorC: number | null;
-  rh: number | null;
-};
+export type Climate = { city: string | null, month: number | null, outdoorC: number | null, rh: number | null, };

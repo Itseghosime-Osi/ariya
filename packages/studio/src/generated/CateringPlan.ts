@@ -7,15 +7,4 @@ import type { CateringStyle } from "./CateringStyle";
  * What the host has decided about the meal. Everything is optional: the plan is the host's, and
  * `catering::plan` fills in what they have not answered. Research §E.
  */
-export type CateringPlan = {
-  style: CateringStyle | null;
-  hours: number | null;
-  alcohol: AlcoholAnswer | null;
-  cake: CakeAnswer | null;
-  takeaway: boolean | null;
-  plusOnes: number | null;
-  vendors: number | null;
-  overage: number | null;
-  coldDisplay: boolean | null;
-  hotWeather: boolean | null;
-};
+export type CateringPlan = { style: CateringStyle | null, hours: number | null, alcohol: AlcoholAnswer | null, cake: CakeAnswer | null, takeaway: boolean | null, plusOnes: number | null, vendors: number | null, overage: number | null, coldDisplay: boolean | null, hotWeather: boolean | null, };

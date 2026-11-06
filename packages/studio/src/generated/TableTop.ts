@@ -4,4 +4,4 @@ import type { TopKind } from "./TopKind";
 /**
  * The table top itself, before chairs.
  */
-export type TableTop = { w: number; h: number; kind: TopKind };
+export type TableTop = { w: number, h: number, kind: TopKind, };

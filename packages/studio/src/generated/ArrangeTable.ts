@@ -3,9 +3,4 @@
 /**
  * One table the host owns, as the generator sees it.
  */
-export type ArrangeTable = {
-  id: string;
-  shape: string;
-  capacity: number;
-  occupied: number;
-};
+export type ArrangeTable = { id: string, shape: string, capacity: number, occupied: number, };

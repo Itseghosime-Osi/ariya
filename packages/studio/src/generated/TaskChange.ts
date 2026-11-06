@@ -3,10 +3,4 @@
 /**
  * An update to one existing row.
  */
-export type TaskChange = {
-  id: string;
-  sourceKey: string;
-  title: string;
-  derivation: string;
-  dueDate: string | null;
-};
+export type TaskChange = { id: string, sourceKey: string, title: string, derivation: string, dueDate: string | null, };

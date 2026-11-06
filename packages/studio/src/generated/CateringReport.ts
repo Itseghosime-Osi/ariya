@@ -4,26 +4,24 @@ import type { ShoppingGroup } from "./ShoppingGroup";
 /**
  * The shopping list, grouped by the unit you buy it in.
  */
-export type CateringReport = {
-  /**
-   * Who the kitchen cooks for, and why it is not the guest count.
-   */
-  effectiveGuests: number;
-  /**
-   * Effective headcount plus overage: the portions to prepare.
-   */
-  portions: number;
-  /**
-   * The overage actually applied, as a fraction.
-   */
-  overage: number;
-  /**
-   * The style multiplier actually applied.
-   */
-  multiplier: number;
-  groups: Array<ShoppingGroup>;
-  /**
-   * The judgement calls behind the list, in plain language.
-   */
-  notes: Array<string>;
-};
+export type CateringReport = { 
+/**
+ * Who the kitchen cooks for, and why it is not the guest count.
+ */
+effectiveGuests: number, 
+/**
+ * Effective headcount plus overage: the portions to prepare.
+ */
+portions: number, 
+/**
+ * The overage actually applied, as a fraction.
+ */
+overage: number, 
+/**
+ * The style multiplier actually applied.
+ */
+multiplier: number, groups: Array<ShoppingGroup>, 
+/**
+ * The judgement calls behind the list, in plain language.
+ */
+notes: Array<string>, };

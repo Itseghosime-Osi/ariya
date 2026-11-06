@@ -3,5 +3,4 @@
 /**
  * How the answer reads to a host.
  */
-export type AdviceLevel =
-  "viable" | "damp" | "too-many" | "under-cooled" | "not-viable";
+export type AdviceLevel = "viable" | "damp" | "too-many" | "under-cooled" | "not-viable";

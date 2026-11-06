@@ -4,22 +4,20 @@ import type { AdviceLevel } from "./AdviceLevel";
 /**
  * The sentence the studio leads with, and the workings behind it.
  */
-export type Advice = {
-  level: AdviceLevel;
-  /**
-   * Plain language, no numbers the breakdown does not already carry.
-   */
-  headline: string;
-  /**
-   * Why, in the order that matters.
-   */
-  reasons: Array<string>;
-  /**
-   * Outdoor wet-bulb, °C — what decides whether evaporative cooling is worth mentioning.
-   */
-  wetBulbC: number;
-  /**
-   * Only true where outdoor wet-bulb stays under about 22 °C. Lagos never qualifies.
-   */
-  evaporative: boolean;
-};
+export type Advice = { level: AdviceLevel, 
+/**
+ * Plain language, no numbers the breakdown does not already carry.
+ */
+headline: string, 
+/**
+ * Why, in the order that matters.
+ */
+reasons: Array<string>, 
+/**
+ * Outdoor wet-bulb, °C — what decides whether evaporative cooling is worth mentioning.
+ */
+wetBulbC: number, 
+/**
+ * Only true where outdoor wet-bulb stays under about 22 °C. Lagos never qualifies.
+ */
+evaporative: boolean, };

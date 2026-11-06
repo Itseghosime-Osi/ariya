@@ -3,10 +3,8 @@
 /**
  * The prevailing wind, which decides where the generator and the open sides go.
  */
-export type Wind = {
-  /**
-   * Degrees, clockwise from north: the direction the wind blows *from*.
-   */
-  direction: number | null;
-  speedMph: number | null;
-};
+export type Wind = { 
+/**
+ * Degrees, clockwise from north: the direction the wind blows *from*.
+ */
+direction: number | null, speedMph: number | null, };

@@ -5,8 +5,4 @@ import type { ShoppingLine } from "./ShoppingLine";
 /**
  * Lines that share a purchase unit, so a caterer can read one column at a time.
  */
-export type ShoppingGroup = {
-  unit: PurchaseUnit;
-  label: string;
-  lines: Array<ShoppingLine>;
-};
+export type ShoppingGroup = { unit: PurchaseUnit, label: string, lines: Array<ShoppingLine>, };

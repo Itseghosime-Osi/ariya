@@ -5,37 +5,32 @@ import type { RiskCategory } from "./RiskCategory";
 /**
  * One risk, with the number and the date the checklist asks for.
  */
-export type RiskItem = {
-  /**
-   * Stable key, so a checklist task can point back at the rule that made it.
-   */
-  id: string;
-  category: RiskCategory;
-  title: string;
-  likelihood: Level;
-  impact: Level;
-  /**
-   * A failure here can injure or kill someone. Kept apart from the experiential risks.
-   */
-  safetyCritical: boolean;
-  /**
-   * What to do, with a number in it.
-   */
-  mitigation: string;
-  /**
-   * Where the advice comes from.
-   */
-  source: string;
-  /**
-   * The research's "when", in words.
-   */
-  when: string;
-  /**
-   * The same deadline as a date, resolved from the event date. `None` when no date was set.
-   */
-  due: string | null;
-  /**
-   * Why this rule fired for this plan: "because your hall has 30 tables".
-   */
-  derivation: string;
-};
+export type RiskItem = { 
+/**
+ * Stable key, so a checklist task can point back at the rule that made it.
+ */
+id: string, category: RiskCategory, title: string, likelihood: Level, impact: Level, 
+/**
+ * A failure here can injure or kill someone. Kept apart from the experiential risks.
+ */
+safetyCritical: boolean, 
+/**
+ * What to do, with a number in it.
+ */
+mitigation: string, 
+/**
+ * Where the advice comes from.
+ */
+source: string, 
+/**
+ * The research's "when", in words.
+ */
+when: string, 
+/**
+ * The same deadline as a date, resolved from the event date. `None` when no date was set.
+ */
+due: string | null, 
+/**
+ * Why this rule fired for this plan: "because your hall has 30 tables".
+ */
+derivation: string, };

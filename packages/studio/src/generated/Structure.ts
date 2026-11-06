@@ -3,10 +3,4 @@
 /**
  * The structure itself: clearspan, leg module, wind rating, anchoring, floor.
  */
-export type Structure = {
-  clearspan: number | null;
-  legModule: number | null;
-  designWindMph: number | null;
-  anchoring: string | null;
-  floor: string | null;
-};
+export type Structure = { clearspan: number | null, legModule: number | null, designWindMph: number | null, anchoring: string | null, floor: string | null, };

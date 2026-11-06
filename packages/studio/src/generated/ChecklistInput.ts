@@ -7,30 +7,24 @@ import type { ZoneKind } from "./ZoneKind";
  * Everything the generator reads from the plan. Mirrors `RiskInput`: every other field defaults,
  * so a half-answered plan still gets the baseline rather than an error.
  */
-export type ChecklistInput = {
-  /**
-   * The event date, `yyyy-mm-dd` or an ISO timestamp. Absent means rows carry no due date.
-   */
-  eventDate: string | null;
-  guests: number;
-  venue: VenueType;
-  environment: Environment;
-  tables: number;
-  /**
-   * The kinds of zone drawn on the hall plan.
-   */
-  zoneKinds: Array<ZoneKind>;
-  /**
-   * The month of the event, 1–12, for the harmattan rows.
-   */
-  month: number | null;
-  /**
-   * `mains`, `generator` or `solar`.
-   */
-  power: string | null;
-  acUnits: boolean;
-  /**
-   * `plated`, `buffet` or `family-style`.
-   */
-  service: string | null;
-};
+export type ChecklistInput = { 
+/**
+ * The event date, `yyyy-mm-dd` or an ISO timestamp. Absent means rows carry no due date.
+ */
+eventDate: string | null, guests: number, venue: VenueType, environment: Environment, tables: number, 
+/**
+ * The kinds of zone drawn on the hall plan.
+ */
+zoneKinds: Array<ZoneKind>, 
+/**
+ * The month of the event, 1–12, for the harmattan rows.
+ */
+month: number | null, 
+/**
+ * `mains`, `generator` or `solar`.
+ */
+power: string | null, acUnits: boolean, 
+/**
+ * `plated`, `buffet` or `family-style`.
+ */
+service: string | null, };

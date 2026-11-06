@@ -2,10 +2,4 @@
 import type { Footprint } from "./Footprint";
 import type { TableTop } from "./TableTop";
 
-export type TableGeometry = {
-  top: TableTop;
-  footprint: Footprint;
-  ex: number;
-  ey: number;
-  wall_gap: number;
-};
+export type TableGeometry = { top: TableTop, footprint: Footprint, ex: number, ey: number, wall_gap: number, };

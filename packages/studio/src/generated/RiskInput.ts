@@ -7,33 +7,21 @@ import type { Zone } from "./Zone";
  * Everything the register reads from the plan. Every field but the venue defaults, so a
  * half-answered plan still gets the always-on rules rather than an error.
  */
-export type RiskInput = {
-  /**
-   * The event date, `yyyy-mm-dd` (an ISO timestamp is accepted and truncated). Absent means the
-   * due dates are blank, not that the risks are.
-   */
-  eventDate: string | null;
-  guests: number;
-  venue: VenueType;
-  environment: Environment;
-  tables: number;
-  zones: Array<Zone>;
-  /**
-   * The certified capacity, when the host has the written figure.
-   */
-  capacity: number | null;
-  /**
-   * The month of the event, 1–12, for the harmattan rule.
-   */
-  month: number | null;
-  /**
-   * `mains`, `generator` or `solar`.
-   */
-  power: string | null;
-  generatorKva: number | null;
-  toilets: number | null;
-  designWindMph: number | null;
-  floor: string | null;
-  anchoring: string | null;
-  chandeliers: boolean;
-};
+export type RiskInput = { 
+/**
+ * The event date, `yyyy-mm-dd` (an ISO timestamp is accepted and truncated). Absent means the
+ * due dates are blank, not that the risks are.
+ */
+eventDate: string | null, guests: number, venue: VenueType, environment: Environment, tables: number, zones: Array<Zone>, 
+/**
+ * The certified capacity, when the host has the written figure.
+ */
+capacity: number | null, 
+/**
+ * The month of the event, 1–12, for the harmattan rule.
+ */
+month: number | null, 
+/**
+ * `mains`, `generator` or `solar`.
+ */
+power: string | null, generatorKva: number | null, toilets: number | null, designWindMph: number | null, floor: string | null, anchoring: string | null, chandeliers: boolean, };

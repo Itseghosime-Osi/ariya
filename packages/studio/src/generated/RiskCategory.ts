@@ -3,11 +3,4 @@
 /**
  * The seven families the register is grouped into. Research §D.1.
  */
-export type RiskCategory =
-  | "venue"
-  | "weather"
-  | "people"
-  | "vendors"
-  | "money"
-  | "programme"
-  | "compliance";
+export type RiskCategory = "venue" | "weather" | "people" | "vendors" | "money" | "programme" | "compliance";

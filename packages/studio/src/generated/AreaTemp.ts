@@ -3,9 +3,4 @@
 /**
  * One named area's share of the map, for the table that stands in for the picture.
  */
-export type AreaTemp = {
-  id: string;
-  label: string;
-  meanC: number;
-  maxC: number;
-};
+export type AreaTemp = { id: string, label: string, meanC: number, maxC: number, };

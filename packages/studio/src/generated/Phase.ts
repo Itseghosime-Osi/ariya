@@ -3,5 +3,4 @@
 /**
  * The seven phases, in order. Research §F.2.
  */
-export type Phase =
-  "foundations" | "book" | "build" | "detail" | "final" | "day" | "after";
+export type Phase = "foundations" | "book" | "build" | "detail" | "final" | "day" | "after";

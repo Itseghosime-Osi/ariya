@@ -3,16 +3,8 @@
 /**
  * The row of the checklist as the database holds it. Carries only what reconciliation reads.
  */
-export type ExistingTask = {
-  id: string;
-  sourceKey: string;
-  title: string;
-  derivation: string;
-  dueDate: string | null;
-  status: string;
-  templateVersion: number | null;
-  /**
-   * A soft-deleted row. Its key is spent: regeneration must not put the task back.
-   */
-  isDeleted: boolean;
-};
+export type ExistingTask = { id: string, sourceKey: string, title: string, derivation: string, dueDate: string | null, status: string, templateVersion: number | null, 
+/**
+ * A soft-deleted row. Its key is spent: regeneration must not put the task back.
+ */
+isDeleted: boolean, };

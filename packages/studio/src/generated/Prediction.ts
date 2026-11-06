@@ -3,21 +3,20 @@
 /**
  * What the room does with that set running flat out.
  */
-export type Prediction = {
-  /**
-   * Predicted air temperature with the splits running, °C.
-   */
-  roomC: number;
-  /**
-   * Predicted moisture content, kg/kg.
-   */
-  wIn: number;
-  /**
-   * Predicted relative humidity, percent.
-   */
-  rhIn: number;
-  /**
-   * True when the splits cannot take out the moisture the room makes.
-   */
-  damp: boolean;
-};
+export type Prediction = { 
+/**
+ * Predicted air temperature with the splits running, °C.
+ */
+roomC: number, 
+/**
+ * Predicted moisture content, kg/kg.
+ */
+wIn: number, 
+/**
+ * Predicted relative humidity, percent.
+ */
+rhIn: number, 
+/**
+ * True when the splits cannot take out the moisture the room makes.
+ */
+damp: boolean, };

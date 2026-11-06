@@ -7,32 +7,20 @@ import type { Zone } from "./Zone";
  * What the studio knows about the room and the crowd. Everything the host has not answered is
  * left out and filled from the venue's own defaults, so a half-answered plan still gets a verdict.
  */
-export type ThermalRequest = {
-  width: number;
-  length: number;
-  height: number;
-  venue: VenueType;
-  headcount: number;
-  dancing: number;
-  /**
-   * Air changes per hour. The dominant uncertainty, so the host can move it.
-   */
-  ach: number | null;
-  outdoorC: number | null;
-  outdoorRh: number | null;
-  targetC: number | null;
-  glazingM2: number | null;
-  /**
-   * The size of split under consideration, in "HP".
-   */
-  unitHp: number | null;
-  derate: number | null;
-  /**
-   * The units the host has placed. Empty means no heat map — there is nothing to map.
-   */
-  units: Array<AcUnit>;
-  /**
-   * The named areas, so the map can report the dance floor and the head table by name.
-   */
-  zones: Array<Zone>;
-};
+export type ThermalRequest = { width: number, length: number, height: number, venue: VenueType, headcount: number, dancing: number, 
+/**
+ * Air changes per hour. The dominant uncertainty, so the host can move it.
+ */
+ach: number | null, outdoorC: number | null, outdoorRh: number | null, targetC: number | null, glazingM2: number | null, 
+/**
+ * The size of split under consideration, in "HP".
+ */
+unitHp: number | null, derate: number | null, 
+/**
+ * The units the host has placed. Empty means no heat map — there is nothing to map.
+ */
+units: Array<AcUnit>, 
+/**
+ * The named areas, so the map can report the dance floor and the head table by name.
+ */
+zones: Array<Zone>, };

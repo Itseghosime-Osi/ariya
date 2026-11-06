@@ -3,10 +3,4 @@
 /**
  * Power, water, toilets, parking.
  */
-export type Services = {
-  power: string | null;
-  generatorKva: number | null;
-  water: string | null;
-  toilets: number | null;
-  parking: number | null;
-};
+export type Services = { power: string | null, generatorKva: number | null, water: string | null, toilets: number | null, parking: number | null, };

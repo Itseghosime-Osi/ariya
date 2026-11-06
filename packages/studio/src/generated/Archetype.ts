@@ -3,14 +3,4 @@
 /**
  * The ten arrangements.
  */
-export type Archetype =
-  | "rounds-rows"
-  | "rounds-staggered"
-  | "long-tables"
-  | "u-shape"
-  | "theatre"
-  | "cocktail"
-  | "cabaret"
-  | "chevron"
-  | "perimeter"
-  | "long-banquet";
+export type Archetype = "rounds-rows" | "rounds-staggered" | "long-tables" | "u-shape" | "theatre" | "cocktail" | "cabaret" | "chevron" | "perimeter" | "long-banquet";

@@ -3,4 +3,4 @@
 /**
  * Where the sun is at the hour the plan is drawn for. Degrees, clockwise from north.
  */
-export type Sun = { azimuth: number | null; elevation: number | null };
+export type Sun = { azimuth: number | null, elevation: number | null, };

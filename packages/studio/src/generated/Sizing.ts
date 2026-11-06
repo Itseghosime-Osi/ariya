@@ -4,24 +4,20 @@ import type { SplitUnit } from "./SplitUnit";
 /**
  * A set of splits, sized on the sticker and delivering less than it.
  */
-export type Sizing = {
-  unit: SplitUnit;
-  /**
-   * Units needed at sticker capacity — what a supplier would quote.
-   */
-  count: number;
-  /**
-   * What the room actually gets once the sun and the coil are accounted for.
-   */
-  installedKw: number;
-  deliveredSensibleKw: number;
-  deliveredLatentKw: number;
-  /**
-   * Running draw of the whole set.
-   */
-  inputKw: number;
-  /**
-   * Draw with every compressor starting at once, which is what trips a generator.
-   */
-  surgeKw: number;
-};
+export type Sizing = { unit: SplitUnit, 
+/**
+ * Units needed at sticker capacity — what a supplier would quote.
+ */
+count: number, 
+/**
+ * What the room actually gets once the sun and the coil are accounted for.
+ */
+installedKw: number, deliveredSensibleKw: number, deliveredLatentKw: number, 
+/**
+ * Running draw of the whole set.
+ */
+inputKw: number, 
+/**
+ * Draw with every compressor starting at once, which is what trips a generator.
+ */
+surgeKw: number, };

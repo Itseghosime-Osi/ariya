@@ -7,37 +7,32 @@ import type { CateringStyle } from "./CateringStyle";
  * Everything the shopping list depends on. Every field defaults, so a half-answered plan still
  * gets a list rather than an error.
  */
-export type CateringInput = {
-  guests: number;
-  style: CateringStyle;
-  /**
-   * Hours of service, which sets the drinks rate and the late-night food. §E.7.
-   */
-  hours: number;
-  alcohol: AlcoholAnswer;
-  cake: CakeAnswer;
-  /**
-   * Takeaway packs are a social obligation at most Nigerian receptions, not an option. §E.6.
-   */
-  takeaway: boolean;
-  /**
-   * Plus-ones above the RSVP. §E.5 puts this at 10–15 % for open events, 3–5 % gated.
-   */
-  plusOnes: number | null;
-  /**
-   * Vendors and staff — the most commonly forgotten line. §E.5.
-   */
-  vendors: number | null;
-  /**
-   * The overage, as a fraction. Defaults by headcount when absent. §E.4.
-   */
-  overage: number | null;
-  /**
-   * A cold display adds ice. §E.7.
-   */
-  coldDisplay: boolean;
-  /**
-   * Outdoor and hot: Lagos at 33 °C wants the top of the ice band. §E.7.
-   */
-  hotWeather: boolean;
-};
+export type CateringInput = { guests: number, style: CateringStyle, 
+/**
+ * Hours of service, which sets the drinks rate and the late-night food. §E.7.
+ */
+hours: number, alcohol: AlcoholAnswer, cake: CakeAnswer, 
+/**
+ * Takeaway packs are a social obligation at most Nigerian receptions, not an option. §E.6.
+ */
+takeaway: boolean, 
+/**
+ * Plus-ones above the RSVP. §E.5 puts this at 10–15 % for open events, 3–5 % gated.
+ */
+plusOnes: number | null, 
+/**
+ * Vendors and staff — the most commonly forgotten line. §E.5.
+ */
+vendors: number | null, 
+/**
+ * The overage, as a fraction. Defaults by headcount when absent. §E.4.
+ */
+overage: number | null, 
+/**
+ * A cold display adds ice. §E.7.
+ */
+coldDisplay: boolean, 
+/**
+ * Outdoor and hot: Lagos at 33 °C wants the top of the ice band. §E.7.
+ */
+hotWeather: boolean, };

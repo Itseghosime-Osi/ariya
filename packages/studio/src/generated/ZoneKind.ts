@@ -3,15 +3,4 @@
 /**
  * The kinds of area a plan can contain.
  */
-export type ZoneKind =
-  | "stage"
-  | "dance"
-  | "buffet"
-  | "bar"
-  | "dj"
-  | "entrance"
-  | "gifts"
-  | "photo"
-  | "pillar"
-  | "cake"
-  | "custom";
+export type ZoneKind = "stage" | "dance" | "buffet" | "bar" | "dj" | "entrance" | "gifts" | "photo" | "pillar" | "cake" | "custom";

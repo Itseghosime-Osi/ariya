@@ -2,16 +2,8 @@
 import type { ArrangeTable } from "./ArrangeTable";
 import type { Zone } from "./Zone";
 
-export type ArrangeRequest = {
-  width: number;
-  length: number;
-  zones: Array<Zone>;
-  tables: Array<ArrangeTable>;
-  gap: number;
-  /**
-   * What the venue is certified for, when the host has said.
-   */
-  capacity: number | null;
-  seed: bigint;
-  keep: number;
-};
+export type ArrangeRequest = { width: number, length: number, zones: Array<Zone>, tables: Array<ArrangeTable>, gap: number, 
+/**
+ * What the venue is certified for, when the host has said.
+ */
+capacity: number | null, seed: bigint, keep: number, };

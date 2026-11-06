@@ -3,6 +3,4 @@
 /**
  * A table's footprint with its chairs: a circle, or an oriented rectangle.
  */
-export type Footprint =
-  | { kind: "circle"; x: number; y: number; r: number }
-  | { kind: "rect"; x: number; y: number; hw: number; hh: number; rot: number };
+export type Footprint = { "kind": "circle", x: number, y: number, r: number, } | { "kind": "rect", x: number, y: number, hw: number, hh: number, rot: number, };

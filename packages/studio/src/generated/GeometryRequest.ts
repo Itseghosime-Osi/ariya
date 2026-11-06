@@ -2,17 +2,12 @@
 import type { TableSpec } from "./TableSpec";
 import type { Zone } from "./Zone";
 
-export type GeometryRequest = {
-  width: number;
-  length: number;
-  tables: Array<TableSpec>;
-  /**
-   * Index pairs into `tables`; the response returns the gap for each, in order.
-   */
-  pairs: Array<[number, number]>;
-  zones: Array<Zone>;
-  /**
-   * `[table index, zone index]` pairs; the response returns the gap for each, in order.
-   */
-  zone_pairs: Array<[number, number]>;
-};
+export type GeometryRequest = { width: number, length: number, tables: Array<TableSpec>, 
+/**
+ * Index pairs into `tables`; the response returns the gap for each, in order.
+ */
+pairs: Array<[number, number]>, zones: Array<Zone>, 
+/**
+ * `[table index, zone index]` pairs; the response returns the gap for each, in order.
+ */
+zone_pairs: Array<[number, number]>, };

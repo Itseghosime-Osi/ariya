@@ -3,23 +3,20 @@
 /**
  * One line of the breakdown.
  */
-export type ScoreTerm = {
-  id: string;
-  label: string;
-  /**
-   * The raw measure, 0..1.
-   */
-  value: number;
-  /**
-   * How much this term counts, signed: negative for a penalty.
-   */
-  weight: number;
-  /**
-   * What this term added to (or took from) the total.
-   */
-  contribution: number;
-  /**
-   * One line the host can read.
-   */
-  detail: string;
-};
+export type ScoreTerm = { id: string, label: string, 
+/**
+ * The raw measure, 0..1.
+ */
+value: number, 
+/**
+ * How much this term counts, signed: negative for a penalty.
+ */
+weight: number, 
+/**
+ * What this term added to (or took from) the total.
+ */
+contribution: number, 
+/**
+ * One line the host can read.
+ */
+detail: string, };

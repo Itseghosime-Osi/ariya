@@ -5,20 +5,17 @@ import type { TemplateTask } from "./TemplateTask";
 /**
  * What a caller should do to bring the table in line with the template.
  */
-export type Reconciliation = {
-  templateVersion: number;
-  insert: Array<TemplateTask>;
-  /**
-   * Rows whose text or due date changed, with the task it should become.
-   */
-  update: Array<TaskChange>;
-  /**
-   * Live rows the template no longer produces — the plan changed under them. Marked skipped,
-   * never deleted, so the host can see what happened and undo it.
-   */
-  retire: Array<string>;
-  /**
-   * Keys the host deleted. Skipped by `insert`, and listed so the caller can log why.
-   */
-  skipped: Array<string>;
-};
+export type Reconciliation = { templateVersion: number, insert: Array<TemplateTask>, 
+/**
+ * Rows whose text or due date changed, with the task it should become.
+ */
+update: Array<TaskChange>, 
+/**
+ * Live rows the template no longer produces — the plan changed under them. Marked skipped,
+ * never deleted, so the host can see what happened and undo it.
+ */
+retire: Array<string>, 
+/**
+ * Keys the host deleted. Skipped by `insert`, and listed so the caller can log why.
+ */
+skipped: Array<string>, };

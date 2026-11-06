@@ -3,15 +3,4 @@
 /**
  * The eleven venue types the studio models. Each is a distinct set of constraints.
  */
-export type VenueType =
-  | "hall"
-  | "pillared-hall"
-  | "marquee"
-  | "pole-tent"
-  | "stretch-tent"
-  | "garden"
-  | "field"
-  | "beach"
-  | "rooftop"
-  | "church"
-  | "hybrid";
+export type VenueType = "hall" | "pillared-hall" | "marquee" | "pole-tent" | "stretch-tent" | "garden" | "field" | "beach" | "rooftop" | "church" | "hybrid";

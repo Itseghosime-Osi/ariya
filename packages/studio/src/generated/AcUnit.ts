@@ -4,20 +4,16 @@ import type { Mount } from "./Mount";
 /**
  * One air conditioner, where the host put it.
  */
-export type AcUnit = {
-  id: string;
-  /**
-   * Centre, in metres from the top-left corner of the room.
-   */
-  x: number;
-  y: number;
-  /**
-   * The size, in "HP".
-   */
-  hp: number;
-  mount: Mount;
-  /**
-   * An inverter unit starts gently, so a roomful of them does not need a bigger generator.
-   */
-  inverter: boolean;
-};
+export type AcUnit = { id: string, 
+/**
+ * Centre, in metres from the top-left corner of the room.
+ */
+x: number, y: number, 
+/**
+ * The size, in "HP".
+ */
+hp: number, mount: Mount, 
+/**
+ * An inverter unit starts gently, so a roomful of them does not need a bigger generator.
+ */
+inverter: boolean, };

@@ -2,14 +2,4 @@
 import type { Footprint } from "./Footprint";
 import type { Zone } from "./Zone";
 
-export type FitRequest = {
-  width: number;
-  length: number;
-  zones: Array<Zone>;
-  obstacles: Array<Footprint>;
-  shape: string;
-  capacity: number;
-  rotation: number;
-  gap: number;
-  aisle: boolean;
-};
+export type FitRequest = { width: number, length: number, zones: Array<Zone>, obstacles: Array<Footprint>, shape: string, capacity: number, rotation: number, gap: number, aisle: boolean, };

@@ -3,12 +3,8 @@
 /**
  * Where one table ended up.
  */
-export type Placement = {
-  /**
-   * Index into the request's table list.
-   */
-  table: number;
-  x: number;
-  y: number;
-  rot: number;
-};
+export type Placement = { 
+/**
+ * Index into the request's table list.
+ */
+table: number, x: number, y: number, rot: number, };

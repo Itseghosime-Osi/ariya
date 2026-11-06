@@ -4,19 +4,12 @@ import type { AreaTemp } from "./AreaTemp";
 /**
  * The map itself: a grid of temperatures, and the numbers the studio quotes.
  */
-export type Field = {
-  cell: number;
-  cols: number;
-  rows: number;
-  /**
-   * Row-major, `rows × cols`, in °C.
-   */
-  temps: Array<number>;
-  minC: number;
-  maxC: number;
-  meanC: number;
-  /**
-   * The named areas, warmest first — the non-visual equivalent of the heat map.
-   */
-  areas: Array<AreaTemp>;
-};
+export type Field = { cell: number, cols: number, rows: number, 
+/**
+ * Row-major, `rows × cols`, in °C.
+ */
+temps: Array<number>, minC: number, maxC: number, meanC: number, 
+/**
+ * The named areas, warmest first — the non-visual equivalent of the heat map.
+ */
+areas: Array<AreaTemp>, };

@@ -14,15 +14,4 @@ import type { Wind } from "./Wind";
  * The venue facts a plan carries. Everything is optional except the type, so a document written
  * before the studio knew about venues still reads.
  */
-export type VenueProfile = {
-  type: VenueType;
-  environment: Environment;
-  structure: Structure | null;
-  services: Services | null;
-  capacity: Capacity | null;
-  climate: Climate | null;
-  cooling: Cooling | null;
-  catering: CateringPlan | null;
-  sun: Sun | null;
-  wind: Wind | null;
-};
+export type VenueProfile = { type: VenueType, environment: Environment, structure: Structure | null, services: Services | null, capacity: Capacity | null, climate: Climate | null, cooling: Cooling | null, catering: CateringPlan | null, sun: Sun | null, wind: Wind | null, };
