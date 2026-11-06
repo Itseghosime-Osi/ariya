@@ -8,7 +8,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { ChairType, Centrepiece, HallLayout, TableTop } from "./model";
+import type {
+  ChairType,
+  Centrepiece,
+  HallLayout,
+  StageItem,
+  StageItemAt,
+  TableTop,
+} from "./model";
 
 /** What the 3D hall needs to draw one table. */
 export interface SceneTable {
@@ -64,6 +71,8 @@ export interface Scene {
   layout: HallLayout;
   tables: SceneTable[];
   chairs: SceneChair[];
+  /** Fixtures on stages, already placed in room metres by `stageItemPlacement`. */
+  stageItems: (StageItem & StageItemAt)[];
   selection: Pick[];
   tool: "select" | "hand";
   labels: boolean;

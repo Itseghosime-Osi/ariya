@@ -896,6 +896,109 @@ export function chairPlacement(
   };
 }
 
+/**
+ * The chair as it should be stored after the host drops it at `to` (room metres). Dropped on a
+ * stage it attaches to that stage, stored from the stage's top-left so it rides with the stage and
+ * stands on the deck; dropped anywhere else it is a floor chair again. It keeps the way it faces
+ * in the room either way.
+ */
+export function chairAfterDrop(
+  chair: FreeChair,
+  to: { x: number; y: number },
+  zones: Zone[]
+): FreeChair {
+  const was = chair.stageId
+    ? zones.find((z) => z.id === chair.stageId)
+    : undefined;
+  const facing = chair.rot + (was?.rot ?? 0);
+  const { stageId: _gone, ...rest } = chair;
+  void _gone;
+  // The last stage in the list is the one drawn on top, so it wins where two overlap.
+  const onto = [...zones].reverse().find((z) => {
+    if (z.kind !== "stage") return false;
+    const r = (-(z.rot ?? 0) * Math.PI) / 180;
+    const dx = to.x - z.x;
+    const dy = to.y - z.y;
+    const lx = dx * Math.cos(r) - dy * Math.sin(r);
+    const ly = dx * Math.sin(r) + dy * Math.cos(r);
+    return Math.abs(lx) <= z.w / 2 && Math.abs(ly) <= z.h / 2;
+  });
+  if (!onto) return { ...rest, x: round2(to.x), y: round2(to.y), rot: facing };
+  const r = (-(onto.rot ?? 0) * Math.PI) / 180;
+  const dx = to.x - onto.x;
+  const dy = to.y - onto.y;
+  return {
+    ...rest,
+    stageId: onto.id,
+    x: round2(dx * Math.cos(r) - dy * Math.sin(r) + onto.w / 2),
+    y: round2(dx * Math.sin(r) + dy * Math.cos(r) + onto.h / 2),
+    rot: facing - (onto.rot ?? 0),
+  };
+}
+
+/** A fixture's place in the room: where it stands, which way it faces, and how high its stage is. */
+export interface StageItemAt {
+  x: number;
+  y: number;
+  /** Degrees, the stage's own turn, so "left of the stage" stays left. */
+  yaw: number;
+  lift: number;
+}
+
+/**
+ * Where a stage fixture actually stands. `across` runs −0.5 to 0.5 over the stage's width and
+ * `depth` 0 (front edge) to 1 (back edge); both are turned by the stage's rotation, the same way
+ * `chairPlacement` turns a chair, so the renderer and the plan can never disagree about it.
+ */
+export function stageItemPlacement(
+  item: Pick<StageItem, "across" | "depth">,
+  stage: Pick<Zone, "x" | "y" | "w" | "h" | "rot" | "height">
+): StageItemAt {
+  const rot = ((stage.rot ?? 0) * Math.PI) / 180;
+  const dx = item.across * stage.w;
+  const dy = (item.depth - 0.5) * stage.h;
+  return {
+    x: stage.x + dx * Math.cos(rot) - dy * Math.sin(rot),
+    y: stage.y + dx * Math.sin(rot) + dy * Math.cos(rot),
+    yaw: stage.rot ?? 0,
+    lift: stage.height ?? 0.8,
+  };
+}
+
+/** Keep every fixture clear of the stage's edges, so none hangs over the deck's rim. */
+export const STAGE_ACROSS_LIMIT = 0.42;
+const STAGE_DEPTH_LIMIT: [number, number] = [0.12, 0.88];
+
+/**
+ * The spot a new fixture takes on a stage. It starts where that kind belongs (a podium to the left,
+ * a lectern to the right, a backdrop at the back) and, if something already stands there, moves
+ * along the row, then to the next row forward, until it finds room. Always inside the stage.
+ */
+export function nextStageSpot(
+  kind: StageItemKind,
+  existing: Pick<StageItem, "across" | "depth">[]
+): { across: number; depth: number } {
+  const backdrop = kind === "arch" || kind === "screen";
+  const home = backdrop ? 0.85 : 0.6;
+  const preferred = kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0;
+  const rows = (backdrop ? [0.85, 0.7, 0.55] : [0.6, 0.38, 0.8, 0.2]).map((d) =>
+    Math.min(STAGE_DEPTH_LIMIT[1], Math.max(STAGE_DEPTH_LIMIT[0], d))
+  );
+  const slots = [preferred, -0.3, 0.3, -0.15, 0.15].map((a) =>
+    Math.min(STAGE_ACROSS_LIMIT, Math.max(-STAGE_ACROSS_LIMIT, a))
+  );
+  const free = (across: number, depth: number) =>
+    existing.every(
+      (e) =>
+        Math.abs(e.across - across) >= 0.14 || Math.abs(e.depth - depth) >= 0.17
+    );
+  for (const depth of rows)
+    for (const across of slots)
+      if (free(across, depth)) return { across, depth };
+  // Every spot is taken: stack on the home spot rather than leave the stage.
+  return { across: preferred, depth: home };
+}
+
 /** How far a footprint sits inside the walls (negative when it pokes through one). */
 export function gapToWalls(
   f: Footprint,

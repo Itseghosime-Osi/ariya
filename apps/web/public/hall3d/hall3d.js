@@ -2141,7 +2141,9 @@ function buildStageItem(item, stage) {
 function syncStageItems() {
   const L = state.layout;
   const seen = new Set();
-  for (const item of L.stageItems || []) {
+  // Where each one stands comes from the studio (stageItemPlacement in model.ts), the same
+  // maths the plan and the tests use. This only draws them there.
+  for (const item of state.stageItems || []) {
     const stage = L.zones.find((z) => z.id === item.stageId);
     if (!stage) continue;
     seen.add(item.id);
@@ -2150,7 +2152,6 @@ function syncStageItems() {
       stage.w,
       stage.h,
       stage.height,
-      stage.rot,
       L.decor.flower,
     ]);
     let entry = stageCache.get(item.id);
@@ -2165,18 +2166,8 @@ function syncStageItems() {
       stageCache.set(item.id, entry);
       stageGroup.add(obj);
     }
-    // The stage's own rotation turns the item with it, so "left of the stage" stays left.
-    const rot = -(stage.rot ?? 0) * DEG;
-    const dx = item.across * stage.w;
-    // `stage.y` is the zone's centre, the same as every other box, so depth 0 sits on the front
-    // edge and depth 1 on the back edge.
-    const dz = (item.depth - 0.5) * stage.h;
-    entry.obj.position.set(
-      stage.x + dx * Math.cos(rot) - dz * Math.sin(rot),
-      0,
-      stage.y + dx * Math.sin(rot) + dz * Math.cos(rot)
-    );
-    entry.obj.rotation.y = rot;
+    entry.obj.position.set(item.x, 0, item.y);
+    entry.obj.rotation.y = -(item.yaw || 0) * DEG;
   }
   for (const [id, entry] of stageCache)
     if (!seen.has(id)) {
@@ -3654,6 +3645,30 @@ window.addEventListener("message", (e) => {
       case "snapshot":
         snapshot();
         break;
+      case "inspect": {
+        // Where things really are in the scene, in metres, so a test can read the drawn room
+        // instead of judging a picture of it.
+        const r = (n) => Math.round(n * 100) / 100;
+        post({
+          t: "inspect",
+          stageItems: [...stageCache].map(([id, e]) => ({
+            id,
+            x: r(e.obj.position.x),
+            y: r(e.obj.children[0]?.position.y ?? 0),
+            z: r(e.obj.position.z),
+            yaw: r(e.obj.rotation.y / DEG),
+          })),
+          chairs: [...items.values()]
+            .filter((i) => i.type === "chair")
+            .map((i) => ({
+              id: i.id,
+              x: r(i.obj.position.x),
+              y: r(i.obj.position.y),
+              z: r(i.obj.position.z),
+            })),
+        });
+        break;
+      }
     }
   }
 });

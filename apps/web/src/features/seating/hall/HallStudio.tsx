@@ -51,7 +51,10 @@ import {
   areaPerDiner,
   SPACING_GAP,
   ZONE_DEFAULTS,
+  chairAfterDrop,
   chairPlacement,
+  nextStageSpot,
+  stageItemPlacement,
   chairPositions,
   chairType,
   clamp,
@@ -754,6 +757,11 @@ export function HallStudio({
           seat: c.seat ?? "guest",
         };
       }),
+      // Resolved here, with the same maths as the plan, so the hall only has to draw them.
+      stageItems: layout.stageItems.flatMap((item) => {
+        const stage = layout.zones.find((z) => z.id === item.stageId);
+        return stage ? [{ ...item, ...stageItemPlacement(item, stage) }] : [];
+      }),
       selection,
       tool,
       labels,
@@ -981,20 +989,11 @@ export function HallStudio({
           chairs: l.chairs.map((c) => {
             const m = chairs.get(c.id);
             if (!m) return c;
-            // The hall reports room metres; a staged chair stores metres from its stage's
-            // top-left, so turn the drag back into stage space.
-            const stage = c.stageId
-              ? l.zones.find((z) => z.id === c.stageId)
-              : undefined;
-            if (!stage) return { ...c, x: round2(m.x), y: round2(m.y) };
-            const rot = (-(stage.rot ?? 0) * Math.PI) / 180;
-            const dx = m.x - stage.x;
-            const dy = m.y - stage.y;
-            return {
-              ...c,
-              x: round2(dx * Math.cos(rot) - dy * Math.sin(rot) + stage.w / 2),
-              y: round2(dx * Math.sin(rot) + dy * Math.cos(rot) + stage.h / 2),
-            };
+            // A chair on a stage that is moving in the same drag rides with it.
+            if (c.stageId && zones.has(c.stageId)) return c;
+            // The hall reports room metres; where it lands decides whether it stands on a
+            // stage (stored from that stage's top-left) or on the floor.
+            return chairAfterDrop(c, m, l.zones);
           }),
           venue: acs.size
             ? {
@@ -1158,25 +1157,15 @@ export function HallStudio({
       say("Add a stage first, then the items go on it.");
       return;
     }
-    // A backdrop sits at the back; anything a host uses stands near the front.
-    const depth = kind === "arch" || kind === "screen" ? 0.85 : 0.6;
-    // A podium stands at the left of the stage, a lectern at the right, an arch in the middle.
-    const preferred = kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0;
-    // Take the first spot along the stage that nothing on the same line already holds, so a
-    // second fixture does not land inside the first.
-    const taken = hall.latest.current.stageItems.filter(
-      (s) => s.stageId === stage.id && Math.abs(s.depth - depth) < 0.3
-    );
-    const across =
-      [preferred, -0.3, 0.3, -0.15, 0.15, -0.42, 0.42].find((a) =>
-        taken.every((s) => Math.abs(s.across - a) >= 0.14)
-      ) ?? preferred;
     const item: StageItem = {
       id: zoneId(),
       stageId: stage.id,
       kind,
-      across,
-      depth,
+      // Where it goes, and clear of whatever already stands on this stage, comes from the model.
+      ...nextStageSpot(
+        kind,
+        hall.latest.current.stageItems.filter((s) => s.stageId === stage.id)
+      ),
     };
     updateLayout((l) => ({ ...l, stageItems: [...l.stageItems, item] }));
     setSelection([{ type: "zone", id: stage.id }]);
