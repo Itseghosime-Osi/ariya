@@ -4,6 +4,7 @@ import {
   chairAfterDrop,
   chairPlacement,
   nextStageSpot,
+  normaliseLayers,
   stageItemPlacement,
   STAGE_ACROSS_LIMIT,
   type StageItem,
@@ -529,6 +530,51 @@ describe("chairAfterDrop", () => {
     const dance: Zone = { ...stage, id: "d", kind: "dance" };
     expect(chairAfterDrop(chair, { x: 15, y: 2 }, [dance]).stageId).toBe(
       undefined
+    );
+  });
+});
+
+describe("layer state", () => {
+  it("starts empty on a new hall", () => {
+    expect(defaultLayout().layers).toEqual({
+      hidden: [],
+      locked: [],
+      order: [],
+    });
+  });
+
+  it("reads stored state, dropping anything that is not a short string and any repeat", () => {
+    const got = normaliseLayers({
+      hidden: ["table:a", "table:a", 7, "", null, "x".repeat(61)],
+      locked: "nope",
+      order: ["chair:1", "chair:2"],
+    });
+    expect(got).toEqual({
+      hidden: ["table:a"],
+      locked: [],
+      order: ["chair:1", "chair:2"],
+    });
+  });
+
+  it("gives a hall saved before layers existed an empty state", () => {
+    const old = JSON.parse(JSON.stringify(defaultLayout()));
+    delete old.layers;
+    expect(normaliseLayout(old)?.layers).toEqual({
+      hidden: [],
+      locked: [],
+      order: [],
+    });
+  });
+
+  it("keeps what a hall saved with", () => {
+    const layout = defaultLayout();
+    layout.layers = {
+      hidden: ["zone:z"],
+      locked: ["table:t"],
+      order: ["table:t"],
+    };
+    expect(normaliseLayout(JSON.parse(JSON.stringify(layout)))?.layers).toEqual(
+      layout.layers
     );
   });
 });

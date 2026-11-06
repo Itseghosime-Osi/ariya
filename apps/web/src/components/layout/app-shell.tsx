@@ -10,6 +10,7 @@ import { InstallHint } from "./install-hint";
 import {
   hasOwnPhoneHeader,
   isValidEventId,
+  isWorkspaceRoute,
   type SwitcherEvent,
 } from "./nav-items";
 import { isEventExpired } from "@/lib/event-expiry";
@@ -220,6 +221,28 @@ export function AppShell({
       router.push(`/events/${nextId}${rest}`);
     }
   };
+
+  // The seating studio is a workspace, not a page: no sidebar, top bar or dock, just the studio and
+  // its own Back button. Every hook above has already run, so this branch is only a different frame.
+  if (isWorkspaceRoute(pathname)) {
+    return (
+      <div data-app-shell data-workspace className="min-h-screen bg-ivory">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2.5 focus:rounded-xl focus:bg-burgundy focus:text-white focus:font-semibold focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="fixed inset-0 overflow-y-auto focus:outline-none"
+        >
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div

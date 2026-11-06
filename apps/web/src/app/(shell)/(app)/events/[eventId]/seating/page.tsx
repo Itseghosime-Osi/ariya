@@ -37,6 +37,7 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
       <EndedLock ended={isEventExpired(eventData.event.date)}>
         <SeatingDesk
           eventId={eventId}
+          eventTitle={eventData.event.title}
           initialData={seatingData}
           hallLayout={hall.layout}
           hallLayoutAvailable={hall.available}

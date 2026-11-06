@@ -25,7 +25,9 @@ import {
   MousePointer2,
   Palette,
   Plus,
+  Printer,
   Redo2,
+  SunMoon,
   RotateCcw,
   RotateCw,
   Ruler,
@@ -37,16 +39,27 @@ import {
   Thermometer,
   UtensilsCrossed,
   Keyboard,
+  Layers as LayersIcon,
   Tag,
   Undo2,
   Users,
   Wand2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { CreateTableInput } from "../schemas";
 import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
+import { LeftDock } from "./LeftDock";
+import { WorkspaceBar } from "./WorkspaceBar";
+import {
+  moveLayer,
+  nudgeLayer,
+  renameLayer,
+  setLayersHidden,
+  setLayersLocked,
+} from "./layers";
 import {
   areaPerDiner,
   SPACING_GAP,
@@ -60,7 +73,6 @@ import {
   clamp,
   defaultZones,
   footprint,
-  formatFeet,
   gapBetween,
   gapToWalls,
   gapToZone,
@@ -285,6 +297,12 @@ interface HallStudioProps {
   deleteTables: (ids: string[]) => Promise<number>;
   /** A short message to show over the hall (saved, could not save…). */
   notice?: React.ReactNode;
+  /** The event's name, shown beside the Back button. */
+  eventTitle?: string;
+  /** Where Back goes. */
+  backHref?: string;
+  /** Opens the new-table form. */
+  onNewTable?: () => void;
 }
 
 function nextTableNames(tables: TableWithGuests[], count: number): string[] {
@@ -326,6 +344,9 @@ export function HallStudio({
   onDeleteTable,
   deleteTables,
   notice,
+  eventTitle,
+  backHref,
+  onNewTable,
 }: HallStudioProps) {
   const hall = useHallLayout({
     eventId,
@@ -385,6 +406,8 @@ export function HallStudio({
   }, []);
   const chooseMode = (next: "simple" | "studio") => {
     setMode(next);
+    // Simple mode answers live in the side panel, so make sure it is there to be seen.
+    if (next === "simple") setPanelOpen(true);
     try {
       localStorage.setItem("ariya:hall-mode", next);
     } catch {
@@ -417,6 +440,42 @@ export function HallStudio({
     if (selection.length > 0) togglePanel(true);
   }, [selection.length]);
 
+  // The left dock (layers and tables) opens by itself on a wide screen and waits behind its button
+  // on a narrow one, where it would cover the hall. Simple mode has no dock: its questions are the
+  // panel.
+  const [dockOpen, setDockOpenRaw] = useState(false);
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem("ariya:hall-dock");
+    } catch {
+      /* no storage */
+    }
+    setDockOpenRaw(
+      saved
+        ? saved === "open"
+        : window.matchMedia("(min-width: 1280px)").matches
+    );
+  }, []);
+  const setDockOpen = (next: boolean | ((cur: boolean) => boolean)) =>
+    setDockOpenRaw((cur) => {
+      const value = typeof next === "function" ? next(cur) : next;
+      try {
+        localStorage.setItem("ariya:hall-dock", value ? "open" : "closed");
+      } catch {
+        /* not remembered */
+      }
+      return value;
+    });
+  const dockShown = dockOpen && mode === "studio";
+  // Where the canvas controls start, clear of the tool rail and the dock.
+  const leftEdge =
+    mode === "simple"
+      ? "left-3"
+      : dockShown
+        ? "left-[4.25rem] lg:left-[392px]"
+        : "left-[4.25rem] lg:left-[76px]";
+
   // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
   const body = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -435,10 +494,12 @@ export function HallStudio({
       const outRight = Math.max(0, window.innerWidth - r.right);
       const outBottom = Math.max(0, window.innerHeight - r.bottom);
       const next = {
-        left: Math.round(r.left),
-        top: Math.round(r.top),
+        left: Math.round(
+          r.left + (wide ? (dockShown ? 392 : mode === "studio" ? 76 : 12) : 0)
+        ),
+        top: Math.round(r.top + 64),
         right: Math.round(
-          outRight + 70 + (wide && panelOpen ? p.offsetWidth + 12 : 0)
+          outRight + (wide && panelOpen ? p.offsetWidth + 12 : 12)
         ),
         bottom: Math.round(
           outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : 0)
@@ -461,7 +522,7 @@ export function HallStudio({
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [panelOpen]);
+  }, [panelOpen, dockShown, mode]);
 
   // The daytime board takes the page's own background, so the hall sits on the page.
   const [pageBg, setPageBg] = useState("#f7f2ea");
@@ -476,6 +537,37 @@ export function HallStudio({
             .join("")
       );
   }, []);
+  // The interface can be light or dark, whatever the hall's own lighting is. Remembered per device.
+  const [theme, setThemeRaw] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("ariya:hall-theme") === "dark")
+        setThemeRaw("dark");
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const toggleTheme = () =>
+    setThemeRaw((cur) => {
+      const next = cur === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("ariya:hall-theme", next);
+      } catch {
+        /* not remembered */
+      }
+      return next;
+    });
+  const dark = theme === "dark";
+  // The hall is transparent by day and shows the page behind it, so the page goes dark with the UI.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (dark) html.dataset.studioTheme = "dark";
+    else delete html.dataset.studioTheme;
+    return () => {
+      delete html.dataset.studioTheme;
+    };
+  }, [dark]);
+
   // Evening darkens the whole page, not just the hall, while the studio is open.
   useEffect(() => {
     const html = document.documentElement;
@@ -774,7 +866,7 @@ export function HallStudio({
             }))
           : [],
       assigning: assigning !== null,
-      board: pageBg,
+      board: dark ? "#1c1317" : pageBg,
       inset,
       units: unitsOf(layout),
       field: thermal?.field ?? null,
@@ -795,6 +887,7 @@ export function HallStudio({
       preset,
       assigning,
       pageBg,
+      dark,
       inset,
       thermal,
       heat,
@@ -807,6 +900,23 @@ export function HallStudio({
     // Any edit makes the "new" side of a comparison stale, so stop comparing.
     setCompare(null);
     hall.update(fn, positions);
+  };
+
+  // ---------- layers: hidden, locked, ordered ----------
+  const lockedKeys = new Set(layout.layers.locked);
+  const isLocked = (p: Pick) => lockedKeys.has(`${p.type}:${p.id}`);
+  const hideLayers = (keys: string[], hide: boolean) => {
+    updateLayout((l) => setLayersHidden(l, keys, hide));
+    // A hidden layer cannot stay selected: there would be nothing to see it by.
+    if (hide)
+      setSelection((cur) =>
+        cur.filter((p) => !keys.includes(`${p.type}:${p.id}`))
+      );
+    say(hide ? "Hidden from the hall" : "Shown in the hall");
+  };
+  const lockLayers = (keys: string[], lock: boolean) => {
+    updateLayout((l) => setLayersLocked(l, keys, lock));
+    say(lock ? "Locked: it will not move" : "Unlocked");
   };
 
   const restorePositions = (snap: Positions) => {
@@ -957,6 +1067,10 @@ export function HallStudio({
   };
   const rotateBy = (delta: number) => {
     if (!single) return;
+    if (isLocked(single)) {
+      say("Locked: unlock it to turn it");
+      return;
+    }
     const cur =
       single.type === "table"
         ? rotationOf(single.id)
@@ -1026,6 +1140,7 @@ export function HallStudio({
   const nudge = (dx: number, dy: number) => {
     const items: Move[] = [];
     for (const p of selection) {
+      if (isLocked(p)) continue;
       const at = posOf(p);
       if (at)
         items.push({
@@ -1036,6 +1151,7 @@ export function HallStudio({
         });
     }
     if (items.length) moveItems(items);
+    else if (selection.some(isLocked)) say("Locked: unlock it to move it");
   };
 
   const align = (a: Align) => {
@@ -1343,11 +1459,17 @@ export function HallStudio({
 
   const remove = () => {
     if (selection.length === 0) return;
+    // A locked layer is protected from the Delete key and the bin alike.
+    const doomed = selection.filter((p) => !isLocked(p));
+    if (doomed.length < selection.length) {
+      say("Locked layers stay: unlock them to delete them");
+      if (doomed.length === 0) return;
+    }
     const zones = new Set(
-      selection.filter((s) => s.type === "zone").map((s) => s.id)
+      doomed.filter((s) => s.type === "zone").map((s) => s.id)
     );
     const chairs = new Set(
-      selection.filter((s) => s.type === "chair").map((s) => s.id)
+      doomed.filter((s) => s.type === "chair").map((s) => s.id)
     );
     if (zones.size || chairs.size) {
       const gone = new Set([...zones, ...chairs]);
@@ -1360,11 +1482,11 @@ export function HallStudio({
         groups: forgetItems(l.groups, gone),
       }));
     }
-    const tables = selection.filter((s) => s.type === "table");
+    const tables = doomed.filter((s) => s.type === "table");
     if (tables.length === 1) onDeleteTable(tables[0].id);
     else if (tables.length > 1)
       say("Delete tables one at a time, so nobody loses a seat by accident.");
-    setSelection([]);
+    setSelection((cur) => cur.filter(isLocked));
   };
 
   const fill = async (onlyNeeded: boolean, count?: number) => {
@@ -1635,7 +1757,9 @@ export function HallStudio({
     else if (k === "c") setFlyout(flyout === "chair" ? null : "chair");
     else if (k === "s") setFlyout(flyout === "zone" ? null : "zone");
     else if (k === "p") openDecor();
-    else if (k === "l") setLabels((v) => !v);
+    else if (k === "y") {
+      if (mode === "studio") setDockOpen((v) => !v);
+    } else if (k === "l") setLabels((v) => !v);
     else if (k === "n") toggleMood();
     else if (k === "w") {
       if (!openVenue) return false;
@@ -1837,30 +1961,68 @@ export function HallStudio({
     },
   ];
 
+  const meter = (
+    <dl className="grid grid-cols-2 gap-x-4 gap-y-2" data-testid="hall-meter">
+      {[
+        {
+          k: "Guests",
+          v: guests,
+          note: buffer ? `${target} with buffer` : undefined,
+        },
+        {
+          k: "Seats",
+          v: seats,
+          note: seats >= target ? "enough" : `${target - seats} short`,
+          bad: seats < target,
+        },
+        { k: "Hall fits", v: fitEmpty.seats, wide: true },
+        {
+          k: "Fire guide",
+          v: fireGuide,
+          note: "max",
+          wide: true,
+        },
+      ].map((m) => (
+        <div
+          key={m.k}
+          className={cn("items-baseline gap-1 whitespace-nowrap", "flex")}
+        >
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
+            {m.k}
+          </dt>
+          <dd className="flex items-baseline gap-1">
+            <span className="text-sm font-bold tabular-nums">{m.v}</span>
+            {m.note && (
+              <span
+                className={cn(
+                  "text-[10px]",
+                  m.bad ? "text-[#9e2a2b]" : "text-label-2"
+                )}
+              >
+                {m.note}
+              </span>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+
   return (
     <section
       ref={studio}
       aria-label="Hall studio"
-      className={cn("relative flex min-h-0 flex-1 flex-col text-night")}
+      className={cn(
+        "relative flex h-full min-h-0 flex-1 flex-col text-night",
+        dark && "dark studio-dark"
+      )}
       data-testid="hall-studio"
     >
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
 
-      <div className="relative z-10 flex justify-center pb-2">
-        <ModeSwitch mode={mode} onChange={chooseMode} />
-      </div>
-
-      {mode === "simple" ? (
-        <SimpleMode
-          layout={layout}
-          // Simple mode's edits are layout edits like any other, and undo covers them.
-          onLayoutChange={(next) => hall.update(next, positions)}
-          totalCapacity={data.stats.totalCapacity}
-          guestCount={guests}
-        />
-      ) : (
+      {
         <>
           {/* The hall fills the whole studio; the controls and the side panel float over it, so
               panning never crops it at a box edge. */}
@@ -1882,80 +2044,32 @@ export function HallStudio({
                   "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
               )}
             >
-              {/* Hall size, live numbers and status */}
-              <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-15rem)] flex-col items-start gap-1.5">
-                <div
-                  className={cn(
-                    float,
-                    "pointer-events-auto flex max-w-full items-center gap-x-4 overflow-hidden rounded-2xl px-4 py-2"
-                  )}
+              {/* Back, the page's name and the mode switch: the only chrome the app leaves. */}
+              <div className="pointer-events-auto absolute left-3 top-3">
+                <WorkspaceBar
+                  backHref={backHref ?? `/events/${eventId}`}
+                  eventTitle={eventTitle}
+                  detail={`${layout.width} × ${layout.length} m${
+                    hall.saving
+                      ? " · saving…"
+                      : hall.storedLocally
+                        ? " · saved on this device"
+                        : ""
+                  }`}
                 >
-                  <p className="whitespace-nowrap text-sm font-semibold">
-                    {layout.width} × {layout.length} m
-                    <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 2xl:inline">
-                      {formatFeet(layout.width)} × {formatFeet(layout.length)}
-                      {hall.saving
-                        ? " · saving…"
-                        : hall.storedLocally
-                          ? " · saved on this device"
-                          : ""}
-                    </span>
-                  </p>
-                  <dl
-                    className="hidden gap-x-4 xl:flex"
-                    data-testid="hall-meter"
-                  >
-                    {[
-                      {
-                        k: "Guests",
-                        v: guests,
-                        note: buffer ? `${target} with buffer` : undefined,
-                      },
-                      {
-                        k: "Seats",
-                        v: seats,
-                        note:
-                          seats >= target
-                            ? "enough"
-                            : `${target - seats} short`,
-                        bad: seats < target,
-                      },
-                      { k: "Hall fits", v: fitEmpty.seats, wide: true },
-                      {
-                        k: "Fire guide",
-                        v: fireGuide,
-                        note: "max",
-                        wide: true,
-                      },
-                    ].map((m) => (
-                      <div
-                        key={m.k}
-                        className={cn(
-                          "items-baseline gap-1 whitespace-nowrap",
-                          "wide" in m ? "hidden 2xl:flex" : "flex"
-                        )}
-                      >
-                        <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
-                          {m.k}
-                        </dt>
-                        <dd className="flex items-baseline gap-1">
-                          <span className="text-sm font-bold tabular-nums">
-                            {m.v}
-                          </span>
-                          {m.note && (
-                            <span
-                              className={cn(
-                                "text-[10px]",
-                                m.bad ? "text-[#9e2a2b]" : "text-label-2"
-                              )}
-                            >
-                              {m.note}
-                            </span>
-                          )}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
+                  <ModeSwitch mode={mode} onChange={chooseMode} />
+                </WorkspaceBar>
+              </div>
+              {/* What needs attention, under the bar and clear of the tool rail and dock. */}
+              <div
+                className={cn(
+                  "pointer-events-none absolute right-3 top-[68px] flex flex-col items-center gap-1.5",
+                  leftEdge
+                )}
+              >
+                {/* Below a wide screen the bar has no room for the switch, so it sits here. */}
+                <div className="pointer-events-auto min-[1440px]:hidden">
+                  <ModeSwitch mode={mode} onChange={chooseMode} />
                 </div>
                 {/* Below the hall numbers rather than centred on the top edge: at the widths the
                     studio actually runs at, a centred bar sits underneath this card and cannot be
@@ -1969,7 +2083,7 @@ export function HallStudio({
                     />
                   </div>
                 )}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap justify-center gap-1.5">
                   {studioStatus === "unavailable" && (
                     <span className="pointer-events-auto inline-flex items-center rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-label-2 shadow-sm">
                       Running the built-in layout engine.
@@ -1992,7 +2106,7 @@ export function HallStudio({
                       </button>
                     </span>
                   )}
-                  {warnCount > 0 && (
+                  {mode === "studio" && warnCount > 0 && (
                     <button
                       type="button"
                       onClick={() => {
@@ -2009,16 +2123,18 @@ export function HallStudio({
                       space · Fix
                     </button>
                   )}
-                  {data.tables.length === 0 && !assigning && (
-                    <span
-                      className={cn(
-                        float,
-                        "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
-                      )}
-                    >
-                      Add tables from the toolbar, or use Fit to fill the hall
-                    </span>
-                  )}
+                  {mode === "studio" &&
+                    data.tables.length === 0 &&
+                    !assigning && (
+                      <span
+                        className={cn(
+                          float,
+                          "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
+                        )}
+                      >
+                        Add tables from the toolbar, or use Fit to fill the hall
+                      </span>
+                    )}
                 </div>
               </div>
 
@@ -2029,6 +2145,26 @@ export function HallStudio({
                   "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
                 )}
               >
+                {onNewTable && (
+                  <>
+                    <button
+                      type="button"
+                      className={cn(
+                        chip,
+                        "bg-burgundy text-ivory hover:bg-wine"
+                      )}
+                      onClick={onNewTable}
+                      aria-label="New table"
+                      title="New table (choose its name and size)"
+                    >
+                      <Plus size={17} />
+                    </button>
+                    <span
+                      className="mx-0.5 h-5 w-px bg-hairline"
+                      aria-hidden="true"
+                    />
+                  </>
+                )}
                 <button
                   type="button"
                   className={chip}
@@ -2062,12 +2198,39 @@ export function HallStudio({
                 >
                   <Camera size={17} />
                 </button>
-                <span
-                  className="mx-0.5 h-5 w-px bg-hairline"
-                  aria-hidden="true"
-                />
+                <Link
+                  href={`/events/${eventId}/seating/print`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={chip}
+                  aria-label="Print cards and chart"
+                  title="Print cards and chart"
+                >
+                  <Printer size={17} />
+                </Link>
+                <button
+                  type="button"
+                  className={chip}
+                  onClick={toggleTheme}
+                  aria-pressed={dark}
+                  aria-label={dark ? "Light interface" : "Dark interface"}
+                  title={
+                    dark
+                      ? "Switch to the light interface"
+                      : "Switch to the dark interface"
+                  }
+                >
+                  <SunMoon size={17} />
+                </button>
+                {mode === "studio" && (
+                  <span
+                    className="mx-0.5 h-5 w-px bg-hairline"
+                    aria-hidden="true"
+                  />
+                )}
                 {/* With the panel tucked away, its tools wait here: one click springs it open on one. */}
-                {!panelOpen &&
+                {mode === "studio" &&
+                  !panelOpen &&
                   tiles.map(({ key, label, icon: I }, n) => (
                     <button
                       key={key}
@@ -2085,30 +2248,32 @@ export function HallStudio({
                       <I size={17} />
                     </button>
                   ))}
-                <button
-                  type="button"
-                  className={cn(
-                    chip,
-                    "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-90",
-                    !panelOpen && "bg-night text-white hover:bg-burgundy"
-                  )}
-                  onClick={() => togglePanel()}
-                  aria-pressed={!panelOpen}
-                  aria-label={
-                    panelOpen ? "Hide the side panel" : "Show the side panel"
-                  }
-                  title={
-                    panelOpen
-                      ? "Hide the panel for a bigger hall (\\)"
-                      : "Show the panel (\\)"
-                  }
-                >
-                  {panelOpen ? (
-                    <PanelRightClose size={17} />
-                  ) : (
-                    <PanelRightOpen size={17} />
-                  )}
-                </button>
+                {mode === "studio" && (
+                  <button
+                    type="button"
+                    className={cn(
+                      chip,
+                      "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-90",
+                      !panelOpen && "bg-night text-white hover:bg-burgundy"
+                    )}
+                    onClick={() => togglePanel()}
+                    aria-pressed={!panelOpen}
+                    aria-label={
+                      panelOpen ? "Hide the side panel" : "Show the side panel"
+                    }
+                    title={
+                      panelOpen
+                        ? "Hide the panel for a bigger hall (\\)"
+                        : "Show the panel (\\)"
+                    }
+                  >
+                    {panelOpen ? (
+                      <PanelRightClose size={17} />
+                    ) : (
+                      <PanelRightOpen size={17} />
+                    )}
+                  </button>
+                )}
               </div>
 
               {notice && (
@@ -2123,354 +2288,456 @@ export function HallStudio({
                 </div>
               )}
 
-              {/* Tool rail */}
-              <div
-                role="toolbar"
-                aria-label="Hall tools"
-                aria-orientation="vertical"
-                className={cn(
-                  float,
-                  "pointer-events-auto absolute right-3 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1 rounded-[26px] p-1.5"
-                )}
-              >
-                <button
-                  type="button"
-                  className={rail}
-                  aria-pressed={tool === "select"}
-                  onClick={() => setTool("select")}
-                  aria-label="Select and move"
-                  aria-keyshortcuts="V M"
-                >
-                  <MousePointer2 size={18} />
-                  <RailTip label="Move" keys={["V", "M"]} />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  aria-pressed={tool === "hand"}
-                  onClick={() => setTool("hand")}
-                  aria-label="Pan around"
-                  aria-keyshortcuts="H D"
-                >
-                  <Hand size={18} />
-                  <RailTip
-                    label="Drag the view (or hold Space)"
-                    keys={["H", "D"]}
-                  />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  onClick={autoLayout}
-                  disabled={busy !== null}
-                  aria-label="Auto layout"
-                  aria-keyshortcuts="A"
-                >
-                  <Sparkles size={18} />
-                  <RailTip label="Auto layout" keys={["A"]} />
-                </button>
-                <span
-                  className="my-0.5 h-px w-6 bg-hairline"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  className={rail}
-                  aria-expanded={flyout === "table"}
-                  onClick={() => setFlyout(flyout === "table" ? null : "table")}
-                  aria-label="Add a table"
-                  aria-keyshortcuts="T"
-                >
-                  <CirclePlus size={18} />
-                  <RailTip label="Add a table" keys={["T"]} />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  aria-expanded={flyout === "chair"}
-                  onClick={() => setFlyout(flyout === "chair" ? null : "chair")}
-                  aria-label="Add chairs"
-                  aria-keyshortcuts="C"
-                >
-                  <Armchair size={18} />
-                  <RailTip label="Add chairs" keys={["C"]} />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  aria-expanded={flyout === "zone"}
-                  onClick={() => setFlyout(flyout === "zone" ? null : "zone")}
-                  aria-label="Add a stage, dance floor or area"
-                  aria-keyshortcuts="S"
-                >
-                  <Shapes size={18} />
-                  <RailTip label="Stage, dance floor or area" keys={["S"]} />
-                </button>
-                <span
-                  className="my-0.5 h-px w-6 bg-hairline"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  className={rail}
-                  aria-pressed={deck === "decor" && selection.length === 0}
-                  onClick={openDecor}
-                  aria-label="Décor"
-                  aria-keyshortcuts="P"
-                >
-                  <Palette size={18} />
-                  <RailTip label="Décor palette" keys={["P"]} />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  aria-pressed={labels}
-                  onClick={() => setLabels((v) => !v)}
-                  aria-label="Show table names"
-                  aria-keyshortcuts="L"
-                >
-                  <Tag size={18} />
-                  <RailTip label="Table names" keys={["L"]} />
-                </button>
-                <button
-                  type="button"
-                  className={rail}
-                  onClick={toggleMood}
-                  aria-label={
-                    evening
-                      ? "Switch to daytime light"
-                      : "Switch to evening light"
-                  }
-                  aria-keyshortcuts="N"
-                >
-                  {evening ? <Sun size={18} /> : <Moon size={18} />}
-                  <RailTip
-                    label={evening ? "Daytime light" : "Evening light"}
-                    keys={["N"]}
-                  />
-                </button>
-                {openVenue && (
-                  <button
-                    type="button"
-                    className={rail}
-                    aria-pressed={rain}
-                    onClick={() => {
-                      view3d.current?.command("rain");
-                      setRain((v) => !v);
-                    }}
-                    aria-label={rain ? "Stop the rain" : "Show rain"}
+              {mode === "studio" && (
+                <>
+                  {/* Tool rail */}
+                  <div
+                    role="toolbar"
+                    aria-label="Hall tools"
+                    aria-orientation="vertical"
+                    className={cn(
+                      float,
+                      "pointer-events-auto absolute left-3 top-[68px] flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:max-h-[calc(100%-5rem)] max-lg:overflow-y-auto"
+                    )}
                   >
-                    <CloudRain size={18} />
-                    <RailTip
-                      label={rain ? "Stop the rain" : "Rain"}
-                      keys={["W"]}
-                    />
-                  </button>
-                )}
-                <span
-                  className="my-0.5 h-px w-6 bg-hairline"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  className={cn(rail, "text-label-2")}
-                  aria-expanded={keysOpen}
-                  onClick={toggleKeys}
-                  aria-label="Keyboard shortcuts"
-                  aria-keyshortcuts="Shift+?"
-                >
-                  <Keyboard size={16} />
-                  <RailTip label="Keyboard shortcuts" keys={["?"]} />
-                </button>
-              </div>
-
-              {keysOpen && !flyout && (
-                <ShortcutSheet onClose={() => setKeysOpen(false)} />
-              )}
-
-              {/* Flyouts */}
-              {flyout && (
-                <div
-                  className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 w-[min(300px,calc(100%-6rem))] -translate-y-1/2 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
-                  role="dialog"
-                  aria-label={
-                    flyout === "table"
-                      ? "Add a table"
-                      : flyout === "chair"
-                        ? "Add chairs"
-                        : "Add an area"
-                  }
-                >
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
-                      {flyout === "table"
-                        ? "Tables"
-                        : flyout === "chair"
-                          ? "Chairs"
-                          : "Stage, floor & areas"}
-                    </p>
                     <button
                       type="button"
-                      onClick={() => setFlyout(null)}
-                      className="grid h-7 w-7 place-items-center rounded-full hover:bg-[#f1ece4]"
-                      aria-label="Close"
+                      className={rail}
+                      aria-pressed={dockOpen}
+                      onClick={() => setDockOpen((v) => !v)}
+                      aria-label="Layers and tables"
+                      aria-controls={dockShown ? "left-dock" : undefined}
                     >
-                      <X size={14} />
+                      <LayersIcon size={18} />
+                      <RailTip label="Layers and tables" keys={["Y"]} />
+                    </button>
+                    <span
+                      className="my-0.5 h-px w-6 bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-pressed={tool === "select"}
+                      onClick={() => setTool("select")}
+                      aria-label="Select and move"
+                      aria-keyshortcuts="V M"
+                    >
+                      <MousePointer2 size={18} />
+                      <RailTip label="Move" keys={["V", "M"]} />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-pressed={tool === "hand"}
+                      onClick={() => setTool("hand")}
+                      aria-label="Pan around"
+                      aria-keyshortcuts="H D"
+                    >
+                      <Hand size={18} />
+                      <RailTip
+                        label="Drag the view (or hold Space)"
+                        keys={["H", "D"]}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      onClick={autoLayout}
+                      disabled={busy !== null}
+                      aria-label="Auto layout"
+                      aria-keyshortcuts="A"
+                    >
+                      <Sparkles size={18} />
+                      <RailTip label="Auto layout" keys={["A"]} />
+                    </button>
+                    <span
+                      className="my-0.5 h-px w-6 bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-expanded={flyout === "table"}
+                      onClick={() =>
+                        setFlyout(flyout === "table" ? null : "table")
+                      }
+                      aria-label="Add a table"
+                      aria-keyshortcuts="T"
+                    >
+                      <CirclePlus size={18} />
+                      <RailTip label="Add a table" keys={["T"]} />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-expanded={flyout === "chair"}
+                      onClick={() =>
+                        setFlyout(flyout === "chair" ? null : "chair")
+                      }
+                      aria-label="Add chairs"
+                      aria-keyshortcuts="C"
+                    >
+                      <Armchair size={18} />
+                      <RailTip label="Add chairs" keys={["C"]} />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-expanded={flyout === "zone"}
+                      onClick={() =>
+                        setFlyout(flyout === "zone" ? null : "zone")
+                      }
+                      aria-label="Add a stage, dance floor or area"
+                      aria-keyshortcuts="S"
+                    >
+                      <Shapes size={18} />
+                      <RailTip
+                        label="Stage, dance floor or area"
+                        keys={["S"]}
+                      />
+                    </button>
+                    <span
+                      className="my-0.5 h-px w-6 bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-pressed={deck === "decor" && selection.length === 0}
+                      onClick={openDecor}
+                      aria-label="Décor"
+                      aria-keyshortcuts="P"
+                    >
+                      <Palette size={18} />
+                      <RailTip label="Décor palette" keys={["P"]} />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      aria-pressed={labels}
+                      onClick={() => setLabels((v) => !v)}
+                      aria-label="Show table names"
+                      aria-keyshortcuts="L"
+                    >
+                      <Tag size={18} />
+                      <RailTip label="Table names" keys={["L"]} />
+                    </button>
+                    <button
+                      type="button"
+                      className={rail}
+                      onClick={toggleMood}
+                      aria-label={
+                        evening
+                          ? "Switch to daytime light"
+                          : "Switch to evening light"
+                      }
+                      aria-keyshortcuts="N"
+                    >
+                      {evening ? <Sun size={18} /> : <Moon size={18} />}
+                      <RailTip
+                        label={evening ? "Daytime light" : "Evening light"}
+                        keys={["N"]}
+                      />
+                    </button>
+                    {openVenue && (
+                      <button
+                        type="button"
+                        className={rail}
+                        aria-pressed={rain}
+                        onClick={() => {
+                          view3d.current?.command("rain");
+                          setRain((v) => !v);
+                        }}
+                        aria-label={rain ? "Stop the rain" : "Show rain"}
+                      >
+                        <CloudRain size={18} />
+                        <RailTip
+                          label={rain ? "Stop the rain" : "Rain"}
+                          keys={["W"]}
+                        />
+                      </button>
+                    )}
+                    <span
+                      className="my-0.5 h-px w-6 bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={cn(rail, "text-label-2")}
+                      aria-expanded={keysOpen}
+                      onClick={toggleKeys}
+                      aria-label="Keyboard shortcuts"
+                      aria-keyshortcuts="Shift+?"
+                    >
+                      <Keyboard size={16} />
+                      <RailTip label="Keyboard shortcuts" keys={["?"]} />
                     </button>
                   </div>
-                  {flyout === "table" && (
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {TABLE_PRESETS.map((p) => (
-                        <button
-                          key={p.key}
-                          type="button"
-                          onClick={() => {
-                            setFlyout(null);
-                            void placeNew(p.shape, p.capacity);
-                          }}
-                          className={cn(
-                            card,
-                            "flex flex-col items-center gap-1 px-1 py-2"
-                          )}
-                        >
-                          <TableGlyph
-                            shape={p.shape}
-                            seats={p.capacity}
-                            size={36}
-                          />
-                          {p.label}
-                        </button>
-                      ))}
-                    </div>
+
+                  {keysOpen && !flyout && (
+                    <ShortcutSheet onClose={() => setKeysOpen(false)} />
                   )}
-                  {flyout === "table" && (
-                    <div className="mt-2">
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-label-2">
-                        Rows of tables
-                      </p>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {TABLE_ROWS.map((r) => (
-                          <button
-                            key={r.key}
-                            type="button"
-                            onClick={() => {
-                              setFlyout(null);
-                              void addTableRow(r.n, r.perRow);
-                            }}
-                            className={cn(
-                              card,
-                              "flex flex-col items-center gap-1 px-1 py-2"
-                            )}
-                          >
-                            <span className="flex flex-wrap justify-center gap-0.5">
-                              {Array.from(
-                                { length: Math.min(r.n, 6) },
-                                (_, i) => (
-                                  <span
-                                    key={i}
-                                    className="h-2 w-2 rounded-full bg-burgundy/70"
-                                  />
-                                )
-                              )}
-                            </span>
-                            {r.label}
-                          </button>
-                        ))}
+
+                  {/* Flyouts */}
+                  {flyout && (
+                    <div
+                      className="pointer-events-auto absolute left-[4.25rem] top-[68px] z-30 max-h-[calc(100%-5rem)] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+                      role="dialog"
+                      aria-label={
+                        flyout === "table"
+                          ? "Add a table"
+                          : flyout === "chair"
+                            ? "Add chairs"
+                            : "Add an area"
+                      }
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
+                          {flyout === "table"
+                            ? "Tables"
+                            : flyout === "chair"
+                              ? "Chairs"
+                              : "Stage, floor & areas"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setFlyout(null)}
+                          className="grid h-7 w-7 place-items-center rounded-full hover:bg-[#f1ece4]"
+                          aria-label="Close"
+                        >
+                          <X size={14} />
+                        </button>
                       </div>
-                    </div>
-                  )}
-                  {flyout === "chair" && (
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {CHAIR_GROUPS.map((g) => (
-                        <button
-                          key={g.key}
-                          type="button"
-                          onClick={() => {
-                            setFlyout(null);
-                            addChairs(g.n, g.spacing, g.seat);
-                          }}
-                          className={cn(
-                            card,
-                            "flex flex-col items-center gap-1 px-1 py-2.5"
-                          )}
-                        >
-                          <span className="flex">
-                            {Array.from(
-                              { length: Math.min(g.n, 3) },
-                              (_, i) => (
-                                <ChairGlyph
-                                  key={i}
-                                  type={layout.decor.chair}
-                                  size={g.n > 1 ? 18 : 26}
+                      {flyout === "table" && (
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {TABLE_PRESETS.map((p) => (
+                            <button
+                              key={p.key}
+                              type="button"
+                              onClick={() => {
+                                setFlyout(null);
+                                void placeNew(p.shape, p.capacity);
+                              }}
+                              className={cn(
+                                card,
+                                "flex flex-col items-center gap-1 px-1 py-2"
+                              )}
+                            >
+                              <TableGlyph
+                                shape={p.shape}
+                                seats={p.capacity}
+                                size={36}
+                              />
+                              {p.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {flyout === "table" && (
+                        <div className="mt-2">
+                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-label-2">
+                            Rows of tables
+                          </p>
+                          <div className="grid grid-cols-3 gap-1.5">
+                            {TABLE_ROWS.map((r) => (
+                              <button
+                                key={r.key}
+                                type="button"
+                                onClick={() => {
+                                  setFlyout(null);
+                                  void addTableRow(r.n, r.perRow);
+                                }}
+                                className={cn(
+                                  card,
+                                  "flex flex-col items-center gap-1 px-1 py-2"
+                                )}
+                              >
+                                <span className="flex flex-wrap justify-center gap-0.5">
+                                  {Array.from(
+                                    { length: Math.min(r.n, 6) },
+                                    (_, i) => (
+                                      <span
+                                        key={i}
+                                        className="h-2 w-2 rounded-full bg-burgundy/70"
+                                      />
+                                    )
+                                  )}
+                                </span>
+                                {r.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {flyout === "chair" && (
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {CHAIR_GROUPS.map((g) => (
+                            <button
+                              key={g.key}
+                              type="button"
+                              onClick={() => {
+                                setFlyout(null);
+                                addChairs(g.n, g.spacing, g.seat);
+                              }}
+                              className={cn(
+                                card,
+                                "flex flex-col items-center gap-1 px-1 py-2.5"
+                              )}
+                            >
+                              <span className="flex">
+                                {Array.from(
+                                  { length: Math.min(g.n, 3) },
+                                  (_, i) => (
+                                    <ChairGlyph
+                                      key={i}
+                                      type={layout.decor.chair}
+                                      size={g.n > 1 ? 18 : 26}
+                                    />
+                                  )
+                                )}
+                              </span>
+                              {g.label}
+                            </button>
+                          ))}
+                          <p className="col-span-3 mt-1 text-[11px] text-label-2">
+                            New chairs use the hall’s chair style; change any of
+                            them in the inspector.
+                          </p>
+                        </div>
+                      )}
+                      {flyout === "zone" && (
+                        <div className="grid max-h-[340px] grid-cols-2 gap-1.5 overflow-y-auto">
+                          {ZONE_GALLERY.map((g) => (
+                            <button
+                              key={g.label}
+                              type="button"
+                              onClick={() => {
+                                setFlyout(null);
+                                addZone(g);
+                              }}
+                              className={cn(
+                                card,
+                                "flex items-center gap-2 px-2 py-2 text-left"
+                              )}
+                            >
+                              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
+                                <ShapeGlyph
+                                  shape={g.shape ?? "rect"}
+                                  size={18}
                                 />
-                              )
-                            )}
-                          </span>
-                          {g.label}
-                        </button>
-                      ))}
-                      <p className="col-span-3 mt-1 text-[11px] text-label-2">
-                        New chairs use the hall’s chair style; change any of
-                        them in the inspector.
-                      </p>
+                              </span>
+                              {g.label}
+                            </button>
+                          ))}
+                          <p className="col-span-2 mt-1 text-[11px] font-semibold uppercase tracking-wide text-label-2">
+                            On the stage
+                          </p>
+                          {(
+                            [
+                              ["podium", "Podium"],
+                              ["lectern", "Lectern"],
+                              ["arch", "Arch"],
+                            ] as const
+                          ).map(([kind, label]) => (
+                            <button
+                              key={kind}
+                              type="button"
+                              onClick={() => {
+                                setFlyout(null);
+                                addStageItem(kind);
+                              }}
+                              className={cn(
+                                card,
+                                "flex items-center gap-2 px-2 py-2 text-left"
+                              )}
+                            >
+                              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
+                                <ShapeGlyph shape="rect" size={18} />
+                              </span>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
-                  {flyout === "zone" && (
-                    <div className="grid max-h-[340px] grid-cols-2 gap-1.5 overflow-y-auto">
-                      {ZONE_GALLERY.map((g) => (
-                        <button
-                          key={g.label}
-                          type="button"
-                          onClick={() => {
-                            setFlyout(null);
-                            addZone(g);
-                          }}
-                          className={cn(
-                            card,
-                            "flex items-center gap-2 px-2 py-2 text-left"
-                          )}
-                        >
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
-                            <ShapeGlyph shape={g.shape ?? "rect"} size={18} />
-                          </span>
-                          {g.label}
-                        </button>
-                      ))}
-                      <p className="col-span-2 mt-1 text-[11px] font-semibold uppercase tracking-wide text-label-2">
-                        On the stage
-                      </p>
-                      {(
-                        [
-                          ["podium", "Podium"],
-                          ["lectern", "Lectern"],
-                          ["arch", "Arch"],
-                        ] as const
-                      ).map(([kind, label]) => (
-                        <button
-                          key={kind}
-                          type="button"
-                          onClick={() => {
-                            setFlyout(null);
-                            addStageItem(kind);
-                          }}
-                          className={cn(
-                            card,
-                            "flex items-center gap-2 px-2 py-2 text-left"
-                          )}
-                        >
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
-                            <ShapeGlyph shape="rect" size={18} />
-                          </span>
-                          {label}
-                        </button>
-                      ))}
+
+                  {/* Layers and the table list, beside the tool rail. */}
+                  {dockShown && (
+                    <div
+                      id="left-dock"
+                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[68px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300"
+                    >
+                      <LeftDock
+                        layout={layout}
+                        tables={data.tables}
+                        unseated={data.unseatedGuests}
+                        selection={selection}
+                        onSelect={(picks, additive) => {
+                          setSelection((cur) =>
+                            additive
+                              ? picks.reduce(
+                                  (acc, p) =>
+                                    acc.some(
+                                      (a) => a.type === p.type && a.id === p.id
+                                    )
+                                      ? acc.filter(
+                                          (a) =>
+                                            !(
+                                              a.type === p.type && a.id === p.id
+                                            )
+                                        )
+                                      : [...acc, p],
+                                  cur
+                                )
+                              : picks
+                          );
+                          if (!additive && picks[0])
+                            view3d.current?.focus(
+                              `${picks[0].type}:${picks[0].id}`
+                            );
+                        }}
+                        onRenameTable={(id, name) =>
+                          void updateTable(id, { name })
+                        }
+                        onRenameLayer={(row, name) =>
+                          updateLayout((l) => renameLayer(l, row, name))
+                        }
+                        onAssign={onAssignTable}
+                        onHover={(key) => view3d.current?.hover(key)}
+                        onToggleHidden={hideLayers}
+                        onToggleLocked={lockLayers}
+                        onReorder={(listed, moving, onto) =>
+                          updateLayout((l) =>
+                            moveLayer(l, listed, moving, onto)
+                          )
+                        }
+                        onNudge={(listed, key, by) =>
+                          updateLayout((l) => nudgeLayer(l, listed, key, by))
+                        }
+                        onNewTable={() => onNewTable?.()}
+                        onAutoSeat={() => {
+                          setSelection([]);
+                          setDeck("seat");
+                          togglePanel(true);
+                        }}
+                        stats={data.stats}
+                        meter={meter}
+                        onClose={() => setDockOpen(false)}
+                      />
                     </div>
                   )}
-                </div>
+                </>
               )}
 
               {/* Zoom and camera */}
-              <div className="pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+              <div
+                className={cn(
+                  "pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2",
+                  leftEdge
+                )}
+              >
                 <div className={cn(float, "flex items-center gap-0.5 p-1")}>
                   <button
                     type="button"
@@ -2583,9 +2850,25 @@ export function HallStudio({
                   "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
               )}
             >
+              {mode === "simple" && (
+                <div className="flex items-center gap-3 border-b border-hairline px-4 py-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-night text-[#e9c98a]">
+                    <Sparkles size={16} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight text-night">
+                      Simple
+                    </p>
+                    <p className="text-[11px] leading-tight text-label-2">
+                      The hall changes as you choose
+                    </p>
+                  </div>
+                </div>
+              )}
               <div
                 role="tablist"
                 aria-label="Planning tools"
+                hidden={mode === "simple"}
                 className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
               >
                 {tiles.map(({ key, label, icon: I, stat }) => {
@@ -2641,7 +2924,17 @@ export function HallStudio({
                 aria-labelledby={`hall-tab-${deck}`}
                 className="min-h-0 flex-1 overflow-y-auto bg-white"
               >
-                {selection.length > 0 && (
+                {mode === "simple" && (
+                  <SimpleMode
+                    docked
+                    layout={layout}
+                    // Simple mode's edits are layout edits like any other, and undo covers them.
+                    onLayoutChange={(next) => hall.update(next, positions)}
+                    totalCapacity={data.stats.totalCapacity}
+                    guestCount={guests}
+                  />
+                )}
+                {mode === "studio" && selection.length > 0 && (
                   <GroupBar
                     count={selection.length}
                     group={selGroup}
@@ -2650,7 +2943,7 @@ export function HallStudio({
                     onUngroup={ungroup}
                   />
                 )}
-                {selTable ? (
+                {mode === "simple" ? null : selTable ? (
                   <TableInspector
                     table={selTable}
                     layout={layout}
@@ -2909,7 +3202,10 @@ export function HallStudio({
                   />
                 )}
               </div>
-              <p className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block">
+              <p
+                hidden={mode === "simple"}
+                className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block"
+              >
                 Drag a table to move it · drag empty space to turn the hall ·
                 right-drag or Space to pan · Shift-drag to select many · press ?
                 for shortcuts
@@ -2917,7 +3213,7 @@ export function HallStudio({
             </div>
           </div>
         </>
-      )}
+      }
     </section>
   );
 }
@@ -3075,7 +3371,7 @@ function RailTip({ label, keys }: { label: string; keys: string[] }) {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute right-full top-1/2 z-20 mr-3 flex -translate-y-1/2 translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
+      className="pointer-events-none absolute left-full top-1/2 z-20 ml-3 flex -translate-y-1/2 -translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
     >
       {label}
       <Keys keys={keys.map((k) => [k])} dark />
@@ -3090,7 +3386,7 @@ function ShortcutSheet({ onClose }: { onClose: () => void }) {
     <div
       role="dialog"
       aria-label="Keyboard shortcuts"
-      className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 max-h-[calc(100%-2rem)] w-[min(340px,calc(100%-6rem))] -translate-y-1/2 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+      className="pointer-events-auto absolute left-[4.25rem] top-[68px] z-30 max-h-[calc(100%-5rem)] w-[min(340px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">

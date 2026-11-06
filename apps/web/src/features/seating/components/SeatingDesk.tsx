@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import {
+  ArrowLeft,
   CircleAlert,
   CircleCheck,
-  LayoutGrid,
-  List,
   Plus,
   Printer,
   Trash2,
@@ -21,7 +21,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +37,8 @@ import type { SeatingDeskData } from "../types";
 
 interface SeatingDeskProps {
   eventId: string;
+  /** The event's name, shown beside the Back button. */
+  eventTitle?: string;
   initialData: SeatingDeskData;
   hallLayout?: unknown;
   hallLayoutAvailable?: boolean;
@@ -47,84 +48,26 @@ interface SeatingDeskProps {
   addedRiskIds?: string[];
 }
 
-const VIEW_KEY = "ariya:seating-view";
-
-function ViewSwitch({
-  view,
-  onChange,
-  compact,
-}: {
-  view: "hall" | "list";
-  onChange: (v: "hall" | "list") => void;
-  compact?: boolean;
-}) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label="Seating view"
-      className="inline-flex rounded-full border border-hairline bg-white p-1"
-    >
-      {(
-        [
-          ["hall", "Hall studio", LayoutGrid],
-          ["list", "Table list", List],
-        ] as const
-      ).map(([key, label, I]) => (
-        <button
-          key={key}
-          type="button"
-          role="radio"
-          aria-checked={view === key}
-          onClick={() => onChange(key)}
-          className={cn(
-            "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-            compact ? "min-h-9" : "min-h-10",
-            view === key
-              ? "bg-burgundy text-ivory"
-              : "text-label-2 hover:bg-burgundy/10"
-          )}
-        >
-          <I size={14} />{" "}
-          <span className={cn(compact && "max-sm:sr-only")}>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export function SeatingDesk({
   eventId,
+  eventTitle,
   initialData,
   hallLayout = null,
   hallLayoutAvailable = false,
   eventDate = null,
   addedRiskIds = [],
 }: SeatingDeskProps) {
-  // The hall studio is for tablets and laptops; phones get the table list, which suits them.
-  const [chosen, setView] = useState<"hall" | "list">("hall");
+  // The hall studio is for tablets and laptops; phones get the table list, which suits them. On a
+  // laptop the list is a tab in the studio's left dock, so there is no separate list view there.
   const [phone, setPhone] = useState(false);
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(VIEW_KEY);
-      if (saved === "hall" || saved === "list") setView(saved);
-    } catch {
-      /* no storage */
-    }
     const mq = window.matchMedia("(max-width: 767px)");
     const on = () => setPhone(mq.matches);
     on();
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  const view = phone ? "list" : chosen;
-  const chooseView = (v: "hall" | "list") => {
-    setView(v);
-    try {
-      localStorage.setItem(VIEW_KEY, v);
-    } catch {
-      /* not remembered */
-    }
-  };
+  const view = phone ? "list" : "hall";
 
   const {
     addTables,
@@ -173,29 +116,14 @@ export function SeatingDesk({
     setIsModalOpen(true);
   };
 
-  // Both views live in one frame that fills the space between the app's bars, so switching
-  // between the studio and the list only swaps what is inside it. The page itself does not scroll.
-  const frame = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | null>(null);
-  // The studio is a workspace: its frame fills the screen and the page does not scroll. The
-  // list is an ordinary page that scrolls (behind the phone dock on phones).
+  // The studio is a workspace: it fills the screen and the page does not scroll. The list is an
+  // ordinary page that scrolls.
   useLayoutEffect(() => {
-    if (view !== "hall") {
-      setHeight(null);
-      return;
-    }
+    if (view !== "hall") return;
     const html = document.documentElement;
     const prev = html.style.overflow;
     html.style.overflow = "hidden";
     window.scrollTo(0, 0);
-    const fit = () => {
-      const el = frame.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      setHeight(Math.max(420, window.innerHeight - top - 24));
-    };
-    fit();
-    window.addEventListener("resize", fit);
     // Hidden overflow still lets the page be scrolled by code or by focusing a control near the
     // bottom; keep it pinned so the workspace never shifts.
     const pin = () => {
@@ -203,7 +131,6 @@ export function SeatingDesk({
     };
     window.addEventListener("scroll", pin, { passive: true });
     return () => {
-      window.removeEventListener("resize", fit);
       window.removeEventListener("scroll", pin);
       html.style.overflow = prev;
     };
@@ -233,48 +160,53 @@ export function SeatingDesk({
       onDragCancel={() => setDragging(null)}
     >
       <div
-        ref={frame}
-        style={height ? { height } : undefined}
         data-seating-frame
         className={cn(
           "relative z-10 flex flex-col",
-          view === "hall" && "h-[calc(100dvh-10rem)] min-h-[420px]"
+          view === "hall" ? "h-dvh" : "min-h-dvh bg-ivory"
         )}
       >
-        <header className="relative z-10 flex h-14 shrink-0 items-center gap-1.5 pb-2 sm:gap-2">
-          <h1 className="min-w-0 truncate whitespace-nowrap font-display text-lg font-bold text-night">
-            Seating &amp; Floor Plan
-          </h1>
-          <span className="hidden whitespace-nowrap rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[11px] font-semibold text-burgundy lg:inline">
-            {data.stats.readinessPct}% seated
-            <span className="font-normal text-label-2">
-              {" "}
-              · {data.stats.seatedAttendees} of{" "}
-              {data.stats.seatedAttendees + data.stats.unseatedAttendees}
-            </span>
-          </span>
-          <div className="mx-auto">
-            {!phone && <ViewSwitch view={view} onChange={chooseView} compact />}
-          </div>
-          <Link
-            href={`/events/${eventId}/seating/print`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Print cards and chart"
-            title="Print cards and chart"
-            className={iconLink}
-          >
-            <Printer size={17} />
-          </Link>
-          <button
-            type="button"
-            onClick={openNewTable}
-            className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-burgundy text-xs font-semibold max-lg:px-0 lg:px-4 text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-          >
-            <Plus size={15} />
-            <span className="max-lg:sr-only">New Table</span>
-          </button>
-        </header>
+        {view === "list" && (
+          // On a phone there is no studio: the list is the page, so it brings its own Back and heading.
+          <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-hairline bg-ivory/95 px-3 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur">
+            <Link
+              href={`/events/${eventId}`}
+              aria-label="Back to the event"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              <ArrowLeft size={15} aria-hidden="true" />
+              Back
+            </Link>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
+                Seating &amp; Floor Plan
+              </h1>
+              <p className="truncate text-[11px] leading-tight text-label-2">
+                {[eventTitle, `${data.stats.readinessPct}% seated`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+            <Link
+              href={`/events/${eventId}/seating/print`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Print cards and chart"
+              title="Print cards and chart"
+              className={iconLink}
+            >
+              <Printer size={17} />
+            </Link>
+            <button
+              type="button"
+              onClick={openNewTable}
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              <Plus size={15} />
+              <span className="max-sm:sr-only">New Table</span>
+            </button>
+          </header>
+        )}
 
         {view === "hall" ? (
           <HallStudio
@@ -294,9 +226,12 @@ export function SeatingDesk({
             onDeleteTable={handleDeleteTable}
             deleteTables={deleteTables}
             notice={notice}
+            eventTitle={eventTitle}
+            backHref={`/events/${eventId}`}
+            onNewTable={openNewTable}
           />
         ) : (
-          <div className="pb-4">
+          <div className="px-3 pb-24 pt-3">
             {notice && (
               <p
                 role="status"

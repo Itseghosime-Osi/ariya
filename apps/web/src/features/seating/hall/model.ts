@@ -101,6 +101,8 @@ export interface FreeChair {
   seat?: SeatKind;
   /** How many people it holds: two on a couple's seat or a couch, one otherwise. */
   seats?: number;
+  /** A name the host gave it in the layers panel. Absent means the panel numbers it. */
+  label?: string;
   /** Its own fabric colour, overriding the room's. Absent means follow the décor. */
   cover?: string;
   /** Its own sash colour, overriding the room's. Absent means follow the décor. */
@@ -138,6 +140,19 @@ export interface StageItem {
   label?: string;
 }
 
+/**
+ * The layers panel's own state. Keys are `kind:id` (`table:…`, `chair:…`, `zone:…`, `stageItem:…`,
+ * `ac:…`). Hiding takes a layer out of the picture without deleting it; locking keeps it from being
+ * dragged by accident; the order is how the host arranged the rows.
+ */
+export interface LayerState {
+  hidden: string[];
+  locked: string[];
+  order: string[];
+}
+
+export const LAYER_STATE_MAX = 600;
+
 export type Spacing = "snug" | "comfortable" | "spacious";
 
 export interface HallLayout {
@@ -158,6 +173,8 @@ export interface HallLayout {
   groups: ItemGroup[];
   /** Podiums, lecterns and arches that sit on a stage and move with it. */
   stageItems: StageItem[];
+  /** What the host hid, locked and the order they put the layers in: view state kept with the plan. */
+  layers: LayerState;
   mood: "day" | "evening";
   chandeliers: boolean;
   /** Ceiling height in metres. */
@@ -437,6 +454,7 @@ export function defaultLayout(width = 30, length = 20): HallLayout {
     chairs: [],
     groups: [],
     stageItems: [],
+    layers: { hidden: [], locked: [], order: [] },
     mood: "day",
     chandeliers: false,
     ceiling: 5,
@@ -471,6 +489,30 @@ export function defaultZones(width: number, length: number): Zone[] {
 }
 
 /** Read a stored layout, filling in anything missing so old or partial documents still work. */
+/** Layer state from stored JSON: only strings, no repeats, and never more than the schema holds. */
+export function normaliseLayers(raw: unknown): LayerState {
+  const list = (v: unknown): string[] =>
+    Array.isArray(v)
+      ? Array.from(
+          new Set(
+            v.filter(
+              (k): k is string =>
+                typeof k === "string" && k.length > 0 && k.length <= 60
+            )
+          )
+        ).slice(0, LAYER_STATE_MAX)
+      : [];
+  const r = (raw && typeof raw === "object" ? raw : {}) as Record<
+    string,
+    unknown
+  >;
+  return {
+    hidden: list(r.hidden),
+    locked: list(r.locked),
+    order: list(r.order),
+  };
+}
+
 export function normaliseLayout(raw: unknown): HallLayout | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const r = raw as Partial<HallLayout>;
@@ -525,6 +567,7 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
             typeof s.stageId === "string"
         )
       : [],
+    layers: normaliseLayers(r.layers),
     mood: r.mood === "evening" ? "evening" : "day",
     chandeliers: r.chandeliers === true,
     ceiling: clamp(Number(r.ceiling) || 5, 3, 15),

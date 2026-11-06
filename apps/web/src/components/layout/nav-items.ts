@@ -162,6 +162,14 @@ export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
 }
 
 /**
+ * Screens that are a full-screen workspace rather than a page: the seating studio fills the window
+ * and carries its own Back button, so the app's sidebar, top bar and phone dock step aside.
+ */
+export function isWorkspaceRoute(pathname: string): boolean {
+  return /^\/events\/[^/]+\/seating$/.test(pathname);
+}
+
+/**
  * Pages that carry their own phone header (Back, title, action) in the installed app, so the app's
  * top bar steps aside for them there. See screen-header.tsx.
  */
