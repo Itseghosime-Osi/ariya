@@ -18,7 +18,9 @@ export function dancingFor(layout: HallLayout, headcount: number): number {
   return Math.min(headcount, Math.round(area * DANCERS_PER_M2));
 }
 
-function wireZone(z: Zone): WireZone {
+/** The hall's drawn zone as the wire reads it. Shared: every deck that sends zones sends them the
+ * same way, and a zone that is optional on screen is explicit on the wire. */
+export function wireZone(z: Zone): WireZone {
   return {
     id: z.id,
     kind: z.kind,
