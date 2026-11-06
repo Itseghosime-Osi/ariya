@@ -8,6 +8,11 @@ import React, {
   useState,
 } from "react";
 import Link from "next/link";
+import { ScreenHeader } from "@/components/layout/screen-header";
+import {
+  DeskItem,
+  DeskMotion,
+} from "@/features/events/components/desk/DeskMotion";
 import { AnimatePresence, m } from "motion/react";
 import {
   CalendarPlus,
@@ -39,8 +44,8 @@ import {
 } from "@/features/checklist/types";
 
 const EYEBROW =
-  "text-[11px] font-bold uppercase tracking-[0.14em] text-gold-ink";
-const CARD = "rounded-2xl border border-hairline bg-white/45 backdrop-blur-sm";
+  "text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink";
+const CARD = "rounded-3xl border border-hairline bg-white/40 backdrop-blur-sm";
 
 const FILTERS: { key: ChecklistFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -281,6 +286,7 @@ export function ChecklistClient({
   if (!data.seeded && (seeding || seedAttempted || tasks.length === 0)) {
     return (
       <FirstRun
+        eventId={eventId}
         title={data.event.title}
         seeding={seeding}
         error={seedError}
@@ -291,161 +297,232 @@ export function ChecklistClient({
     );
   }
 
+  const header = (
+    <ScreenHeader
+      title="Checklist"
+      subtitle={data.event.title}
+      backHref={`/events/${eventId}`}
+    />
+  );
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pb-28 pt-6 sm:px-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+    <div className="sm:pb-16">
+      {header}
+      <DeskMotion className="mx-auto flex max-w-6xl flex-col gap-5 pb-24 sm:gap-6 sm:pb-8">
+        <DeskItem className="flex flex-col gap-1 standalone:max-md:hidden sm:gap-2">
           <p className={EYEBROW}>Checklist</p>
-          <h1 className="mt-1 font-display text-3xl text-night">
+          <h1 className="font-serif text-3xl font-bold leading-tight text-on-surface sm:text-5xl">
             {data.event.title}
           </h1>
-          <p className="mt-1 text-sm text-label-2">
-            {total > 0
-              ? `${done} of ${total} done` +
-                (data.event.date ? ` · ${countdown(data.event.date, now)}` : "")
-              : "Nothing to do yet."}
+          <p className="text-sm text-label-2">
+            Everything between now and the day, in the order it needs doing.
           </p>
-          {total > 0 && (
-            // A plain link, not a server action: the file is a download, and a browser can save it
-            // without any JavaScript running.
-            <a
-              href={`/api/events/${eventId}/checklist.ics`}
-              className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-burgundy underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-            >
-              <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
-              Add the dates to your calendar
-            </a>
-          )}
-        </div>
-        <ProgressRing done={done} total={total} />
-      </header>
+        </DeskItem>
 
-      {seedError && <ErrorNote message={seedError} className="mt-4" />}
-
-      {nextBest && (
-        <NextAction
-          task={nextBest}
-          phase={currentPhase}
-          onDone={() => void changeStatus(nextBest, "done")}
-          onAnother={() => setShowAnother((n) => n + 1)}
-        />
-      )}
-
-      <div
-        className="sticky top-0 z-10 -mx-4 mt-6 bg-ivory/85 px-4 py-2 backdrop-blur-sm sm:-mx-6 sm:px-6"
-        role="toolbar"
-        aria-label="Filter the checklist"
-      >
-        <div className="flex gap-2 overflow-x-auto">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setFilter(f.key)}
-              aria-pressed={filter === f.key}
-              className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
-                filter === f.key
-                  ? "border-burgundy bg-burgundy text-ivory"
-                  : "border-hairline bg-white/45 text-night hover:bg-white/70"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-          {openBeyondWeek > 0 && (
-            <button
-              type="button"
-              onClick={() => void moveToThisWeek()}
-              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-gold/60 bg-gold/10 px-3.5 text-xs font-semibold text-night hover:bg-gold/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
-            >
-              Move {openBeyondWeek} open to this week
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        {PHASE_ORDER.map((phase) => {
-          const rows = visible.filter((t) => t.phase === phase);
-          if (rows.length === 0) return null;
-          const phaseDone = rows.filter((t) => t.status === "done").length;
-          const isOpen = expanded === phase;
-          const finished = phaseDone === rows.length;
-          if (!isOpen) {
-            return (
-              <button
-                key={phase}
-                type="button"
-                onClick={() => setExpanded(phase)}
-                className={`${CARD} flex w-full items-center justify-between px-4 py-3 text-left hover:bg-white/65`}
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:items-start lg:gap-8">
+          <div className="flex flex-col gap-5 lg:sticky lg:top-6">
+            <DeskItem>
+              <section
+                aria-label="Where the checklist stands"
+                className="profile-card relative overflow-hidden rounded-[28px] p-5 sm:p-6"
               >
-                <span className="flex items-center gap-2 text-sm font-semibold text-night">
-                  {PHASE_LABELS[phase]}
-                  {finished && (
-                    <Check
-                      className="h-4 w-4 text-gold-ink"
-                      aria-label="Phase complete"
+                <span aria-hidden="true" className="profile-card__weave" />
+                <div className="relative flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#f3d98f]">
+                      {total > 0 && done === total ? "All done" : "So far"}
+                    </p>
+                    {total > 0 ? (
+                      <p className="mt-1 flex items-baseline gap-2 font-display text-[#fff6dc]">
+                        <span className="text-5xl font-semibold leading-none">
+                          {done}
+                        </span>
+                        <span className="text-xl text-[#f4e8cc]">
+                          of {total} done
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-lg text-[#f4e8cc]">
+                        Nothing to do yet.
+                      </p>
+                    )}
+                    {data.event.date && (
+                      <p className="mt-2 text-[13px] text-[#f4e8cc]">
+                        {countdown(data.event.date, now)}
+                      </p>
+                    )}
+                  </div>
+                  <ProgressRing done={done} total={total} />
+                </div>
+                {total > 0 && (
+                  <div
+                    aria-hidden="true"
+                    className="relative mt-4 h-2 overflow-hidden rounded-full bg-white/15"
+                  >
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[#f6e2ad] to-[#d4a85a] transition-[width] duration-500"
+                      style={{ width: `${pct}%` }}
                     />
-                  )}
-                </span>
-                <span className="text-xs text-label-2">
-                  {phaseDone} of {rows.length}
-                </span>
-              </button>
-            );
-          }
-          return (
-            <section
-              key={phase}
-              className={CARD}
-              aria-label={PHASE_LABELS[phase]}
-            >
-              <button
-                type="button"
-                onClick={() => setExpanded(null)}
-                aria-expanded={true}
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
+                  </div>
+                )}
+                {total > 0 && (
+                  // A plain link, not a server action: the file is a download, and a browser can
+                  // save it without any JavaScript running.
+                  <a
+                    href={`/api/events/${eventId}/checklist.ics`}
+                    className="relative mt-4 inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-[#f3d98f] underline decoration-[#f3d98f]/50 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3d98f]"
+                  >
+                    <CalendarPlus className="h-4 w-4" aria-hidden />
+                    Add the dates to your calendar
+                  </a>
+                )}
+              </section>
+            </DeskItem>
+
+            {seedError && <ErrorNote message={seedError} />}
+
+            {nextBest && (
+              <DeskItem>
+                <NextAction
+                  task={nextBest}
+                  phase={currentPhase}
+                  onDone={() => void changeStatus(nextBest, "done")}
+                  onAnother={() => setShowAnother((n) => n + 1)}
+                />
+              </DeskItem>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-4">
+            <DeskItem>
+              <div
+                className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+                role="toolbar"
+                aria-label="Filter the checklist"
               >
-                <span className="text-sm font-semibold text-night">
-                  {PHASE_LABELS[phase]}
-                </span>
-                <span className="flex items-center gap-2 text-xs text-label-2">
-                  {phaseDone} of {rows.length}
-                  <ChevronDown className="h-4 w-4 rotate-180" />
-                </span>
-              </button>
-              <PhaseBar done={phaseDone} total={rows.length} />
-              <ul className="divide-y divide-hairline/60">
-                {rows.map((task) => (
-                  <TaskRow
-                    key={task.id}
-                    task={task}
-                    open={open === task.id}
-                    onOpen={() =>
-                      setOpen((id) => (id === task.id ? null : task.id))
-                    }
-                    onToggle={() =>
-                      void changeStatus(task, toggle(task.status))
-                    }
-                    onWait={() =>
-                      void changeStatus(
-                        task,
-                        task.status === "waiting" ? "todo" : "waiting"
-                      )
-                    }
-                    onDelete={() => void remove(task)}
-                  />
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-        {visible.length === 0 && (
-          <p className={`${CARD} px-4 py-6 text-center text-sm text-label-2`}>
-            Nothing matches this filter. Try All.
-          </p>
-        )}
-      </div>
+                <div className="flex gap-2">
+                  {FILTERS.map((f) => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => setFilter(f.key)}
+                      aria-pressed={filter === f.key}
+                      className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+                        filter === f.key
+                          ? "bg-burgundy text-ivory shadow-sm"
+                          : "desk-chip text-burgundy"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                  {openBeyondWeek > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => void moveToThisWeek()}
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-gold/60 bg-gold/10 px-4 text-[13px] font-semibold text-night hover:bg-gold/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
+                    >
+                      Move {openBeyondWeek} open to this week
+                    </button>
+                  )}
+                </div>
+              </div>
+            </DeskItem>
+
+            <DeskItem className="space-y-3">
+              {PHASE_ORDER.map((phase) => {
+                const rows = visible.filter((t) => t.phase === phase);
+                if (rows.length === 0) return null;
+                const phaseDone = rows.filter(
+                  (t) => t.status === "done"
+                ).length;
+                const isOpen = expanded === phase;
+                const finished = phaseDone === rows.length;
+                if (!isOpen) {
+                  return (
+                    <button
+                      key={phase}
+                      type="button"
+                      onClick={() => setExpanded(phase)}
+                      className={`${CARD} flex min-h-14 w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-white/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy`}
+                    >
+                      <span className="flex items-center gap-2 font-serif text-lg font-bold text-on-surface">
+                        {PHASE_LABELS[phase]}
+                        {finished && (
+                          <Check
+                            className="h-4 w-4 text-gold-ink"
+                            aria-label="Phase complete"
+                          />
+                        )}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-label-2">
+                        {phaseDone} of {rows.length}
+                        <ChevronDown className="h-4 w-4" aria-hidden />
+                      </span>
+                    </button>
+                  );
+                }
+                return (
+                  <section
+                    key={phase}
+                    className={`${CARD} overflow-hidden`}
+                    aria-label={PHASE_LABELS[phase]}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setExpanded(null)}
+                      aria-expanded={true}
+                      className="flex min-h-14 w-full items-center justify-between gap-3 px-5 py-3 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-burgundy"
+                    >
+                      <span className="font-serif text-lg font-bold text-on-surface">
+                        {PHASE_LABELS[phase]}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-label-2">
+                        {phaseDone} of {rows.length}
+                        <ChevronDown
+                          className="h-4 w-4 rotate-180"
+                          aria-hidden
+                        />
+                      </span>
+                    </button>
+                    <PhaseBar done={phaseDone} total={rows.length} />
+                    <ul className="divide-y divide-hairline">
+                      {rows.map((task) => (
+                        <TaskRow
+                          key={task.id}
+                          task={task}
+                          open={open === task.id}
+                          onOpen={() =>
+                            setOpen((id) => (id === task.id ? null : task.id))
+                          }
+                          onToggle={() =>
+                            void changeStatus(task, toggle(task.status))
+                          }
+                          onWait={() =>
+                            void changeStatus(
+                              task,
+                              task.status === "waiting" ? "todo" : "waiting"
+                            )
+                          }
+                          onDelete={() => void remove(task)}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+              {visible.length === 0 && (
+                <p
+                  className={`${CARD} px-5 py-8 text-center text-sm text-label-2`}
+                >
+                  Nothing matches this filter. Try All.
+                </p>
+              )}
+            </DeskItem>
+          </div>
+        </div>
+      </DeskMotion>
 
       <AnimatePresence>
         {toast && (
@@ -487,7 +564,7 @@ function UndoToast({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 16 }}
-      className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-night px-4 py-3 text-sm text-ivory shadow-lg"
+      className="fixed inset-x-4 bottom-24 z-50 md:bottom-6 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-night px-4 py-2 text-sm text-ivory shadow-lg"
       role={toast.kind === "error" ? "alert" : "status"}
     >
       <span>{toast.message}</span>
@@ -509,7 +586,7 @@ function UndoToast({
             }
             onClose();
           }}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold uppercase tracking-wide text-gold hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-bold uppercase tracking-wide text-gold hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           <RotateCcw className="h-3.5 w-3.5" /> Undo
         </button>
@@ -517,7 +594,7 @@ function UndoToast({
         <button
           type="button"
           onClick={onClose}
-          className="text-xs font-bold uppercase tracking-wide"
+          className="min-h-11 px-3 text-xs font-bold uppercase tracking-wide"
         >
           Close
         </button>
@@ -545,6 +622,7 @@ function ErrorNote({
 }
 
 function FirstRun({
+  eventId,
   title,
   seeding,
   error,
@@ -552,6 +630,7 @@ function FirstRun({
   engineReady,
   onSeed,
 }: {
+  eventId: string;
   title: string;
   seeding: boolean;
   error: string | null;
@@ -560,10 +639,15 @@ function FirstRun({
   onSeed: () => void;
 }) {
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-xl flex-col items-center justify-center px-4 text-center">
-      <div className={`${CARD} w-full px-6 py-8`}>
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-xl flex-col items-center justify-center text-center">
+      <ScreenHeader
+        title="Checklist"
+        subtitle={title}
+        backHref={`/events/${eventId}`}
+      />
+      <div className={`${CARD} w-full px-6 py-10`}>
         <Sparkles className="mx-auto h-8 w-8 text-gold-ink" aria-hidden />
-        <h1 className="mt-3 font-display text-2xl text-night">
+        <h1 className="mt-3 font-serif text-3xl font-bold text-on-surface">
           Build {title}&apos;s checklist
         </h1>
         <p className="mt-2 text-sm text-label-2">
@@ -575,7 +659,7 @@ function FirstRun({
           type="button"
           onClick={onSeed}
           disabled={seeding || !canSeed || !engineReady}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-burgundy px-4 py-3 text-sm font-semibold text-ivory transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-burgundy px-6 text-sm font-semibold text-ivory shadow-[0_8px_20px_-8px_rgba(110,20,38,0.6)] transition-opacity hover:bg-wine disabled:opacity-50"
         >
           {seeding || !engineReady ? (
             <>
@@ -621,24 +705,26 @@ function NextAction({
 }) {
   return (
     <section
-      className="mt-5 overflow-hidden rounded-2xl border border-gold/40 bg-gradient-to-br from-white/70 to-gold/10 p-4 backdrop-blur-sm"
+      className="overflow-hidden rounded-3xl border border-gold/50 bg-gradient-to-br from-white/60 to-gold/15 p-5 backdrop-blur-sm"
       aria-label="Next action"
     >
       <p className={EYEBROW}>Next in {PHASE_LABELS[phase]}</p>
-      <h2 className="mt-1 text-lg font-semibold text-night">{task.title}</h2>
+      <h2 className="mt-1 font-serif text-xl font-bold leading-snug text-on-surface">
+        {task.title}
+      </h2>
       <p className="mt-1 text-sm text-label-2">{whyNow(task)}</p>
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onDone}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-burgundy px-4 text-sm font-semibold text-ivory hover:opacity-90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory shadow-[0_8px_20px_-8px_rgba(110,20,38,0.6)] hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           <Check className="h-4 w-4" /> Done
         </button>
         <button
           type="button"
           onClick={onAnother}
-          className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-night/80 hover:text-night"
+          className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-semibold text-burgundy hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           Show me something else
         </button>
@@ -669,18 +755,18 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
   const circumference = 2 * Math.PI * 26;
   return (
     <div
-      className="relative grid h-16 w-16 place-items-center"
+      className="relative grid h-16 w-16 shrink-0 place-items-center sm:h-20 sm:w-20"
       role="img"
       aria-label={`${done} of ${total} done`}
     >
-      <svg viewBox="0 0 64 64" className="h-16 w-16 -rotate-90" aria-hidden>
+      <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90" aria-hidden>
         <circle
           cx="32"
           cy="32"
           r="26"
           fill="none"
           stroke="currentColor"
-          className="text-hairline"
+          className="text-white/20"
           strokeWidth="5"
         />
         <circle
@@ -689,14 +775,14 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
           r="26"
           fill="none"
           stroke="currentColor"
-          className="text-gold-ink"
+          className="text-[#f3d98f]"
           strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * (1 - pct)}
         />
       </svg>
-      <span className="absolute text-xs font-bold text-night">
+      <span className="absolute text-xs font-bold text-[#fff6dc]">
         {Math.round(pct * 100)}%
       </span>
     </div>
@@ -706,7 +792,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
 function PhaseBar({ done, total }: { done: number; total: number }) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   return (
-    <div className="px-4 pb-3">
+    <div className="px-5 pb-3">
       <div
         className="h-1.5 overflow-hidden rounded-full bg-hairline"
         role="progressbar"
@@ -716,7 +802,7 @@ function PhaseBar({ done, total }: { done: number; total: number }) {
         aria-label={`${done} of ${total} done in this phase`}
       >
         <div
-          className="h-full rounded-full bg-gold-ink"
+          className="h-full rounded-full bg-gradient-to-r from-[#d4a85a] to-gold-ink"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -747,7 +833,7 @@ function TaskRow({
 
   return (
     <li>
-      <div className="flex min-h-[44px] items-center gap-3 px-4 py-2">
+      <div className="flex min-h-[56px] items-center gap-2 px-3 py-1 sm:px-4">
         <button
           type="button"
           onClick={onToggle}
@@ -760,7 +846,7 @@ function TaskRow({
             className={`grid h-7 w-7 place-items-center rounded-md border transition-colors ${
               isDone
                 ? "border-burgundy bg-burgundy text-ivory"
-                : "border-night/30 bg-white/50 hover:border-night/60"
+                : "border-gold-ink/50 bg-white/60 hover:border-burgundy"
             }`}
           >
             {isDone && <Check className="h-4 w-4" aria-hidden />}
@@ -770,22 +856,22 @@ function TaskRow({
           type="button"
           onClick={onOpen}
           aria-expanded={open}
-          className="flex min-h-[44px] min-w-0 flex-1 items-center justify-between gap-3 text-left"
+          className="flex min-h-[44px] min-w-0 flex-1 items-center justify-between gap-3 rounded-lg py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           <span
-            className={`truncate text-sm ${isDone ? "text-label-2 line-through" : "text-night"}`}
+            className={`text-sm font-medium leading-snug sm:truncate ${isDone ? "text-label-2 line-through" : "text-on-surface"}`}
           >
             {task.title}
           </span>
           <span className="flex shrink-0 items-center gap-2 text-[11px] text-label-2">
             {task.status === "waiting" && (
-              <span className="rounded-full bg-white/60 px-2 py-0.5">
+              <span className="rounded-full bg-gold/15 px-2 py-0.5 font-semibold text-gold-ink">
                 Waiting
               </span>
             )}
             {task.dueDate && (
               <span
-                className={`flex items-center gap-1 ${overdue ? "text-night" : ""}`}
+                className={`flex items-center gap-1 ${overdue ? "font-semibold text-burgundy" : ""}`}
               >
                 <Clock className="h-3 w-3" aria-hidden />
                 {shortDate(task.dueDate)}
@@ -795,7 +881,7 @@ function TaskRow({
         </button>
       </div>
       {open && (
-        <div className="space-y-2 border-t border-hairline/50 bg-white/35 px-4 py-3 text-xs text-label-2">
+        <div className="space-y-2 border-t border-hairline bg-white/30 px-5 py-4 text-xs text-label-2">
           {task.detail && (
             <p className="text-sm text-night/80">{task.detail}</p>
           )}
@@ -816,11 +902,11 @@ function TaskRow({
               Source: {task.adviceSource}.
             </p>
           )}
-          <div className="flex flex-wrap gap-3 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             <button
               type="button"
               onClick={onWait}
-              className="font-semibold text-burgundy underline"
+              className="desk-chip inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               {task.status === "waiting"
                 ? "No longer waiting"
@@ -829,7 +915,7 @@ function TaskRow({
             <button
               type="button"
               onClick={onDelete}
-              className="font-semibold text-night/70 underline"
+              className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-label-2 hover:text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               Delete
             </button>
