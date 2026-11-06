@@ -1158,14 +1158,25 @@ export function HallStudio({
       say("Add a stage first, then the items go on it.");
       return;
     }
+    // A backdrop sits at the back; anything a host uses stands near the front.
+    const depth = kind === "arch" || kind === "screen" ? 0.85 : 0.6;
+    // A podium stands at the left of the stage, a lectern at the right, an arch in the middle.
+    const preferred = kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0;
+    // Take the first spot along the stage that nothing on the same line already holds, so a
+    // second fixture does not land inside the first.
+    const taken = hall.latest.current.stageItems.filter(
+      (s) => s.stageId === stage.id && Math.abs(s.depth - depth) < 0.3
+    );
+    const across =
+      [preferred, -0.3, 0.3, -0.15, 0.15, -0.42, 0.42].find((a) =>
+        taken.every((s) => Math.abs(s.across - a) >= 0.14)
+      ) ?? preferred;
     const item: StageItem = {
       id: zoneId(),
       stageId: stage.id,
       kind,
-      // A podium stands at the left of the stage, a lectern at the right, an arch in the middle.
-      across: kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0,
-      // A backdrop sits at the back; anything a host uses stands near the front.
-      depth: kind === "arch" || kind === "screen" ? 0.85 : 0.6,
+      across,
+      depth,
     };
     updateLayout((l) => ({ ...l, stageItems: [...l.stageItems, item] }));
     setSelection([{ type: "zone", id: stage.id }]);
@@ -1204,7 +1215,12 @@ export function HallStudio({
               : "Item"
             : def.label,
       x: round2(hall.latest.current.width / 2),
-      y: round2(hall.latest.current.length / 2),
+      // A stage belongs at the front of the room, as the starting plan has it, not on top of the
+      // dance floor in the middle. Everything else still starts at the centre, easy to find.
+      y:
+        g.kind === "stage"
+          ? round2((g.h ?? def.h) / 2 + 0.4)
+          : round2(hall.latest.current.length / 2),
       w: g.w ?? def.w,
       h: g.h ?? def.h,
       ...(g.shape ? { shape: g.shape } : {}),

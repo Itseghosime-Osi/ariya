@@ -2755,7 +2755,7 @@ function frame(now) {
   if (goal) {
     const k = Math.min(1, (now - goal.t0) / goal.ms);
     const e = 1 - Math.pow(1 - k, 3);
-    for (const key of ["tx", "tz", "az", "pol", "dist"])
+    for (const key of ["tx", "ty", "tz", "az", "pol", "dist"])
       cam[key] = goal.from[key] + (goal.to[key] - goal.from[key]) * e;
     applyCamera();
     if (k >= 1) goal = null;
