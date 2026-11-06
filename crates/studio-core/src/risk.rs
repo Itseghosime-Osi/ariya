@@ -105,8 +105,6 @@ pub struct RiskInput {
     /// The month of the event, 1–12, for the harmattan rule.
     #[serde(default)]
     pub month: Option<u32>,
-    #[serde(default)]
-    pub alcohol: bool,
     /// `mains`, `generator` or `solar`.
     #[serde(default)]
     pub power: Option<String>,
@@ -168,7 +166,8 @@ pub struct RiskReport {
     pub event_date: Option<String>,
 }
 
-/// What makes a rule fire. `Always` is the baseline register — every event carries it.
+/// What makes a rule fire. `Always` is the baseline register: every event carries it once the plan
+/// is far enough along to be worth advising on (see `worth_advising`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Trigger {
     Always,
@@ -772,10 +771,17 @@ const RULES: [Rule; 43] = [
     },
 ];
 
+/// A plan is worth advising on once the host has told us who is coming and where: a guest count
+/// and a room. Before that the baseline is 32 identical rows, which is a wall rather than advice.
+/// The triggered rules still fire for a bare plan — they are the ones the plan itself earned.
+fn worth_advising(input: &RiskInput) -> bool {
+    input.guests > 0
+}
+
 /// Whether a rule fires for this plan, and the sentence that says why.
-fn fires(trigger: Trigger, input: &RiskInput) -> Option<String> {
+fn fires(trigger: Trigger, input: &RiskInput, advising: bool) -> Option<String> {
     match trigger {
-        Trigger::Always => Some("every event".to_string()),
+        Trigger::Always => advising.then(|| "every event".to_string()),
         Trigger::Capacity => {
             let certified = input.capacity?;
             if input.guests > certified {
@@ -904,7 +910,7 @@ pub fn plan(input: &RiskInput) -> RiskReport {
     let items = RULES
         .iter()
         .filter_map(|rule| {
-            let derivation = fires(rule.trigger, input)?;
+            let derivation = fires(rule.trigger, input, worth_advising(input))?;
             Some(RiskItem {
                 id: rule.id.to_string(),
                 category: rule.category,
@@ -937,6 +943,12 @@ fn notes(input: &RiskInput) -> Vec<String> {
         "Safety-critical risks are marked apart from experiential ones: a blocked exit and a late cake are not the same kind of problem.".to_string(),
         "Where the research gives no figure, the number in a mitigation is a planning heuristic, not a standard. Treat it as a starting point and adjust it to the venue.".to_string(),
     ];
+    if !worth_advising(input) {
+        notes.push(
+            "No guests are on the plan yet, so only the risks this plan has already earned are shown. Add guests and the rest of the register appears."
+                .to_string(),
+        );
+    }
     if input.event_date.is_none() {
         notes.push(
             "No event date is set, so the due dates are blank. Add the date and every risk gets a deadline."
@@ -1000,7 +1012,6 @@ mod tests {
             zones: vec![],
             capacity: Some(250),
             month: Some(12),
-            alcohol: true,
             power: Some("mains".to_string()),
             generator_kva: None,
             toilets: Some(8),
@@ -1049,12 +1060,39 @@ mod tests {
     }
 
     #[test]
-    fn a_bare_plan_still_gets_the_always_on_register() {
+    fn a_plan_with_guests_gets_the_always_on_register() {
         let report = plan(&hall());
         assert!(has(&report, "venue.exits"));
         assert!(has(&report, "people.medical"));
         assert!(has(&report, "compliance.fire-safety"));
-        assert!(!report.items.is_empty());
+    }
+
+    #[test]
+    fn an_empty_hall_shows_only_what_its_plan_earns() {
+        let mut input = hall();
+        input.guests = 0;
+        input.capacity = None;
+        let report = plan(&input);
+        assert!(
+            !has(&report, "venue.exits"),
+            "the baseline is not advice on a hall nobody is coming to"
+        );
+        assert!(
+            report.notes.iter().any(|n| n.contains("No guests are on the plan yet")),
+            "the report should say why the register is short"
+        );
+    }
+
+    #[test]
+    fn a_rule_the_plan_earned_still_fires_on_an_empty_hall() {
+        let mut input = hall();
+        input.guests = 0;
+        input.chandeliers = true;
+        let report = plan(&input);
+        assert!(
+            has(&report, "venue.rigging"),
+            "a plan that hangs chandeliers carries its own risk regardless of head count"
+        );
     }
 
     #[test]

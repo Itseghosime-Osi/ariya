@@ -62,10 +62,6 @@ describe("risk request", () => {
     expect(request.chandeliers).toBe(true);
     expect(request.tables).toBe(30);
   });
-
-  it("treats a plan with no catering answer as a dry event", () => {
-    expect(riskRequest(defaultLayout(), 30, 300, null).alcohol).toBe(false);
-  });
 });
 
 describe("grouping", () => {

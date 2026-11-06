@@ -26,7 +26,6 @@ export type RiskInput = {
    * The month of the event, 1–12, for the harmattan rule.
    */
   month: number | null;
-  alcohol: boolean;
   /**
    * `mains`, `generator` or `solar`.
    */

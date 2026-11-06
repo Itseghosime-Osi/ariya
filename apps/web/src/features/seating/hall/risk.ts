@@ -39,8 +39,6 @@ export function riskRequest(
     zones: layout.zones.map(wireZone),
     capacity: venue.capacity?.certified ?? null,
     month: monthOf(eventDate),
-    alcohol:
-      venue.catering?.alcohol != null && venue.catering.alcohol !== "none",
     power: venue.services?.power ?? null,
     generatorKva: venue.services?.generatorKva ?? null,
     toilets: venue.services?.toilets ?? null,
