@@ -181,7 +181,6 @@ enum Trigger {
     Outdoor,
     Harmattan,
     Band,
-    Alcohol,
 }
 
 struct Rule {
@@ -862,13 +861,6 @@ fn fires(trigger: Trigger, input: &RiskInput) -> Option<String> {
         Trigger::Band => {
             if has_zone(input, ZoneKind::Stage) {
                 Some("your plan has a stage for a band".to_string())
-            } else {
-                None
-            }
-        }
-        Trigger::Alcohol => {
-            if input.alcohol {
-                Some("you are serving alcohol".to_string())
             } else {
                 None
             }
