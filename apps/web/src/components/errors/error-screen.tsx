@@ -45,7 +45,7 @@ export function ErrorScreen({
     <div
       role={alert ? "alert" : undefined}
       data-testid={testId}
-      className={`relative isolate flex items-center justify-center overflow-hidden px-4 ${
+      className={`relative isolate flex items-center justify-center px-4 ${
         page ? "min-h-[100dvh] bg-ivory py-12" : "py-12 sm:py-20"
       }`}
     >
@@ -53,8 +53,12 @@ export function ErrorScreen({
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background:
-            "radial-gradient(60% 45% at 50% 0%, rgba(110,20,38,0.10), transparent 70%), radial-gradient(45% 35% at 50% 100%, rgba(212,168,90,0.14), transparent 70%)",
+          // Both glows sit inside the box and fade to nothing before its edges, so the light never
+          // ends in a line. Extra stops ease the fall-off.
+          background: [
+            "radial-gradient(ellipse 52% 48% at 50% 38%, rgba(110,20,38,0.10) 0%, rgba(110,20,38,0.055) 35%, rgba(110,20,38,0.02) 65%, transparent 100%)",
+            "radial-gradient(ellipse 42% 36% at 50% 72%, rgba(212,168,90,0.16) 0%, rgba(212,168,90,0.07) 40%, transparent 100%)",
+          ].join(", "),
         }}
       />
 
