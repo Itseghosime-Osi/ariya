@@ -2,9 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-const CLASS =
-  "inline-flex min-h-11 items-center justify-center rounded-2xl bg-wine px-6 text-xs font-semibold text-ivory shadow-md transition-all hover:bg-wine/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
+import { ERROR_PRIMARY } from "@/components/errors/error-screen";
 
 /**
  * Takes a visitor back to the page they came from, such as the page editor a host opened their
@@ -41,7 +39,7 @@ export function GoBackLink() {
   };
 
   return (
-    <button type="button" onClick={go} className={CLASS}>
+    <button type="button" onClick={go} className={ERROR_PRIMARY}>
       {from === null ? "Return to Àríyá" : "Go back"}
     </button>
   );

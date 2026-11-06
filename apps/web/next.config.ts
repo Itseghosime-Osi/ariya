@@ -50,6 +50,8 @@ export function getRemotePatterns(
 const allowLocalIP = shouldAllowLocalIP(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 const nextConfig: NextConfig = {
+  // One styled 404 for every address that matches no route, whichever layout group it falls in.
+  experimental: { globalNotFound: true },
   reactStrictMode: true,
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   images: {
