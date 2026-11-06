@@ -73,6 +73,19 @@ test.describe("Connect your AI", () => {
       );
     }
 
+    // ChatGPT and Gemini steps carry copy chips, so nothing is typed into their forms.
+    for (const name of ["ChatGPT", "Gemini"]) {
+      await page.getByRole("radio", { name: new RegExp(`^${name}`) }).click();
+      await page.getByRole("button", { name: "Copy name" }).click();
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+        "Àríyá"
+      );
+      await page.getByRole("button", { name: "Copy link" }).first().click();
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
+        /\/mcp$/
+      );
+    }
+
     // The plain MCP link and the developer commands are there for anyone who wants them.
     await page.getByText(/prefer to do it yourself/i).click();
     await expect(page.getByTestId("mcp-address")).toContainText("/mcp");

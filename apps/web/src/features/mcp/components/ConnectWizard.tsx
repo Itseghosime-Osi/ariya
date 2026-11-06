@@ -209,6 +209,9 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
                 <ol className="mt-6 space-y-3">
                   {selected.steps.map((step, i) => {
                     const finished = started && i === 0;
+                    const copies = (selected.stepCopies ?? []).filter(
+                      (chip) => chip.step === i
+                    );
                     return (
                       <li key={step} className="flex items-start gap-3">
                         <span
@@ -221,13 +224,45 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
                         >
                           {finished ? <Icon name="check" size={14} /> : i + 1}
                         </span>
-                        <span className="text-[14.5px] leading-relaxed text-[#f4e8cc]">
-                          {step}
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[14.5px] leading-relaxed text-[#f4e8cc]">
+                            {step}
+                          </span>
+                          {copies.length > 0 && (
+                            <span className="mt-2 flex flex-wrap gap-2">
+                              {copies.map((chip) => (
+                                <CopyButton
+                                  key={chip.label}
+                                  value={chip.value}
+                                  label={chip.label}
+                                  tone="dark"
+                                />
+                              ))}
+                            </span>
+                          )}
                         </span>
                       </li>
                     );
                   })}
                 </ol>
+
+                {selected.notes && selected.notes.length > 0 && (
+                  <ul className="mt-5 space-y-2 rounded-2xl border border-[#f6e2ad]/25 px-4 py-3">
+                    {selected.notes.map((note) => (
+                      <li
+                        key={note}
+                        className="flex items-start gap-2 text-[13px] leading-relaxed text-[#f4e8cc]"
+                      >
+                        <Icon
+                          name="info"
+                          size={14}
+                          className="mt-0.5 shrink-0 text-[#f6e2ad]"
+                        />
+                        <span>{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                 <div
                   className="mt-6 flex items-center gap-2.5 rounded-2xl bg-white/[0.08] px-4 py-3 text-[13.5px] text-[#f4e8cc]"

@@ -26,7 +26,22 @@ export interface AiClient {
   action: PrimaryAction;
   /** Plain-language steps. The first is what the big button just did. */
   steps: string[];
+  /** One-tap copy chips under a step, so nothing has to be typed into the app's own form. */
+  stepCopies?: StepCopy[];
+  /** What the app itself requires of the person, in plain words. */
+  notes?: string[];
 }
+
+export interface StepCopy {
+  /** The zero-based step the chip sits under. */
+  step: number;
+  label: string;
+  value: string;
+}
+
+/** What to call the connection when an app asks for a name and a description. */
+export const CONNECTION_NAME = "Àríyá";
+export const CONNECTION_DESCRIPTION = "Your Àríyá celebration desk";
 
 /**
  * Claude's own install link: the Add custom connector dialog opens with the name and address
@@ -79,9 +94,18 @@ export function aiClients(address: string): AiClient[] {
       },
       steps: [
         "Press the button. We copy your Àríyá link and open ChatGPT in a new tab.",
-        "Open Settings and find Connectors (menus move around, so look for Apps or Connectors). If you see Developer mode under Advanced, switch it on.",
-        "Choose to create a new connector, name it Àríyá and paste the link.",
+        "In ChatGPT open Plugins (on some accounts it is Settings, then Connectors). If you see Developer mode under Advanced, switch it on.",
+        "Press the plus button and choose Add custom MCP server (or Create). Tap each chip below to copy it, then paste it into the matching box.",
         "Pick OAuth if it asks how to sign in, then sign in to Àríyá and press Approve.",
+      ],
+      stepCopies: [
+        { step: 2, label: "Copy name", value: CONNECTION_NAME },
+        { step: 2, label: "Copy description", value: CONNECTION_DESCRIPTION },
+        { step: 2, label: "Copy link", value: address },
+      ],
+      notes: [
+        "What ChatGPT lets you add depends on your plan. Business, Enterprise and Edu workspaces can add custom connectors; Pro can connect with read and fetch access. If you do not see the option, ask your workspace admin.",
+        "ChatGPT has no link that fills the form in for you yet, so these chips stand in for typing.",
       ],
     },
     {
@@ -98,9 +122,17 @@ export function aiClients(address: string): AiClient[] {
       },
       steps: [
         "Press the button. We copy your Àríyá link and open Gemini in a new tab.",
-        "Open Settings and find Connected apps (it can also be called Connectors), then choose Add a custom app.",
-        "Paste the link and press Next.",
+        "In Gemini open Settings, then Connected apps (it can also be called Connectors), and choose Add a custom app.",
+        "Paste the link below into the box and press Next. If it asks for a name, use the chip too.",
         "Sign in to Àríyá if asked, then press Approve on the card you see.",
+      ],
+      stepCopies: [
+        { step: 2, label: "Copy link", value: address },
+        { step: 2, label: "Copy name", value: CONNECTION_NAME },
+      ],
+      notes: [
+        "Gemini adds custom apps on the web, not in the phone app, and not with a work or school Google account.",
+        "Gemini has no link that fills the form in for you yet, so these chips stand in for typing.",
       ],
     },
     {
