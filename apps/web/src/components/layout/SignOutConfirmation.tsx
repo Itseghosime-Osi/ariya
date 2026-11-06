@@ -89,7 +89,7 @@ export function SignOutConfirmation({
             event.preventDefault();
             titleRef.current?.focus();
           }}
-          className="max-w-sm overflow-hidden rounded-[28px] border border-[#e9c98a]/30 bg-[#1c070d] p-6 text-ivory shadow-[0_28px_90px_-28px_rgba(28,7,13,0.9)] [&>button:last-child]:z-20 [&>button:last-child]:text-ivory/65 [&>button:last-child]:hover:bg-ivory/10 [&>button:last-child]:focus:ring-gold"
+          className="max-w-md overflow-hidden rounded-[28px] border border-[#e9c98a]/30 bg-[#1c070d] p-6 text-ivory shadow-[0_28px_90px_-28px_rgba(28,7,13,0.9)] [&>button:last-child]:z-20 [&>button:last-child]:text-ivory/65 [&>button:last-child]:hover:bg-ivory/10 [&>button:last-child]:focus:ring-gold"
         >
           <div
             aria-hidden="true"
@@ -124,7 +124,7 @@ export function SignOutConfirmation({
                 Sign out of Àríyá?
               </DialogTitle>
               <DialogDescription
-                className="max-w-xs text-ivory/70"
+                className="max-w-sm text-ivory/70"
                 data-testid="sign-out-mood"
                 aria-live="polite"
                 aria-atomic="true"
@@ -181,7 +181,7 @@ export function SignOutConfirmation({
 
       {showStayToast && (
         <div
-          className="fixed top-[calc(1rem+env(safe-area-inset-top))] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#e9c98a]/35 bg-[#1c070d] px-4 py-3 text-sm text-ivory shadow-[0_18px_48px_-20px_rgba(28,7,13,0.9)]"
+          className="fixed top-[calc(1rem+env(safe-area-inset-top))] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#e9c98a]/35 bg-[#1c070d] px-4 py-3 text-sm whitespace-nowrap text-ivory shadow-[0_18px_48px_-20px_rgba(28,7,13,0.9)]"
           role="status"
           data-testid="sign-out-stay-toast"
         >
