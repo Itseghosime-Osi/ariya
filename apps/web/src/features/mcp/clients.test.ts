@@ -83,6 +83,20 @@ describe("aiClients", () => {
     }
   });
 
+  it("gives ChatGPT and Gemini copy chips so nothing is typed into their forms", () => {
+    for (const id of ["chatgpt", "gemini"]) {
+      const client = clients.find((c) => c.id === id)!;
+      const chips = client.stepCopies ?? [];
+      expect(chips.some((c) => c.value === ADDRESS)).toBe(true);
+      expect(chips.some((c) => c.value === "Àríyá")).toBe(true);
+      for (const chip of chips) {
+        expect(chip.step).toBeGreaterThanOrEqual(0);
+        expect(chip.step).toBeLessThan(client.steps.length);
+      }
+      expect((client.notes ?? []).length).toBeGreaterThan(0);
+    }
+  });
+
   it("never puts a secret in anything it copies or links", () => {
     const text = JSON.stringify(clients);
     expect(text).not.toMatch(/token|secret|password/i);
