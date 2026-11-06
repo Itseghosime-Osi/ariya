@@ -2065,6 +2065,160 @@ function syncTables() {
       (l.obj.removeFromParent(), labels.delete(k));
 }
 
+// ---------------------------------------------------------------- air conditioners
+
+const acGroup = new THREE.Group();
+scene.add(acGroup);
+const acCache = new Map();
+
+const AC_MOUNT_COLOUR = {
+  wall: "#e8e4dc",
+  cassette: "#dcd6cc",
+  floor: "#cfc8bc",
+};
+
+/** One unit, drawn where it sits. The shape says how it is fixed, which is what decides its throw. */
+function buildUnit(u) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: AC_MOUNT_COLOUR[u.mount] ?? "#e8e4dc",
+    roughness: 0.55,
+    metalness: 0.15,
+  });
+  const ceiling = state.layout ? state.layout.ceiling : 5;
+  let body;
+  if (u.mount === "cassette") {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.14, 0.7), mat);
+    body.position.y = ceiling - 0.2;
+  } else if (u.mount === "floor") {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.6, 0.32), mat);
+    body.position.y = 0.8;
+  } else {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.3, 0.26), mat);
+    body.position.y = 2.4;
+  }
+  body.castShadow = true;
+  g.add(body);
+  // A small grille, so the unit reads as a machine rather than a box.
+  const grille = new THREE.Mesh(
+    new THREE.BoxGeometry(
+      u.mount === "floor" ? 0.3 : 0.6,
+      u.mount === "floor" ? 0.5 : 0.12,
+      0.02
+    ),
+    new THREE.MeshStandardMaterial({ color: "#8f8a82", roughness: 0.8 })
+  );
+  grille.position.copy(body.position);
+  grille.position.z += u.mount === "floor" ? 0.17 : 0.14;
+  g.add(grille);
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), M.hit);
+  hit.position.y = 1.1;
+  hit.userData.pick = { type: "ac", id: u.id };
+  g.add(hit);
+  return g;
+}
+
+function syncUnits() {
+  const units = state.units || [];
+  const seen = new Set();
+  for (const u of units) {
+    seen.add(u.id);
+    const sig = `${u.mount}:${u.hp}:${u.inverter}`;
+    let entry = acCache.get(u.id);
+    if (!entry || entry.sig !== sig) {
+      if (entry) {
+        acGroup.remove(entry.obj);
+        disposeGroup(entry.obj);
+      }
+      const obj = buildUnit(u);
+      entry = { sig, obj };
+      acCache.set(u.id, entry);
+      acGroup.add(obj);
+    }
+    entry.obj.position.set(u.x, 0, u.y);
+    items.set("ac:" + u.id, { type: "ac", id: u.id, obj: entry.obj });
+  }
+  for (const [id, entry] of acCache)
+    if (!seen.has(id)) {
+      acGroup.remove(entry.obj);
+      disposeGroup(entry.obj);
+      acCache.delete(id);
+      items.delete("ac:" + id);
+    }
+}
+
+// ---------------------------------------------------------------- heat map
+
+const HEAT_STOPS = ["#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"];
+const heatGroup = new THREE.Group();
+scene.add(heatGroup);
+let heatMesh = null;
+let heatSig = "";
+
+function heatColour(t) {
+  const x = Math.min(0.9999, Math.max(0, t)) * (HEAT_STOPS.length - 1);
+  const i = Math.floor(x);
+  const f = x - i;
+  const a = new THREE.Color(HEAT_STOPS[i]);
+  const b = new THREE.Color(HEAT_STOPS[i + 1]);
+  return a.lerp(b, f);
+}
+
+/** Paint the field onto a canvas and lay it on the floor. */
+function syncHeat() {
+  const f = state.field;
+  const show = !!(f && state.heat);
+  if (!show) {
+    if (heatMesh) heatMesh.visible = false;
+    return;
+  }
+  const sum = f.temps.reduce((a, b) => a + b, 0);
+  const sig = `${f.cols}:${f.rows}:${f.minC}:${f.maxC}:${sum.toFixed(3)}`;
+  if (!heatMesh || heatSig !== sig) {
+    const canvas = document.createElement("canvas");
+    canvas.width = f.cols;
+    canvas.height = f.rows;
+    const ctx = canvas.getContext("2d");
+    const span = Math.max(0.001, f.maxC - f.minC);
+    for (let r = 0; r < f.rows; r++) {
+      for (let c = 0; c < f.cols; c++) {
+        const t = (f.temps[r * f.cols + c] - f.minC) / span;
+        const col = heatColour(t);
+        ctx.fillStyle = `rgb(${Math.round(col.r * 255)},${Math.round(
+          col.g * 255
+        )},${Math.round(col.b * 255)})`;
+        ctx.fillRect(c, r, 1, 1);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearFilter;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    if (heatMesh) {
+      heatGroup.remove(heatMesh);
+      heatMesh.geometry.dispose();
+      heatMesh.material.map?.dispose();
+      heatMesh.material.dispose();
+    }
+    const W = state.layout.width;
+    const L = state.layout.length;
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    heatMesh = new THREE.Mesh(new THREE.PlaneGeometry(W, L), mat);
+    heatMesh.rotation.x = -Math.PI / 2;
+    heatMesh.position.set(W / 2, 0.03, L / 2);
+    heatMesh.renderOrder = 1;
+    heatGroup.add(heatMesh);
+    heatSig = sig;
+  }
+  heatMesh.visible = true;
+}
+
 // ---------------------------------------------------------------- selection visuals
 
 const selGroup = new THREE.Group();
@@ -2685,6 +2839,7 @@ function pick(e) {
     ...selGroup.children,
     ...proxies.children,
     ...zoneGroup.children,
+    ...acGroup.children,
   ];
   const hits = ray.intersectObjects(targets, true);
   for (const h of hits) {
@@ -2746,8 +2901,28 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     return;
   }
   const p = pick(e);
+  if (state.placing) {
+    const f = floorPoint(e);
+    if (f) post({ t: "placeAc", x: round2(f.x), y: round2(f.z) });
+    return;
+  }
   if (state.assigning) {
     if (p?.type === "table") post({ t: "tableClick", id: p.id });
+    return;
+  }
+  // A unit is dragged, never selected: it has no inspector, and selecting it would empty the deck.
+  if (p?.type === "ac") {
+    const item = items.get("ac:" + p.id);
+    if (item) {
+      drag = {
+        kind: "move",
+        p0: floorPoint(e),
+        start: [{ i: item, x: item.obj.position.x, z: item.obj.position.z }],
+        moved: false,
+        clicked: p,
+        toggle: false,
+      };
+    }
     return;
   }
   if (p?.type === "rotate") {
@@ -3122,6 +3297,10 @@ const state = {
   warnings: {},
   ghosts: [],
   assigning: false,
+  units: [],
+  field: null,
+  heat: false,
+  placing: false,
 };
 let pendingScene = null;
 let first = true;
@@ -3140,6 +3319,8 @@ function applyScene(s) {
   if (moodChanged) zoneCache.forEach((e) => (e.sig = ""));
   syncZones();
   syncTables();
+  syncUnits();
+  syncHeat();
   rebuildInstances();
   syncSelection();
   labelRenderer.domElement.style.display = state.labels ? "" : "none";

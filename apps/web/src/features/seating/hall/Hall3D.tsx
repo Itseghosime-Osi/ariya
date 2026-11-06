@@ -42,10 +42,20 @@ export interface SceneChair {
   sash: string | null;
 }
 
-export type PickType = "table" | "zone" | "chair";
+export type PickType = "table" | "zone" | "chair" | "ac";
 export interface Pick {
   type: PickType;
   id: string;
+}
+
+/** One air conditioner, as the 3D hall draws it. */
+export interface SceneUnit {
+  id: string;
+  x: number;
+  y: number;
+  hp: number;
+  mount: "wall" | "cassette" | "floor";
+  inverter: boolean;
 }
 
 export interface Scene {
@@ -62,6 +72,22 @@ export interface Scene {
   board: string;
   /** Pixels of the full-screen hall covered on each side by the page's bars and panels. */
   inset: { left: number; top: number; right: number; bottom: number };
+  /** The units the host has placed, drawn where they sit. */
+  units?: SceneUnit[];
+  /** The heat map, when the engine has one. Absent means nothing to paint. */
+  field?: {
+    cell: number;
+    cols: number;
+    rows: number;
+    temps: number[];
+    minC: number;
+    maxC: number;
+    meanC: number;
+  } | null;
+  /** Whether the heat map is painted on the floor. */
+  heat?: boolean;
+  /** Whether the next floor click places a unit. */
+  placing?: boolean;
 }
 
 export type HallCommand =
@@ -90,6 +116,9 @@ export interface HallMessage {
   alt?: boolean;
   dx?: number;
   dy?: number;
+  /** A floor point, in metres, for a placement. */
+  x?: number;
+  y?: number;
   pct?: number;
   view?: "top" | "3d";
   /** Whether the rain is falling, reported back after a `rain` command. */

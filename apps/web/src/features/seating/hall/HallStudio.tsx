@@ -33,6 +33,7 @@ import {
   Sparkles,
   Square,
   Sun,
+  Thermometer,
   Keyboard,
   Tag,
   Undo2,
@@ -89,7 +90,12 @@ import {
 } from "./suggested-layouts";
 import { SuggestedLayouts } from "./SuggestedLayouts";
 import { LayoutComparison, type Compared } from "./LayoutComparison";
-import type { LayoutOption } from "@ariya/studio";
+import type {
+  AcUnit,
+  Cooling,
+  LayoutOption,
+  ThermalReport,
+} from "@ariya/studio";
 import {
   Hall3D,
   type Hall3DHandle,
@@ -103,7 +109,15 @@ import {
   GuestsPanel,
   RoomPanel,
   SeatPanel,
+  ThermalPanel,
 } from "./StudioPanels";
+import {
+  DEFAULT_UNIT_HP,
+  defaultCooling,
+  thermalRequest,
+  unitId,
+  unitsOf,
+} from "./thermal";
 import { LayoutSummary } from "./LayoutSummary";
 import {
   ChairInspector,
@@ -116,7 +130,7 @@ import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
 import { Keys, SHORTCUTS } from "./shortcuts";
 
 type Positions = Record<string, { x: number; y: number }>;
-type Deck = "guests" | "room" | "fit" | "seat" | "decor";
+type Deck = "guests" | "room" | "fit" | "seat" | "decor" | "thermal";
 type Flyout = "table" | "chair" | "zone" | null;
 type Move = { type: string; id: string; x: number; y: number };
 
@@ -262,6 +276,11 @@ export function HallStudio({
     showing: Compared;
   } | null>(null);
   const say = (msg: string) => setAnnounce(msg);
+
+  // ---------- cooling ----------
+  const [thermal, setThermal] = useState<ThermalReport | null>(null);
+  const [placingUnit, setPlacingUnit] = useState(false);
+  const [heat, setHeat] = useState(true);
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
   const [panelOpen, setPanelOpen] = useState(true);
@@ -444,6 +463,16 @@ export function HallStudio({
 
   // ---------- planning numbers ----------
   const guests = data.stats.seatedAttendees + data.stats.unseatedAttendees;
+
+  // The cooling verdict follows the plan: every edit to the room, the crowd or the units re-asks.
+  useEffect(() => {
+    if (!studioEngine || studioStatus !== "ready") return;
+    try {
+      setThermal(studioEngine.thermal(thermalRequest(layout, guests)));
+    } catch {
+      setThermal(null);
+    }
+  }, [studioEngine, studioStatus, layout, guests]);
   const seats = data.tables.reduce((a, t) => a + t.capacity, 0);
   const area = layout.width * layout.length;
   const zoneArea = layout.zones.reduce((a, z) => a + z.w * z.h, 0);
@@ -591,6 +620,10 @@ export function HallStudio({
       assigning: assigning !== null,
       board: pageBg,
       inset,
+      units: unitsOf(layout),
+      field: thermal?.field ?? null,
+      heat,
+      placing: placingUnit,
     }),
     [
       layout,
@@ -607,6 +640,9 @@ export function HallStudio({
       assigning,
       pageBg,
       inset,
+      thermal,
+      heat,
+      placingUnit,
     ]
   );
 
@@ -668,6 +704,55 @@ export function HallStudio({
       ...l,
       chairs: l.chairs.map((c) => (c.id === id ? { ...c, ...patch } : c)),
     }));
+
+  // ---------- cooling edits ----------
+  const withCooling = (
+    l: HallLayout,
+    fn: (c: Cooling) => Cooling
+  ): HallLayout => ({
+    ...l,
+    venue: { ...l.venue, cooling: fn(l.venue.cooling ?? defaultCooling()) },
+  });
+  const patchCooling = (patch: Partial<Cooling>) =>
+    updateLayout((l) => withCooling(l, (c) => ({ ...c, ...patch })));
+  const addUnit = (x: number, y: number) => {
+    const unit: AcUnit = {
+      id: unitId(),
+      x: round2(x),
+      y: round2(y),
+      hp: DEFAULT_UNIT_HP,
+      mount: "wall",
+      inverter: false,
+    };
+    updateLayout((l) =>
+      withCooling(l, (c) => ({ ...c, units: [...c.units, unit] }))
+    );
+    setPlacingUnit(false);
+    say("Unit placed");
+  };
+  /** A keyboard path to the same thing the floor click does: one unit, in a tidy grid. */
+  const addUnitAtCentre = () => {
+    const n = unitsOf(layout).length;
+    const cols = Math.max(1, Math.ceil(Math.sqrt(n + 1)));
+    const rows = Math.ceil((n + 1) / cols);
+    const x = (layout.width * ((n % cols) + 1)) / (cols + 1);
+    const y = (layout.length * (Math.floor(n / cols) + 1)) / (rows + 1);
+    addUnit(x, y);
+  };
+  const updateUnit = (id: string, patch: Partial<AcUnit>) =>
+    updateLayout((l) =>
+      withCooling(l, (c) => ({
+        ...c,
+        units: c.units.map((u) => (u.id === id ? { ...u, ...patch } : u)),
+      }))
+    );
+  const deleteUnit = (id: string) =>
+    updateLayout((l) =>
+      withCooling(l, (c) => ({
+        ...c,
+        units: c.units.filter((u) => u.id !== id),
+      }))
+    );
   const styleTables = (ids: string[], patch: TableStyle) =>
     updateLayout((l) => ({
       ...l,
@@ -706,7 +791,10 @@ export function HallStudio({
     const chairs = new Map(
       items.filter((i) => i.type === "chair").map((i) => [i.id, i])
     );
-    if (zones.size || chairs.size) {
+    const acs = new Map(
+      items.filter((i) => i.type === "ac").map((i) => [i.id, i])
+    );
+    if (zones.size || chairs.size || acs.size) {
       hall.update(
         (l) => ({
           ...l,
@@ -718,6 +806,18 @@ export function HallStudio({
             const m = chairs.get(c.id);
             return m ? { ...c, x: round2(m.x), y: round2(m.y) } : c;
           }),
+          venue: acs.size
+            ? {
+                ...l.venue,
+                cooling: {
+                  ...(l.venue.cooling ?? defaultCooling()),
+                  units: (l.venue.cooling?.units ?? []).map((u) => {
+                    const m = acs.get(u.id);
+                    return m ? { ...u, x: round2(m.x), y: round2(m.y) } : u;
+                  }),
+                },
+              }
+            : l.venue,
         }),
         positions
       );
@@ -1253,6 +1353,8 @@ export function HallStudio({
           y: i.y ?? 0,
         }))
       );
+    else if (m.t === "placeAc" && m.x !== undefined && m.y !== undefined)
+      addUnit(m.x, m.y);
     else if (m.t === "rotate" && m.type && m.id)
       setRotation({ type: m.type, id: m.id }, m.rot ?? 0);
     else if (m.t === "tableClick" && m.id && assigning)
@@ -1336,6 +1438,20 @@ export function HallStudio({
       label: "Seat",
       icon: Wand2,
       stat: `${data.stats.readinessPct}% done`,
+    },
+    {
+      key: "thermal",
+      label: "Cooling",
+      icon: Thermometer,
+      stat: thermal?.advice
+        ? {
+            viable: "Holds",
+            damp: "Damp",
+            "too-many": "Too many",
+            "under-cooled": "Too hot",
+            "not-viable": "Not viable",
+          }[thermal.advice.level]
+        : "—",
     },
     {
       key: "decor",
@@ -1986,7 +2102,7 @@ export function HallStudio({
           <div
             role="tablist"
             aria-label="Planning tools"
-            className="grid grid-cols-5 gap-1 border-b border-hairline p-2"
+            className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
           >
             {tiles.map(({ key, label, icon: I, stat }) => {
               const on = deck === key && selection.length === 0;
@@ -2231,6 +2347,24 @@ export function HallStudio({
                 readiness={data.stats.readinessPct}
                 busy={busy}
                 onSeat={seatEveryone}
+              />
+            ) : deck === "thermal" ? (
+              <ThermalPanel
+                report={thermal}
+                status={studioStatus}
+                cooling={layout.venue.cooling}
+                onCooling={patchCooling}
+                placing={placingUnit}
+                onTogglePlacing={() => setPlacingUnit((p) => !p)}
+                onAddUnit={addUnitAtCentre}
+                onDeleteUnit={deleteUnit}
+                onUpdateUnit={updateUnit}
+                onFocusArea={(id) => {
+                  setSelection([{ type: "zone", id }]);
+                  view3d.current?.focus(`zone:${id}`);
+                }}
+                heat={heat}
+                onToggleHeat={() => setHeat((h) => !h)}
               />
             ) : (
               <DecorPanel
