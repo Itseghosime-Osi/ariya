@@ -55,6 +55,8 @@ To ensure that existing links within static marketing pages resolve seamlessly w
 - **Tables & DND**: TanStack Table for registry, dnd-kit for seating chart
 - **Emails**: Resend + React Email templates
 - **Payments**: Paystack in test mode, with server action initialization and idempotent webhook verification
+- **Studio engine**: Rust (`crates/studio-core`, `crates/studio-wasm`) behind one JSON call, loaded lazily as wasm — see [ADR 0005](adr/0005-rust-studio-core-and-json-abi.md)
+- **Checklist storage**: `public.tasks`, generated from the plan and reconciled by `source_key` — see [ADR 0006](adr/0006-tasks-table-and-rls.md)
 
 ## 5. Phase 2 Security & Database Architecture
 
@@ -143,19 +145,21 @@ The framework baseline (shared React 19 framework, Turbopack runtime, and root l
 
 Every application route strictly reflects the design system and editorial conventions established across the design artifacts:
 
-| Route                   | Design Source                                 | Key UI / Layout Characteristics                                                                    |
-| :---------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| `/events`               | FINAL 01 Dashboard / Celebrations Hub         | Asymmetric portfolio layout, status filter pills, hero event card, quick creation triggers         |
-| `/events/new`           | FINAL 01 Wizard Flow                          | 3-stage celebration creation wizard, date & zone picker, cultural attire styling, quota allocation |
-| `/events/[id]`          | FINAL 01 Overview Desk                        | RsvpHorizon bar, RSVP trajectory chart, personal stationery specimen, "Next to Care For" card      |
-| `/events/[id]/guests`   | FINAL 03 Guest Registry, V2 22 CSV Intake     | TanStack registry table, side/group filters, drawer details, CSV import modal with column mapping  |
-| `/events/[id]/seating`  | FINAL 02 Seating, V2 23 Protocol              | Banquet floor plan, drag-and-drop seating, keyboard accessible table selector, printable cards     |
-| `/events/[id]/check-in` | FINAL 02 Check-In, V2 21 Reception Concierge  | QR camera scanner, security code admittance (`ARY-***-***`), live check-in telemetry               |
-| `/events/[id]/team`     | FINAL 01 Team & Roles                         | Role hierarchy table (Owner, Planner, Couple, Staff), invitation modal, link generator             |
-| `/events/[id]/billing`  | FINAL 01 Billing Desk                         | Royal Celebration Pass checkout (₦50,000), payment history, staff 403 block                        |
-| `/i/[token]`            | FINAL 01 Guest Pass, V2 20 Digital Stationery | Wax-sealed personal invitation, interactive RSVP accept/decline, dietary & plus-one inputs         |
-| `/e/[slug]`             | V2 20 Public Event Gazette                    | Public ceremonial schedule, district coordinates, aṣọ-ẹbí dress code protocol                      |
-| Mobile Navigation       | MOBILE 01–08 Mobile Viewports                 | 390px responsive bottom navigation bar, 44px minimum tap targets, zero horizontal scroll           |
+| Route                    | Design Source                                 | Key UI / Layout Characteristics                                                                                                                     |
+| :----------------------- | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/events`                | FINAL 01 Dashboard / Celebrations Hub         | Asymmetric portfolio layout, status filter pills, hero event card, quick creation triggers                                                          |
+| `/events/new`            | FINAL 01 Wizard Flow                          | 3-stage celebration creation wizard, date & zone picker, cultural attire styling, quota allocation                                                  |
+| `/events/[id]`           | FINAL 01 Overview Desk                        | RsvpHorizon bar, RSVP trajectory chart, personal stationery specimen, "Next to Care For" card                                                       |
+| `/events/[id]/guests`    | FINAL 03 Guest Registry, V2 22 CSV Intake     | TanStack registry table, side/group filters, drawer details, CSV import modal with column mapping                                                   |
+| `/events/[id]/seating`   | FINAL 02 Seating, V2 23 Protocol              | 3D venue studio (Simple and Studio modes), drag-and-drop seating, keyboard accessible table selector, thermal verdict, catering list, risk register |
+| `/events/[id]/checklist` | —                                             | Generated checklist, one next action, phase rail, filters, undo toasts, ICS export                                                                  |
+| `/events/[id]/day-of`    | —                                             | Offline-first run sheet: times, contacts and hard stops, cached by the service worker                                                               |
+| `/events/[id]/check-in`  | FINAL 02 Check-In, V2 21 Reception Concierge  | QR camera scanner, security code admittance (`ARY-***-***`), live check-in telemetry                                                                |
+| `/events/[id]/team`      | FINAL 01 Team & Roles                         | Role hierarchy table (Owner, Planner, Couple, Staff), invitation modal, link generator                                                              |
+| `/events/[id]/billing`   | FINAL 01 Billing Desk                         | Royal Celebration Pass checkout (₦50,000), payment history, staff 403 block                                                                         |
+| `/i/[token]`             | FINAL 01 Guest Pass, V2 20 Digital Stationery | Wax-sealed personal invitation, interactive RSVP accept/decline, dietary & plus-one inputs                                                          |
+| `/e/[slug]`              | V2 20 Public Event Gazette                    | Public ceremonial schedule, district coordinates, aṣọ-ẹbí dress code protocol                                                                       |
+| Mobile Navigation        | MOBILE 01–08 Mobile Viewports                 | 390px responsive bottom navigation bar, 44px minimum tap targets, zero horizontal scroll                                                            |
 
 ## 11. Relational Data Model
 
@@ -289,7 +293,23 @@ erDiagram
     }
 ```
 
-## 12. Global Search Architecture
+## 12. The Venue Studio
+
+The seating route is two things in one shell: a **3D hall** rendered in `public/hall3d/hall3d.js` inside an iframe, and an **HTML studio** beside it (`apps/web/src/features/seating/hall/`). The renderer is not a second model — it is handed the same JSON document the app holds and derives venue, ground, sun and snapping from it.
+
+- **The document**: `events.hall_layout` (jsonb, ≤ 64 KB) holds the room, zones (stage, dance floor, buffet…), décor, free chairs, named groups and stage fixtures. Tables live in `public.tables`; their positions in `position_x` / `position_y`, in centimetres. `hallLayoutSchema` bounds every collection so a layout at its maxima still fits the column (`seating.test.ts`).
+- **The engine**: auto-layout, scoring, thermal, catering, risk and checklist generation run in `crates/studio-core` via `packages/studio` (ADR 0005). A failed wasm load falls back to the TypeScript geometry and hides the engine decks.
+- **The canvas gestures** live in `grouping.ts` and are pure: duplicate (⌘/Ctrl + D, or Ctrl-click), row placement for tables and chairs, and grouping — a group is a way of holding items together, so clicking any member selects the whole group and moving it is one undo step.
+- **Two modes, one document**: Simple mode asks six questions and writes the same layout Studio mode edits.
+
+## 13. Checklist and Day-of
+
+- **Generation**: `crates/studio-core/src/checklist.rs` turns the plan into a dated task list; `seedChecklistAction` reconciles it into `public.tasks` by `source_key` (ADR 0006). The page seeds itself on first visit, so it is never empty.
+- **Advice**: risk rows carry a mitigation and a source, and "Add to checklist" keys them by rule id so asking twice is a no-op.
+- **Reminders**: weekly digest by default from `/api/cron/digest` (constant-time bearer secret, `digest_log` claims one send per person per week, quiet hours hold rather than drop); ICS export at `/api/events/[eventId]/checklist.ics` through the RLS-scoped client.
+- **Day-of mode**: `/events/[eventId]/day-of` is a separate offline-first surface. The service worker (`public/sw.js`) caches the run sheet so it survives with no signal.
+
+## 14. Global Search Architecture
 
 - **Unified RPC (`global_search`)**:
   - Powers keyboard shortcut `⌘K` modal across all authenticated screens.

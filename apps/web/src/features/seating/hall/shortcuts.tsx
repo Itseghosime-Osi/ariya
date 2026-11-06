@@ -63,6 +63,7 @@ export const SHORTCUTS = (
       [[["Arrow keys"]], "Nudge 10 cm"],
       [[["Shift", "Arrow keys"]], "Nudge 1 m"],
       [[[mod, "D"]], "Duplicate"],
+      [[[mod, "Click"]], "Copy what you click"],
       [[["Del"]], "Delete"],
       [[[mod, "Z"]], "Undo"],
       [

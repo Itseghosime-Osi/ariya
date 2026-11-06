@@ -68,6 +68,9 @@ import {
   zoneId,
   type FreeChair,
   type HallLayout,
+  type ItemGroup,
+  type SeatKind,
+  type StageItem,
   type TableStyle,
   type Zone,
   type ZoneKind,
@@ -142,6 +145,18 @@ import {
 } from "./Inspector";
 import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
 import { Keys, SHORTCUTS } from "./shortcuts";
+import { SimpleMode } from "./SimpleMode";
+import {
+  chairRow,
+  copyChair,
+  copyZone,
+  expandSelection,
+  forgetItems,
+  groupHolding,
+  makeGroup,
+  tableRowSlots,
+  type Picked,
+} from "./grouping";
 
 type Positions = Record<string, { x: number; y: number }>;
 type Deck =
@@ -197,11 +212,36 @@ const ZONE_GALLERY: {
   { kind: "custom", label: "Custom item", w: 1.2, h: 1.2 },
 ];
 
-const CHAIR_GROUPS = [
+const CHAIR_GROUPS: {
+  key: string;
+  label: string;
+  n: number;
+  spacing: number;
+  seat?: SeatKind;
+}[] = [
   { key: "one", label: "One chair", n: 1, spacing: 0 },
-  { key: "two", label: "Couple’s chairs", n: 2, spacing: 0.7 },
+  { key: "two", label: "Couple’s chairs", n: 2, spacing: 0.7, seat: "couple" },
   { key: "row", label: "Row of 6", n: 6, spacing: 0.55 },
+  { key: "row12", label: "Row of 12", n: 12, spacing: 0.55 },
+  {
+    key: "celebrant",
+    label: "Celebrant’s chair",
+    n: 1,
+    spacing: 0,
+    seat: "celebrant",
+  },
+  { key: "couch", label: "Couch (two seats)", n: 1, spacing: 0, seat: "couch" },
 ];
+
+/** Rows of tables, so a host can lay out a block without placing each one. */
+const TABLE_ROWS: { key: string; label: string; n: number; perRow: number }[] =
+  [
+    { key: "r3", label: "Row of 3", n: 3, perRow: 3 },
+    { key: "r4", label: "Row of 4", n: 4, perRow: 4 },
+    { key: "r6", label: "Row of 6", n: 6, perRow: 6 },
+    { key: "block6", label: "2 rows of 3", n: 6, perRow: 3 },
+    { key: "block12", label: "3 rows of 4", n: 12, perRow: 4 },
+  ];
 
 interface HallStudioProps {
   eventId: string;
@@ -316,6 +356,26 @@ export function HallStudio({
 
   // ---------- risk ----------
   const [risk, setRisk] = useState<RiskReport | null>(null);
+
+  // Simple mode and the studio edit the same document (7.2), so the switch is a view, not a
+  // save: whichever mode is left behind keeps every answer it wrote.
+  const [mode, setMode] = useState<"simple" | "studio">("studio");
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("ariya:hall-mode") === "simple")
+        setMode("simple");
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const chooseMode = (next: "simple" | "studio") => {
+    setMode(next);
+    try {
+      localStorage.setItem("ariya:hall-mode", next);
+    } catch {
+      /* not remembered */
+    }
+  };
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
   const [panelOpen, setPanelOpen] = useState(true);
@@ -676,6 +736,7 @@ export function HallStudio({
         type: chairType(c.chair ?? layout.decor.chair),
         cover: layout.decor.cover,
         sash: layout.decor.sash,
+        seat: c.seat ?? "guest",
       })),
       selection,
       tool,
@@ -764,6 +825,8 @@ export function HallStudio({
     single?.type === "chair"
       ? layout.chairs.find((c) => c.id === single.id)
       : undefined;
+  // The named group the whole selection sits in, if any: what "rename" and "ungroup" act on.
+  const selGroup = groupHolding(selection, layout.groups);
 
   const patchZone = (id: string, patch: Partial<Zone>) =>
     updateLayout((l) => ({
@@ -1037,19 +1100,41 @@ export function HallStudio({
       setSelection([{ type: "table", id: created[0].id }]);
   };
 
-  const addChairs = (n: number, spacing: number) => {
+  const addChairs = (n: number, spacing: number, seat: SeatKind = "guest") => {
     const cx = layout.width / 2;
     const cy = clamp(front.y + 4, 1, layout.length - 1);
-    const stamp = Date.now().toString(36);
-    const chairs: FreeChair[] = Array.from({ length: n }, (_, i) => ({
-      id: `c${stamp}${i}`,
-      x: round2(cx + (i - (n - 1) / 2) * spacing),
-      y: round2(cy),
-      rot: 0,
-    }));
+    const chairs = chairRow(n, spacing, cx, cy, 0, seat);
     updateLayout((l) => ({ ...l, chairs: [...l.chairs, ...chairs] }));
     setSelection(chairs.map((c) => ({ type: "chair", id: c.id })));
-    say(`${n} ${n === 1 ? "chair" : "chairs"} added`);
+    const what =
+      seat === "couch"
+        ? n === 1
+          ? "couch"
+          : "couches"
+        : n === 1
+          ? "chair"
+          : "chairs";
+    say(`${n} ${what} added`);
+  };
+
+  /** Put a podium, lectern or arch on a stage. It moves when the stage moves. */
+  const addStageItem = (kind: StageItem["kind"]) => {
+    const stage = layout.zones.find((z) => z.kind === "stage");
+    if (!stage) {
+      say("Add a stage first, then the items go on it.");
+      return;
+    }
+    const item: StageItem = {
+      id: zoneId(),
+      stageId: stage.id,
+      kind,
+      // A podium stands at the left of the stage, a lectern at the right, an arch in the middle.
+      across: kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0,
+      depth: 0.7,
+    };
+    updateLayout((l) => ({ ...l, stageItems: [...l.stageItems, item] }));
+    setSelection([{ type: "zone", id: stage.id }]);
+    say(`${kind[0].toUpperCase()}${kind.slice(1)} added to the stage`);
   };
 
   const addZone = (g: (typeof ZONE_GALLERY)[number]) => {
@@ -1082,31 +1167,125 @@ export function HallStudio({
     say(`${z.label} added`);
   };
 
-  const duplicate = () => {
-    if (selTable)
-      void placeNew(
-        selTable.shape as TableShape,
-        selTable.capacity,
-        positions[selTable.id]
-      );
-    else if (selZone) {
-      const copy = {
-        ...selZone,
-        id: zoneId(),
-        x: round2(selZone.x + 1),
-        y: round2(selZone.y + 1),
-      };
-      updateLayout((l) => ({ ...l, zones: [...l.zones, copy] }));
-      setSelection([{ type: "zone", id: copy.id }]);
-    } else if (selChair) {
-      const copy = {
-        ...selChair,
-        id: `c${Date.now().toString(36)}`,
-        x: round2(selChair.x + 0.6),
-      };
-      updateLayout((l) => ({ ...l, chairs: [...l.chairs, copy] }));
-      setSelection([{ type: "chair", id: copy.id }]);
+  /**
+   * A copy of everything selected, offset so it lands clear of the original. Chairs and areas copy
+   * in place; tables have to be created on the server, so they come back a moment later and are
+   * selected together once they do.
+   */
+  const duplicate = (of: Pick[] = selection) => {
+    if (of.length === 0) return;
+    const zones: Zone[] = [];
+    const chairs: FreeChair[] = [];
+    for (const p of of) {
+      if (p.type === "zone") {
+        const z = layout.zones.find((x) => x.id === p.id);
+        if (z) zones.push(copyZone(z, layout));
+      } else if (p.type === "chair") {
+        const c = layout.chairs.find((x) => x.id === p.id);
+        if (c) chairs.push(copyChair(c, layout));
+      }
     }
+    const tables = of
+      .filter((p) => p.type === "table")
+      .map((p) => data.tables.find((t) => t.id === p.id))
+      .filter((t): t is TableWithGuests => !!t);
+    if (zones.length || chairs.length)
+      updateLayout((l) => ({
+        ...l,
+        zones: [...l.zones, ...zones],
+        chairs: [...l.chairs, ...chairs],
+      }));
+    if (tables.length) {
+      const names = nextTableNames(data.tables, tables.length);
+      void addTables(
+        tables.map((t, i) => ({
+          name: names[i],
+          shape: t.shape as TableShape,
+          capacity: t.capacity,
+          position_x: toCm(
+            Math.min((positions[t.id]?.x ?? 0) + 1, layout.width - 1)
+          ),
+          position_y: toCm(
+            Math.min((positions[t.id]?.y ?? 0) + 1, layout.length - 1)
+          ),
+        }))
+      ).then((created) => {
+        if (created.length === 0) return;
+        // Copies keep the styling and rotation of what they came from.
+        const from = tables.slice(0, created.length);
+        updateLayout((l) => ({
+          ...l,
+          rotations: {
+            ...l.rotations,
+            ...Object.fromEntries(
+              created.map((c, i) => [c.id, l.rotations[from[i].id] ?? 0])
+            ),
+          },
+          tableStyles: {
+            ...l.tableStyles,
+            ...Object.fromEntries(
+              created
+                .map((c, i) => [c.id, l.tableStyles[from[i].id]] as const)
+                .filter(
+                  (e): e is [string, NonNullable<(typeof e)[1]>] => !!e[1]
+                )
+            ),
+          },
+        }));
+        setSelection([
+          ...zones.map((z) => ({ type: "zone" as const, id: z.id })),
+          ...chairs.map((c) => ({ type: "chair" as const, id: c.id })),
+          ...created.map((c) => ({ type: "table" as const, id: c.id })),
+        ]);
+      });
+    }
+    const made = zones.length + chairs.length + tables.length;
+    if (made) say(`${made} ${made === 1 ? "copy" : "copies"} made`);
+  };
+
+  /** Group what is selected under a name, so it moves as one thing. */
+  const groupSelected = (name: string) => {
+    if (selection.length < 2) {
+      say("Select two or more items to group them.");
+      return;
+    }
+    const { groups, group } = makeGroup(layout, selection, name);
+    updateLayout((l) => ({ ...l, groups }));
+    say(`“${group.name}” now holds ${group.items.length} items`);
+  };
+
+  const renameGroup = (id: string, name: string) =>
+    updateLayout((l) => ({
+      ...l,
+      groups: l.groups.map((g) =>
+        g.id === id ? { ...g, name: name.trim().slice(0, 60) || g.name } : g
+      ),
+    }));
+
+  const ungroup = (id: string) => {
+    updateLayout((l) => ({
+      ...l,
+      groups: l.groups.filter((g) => g.id !== id),
+    }));
+    say("Group taken apart");
+  };
+
+  /** Add a row of tables, spaced across the hall in front of the stage. */
+  const addTableRow = async (n: number, perRow: number) => {
+    const slots = tableRowSlots(n, perRow, layout, front.x, front.y + 6);
+    const names = nextTableNames(data.tables, slots.length);
+    const created = await addTables(
+      slots.map((p, i) => ({
+        name: names[i],
+        shape: preset.shape,
+        capacity: preset.capacity,
+        position_x: toCm(p.x),
+        position_y: toCm(p.y),
+      }))
+    );
+    if (created.length)
+      setSelection(created.map((c) => ({ type: "table", id: c.id })));
+    say(`${created.length} ${created.length === 1 ? "table" : "tables"} added`);
   };
 
   const remove = () => {
@@ -1117,12 +1296,17 @@ export function HallStudio({
     const chairs = new Set(
       selection.filter((s) => s.type === "chair").map((s) => s.id)
     );
-    if (zones.size || chairs.size)
+    if (zones.size || chairs.size) {
+      const gone = new Set([...zones, ...chairs]);
       updateLayout((l) => ({
         ...l,
         zones: l.zones.filter((z) => !zones.has(z.id)),
         chairs: l.chairs.filter((c) => !chairs.has(c.id)),
+        // A podium or arch on a deleted stage goes with it.
+        stageItems: l.stageItems.filter((s) => !zones.has(s.stageId)),
+        groups: forgetItems(l.groups, gone),
       }));
+    }
     const tables = selection.filter((s) => s.type === "table");
     if (tables.length === 1) onDeleteTable(tables[0].id);
     else if (tables.length > 1)
@@ -1152,7 +1336,9 @@ export function HallStudio({
         position_y: toCm(p.y),
       }))
     );
-    if (created.length && list.some((p) => p.rot))
+    // Record the room even when every table sits square: the checklist builds its tasks from the
+    // saved layout, so filling the hall without a rotation still has to write one.
+    if (created.length)
       updateLayout((l) => ({
         ...l,
         rotations: {
@@ -1439,7 +1625,11 @@ export function HallStudio({
 
   const onMessage = (m: HallMessage) => {
     if (m.t === "select" && m.items) {
-      setSelection(m.items.map(({ type, id }) => ({ type, id })));
+      // Clicking one member of a group picks up the whole group: it is one thing to move.
+      const picked: Picked[] = m.items
+        .filter((i) => i.type !== "ac")
+        .map(({ type, id }) => ({ type, id }));
+      setSelection(expandSelection(picked, layout.groups));
       setFlyout(null);
     } else if (m.t === "move" && m.items)
       moveItems(
@@ -1450,7 +1640,15 @@ export function HallStudio({
           y: i.y ?? 0,
         }))
       );
-    else if (m.t === "placeAc" && m.x !== undefined && m.y !== undefined)
+    else if (m.t === "duplicate" && m.items) {
+      // Ctrl-click on the canvas: copy what was clicked, and leave the copies selected.
+      const picked: Picked[] = m.items
+        .filter((i) => i.type !== "ac")
+        .map(({ type, id }) => ({ type, id }));
+      const whole = expandSelection(picked, layout.groups);
+      setSelection(whole);
+      duplicate(whole);
+    } else if (m.t === "placeAc" && m.x !== undefined && m.y !== undefined)
       addUnit(m.x, m.y);
     else if (m.t === "rotate" && m.type && m.id)
       setRotation({ type: m.type, id: m.id }, m.rot ?? 0);
@@ -1500,7 +1698,7 @@ export function HallStudio({
   const rail =
     "group/rail relative grid h-11 w-11 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] aria-pressed:bg-night aria-pressed:text-white aria-expanded:bg-night aria-expanded:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
   const chip =
-    "grid h-10 w-10 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
+    "grid h-11 w-11 place-items-center rounded-full text-night transition-colors hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
   const float =
     "rounded-full border border-black/[0.06] bg-white/95 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur";
   const card =
@@ -1597,924 +1795,1224 @@ export function HallStudio({
         {announce}
       </p>
 
-      {/* The hall fills the whole studio; the controls and the side panel float over it, so
-          panning never crops it at a box edge. */}
-      <div ref={body} className="relative min-h-0 flex-1">
-        <Hall3D
-          ref={view3d}
-          scene={scene}
-          onMessage={onMessage}
-          className="fixed inset-0 z-0"
+      <div className="relative z-10 flex justify-center pb-2">
+        <ModeSwitch mode={mode} onChange={chooseMode} />
+      </div>
+
+      {mode === "simple" ? (
+        <SimpleMode
+          layout={layout}
+          // Simple mode's edits are layout edits like any other, and undo covers them.
+          onLayoutChange={(next) => hall.update(next, positions)}
+          totalCapacity={data.stats.totalCapacity}
+          guestCount={guests}
         />
-        {/* Canvas controls */}
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 transition-[right,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-            panelOpen && "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
-          )}
-        >
-          {compare && (
-            <div className="absolute left-1/2 top-3 -translate-x-1/2">
-              <LayoutComparison
-                showing={compare.showing}
-                onShow={showCompared}
-                onKeep={keepCompared}
-              />
-            </div>
-          )}
-          {/* Hall size, live numbers and status */}
-          <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-15rem)] flex-col items-start gap-1.5">
+      ) : (
+        <>
+          {/* The hall fills the whole studio; the controls and the side panel float over it, so
+              panning never crops it at a box edge. */}
+          <div ref={body} className="relative min-h-0 flex-1">
+            <Hall3D
+              ref={view3d}
+              scene={scene}
+              onMessage={onMessage}
+              className="fixed inset-0 z-0"
+            />
+            {/* Canvas controls */}
             <div
               className={cn(
-                float,
-                "pointer-events-auto flex max-w-full items-center gap-x-4 overflow-hidden rounded-2xl px-4 py-2"
+                // z-10 keeps the floating controls above the canvas, which is `fixed inset-0 z-0`:
+                // without it the compare bar and the zoom buttons sit under the iframe and cannot
+                // be clicked.
+                "pointer-events-none absolute inset-0 z-10 transition-[right,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+                panelOpen &&
+                  "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
               )}
             >
-              <p className="whitespace-nowrap text-sm font-semibold">
-                {layout.width} × {layout.length} m
-                <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 2xl:inline">
-                  {formatFeet(layout.width)} × {formatFeet(layout.length)}
-                  {hall.saving
-                    ? " · saving…"
-                    : hall.storedLocally
-                      ? " · saved on this device"
-                      : ""}
-                </span>
-              </p>
-              <dl className="hidden gap-x-4 xl:flex" data-testid="hall-meter">
-                {[
-                  {
-                    k: "Guests",
-                    v: guests,
-                    note: buffer ? `${target} with buffer` : undefined,
-                  },
-                  {
-                    k: "Seats",
-                    v: seats,
-                    note:
-                      seats >= target ? "enough" : `${target - seats} short`,
-                    bad: seats < target,
-                  },
-                  { k: "Hall fits", v: fitEmpty.seats, wide: true },
-                  { k: "Fire guide", v: fireGuide, note: "max", wide: true },
-                ].map((m) => (
-                  <div
-                    key={m.k}
-                    className={cn(
-                      "items-baseline gap-1 whitespace-nowrap",
-                      "wide" in m ? "hidden 2xl:flex" : "flex"
-                    )}
+              {/* Hall size, live numbers and status */}
+              <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-15rem)] flex-col items-start gap-1.5">
+                <div
+                  className={cn(
+                    float,
+                    "pointer-events-auto flex max-w-full items-center gap-x-4 overflow-hidden rounded-2xl px-4 py-2"
+                  )}
+                >
+                  <p className="whitespace-nowrap text-sm font-semibold">
+                    {layout.width} × {layout.length} m
+                    <span className="ml-1.5 hidden text-[11px] font-normal text-label-2 2xl:inline">
+                      {formatFeet(layout.width)} × {formatFeet(layout.length)}
+                      {hall.saving
+                        ? " · saving…"
+                        : hall.storedLocally
+                          ? " · saved on this device"
+                          : ""}
+                    </span>
+                  </p>
+                  <dl
+                    className="hidden gap-x-4 xl:flex"
+                    data-testid="hall-meter"
                   >
-                    <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
-                      {m.k}
-                    </dt>
-                    <dd className="flex items-baseline gap-1">
-                      <span className="text-sm font-bold tabular-nums">
-                        {m.v}
-                      </span>
-                      {m.note && (
-                        <span
-                          className={cn(
-                            "text-[10px]",
-                            m.bad ? "text-[#9e2a2b]" : "text-label-2"
+                    {[
+                      {
+                        k: "Guests",
+                        v: guests,
+                        note: buffer ? `${target} with buffer` : undefined,
+                      },
+                      {
+                        k: "Seats",
+                        v: seats,
+                        note:
+                          seats >= target
+                            ? "enough"
+                            : `${target - seats} short`,
+                        bad: seats < target,
+                      },
+                      { k: "Hall fits", v: fitEmpty.seats, wide: true },
+                      {
+                        k: "Fire guide",
+                        v: fireGuide,
+                        note: "max",
+                        wide: true,
+                      },
+                    ].map((m) => (
+                      <div
+                        key={m.k}
+                        className={cn(
+                          "items-baseline gap-1 whitespace-nowrap",
+                          "wide" in m ? "hidden 2xl:flex" : "flex"
+                        )}
+                      >
+                        <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
+                          {m.k}
+                        </dt>
+                        <dd className="flex items-baseline gap-1">
+                          <span className="text-sm font-bold tabular-nums">
+                            {m.v}
+                          </span>
+                          {m.note && (
+                            <span
+                              className={cn(
+                                "text-[10px]",
+                                m.bad ? "text-[#9e2a2b]" : "text-label-2"
+                              )}
+                            >
+                              {m.note}
+                            </span>
                           )}
-                        >
-                          {m.note}
-                        </span>
-                      )}
-                    </dd>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                {/* Below the hall numbers rather than centred on the top edge: at the widths the
+                    studio actually runs at, a centred bar sits underneath this card and cannot be
+                    clicked. */}
+                {compare && (
+                  <div className="pointer-events-auto">
+                    <LayoutComparison
+                      showing={compare.showing}
+                      onShow={showCompared}
+                      onKeep={keepCompared}
+                    />
                   </div>
-                ))}
-              </dl>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {studioStatus === "unavailable" && (
-                <span className="pointer-events-auto inline-flex items-center rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-label-2 shadow-sm">
-                  Running the built-in layout engine.
-                </span>
-              )}
-              {assigning && (
-                <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-burgundy py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white shadow-lg">
-                  Click a table for{" "}
-                  {data.unseatedGuests.find((g) => g.id === assigning)?.name}
-                  <button
-                    type="button"
-                    onClick={() => setAssigning(null)}
-                    className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/20"
-                    aria-label="Stop choosing a table"
-                  >
-                    <X size={13} />
-                  </button>
-                </span>
-              )}
-              {warnCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelection([]);
-                    setDeck("fit");
-                  }}
-                  className={cn(
-                    float,
-                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b] hover:bg-white"
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {studioStatus === "unavailable" && (
+                    <span className="pointer-events-auto inline-flex items-center rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-label-2 shadow-sm">
+                      Running the built-in layout engine.
+                    </span>
                   )}
-                >
-                  {warnCount} {warnCount === 1 ? "table needs" : "tables need"}{" "}
-                  more space · Fix
-                </button>
-              )}
-              {data.tables.length === 0 && !assigning && (
-                <span
-                  className={cn(
-                    float,
-                    "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
+                  {assigning && (
+                    <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-burgundy py-1.5 pl-3 pr-1.5 text-xs font-semibold text-white shadow-lg">
+                      Click a table for{" "}
+                      {
+                        data.unseatedGuests.find((g) => g.id === assigning)
+                          ?.name
+                      }
+                      <button
+                        type="button"
+                        onClick={() => setAssigning(null)}
+                        className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/20"
+                        aria-label="Stop choosing a table"
+                      >
+                        <X size={13} />
+                      </button>
+                    </span>
                   )}
-                >
-                  Add tables from the toolbar, or use Fit to fill the hall
-                </span>
-              )}
-            </div>
-          </div>
+                  {warnCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelection([]);
+                        setDeck("fit");
+                      }}
+                      className={cn(
+                        float,
+                        "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-[#9e2a2b] hover:bg-white"
+                      )}
+                    >
+                      {warnCount}{" "}
+                      {warnCount === 1 ? "table needs" : "tables need"} more
+                      space · Fix
+                    </button>
+                  )}
+                  {data.tables.length === 0 && !assigning && (
+                    <span
+                      className={cn(
+                        float,
+                        "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
+                      )}
+                    >
+                      Add tables from the toolbar, or use Fit to fill the hall
+                    </span>
+                  )}
+                </div>
+              </div>
 
-          {/* Undo, redo, picture */}
-          <div
-            className={cn(
-              float,
-              "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
-            )}
-          >
-            <button
-              type="button"
-              className={chip}
-              onClick={undo}
-              disabled={!hall.canUndo}
-              aria-label="Undo"
-              title="Undo (Ctrl + Z)"
-            >
-              <Undo2 size={17} />
-            </button>
-            <button
-              type="button"
-              className={chip}
-              onClick={redo}
-              disabled={!hall.canRedo}
-              aria-label="Redo"
-              title="Redo (Ctrl + Shift + Z)"
-            >
-              <Redo2 size={17} />
-            </button>
-            <span className="mx-0.5 h-5 w-px bg-hairline" aria-hidden="true" />
-            <button
-              type="button"
-              className={chip}
-              onClick={() => view3d.current?.command("snapshot")}
-              aria-label="Save a picture of the hall"
-              title="Save a picture"
-            >
-              <Camera size={17} />
-            </button>
-            <span className="mx-0.5 h-5 w-px bg-hairline" aria-hidden="true" />
-            {/* With the panel tucked away, its tools wait here: one click springs it open on one. */}
-            {!panelOpen &&
-              tiles.map(({ key, label, icon: I }, n) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={cn(chip, "hall-pop")}
-                  style={{ animationDelay: `${n * 45}ms` }}
-                  onClick={() => {
-                    setSelection([]);
-                    setDeck(key);
-                    togglePanel(true);
-                  }}
-                  aria-label={`Open ${label}`}
-                  title={label}
-                >
-                  <I size={17} />
-                </button>
-              ))}
-            <button
-              type="button"
-              className={cn(
-                chip,
-                "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-90",
-                !panelOpen && "bg-night text-white hover:bg-burgundy"
-              )}
-              onClick={() => togglePanel()}
-              aria-pressed={!panelOpen}
-              aria-label={
-                panelOpen ? "Hide the side panel" : "Show the side panel"
-              }
-              title={
-                panelOpen
-                  ? "Hide the panel for a bigger hall (\\)"
-                  : "Show the panel (\\)"
-              }
-            >
-              {panelOpen ? (
-                <PanelRightClose size={17} />
-              ) : (
-                <PanelRightOpen size={17} />
-              )}
-            </button>
-          </div>
-
-          {notice && (
-            <div
-              role="status"
-              className={cn(
-                float,
-                "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
-              )}
-            >
-              {notice}
-            </div>
-          )}
-
-          {/* Tool rail */}
-          <div
-            role="toolbar"
-            aria-label="Hall tools"
-            aria-orientation="vertical"
-            className={cn(
-              float,
-              "pointer-events-auto absolute right-3 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1 rounded-[26px] p-1.5"
-            )}
-          >
-            <button
-              type="button"
-              className={rail}
-              aria-pressed={tool === "select"}
-              onClick={() => setTool("select")}
-              aria-label="Select and move"
-              aria-keyshortcuts="V M"
-            >
-              <MousePointer2 size={18} />
-              <RailTip label="Move" keys={["V", "M"]} />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              aria-pressed={tool === "hand"}
-              onClick={() => setTool("hand")}
-              aria-label="Pan around"
-              aria-keyshortcuts="H D"
-            >
-              <Hand size={18} />
-              <RailTip
-                label="Drag the view (or hold Space)"
-                keys={["H", "D"]}
-              />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              onClick={autoLayout}
-              disabled={busy !== null}
-              aria-label="Auto layout"
-              aria-keyshortcuts="A"
-            >
-              <Sparkles size={18} />
-              <RailTip label="Auto layout" keys={["A"]} />
-            </button>
-            <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
-            <button
-              type="button"
-              className={rail}
-              aria-expanded={flyout === "table"}
-              onClick={() => setFlyout(flyout === "table" ? null : "table")}
-              aria-label="Add a table"
-              aria-keyshortcuts="T"
-            >
-              <CirclePlus size={18} />
-              <RailTip label="Add a table" keys={["T"]} />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              aria-expanded={flyout === "chair"}
-              onClick={() => setFlyout(flyout === "chair" ? null : "chair")}
-              aria-label="Add chairs"
-              aria-keyshortcuts="C"
-            >
-              <Armchair size={18} />
-              <RailTip label="Add chairs" keys={["C"]} />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              aria-expanded={flyout === "zone"}
-              onClick={() => setFlyout(flyout === "zone" ? null : "zone")}
-              aria-label="Add a stage, dance floor or area"
-              aria-keyshortcuts="S"
-            >
-              <Shapes size={18} />
-              <RailTip label="Stage, dance floor or area" keys={["S"]} />
-            </button>
-            <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
-            <button
-              type="button"
-              className={rail}
-              aria-pressed={deck === "decor" && selection.length === 0}
-              onClick={openDecor}
-              aria-label="Décor"
-              aria-keyshortcuts="P"
-            >
-              <Palette size={18} />
-              <RailTip label="Décor palette" keys={["P"]} />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              aria-pressed={labels}
-              onClick={() => setLabels((v) => !v)}
-              aria-label="Show table names"
-              aria-keyshortcuts="L"
-            >
-              <Tag size={18} />
-              <RailTip label="Table names" keys={["L"]} />
-            </button>
-            <button
-              type="button"
-              className={rail}
-              onClick={toggleMood}
-              aria-label={
-                evening ? "Switch to daytime light" : "Switch to evening light"
-              }
-              aria-keyshortcuts="N"
-            >
-              {evening ? <Sun size={18} /> : <Moon size={18} />}
-              <RailTip
-                label={evening ? "Daytime light" : "Evening light"}
-                keys={["N"]}
-              />
-            </button>
-            {openVenue && (
-              <button
-                type="button"
-                className={rail}
-                aria-pressed={rain}
-                onClick={() => {
-                  view3d.current?.command("rain");
-                  setRain((v) => !v);
-                }}
-                aria-label={rain ? "Stop the rain" : "Show rain"}
+              {/* Undo, redo, picture */}
+              <div
+                className={cn(
+                  float,
+                  "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
+                )}
               >
-                <CloudRain size={18} />
-                <RailTip label={rain ? "Stop the rain" : "Rain"} keys={["W"]} />
-              </button>
-            )}
-            <span className="my-0.5 h-px w-6 bg-hairline" aria-hidden="true" />
-            <button
-              type="button"
-              className={cn(rail, "h-9 text-label-2")}
-              aria-expanded={keysOpen}
-              onClick={toggleKeys}
-              aria-label="Keyboard shortcuts"
-              aria-keyshortcuts="Shift+?"
-            >
-              <Keyboard size={16} />
-              <RailTip label="Keyboard shortcuts" keys={["?"]} />
-            </button>
-          </div>
-
-          {keysOpen && !flyout && (
-            <ShortcutSheet onClose={() => setKeysOpen(false)} />
-          )}
-
-          {/* Flyouts */}
-          {flyout && (
-            <div
-              className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 w-[min(300px,calc(100%-6rem))] -translate-y-1/2 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
-              role="dialog"
-              aria-label={
-                flyout === "table"
-                  ? "Add a table"
-                  : flyout === "chair"
-                    ? "Add chairs"
-                    : "Add an area"
-              }
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
-                  {flyout === "table"
-                    ? "Tables"
-                    : flyout === "chair"
-                      ? "Chairs"
-                      : "Stage, floor & areas"}
-                </p>
                 <button
                   type="button"
-                  onClick={() => setFlyout(null)}
-                  className="grid h-7 w-7 place-items-center rounded-full hover:bg-[#f1ece4]"
-                  aria-label="Close"
+                  className={chip}
+                  onClick={undo}
+                  disabled={!hall.canUndo}
+                  aria-label="Undo"
+                  title="Undo (Ctrl + Z)"
                 >
-                  <X size={14} />
+                  <Undo2 size={17} />
+                </button>
+                <button
+                  type="button"
+                  className={chip}
+                  onClick={redo}
+                  disabled={!hall.canRedo}
+                  aria-label="Redo"
+                  title="Redo (Ctrl + Shift + Z)"
+                >
+                  <Redo2 size={17} />
+                </button>
+                <span
+                  className="mx-0.5 h-5 w-px bg-hairline"
+                  aria-hidden="true"
+                />
+                <button
+                  type="button"
+                  className={chip}
+                  onClick={() => view3d.current?.command("snapshot")}
+                  aria-label="Save a picture of the hall"
+                  title="Save a picture"
+                >
+                  <Camera size={17} />
+                </button>
+                <span
+                  className="mx-0.5 h-5 w-px bg-hairline"
+                  aria-hidden="true"
+                />
+                {/* With the panel tucked away, its tools wait here: one click springs it open on one. */}
+                {!panelOpen &&
+                  tiles.map(({ key, label, icon: I }, n) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={cn(chip, "hall-pop")}
+                      style={{ animationDelay: `${n * 45}ms` }}
+                      onClick={() => {
+                        setSelection([]);
+                        setDeck(key);
+                        togglePanel(true);
+                      }}
+                      aria-label={`Open ${label}`}
+                      title={label}
+                    >
+                      <I size={17} />
+                    </button>
+                  ))}
+                <button
+                  type="button"
+                  className={cn(
+                    chip,
+                    "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-90",
+                    !panelOpen && "bg-night text-white hover:bg-burgundy"
+                  )}
+                  onClick={() => togglePanel()}
+                  aria-pressed={!panelOpen}
+                  aria-label={
+                    panelOpen ? "Hide the side panel" : "Show the side panel"
+                  }
+                  title={
+                    panelOpen
+                      ? "Hide the panel for a bigger hall (\\)"
+                      : "Show the panel (\\)"
+                  }
+                >
+                  {panelOpen ? (
+                    <PanelRightClose size={17} />
+                  ) : (
+                    <PanelRightOpen size={17} />
+                  )}
                 </button>
               </div>
-              {flyout === "table" && (
-                <div className="grid grid-cols-3 gap-1.5">
-                  {TABLE_PRESETS.map((p) => (
-                    <button
-                      key={p.key}
-                      type="button"
-                      onClick={() => {
-                        setFlyout(null);
-                        void placeNew(p.shape, p.capacity);
-                      }}
-                      className={cn(
-                        card,
-                        "flex flex-col items-center gap-1 px-1 py-2"
-                      )}
-                    >
-                      <TableGlyph
-                        shape={p.shape}
-                        seats={p.capacity}
-                        size={36}
-                      />
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {flyout === "chair" && (
-                <div className="grid grid-cols-3 gap-1.5">
-                  {CHAIR_GROUPS.map((g) => (
-                    <button
-                      key={g.key}
-                      type="button"
-                      onClick={() => {
-                        setFlyout(null);
-                        addChairs(g.n, g.spacing);
-                      }}
-                      className={cn(
-                        card,
-                        "flex flex-col items-center gap-1 px-1 py-2.5"
-                      )}
-                    >
-                      <span className="flex">
-                        {Array.from({ length: Math.min(g.n, 3) }, (_, i) => (
-                          <ChairGlyph
-                            key={i}
-                            type={layout.decor.chair}
-                            size={g.n > 1 ? 18 : 26}
-                          />
-                        ))}
-                      </span>
-                      {g.label}
-                    </button>
-                  ))}
-                  <p className="col-span-3 mt-1 text-[11px] text-label-2">
-                    New chairs use the hall’s chair style; change any of them in
-                    the inspector.
-                  </p>
-                </div>
-              )}
-              {flyout === "zone" && (
-                <div className="grid max-h-[340px] grid-cols-2 gap-1.5 overflow-y-auto">
-                  {ZONE_GALLERY.map((g) => (
-                    <button
-                      key={g.label}
-                      type="button"
-                      onClick={() => {
-                        setFlyout(null);
-                        addZone(g);
-                      }}
-                      className={cn(
-                        card,
-                        "flex items-center gap-2 px-2 py-2 text-left"
-                      )}
-                    >
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
-                        <ShapeGlyph shape={g.shape ?? "rect"} size={18} />
-                      </span>
-                      {g.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Zoom and camera */}
-          <div className="pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
-            <div className={cn(float, "flex items-center gap-0.5 p-1")}>
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("zoomOut")}
-                aria-label="Zoom out"
-                title="Zoom out (−)"
-              >
-                <Minus size={17} />
-              </button>
-              <span
-                className="w-12 text-center text-xs font-semibold tabular-nums text-night"
-                aria-hidden="true"
-              >
-                {cam.pct}%
-              </span>
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("zoomIn")}
-                aria-label="Zoom in"
-                title="Zoom in (+)"
-              >
-                <Plus size={17} />
-              </button>
-              <span
-                className="mx-0.5 h-5 w-px bg-hairline"
-                aria-hidden="true"
-              />
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("fit")}
-                aria-label="Fit the hall in view"
-                title="Fit (F or 0)"
-              >
-                <Maximize size={16} />
-              </button>
-            </div>
-            <div
-              className={cn(float, "flex items-center gap-0.5 p-1")}
-              role="radiogroup"
-              aria-label="Camera"
-            >
-              {(
-                [
-                  ["top", "Top", Square, "top"],
-                  ["3d", "3D", Box, "perspective"],
-                ] as const
-              ).map(([k, l, I, cmd]) => (
-                <button
-                  key={k}
-                  type="button"
-                  role="radio"
-                  aria-checked={cam.view === k}
-                  onClick={() => view3d.current?.command(cmd)}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-                >
-                  <I size={15} /> {l}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("rotateLeft")}
-                aria-label="Turn the view left"
-                title="Turn the view (or drag empty space)"
-              >
-                <RotateCcw size={16} />
-              </button>
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("rotateRight")}
-                aria-label="Turn the view right"
-                title="Turn the view (or drag empty space)"
-              >
-                <RotateCw size={16} />
-              </button>
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("tiltUp")}
-                aria-label="Look down from higher"
-                title="Look from higher (or drag down on empty space)"
-              >
-                <ChevronUp size={17} />
-              </button>
-              <button
-                type="button"
-                className={chip}
-                onClick={() => view3d.current?.command("tiltDown")}
-                aria-label="Look from lower"
-                title="Look from lower, down to eye level"
-              >
-                <ChevronDown size={17} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Side bar: planning tools and the inspector */}
-        <div
-          ref={panel}
-          inert={!panelOpen}
-          aria-hidden={!panelOpen || undefined}
-          className={cn(
-            "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]",
-            !panelOpen &&
-              "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
-          )}
-        >
-          <div
-            role="tablist"
-            aria-label="Planning tools"
-            className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
-          >
-            {tiles.map(({ key, label, icon: I, stat }) => {
-              const on = deck === key && selection.length === 0;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  role="tab"
-                  id={`hall-tab-${key}`}
-                  aria-selected={on}
-                  aria-controls="hall-panel"
-                  onClick={() => {
-                    setSelection([]);
-                    setDeck(key);
-                  }}
+              {notice && (
+                <div
+                  role="status"
                   className={cn(
-                    "group relative flex min-h-[76px] flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 text-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-                    on
-                      ? "bg-night text-white shadow-[0_8px_20px_-10px_rgba(28,7,13,0.7)]"
-                      : "text-night hover:bg-white hover:shadow-sm"
+                    float,
+                    "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "grid h-8 w-8 place-items-center rounded-full transition-transform group-hover:scale-110 motion-reduce:transition-none",
-                      on
-                        ? "bg-white/10 text-[#e9c98a]"
-                        : "bg-white text-burgundy shadow-sm"
-                    )}
-                  >
-                    <I size={16} />
-                  </span>
-                  <span className="text-[11px] font-semibold leading-none">
-                    {label}
-                  </span>
-                  <span
-                    className={cn(
-                      "max-w-full truncate px-0.5 text-[10px] leading-none",
-                      on ? "text-white/80" : "text-label-2"
-                    )}
-                  >
-                    {stat}
-                  </span>
+                  {notice}
+                </div>
+              )}
+
+              {/* Tool rail */}
+              <div
+                role="toolbar"
+                aria-label="Hall tools"
+                aria-orientation="vertical"
+                className={cn(
+                  float,
+                  "pointer-events-auto absolute right-3 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1 rounded-[26px] p-1.5"
+                )}
+              >
+                <button
+                  type="button"
+                  className={rail}
+                  aria-pressed={tool === "select"}
+                  onClick={() => setTool("select")}
+                  aria-label="Select and move"
+                  aria-keyshortcuts="V M"
+                >
+                  <MousePointer2 size={18} />
+                  <RailTip label="Move" keys={["V", "M"]} />
                 </button>
-              );
-            })}
-          </div>
-          <div
-            key={single ? `${single.type}:${single.id}` : `deck:${deck}`}
-            id="hall-panel"
-            role="tabpanel"
-            aria-labelledby={`hall-tab-${deck}`}
-            className="min-h-0 flex-1 overflow-y-auto bg-white"
-          >
-            {selTable ? (
-              <TableInspector
-                table={selTable}
-                layout={layout}
-                pos={positions[selTable.id] ?? { x: 0, y: 0 }}
-                rot={rotationOf(selTable.id)}
-                onClose={() => setSelection([])}
-                onRotate={rotateBy}
-                onRot={(d) =>
-                  setRotation({ type: "table", id: selTable.id }, d)
-                }
-                onMove={(x, y) =>
-                  moveItems([{ type: "table", id: selTable.id, x, y }])
-                }
-                onDuplicate={duplicate}
-                onDelete={remove}
-                onUpdate={(patch) => void updateTable(selTable.id, patch)}
-                onStyle={(patch) => styleTables([selTable.id], patch)}
-                onStyleAll={() => {
-                  const st = styleOf(layout, selTable.id);
-                  updateLayout((l) => ({
-                    ...l,
-                    tableStyles: {},
-                    decor: {
-                      ...l.decor,
-                      linen: st.cloth,
-                      chair: st.chair,
-                      cover: st.cover,
-                      sash: st.sash,
-                      centrepiece: st.centrepiece,
-                      flower: st.flower,
-                    },
-                  }));
-                  say("Every table now has this look");
-                }}
-                onResetStyle={() =>
-                  updateLayout((l) => {
-                    const rest = { ...l.tableStyles };
-                    delete rest[selTable.id];
-                    return { ...l, tableStyles: rest };
-                  })
-                }
-                onUnseat={(guestId) => onAssignTable(guestId, null)}
-              />
-            ) : selZone ? (
-              <ZoneInspector
-                zone={selZone}
-                layout={layout}
-                onClose={() => setSelection([])}
-                onChange={(p) => patchZone(selZone.id, p)}
-                onRotate={rotateBy}
-                onDuplicate={duplicate}
-                onDelete={remove}
-              />
-            ) : selChair ? (
-              <ChairInspector
-                chair={selChair}
-                layout={layout}
-                onClose={() => setSelection([])}
-                onChange={(p) => patchChair(selChair.id, p)}
-                onRotate={rotateBy}
-                onDuplicate={duplicate}
-                onDelete={remove}
-              />
-            ) : selection.length > 1 ? (
-              <MultiInspector
-                count={selection.length}
-                tables={selTables.length}
-                onClose={() => setSelection([])}
-                onAlign={align}
-                onDelete={remove}
-                onStyle={(p) =>
-                  styleTables(
-                    selTables.map((t) => t.id),
-                    p
-                  )
-                }
-              />
-            ) : deck === "guests" ? (
-              <GuestsPanel
-                guests={data.unseatedGuests}
-                tables={data.tables}
-                assigning={assigning}
-                onStartAssign={setAssigning}
-                onAssign={assignTo}
-                onFocusTable={(id) => {
-                  setSelection([{ type: "table", id }]);
-                  view3d.current?.focus(`table:${id}`);
-                }}
-              />
-            ) : deck === "room" ? (
-              <>
-                <RoomPanel
-                  layout={layout}
-                  onChange={(patch) =>
-                    updateLayout((l) => ({ ...l, ...patch }))
-                  }
-                  onResetZones={() =>
-                    updateLayout((l) => ({
-                      ...l,
-                      zones: defaultZones(l.width, l.length),
-                    }))
-                  }
-                  layers={layers}
-                  selection={selection}
-                  onSelectLayer={(p) => {
-                    setSelection([p]);
-                    view3d.current?.focus(`${p.type}:${p.id}`);
-                  }}
+                <button
+                  type="button"
+                  className={rail}
+                  aria-pressed={tool === "hand"}
+                  onClick={() => setTool("hand")}
+                  aria-label="Pan around"
+                  aria-keyshortcuts="H D"
+                >
+                  <Hand size={18} />
+                  <RailTip
+                    label="Drag the view (or hold Space)"
+                    keys={["H", "D"]}
+                  />
+                </button>
+                <button
+                  type="button"
+                  className={rail}
+                  onClick={autoLayout}
+                  disabled={busy !== null}
+                  aria-label="Auto layout"
+                  aria-keyshortcuts="A"
+                >
+                  <Sparkles size={18} />
+                  <RailTip label="Auto layout" keys={["A"]} />
+                </button>
+                <span
+                  className="my-0.5 h-px w-6 bg-hairline"
+                  aria-hidden="true"
                 />
-                <LayoutSummary
-                  layout={layout}
-                  tables={scene.tables}
-                  onFocus={(id) => {
-                    setSelection([{ type: "table", id }]);
-                    view3d.current?.focus(`table:${id}`);
-                  }}
+                <button
+                  type="button"
+                  className={rail}
+                  aria-expanded={flyout === "table"}
+                  onClick={() => setFlyout(flyout === "table" ? null : "table")}
+                  aria-label="Add a table"
+                  aria-keyshortcuts="T"
+                >
+                  <CirclePlus size={18} />
+                  <RailTip label="Add a table" keys={["T"]} />
+                </button>
+                <button
+                  type="button"
+                  className={rail}
+                  aria-expanded={flyout === "chair"}
+                  onClick={() => setFlyout(flyout === "chair" ? null : "chair")}
+                  aria-label="Add chairs"
+                  aria-keyshortcuts="C"
+                >
+                  <Armchair size={18} />
+                  <RailTip label="Add chairs" keys={["C"]} />
+                </button>
+                <button
+                  type="button"
+                  className={rail}
+                  aria-expanded={flyout === "zone"}
+                  onClick={() => setFlyout(flyout === "zone" ? null : "zone")}
+                  aria-label="Add a stage, dance floor or area"
+                  aria-keyshortcuts="S"
+                >
+                  <Shapes size={18} />
+                  <RailTip label="Stage, dance floor or area" keys={["S"]} />
+                </button>
+                <span
+                  className="my-0.5 h-px w-6 bg-hairline"
+                  aria-hidden="true"
                 />
-              </>
-            ) : deck === "fit" ? (
-              <>
-                {studioStatus === "ready" && (
-                  <Section title="Three ways to lay out the hall">
+                <button
+                  type="button"
+                  className={rail}
+                  aria-pressed={deck === "decor" && selection.length === 0}
+                  onClick={openDecor}
+                  aria-label="Décor"
+                  aria-keyshortcuts="P"
+                >
+                  <Palette size={18} />
+                  <RailTip label="Décor palette" keys={["P"]} />
+                </button>
+                <button
+                  type="button"
+                  className={rail}
+                  aria-pressed={labels}
+                  onClick={() => setLabels((v) => !v)}
+                  aria-label="Show table names"
+                  aria-keyshortcuts="L"
+                >
+                  <Tag size={18} />
+                  <RailTip label="Table names" keys={["L"]} />
+                </button>
+                <button
+                  type="button"
+                  className={rail}
+                  onClick={toggleMood}
+                  aria-label={
+                    evening
+                      ? "Switch to daytime light"
+                      : "Switch to evening light"
+                  }
+                  aria-keyshortcuts="N"
+                >
+                  {evening ? <Sun size={18} /> : <Moon size={18} />}
+                  <RailTip
+                    label={evening ? "Daytime light" : "Evening light"}
+                    keys={["N"]}
+                  />
+                </button>
+                {openVenue && (
+                  <button
+                    type="button"
+                    className={rail}
+                    aria-pressed={rain}
+                    onClick={() => {
+                      view3d.current?.command("rain");
+                      setRain((v) => !v);
+                    }}
+                    aria-label={rain ? "Stop the rain" : "Show rain"}
+                  >
+                    <CloudRain size={18} />
+                    <RailTip
+                      label={rain ? "Stop the rain" : "Rain"}
+                      keys={["W"]}
+                    />
+                  </button>
+                )}
+                <span
+                  className="my-0.5 h-px w-6 bg-hairline"
+                  aria-hidden="true"
+                />
+                <button
+                  type="button"
+                  className={cn(rail, "text-label-2")}
+                  aria-expanded={keysOpen}
+                  onClick={toggleKeys}
+                  aria-label="Keyboard shortcuts"
+                  aria-keyshortcuts="Shift+?"
+                >
+                  <Keyboard size={16} />
+                  <RailTip label="Keyboard shortcuts" keys={["?"]} />
+                </button>
+              </div>
+
+              {keysOpen && !flyout && (
+                <ShortcutSheet onClose={() => setKeysOpen(false)} />
+              )}
+
+              {/* Flyouts */}
+              {flyout && (
+                <div
+                  className="pointer-events-auto absolute right-[4.25rem] top-1/2 z-10 w-[min(300px,calc(100%-6rem))] -translate-y-1/2 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+                  role="dialog"
+                  aria-label={
+                    flyout === "table"
+                      ? "Add a table"
+                      : flyout === "chair"
+                        ? "Add chairs"
+                        : "Add an area"
+                  }
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
+                      {flyout === "table"
+                        ? "Tables"
+                        : flyout === "chair"
+                          ? "Chairs"
+                          : "Stage, floor & areas"}
+                    </p>
                     <button
                       type="button"
-                      onClick={suggestLayouts}
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      onClick={() => setFlyout(null)}
+                      className="grid h-7 w-7 place-items-center rounded-full hover:bg-[#f1ece4]"
+                      aria-label="Close"
                     >
-                      <Sparkles size={15} /> Suggest three layouts
+                      <X size={14} />
                     </button>
-                    <p className="mt-2 text-[11px] text-label-2">
-                      Ranked by seats, sightlines, circulation and service. Each
-                      option explains its trade-off.
-                    </p>
-                  </Section>
-                )}
-                {suggestions && (
-                  <SuggestedLayouts
-                    options={suggestions}
-                    tables={data.tables.map((t) => ({
-                      id: t.id,
-                      shape: t.shape,
-                      capacity: t.capacity,
-                      occupied: t.occupiedSeats,
-                    }))}
-                    onChoose={chooseSuggestion}
-                    onClose={() => setSuggestions(null)}
+                  </div>
+                  {flyout === "table" && (
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {TABLE_PRESETS.map((p) => (
+                        <button
+                          key={p.key}
+                          type="button"
+                          onClick={() => {
+                            setFlyout(null);
+                            void placeNew(p.shape, p.capacity);
+                          }}
+                          className={cn(
+                            card,
+                            "flex flex-col items-center gap-1 px-1 py-2"
+                          )}
+                        >
+                          <TableGlyph
+                            shape={p.shape}
+                            seats={p.capacity}
+                            size={36}
+                          />
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {flyout === "table" && (
+                    <div className="mt-2">
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-label-2">
+                        Rows of tables
+                      </p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {TABLE_ROWS.map((r) => (
+                          <button
+                            key={r.key}
+                            type="button"
+                            onClick={() => {
+                              setFlyout(null);
+                              void addTableRow(r.n, r.perRow);
+                            }}
+                            className={cn(
+                              card,
+                              "flex flex-col items-center gap-1 px-1 py-2"
+                            )}
+                          >
+                            <span className="flex flex-wrap justify-center gap-0.5">
+                              {Array.from(
+                                { length: Math.min(r.n, 6) },
+                                (_, i) => (
+                                  <span
+                                    key={i}
+                                    className="h-2 w-2 rounded-full bg-burgundy/70"
+                                  />
+                                )
+                              )}
+                            </span>
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {flyout === "chair" && (
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {CHAIR_GROUPS.map((g) => (
+                        <button
+                          key={g.key}
+                          type="button"
+                          onClick={() => {
+                            setFlyout(null);
+                            addChairs(g.n, g.spacing, g.seat);
+                          }}
+                          className={cn(
+                            card,
+                            "flex flex-col items-center gap-1 px-1 py-2.5"
+                          )}
+                        >
+                          <span className="flex">
+                            {Array.from(
+                              { length: Math.min(g.n, 3) },
+                              (_, i) => (
+                                <ChairGlyph
+                                  key={i}
+                                  type={layout.decor.chair}
+                                  size={g.n > 1 ? 18 : 26}
+                                />
+                              )
+                            )}
+                          </span>
+                          {g.label}
+                        </button>
+                      ))}
+                      <p className="col-span-3 mt-1 text-[11px] text-label-2">
+                        New chairs use the hall’s chair style; change any of
+                        them in the inspector.
+                      </p>
+                    </div>
+                  )}
+                  {flyout === "zone" && (
+                    <div className="grid max-h-[340px] grid-cols-2 gap-1.5 overflow-y-auto">
+                      {ZONE_GALLERY.map((g) => (
+                        <button
+                          key={g.label}
+                          type="button"
+                          onClick={() => {
+                            setFlyout(null);
+                            addZone(g);
+                          }}
+                          className={cn(
+                            card,
+                            "flex items-center gap-2 px-2 py-2 text-left"
+                          )}
+                        >
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
+                            <ShapeGlyph shape={g.shape ?? "rect"} size={18} />
+                          </span>
+                          {g.label}
+                        </button>
+                      ))}
+                      <p className="col-span-2 mt-1 text-[11px] font-semibold uppercase tracking-wide text-label-2">
+                        On the stage
+                      </p>
+                      {(
+                        [
+                          ["podium", "Podium"],
+                          ["lectern", "Lectern"],
+                          ["arch", "Arch"],
+                        ] as const
+                      ).map(([kind, label]) => (
+                        <button
+                          key={kind}
+                          type="button"
+                          onClick={() => {
+                            setFlyout(null);
+                            addStageItem(kind);
+                          }}
+                          className={cn(
+                            card,
+                            "flex items-center gap-2 px-2 py-2 text-left"
+                          )}
+                        >
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f6f1e8] text-burgundy">
+                            <ShapeGlyph shape="rect" size={18} />
+                          </span>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Zoom and camera */}
+              <div className="pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+                <div className={cn(float, "flex items-center gap-0.5 p-1")}>
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("zoomOut")}
+                    aria-label="Zoom out"
+                    title="Zoom out (−)"
+                  >
+                    <Minus size={17} />
+                  </button>
+                  <span
+                    className="w-12 text-center text-xs font-semibold tabular-nums text-night"
+                    aria-hidden="true"
+                  >
+                    {cam.pct}%
+                  </span>
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("zoomIn")}
+                    aria-label="Zoom in"
+                    title="Zoom in (+)"
+                  >
+                    <Plus size={17} />
+                  </button>
+                  <span
+                    className="mx-0.5 h-5 w-px bg-hairline"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("fit")}
+                    aria-label="Fit the hall in view"
+                    title="Fit (F or 0)"
+                  >
+                    <Maximize size={16} />
+                  </button>
+                </div>
+                <div
+                  className={cn(float, "flex items-center gap-0.5 p-1")}
+                  role="radiogroup"
+                  aria-label="Camera"
+                >
+                  {(
+                    [
+                      ["top", "Top", Square, "top"],
+                      ["3d", "3D", Box, "perspective"],
+                    ] as const
+                  ).map(([k, l, I, cmd]) => (
+                    <button
+                      key={k}
+                      type="button"
+                      role="radio"
+                      aria-checked={cam.view === k}
+                      onClick={() => view3d.current?.command(cmd)}
+                      className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                    >
+                      <I size={15} /> {l}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("rotateLeft")}
+                    aria-label="Turn the view left"
+                    title="Turn the view (or drag empty space)"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("rotateRight")}
+                    aria-label="Turn the view right"
+                    title="Turn the view (or drag empty space)"
+                  >
+                    <RotateCw size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("tiltUp")}
+                    aria-label="Look down from higher"
+                    title="Look from higher (or drag down on empty space)"
+                  >
+                    <ChevronUp size={17} />
+                  </button>
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => view3d.current?.command("tiltDown")}
+                    aria-label="Look from lower"
+                    title="Look from lower, down to eye level"
+                  >
+                    <ChevronDown size={17} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Side bar: planning tools and the inspector */}
+            <div
+              ref={panel}
+              inert={!panelOpen}
+              aria-hidden={!panelOpen || undefined}
+              className={cn(
+                "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]",
+                !panelOpen &&
+                  "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
+              )}
+            >
+              <div
+                role="tablist"
+                aria-label="Planning tools"
+                className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
+              >
+                {tiles.map(({ key, label, icon: I, stat }) => {
+                  const on = deck === key && selection.length === 0;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      role="tab"
+                      id={`hall-tab-${key}`}
+                      aria-selected={on}
+                      aria-controls="hall-panel"
+                      onClick={() => {
+                        setSelection([]);
+                        setDeck(key);
+                      }}
+                      className={cn(
+                        "group relative flex min-h-[76px] flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 text-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+                        on
+                          ? "bg-night text-white shadow-[0_8px_20px_-10px_rgba(28,7,13,0.7)]"
+                          : "text-night hover:bg-white hover:shadow-sm"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "grid h-8 w-8 place-items-center rounded-full transition-transform group-hover:scale-110 motion-reduce:transition-none",
+                          on
+                            ? "bg-white/10 text-[#e9c98a]"
+                            : "bg-white text-burgundy shadow-sm"
+                        )}
+                      >
+                        <I size={16} />
+                      </span>
+                      <span className="text-[11px] font-semibold leading-none">
+                        {label}
+                      </span>
+                      <span
+                        className={cn(
+                          "max-w-full truncate px-0.5 text-[10px] leading-none",
+                          on ? "text-white/80" : "text-label-2"
+                        )}
+                      >
+                        {stat}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div
+                key={single ? `${single.type}:${single.id}` : `deck:${deck}`}
+                id="hall-panel"
+                role="tabpanel"
+                aria-labelledby={`hall-tab-${deck}`}
+                className="min-h-0 flex-1 overflow-y-auto bg-white"
+              >
+                {selection.length > 0 && (
+                  <GroupBar
+                    count={selection.length}
+                    group={selGroup}
+                    onGroup={groupSelected}
+                    onRename={renameGroup}
+                    onUngroup={ungroup}
                   />
                 )}
-                <FitPanel
-                  presets={fitPresets}
-                  preset={preset}
-                  onPreset={setFitPreset}
-                  fitEmpty={fitEmpty}
-                  fitAround={fitAround}
-                  aisle={aisle}
-                  onAisle={setAisle}
-                  buffer={buffer}
-                  onBuffer={setBuffer}
-                  target={target}
-                  shortBy={shortBy}
-                  tablesNeeded={tablesNeeded}
-                  gap={gap}
-                  busy={busy}
-                  onFill={fill}
-                  tableCount={data.tables.length}
-                  emptyCount={
-                    data.tables.filter((t) => t.occupiedSeats === 0).length
-                  }
-                  crowded={warnCount}
-                  onAddOne={() =>
-                    void placeNew(
-                      preset.shape,
-                      preset.capacity,
-                      undefined,
-                      false
-                    )
-                  }
-                  onRemove={(n) => void removeTables(n)}
-                  onFixCrowding={() => void fixCrowding()}
-                  onAutoLayout={autoLayout}
-                />
-              </>
-            ) : deck === "seat" ? (
-              <SeatPanel
-                plan={seatPlan.plan}
-                units={seatPlan.units}
-                readiness={data.stats.readinessPct}
-                busy={busy}
-                onSeat={seatEveryone}
-              />
-            ) : deck === "thermal" ? (
-              <ThermalPanel
-                report={thermal}
-                status={studioStatus}
-                cooling={layout.venue.cooling}
-                onCooling={patchCooling}
-                placing={placingUnit}
-                onTogglePlacing={() => setPlacingUnit((p) => !p)}
-                onAddUnit={addUnitAtCentre}
-                onDeleteUnit={deleteUnit}
-                onUpdateUnit={updateUnit}
-                onFocusArea={(id) => {
-                  setSelection([{ type: "zone", id }]);
-                  view3d.current?.focus(`zone:${id}`);
-                }}
-                heat={heat}
-                onToggleHeat={() => setHeat((h) => !h)}
-              />
-            ) : deck === "catering" ? (
-              <CateringPanel
-                report={catering}
-                status={studioStatus}
-                plan={cateringPlan}
-                guests={guests}
-                onPlan={patchCatering}
-                onExport={exportCatering}
-                exporting={exporting}
-              />
-            ) : deck === "risk" ? (
-              <RiskPanel
-                report={risk}
-                status={studioStatus}
-                eventDate={eventDate}
-                eventId={eventId}
-                addedRiskIds={addedRiskIds}
-              />
-            ) : (
-              <DecorPanel
-                layout={layout}
-                onDecor={(decor) => updateLayout((l) => ({ ...l, decor }))}
-                onLayout={(patch) => updateLayout((l) => ({ ...l, ...patch }))}
-                styledCount={Object.keys(layout.tableStyles).length}
-                onResetTables={() =>
-                  updateLayout((l) => ({ ...l, tableStyles: {} }))
-                }
-              />
-            )}
+                {selTable ? (
+                  <TableInspector
+                    table={selTable}
+                    layout={layout}
+                    pos={positions[selTable.id] ?? { x: 0, y: 0 }}
+                    rot={rotationOf(selTable.id)}
+                    onClose={() => setSelection([])}
+                    onRotate={rotateBy}
+                    onRot={(d) =>
+                      setRotation({ type: "table", id: selTable.id }, d)
+                    }
+                    onMove={(x, y) =>
+                      moveItems([{ type: "table", id: selTable.id, x, y }])
+                    }
+                    onDuplicate={duplicate}
+                    onDelete={remove}
+                    onUpdate={(patch) => void updateTable(selTable.id, patch)}
+                    onStyle={(patch) => styleTables([selTable.id], patch)}
+                    onStyleAll={() => {
+                      const st = styleOf(layout, selTable.id);
+                      updateLayout((l) => ({
+                        ...l,
+                        tableStyles: {},
+                        decor: {
+                          ...l.decor,
+                          linen: st.cloth,
+                          chair: st.chair,
+                          cover: st.cover,
+                          sash: st.sash,
+                          centrepiece: st.centrepiece,
+                          flower: st.flower,
+                        },
+                      }));
+                      say("Every table now has this look");
+                    }}
+                    onResetStyle={() =>
+                      updateLayout((l) => {
+                        const rest = { ...l.tableStyles };
+                        delete rest[selTable.id];
+                        return { ...l, tableStyles: rest };
+                      })
+                    }
+                    onUnseat={(guestId) => onAssignTable(guestId, null)}
+                  />
+                ) : selZone ? (
+                  <ZoneInspector
+                    zone={selZone}
+                    layout={layout}
+                    onClose={() => setSelection([])}
+                    onChange={(p) => patchZone(selZone.id, p)}
+                    onRotate={rotateBy}
+                    onDuplicate={duplicate}
+                    onDelete={remove}
+                    stageItems={layout.stageItems.filter(
+                      (s) => s.stageId === selZone.id
+                    )}
+                    onStageItem={(id, patch) =>
+                      updateLayout((l) => ({
+                        ...l,
+                        stageItems: l.stageItems.map((s) =>
+                          s.id === id ? { ...s, ...patch } : s
+                        ),
+                      }))
+                    }
+                    onRemoveStageItem={(id) =>
+                      updateLayout((l) => ({
+                        ...l,
+                        stageItems: l.stageItems.filter((s) => s.id !== id),
+                      }))
+                    }
+                  />
+                ) : selChair ? (
+                  <ChairInspector
+                    chair={selChair}
+                    layout={layout}
+                    onClose={() => setSelection([])}
+                    onChange={(p) => patchChair(selChair.id, p)}
+                    onRotate={rotateBy}
+                    onDuplicate={duplicate}
+                    onDelete={remove}
+                  />
+                ) : selection.length > 1 ? (
+                  <MultiInspector
+                    count={selection.length}
+                    tables={selTables.length}
+                    onClose={() => setSelection([])}
+                    onAlign={align}
+                    onDelete={remove}
+                    onStyle={(p) =>
+                      styleTables(
+                        selTables.map((t) => t.id),
+                        p
+                      )
+                    }
+                  />
+                ) : deck === "guests" ? (
+                  <GuestsPanel
+                    guests={data.unseatedGuests}
+                    tables={data.tables}
+                    assigning={assigning}
+                    onStartAssign={setAssigning}
+                    onAssign={assignTo}
+                    onFocusTable={(id) => {
+                      setSelection([{ type: "table", id }]);
+                      view3d.current?.focus(`table:${id}`);
+                    }}
+                  />
+                ) : deck === "room" ? (
+                  <>
+                    <RoomPanel
+                      layout={layout}
+                      onChange={(patch) =>
+                        updateLayout((l) => ({ ...l, ...patch }))
+                      }
+                      onResetZones={() =>
+                        updateLayout((l) => ({
+                          ...l,
+                          zones: defaultZones(l.width, l.length),
+                        }))
+                      }
+                      layers={layers}
+                      selection={selection}
+                      onSelectLayer={(p) => {
+                        setSelection([p]);
+                        view3d.current?.focus(`${p.type}:${p.id}`);
+                      }}
+                    />
+                    <LayoutSummary
+                      layout={layout}
+                      tables={scene.tables}
+                      onFocus={(id) => {
+                        setSelection([{ type: "table", id }]);
+                        view3d.current?.focus(`table:${id}`);
+                      }}
+                    />
+                  </>
+                ) : deck === "fit" ? (
+                  <>
+                    {studioStatus === "ready" && (
+                      <Section title="Three ways to lay out the hall">
+                        <button
+                          type="button"
+                          onClick={suggestLayouts}
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                        >
+                          <Sparkles size={15} /> Suggest three layouts
+                        </button>
+                        <p className="mt-2 text-[11px] text-label-2">
+                          Ranked by seats, sightlines, circulation and service.
+                          Each option explains its trade-off.
+                        </p>
+                      </Section>
+                    )}
+                    {suggestions && (
+                      <SuggestedLayouts
+                        options={suggestions}
+                        tables={data.tables.map((t) => ({
+                          id: t.id,
+                          shape: t.shape,
+                          capacity: t.capacity,
+                          occupied: t.occupiedSeats,
+                        }))}
+                        onChoose={chooseSuggestion}
+                        onClose={() => setSuggestions(null)}
+                      />
+                    )}
+                    <FitPanel
+                      presets={fitPresets}
+                      preset={preset}
+                      onPreset={setFitPreset}
+                      fitEmpty={fitEmpty}
+                      fitAround={fitAround}
+                      aisle={aisle}
+                      onAisle={setAisle}
+                      buffer={buffer}
+                      onBuffer={setBuffer}
+                      target={target}
+                      shortBy={shortBy}
+                      tablesNeeded={tablesNeeded}
+                      gap={gap}
+                      busy={busy}
+                      onFill={fill}
+                      tableCount={data.tables.length}
+                      emptyCount={
+                        data.tables.filter((t) => t.occupiedSeats === 0).length
+                      }
+                      crowded={warnCount}
+                      onAddOne={() =>
+                        void placeNew(
+                          preset.shape,
+                          preset.capacity,
+                          undefined,
+                          false
+                        )
+                      }
+                      onRemove={(n) => void removeTables(n)}
+                      onFixCrowding={() => void fixCrowding()}
+                      onAutoLayout={autoLayout}
+                    />
+                  </>
+                ) : deck === "seat" ? (
+                  <SeatPanel
+                    plan={seatPlan.plan}
+                    units={seatPlan.units}
+                    readiness={data.stats.readinessPct}
+                    busy={busy}
+                    onSeat={seatEveryone}
+                  />
+                ) : deck === "thermal" ? (
+                  <ThermalPanel
+                    report={thermal}
+                    status={studioStatus}
+                    cooling={layout.venue.cooling}
+                    onCooling={patchCooling}
+                    placing={placingUnit}
+                    onTogglePlacing={() => setPlacingUnit((p) => !p)}
+                    onAddUnit={addUnitAtCentre}
+                    onDeleteUnit={deleteUnit}
+                    onUpdateUnit={updateUnit}
+                    onFocusArea={(id) => {
+                      setSelection([{ type: "zone", id }]);
+                      view3d.current?.focus(`zone:${id}`);
+                    }}
+                    heat={heat}
+                    onToggleHeat={() => setHeat((h) => !h)}
+                  />
+                ) : deck === "catering" ? (
+                  <CateringPanel
+                    report={catering}
+                    status={studioStatus}
+                    plan={cateringPlan}
+                    guests={guests}
+                    onPlan={patchCatering}
+                    onExport={exportCatering}
+                    exporting={exporting}
+                  />
+                ) : deck === "risk" ? (
+                  <RiskPanel
+                    report={risk}
+                    status={studioStatus}
+                    eventDate={eventDate}
+                    eventId={eventId}
+                    addedRiskIds={addedRiskIds}
+                  />
+                ) : (
+                  <DecorPanel
+                    layout={layout}
+                    onDecor={(decor) => updateLayout((l) => ({ ...l, decor }))}
+                    onLayout={(patch) =>
+                      updateLayout((l) => ({ ...l, ...patch }))
+                    }
+                    styledCount={Object.keys(layout.tableStyles).length}
+                    onResetTables={() =>
+                      updateLayout((l) => ({ ...l, tableStyles: {} }))
+                    }
+                  />
+                )}
+              </div>
+              <p className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block">
+                Drag a table to move it · drag empty space to turn the hall ·
+                right-drag or Space to pan · Shift-drag to select many · press ?
+                for shortcuts
+              </p>
+            </div>
           </div>
-          <p className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block">
-            Drag a table to move it · drag empty space to turn the hall ·
-            right-drag or Space to pan · Shift-drag to select many · press ? for
-            shortcuts
-          </p>
-        </div>
-      </div>
+        </>
+      )}
     </section>
+  );
+}
+
+/**
+ * Grouping, above whatever is selected: name a set of items so it moves as one, rename it, or
+ * take it apart. A group is a way of holding things together, not a copy of them.
+ */
+function GroupBar({
+  count,
+  group,
+  onGroup,
+  onRename,
+  onUngroup,
+}: {
+  count: number;
+  group: ItemGroup | null;
+  onGroup: (name: string) => void;
+  onRename: (id: string, name: string) => void;
+  onUngroup: (id: string) => void;
+}) {
+  const [name, setName] = React.useState("");
+  const [editing, setEditing] = React.useState(false);
+  React.useEffect(() => {
+    setName(group?.name ?? "");
+    setEditing(false);
+  }, [group?.id, group?.name]);
+
+  return (
+    <div className="border-b border-hairline bg-[#faf7f2] px-4 py-2.5">
+      {group ? (
+        <div className="flex items-center gap-2">
+          {editing ? (
+            <form
+              className="flex min-w-0 flex-1 items-center gap-1.5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                onRename(group.id, name);
+                setEditing(false);
+              }}
+            >
+              <input
+                autoFocus
+                value={name}
+                aria-label="Group name"
+                onChange={(e) => setName(e.target.value.slice(0, 60))}
+                className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
+              />
+              <button
+                type="submit"
+                className="min-h-9 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory"
+              >
+                Save
+              </button>
+            </form>
+          ) : (
+            <>
+              <p className="min-w-0 flex-1 truncate text-xs font-semibold text-night">
+                {group.name}
+                <span className="ml-1.5 font-normal text-label-2">
+                  {group.items.length} items
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="min-h-9 rounded-full px-3 text-xs font-semibold text-burgundy hover:bg-burgundy/10"
+              >
+                Rename
+              </button>
+              <button
+                type="button"
+                onClick={() => onUngroup(group.id)}
+                className="min-h-9 rounded-full px-3 text-xs font-semibold text-label-2 hover:bg-black/5"
+              >
+                Ungroup
+              </button>
+            </>
+          )}
+        </div>
+      ) : count > 1 ? (
+        <form
+          className="flex items-center gap-1.5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onGroup(name);
+            setName("");
+          }}
+        >
+          <input
+            value={name}
+            aria-label="Name this group"
+            placeholder="Name this group"
+            onChange={(e) => setName(e.target.value.slice(0, 60))}
+            className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
+          />
+          <button
+            type="submit"
+            className="min-h-9 shrink-0 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory hover:bg-wine"
+          >
+            Group {count}
+          </button>
+        </form>
+      ) : (
+        <p className="text-[11px] text-label-2">
+          Select two or more items to group them, so they move together.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Simple mode on one side, the full studio on the other, over the same document (7.2). */
+function ModeSwitch({
+  mode,
+  onChange,
+}: {
+  mode: "simple" | "studio";
+  onChange: (m: "simple" | "studio") => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="How much detail to show"
+      className="inline-flex rounded-full border border-hairline bg-white p-1"
+    >
+      {(
+        [
+          ["simple", "Simple"],
+          ["studio", "Full studio"],
+        ] as const
+      ).map(([key, label]) => (
+        <button
+          key={key}
+          type="button"
+          role="radio"
+          aria-checked={mode === key}
+          onClick={() => onChange(key)}
+          className={cn(
+            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+            mode === key
+              ? "bg-burgundy text-ivory"
+              : "text-label-2 hover:bg-burgundy/10"
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
   );
 }
 

@@ -272,6 +272,33 @@ export type Database = {
           },
         ];
       };
+      digest_log: {
+        Row: {
+          sent_at: string;
+          user_id: string;
+          week_start: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          sent_at?: string;
+          user_id: string;
+          week_start: string;
+        };
+        Update: {
+          sent_at?: string;
+          user_id?: string;
+          week_start?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "digest_log_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       email_log: {
         Row: {
           created_at: string;
@@ -414,45 +441,6 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      event_weather: {
-        Row: {
-          event_id: string;
-          fetched_at: string;
-          latitude: number | null;
-          longitude: number | null;
-          payload: NonNullable<Json>;
-          resolved_name: string | null;
-          source: string;
-        };
-        ComputedFields: never;
-        Insert: {
-          event_id: string;
-          fetched_at?: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          payload: NonNullable<Json>;
-          resolved_name?: string | null;
-          source: string;
-        };
-        Update: {
-          event_id?: string;
-          fetched_at?: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          payload?: NonNullable<Json>;
-          resolved_name?: string | null;
-          source?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "event_weather_event_id_fkey";
-            columns: ["event_id"];
-            isOneToOne: true;
-            referencedRelation: "events";
             referencedColumns: ["id"];
           },
         ];
@@ -659,6 +647,42 @@ export type Database = {
             columns: ["payment_id"];
             isOneToOne: false;
             referencedRelation: "payments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: {
+          created_at: string;
+          digest: string;
+          quiet_from: string;
+          quiet_to: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          digest?: string;
+          quiet_from?: string;
+          quiet_to?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          digest?: string;
+          quiet_from?: string;
+          quiet_to?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -954,6 +978,7 @@ export type Database = {
       };
       tasks: {
         Row: {
+          advice_source: string | null;
           completed_at: string | null;
           created_at: string;
           deleted_at: string | null;
@@ -962,6 +987,7 @@ export type Database = {
           due_date: string | null;
           event_id: string;
           id: string;
+          mitigation: string | null;
           owner_id: string | null;
           phase: string;
           sort: number;
@@ -969,11 +995,13 @@ export type Database = {
           source_key: string | null;
           status: string;
           template_version: number | null;
+          time_slot: string | null;
           title: string;
           updated_at: string;
         };
         ComputedFields: never;
         Insert: {
+          advice_source?: string | null;
           completed_at?: string | null;
           created_at?: string;
           deleted_at?: string | null;
@@ -982,6 +1010,7 @@ export type Database = {
           due_date?: string | null;
           event_id: string;
           id?: string;
+          mitigation?: string | null;
           owner_id?: string | null;
           phase: string;
           sort?: number;
@@ -989,10 +1018,12 @@ export type Database = {
           source_key?: string | null;
           status?: string;
           template_version?: number | null;
+          time_slot?: string | null;
           title: string;
           updated_at?: string;
         };
         Update: {
+          advice_source?: string | null;
           completed_at?: string | null;
           created_at?: string;
           deleted_at?: string | null;
@@ -1001,6 +1032,7 @@ export type Database = {
           due_date?: string | null;
           event_id?: string;
           id?: string;
+          mitigation?: string | null;
           owner_id?: string | null;
           phase?: string;
           sort?: number;
@@ -1008,6 +1040,7 @@ export type Database = {
           source_key?: string | null;
           status?: string;
           template_version?: number | null;
+          time_slot?: string | null;
           title?: string;
           updated_at?: string;
         };

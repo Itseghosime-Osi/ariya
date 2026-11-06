@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Great_Vibes, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { AppSplash, splashScript } from "@/components/layout/app-splash";
+import { OfflineCache } from "@/components/layout/offline-cache";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -78,6 +79,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
         <AppSplash />
+        <OfflineCache />
         {children}
       </body>
     </html>

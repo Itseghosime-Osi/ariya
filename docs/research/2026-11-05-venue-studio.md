@@ -1,6 +1,6 @@
 # The Venue Studio — research and design
 
-**Status:** research complete; planned into work in [the build checklist](../plans/2026-11-05-venue-studio-build-checklist.md)
+**Status:** built (2026-11-06); tracked in [the build checklist](../plans/2026-11-05-venue-studio-build-checklist.md)
 **Date:** 2026-11-05
 **Scope:** the 3D seating studio (`/events/[eventId]/seating`), its auto-layout, venue coverage, thermal modelling, risk advisory, catering quantities, and a checklist page.
 

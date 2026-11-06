@@ -84,6 +84,12 @@ export interface TableStyle {
   flower?: string;
 }
 
+/**
+ * What a free chair is for. The couple and the celebrant sit in chairs that belong to the
+ * ceremony rather than the seating plan, and a couch is the same object at a larger scale.
+ */
+export type SeatKind = "guest" | "couple" | "celebrant" | "couch";
+
 /** A chair standing on its own (a lounge row, a couple's chairs, extra seats). */
 export interface FreeChair {
   id: string;
@@ -91,6 +97,29 @@ export interface FreeChair {
   y: number;
   rot: number;
   chair?: ChairType;
+  /** Absent means an ordinary guest chair. */
+  seat?: SeatKind;
+  /** How many people it holds: two on a couple's seat or a couch, one otherwise. */
+  seats?: number;
+}
+
+/** A named group of items the host can select and move as one. */
+export interface ItemGroup {
+  id: string;
+  name: string;
+  items: { type: "table" | "zone" | "chair"; id: string }[];
+}
+
+/** A fixture that belongs to a stage and moves with it: a podium, a lectern, an arch. */
+export interface StageItem {
+  id: string;
+  stageId: string;
+  kind: "podium" | "lectern" | "arch";
+  /** −0.5 to 0.5 across the stage, left to right. */
+  across: number;
+  /** 0 at the stage's front edge, 1 at its back. */
+  depth: number;
+  label?: string;
 }
 
 export type Spacing = "snug" | "comfortable" | "spacious";
@@ -109,6 +138,10 @@ export interface HallLayout {
   /** Per-table styling by table id. */
   tableStyles: Record<string, TableStyle>;
   chairs: FreeChair[];
+  /** Named groups of items the host can select and move together. */
+  groups: ItemGroup[];
+  /** Podiums, lecterns and arches that sit on a stage and move with it. */
+  stageItems: StageItem[];
   mood: "day" | "evening";
   chandeliers: boolean;
   /** Ceiling height in metres. */
@@ -386,6 +419,8 @@ export function defaultLayout(width = 30, length = 20): HallLayout {
     rotations: {},
     tableStyles: {},
     chairs: [],
+    groups: [],
+    stageItems: [],
     mood: "day",
     chandeliers: false,
     ceiling: 5,
@@ -449,9 +484,29 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
         )
       : {},
     chairs: Array.isArray(r.chairs)
-      ? r.chairs.filter(
-          (c): c is FreeChair =>
-            !!c && typeof c === "object" && typeof c.id === "string"
+      ? r.chairs
+          .filter(
+            (c): c is FreeChair =>
+              !!c && typeof c === "object" && typeof c.id === "string"
+          )
+          .map((c) => ({ ...c, seat: seatKind(c.seat) }))
+      : [],
+    groups: Array.isArray(r.groups)
+      ? r.groups.filter(
+          (g): g is ItemGroup =>
+            !!g &&
+            typeof g === "object" &&
+            typeof g.id === "string" &&
+            Array.isArray(g.items)
+        )
+      : [],
+    stageItems: Array.isArray(r.stageItems)
+      ? r.stageItems.filter(
+          (s): s is StageItem =>
+            !!s &&
+            typeof s === "object" &&
+            typeof s.id === "string" &&
+            typeof s.stageId === "string"
         )
       : [],
     mood: r.mood === "evening" ? "evening" : "day",
@@ -504,6 +559,11 @@ export function normaliseVenue(raw: unknown): VenueProfile {
 
 function isRecord<T>(v: T | undefined): v is T {
   return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+/** A stored seat kind, defaulting to an ordinary guest chair. */
+export function seatKind(v: unknown): SeatKind {
+  return v === "couple" || v === "celebrant" || v === "couch" ? v : "guest";
 }
 
 /** Chair names from the first version of the planner, mapped onto the chair types. */

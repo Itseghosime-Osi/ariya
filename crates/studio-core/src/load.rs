@@ -975,7 +975,11 @@ mod tests {
     fn the_plant_reports_the_generator_and_the_drain() {
         let report = assess(&worked_example());
         let plant = report.plant.expect("a sized hall has a plant");
-        assert!((plant.running_kw - 41.8).abs() < 0.5, "{}", plant.running_kw);
+        assert!(
+            (plant.running_kw - 41.8).abs() < 0.5,
+            "{}",
+            plant.running_kw
+        );
         assert!((plant.surge_kw - 146.3).abs() < 1.0, "{}", plant.surge_kw);
         // 41.1 kW of latent removal is ~60 L/h. The research's 22–38 L/h does not follow from its
         // own 55 kW; the model does the multiplication.

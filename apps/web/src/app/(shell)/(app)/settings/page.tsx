@@ -6,6 +6,7 @@ import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
 import { countPendingProposals } from "@/features/approvals/queries";
 import { getUserEvents } from "@/features/events/queries";
 import { SettingsDesk } from "@/features/settings/components/SettingsDesk";
+import { getNotificationPreferences } from "@/features/notifications/preferences";
 import { clientEnv } from "@/lib/env/client";
 
 export const metadata: Metadata = {
@@ -16,11 +17,13 @@ export const metadata: Metadata = {
 export default async function SettingsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=%2Fsettings");
-  const [profile, events, pendingApprovals] = await Promise.all([
-    getCurrentProfile(),
-    getUserEvents(),
-    countPendingProposals(),
-  ]);
+  const [profile, events, pendingApprovals, digestPreferences] =
+    await Promise.all([
+      getCurrentProfile(),
+      getUserEvents(),
+      countPendingProposals(),
+      getNotificationPreferences(),
+    ]);
 
   const email = profile?.email ?? user.email ?? "";
   const name =
@@ -49,6 +52,7 @@ export default async function SettingsPage() {
       )}
       pendingApprovals={pendingApprovals}
       publicKey={clientEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      digestPreferences={digestPreferences}
     />
   );
 }

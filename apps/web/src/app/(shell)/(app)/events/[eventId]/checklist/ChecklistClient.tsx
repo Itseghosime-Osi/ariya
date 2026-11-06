@@ -10,6 +10,7 @@ import React, {
 import Link from "next/link";
 import { AnimatePresence, m } from "motion/react";
 import {
+  CalendarPlus,
   Check,
   ChevronDown,
   Clock,
@@ -224,13 +225,10 @@ export function ChecklistClient({
             : `Moved to ${STATUS_WORDS[next].toLowerCase()}`,
         undo: async () => {
           const back = await setTaskStatusAction(eventId, task.id, previous);
-          if (back.success) {
-            setTasks((list) =>
-              list.map((t) =>
-                t.id === task.id ? { ...t, status: previous } : t
-              )
-            );
-          }
+          if (back.error) throw new Error(back.error);
+          setTasks((list) =>
+            list.map((t) => (t.id === task.id ? { ...t, status: previous } : t))
+          );
         },
       });
     },
@@ -253,11 +251,10 @@ export function ChecklistClient({
         message: "Deleted",
         undo: async () => {
           const back = await restoreTaskAction(eventId, task.id);
-          if (back.success) {
-            setTasks((list) =>
-              list.some((t) => t.id === task.id) ? list : [...list, task]
-            );
-          }
+          if (back.error) throw new Error(back.error);
+          setTasks((list) =>
+            list.some((t) => t.id === task.id) ? list : [...list, task]
+          );
         },
       });
     },
@@ -308,6 +305,17 @@ export function ChecklistClient({
                 (data.event.date ? ` · ${countdown(data.event.date, now)}` : "")
               : "Nothing to do yet."}
           </p>
+          {total > 0 && (
+            // A plain link, not a server action: the file is a download, and a browser can save it
+            // without any JavaScript running.
+            <a
+              href={`/api/events/${eventId}/checklist.ics`}
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-burgundy underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
+              Add the dates to your calendar
+            </a>
+          )}
         </div>
         <ProgressRing done={done} total={total} />
       </header>
@@ -335,7 +343,7 @@ export function ChecklistClient({
               type="button"
               onClick={() => setFilter(f.key)}
               aria-pressed={filter === f.key}
-              className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
                 filter === f.key
                   ? "border-burgundy bg-burgundy text-ivory"
                   : "border-hairline bg-white/45 text-night hover:bg-white/70"
@@ -348,7 +356,7 @@ export function ChecklistClient({
             <button
               type="button"
               onClick={() => void moveToThisWeek()}
-              className="shrink-0 rounded-full border border-gold/60 bg-gold/10 px-3.5 py-2 text-xs font-semibold text-night hover:bg-gold/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-gold/60 bg-gold/10 px-3.5 text-xs font-semibold text-night hover:bg-gold/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
             >
               Move {openBeyondWeek} open to this week
             </button>
@@ -440,7 +448,13 @@ export function ChecklistClient({
       </div>
 
       <AnimatePresence>
-        {toast && <UndoToast toast={toast} onClose={() => setToast(null)} />}
+        {toast && (
+          <UndoToast
+            toast={toast}
+            onClose={() => setToast(null)}
+            onError={(message) => setToast({ kind: "error", message })}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
@@ -452,7 +466,15 @@ interface Toast {
   undo?: () => Promise<void>;
 }
 
-function UndoToast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
+function UndoToast({
+  toast,
+  onClose,
+  onError,
+}: {
+  toast: Toast;
+  onClose: () => void;
+  onError: (message: string) => void;
+}) {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (!toast.undo) return;
@@ -475,7 +497,16 @@ function UndoToast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
           disabled={busy}
           onClick={async () => {
             setBusy(true);
-            await toast.undo?.();
+            try {
+              await toast.undo?.();
+            } catch (error) {
+              // Closing on a failed undo told the host it worked. Say so instead.
+              console.error("[UndoToast] undo failed:", error);
+              onError(
+                "That could not be undone. Reload to see the current list."
+              );
+              return;
+            }
             onClose();
           }}
           className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold uppercase tracking-wide text-gold hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -554,6 +585,12 @@ function FirstRun({
             "Build the checklist"
           )}
         </button>
+        {canSeed && !engineReady && (
+          // The button is inert until the hall plan loads; without this the click just does nothing.
+          <p role="status" className="mt-3 text-xs text-label-2">
+            Reading your hall plan…
+          </p>
+        )}
         {!canSeed && (
           <p className="mt-3 text-xs text-label-2">
             No hall plan yet.{" "}
@@ -594,14 +631,14 @@ function NextAction({
         <button
           type="button"
           onClick={onDone}
-          className="inline-flex items-center gap-2 rounded-xl bg-burgundy px-4 py-2.5 text-sm font-semibold text-ivory hover:opacity-90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-burgundy px-4 text-sm font-semibold text-ivory hover:opacity-90"
         >
           <Check className="h-4 w-4" /> Done
         </button>
         <button
           type="button"
           onClick={onAnother}
-          className="rounded-xl px-3 py-2.5 text-sm font-semibold text-night/80 hover:text-night"
+          className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-night/80 hover:text-night"
         >
           Show me something else
         </button>
@@ -717,13 +754,17 @@ function TaskRow({
           role="checkbox"
           aria-checked={isDone}
           aria-label={isDone ? `Un-tick ${task.title}` : `Tick ${task.title}`}
-          className={`grid h-7 w-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
-            isDone
-              ? "border-burgundy bg-burgundy text-ivory"
-              : "border-night/30 bg-white/50 hover:border-night/60"
-          }`}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
-          {isDone && <Check className="h-4 w-4" aria-hidden />}
+          <span
+            className={`grid h-7 w-7 place-items-center rounded-md border transition-colors ${
+              isDone
+                ? "border-burgundy bg-burgundy text-ivory"
+                : "border-night/30 bg-white/50 hover:border-night/60"
+            }`}
+          >
+            {isDone && <Check className="h-4 w-4" aria-hidden />}
+          </span>
         </button>
         <button
           type="button"
@@ -758,10 +799,21 @@ function TaskRow({
           {task.detail && (
             <p className="text-sm text-night/80">{task.detail}</p>
           )}
+          {task.mitigation && (
+            <p className="text-sm text-night/80">
+              <span className="font-semibold text-night">Do this: </span>
+              {task.mitigation}
+            </p>
+          )}
           {typeof task.derivation?.why === "string" && (
             <p>
               <span className="font-semibold text-night">Because: </span>
               {task.derivation.why}
+            </p>
+          )}
+          {task.adviceSource && (
+            <p className="text-[11px] leading-snug text-label-2">
+              Source: {task.adviceSource}.
             </p>
           )}
           <div className="flex flex-wrap gap-3 pt-1">

@@ -97,13 +97,20 @@ export const floorFinishSchema = z.enum(["marble", "wood", "dark", "carpet"]);
  */
 export const HALL_MIN_SIZE = 6;
 export const HALL_MAX_SIZE = 120;
-export const HALL_MAX_ZONES = 60;
-export const HALL_MAX_CHAIRS = 400;
+// These bounds are not just sanity limits: a document at every one of them at once has to fit
+// `MAX_HALL_LAYOUT_BYTES`, or the validator would accept a layout the column then refuses. The
+// size test in `seating.test.ts` holds the two together.
+export const HALL_MAX_ZONES = 40;
+export const HALL_MAX_CHAIRS = 200;
+export const HALL_MAX_GROUPS = 40;
+export const HALL_MAX_STAGE_ITEMS = 8;
 export const HALL_CEILING_MIN = 3;
 export const HALL_CEILING_MAX = 15;
 export const TABLE_POSITION_MIN = -1000;
 export const TABLE_POSITION_MAX = 13000;
-export const HALL_MAX_TABLE_POSITIONS = 300;
+export const HALL_MAX_TABLE_POSITIONS = 200;
+/** Per-table rotations and styles are keyed by table id, so they grow with the table count. */
+export const HALL_MAX_TABLE_STYLES = 200;
 
 /** `events.hall_layout` refuses anything larger, so a proposal beyond it could never be applied. */
 export const MAX_HALL_LAYOUT_BYTES = 64 * 1024;
@@ -176,7 +183,7 @@ export const venueProfileSchema = z.object({
             inverter: z.boolean().default(false),
           })
         )
-        .max(64)
+        .max(32)
         .default([]),
       ach: z.number().min(0).max(60).nullable().default(null),
       targetC: z.number().min(10).max(35).nullable().default(null),
@@ -250,18 +257,26 @@ export const hallLayoutSchema = z.object({
     floor: floorFinishSchema,
     wall: hexColour,
   }),
-  rotations: z.record(z.string().uuid(), z.number().min(-360).max(360)),
-  tableStyles: z.record(
-    z.string().uuid(),
-    z.object({
-      cloth: hexColour.optional(),
-      chair: chairTypeSchema.optional(),
-      cover: hexColour.optional(),
-      sash: hexColour.nullable().optional(),
-      centrepiece: centrepieceSchema.optional(),
-      flower: hexColour.optional(),
-    })
-  ),
+  rotations: z
+    .record(z.string().uuid(), z.number().min(-360).max(360))
+    .refine((r) => Object.keys(r).length <= HALL_MAX_TABLE_STYLES, {
+      message: `At most ${HALL_MAX_TABLE_STYLES} tables may carry a rotation.`,
+    }),
+  tableStyles: z
+    .record(
+      z.string().uuid(),
+      z.object({
+        cloth: hexColour.optional(),
+        chair: chairTypeSchema.optional(),
+        cover: hexColour.optional(),
+        sash: hexColour.nullable().optional(),
+        centrepiece: centrepieceSchema.optional(),
+        flower: hexColour.optional(),
+      })
+    )
+    .refine((r) => Object.keys(r).length <= HALL_MAX_TABLE_STYLES, {
+      message: `At most ${HALL_MAX_TABLE_STYLES} tables may be styled on their own.`,
+    }),
   chairs: z
     .array(
       z.object({
@@ -270,9 +285,42 @@ export const hallLayoutSchema = z.object({
         y: z.number().finite(),
         rot: z.number().min(-360).max(360),
         chair: chairTypeSchema.optional(),
+        seat: z.enum(["guest", "couple", "celebrant", "couch"]).optional(),
+        seats: z.number().int().min(1).max(4).optional(),
       })
     )
     .max(HALL_MAX_CHAIRS),
+  groups: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(40),
+        name: z.string().min(1).max(60),
+        items: z
+          .array(
+            z.object({
+              type: z.enum(["table", "zone", "chair"]),
+              id: z.string().min(1).max(40),
+            })
+          )
+          .min(2)
+          .max(HALL_MAX_CHAIRS),
+      })
+    )
+    .max(HALL_MAX_GROUPS)
+    .default([]),
+  stageItems: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(40),
+        stageId: z.string().min(1).max(40),
+        kind: z.enum(["podium", "lectern", "arch"]),
+        across: z.number().min(-0.5).max(0.5),
+        depth: z.number().min(0).max(1),
+        label: z.string().max(60).optional(),
+      })
+    )
+    .max(HALL_MAX_STAGE_ITEMS)
+    .default([]),
   mood: z.enum(["day", "evening"]),
   chandeliers: z.boolean(),
   ceiling: z.number().min(HALL_CEILING_MIN).max(HALL_CEILING_MAX),

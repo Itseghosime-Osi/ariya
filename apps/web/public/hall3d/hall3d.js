@@ -506,6 +506,40 @@ function chairYaw(top, cx, cz, shape) {
   return Math.atan2(-cx, -cz);
 }
 
+/**
+ * A couch: a seat wide enough for two, with a back and arms. Drawn from boxes rather than a new
+ * geometry so it costs nothing when no couch is placed.
+ */
+function pushCouch(m, cover) {
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.42, 0.7), M.fabric);
+  seat.position.y = 0.21;
+  seat.castShadow = true;
+  const back = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 0.16), M.fabric);
+  back.position.set(0, 0.62, -0.27);
+  back.castShadow = true;
+  const arm = new THREE.BoxGeometry(0.16, 0.3, 0.7);
+  const left = new THREE.Mesh(arm, M.fabric);
+  left.position.set(-0.67, 0.5, 0);
+  const right = new THREE.Mesh(arm, M.fabric);
+  right.position.set(0.67, 0.5, 0);
+  const g = new THREE.Group();
+  g.add(seat, back, left, right);
+  g.traverse((o) => {
+    if (o.isMesh) o.material = M.fabric;
+  });
+  const mesh = g.clone();
+  mesh.applyMatrix4(m);
+  // The colour is per couch, so it cannot ride the shared material.
+  mesh.traverse((o) => {
+    if (o.isMesh) {
+      o.material = M.fabric.clone();
+      o.material.color = new THREE.Color(cover || "#f4efe6");
+    }
+  });
+  scene.add(mesh);
+  couchMeshes.push(mesh);
+}
+
 function pushChair(m, type, cover, sash, settings, sashOn = true) {
   if (type === "covered") {
     batch("cover", () => new Batch(G.cover, M.fabric, { colored: true })).push(
@@ -576,17 +610,20 @@ function rebuildInstances() {
     }
     pushCentrepiece(tm, st.centrepiece, st.flower, t.top, hash(t.id) % 1000);
   }
+  for (const mesh of couchMeshes) {
+    scene.remove(mesh);
+    mesh.traverse((o) => {
+      if (o.isMesh) o.material.dispose();
+    });
+  }
+  couchMeshes.length = 0;
   for (const c of state.chairs) {
     const item = items.get("chair:" + c.id);
     if (!item) continue;
     const o = item.obj;
-    pushChair(
-      mat(o.position.x, 0, o.position.z, o.rotation.y),
-      c.type,
-      c.cover,
-      c.sash,
-      null
-    );
+    const m = mat(o.position.x, 0, o.position.z, o.rotation.y);
+    if (c.seat === "couch") pushCouch(m, c.cover);
+    else pushChair(m, c.type, c.cover, c.sash, null);
   }
   for (const g of state.ghosts) {
     const geo = g.top.kind === "rect" ? ghostBox : ghostDisc;
@@ -1975,6 +2012,115 @@ function syncZones() {
     }
 }
 
+// ---------------------------------------------------------------- stage items
+
+/**
+ * Podiums, lecterns and arches belong to a stage: they are stored as a share of the stage's width
+ * and depth, so moving or resizing the stage carries them with it rather than leaving them behind.
+ */
+const stageGroup = new THREE.Group();
+scene.add(stageGroup);
+const stageCache = new Map();
+/** Couches are drawn one by one, so they are tracked to be cleared on the next rebuild. */
+const couchMeshes = [];
+
+function buildStageItem(item, stage) {
+  const g = new THREE.Group();
+  const top = stage.height ?? 0.8;
+  if (item.kind === "arch") {
+    const w = Math.min(stage.w * 0.5, 3.2);
+    const h = 2.6;
+    const post = new THREE.BoxGeometry(0.16, h, 0.16);
+    for (const side of [-1, 1]) {
+      const m = new THREE.Mesh(post, M.gold);
+      m.position.set((side * w) / 2, h / 2, 0);
+      m.castShadow = true;
+      g.add(m);
+    }
+    const beam = new THREE.Mesh(
+      new THREE.BoxGeometry(w + 0.16, 0.16, 0.16),
+      M.gold
+    );
+    beam.position.y = h;
+    beam.castShadow = true;
+    g.add(beam);
+    // Flowers along the top, so an arch reads as an arch and not a goalpost.
+    for (let i = 0; i <= 6; i++) {
+      const f = new THREE.Mesh(G.bud, M.flower);
+      f.position.set(-w / 2 + (w * i) / 6, h + 0.12, 0);
+      f.scale.setScalar(1.6);
+      g.add(f);
+    }
+  } else {
+    const w = item.kind === "podium" ? 0.7 : 0.5;
+    const h = item.kind === "podium" ? 1.1 : 1.15;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.5), M.wood);
+    body.position.y = h / 2;
+    body.castShadow = true;
+    g.add(body);
+    const topSlab = new THREE.Mesh(
+      new THREE.BoxGeometry(w + 0.08, 0.06, 0.58),
+      M.gold
+    );
+    topSlab.position.y = h + 0.03;
+    g.add(topSlab);
+    if (item.kind === "lectern") {
+      const slope = new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, 0.4), M.wood);
+      slope.position.set(0, h + 0.12, 0.02);
+      slope.rotation.x = -0.35;
+      g.add(slope);
+    }
+  }
+  g.position.y = top;
+  return g;
+}
+
+function syncStageItems() {
+  const L = state.layout;
+  const seen = new Set();
+  for (const item of L.stageItems || []) {
+    const stage = L.zones.find((z) => z.id === item.stageId);
+    if (!stage) continue;
+    seen.add(item.id);
+    const sig = JSON.stringify([
+      item.kind,
+      stage.w,
+      stage.h,
+      stage.height,
+      stage.rot,
+      L.decor.flower,
+    ]);
+    let entry = stageCache.get(item.id);
+    if (!entry || entry.sig !== sig) {
+      if (entry) {
+        stageGroup.remove(entry.obj);
+        disposeGroup(entry.obj);
+      }
+      const obj = new THREE.Group();
+      obj.add(buildStageItem(item, stage));
+      entry = { sig, obj };
+      stageCache.set(item.id, entry);
+      stageGroup.add(obj);
+    }
+    // The stage's own rotation turns the item with it, so "left of the stage" stays left.
+    const rot = -(stage.rot ?? 0) * DEG;
+    const dx = item.across * stage.w;
+    const dz = (item.depth - 0.5) * stage.h;
+    entry.obj.position.set(
+      stage.x + dx * Math.cos(rot) - dz * Math.sin(rot),
+      0,
+      stage.y + dx * Math.sin(rot) + dz * Math.cos(rot)
+    );
+    entry.obj.rotation.y = rot;
+  }
+  for (const [id, entry] of stageCache)
+    if (!seen.has(id)) {
+      stageGroup.remove(entry.obj);
+      disposeGroup(entry.obj);
+      stageCache.delete(id);
+    }
+}
+
 // ---------------------------------------------------------------- tables, chairs, labels
 
 const proxies = new THREE.Group();
@@ -2938,6 +3084,11 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
       post({ t: "select", items: state.selection });
       syncSelection();
     }
+    // Ctrl (or Cmd) on an item copies it. Alt is already the orbit gesture, so it cannot be this.
+    if (e.ctrlKey || e.metaKey) {
+      post({ t: "duplicate", items: state.selection });
+      return;
+    }
     const moving = state.selection
       .map((s) => items.get(s.type + ":" + s.id))
       .filter(Boolean);
@@ -3318,6 +3469,7 @@ function applyScene(s) {
   applyEnvironment();
   if (moodChanged) zoneCache.forEach((e) => (e.sig = ""));
   syncZones();
+  syncStageItems();
   syncTables();
   syncUnits();
   syncHeat();

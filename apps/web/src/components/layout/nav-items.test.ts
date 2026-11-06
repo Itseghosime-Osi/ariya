@@ -14,6 +14,7 @@ describe("getPhoneMoreSections", () => {
 
     expect(names).not.toContain("Guests");
     expect(names).not.toContain("Check-in");
+    expect(names).toContain("Run sheet");
     expect(names).toContain("Seating");
     expect(names).toContain("Invitations");
   });
@@ -61,6 +62,7 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/guests`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/reminders`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/checklist`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/day-of`)).toBe(true);
   });
 
   it("is false everywhere else, including billing's callback", () => {

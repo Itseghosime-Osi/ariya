@@ -94,7 +94,7 @@ function OptionCard({
         <button
           type="button"
           onClick={() => onChoose(option)}
-          className="inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#9e2a2b] px-3 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#9e2a2b] px-3 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           <Check size={14} /> Use this layout
         </button>
@@ -102,7 +102,7 @@ function OptionCard({
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex min-h-9 items-center gap-1 rounded-full border border-hairline px-3 text-xs font-semibold text-night hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className="inline-flex min-h-11 items-center gap-1 rounded-full border border-hairline px-3 text-xs font-semibold text-night hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           Why?
           <ChevronDown
@@ -150,7 +150,7 @@ export function SuggestedLayouts({
         <button
           type="button"
           onClick={onClose}
-          className="text-[11px] font-semibold text-label-2 hover:text-night"
+          className="inline-flex min-h-11 items-center text-[11px] font-semibold text-label-2 hover:text-night"
         >
           Close
         </button>

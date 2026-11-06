@@ -36,17 +36,14 @@ use ts_rs::TS;
     feature = "ts",
     ts(export, export_to = "../../../packages/studio/src/generated/")
 )]
+#[derive(Default)]
 pub enum CateringStyle {
     Plated,
     Family,
+    /// The default: a Nigerian reception is usually served buffet.
+    #[default]
     Buffet,
     Cocktail,
-}
-
-impl Default for CateringStyle {
-    fn default() -> Self {
-        CateringStyle::Buffet
-    }
 }
 
 impl CateringStyle {
@@ -89,20 +86,16 @@ impl CateringStyle {
     feature = "ts",
     ts(export, export_to = "../../../packages/studio/src/generated/")
 )]
+#[derive(Default)]
 pub enum AlcoholAnswer {
     None,
+    /// The default: a Nigerian reception usually serves something, and a host who has not answered
+    /// yet is better shown a bar they can switch off than a dry event they have to switch on.
+    #[default]
     BeerWine,
     FullBar,
     /// "Not sure — show me both." Priced as beer and wine, which is the middle of the three.
     Unsure,
-}
-
-impl Default for AlcoholAnswer {
-    fn default() -> Self {
-        // A Nigerian reception usually serves something, and a host who has not answered yet is
-        // better shown a bar they can switch off than a dry event they have to switch on.
-        AlcoholAnswer::BeerWine
-    }
 }
 
 /// Whether the cake is pudding or a photograph. §E.8 calls this a 10× swing, and means it.
@@ -113,19 +106,15 @@ impl Default for AlcoholAnswer {
     feature = "ts",
     ts(export, export_to = "../../../packages/studio/src/generated/")
 )]
+#[derive(Default)]
 pub enum CakeAnswer {
     /// Sliced and eaten: 90–120 g a guest, and above ~200 people a sheet cake behind the display.
     Dessert,
     /// Cut for photographs. Feed people something else.
     Decoration,
-    /// A slice from the display cake, sized like a wedding serving at 60–80 g.
+    /// A slice from the display cake, sized like a wedding serving at 60–80 g. The default.
+    #[default]
     Ceremonial,
-}
-
-impl Default for CakeAnswer {
-    fn default() -> Self {
-        CakeAnswer::Ceremonial
-    }
 }
 
 /// Everything the shopping list depends on. Every field defaults, so a half-answered plan still
@@ -540,8 +529,7 @@ fn rounded_per_guest(raw: f64, unit: PurchaseUnit) -> f64 {
 fn food_lines(input: &CateringInput) -> Vec<ShoppingLine> {
     let eating = input.effective_guests() as f64;
     let factor = (1.0 + input.overage()) * input.style.multiplier();
-    MENU
-        .iter()
+    MENU.iter()
         .map(|item| {
             let grams = eating * item.share * item.per_guest * factor;
             let basis = if item.share < 1.0 {
@@ -579,20 +567,23 @@ fn food_lines(input: &CateringInput) -> Vec<ShoppingLine> {
 fn raw_rice_lines(input: &CateringInput) -> Vec<ShoppingLine> {
     let eating = input.effective_guests() as f64;
     let factor = (1.0 + input.overage()) * input.style.multiplier();
-    [("Jollof rice, raw", 280.0, 1.0), ("Fried rice, raw", 220.0, 0.65)]
-        .iter()
-        .map(|(label, per_guest, share)| {
-            let grams = eating * share * per_guest * factor / 3.0;
-            line(
-                *label,
-                grams / 1000.0,
-                PurchaseUnit::Kg,
-                format!("{} guests, ÷3 for raw", input.effective_guests()),
-                Confidence::High,
-                Some((input.effective_guests(), "to cook for")),
-            )
-        })
-        .collect()
+    [
+        ("Jollof rice, raw", 280.0, 1.0),
+        ("Fried rice, raw", 220.0, 0.65),
+    ]
+    .iter()
+    .map(|(label, per_guest, share)| {
+        let grams = eating * share * per_guest * factor / 3.0;
+        line(
+            *label,
+            grams / 1000.0,
+            PurchaseUnit::Kg,
+            format!("{} guests, ÷3 for raw", input.effective_guests()),
+            Confidence::High,
+            Some((input.effective_guests(), "to cook for")),
+        )
+    })
+    .collect()
 }
 
 /// Drinks. §E.7. The alcohol split is the assumption most likely to be wrong, so it is driven
@@ -1002,7 +993,10 @@ mod tests {
     #[test]
     fn the_worked_example_follows_the_formula() {
         let report = plan(&CateringInput::worked_example());
-        assert_eq!(report.effective_guests, 354, "300 + 30 plus-ones + 24 vendors");
+        assert_eq!(
+            report.effective_guests, 354,
+            "300 + 30 plus-ones + 24 vendors"
+        );
         // 354 × 1.11 = 393 — §E.10's "~390 portions", reached from the formula.
         assert_eq!(report.portions, 393);
         assert!((report.overage - 0.11).abs() < 1e-9);
@@ -1038,7 +1032,11 @@ mod tests {
         let report = plan(&CateringInput::worked_example());
         let ice = find(&report, "Ice");
         // 300 × 0.9 kg = 270 kg, bought in 25 kg bags → 11.
-        assert!((ice.likely - 11.0).abs() < 0.5, "ice came out {} bags", ice.likely);
+        assert!(
+            (ice.likely - 11.0).abs() < 0.5,
+            "ice came out {} bags",
+            ice.likely
+        );
         assert_eq!(ice.unit, PurchaseUnit::Bag);
     }
 
@@ -1140,7 +1138,10 @@ mod tests {
         for l in report.groups.iter().flat_map(|g| g.lines.iter()) {
             // The tiered cake feeds 120 of the room by design and carries no figure against it.
             if l.label == "Cake, display" {
-                assert_eq!(l.per_guest, 0.0, "the display cake claims a per-guest figure");
+                assert_eq!(
+                    l.per_guest, 0.0,
+                    "the display cake claims a per-guest figure"
+                );
                 assert_eq!(l.per_guests, 0, "the display cake names a headcount");
                 continue;
             }

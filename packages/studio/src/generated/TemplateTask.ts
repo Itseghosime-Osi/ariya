@@ -29,6 +29,16 @@ export type TemplateTask = {
    */
   riskId: string | null;
   /**
+   * The advice the linked rule gives, with a number in it. Resolved from the risk register by
+   * `risk_id` rather than copied into the template, so the two can never drift. `None` for a row
+   * that answers no rule; the detail sheet then shows only what the host must decide.
+   */
+  mitigation: string | null;
+  /**
+   * Where that advice comes from. `None` for a row with no rule behind it.
+   */
+  adviceSource: string | null;
+  /**
    * The date it is due, resolved from the event date. `None` with no event date, and for the
    * day itself and anything after it.
    */

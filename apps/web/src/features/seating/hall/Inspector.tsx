@@ -27,6 +27,8 @@ import {
   type Centrepiece,
   type FreeChair,
   type HallLayout,
+  type SeatKind,
+  type StageItem,
   type TableStyle,
   type Zone,
   type ZoneFinish,
@@ -527,6 +529,9 @@ export function ZoneInspector({
   onRotate,
   onDuplicate,
   onDelete,
+  stageItems = [],
+  onStageItem,
+  onRemoveStageItem,
 }: {
   zone: Zone;
   layout: HallLayout;
@@ -535,6 +540,10 @@ export function ZoneInspector({
   onRotate: (d: number) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  /** The podium, lectern and arch standing on this stage. */
+  stageItems?: StageItem[];
+  onStageItem?: (id: string, patch: Partial<StageItem>) => void;
+  onRemoveStageItem?: (id: string) => void;
 }) {
   const shape = zone.shape ?? "rect";
   return (
@@ -705,11 +714,67 @@ export function ZoneInspector({
           />
         </Section>
       )}
+      {zone.kind === "stage" && (
+        <Section title="On the stage">
+          {stageItems.length === 0 ? (
+            <p className="text-[11px] text-label-2">
+              Add a podium, lectern or arch from the Areas tool. They move with
+              the stage.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {stageItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center gap-2 rounded-lg border border-hairline px-2 py-1.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-xs font-semibold capitalize text-night">
+                    {item.label ?? item.kind}
+                  </span>
+                  <label className="flex items-center gap-1 text-[11px] text-label-2">
+                    <span className="sr-only">
+                      {item.kind} position across the stage
+                    </span>
+                    <input
+                      type="range"
+                      min={-0.5}
+                      max={0.5}
+                      step={0.05}
+                      value={item.across}
+                      onChange={(e) =>
+                        onStageItem?.(item.id, {
+                          across: Number(e.target.value),
+                        })
+                      }
+                      className="w-20 accent-burgundy"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveStageItem?.(item.id)}
+                    aria-label={`Remove the ${item.kind}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-label-2 hover:bg-black/5"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      )}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- free chair
+
+const SEAT_LABEL: Record<SeatKind, string> = {
+  guest: "Guest chair",
+  couple: "Couple’s chair",
+  celebrant: "Celebrant’s chair",
+  couch: "Couch",
+};
 
 export function ChairInspector({
   chair,
@@ -731,13 +796,28 @@ export function ChairInspector({
   return (
     <div data-testid="hall-inspector">
       <Header
-        kicker="Chair"
-        title="Single chair"
+        kicker="Seat"
+        title={SEAT_LABEL[chair.seat ?? "guest"]}
         onClose={onClose}
         onRotate={onRotate}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
       />
+      <Section title="What it is for">
+        <Tiles<SeatKind>
+          label="What this seat is for"
+          value={chair.seat ?? "guest"}
+          onPick={(v) => onChange({ seat: v, seats: v === "couch" ? 2 : 1 })}
+          options={(
+            [
+              ["guest", "Guest chair"],
+              ["couple", "Couple’s chair"],
+              ["celebrant", "Celebrant’s chair"],
+              ["couch", "Couch"],
+            ] as const
+          ).map(([key, label]) => ({ key, label }))}
+        />
+      </Section>
       <Section title="Chair type">
         <Tiles<ChairType>
           label="Chair type"

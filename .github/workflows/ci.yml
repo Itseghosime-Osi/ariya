@@ -74,6 +74,12 @@ jobs:
       - name: Tests
         run: cargo test --workspace
 
+      # The budget in research Part K (a 300-table arrange under 150 ms) is a release-build
+      # promise, and the debug run above runs the same arithmetic far too slowly to check it. This
+      # is the job that would actually fail if the search became an order of magnitude slower.
+      - name: Performance budgets
+        run: cargo test --release -p ariya-studio-core --test performance
+
       # The wire types are generated from Rust. A stale file means the two sides have drifted.
       - name: Generated TypeScript types are up to date
         run: |

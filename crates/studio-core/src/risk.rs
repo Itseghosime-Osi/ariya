@@ -856,13 +856,16 @@ fn fires(trigger: Trigger, input: &RiskInput, advising: bool) -> Option<String> 
         },
         Trigger::Outdoor => match input.environment {
             Environment::Indoor => None,
-            Environment::Covered => Some("your venue is covered but open to the weather".to_string()),
+            Environment::Covered => {
+                Some("your venue is covered but open to the weather".to_string())
+            }
             Environment::Outdoor => Some("your venue is outdoors".to_string()),
         },
         Trigger::Harmattan => match input.month {
-            Some(m) if (11..=12).contains(&m) || (1..=3).contains(&m) => {
-                Some(format!("your event is in {}, inside the harmattan", month_name(m)))
-            }
+            Some(m) if (11..=12).contains(&m) || (1..=3).contains(&m) => Some(format!(
+                "your event is in {}, inside the harmattan",
+                month_name(m)
+            )),
             _ => None,
         },
         Trigger::Band => {
@@ -911,6 +914,18 @@ fn month_name(m: u32) -> &'static str {
 /// this to check that the risk it links a task to exists, without having to guess which rules fire.
 pub fn known_ids() -> Vec<&'static str> {
     RULES.iter().map(|r| r.id).collect()
+}
+
+/// One rule's advice, by id: `(mitigation, source)`.
+///
+/// A checklist row links back to a rule with `risk_id`, and the words to act on live here rather
+/// than in the checklist template — one register, so the two can never drift apart. `None` for an
+/// id the register does not know, which the template tests guard against.
+pub fn rule(id: &str) -> Option<(&'static str, &'static str)> {
+    RULES
+        .iter()
+        .find(|r| r.id == id)
+        .map(|r| (r.mitigation, r.source))
 }
 
 pub fn plan(input: &RiskInput) -> RiskReport {
@@ -967,7 +982,11 @@ fn notes(input: &RiskInput) -> Vec<String> {
 
 /// Resolve a deadline to a date. Accepts `yyyy-mm-dd` or an ISO timestamp, which is truncated.
 fn resolve_due(event_date: &str, days_before: u32) -> Option<String> {
-    Some(Date::parse(event_date)?.minus_days(days_before as i64).iso())
+    Some(
+        Date::parse(event_date)?
+            .minus_days(days_before as i64)
+            .iso(),
+    )
 }
 
 #[cfg(test)]
@@ -1050,7 +1069,10 @@ mod tests {
             "the baseline is not advice on a hall nobody is coming to"
         );
         assert!(
-            report.notes.iter().any(|n| n.contains("No guests are on the plan yet")),
+            report
+                .notes
+                .iter()
+                .any(|n| n.contains("No guests are on the plan yet")),
             "the report should say why the register is short"
         );
     }
@@ -1219,5 +1241,4 @@ mod tests {
         assert!(json.contains("\"eventDate\""));
         assert!(json.contains("\"due\""));
     }
-
 }

@@ -40,7 +40,7 @@ use crate::venue::{Environment, VenueType, ZoneKind};
 ///
 /// Version history:
 /// - 1 — first checklist, research §F.5 minus the licensing rule.
-pub const TEMPLATE_VERSION: i32 = 1;
+pub const TEMPLATE_VERSION: i32 = 2;
 
 /// The seven phases, in order. Research §F.2.
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -156,6 +156,14 @@ pub struct TemplateTask {
     /// The risk rule this row answers, when it answers one. The checklist links to it.
     #[serde(default, rename = "riskId")]
     pub risk_id: Option<String>,
+    /// The advice the linked rule gives, with a number in it. Resolved from the risk register by
+    /// `risk_id` rather than copied into the template, so the two can never drift. `None` for a row
+    /// that answers no rule; the detail sheet then shows only what the host must decide.
+    #[serde(default)]
+    pub mitigation: Option<String>,
+    /// Where that advice comes from. `None` for a row with no rule behind it.
+    #[serde(default, rename = "adviceSource")]
+    pub advice_source: Option<String>,
     /// The date it is due, resolved from the event date. `None` with no event date, and for the
     /// day itself and anything after it.
     #[serde(default, rename = "dueDate")]
@@ -265,7 +273,10 @@ pub fn template(input: &ChecklistInput) -> ChecklistPlan {
             "build.linens",
             Phase::Build,
             format!("Confirm {}", plural(input.tables, "table linen")),
-            format!("Confirm {} table linens and the colour they will be", input.tables),
+            format!(
+                "Confirm {} table linens and the colour they will be",
+                input.tables
+            ),
             because_tables(input.tables),
             Some(90),
             None,
@@ -568,6 +579,10 @@ impl Spec {
     }
 }
 
+// Each argument is one field of the row being built, and the nineteen call sites pass them
+// positionally from the plan they describe; bundling them into a struct would add a type per
+// sentence and hide which number is which at the call site.
+#[allow(clippy::too_many_arguments)]
 fn counted(
     event: Option<Date>,
     key: &str,
@@ -583,6 +598,9 @@ fn counted(
         .position(|k| *k == key)
         .map(|i| i as i32)
         .unwrap_or(1000);
+    // The advice comes from the register, not from the template: one place to edit, and a rule that
+    // is reworded updates every row that answers it on the next regeneration.
+    let advice = risk_id.and_then(crate::risk::rule);
     TemplateTask {
         source_key: key.to_string(),
         phase,
@@ -591,6 +609,8 @@ fn counted(
         derivation,
         days_before,
         risk_id: risk_id.map(str::to_string),
+        mitigation: advice.map(|(mitigation, _)| mitigation.to_string()),
+        advice_source: advice.map(|(_, source)| source.to_string()),
         due_date: days_before.and_then(|d| event.map(|e| e.minus_days(d as i64).iso())),
         when: None,
         sort,
@@ -927,7 +947,11 @@ pub fn reconcile(plan: &ChecklistPlan, existing: &[ExistingTask]) -> Reconciliat
     // a threshold, the venue went indoors). Retire them visibly rather than deleting them.
     let keys: Vec<&str> = plan.tasks.iter().map(|t| t.source_key.as_str()).collect();
     for e in existing {
-        if !e.is_deleted && e.status != "done" && e.status != "skipped" && !keys.contains(&e.source_key.as_str()) {
+        if !e.is_deleted
+            && e.status != "done"
+            && e.status != "skipped"
+            && !keys.contains(&e.source_key.as_str())
+        {
             out.retire.push(e.id.clone());
         }
     }
@@ -963,6 +987,42 @@ mod tests {
 
     fn has(plan: &ChecklistPlan, key: &str) -> bool {
         plan.tasks.iter().any(|t| t.source_key == key)
+    }
+
+    #[test]
+    fn a_row_that_answers_a_rule_carries_its_advice() {
+        let plan = template(&wedding());
+        let insurance = keyed(&plan, "foundations.insurance");
+        let (mitigation, source) =
+            crate::risk::rule("compliance.insurance").expect("the rule the row points at exists");
+        assert_eq!(insurance.mitigation.as_deref(), Some(mitigation));
+        assert_eq!(insurance.advice_source.as_deref(), Some(source));
+    }
+
+    #[test]
+    fn a_row_with_no_rule_carries_no_advice() {
+        let plan = template(&wedding());
+        let set_date = keyed(&plan, "foundations.set-date");
+        assert!(set_date.risk_id.is_none());
+        assert!(set_date.mitigation.is_none());
+        assert!(set_date.advice_source.is_none());
+    }
+
+    #[test]
+    fn every_linked_rule_resolves() {
+        // A typo in one of the template's `risk_id`s would otherwise silently drop the advice for
+        // that row, and the only symptom would be a detail sheet missing a line.
+        let plan = template(&wedding());
+        for task in &plan.tasks {
+            let Some(id) = task.risk_id.as_deref() else {
+                continue;
+            };
+            assert!(
+                crate::risk::rule(id).is_some(),
+                "`{}` points at rule `{id}`, which the register does not know",
+                task.source_key
+            );
+        }
     }
 
     #[test]
@@ -1009,13 +1069,20 @@ mod tests {
         keys.sort_unstable();
         let before = keys.len();
         keys.dedup();
-        assert_eq!(before, keys.len(), "a duplicate key would be inserted twice");
+        assert_eq!(
+            before,
+            keys.len(),
+            "a duplicate key would be inserted twice"
+        );
     }
 
     #[test]
     fn the_table_count_reaches_the_text() {
         let plan = template(&wedding());
-        assert_eq!(keyed(&plan, "build.linens").title, "Confirm 30 table linens");
+        assert_eq!(
+            keyed(&plan, "build.linens").title,
+            "Confirm 30 table linens"
+        );
         assert_eq!(
             keyed(&plan, "build.linens").derivation,
             "because your hall has 30 tables"
@@ -1158,11 +1225,7 @@ mod tests {
     #[test]
     fn a_second_run_inserts_nothing() {
         let plan = template(&wedding());
-        let held: Vec<ExistingTask> = plan
-            .tasks
-            .iter()
-            .map(|t| held(t, "todo"))
-            .collect();
+        let held: Vec<ExistingTask> = plan.tasks.iter().map(|t| held(t, "todo")).collect();
         let out = reconcile(&plan, &held);
         assert!(out.insert.is_empty(), "regeneration is idempotent");
         assert!(out.update.is_empty());
@@ -1172,12 +1235,11 @@ mod tests {
     #[test]
     fn a_deleted_row_is_never_resurrected() {
         let plan = template(&wedding());
-        let mut held: Vec<ExistingTask> = plan
-            .tasks
-            .iter()
-            .map(|t| held(t, "todo"))
-            .collect();
-        let linen = held.iter_mut().find(|e| e.source_key == "build.linens").unwrap();
+        let mut held: Vec<ExistingTask> = plan.tasks.iter().map(|t| held(t, "todo")).collect();
+        let linen = held
+            .iter_mut()
+            .find(|e| e.source_key == "build.linens")
+            .unwrap();
         linen.is_deleted = true;
         held.retain(|e| e.source_key != "build.linens" || e.is_deleted);
 
@@ -1191,18 +1253,18 @@ mod tests {
         let mut held_input = wedding();
         held_input.event_date = Some("2026-12-12".to_string());
         let old = template(&held_input);
-        let held: Vec<ExistingTask> = old
-            .tasks
-            .iter()
-            .map(|t| held(t, "todo"))
-            .collect();
+        let held: Vec<ExistingTask> = old.tasks.iter().map(|t| held(t, "todo")).collect();
 
         let mut moved = wedding();
         moved.event_date = Some("2027-01-09".to_string());
         let out = reconcile(&template(&moved), &held);
         assert!(out.insert.is_empty());
-        assert!(out.update.iter().any(|c| c.source_key == "build.linens"
-            && c.due_date.as_deref() == Some("2026-10-11")));
+        assert!(
+            out.update
+                .iter()
+                .any(|c| c.source_key == "build.linens"
+                    && c.due_date.as_deref() == Some("2026-10-11"))
+        );
     }
 
     #[test]

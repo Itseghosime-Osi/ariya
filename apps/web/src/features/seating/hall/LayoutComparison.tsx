@@ -41,7 +41,7 @@ export function LayoutComparison({
           aria-pressed={showing === side.key}
           onClick={() => onShow(side.key)}
           className={cn(
-            "min-h-8 rounded-full px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+            "min-h-11 rounded-full px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
             showing === side.key
               ? "bg-night text-white"
               : "text-night hover:bg-black/[0.04]"
@@ -53,7 +53,7 @@ export function LayoutComparison({
       <button
         type="button"
         onClick={() => onKeep(showing)}
-        className="ml-1 inline-flex min-h-8 items-center gap-1.5 rounded-full bg-[#9e2a2b] px-3 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#9e2a2b] px-3 text-xs font-semibold text-white hover:bg-[#82211f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
         <Check size={14} /> Keep this
       </button>

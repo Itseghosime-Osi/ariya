@@ -22,6 +22,21 @@ export interface ActionResult<T = void> {
   error?: string;
 }
 
+const NOT_A_MEMBER = "This celebration could not be found.";
+
+/**
+ * RLS already refuses a write from someone outside the event, but it refuses silently — an update
+ * that matches no row comes back as success. Check membership first so a caller learns why.
+ */
+async function memberClient(eventId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("is_event_member", {
+    p_event_id: eventId,
+  });
+  if (error || !data) return null;
+  return supabase;
+}
+
 export async function createTableAction(
   eventId: string,
   input: CreateTableInput
@@ -31,7 +46,8 @@ export async function createTableAction(
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
 
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { data, error } = await supabase
     .from("tables")
     .insert({
@@ -67,7 +83,8 @@ export async function updateTableAction(
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
 
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { error } = await supabase
     .from("tables")
     .update({
@@ -101,7 +118,8 @@ export async function deleteTableAction(
   eventId: string,
   tableId: string
 ): Promise<ActionResult> {
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { error } = await supabase
     .from("tables")
     .delete()
@@ -127,7 +145,8 @@ export async function assignSeatAction(
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
 
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { data, error } = await supabase.rpc("assign_seat", {
     p_guest_id: guestId,
     p_table_id: tableId || undefined,
@@ -169,7 +188,8 @@ export async function saveHallLayoutAction(
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { error } = await supabase
     .from("events")
     .update({ hall_layout: parsed.data })
@@ -187,6 +207,10 @@ export async function saveHallLayoutAction(
         : mapError(error, "Could not save the hall layout."),
     };
   }
+  // The checklist builds its tasks from the room, so it must not keep a render made before this
+  // save; the studio's own page caches the panel it was opened with.
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}/seating`);
   return { ok: true };
 }
 
@@ -199,7 +223,8 @@ export async function saveTablePositionsAction(
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   for (let i = 0; i < parsed.data.length; i += 20) {
     const batch = parsed.data.slice(i, i + 20);
     const results = await Promise.all(
@@ -231,7 +256,8 @@ export async function createTablesBulkAction(
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   const { data, error } = await supabase
     .from("tables")
     .insert(parsed.data.map((t) => ({ ...t, event_id: eventId })))
@@ -256,7 +282,8 @@ export async function bulkAssignSeatsAction(
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
-  const supabase = await createClient();
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   let seated = 0;
   const failed: string[] = [];
   for (const p of parsed.data) {

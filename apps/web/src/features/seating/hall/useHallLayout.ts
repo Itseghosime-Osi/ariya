@@ -36,6 +36,8 @@ export function useHallLayout({
   const future = useRef<Snapshot[]>([]);
   const [, bump] = useState(0);
   const timer = useRef<number | null>(null);
+  // The document the pause is holding, so it can be sent before the page goes away.
+  const latest = useRef<HallLayout | null>(null);
   const hydrated = useRef(false);
   // The latest layout, so quick successive edits and undos never read a stale render.
   const current = useRef(layout);
@@ -44,6 +46,47 @@ export function useHallLayout({
     current.current = value;
     setLayout(value);
   }, []);
+
+  /**
+   * Send whatever the pause was waiting on. Leaving the studio for another page cancels the
+   * timeout, so without this the last edit of a visit is lost — which is how a host lays out a
+   * hall and then finds the checklist saying there is no plan.
+   */
+  const flush = useCallback(
+    (leaving = false) => {
+      if (timer.current) window.clearTimeout(timer.current);
+      timer.current = null;
+      const next = latest.current;
+      latest.current = null;
+      if (!next) return;
+      try {
+        localStorage.setItem(LOCAL_KEY(eventId), JSON.stringify(next));
+      } catch {
+        /* private mode */
+      }
+      if (storedLocally && !available) return;
+      if (leaving) {
+        // The component is going away, so a server action would be torn down with it. `keepalive`
+        // lets the browser finish this request after the page has moved on.
+        void fetch(`/api/events/${eventId}/hall-layout`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(next),
+          keepalive: true,
+        }).catch(() => {
+          /* the local copy is the fallback */
+        });
+        return;
+      }
+      setSaving(true);
+      void saveHallLayoutAction(eventId, next).then((res) => {
+        setSaving(false);
+        if (!res.ok && res.data?.fallback) setStoredLocally(true);
+        else if (res.ok) setStoredLocally(false);
+      });
+    },
+    [eventId, storedLocally, available]
+  );
 
   // A layout kept on this device wins over the empty default when the database has none.
   useEffect(() => {
@@ -61,22 +104,11 @@ export function useHallLayout({
 
   const persist = useCallback(
     (next: HallLayout) => {
+      latest.current = next;
       if (timer.current) window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(async () => {
-        try {
-          localStorage.setItem(LOCAL_KEY(eventId), JSON.stringify(next));
-        } catch {
-          /* private mode */
-        }
-        if (storedLocally && !available) return;
-        setSaving(true);
-        const res = await saveHallLayoutAction(eventId, next);
-        setSaving(false);
-        if (!res.ok && res.data?.fallback) setStoredLocally(true);
-        else if (res.ok) setStoredLocally(false);
-      }, 600);
+      timer.current = window.setTimeout(flush, 600);
     },
-    [eventId, storedLocally, available]
+    [flush]
   );
 
   /** Record the current state so it can be undone, before making a change. */
@@ -144,12 +176,16 @@ export function useHallLayout({
     [commit, persist]
   );
 
-  useEffect(
-    () => () => {
-      if (timer.current) window.clearTimeout(timer.current);
-    },
-    []
-  );
+  useEffect(() => {
+    const leave = () => flush(true);
+    // pagehide covers a reload or a tab close. An in-app link click does not fire it, so the
+    // cleanup below is the one that matters: it runs as the studio unmounts.
+    window.addEventListener("pagehide", leave);
+    return () => {
+      window.removeEventListener("pagehide", leave);
+      leave();
+    };
+  }, [flush]);
 
   return {
     layout,

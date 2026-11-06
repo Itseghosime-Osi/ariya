@@ -7,10 +7,12 @@
     ],
     "tasks": [
       {
+        "adviceSource": null,
         "daysBefore": 300,
         "derivation": "every event needs a date",
         "detail": "Pick the main date, and a fallback in case the venue falls through. Write both down.",
         "dueDate": "2026-02-15",
+        "mitigation": null,
         "phase": "foundations",
         "riskId": null,
         "sort": 0,
@@ -19,10 +21,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 280,
         "derivation": "every event needs a head count",
         "detail": "A working number, not a final one. Most of the hall's numbers follow from it.",
         "dueDate": "2026-03-07",
+        "mitigation": null,
         "phase": "foundations",
         "riskId": null,
         "sort": 1,
@@ -31,10 +35,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 270,
         "derivation": "every event needs a budget",
         "detail": "One figure, and the ten per cent that stays in reserve.",
         "dueDate": "2026-03-17",
+        "mitigation": null,
         "phase": "foundations",
         "riskId": null,
         "sort": 2,
@@ -43,10 +49,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 240,
         "derivation": "every event carries venue liability",
         "detail": "Who is covered for what, and what the venue requires from you in writing.",
         "dueDate": "2026-04-16",
+        "mitigation": "Venue public liability; vendor PL certificates for all suppliers; an event policy for cancellation and supplier failure, checked 6 weeks out.",
         "phase": "foundations",
         "riskId": "compliance.insurance",
         "sort": 3,
@@ -55,10 +63,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 240,
         "derivation": "every event needs a room",
         "detail": "Confirm capacity, access times, power, toilets and what happens if it rains.",
         "dueDate": "2026-04-16",
+        "mitigation": "Compare the final RSVP against the written capacity; hold a 5–10 % buffer; name an overflow room.",
         "phase": "foundations",
         "riskId": "venue.capacity",
         "sort": 4,
@@ -67,10 +77,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 180,
         "derivation": "every event needs its vendors",
         "detail": "Caterer, photographer, DJ or band, and the décor house. In that order in December.",
         "dueDate": "2026-06-15",
+        "mitigation": "A cancellation clause with a refund schedule; a tight force-majeure; a backup list of 2 vendors per category.",
         "phase": "book",
         "riskId": "money.cancellation",
         "sort": 5,
@@ -79,10 +91,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 165,
         "derivation": "every event pays deposits",
         "detail": "A deposit without a receipt is a gift. Keep them together in one place.",
         "dueDate": "2026-06-30",
+        "mitigation": "Pay by card; staged payments, no more than 50 % before the event; verify registration; event insurance covering supplier failure.",
         "phase": "book",
         "riskId": "money.deposit",
         "sort": 6,
@@ -91,10 +105,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 120,
         "derivation": "every event is catered",
         "detail": "Agree the portion size per guest, and whether the vendor plates or serves.",
         "dueDate": "2026-08-14",
+        "mitigation": "A guaranteed headcount plus 5–10 %; model plated against buffet; count vendor and crew meals.",
         "phase": "book",
         "riskId": "vendors.food-runs-out",
         "sort": 7,
@@ -103,10 +119,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 120,
         "derivation": "every event is photographed",
         "detail": "The list of must-have shots, and who from the family is in them.",
         "dueDate": "2026-08-14",
+        "mitigation": null,
         "phase": "book",
         "riskId": null,
         "sort": 8,
@@ -115,10 +133,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 90,
         "derivation": "because your hall has 30 tables",
         "detail": "Confirm 30 table linens and the colour they will be",
         "dueDate": "2026-09-13",
+        "mitigation": null,
         "phase": "build",
         "riskId": null,
         "sort": 9,
@@ -127,10 +147,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 75,
         "derivation": "because your hall has 30 tables",
         "detail": "One centrepiece per table, plus two spare for the high table. Order 30 and keep the spares in a box.",
         "dueDate": "2026-09-28",
+        "mitigation": null,
         "phase": "build",
         "riskId": null,
         "sort": 10,
@@ -139,10 +161,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 45,
         "derivation": "because the plan runs on a generator",
         "detail": "Price the litres for the full run plus the load-in, and agree who delivers them. A generator with an empty tank is a generator.",
         "dueDate": "2026-10-28",
+        "mitigation": "Size with 30–40 % headroom; fuel for the day plus 4 hours; a second smaller backup; service log.",
         "phase": "build",
         "riskId": "venue.generator",
         "sort": 14,
@@ -151,10 +175,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 45,
         "derivation": "because the plan runs on a generator",
         "detail": "A second set, or a clear answer about which circuits go dark. Write the answer down.",
         "dueDate": "2026-10-28",
+        "mitigation": "Dual supply; UPS on sound and AV; rehearse the changeover 2 times.",
         "phase": "build",
         "riskId": "venue.power-outage",
         "sort": 15,
@@ -163,10 +189,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 60,
         "derivation": "because you chose buffet service",
         "detail": "One station per 60 guests, chafing dishes priced in, and enough aisle that the queue does not block the dance floor.",
         "dueDate": "2026-10-13",
+        "mitigation": null,
         "phase": "build",
         "riskId": null,
         "sort": 18,
@@ -175,10 +203,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 45,
         "derivation": "because 300 guests is above 250",
         "detail": "300 guests needs more toilets than the venue will admit to having. Count them on a site visit and hire the shortfall.",
         "dueDate": "2026-10-28",
+        "mitigation": "Ratio check; at least one accessible unit; one attendant per 2 units, with consumables.",
         "phase": "build",
         "riskId": "venue.toilets",
         "sort": 19,
@@ -187,10 +217,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 90,
         "derivation": "every event has a guest list",
         "detail": "One list, one link, and a reply-by date the caterer can hold you to.",
         "dueDate": "2026-09-13",
+        "mitigation": null,
         "phase": "detail",
         "riskId": null,
         "sort": 20,
@@ -199,10 +231,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 42,
         "derivation": "seating cannot start before replies close",
         "detail": "Chase the undecided once, then count what you have.",
         "dueDate": "2026-10-31",
+        "mitigation": "A 10 % RSVP buffer; overflow seating; a standing area; a second room.",
         "phase": "detail",
         "riskId": "people.overflow",
         "sort": 21,
@@ -211,10 +245,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": 21,
         "derivation": "because your hall has 30 tables and 300 guests",
         "detail": "The hall plan seats 300 guests across 30 tables. Check the party sizes and the family groupings before you lock it.",
         "dueDate": "2026-11-21",
+        "mitigation": null,
         "phase": "detail",
         "riskId": null,
         "sort": 22,
@@ -223,10 +259,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 30,
         "derivation": "because your plan has a dance floor",
         "detail": "A floor on soft ground or over a bund sinks by the second set. Ask the venue where the slab ends.",
         "dueDate": "2026-11-12",
+        "mitigation": "Ask for floor loading figures; spread heavy items; cap raised staging at 4 people per m².",
         "phase": "detail",
         "riskId": "venue.floor-load",
         "sort": 23,
@@ -235,10 +273,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 28,
         "derivation": "every event has guests who need it",
         "detail": "Steps at the entrance, a toilet someone can reach, and a seat for an elder who cannot stand long.",
         "dueDate": "2026-11-14",
+        "mitigation": "A step-free route; one accessible toilet; 2 reserved seats per 50 guests; MC and sign-language provision.",
         "phase": "detail",
         "riskId": "people.accessibility",
         "sort": 24,
@@ -247,10 +287,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 21,
         "derivation": "every event ends at night",
         "detail": "Who is driving, who is not, and how the last guests get home.",
         "dueDate": "2026-11-21",
+        "mitigation": "A confirmed fleet with driver contacts; one spare vehicle; departures staggered 15 minutes apart; a return schedule.",
         "phase": "detail",
         "riskId": "vendors.transport",
         "sort": 25,
@@ -259,10 +301,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 21,
         "derivation": "every event needs a run sheet",
         "detail": "Times, who gives each signal, and the number for every vendor.",
         "dueDate": "2026-11-21",
+        "mitigation": "A run sheet with a 10-minute buffer between segments; hard stops; the MC has written authority to cut.",
         "phase": "detail",
         "riskId": "programme.overrun",
         "sort": 26,
@@ -271,10 +315,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 7,
         "derivation": "every event confirms its vendors",
         "detail": "Time, address, load-in door, contact number. One message each.",
         "dueDate": "2026-12-05",
+        "mitigation": "A written setup window and venue access time; a 2-hour buffer before guest arrival.",
         "phase": "final",
         "riskId": "people.late-vendors",
         "sort": 27,
@@ -283,10 +329,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 7,
         "derivation": "because the plan runs on a generator",
         "detail": "Oil, filters, and a run under the plan's real load. Do it a week out, so a fault still has time to be fixed.",
         "dueDate": "2026-12-05",
+        "mitigation": "Size with 30–40 % headroom; fuel for the day plus 4 hours; a second smaller backup; service log.",
         "phase": "final",
         "riskId": "venue.generator",
         "sort": 28,
@@ -295,10 +343,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 30,
         "derivation": "because 300 guests is above 250",
         "detail": "Above 250 guests the room needs someone whose only job is medical. Confirm they carry a kit and know where the nearest hospital is.",
         "dueDate": "2026-11-12",
+        "mitigation": "One first-aider per 250 guests; the AED location; an ambulance access route; the nearest hospital printed.",
         "phase": "final",
         "riskId": "people.medical",
         "sort": 29,
@@ -307,10 +357,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 30,
         "derivation": "because 300 guests is above 250",
         "detail": "Match the number to the crowd and the car park, and agree radio channels with the venue.",
         "dueDate": "2026-11-12",
+        "mitigation": "One vetted guard per 100 guests; a guest list at the gate; a bag policy; a secure point for gifts and cash.",
         "phase": "final",
         "riskId": "people.security",
         "sort": 30,
@@ -319,10 +371,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 5,
         "derivation": "every event is outdoors somewhere",
         "detail": "Rain, heat, wind. Decide now whether the plan changes.",
         "dueDate": "2026-12-07",
+        "mitigation": "A covered route between ceremony and reception; an indoor fallback of equal capacity; drainage; umbrellas for 1 in 5 guests.",
         "phase": "final",
         "riskId": "weather.rain",
         "sort": 31,
@@ -331,10 +385,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 10,
         "derivation": "because your date falls in the harmattan",
         "detail": "Dust settles on linen and in eyes, and drops the evening temperature. Plan covers, lip balm for the bridal party, and a gentle rehydration station.",
         "dueDate": "2026-12-02",
+        "mitigation": "Prefer indoor or covered; dust covers for cake and plated food; seal AV; warn guests 72 hours out about visibility, travel delays, dry eyes and respiratory effects.",
         "phase": "final",
         "riskId": "weather.harmattan",
         "sort": 32,
@@ -343,10 +399,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": 2,
         "derivation": "the network may not reach the venue",
         "detail": "Two copies: one for the venue, one for you. A phone dies on the day.",
         "dueDate": "2026-12-10",
+        "mitigation": "A run sheet with a 10-minute buffer between segments; hard stops; the MC has written authority to cut.",
         "phase": "final",
         "riskId": "programme.overrun",
         "sort": 33,
@@ -355,10 +413,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": null,
         "derivation": "the day starts with a briefing",
         "detail": "One page, one walk through the room, every name and number read out.",
         "dueDate": null,
+        "mitigation": null,
         "phase": "day",
         "riskId": null,
         "sort": 34,
@@ -367,10 +427,12 @@
         "when": "Morning, before load-in"
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": null,
         "derivation": "the day has fixed times",
         "detail": "The times that cannot move: caterer on site, guests in, cake, last set.",
         "dueDate": null,
+        "mitigation": "A run sheet with a 10-minute buffer between segments; hard stops; the MC has written authority to cut.",
         "phase": "day",
         "riskId": "programme.overrun",
         "sort": 35,
@@ -379,10 +441,12 @@
         "when": "All day"
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": null,
         "derivation": "hired equipment comes back",
         "detail": "Whatever came from the venue or the décor house goes back, and the deposit comes with it.",
         "dueDate": null,
+        "mitigation": "Pay by card; staged payments, no more than 50 % before the event; verify registration; event insurance covering supplier failure.",
         "phase": "after",
         "riskId": "money.deposit",
         "sort": 36,
@@ -391,10 +455,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": null,
         "derivation": "the people who helped deserve a note",
         "detail": "To the vendors, and to the family who carried the day.",
         "dueDate": null,
+        "mitigation": null,
         "phase": "after",
         "riskId": null,
         "sort": 37,
@@ -403,10 +469,12 @@
         "when": null
       },
       {
+        "adviceSource": "Research §D.1–D.2",
         "daysBefore": null,
         "derivation": "final invoices land after the day",
         "detail": "Every final invoice, paid and filed where you can find it.",
         "dueDate": null,
+        "mitigation": "An itemised quote; an all-in comparison of 3 quotes; overtime and power rates in writing.",
         "phase": "after",
         "riskId": "money.hidden-fees",
         "sort": 38,
@@ -415,10 +483,12 @@
         "when": null
       },
       {
+        "adviceSource": null,
         "daysBefore": null,
         "derivation": "vendor trust is built by reviews",
         "detail": "A line each. It helps the next couple, and it helps you remember.",
         "dueDate": null,
+        "mitigation": null,
         "phase": "after",
         "riskId": null,
         "sort": 39,
@@ -427,7 +497,7 @@
         "when": null
       }
     ],
-    "templateVersion": 1
+    "templateVersion": 2
   },
   "ok": true
 }

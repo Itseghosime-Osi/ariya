@@ -292,22 +292,22 @@ Goal: one place to track everything, generated from the plan.
 
 ### 6.3 UI
 
-- [ ] **6.3.1** Phase rail: current phase expanded, next phase collapsed but visible, completed collapsed to a line.
-- [ ] **6.3.2** Next best action card: title, why-now, one button, "show me something else".
-- [ ] **6.3.3** Task row: ≥ 44 px, checkbox, title, meta line, detail sheet with mitigation and source.
-- [ ] **6.3.4** Filters: mine / ours / waiting on / this week, as a sticky chip row.
-- [ ] **6.3.5** Progress: ring for the event, bar for the phase; lead with done; overdue is neutral, not red; one-tap "move all to this week".
-- [ ] **6.3.6** "Waiting on" as a distinct state from "not started".
-- [ ] **6.3.7** Undo toast (5 s) for every reversible action; dialogs only for the irreversible.
-- [ ] **6.3.8** Seed the list on first run from the hall plan — never an empty panel.
+- [x] **6.3.1** Phase rail: current phase expanded, next phase collapsed but visible, completed collapsed to a line.
+- [x] **6.3.2** Next best action card: title, why-now, one button, "show me something else".
+- [x] **6.3.3** Task row: ≥ 44 px, checkbox, title, meta line, detail sheet with mitigation and source.
+- [x] **6.3.4** Filters: mine / ours / waiting on / this week, as a sticky chip row.
+- [x] **6.3.5** Progress: ring for the event, bar for the phase; lead with done; overdue is neutral, not red; one-tap "move all to this week".
+- [x] **6.3.6** "Waiting on" as a distinct state from "not started".
+- [x] **6.3.7** Undo toast (5 s) for every reversible action; dialogs only for the irreversible.
+- [x] **6.3.8** Seed the list on first run from the hall plan — never an empty panel.
 
 ### 6.4 Reminders and offline
 
-- [ ] **6.4.1** Notification permission requested in context, not at launch.
-- [ ] **6.4.2** Weekly digest by default; obvious in-app off switch; quiet hours.
-- [ ] **6.4.3** ICS export of due dates. No two-way sync.
-- [ ] **6.4.4** Day-of mode: separate offline-first surface, run sheet with times, contacts and hard stops.
-- [ ] **6.4.5** Service worker caches the run sheet; test with the network off.
+- [x] **6.4.1** Notification permission requested in context, not at launch.
+- [x] **6.4.2** Weekly digest by default; obvious in-app off switch; quiet hours.
+- [x] **6.4.3** ICS export of due dates. No two-way sync.
+- [x] **6.4.4** Day-of mode: separate offline-first surface, run sheet with times, contacts and hard stops.
+- [x] **6.4.5** Service worker caches the run sheet; test with the network off.
 
 **Phase 6 exit:** a couple can open the page on a phone, see one next action, tick it, and the list survives a reload with no signal.
 
@@ -315,14 +315,14 @@ Goal: one place to track everything, generated from the plan.
 
 ## Phase 7 — Polish
 
-- [ ] **7.1** Simple mode: six questions → plan, three options, temperature verdict, shopping list, checklist.
-- [ ] **7.2** Mode switch in the header; both modes write the same document.
-- [ ] **7.3** Explainability sheets on every derived number.
-- [ ] **7.4** Accessibility pass: axe clean at 1440 and 390 on every new surface; keyboard alternative for every drag; reduced motion; 200 % zoom.
-- [ ] **7.5** Playwright flows: pick a venue → auto-arrange → compare options → place an AC → read the verdict → generate the checklist → tick a task.
-- [ ] **7.6** Performance test in CI: 300-table arrange < 150 ms.
-- [ ] **7.7** Update `docs/architecture.md` and the research doc's status line.
-- [ ] **7.8** Remove the "current vs new" layout flag once the new path has run a release.
+- [x] **7.1** Simple mode: six questions → plan, three options, temperature verdict, shopping list, checklist.
+- [x] **7.2** Mode switch in the header; both modes write the same document.
+- [x] **7.3** Explainability sheets on every derived number. _(Every derived output carries a disclosure: cooling and catering have a "How we got this", each shopping-list line states its basis and band, the risk panel has "How to read this", each layout option opens the score term by term, and every checklist row keeps its derivation and mitigation.)_
+- [x] **7.4** Accessibility pass: axe clean at 1440 and 390 on every new surface; keyboard alternative for every drag; reduced motion; 200 % zoom. _(`20-studio-accessibility.spec.ts` audits the studio and Simple mode at 1440 and the table list, checklist and run sheet at 390, plus 44 px targets, the inspector's keyboard path, reduced motion and 200 % zoom. Two real defects fell out: the shortcuts rail button was 36 px tall, and the phone run-sheet assertion was matching a hidden sidebar label.)_
+- [x] **7.5** Playwright flows: pick a venue → auto-arrange → compare options → place an AC → read the verdict → generate the checklist → tick a task. _(`19-venue-studio.spec.ts` and `19-studio-flow.spec.ts`. Driving it exposed three ways a laid-out hall could be lost: the compare bar sat under the hall numbers and could not be clicked, the save debounce was cancelled on unmount so the last edit of a visit vanished, and filling the hall through Fit never wrote a layout at all. The unmount save now goes out with `keepalive` so it survives the navigation.)_
+- [x] **7.6** Performance test in CI: 300-table arrange < 150 ms. _(`crates/studio-core/ tests/performance.rs`, run release-mode by the `rust` job.)_
+- [x] **7.7** Update `docs/architecture.md` and the research doc's status line. _(`architecture.md` carries a Venue Studio section and a Checklist/Day-of section; the research doc's header reads "built (2026-11-06)".)_
+- [x] **7.8** Remove the "current vs new" layout flag once the new path has run a release. _(`NEXT_PUBLIC_STUDIO_LAYOUT_COMPARISON` is gone from the client env schema and `HallStudio`; applying a suggestion always opens the compare bar.)_
 
 ---
 
@@ -330,10 +330,10 @@ Goal: one place to track everything, generated from the plan.
 
 ### Security and data
 
-- [ ] Every new server action re-checks event membership; RLS is the backstop, not the only check.
-- [ ] `hall_layout` stays under 64 KB — venue facts are small, but AC arrays and zone strategies can grow. Add a size test.
-- [ ] No guest PII in the layout document or the wasm payload.
-- [ ] Catering and thermal are computed on read; only user overrides are stored.
+- [x] Every new server action re-checks event membership; RLS is the backstop, not the only check. _(All eight seating actions go through `memberClient`, and the hall-layout route asks `is_event_member` before writing — RLS refuses a stranger's write by matching no row, which reads as success, so the check also makes the refusal legible. `actions.test.ts` proves no table is touched when the caller is outside the event.)_
+- [x] `hall_layout` stays under 64 KB — venue facts are small, but AC arrays and zone strategies can grow. Add a size test. _(`seating.test.ts` builds a layout at every collection's maximum and asserts the serialised bytes fit `MAX_HALL_LAYOUT_BYTES`.)_
+- [x] No guest PII in the layout document or the wasm payload. _(The schema carries `guestId` only — no names, emails or phones. The id is required to render who sits where.)_
+- [x] Catering and thermal are computed on read; only user overrides are stored. _(`HallStudio` and `SimpleMode` call `engine.thermal` / `engine.catering` on every layout change and keep the result in component state; the stored document carries the inputs a host chose (ACH, target, service style, overage) and never a derived number.)_
 
 ### Performance
 
@@ -347,9 +347,9 @@ Goal: one place to track everything, generated from the plan.
 
 ### Documentation
 
-- [ ] ADR for the Rust core and the JSON ABI (follows `docs/adr/0001`–`0004`).
-- [ ] ADR for the `tasks` table and its RLS model.
-- [ ] Note in the research doc that licensing and dietary are out of scope, with the date.
+- [x] ADR for the Rust core and the JSON ABI (follows `docs/adr/0001`–`0004`). _(`docs/adr/0005-rust-studio-core-and-json-abi.md`.)_
+- [x] ADR for the `tasks` table and its RLS model. _(`docs/adr/0006-tasks-table-and-rls.md`.)_
+- [x] Note in the research doc that licensing and dietary are out of scope, with the date. _(The research doc's header carries it, dated 2026-11-05.)_
 
 ---
 

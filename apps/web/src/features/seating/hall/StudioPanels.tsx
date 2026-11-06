@@ -863,7 +863,7 @@ export function FitPanel({
                 ? onFill(false, wanted - tableCount)
                 : onRemove(tableCount - wanted)
             }
-            className="min-h-10 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="min-h-11 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             Apply
           </button>
@@ -883,7 +883,7 @@ export function FitPanel({
               type="button"
               disabled={busy !== null}
               onClick={onFixCrowding}
-              className="mt-2 min-h-10 w-full rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              className="mt-2 min-h-11 w-full rounded-full bg-[#9e2a2b] px-4 text-xs font-semibold text-white hover:bg-[#82211f] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               Fix the crowding
             </button>
@@ -1458,7 +1458,7 @@ export function ThermalPanel({
             onClick={onTogglePlacing}
             aria-pressed={placing}
             className={cn(
-              "min-h-10 flex-1 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+              "min-h-11 flex-1 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
               placing
                 ? "bg-night text-white"
                 : "border border-hairline bg-white text-night hover:border-night/40"
@@ -1469,7 +1469,7 @@ export function ThermalPanel({
           <button
             type="button"
             onClick={onAddUnit}
-            className="min-h-10 rounded-full border border-hairline bg-white px-4 text-xs font-semibold text-night transition-colors hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="min-h-11 rounded-full border border-hairline bg-white px-4 text-xs font-semibold text-night transition-colors hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             Add one
           </button>
@@ -1500,7 +1500,7 @@ export function ThermalPanel({
                     type="button"
                     onClick={() => onDeleteUnit(u.id)}
                     aria-label={`Remove unit ${i + 1}`}
-                    className="grid h-7 w-7 place-items-center rounded-full text-label-2 hover:bg-[#f1ece4] hover:text-night focus-visible:outline-2 focus-visible:outline-burgundy"
+                    className="grid h-11 w-11 place-items-center rounded-full text-label-2 hover:bg-[#f1ece4] hover:text-night focus-visible:outline-2 focus-visible:outline-burgundy"
                   >
                     <X size={14} />
                   </button>
@@ -1512,7 +1512,7 @@ export function ThermalPanel({
                       type="button"
                       aria-pressed={u.mount === m.key}
                       onClick={() => onUpdateUnit(u.id, { mount: m.key })}
-                      className="min-h-8 flex-1 rounded-lg border border-hairline text-[11px] font-medium text-label-2 transition-colors aria-pressed:border-night aria-pressed:bg-night aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-burgundy"
+                      className="min-h-11 flex-1 rounded-lg border border-hairline text-[11px] font-medium text-label-2 transition-colors aria-pressed:border-night aria-pressed:bg-night aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-burgundy"
                     >
                       {m.label}
                     </button>
@@ -1526,7 +1526,7 @@ export function ThermalPanel({
                       aria-pressed={u.hp === hp}
                       aria-label={`${hp} HP`}
                       onClick={() => onUpdateUnit(u.id, { hp })}
-                      className="min-h-8 flex-1 rounded-lg border border-hairline text-[11px] font-medium tabular-nums text-label-2 transition-colors aria-pressed:border-night aria-pressed:bg-night aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-burgundy"
+                      className="min-h-11 flex-1 rounded-lg border border-hairline text-[11px] font-medium tabular-nums text-label-2 transition-colors aria-pressed:border-night aria-pressed:bg-night aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-burgundy"
                     >
                       {hp}
                     </button>

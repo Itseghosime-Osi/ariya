@@ -27,6 +27,12 @@ export interface ChecklistTask {
   source: ChecklistTaskSource;
   sourceKey: string | null;
   derivation: TaskDerivation | null;
+  /** What the practice says to do, when a rule stands behind this row. */
+  mitigation: string | null;
+  /** Where that advice comes from. Not `source`, which is the row's origin. */
+  adviceSource: string | null;
+  /** The run sheet's time for a day row, in words. Null outside the day phase. */
+  timeSlot: string | null;
   sort: number;
   completedAt: string | null;
 }

@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(25);
+select plan(34);
 
 -- 1. The table and its grants.
 
@@ -233,6 +233,64 @@ select lives_ok(
      where event_id = (select past_id from tk) and source_key is null $$,
   'an after-phase task on an ended event may still be ticked'
 );
+
+-- 8. The advice a row carries, and the run sheet's time slot.
+
+select has_column('public', 'tasks', 'mitigation', 'a task carries the advice for its rule');
+select has_column('public', 'tasks', 'advice_source', 'a task carries where that advice comes from');
+select has_column('public', 'tasks', 'time_slot', 'a day row carries a run-sheet time');
+
+select lives_ok(
+  $$ insert into public.tasks
+       (event_id, title, phase, source, source_key, mitigation, advice_source, time_slot)
+     values ((select event_id from tk), 'Brief the ushers', 'day', 'template', 'day.ushers',
+             'Allow 15 minutes for the brief, not 5.', 'Venue run-sheet checklist',
+             'before the guests arrive') $$,
+  'a day row may carry advice and a time slot together'
+);
+
+select throws_ok(
+  $$ insert into public.tasks (event_id, title, phase, mitigation)
+     values ((select event_id from tk), 'Blank advice', 'detail', '   ') $$,
+  '23514', null,
+  'advice of nothing but spaces is rejected rather than stored as an empty line'
+);
+
+select throws_ok(
+  $$ insert into public.tasks (event_id, title, phase, advice_source)
+     values ((select event_id from tk), 'Long source', 'detail', repeat('x', 201)) $$,
+  '23514', null,
+  'an advice source longer than a citation is rejected'
+);
+
+-- The guard covers the advice for the same reason it covers derivation: a row that could rewrite
+-- its own advice would dodge the next regeneration and keep stale words forever.
+select throws_ok(
+  $$ update public.tasks set mitigation = 'Do something else entirely'
+     where id = (select mine from tk) $$,
+  'P0001', null,
+  'not even the owner may rewrite the advice a generation gave a task'
+);
+
+select throws_ok(
+  $$ update public.tasks set advice_source = 'Some blog'
+     where id = (select mine from tk) $$,
+  'P0001', null,
+  'not even the owner may rewrite where the advice claims to come from'
+);
+
+-- time_slot is deliberately absent from the identity guard: moving a day row's time is a planner
+-- reordering the run sheet, not a change of what the row is.
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', planner_id::text, 'role', 'authenticated')::text, true) from tk;
+
+select lives_ok(
+  $$ update public.tasks set time_slot = '10:00'
+     where event_id = (select event_id from tk) and source_key = 'day.ushers' $$,
+  'a planner may move a day row to a new time'
+);
+
+reset role;
 
 select finish();
 rollback;

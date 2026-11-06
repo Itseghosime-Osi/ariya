@@ -68,6 +68,9 @@ export async function seedChecklistAction(
       due_date: t.dueDate ?? null,
       source: "template" as const,
       source_key: t.sourceKey,
+      mitigation: t.mitigation ?? null,
+      advice_source: t.adviceSource ?? null,
+      time_slot: t.when ?? null,
       derivation: {
         kind: t.riskId ? "risk" : "plan",
         count: t.daysBefore ?? undefined,
@@ -94,6 +97,10 @@ export async function seedChecklistAction(
         derivation: task
           ? { kind: task.riskId ? "risk" : "plan", why: task.derivation }
           : undefined,
+        // A reworded rule refreshes the advice on every row that answers it.
+        mitigation: task?.mitigation ?? null,
+        advice_source: task?.adviceSource ?? null,
+        time_slot: task?.when ?? null,
         due_date: change.dueDate,
         template_version: plan.templateVersion,
       })
@@ -181,7 +188,11 @@ export async function addRiskToChecklistAction(
   const { error } = await supabase.from("tasks").insert({
     event_id: eventId,
     title,
-    detail: risk.mitigation ?? null,
+    // The advice goes where advice belongs, and says where it came from. It used to be written to
+    // `detail` with its source dropped, which left the host unable to tell advice from a decision.
+    detail: null,
+    mitigation: risk.mitigation ?? null,
+    advice_source: risk.source ?? null,
     // A risk is reader-facing advice, so it belongs with the detail that shapes the day.
     phase: "detail",
     due_date: risk.due ?? null,
@@ -288,14 +299,21 @@ export async function restoreTaskAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Your session has ended. Sign in again." };
 
-  const { error } = await supabase
+  // `.select()` so a no-op update is visible: without it Supabase reports success for a row the
+  // policy filtered out, and the host is told the task came back when it did not.
+  const { data, error } = await supabase
     .from("tasks")
     .update({ deleted_at: null })
     .eq("id", taskId)
-    .eq("event_id", eventId);
+    .eq("event_id", eventId)
+    .select("id");
   if (error) {
     console.error("[restoreTaskAction] update failed:", error);
     return { error: `Could not undo the delete: ${error.message}` };
+  }
+  if (!data || data.length === 0) {
+    console.error("[restoreTaskAction] no row matched", { eventId, taskId });
+    return { error: "That task is no longer there to bring back." };
   }
 
   revalidatePath(`/events/${eventId}/checklist`);

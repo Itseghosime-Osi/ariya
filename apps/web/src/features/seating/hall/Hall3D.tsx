@@ -40,6 +40,8 @@ export interface SceneChair {
   type: ChairType;
   cover: string;
   sash: string | null;
+  /** A couch draws as a couch; the rest draw as chairs. */
+  seat?: "guest" | "couple" | "celebrant" | "couch";
 }
 
 export type PickType = "table" | "zone" | "chair" | "ac";
