@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.1
         with:
           components: rustfmt, clippy
           targets: wasm32-unknown-unknown
@@ -114,8 +114,16 @@ jobs:
         with:
           version: 2.122.0
 
+      # Supabase's local ports (57320-57329, see supabase/config.toml) sit inside Linux's range for
+      # temporary outgoing connections (32768-60999). While Docker pulls the images the kernel can hand
+      # one of those ports to a download, and `supabase start` then fails with "address already in use".
+      # Reserving them keeps the kernel from ever picking them for an outgoing connection.
+      - name: Reserve the local Supabase ports
+        run: sudo sysctl -w net.ipv4.ip_local_reserved_ports=57320-57329
+
       - name: Start Supabase
-        run: supabase start
+        # One retry for anything else that flakes while the containers come up.
+        run: supabase start || { supabase stop --no-backup; supabase start; }
 
       - name: Run pgTAP tests
         run: pnpm test:db
@@ -165,8 +173,16 @@ jobs:
         with:
           version: 2.122.0
 
+      # Supabase's local ports (57320-57329, see supabase/config.toml) sit inside Linux's range for
+      # temporary outgoing connections (32768-60999). While Docker pulls the images the kernel can hand
+      # one of those ports to a download, and `supabase start` then fails with "address already in use".
+      # Reserving them keeps the kernel from ever picking them for an outgoing connection.
+      - name: Reserve the local Supabase ports
+        run: sudo sysctl -w net.ipv4.ip_local_reserved_ports=57320-57329
+
       - name: Start Supabase
-        run: supabase start
+        # One retry for anything else that flakes while the containers come up.
+        run: supabase start || { supabase stop --no-backup; supabase start; }
 
       - name: Start Mailpit
         run: |

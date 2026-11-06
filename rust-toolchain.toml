@@ -1,0 +1,8 @@
+# One Rust for everyone. The committed wasm in apps/web/public/wasm is compared with a fresh build in
+# CI, and two compiler versions emit different bytes for the same source, so the version is pinned.
+# Bump it on purpose, rebuild with `pnpm build:wasm` and commit the artifacts in the same change.
+[toolchain]
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
