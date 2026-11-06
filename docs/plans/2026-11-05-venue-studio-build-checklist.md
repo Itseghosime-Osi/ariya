@@ -260,9 +260,11 @@ Goal: specific, dated advice — not "ensure adequate fuel".
 
 - [x] **5.2.1** Risk panel grouped by category, safety-critical visually distinct from experiential.
 - [x] **5.2.2** Each row expands to the mitigation text and its source.
-- [ ] **5.2.3** "Add to checklist" creates a task with the derivation attached.
-      Blocked on 6.1.1: there is no `tasks` table to add to yet. `RiskItem.id` and `derivation` are
-      already on the wire for it — a stable key and the "because your hall has 30 tables" line.
+- [x] **5.2.3** "Add to checklist" creates a task with the derivation attached.
+      The key is `risk:{ruleId}`, so adding the same risk twice is a no-op rather than a duplicate,
+      and the tombstone plus the live-only partial unique index mean a row the host deleted is never
+      resurrected. `getAddedRiskIds` reads the keys back on load, so the button says "On the
+      checklist" after a reload instead of offering the add again.
 
 **Phase 5 exit:** every risk shown carries a number and a date.
 
@@ -281,12 +283,12 @@ Goal: one place to track everything, generated from the plan.
 
 ### 6.2 Generation
 
-- [ ] **6.2.1** `checklist.rs`: template (25–40 tasks) + generation rules from research §F.5, **minus the licensing rule**.
-- [ ] **6.2.2** Stable `source_key` per generated task; regeneration is idempotent and never duplicates.
-- [ ] **6.2.3** Every generated row stores its `derivation` and shows it ("because your hall has 30 tables").
-- [ ] **6.2.4** Never resurrect a deleted task; deleting is a signal.
-- [ ] **6.2.5** Version templates so an update does not duplicate existing tasks.
-- [ ] **6.2.6** Invalidate dependents when a parent changes (guest count, venue type, service style).
+- [x] **6.2.1** `checklist.rs`: template (25–40 tasks) + generation rules from research §F.5, **minus the licensing rule**.
+- [x] **6.2.2** Stable `source_key` per generated task; regeneration is idempotent and never duplicates.
+- [x] **6.2.3** Every generated row stores its `derivation` and shows it ("because your hall has 30 tables").
+- [x] **6.2.4** Never resurrect a deleted task; deleting is a signal.
+- [x] **6.2.5** Version templates so an update does not duplicate existing tasks.
+- [x] **6.2.6** Invalidate dependents when a parent changes (guest count, venue type, service style).
 
 ### 6.3 UI
 
