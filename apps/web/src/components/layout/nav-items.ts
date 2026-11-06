@@ -160,6 +160,8 @@ export function hasOwnPhoneHeader(pathname: string): boolean {
     pathname === "/profile/archive" ||
     pathname === "/events/new" ||
     pathname === "/approvals" ||
+    pathname === "/connect-ai" ||
+    pathname === "/connect-ai/guide" ||
     /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders|page-editor)$/.test(
       pathname
     )
