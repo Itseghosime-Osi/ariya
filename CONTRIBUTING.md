@@ -36,6 +36,15 @@ pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 Husky runs lint-staged on commit and the type check and unit tests on push. CI runs the
 full set on every pull request.
 
+## Review checklist
+
+- **No hand-written wire types in `apps/web`.** The studio's request and response types
+  (`GeometryRequest`, `GeometryResponse`, `FitRequest`, `TableSpec`, `TableGeometry`,
+  `StudioEngine`) are generated from the Rust crate into `@ariya/studio`. Import them; never
+  re-declare them. A local copy drifts from the ABI without anything failing. The domain types
+  the app owns (`Zone`, `Footprint`, `TableTop`, `FitResult`) are the opposite case: the
+  TypeScript is their source of truth and the Rust is held to it by the parity corpus.
+
 ## Database changes
 
 1. Add a migration in `supabase/migrations`; never edit one that has already shipped.

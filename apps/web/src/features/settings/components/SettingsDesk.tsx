@@ -23,6 +23,8 @@ import {
 import { PasswordField } from "@/features/auth/components/PasswordField";
 import { PasswordStrengthMeter } from "@/features/auth/components/PasswordStrengthMeter";
 import { useAppNotifications } from "@/features/notifications/use-app-notifications";
+import { useDigestPreferences } from "@/features/notifications/use-digest-preferences";
+import type { NotificationPreferences } from "@/features/notifications/preference-types";
 import { Keys, SHORTCUTS } from "@/features/seating/hall/shortcuts";
 import { readDevicePref, writeDevicePref, type DevicePref } from "../prefs";
 
@@ -47,6 +49,7 @@ interface SettingsDeskProps {
   guestCount: number;
   pendingApprovals: number;
   publicKey?: string;
+  digestPreferences: NotificationPreferences;
 }
 
 type Tone = "wine" | "gold" | "night" | "rose" | "sage";
@@ -85,6 +88,7 @@ export function SettingsDesk({
   guestCount,
   pendingApprovals,
   publicKey,
+  digestPreferences,
 }: SettingsDeskProps) {
   const [active, setActive] = useState(SECTIONS[0].id);
   const [sheet, setSheet] = useState<
@@ -205,7 +209,10 @@ export function SettingsDesk({
         </aside>
 
         <div className="mt-8 space-y-8 lg:mt-0 lg:max-w-2xl lg:space-y-10">
-          <NotificationsSection publicKey={publicKey} />
+          <NotificationsSection
+            publicKey={publicKey}
+            digestPreferences={digestPreferences}
+          />
 
           <Section id="security" title="Sign-in & security" index={2}>
             <Row
@@ -629,9 +636,23 @@ function PrefRow({
 
 /* ---------------------------------------------------------------- notifications */
 
-function NotificationsSection({ publicKey }: { publicKey?: string }) {
+function NotificationsSection({
+  publicKey,
+  digestPreferences,
+}: {
+  publicKey?: string;
+  digestPreferences: NotificationPreferences;
+}) {
   const { state, message, pending, turnOn, turnOff, sendTest } =
     useAppNotifications(publicKey);
+  const {
+    preferences,
+    message: digestMessage,
+    pending: digestPending,
+    setDigest,
+    setQuietHours,
+  } = useDigestPreferences(digestPreferences);
+  const digestOn = preferences.digest === "weekly";
   const on = state === "on";
   const hint =
     state === "on"
@@ -673,6 +694,74 @@ function NotificationsSection({ publicKey }: { publicKey?: string }) {
           onClick={sendTest}
           disabled={pending}
         />
+      )}
+      <Row
+        icon="calendar"
+        tone="wine"
+        label="Weekly checklist digest"
+        hint={
+          digestOn
+            ? "A Monday reminder of what is due this week"
+            : "Off — you will not get the weekly reminder"
+        }
+        trailing={
+          <Switch
+            on={digestOn}
+            label="Weekly checklist digest"
+            disabled={digestPending}
+            onChange={(next) => setDigest(next ? "weekly" : "off")}
+          />
+        }
+      />
+      {digestOn && (
+        <div className="px-4 py-3 sm:px-5">
+          <p className="text-[13px] font-medium text-night">Quiet hours</p>
+          <p className="mt-0.5 text-xs text-label-2">
+            Nothing is sent between these times.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <label className="sr-only" htmlFor="quiet-from">
+              Quiet hours start
+            </label>
+            <input
+              id="quiet-from"
+              type="time"
+              value={preferences.quietFrom}
+              disabled={digestPending}
+              onChange={(e) =>
+                setQuietHours(e.target.value, preferences.quietTo)
+              }
+              className="min-h-11 rounded-lg border border-hairline bg-white/70 px-3 text-sm text-night disabled:opacity-60"
+            />
+            <span className="text-xs text-label-2">to</span>
+            <label className="sr-only" htmlFor="quiet-to">
+              Quiet hours end
+            </label>
+            <input
+              id="quiet-to"
+              type="time"
+              value={preferences.quietTo}
+              disabled={digestPending}
+              onChange={(e) =>
+                setQuietHours(preferences.quietFrom, e.target.value)
+              }
+              className="min-h-11 rounded-lg border border-hairline bg-white/70 px-3 text-sm text-night disabled:opacity-60"
+            />
+          </div>
+        </div>
+      )}
+      {/* Outside the quiet-hours block: turning the digest off hides that block, and the "off"
+          confirmation is the one a host most needs to see. */}
+      {digestMessage && (
+        <p
+          className={cn(
+            "px-4 py-2 text-xs font-medium sm:px-5",
+            digestMessage.tone === "good" ? "text-emerald-700" : "text-red-700"
+          )}
+          role="status"
+        >
+          {digestMessage.text}
+        </p>
       )}
       {(state === "blocked" || state === "install-first" || message) && (
         <div className="px-4 py-3 text-[13px] sm:px-5" role="status">

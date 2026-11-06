@@ -12,8 +12,10 @@
 import { useMemo, useState } from "react";
 import { Hall3D, type Scene } from "@/features/seating/hall/Hall3D";
 import {
+  chairPlacement,
   chairPositions,
   chairType,
+  stageItemPlacement,
   styleOf,
   tableTop,
   type HallLayout,
@@ -136,15 +138,24 @@ function sceneOf(layout: HallLayout, tables: PreviewTable[]): Scene {
       })),
       style: styleOf(layout, table.id),
     })),
-    chairs: layout.chairs.map((chair) => ({
-      id: chair.id,
-      x: chair.x,
-      y: chair.y,
-      rot: chair.rot,
-      type: chairType(chair.chair ?? layout.decor.chair),
-      cover: layout.decor.cover,
-      sash: layout.decor.sash,
-    })),
+    chairs: layout.chairs.map((chair) => {
+      // A chair on a stage is stored from the stage's corner; place it in the room and lift it.
+      const at = chairPlacement(chair, layout.zones);
+      return {
+        id: chair.id,
+        x: at.x,
+        y: at.y,
+        rot: at.yaw,
+        lift: at.lift,
+        type: chairType(chair.chair ?? layout.decor.chair),
+        cover: layout.decor.cover,
+        sash: layout.decor.sash,
+      };
+    }),
+    stageItems: layout.stageItems.flatMap((item) => {
+      const stage = layout.zones.find((z) => z.id === item.stageId);
+      return stage ? [{ ...item, ...stageItemPlacement(item, stage) }] : [];
+    }),
     selection: [],
     tool: "hand",
     labels: true,

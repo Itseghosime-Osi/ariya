@@ -63,6 +63,7 @@ import {
   Undo2,
   Redo2,
   Layers,
+  ListChecks,
   Wand2,
   Move,
   EyeOff,
@@ -96,6 +97,7 @@ export type IconName =
   | "restaurant_menu"
   | "info"
   | "check"
+  | "checklist"
   | "schedule"
   | "search"
   | "filter_list"
@@ -167,6 +169,7 @@ const iconMap: Record<IconName, React.ComponentType<LucideProps>> = {
   restaurant_menu: Utensils,
   info: Info,
   check: Check,
+  checklist: ListChecks,
   schedule: Clock,
   search: Search,
   filter_list: Filter,

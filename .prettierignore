@@ -5,3 +5,5 @@ coverage/
 node_modules/
 pnpm-lock.yaml
 supabase/.temp/
+# ts-rs writes these, and CI regenerates them and fails on any difference, so they are never reformatted.
+packages/studio/src/generated/

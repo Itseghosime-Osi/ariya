@@ -27,6 +27,9 @@ import {
   type Centrepiece,
   type FreeChair,
   type HallLayout,
+  type SeatKind,
+  type StageItem,
+  type StageItemKind,
   type TableStyle,
   type Zone,
   type ZoneFinish,
@@ -527,6 +530,10 @@ export function ZoneInspector({
   onRotate,
   onDuplicate,
   onDelete,
+  stageItems = [],
+  onStageItem,
+  onRemoveStageItem,
+  onAddStageItem,
 }: {
   zone: Zone;
   layout: HallLayout;
@@ -535,6 +542,12 @@ export function ZoneInspector({
   onRotate: (d: number) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  /** The podium, lectern and arch standing on this stage. */
+  stageItems?: StageItem[];
+  onStageItem?: (id: string, patch: Partial<StageItem>) => void;
+  onRemoveStageItem?: (id: string) => void;
+  /** Adds a fixture to this stage; whichever one the host taps. */
+  onAddStageItem?: (kind: StageItemKind) => void;
 }) {
   const shape = zone.shape ?? "rect";
   return (
@@ -705,11 +718,95 @@ export function ZoneInspector({
           />
         </Section>
       )}
+      {zone.kind === "stage" && (
+        <Section title="On the stage">
+          {onAddStageItem && (
+            <div className="mb-2 grid grid-cols-2 gap-1.5">
+              {STAGE_ITEM_KINDS.map((k) => (
+                <button
+                  key={k.kind}
+                  type="button"
+                  onClick={() => onAddStageItem(k.kind)}
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-hairline bg-white/60 px-2 text-xs font-semibold text-night hover:bg-white"
+                >
+                  {k.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {stageItems.length === 0 ? (
+            <p className="text-[11px] text-label-2">
+              Nothing on the stage yet. Whatever you add here moves with the
+              stage.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {stageItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center gap-2 rounded-lg border border-hairline px-2 py-1.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-xs font-semibold capitalize text-night">
+                    {item.label ?? item.kind}
+                  </span>
+                  <label className="flex items-center gap-1 text-[11px] text-label-2">
+                    <span className="sr-only">
+                      {item.kind} position across the stage
+                    </span>
+                    <input
+                      type="range"
+                      min={-0.5}
+                      max={0.5}
+                      step={0.05}
+                      value={item.across}
+                      onChange={(e) =>
+                        onStageItem?.(item.id, {
+                          across: Number(e.target.value),
+                        })
+                      }
+                      className="w-20 accent-burgundy"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveStageItem?.(item.id)}
+                    aria-label={`Remove the ${(
+                      STAGE_ITEM_KINDS.find((k) => k.kind === item.kind)
+                        ?.label ?? item.kind
+                    ).toLowerCase()}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-label-2 hover:bg-black/5"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      )}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- free chair
+
+/** Everything a stage can carry, in the order a host is likely to want it. */
+const STAGE_ITEM_KINDS: { kind: StageItemKind; label: string }[] = [
+  { kind: "podium", label: "Podium" },
+  { kind: "lectern", label: "Lectern" },
+  { kind: "arch", label: "Arch" },
+  { kind: "couch", label: "Couch" },
+  { kind: "table", label: "Table" },
+  { kind: "cake", label: "Cake table" },
+  { kind: "screen", label: "Screen" },
+];
+
+const SEAT_LABEL: Record<SeatKind, string> = {
+  guest: "Guest chair",
+  couple: "Couple’s chair",
+  celebrant: "Celebrant’s chair",
+  couch: "Couch",
+};
 
 export function ChairInspector({
   chair,
@@ -731,13 +828,28 @@ export function ChairInspector({
   return (
     <div data-testid="hall-inspector">
       <Header
-        kicker="Chair"
-        title="Single chair"
+        kicker="Seat"
+        title={SEAT_LABEL[chair.seat ?? "guest"]}
         onClose={onClose}
         onRotate={onRotate}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
       />
+      <Section title="What it is for">
+        <Tiles<SeatKind>
+          label="What this seat is for"
+          value={chair.seat ?? "guest"}
+          onPick={(v) => onChange({ seat: v, seats: v === "couch" ? 2 : 1 })}
+          options={(
+            [
+              ["guest", "Guest chair"],
+              ["couple", "Couple’s chair"],
+              ["celebrant", "Celebrant’s chair"],
+              ["couch", "Couch"],
+            ] as const
+          ).map(([key, label]) => ({ key, label }))}
+        />
+      </Section>
       <Section title="Chair type">
         <Tiles<ChairType>
           label="Chair type"
@@ -749,6 +861,64 @@ export function ChairInspector({
             icon: <ChairGlyph type={c.key} />,
           }))}
         />
+      </Section>
+      {layout.zones.some((z) => z.kind === "stage") && (
+        <Section title="Where it stands">
+          <label className="block text-[11px] font-semibold text-label-2">
+            On the floor, or on a stage
+            <select
+              aria-label="Where this chair stands"
+              value={chair.stageId ?? ""}
+              onChange={(e) => {
+                const stageId = e.target.value || undefined;
+                // Re-home the chair to the middle of the stage so it never lands off the edge.
+                const stage = layout.zones.find((z) => z.id === stageId);
+                onChange(
+                  stage
+                    ? { stageId, x: stage.w / 2, y: stage.h / 2 }
+                    : { stageId: undefined }
+                );
+              }}
+              className="mt-1 h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base text-night outline-none focus:border-night sm:text-sm"
+            >
+              <option value="">On the floor</option>
+              {layout.zones
+                .filter((z) => z.kind === "stage")
+                .map((z) => (
+                  <option key={z.id} value={z.id}>
+                    {z.label || "Stage"}
+                  </option>
+                ))}
+            </select>
+          </label>
+          {chair.stageId && (
+            <p className="mt-2 text-[11px] leading-snug text-label-2">
+              On the stage: it rides along when you move or rotate the stage.
+            </p>
+          )}
+        </Section>
+      )}
+      <Section title="Colour">
+        {/* Unset follows the room, which is what a host expects until they say otherwise. */}
+        <Swatches
+          label="This seat's cover"
+          value={chair.cover ?? layout.decor.cover}
+          onPick={(v) => v && onChange({ cover: v })}
+        />
+        <p className="mt-2 text-[11px] leading-snug text-label-2">
+          {chair.cover
+            ? "This seat has its own colour, so changing the room's will leave it alone."
+            : "Following the room's chair colour."}
+        </p>
+        {chair.cover && (
+          <button
+            type="button"
+            onClick={() => onChange({ cover: undefined })}
+            className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-burgundy underline"
+          >
+            Match the room again
+          </button>
+        )}
       </Section>
       <Position
         id="insp-c"

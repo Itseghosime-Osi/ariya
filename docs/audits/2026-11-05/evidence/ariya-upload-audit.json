@@ -1,0 +1,18 @@
+{
+  "bytes": 2435281,
+  "errors": [
+    "Body exceeded 1 MB limit.\nTo configure the body size limit for Server Actions, see: https://nextjs.org/docs/app/api-reference/next-config-js/serverActions#bodysizelimit"
+  ],
+  "responses": [
+    {
+      "status": 500,
+      "url": "http://localhost:3000/events/962eca35-576d-444d-8a8c-a1d637a4ec69/page-editor"
+    },
+    {
+      "status": 200,
+      "url": "http://localhost:3000/__nextjs_original-stack-frames"
+    }
+  ],
+  "uploadingText": 1,
+  "body": "the public event page.\n\nView Public Page\nSave Changes\nEvent details\n\nEdit details shown on public pages and invitations.\n\nPublic Event Page (/e/audit-upload-1793867233437)\n\nWhen disabled, /e/[slug] returns 404. Direct invitation passes (/i/token) remain active.\n\nHEADLINE\nCOUPLE NAMES\nCEREMONY DATE & TIME\nRSVP DEADLINE\nVENUE LOCATION\nCITY / STATE\nYOUR STORY\nCELEBRATION COVER BANNER\n\nUploading Cover...\n\nJPEG, PNG, or WebP • Max file size 5 MB\n\nDRESS CODE & ASO-EBI PALETTE\nPUBLICATION STATUS\nDraft (Private)\nActive (Published to Guests)\nArchived (Concluded)\nPUBLIC PAGE PRIVATE (404)\nDesktop\nMobile (390px)\n400 Days Away\nAudit upload event\n\nThe Celebration of Audit Couple\n\nDATE & TIME\n\n10 Dec 2027, 1:00 PM WAT\n\nVENUE\n\nAudit Venue\n\nLagos\n\nPersonal Invitation Access\n\nEnter pass code...\nAccess Pass"
+}

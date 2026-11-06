@@ -506,6 +506,40 @@ function chairYaw(top, cx, cz, shape) {
   return Math.atan2(-cx, -cz);
 }
 
+/**
+ * A couch: a seat wide enough for two, with a back and arms. Drawn from boxes rather than a new
+ * geometry so it costs nothing when no couch is placed.
+ */
+function pushCouch(m, cover) {
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.42, 0.7), M.fabric);
+  seat.position.y = 0.21;
+  seat.castShadow = true;
+  const back = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 0.16), M.fabric);
+  back.position.set(0, 0.62, -0.27);
+  back.castShadow = true;
+  const arm = new THREE.BoxGeometry(0.16, 0.3, 0.7);
+  const left = new THREE.Mesh(arm, M.fabric);
+  left.position.set(-0.67, 0.5, 0);
+  const right = new THREE.Mesh(arm, M.fabric);
+  right.position.set(0.67, 0.5, 0);
+  const g = new THREE.Group();
+  g.add(seat, back, left, right);
+  g.traverse((o) => {
+    if (o.isMesh) o.material = M.fabric;
+  });
+  const mesh = g.clone();
+  mesh.applyMatrix4(m);
+  // The colour is per couch, so it cannot ride the shared material.
+  mesh.traverse((o) => {
+    if (o.isMesh) {
+      o.material = M.fabric.clone();
+      o.material.color = new THREE.Color(cover || "#f4efe6");
+    }
+  });
+  scene.add(mesh);
+  couchMeshes.push(mesh);
+}
+
 function pushChair(m, type, cover, sash, settings, sashOn = true) {
   if (type === "covered") {
     batch("cover", () => new Batch(G.cover, M.fabric, { colored: true })).push(
@@ -576,17 +610,21 @@ function rebuildInstances() {
     }
     pushCentrepiece(tm, st.centrepiece, st.flower, t.top, hash(t.id) % 1000);
   }
+  for (const mesh of couchMeshes) {
+    scene.remove(mesh);
+    mesh.traverse((o) => {
+      if (o.isMesh) o.material.dispose();
+    });
+  }
+  couchMeshes.length = 0;
   for (const c of state.chairs) {
     const item = items.get("chair:" + c.id);
     if (!item) continue;
     const o = item.obj;
-    pushChair(
-      mat(o.position.x, 0, o.position.z, o.rotation.y),
-      c.type,
-      c.cover,
-      c.sash,
-      null
-    );
+    // `lift` is the deck a chair stands on, so a chair on a stage is not sunk into it.
+    const m = mat(o.position.x, c.lift || 0, o.position.z, o.rotation.y);
+    if (c.seat === "couch") pushCouch(m, c.cover);
+    else pushChair(m, c.type, c.cover, c.sash, null);
   }
   for (const g of state.ghosts) {
     const geo = g.top.kind === "rect" ? ghostBox : ghostDisc;
@@ -618,6 +656,8 @@ const shell = new THREE.Group();
 scene.add(shell);
 let shellSig = "";
 const walls = [];
+/** Roofs that hide the plan from above, and the height at which they start to. */
+const roofs = [];
 
 function disposeGroup(g) {
   g.traverse((o) => {
@@ -657,8 +697,53 @@ function floorMaterial(finish, W, L) {
   return m;
 }
 
+// ---------------------------------------------------------------- venue
+
+/** The venue facts the app sends with the layout. Absent means a plain indoor hall. */
+function venueOf(L) {
+  return L.venue ?? { type: "hall", environment: "indoor" };
+}
+
+/** Venues with no roof over the tables. */
+const OPEN_TYPES = new Set(["garden", "field", "beach", "rooftop"]);
+/** Venues roofed by fabric on legs rather than walls. */
+const TENT_TYPES = new Set(["marquee", "pole-tent", "stretch-tent"]);
+
+function isOpen(venue) {
+  return OPEN_TYPES.has(venue.type) || venue.environment === "outdoor";
+}
+
+function isTent(venue) {
+  return TENT_TYPES.has(venue.type);
+}
+
+/**
+ * The ground the venue stands on, or null to use the decor floor.
+ *
+ * The answer the host gave wins over the venue type, so a marquee on gravel draws gravel.
+ */
+function groundTexture(venue) {
+  const floor = venue.structure?.floor;
+  if (floor === "grass") return T.grass();
+  if (floor === "sand") return T.sand();
+  if (floor === "gravel") return T.sand("#8f8a7e");
+  if (floor === "soil") return T.grass("#6b5a44");
+  if (floor === "deck") return T.wood();
+  if (venue.type === "beach") return T.sand();
+  if (venue.type === "garden" || venue.type === "field") return T.grass();
+  return null;
+}
+
+/** The leg module a tent snaps to, in metres, or 0 when the venue has no leg grid. */
+function legModule(venue) {
+  if (!isTent(venue)) return 0;
+  const m = venue.structure?.legModule;
+  return m === 3 || m === 5 ? m : 0;
+}
+
 function buildShell(L) {
   const { width: W, length: Ln, ceiling: H, decor, mood } = L;
+  const venue = venueOf(L);
   const sig = JSON.stringify([
     W,
     Ln,
@@ -669,18 +754,37 @@ function buildShell(L) {
     decor.uplight,
     mood,
     L.chandeliers,
+    venue.type,
+    venue.environment,
+    venue.structure?.floor,
+    venue.structure?.legModule,
   ]);
   if (sig === shellSig) return;
   shellSig = sig;
   disposeGroup(shell);
   walls.length = 0;
+  roofs.length = 0;
   const evening = mood === "evening";
+  const open = isOpen(venue);
+  const tent = isTent(venue);
 
-  // Floor slab.
+  // Floor slab. An open-air venue stands on its own ground rather than a polished floor.
+  const ground = groundTexture(venue);
+  const top = ground
+    ? (() => {
+        const m = new THREE.MeshStandardMaterial({
+          map: ground.clone(),
+          roughness: 0.95,
+        });
+        m.map.needsUpdate = true;
+        m.map.repeat.set((W + 0.6) / 2, (Ln + 0.6) / 2);
+        return m;
+      })()
+    : floorMaterial(decor.floor, W + 0.6, Ln + 0.6);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(W + 0.6, 0.2, Ln + 0.6), [
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
-    floorMaterial(decor.floor, W + 0.6, Ln + 0.6),
+    top,
     new THREE.MeshStandardMaterial({ color: "#d9d2c6" }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.8 }),
@@ -689,7 +793,234 @@ function buildShell(L) {
   slab.receiveShadow = true;
   shell.add(slab);
 
-  // Walls with panelling, skirting and a gold cornice.
+  if (open) {
+    buildOpenVenue(venue, W, Ln, evening);
+  } else if (tent) {
+    buildTent(venue, W, Ln, H, evening);
+  } else {
+    buildWalls(decor, W, Ln, H, evening);
+    if (venue.type === "church") buildChurch(W, Ln, evening);
+  }
+
+  // Chandeliers.
+  if (L.chandeliers && !open) {
+    buildChandeliers(W, Ln, H, evening);
+  }
+
+  // Key light and shadow camera over the hall.
+  key.position.set(
+    W / 2 + W * 0.25,
+    Math.max(W, Ln) * 0.9 + 10,
+    Ln / 2 + Ln * 0.35
+  );
+  key.target.position.set(W / 2, 0, Ln / 2);
+  const ext = Math.max(W, Ln) * 0.8 + 4;
+  Object.assign(key.shadow.camera, {
+    left: -ext,
+    right: ext,
+    top: ext,
+    bottom: -ext,
+    near: 1,
+    far: Math.max(W, Ln) * 3 + 40,
+  });
+  key.shadow.camera.updateProjectionMatrix();
+}
+
+/** A terrace, garden, field or beach: a parapet or nothing, and the sky above. */
+function buildOpenVenue(venue, W, Ln, evening) {
+  if (venue.type === "rooftop") {
+    // A low parapet, so the terrace reads as a roof rather than a floating floor.
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#cfc7ba",
+      roughness: 0.9,
+    });
+    const h = 1.05;
+    const t = 0.18;
+    for (const d of [
+      { len: W + 2 * t, x: W / 2, z: -t / 2, ry: 0 },
+      { len: W + 2 * t, x: W / 2, z: Ln + t / 2, ry: 0 },
+      { len: Ln, x: -t / 2, z: Ln / 2, ry: Math.PI / 2 },
+      { len: Ln, x: W + t / 2, z: Ln / 2, ry: Math.PI / 2 },
+    ]) {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(d.len, h, t), mat);
+      wall.position.set(d.x, h / 2, d.z);
+      wall.rotation.y = d.ry;
+      wall.castShadow = true;
+      wall.receiveShadow = true;
+      shell.add(wall);
+    }
+    return;
+  }
+
+  if (venue.type === "garden") {
+    // A few trees around the edge, so the ground reads as a garden and not a lawn.
+    const trunk = new THREE.MeshStandardMaterial({
+      color: "#5a4632",
+      roughness: 1,
+    });
+    const leaf = new THREE.MeshStandardMaterial({
+      color: evening ? "#2f4a2c" : "#3f6b38",
+      roughness: 1,
+    });
+    const spots = [
+      [1.6, 1.6],
+      [W - 1.6, 1.6],
+      [1.6, Ln - 1.6],
+      [W - 1.6, Ln - 1.6],
+      [W / 2, -1.4],
+    ];
+    for (const [x, z] of spots) {
+      const g = new THREE.Group();
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.22, 2.6, 8),
+        trunk
+      );
+      stem.position.y = 1.3;
+      stem.castShadow = true;
+      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 1), leaf);
+      crown.position.y = 3.4;
+      crown.castShadow = true;
+      g.add(stem, crown);
+      g.position.set(x, 0, z);
+      shell.add(g);
+    }
+  }
+}
+
+/** A marquee, pole tent or stretch tent: legs on the module, and a fabric roof. */
+function buildTent(venue, W, Ln, H, evening) {
+  const module = legModule(venue) || 5;
+  const legMat = new THREE.MeshStandardMaterial({
+    color: "#b9b3a6",
+    metalness: 0.4,
+    roughness: 0.5,
+  });
+  const legH = Math.max(2.4, Math.min(H, 4.2));
+  const legR = 0.07;
+
+  // Legs on the module, inset half a module from each edge so the roof overhangs.
+  const xs = [];
+  for (let x = module / 2; x <= W; x += module) xs.push(x);
+  const zs = [];
+  for (let z = module / 2; z <= Ln; z += module) zs.push(z);
+  for (const x of xs)
+    for (const z of zs) {
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(legR, legR, legH, 8),
+        legMat
+      );
+      leg.position.set(x, legH / 2, z);
+      leg.castShadow = true;
+      shell.add(leg);
+    }
+
+  // The fabric roof: a shallow hip that rises to a ridge along the long axis.
+  const fabric = new THREE.MeshStandardMaterial({
+    color: evening ? "#e8e2d6" : "#f4efe6",
+    roughness: 0.95,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  const overhang = 0.6;
+  const ridge = legH + Math.min(1.6, Math.max(W, Ln) * 0.06);
+  const roof = new THREE.BufferGeometry();
+  const x0 = -overhang;
+  const x1 = W + overhang;
+  const z0 = -overhang;
+  const z1 = Ln + overhang;
+  const zm = Ln / 2;
+  const verts = new Float32Array([
+    // long side A
+    x0,
+    legH,
+    z0,
+    x1,
+    legH,
+    z0,
+    x1,
+    ridge,
+    zm,
+    x0,
+    legH,
+    z0,
+    x1,
+    ridge,
+    zm,
+    x0,
+    ridge,
+    zm,
+    // long side B
+    x1,
+    legH,
+    z1,
+    x0,
+    legH,
+    z1,
+    x0,
+    ridge,
+    zm,
+    x1,
+    legH,
+    z1,
+    x0,
+    ridge,
+    zm,
+    x1,
+    ridge,
+    zm,
+    // gable A
+    x0,
+    legH,
+    z1,
+    x0,
+    legH,
+    z0,
+    x0,
+    ridge,
+    zm,
+    // gable B
+    x1,
+    legH,
+    z0,
+    x1,
+    legH,
+    z1,
+    x1,
+    ridge,
+    zm,
+  ]);
+  roof.setAttribute("position", new THREE.BufferAttribute(verts, 3));
+  roof.computeVertexNormals();
+  const roofMesh = new THREE.Mesh(roof, fabric);
+  roofMesh.castShadow = true;
+  roofMesh.receiveShadow = true;
+  shell.add(roofMesh);
+  // The fabric hides the plan from above, so it fades out when the camera rises over the eaves.
+  roofs.push({ mats: [fabric], y: legH });
+
+  // A valance along the eaves, so the roof edge is not a bare line.
+  const valance = new THREE.MeshStandardMaterial({
+    color: evening ? "#d8d1c4" : "#ece6db",
+    roughness: 1,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  roofs[roofs.length - 1].mats.push(valance);
+  for (const d of [
+    { len: W + 2 * overhang, x: W / 2, z: z0, ry: 0 },
+    { len: W + 2 * overhang, x: W / 2, z: z1, ry: 0 },
+    { len: Ln + 2 * overhang, x: x0, z: Ln / 2, ry: Math.PI / 2 },
+    { len: Ln + 2 * overhang, x: x1, z: Ln / 2, ry: Math.PI / 2 },
+  ]) {
+    const v = new THREE.Mesh(new THREE.PlaneGeometry(d.len, 0.35), valance);
+    v.position.set(d.x, legH - 0.175, d.z);
+    v.rotation.y = d.ry;
+    shell.add(v);
+  }
+}
+
+/** The indoor shell: panelled walls, skirting, a gold cornice, drapes and uplights. */
+function buildWalls(decor, W, Ln, H, evening) {
   const t = 0.25;
   const wallTex = (len) => {
     const m = T.panels(decor.wall).clone();
@@ -818,9 +1149,77 @@ function buildShell(L) {
       mats,
     });
   }
+}
 
-  // Chandeliers.
-  if (L.chandeliers) {
+/**
+ * A church: a raised altar at the far end, a chancel rail, and a runner down the aisle.
+ *
+ * The pews are not drawn. In this venue the seating is what the host is arranging, so drawing
+ * fixed pews underneath the tables would show two seatings at once. The architecture is what the
+ * shell owes the plan: where the altar is, and where the aisle runs.
+ */
+function buildChurch(W, Ln, evening) {
+  const stone = new THREE.MeshStandardMaterial({
+    color: "#e6e0d4",
+    roughness: 0.9,
+  });
+  const wood = new THREE.MeshStandardMaterial({
+    color: "#6b4f36",
+    roughness: 0.8,
+  });
+  const runner = new THREE.MeshStandardMaterial({
+    color: evening ? "#5a1f2a" : "#7d2b3a",
+    roughness: 1,
+  });
+
+  const altarW = Math.min(W * 0.42, 6);
+  const altarD = 2.6;
+  const stepZ = altarD / 2 + 0.4;
+
+  // The sanctuary step, and the altar standing on it.
+  const step = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW, 0.45, altarD),
+    stone
+  );
+  step.position.set(W / 2, 0.225, stepZ);
+  step.castShadow = true;
+  step.receiveShadow = true;
+  shell.add(step);
+
+  const altar = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW * 0.55, 0.9, 0.7),
+    wood
+  );
+  altar.position.set(W / 2, 0.9, stepZ);
+  altar.castShadow = true;
+  shell.add(altar);
+
+  // A low rail across the chancel, so the sanctuary reads as set apart.
+  const rail = new THREE.Mesh(
+    new THREE.BoxGeometry(altarW + 1.2, 0.08, 0.1),
+    wood
+  );
+  rail.position.set(W / 2, 0.72, altarD + 0.4);
+  shell.add(rail);
+  for (const x of [-1, 1]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.72, 0.1), wood);
+    post.position.set(W / 2 + (x * (altarW + 1.2)) / 2, 0.36, altarD + 0.4);
+    shell.add(post);
+  }
+
+  // The runner, from the chancel to the back of the room.
+  const aisle = 1.6;
+  const runLen = Math.max(1, Ln - altarD - 0.8);
+  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(aisle, runLen), runner);
+  carpet.rotation.x = -Math.PI / 2;
+  carpet.position.set(W / 2, 0.012, altarD + 0.4 + runLen / 2);
+  carpet.receiveShadow = true;
+  shell.add(carpet);
+}
+
+/** Crystal chandeliers on a grid, hung from the ceiling. */
+function buildChandeliers(W, Ln, H, evening) {
+  {
     const nx = Math.max(1, Math.round(W / 9));
     const nz = Math.max(1, Math.round(Ln / 9));
     const crystals = new THREE.OctahedronGeometry(0.035, 0);
@@ -892,24 +1291,6 @@ function buildShell(L) {
     inst.count = k;
     shell.add(inst);
   }
-
-  // Key light and shadow camera over the hall.
-  key.position.set(
-    W / 2 + W * 0.25,
-    Math.max(W, Ln) * 0.9 + 10,
-    Ln / 2 + Ln * 0.35
-  );
-  key.target.position.set(W / 2, 0, Ln / 2);
-  const ext = Math.max(W, Ln) * 0.8 + 4;
-  Object.assign(key.shadow.camera, {
-    left: -ext,
-    right: ext,
-    top: ext,
-    bottom: -ext,
-    near: 1,
-    far: Math.max(W, Ln) * 3 + 40,
-  });
-  key.shadow.camera.updateProjectionMatrix();
 }
 
 // ---------------------------------------------------------------- zones
@@ -1632,6 +2013,170 @@ function syncZones() {
     }
 }
 
+// ---------------------------------------------------------------- stage items
+
+/**
+ * Podiums, lecterns and arches belong to a stage: they are stored as a share of the stage's width
+ * and depth, so moving or resizing the stage carries them with it rather than leaving them behind.
+ */
+const stageGroup = new THREE.Group();
+scene.add(stageGroup);
+const stageCache = new Map();
+/** Couches are drawn one by one, so they are tracked to be cleared on the next rebuild. */
+const couchMeshes = [];
+
+function buildStageItem(item, stage) {
+  const g = new THREE.Group();
+  const top = stage.height ?? 0.8;
+  if (item.kind === "arch") {
+    const w = Math.min(stage.w * 0.5, 3.2);
+    const h = 2.6;
+    const post = new THREE.BoxGeometry(0.16, h, 0.16);
+    for (const side of [-1, 1]) {
+      const m = new THREE.Mesh(post, M.gold);
+      m.position.set((side * w) / 2, h / 2, 0);
+      m.castShadow = true;
+      g.add(m);
+    }
+    const beam = new THREE.Mesh(
+      new THREE.BoxGeometry(w + 0.16, 0.16, 0.16),
+      M.gold
+    );
+    beam.position.y = h;
+    beam.castShadow = true;
+    g.add(beam);
+    // Flowers along the top, so an arch reads as an arch and not a goalpost.
+    for (let i = 0; i <= 6; i++) {
+      const f = new THREE.Mesh(G.bud, M.flower);
+      f.position.set(-w / 2 + (w * i) / 6, h + 0.12, 0);
+      f.scale.setScalar(1.6);
+      g.add(f);
+    }
+  } else if (item.kind === "couch") {
+    // The couple's sofa: a seat, a back and two arms, in the room's cover colour.
+    const w = Math.min(stage.w * 0.4, 2.2);
+    const seatH = 0.42;
+    const seat = new THREE.Mesh(
+      new THREE.BoxGeometry(w, seatH, 0.85),
+      M.fabric.clone()
+    );
+    seat.position.y = seatH / 2;
+    seat.castShadow = true;
+    g.add(seat);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(w, 0.55, 0.18), M.fabric);
+    back.position.set(0, seatH + 0.275, -0.335);
+    g.add(back);
+    for (const side of [-1, 1]) {
+      const arm = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.3, 0.85),
+        M.fabric
+      );
+      arm.position.set((side * (w - 0.18)) / 2, seatH + 0.15, 0);
+      g.add(arm);
+    }
+  } else if (item.kind === "table" || item.kind === "cake") {
+    const round = item.kind === "cake";
+    const r = round ? 0.5 : 0.75;
+    const top = new THREE.Mesh(
+      round
+        ? new THREE.CylinderGeometry(r, r, 0.06, 24)
+        : new THREE.BoxGeometry(r * 2, 0.06, r * 2),
+      M.fabric.clone()
+    );
+    top.position.y = 0.75;
+    top.castShadow = true;
+    g.add(top);
+    for (const [sx, sz] of [
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1],
+    ]) {
+      const leg = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.75, 0.05),
+        M.wood
+      );
+      leg.position.set((sx * r) / 1.4, 0.375, (sz * r) / 1.4);
+      g.add(leg);
+    }
+    if (round) {
+      const cake = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.22, 0.3, 20),
+        M.porcelain
+      );
+      cake.position.y = 0.93;
+      g.add(cake);
+    }
+  } else if (item.kind === "screen") {
+    const w = Math.min(stage.w * 0.5, 3);
+    const h = 1.7;
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.06), M.hit);
+    panel.position.set(0, h / 2 + 0.1, -0.1);
+    panel.castShadow = true;
+    g.add(panel);
+  } else {
+    const w = item.kind === "podium" ? 0.7 : 0.5;
+    const h = item.kind === "podium" ? 1.1 : 1.15;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.5), M.wood);
+    body.position.y = h / 2;
+    body.castShadow = true;
+    g.add(body);
+    const topSlab = new THREE.Mesh(
+      new THREE.BoxGeometry(w + 0.08, 0.06, 0.58),
+      M.gold
+    );
+    topSlab.position.y = h + 0.03;
+    g.add(topSlab);
+    if (item.kind === "lectern") {
+      const slope = new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, 0.4), M.wood);
+      slope.position.set(0, h + 0.12, 0.02);
+      slope.rotation.x = -0.35;
+      g.add(slope);
+    }
+  }
+  g.position.y = top;
+  return g;
+}
+
+function syncStageItems() {
+  const L = state.layout;
+  const seen = new Set();
+  // Where each one stands comes from the studio (stageItemPlacement in model.ts), the same
+  // maths the plan and the tests use. This only draws them there.
+  for (const item of state.stageItems || []) {
+    const stage = L.zones.find((z) => z.id === item.stageId);
+    if (!stage) continue;
+    seen.add(item.id);
+    const sig = JSON.stringify([
+      item.kind,
+      stage.w,
+      stage.h,
+      stage.height,
+      L.decor.flower,
+    ]);
+    let entry = stageCache.get(item.id);
+    if (!entry || entry.sig !== sig) {
+      if (entry) {
+        stageGroup.remove(entry.obj);
+        disposeGroup(entry.obj);
+      }
+      const obj = new THREE.Group();
+      obj.add(buildStageItem(item, stage));
+      entry = { sig, obj };
+      stageCache.set(item.id, entry);
+      stageGroup.add(obj);
+    }
+    entry.obj.position.set(item.x, 0, item.y);
+    entry.obj.rotation.y = -(item.yaw || 0) * DEG;
+  }
+  for (const [id, entry] of stageCache)
+    if (!seen.has(id)) {
+      stageGroup.remove(entry.obj);
+      disposeGroup(entry.obj);
+      stageCache.delete(id);
+    }
+}
+
 // ---------------------------------------------------------------- tables, chairs, labels
 
 const proxies = new THREE.Group();
@@ -1704,7 +2249,8 @@ function syncTables() {
       item = { type: "chair", id: c.id, obj };
       items.set(k, item);
     }
-    item.obj.position.set(c.x, 0, c.y);
+    // The pick box rises with the chair, or a chair on a stage is unclickable from above the deck.
+    item.obj.position.set(c.x, c.lift || 0, c.y);
     item.obj.rotation.y = -c.rot * DEG;
   }
   for (const [k, item] of items)
@@ -1720,6 +2266,160 @@ function syncTables() {
   for (const [k, l] of labels)
     if (k.startsWith("zone:") && !items.has(k))
       (l.obj.removeFromParent(), labels.delete(k));
+}
+
+// ---------------------------------------------------------------- air conditioners
+
+const acGroup = new THREE.Group();
+scene.add(acGroup);
+const acCache = new Map();
+
+const AC_MOUNT_COLOUR = {
+  wall: "#e8e4dc",
+  cassette: "#dcd6cc",
+  floor: "#cfc8bc",
+};
+
+/** One unit, drawn where it sits. The shape says how it is fixed, which is what decides its throw. */
+function buildUnit(u) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: AC_MOUNT_COLOUR[u.mount] ?? "#e8e4dc",
+    roughness: 0.55,
+    metalness: 0.15,
+  });
+  const ceiling = state.layout ? state.layout.ceiling : 5;
+  let body;
+  if (u.mount === "cassette") {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.14, 0.7), mat);
+    body.position.y = ceiling - 0.2;
+  } else if (u.mount === "floor") {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.6, 0.32), mat);
+    body.position.y = 0.8;
+  } else {
+    body = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.3, 0.26), mat);
+    body.position.y = 2.4;
+  }
+  body.castShadow = true;
+  g.add(body);
+  // A small grille, so the unit reads as a machine rather than a box.
+  const grille = new THREE.Mesh(
+    new THREE.BoxGeometry(
+      u.mount === "floor" ? 0.3 : 0.6,
+      u.mount === "floor" ? 0.5 : 0.12,
+      0.02
+    ),
+    new THREE.MeshStandardMaterial({ color: "#8f8a82", roughness: 0.8 })
+  );
+  grille.position.copy(body.position);
+  grille.position.z += u.mount === "floor" ? 0.17 : 0.14;
+  g.add(grille);
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), M.hit);
+  hit.position.y = 1.1;
+  hit.userData.pick = { type: "ac", id: u.id };
+  g.add(hit);
+  return g;
+}
+
+function syncUnits() {
+  const units = state.units || [];
+  const seen = new Set();
+  for (const u of units) {
+    seen.add(u.id);
+    const sig = `${u.mount}:${u.hp}:${u.inverter}`;
+    let entry = acCache.get(u.id);
+    if (!entry || entry.sig !== sig) {
+      if (entry) {
+        acGroup.remove(entry.obj);
+        disposeGroup(entry.obj);
+      }
+      const obj = buildUnit(u);
+      entry = { sig, obj };
+      acCache.set(u.id, entry);
+      acGroup.add(obj);
+    }
+    entry.obj.position.set(u.x, 0, u.y);
+    items.set("ac:" + u.id, { type: "ac", id: u.id, obj: entry.obj });
+  }
+  for (const [id, entry] of acCache)
+    if (!seen.has(id)) {
+      acGroup.remove(entry.obj);
+      disposeGroup(entry.obj);
+      acCache.delete(id);
+      items.delete("ac:" + id);
+    }
+}
+
+// ---------------------------------------------------------------- heat map
+
+const HEAT_STOPS = ["#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"];
+const heatGroup = new THREE.Group();
+scene.add(heatGroup);
+let heatMesh = null;
+let heatSig = "";
+
+function heatColour(t) {
+  const x = Math.min(0.9999, Math.max(0, t)) * (HEAT_STOPS.length - 1);
+  const i = Math.floor(x);
+  const f = x - i;
+  const a = new THREE.Color(HEAT_STOPS[i]);
+  const b = new THREE.Color(HEAT_STOPS[i + 1]);
+  return a.lerp(b, f);
+}
+
+/** Paint the field onto a canvas and lay it on the floor. */
+function syncHeat() {
+  const f = state.field;
+  const show = !!(f && state.heat);
+  if (!show) {
+    if (heatMesh) heatMesh.visible = false;
+    return;
+  }
+  const sum = f.temps.reduce((a, b) => a + b, 0);
+  const sig = `${f.cols}:${f.rows}:${f.minC}:${f.maxC}:${sum.toFixed(3)}`;
+  if (!heatMesh || heatSig !== sig) {
+    const canvas = document.createElement("canvas");
+    canvas.width = f.cols;
+    canvas.height = f.rows;
+    const ctx = canvas.getContext("2d");
+    const span = Math.max(0.001, f.maxC - f.minC);
+    for (let r = 0; r < f.rows; r++) {
+      for (let c = 0; c < f.cols; c++) {
+        const t = (f.temps[r * f.cols + c] - f.minC) / span;
+        const col = heatColour(t);
+        ctx.fillStyle = `rgb(${Math.round(col.r * 255)},${Math.round(
+          col.g * 255
+        )},${Math.round(col.b * 255)})`;
+        ctx.fillRect(c, r, 1, 1);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearFilter;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    if (heatMesh) {
+      heatGroup.remove(heatMesh);
+      heatMesh.geometry.dispose();
+      heatMesh.material.map?.dispose();
+      heatMesh.material.dispose();
+    }
+    const W = state.layout.width;
+    const L = state.layout.length;
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    heatMesh = new THREE.Mesh(new THREE.PlaneGeometry(W, L), mat);
+    heatMesh.rotation.x = -Math.PI / 2;
+    heatMesh.position.set(W / 2, 0.03, L / 2);
+    heatMesh.renderOrder = 1;
+    heatGroup.add(heatMesh);
+    heatSig = sig;
+  }
+  heatMesh.visible = true;
 }
 
 // ---------------------------------------------------------------- selection visuals
@@ -1861,7 +2561,7 @@ function syncSelection() {
 
 // ---------------------------------------------------------------- camera
 
-const cam = { tx: 15, tz: 10, az: 0, pol: 0.95, dist: 50 };
+const cam = { tx: 15, ty: 0, tz: 10, az: 0, pol: 0.95, dist: 50 };
 let goal = null;
 let fitDist = 50;
 
@@ -1872,10 +2572,10 @@ function maxPolar(dist) {
 
 function applyCamera() {
   cam.pol = Math.min(cam.pol, maxPolar(cam.dist));
-  const { tx, tz, az, pol, dist } = cam;
+  const { tx, ty, tz, az, pol, dist } = cam;
   camera.position.set(
     tx + dist * Math.sin(pol) * Math.sin(az),
-    dist * Math.cos(pol),
+    ty + dist * Math.cos(pol),
     tz + dist * Math.sin(pol) * Math.cos(az)
   );
   const f = new THREE.Vector3(-Math.sin(az), 0, -Math.cos(az));
@@ -1885,7 +2585,7 @@ function applyCamera() {
       .add(new THREE.Vector3(0, Math.sin(pol), 0))
       .normalize()
   );
-  camera.lookAt(tx, 0, tz);
+  camera.lookAt(tx, ty, tz);
   camera.near = Math.max(0.05, dist / 200);
   camera.far = dist * 20 + 200;
   camera.updateProjectionMatrix();
@@ -1904,6 +2604,17 @@ function applyCamera() {
             : m.userData.base
           : o;
       m.depthWrite = !near && m.blending !== THREE.AdditiveBlending;
+    }
+  }
+  // A roof over the tables fades as soon as the camera rises above its eaves, so the plan stays
+  // readable from above. Unlike a wall this does not depend on the polar angle: looking straight
+  // down is exactly when the roof is most in the way.
+  for (const r of roofs) {
+    const above = camera.position.y > r.y;
+    for (const m of r.mats) {
+      m.userData.base ??= m.opacity;
+      m.opacity = above ? 0.06 : m.userData.base;
+      m.depthWrite = !above;
     }
   }
   // Glow sprites face the camera.
@@ -1989,6 +2700,7 @@ function fitView(pol = cam.pol) {
   fitDist = hallFitDistance(pol);
   tweenTo({
     tx: L.width / 2,
+    ty: 0,
     tz: L.length / 2 + (pol < 0.1 ? 0 : 0.6),
     pol,
     dist: fitDist,
@@ -2013,8 +2725,15 @@ function loop() {
   looping = true;
   requestAnimationFrame(frame);
 }
+let lastFrame = 0;
 function frame(now) {
   looping = false;
+  const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
+  lastFrame = now;
+  if (rainOn && stepRain(dt)) {
+    dirty = true;
+    loop();
+  }
   if (offset.x !== offset.tx || offset.y !== offset.ty) {
     const k = Math.min(1, (now - offset.t0) / OFFSET_MS);
     const e = 1 - Math.pow(1 - k, 3);
@@ -2027,7 +2746,7 @@ function frame(now) {
   if (goal) {
     const k = Math.min(1, (now - goal.t0) / goal.ms);
     const e = 1 - Math.pow(1 - k, 3);
-    for (const key of ["tx", "tz", "az", "pol", "dist"])
+    for (const key of ["tx", "ty", "tz", "az", "pol", "dist"])
       cam[key] = goal.from[key] + (goal.to[key] - goal.from[key]) * e;
     applyCamera();
     if (k >= 1) goal = null;
@@ -2125,6 +2844,176 @@ function applyMood() {
   M.flame.color.set(evening ? "#ffd690" : "#ffe7bf");
 }
 
+// ---------------------------------------------------------------- environment
+
+const envGroup = new THREE.Group();
+scene.add(envGroup);
+let envSig = "";
+let rainOn = false;
+let rain = null;
+
+/**
+ * Where the sun is, in degrees: azimuth clockwise from north, elevation above the horizon.
+ *
+ * The host's answer wins. Without one, a seasonal arc from the month keeps an unanswered venue
+ * from being lit from a direction that could never happen.
+ */
+function sunAngles(venue) {
+  const az = venue.sun?.azimuth;
+  const el = venue.sun?.elevation;
+  if (typeof az === "number" && typeof el === "number") {
+    return { az, el: Math.max(2, Math.min(88, el)) };
+  }
+  const month = venue.climate?.month ?? 6;
+  return {
+    az: 135,
+    el: Math.max(8, 35 + 25 * Math.sin(((month - 3) / 12) * Math.PI * 2)),
+  };
+}
+
+/** A bearing in degrees to a direction on the floor, with north along -Z. */
+function bearing(deg) {
+  const r = (deg * Math.PI) / 180;
+  return { x: Math.sin(r), z: -Math.cos(r) };
+}
+
+function applyEnvironment() {
+  const L = state.layout;
+  if (!L) return;
+  const venue = venueOf(L);
+  const open = isOpen(venue);
+  const evening = L.mood === "evening";
+  // Sky: an open venue gets a gradient behind it instead of the page board. This is set on every
+  // pass, not behind the signature guard, because the mood pass just before it resets the
+  // background to the board colour. The texture is cached, so re-setting it costs nothing.
+  if (open) scene.background = T.sky(evening);
+
+  const sig = JSON.stringify([
+    venue.type,
+    venue.environment,
+    venue.sun,
+    venue.wind,
+    venue.climate?.month,
+    evening,
+    L.width,
+    L.length,
+  ]);
+  if (sig === envSig) return;
+  envSig = sig;
+  disposeGroup(envGroup);
+
+  const W = L.width;
+  const Ln = L.length;
+
+  // Sun: the key light is placed on the arc the host described.
+  const { az, el } = sunAngles(venue);
+  const dir = bearing(az);
+  const reach = Math.max(W, Ln) * 1.4 + 14;
+  const flat = Math.cos((el * Math.PI) / 180) * reach;
+  key.position.set(
+    W / 2 + dir.x * flat,
+    Math.max(3, Math.sin((el * Math.PI) / 180) * reach),
+    Ln / 2 + dir.z * flat
+  );
+  key.target.position.set(W / 2, 0, Ln / 2);
+  key.target.updateMatrixWorld();
+
+  // Wind: an arrow on the upwind edge, pointing the way the wind blows.
+  const wind = venue.wind;
+  if (wind && typeof wind.direction === "number") {
+    const from = bearing(wind.direction);
+    const mat = new THREE.MeshBasicMaterial({
+      color: evening ? "#9fc4e8" : "#3f6f9e",
+      toneMapped: false,
+    });
+    const arrow = new THREE.Group();
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 2.2, 8),
+      mat
+    );
+    shaft.rotation.z = Math.PI / 2;
+    shaft.position.x = 1.1;
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.6, 12), mat);
+    head.rotation.z = -Math.PI / 2;
+    head.position.x = 2.5;
+    arrow.add(shaft, head);
+    const rad = Math.min(W, Ln) / 2 + 1.6;
+    arrow.position.set(W / 2 + from.x * rad, 0.08, Ln / 2 + from.z * rad);
+    // The arrow is modelled along +X; turn it to point back across the room.
+    arrow.rotation.y = Math.PI / 2 - ((wind.direction + 180) * Math.PI) / 180;
+    envGroup.add(arrow);
+  }
+
+  requestRender();
+}
+
+/** Rain: a column of falling streaks over the room, toggled from the studio. */
+function setRain(on) {
+  rainOn = on;
+  if (rain) {
+    scene.remove(rain);
+    rain.geometry.dispose();
+    rain.material.dispose();
+    rain = null;
+  }
+  if (!on || !state.layout) {
+    requestRender();
+    return;
+  }
+  const W = state.layout.width;
+  const Ln = state.layout.length;
+  const count = 900;
+  const streak = 0.45;
+  // Two vertices a drop: the head and the tail above it, so the rain reads as streaks rather
+  // than as dots falling.
+  const pos = new Float32Array(count * 6);
+  const speed = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * (W + 8) - 4;
+    const y = Math.random() * 14;
+    const z = Math.random() * (Ln + 8) - 4;
+    pos[i * 6] = x;
+    pos[i * 6 + 1] = y;
+    pos[i * 6 + 2] = z;
+    pos[i * 6 + 3] = x;
+    pos[i * 6 + 4] = y + streak;
+    pos[i * 6 + 5] = z;
+    speed[i] = 9 + Math.random() * 7;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.LineBasicMaterial({
+    color: "#7fa8cc",
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  rain = new THREE.LineSegments(geo, mat);
+  rain.userData.speed = speed;
+  rain.userData.streak = streak;
+  rain.frustumCulled = false;
+  scene.add(rain);
+  requestRender();
+}
+
+/** Fall the rain one frame. Returns true while it is still moving. */
+function stepRain(dt) {
+  if (!rain) return false;
+  const p = rain.geometry.attributes.position;
+  const speed = rain.userData.speed;
+  const streak = rain.userData.streak;
+  for (let i = 0; i < speed.length; i++) {
+    const head = i * 2;
+    let y = p.getY(head) - speed[i] * dt;
+    if (y < 0) y += 14;
+    p.setY(head, y);
+    p.setY(head + 1, y + streak);
+  }
+  p.needsUpdate = true;
+  return true;
+}
+
 // ---------------------------------------------------------------- pointer
 
 const ray = new THREE.Raycaster();
@@ -2154,6 +3043,7 @@ function pick(e) {
     ...selGroup.children,
     ...proxies.children,
     ...zoneGroup.children,
+    ...acGroup.children,
   ];
   const hits = ray.intersectObjects(targets, true);
   for (const h of hits) {
@@ -2164,7 +3054,19 @@ function pick(e) {
   return null;
 }
 
-const snap = (v, e) => (e.altKey ? v : Math.round(v / 0.05) * 0.05);
+/**
+ * Snap a dragged coordinate. A tent snaps to its leg module, so a table never lands on a leg;
+ * every other venue snaps to 5 cm. Holding Alt turns snapping off.
+ *
+ * This is the input transform, not a second model: the app stores the value the renderer reports,
+ * so what is drawn and what is saved stay the same number.
+ */
+function snap(v, e) {
+  if (e.altKey) return v;
+  const module = state.layout ? legModule(venueOf(state.layout)) : 0;
+  const step = module || 0.05;
+  return Math.round(v / step) * step;
+}
 
 renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
 
@@ -2203,8 +3105,28 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     return;
   }
   const p = pick(e);
+  if (state.placing) {
+    const f = floorPoint(e);
+    if (f) post({ t: "placeAc", x: round2(f.x), y: round2(f.z) });
+    return;
+  }
   if (state.assigning) {
     if (p?.type === "table") post({ t: "tableClick", id: p.id });
+    return;
+  }
+  // A unit is dragged, never selected: it has no inspector, and selecting it would empty the deck.
+  if (p?.type === "ac") {
+    const item = items.get("ac:" + p.id);
+    if (item) {
+      drag = {
+        kind: "move",
+        p0: floorPoint(e),
+        start: [{ i: item, x: item.obj.position.x, z: item.obj.position.z }],
+        moved: false,
+        clicked: p,
+        toggle: false,
+      };
+    }
     return;
   }
   if (p?.type === "rotate") {
@@ -2220,9 +3142,25 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
       post({ t: "select", items: state.selection });
       syncSelection();
     }
+    // Ctrl (or Cmd) on an item copies it. Alt is already the orbit gesture, so it cannot be this.
+    if (e.ctrlKey || e.metaKey) {
+      post({ t: "duplicate", items: state.selection });
+      return;
+    }
     const moving = state.selection
       .map((s) => items.get(s.type + ":" + s.id))
       .filter(Boolean);
+    // A chair set on a stage travels with it, so dragging the stage does not leave it behind.
+    const staged = new Set(
+      state.selection.filter((s) => s.type === "zone").map((s) => s.id)
+    );
+    if (staged.size) {
+      for (const c of state.chairs) {
+        if (!c.stageId || !staged.has(c.stageId)) continue;
+        const item = items.get("chair:" + c.id);
+        if (item && !moving.includes(item)) moving.push(item);
+      }
+    }
     drag = {
       kind: "move",
       p0: floorPoint(e),
@@ -2545,11 +3483,14 @@ function snapshot() {
   resize();
   if (state.layout.mood === "evening") composer.render();
   else {
-    // The picture gets the page colour behind it rather than a see-through background.
-    scene.background = new THREE.Color(state.board || "#f7f2ea");
+    // The picture gets the page colour behind it rather than a see-through background. An open
+    // venue already has a sky, so it keeps it.
+    const open = isOpen(venueOf(state.layout));
+    const prevBg = scene.background;
+    if (!open) scene.background = new THREE.Color(state.board || "#f7f2ea");
     boardMat.uniforms.uOpaque.value = 1;
     renderer.render(scene, camera);
-    scene.background = null;
+    scene.background = prevBg;
     boardMat.uniforms.uOpaque.value = 0;
   }
   const url = renderer.domElement.toDataURL("image/png");
@@ -2576,6 +3517,10 @@ const state = {
   warnings: {},
   ghosts: [],
   assigning: false,
+  units: [],
+  field: null,
+  heat: false,
+  placing: false,
 };
 let pendingScene = null;
 let first = true;
@@ -2589,9 +3534,14 @@ function applyScene(s) {
   // New walls start opaque; fade the ones in front of the camera again.
   applyCamera();
   applyMood();
+  // After the mood, which sets the board colour the sky replaces for an open venue.
+  applyEnvironment();
   if (moodChanged) zoneCache.forEach((e) => (e.sig = ""));
   syncZones();
+  syncStageItems();
   syncTables();
+  syncUnits();
+  syncHeat();
   rebuildInstances();
   syncSelection();
   labelRenderer.domElement.style.display = state.labels ? "" : "none";
@@ -2669,14 +3619,75 @@ window.addEventListener("message", (e) => {
         if (item)
           tweenTo({
             tx: item.obj.position.x,
+            ty: item.obj.position.y || 0,
             tz: item.obj.position.z,
             dist: Math.min(cam.dist, 14),
           });
         break;
       }
+      case "frame": {
+        // Look at the top of an area rather than the floor, so a stage's furniture is in view.
+        const at = m.at;
+        if (!at) break;
+        const span = Math.max(at.w, at.h);
+        tweenTo({
+          tx: at.x,
+          tz: at.y,
+          ty: at.height || 0,
+          dist: Math.max(6, span * 2.6),
+        });
+        break;
+      }
+      case "rain":
+        setRain(!rainOn);
+        post({ t: "rain", on: rainOn });
+        break;
       case "snapshot":
         snapshot();
         break;
+      case "inspect": {
+        // Where things really are in the scene, in metres, so a test can read the drawn room
+        // instead of judging a picture of it.
+        const r = (n) => Math.round(n * 100) / 100;
+        // Where a point of the room lands on the page, so a test can aim a real pointer at it.
+        const rect = renderer.domElement.getBoundingClientRect();
+        const onScreen = (x, y, z) => {
+          const v = new THREE.Vector3(x, y, z).project(camera);
+          return {
+            sx: Math.round(rect.left + ((v.x + 1) / 2) * rect.width),
+            sy: Math.round(rect.top + ((1 - v.y) / 2) * rect.height),
+          };
+        };
+        post({
+          t: "inspect",
+          points: (m.points || []).map((p) => ({
+            ...p,
+            ...onScreen(p.x, p.y || 0, p.z),
+          })),
+          stageItems: [...stageCache].map(([id, e]) => ({
+            id,
+            x: r(e.obj.position.x),
+            y: r(e.obj.children[0]?.position.y ?? 0),
+            z: r(e.obj.position.z),
+            yaw: r(e.obj.rotation.y / DEG),
+          })),
+          chairs: [...items.values()]
+            .filter((i) => i.type === "chair")
+            .map((i) => ({
+              id: i.id,
+              x: r(i.obj.position.x),
+              y: r(i.obj.position.y),
+              z: r(i.obj.position.z),
+              // The middle of its pick box, which is what a pointer has to land on.
+              ...onScreen(
+                i.obj.position.x,
+                i.obj.position.y + 0.5,
+                i.obj.position.z
+              ),
+            })),
+        });
+        break;
+      }
     }
   }
 });

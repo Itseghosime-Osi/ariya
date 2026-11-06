@@ -6,6 +6,7 @@
  * in centimetres in `position_x` / `position_y`; everything else about the hall lives in one
  * `hall_layout` JSON document per event.
  */
+import type { Environment, VenueProfile, VenueType } from "@ariya/studio";
 
 export type ZoneKind =
   | "stage"
@@ -83,6 +84,12 @@ export interface TableStyle {
   flower?: string;
 }
 
+/**
+ * What a free chair is for. The couple and the celebrant sit in chairs that belong to the
+ * ceremony rather than the seating plan, and a couch is the same object at a larger scale.
+ */
+export type SeatKind = "guest" | "couple" | "celebrant" | "couch";
+
 /** A chair standing on its own (a lounge row, a couple's chairs, extra seats). */
 export interface FreeChair {
   id: string;
@@ -90,12 +97,53 @@ export interface FreeChair {
   y: number;
   rot: number;
   chair?: ChairType;
+  /** Absent means an ordinary guest chair. */
+  seat?: SeatKind;
+  /** How many people it holds: two on a couple's seat or a couch, one otherwise. */
+  seats?: number;
+  /** Its own fabric colour, overriding the room's. Absent means follow the décor. */
+  cover?: string;
+  /** Its own sash colour, overriding the room's. Absent means follow the décor. */
+  sash?: string | null;
+  /**
+   * A stage it stands on, so it rides with the stage and is lifted onto its deck. Absent means it
+   * stands on the floor. `x` and `y` are then metres from the stage's top-left, not the room's.
+   */
+  stageId?: string;
+}
+
+/** A named group of items the host can select and move as one. */
+export interface ItemGroup {
+  id: string;
+  name: string;
+  items: { type: "table" | "zone" | "chair"; id: string }[];
+}
+
+/**
+ * Things a stage can carry: the speaker's furniture, the ceremony's backdrop, and the tables a
+ * host actually puts up there — a cake table, a gift table, the couple's sofa, a screen.
+ */
+export type StageItemKind =
+  "podium" | "lectern" | "arch" | "couch" | "table" | "cake" | "screen";
+
+/** A fixture that belongs to a stage and moves with it. */
+export interface StageItem {
+  id: string;
+  stageId: string;
+  kind: StageItemKind;
+  /** −0.5 to 0.5 across the stage, left to right. */
+  across: number;
+  /** 0 at the stage's front edge, 1 at its back. */
+  depth: number;
+  label?: string;
 }
 
 export type Spacing = "snug" | "comfortable" | "spacious";
 
 export interface HallLayout {
-  version: 1;
+  version: 2;
+  /** What kind of place this is, and the facts that follow from it. */
+  venue: VenueProfile;
   width: number;
   length: number;
   zones: Zone[];
@@ -106,6 +154,10 @@ export interface HallLayout {
   /** Per-table styling by table id. */
   tableStyles: Record<string, TableStyle>;
   chairs: FreeChair[];
+  /** Named groups of items the host can select and move together. */
+  groups: ItemGroup[];
+  /** Podiums, lecterns and arches that sit on a stage and move with it. */
+  stageItems: StageItem[];
   mood: "day" | "evening";
   chandeliers: boolean;
   /** Ceiling height in metres. */
@@ -278,8 +330,93 @@ export const WALL_MARGIN = 1.0;
 export const ZONE_CLEARANCE = 1.0;
 /** NFPA 101 main aisle where it serves more than 50 people. */
 export const MAIN_AISLE = 1.12;
-/** Floor area per seated guest used for the fire-safety guidance (UK and NFPA both ~1.4 m²). */
-export const AREA_PER_DINER = 1.4;
+
+/**
+ * Floor area one seated guest needs, in square metres, by venue type.
+ *
+ * A banquet round needs 1.4 m² for comfort; open ground needs more because circulation is less
+ * tidy; pews are the one place a guest needs less than a square metre. Mirrors
+ * `VenueType::area_per_diner` in `crates/studio-core/src/venue.rs`.
+ */
+export const AREA_PER_DINER: Record<VenueType, number> = {
+  hall: 1.4,
+  "pillared-hall": 1.4,
+  marquee: 1.4,
+  "pole-tent": 1.4,
+  "stretch-tent": 1.4,
+  garden: 1.5,
+  field: 1.5,
+  beach: 1.5,
+  rooftop: 1.4,
+  church: 0.65,
+  hybrid: 1.4,
+};
+
+/** The floor area per guest for a venue type, defaulting to a hall. */
+export function areaPerDiner(venue: { type: VenueType } | undefined): number {
+  return AREA_PER_DINER[venue?.type ?? "hall"] ?? 1.4;
+}
+
+/** The environment a venue type starts in, which the host can then override. */
+export const VENUE_ENVIRONMENT: Record<VenueType, Environment> = {
+  hall: "indoor",
+  "pillared-hall": "indoor",
+  church: "indoor",
+  marquee: "covered",
+  "pole-tent": "covered",
+  "stretch-tent": "covered",
+  rooftop: "covered",
+  hybrid: "covered",
+  garden: "outdoor",
+  field: "outdoor",
+  beach: "outdoor",
+};
+
+/** The name a host would use for each venue type. */
+export const VENUE_LABEL: Record<VenueType, string> = {
+  hall: "Pillar-free hall",
+  "pillared-hall": "Pillared hall",
+  marquee: "Marquee",
+  "pole-tent": "Pole tent",
+  "stretch-tent": "Stretch tent",
+  garden: "Garden",
+  field: "Open field",
+  beach: "Beach",
+  rooftop: "Rooftop",
+  church: "Church",
+  hybrid: "Two venues",
+};
+
+/** A one-line description for the venue picker. */
+export const VENUE_BLURB: Record<VenueType, string> = {
+  hall: "Walls, a roof and no pillars in the way.",
+  "pillared-hall": "Columns you have to plan around.",
+  marquee: "A tent on a leg grid, open to the air.",
+  "pole-tent": "Poles down the middle, fabric over.",
+  "stretch-tent": "Fabric pulled over irregular ground.",
+  garden: "Lawn, trees and a house behind you.",
+  field: "Open ground with nothing to fix to.",
+  beach: "Sand, wind and a tide line.",
+  rooftop: "A terrace with a parapet and a view.",
+  church: "Pews, an aisle and a raised altar.",
+  hybrid: "Ceremony in one place, reception in another.",
+};
+
+/** A fresh venue profile for a type, with the environment it starts in. */
+export function defaultVenue(type: VenueType = "hall"): VenueProfile {
+  return {
+    type,
+    environment: VENUE_ENVIRONMENT[type],
+    structure: null,
+    services: null,
+    capacity: null,
+    climate: null,
+    cooling: null,
+    catering: null,
+    sun: null,
+    wind: null,
+  };
+}
 
 let idCounter = 0;
 export function zoneId(): string {
@@ -289,7 +426,8 @@ export function zoneId(): string {
 
 export function defaultLayout(width = 30, length = 20): HallLayout {
   return {
-    version: 1,
+    version: 2,
+    venue: defaultVenue("hall"),
     width,
     length,
     spacing: "comfortable",
@@ -297,6 +435,8 @@ export function defaultLayout(width = 30, length = 20): HallLayout {
     rotations: {},
     tableStyles: {},
     chairs: [],
+    groups: [],
+    stageItems: [],
     mood: "day",
     chandeliers: false,
     ceiling: 5,
@@ -338,7 +478,8 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
   const length = clamp(Number(r.length) || 20, 6, 120);
   const base = defaultLayout(width, length);
   return {
-    version: 1,
+    version: 2,
+    venue: normaliseVenue(r.venue),
     width,
     length,
     spacing:
@@ -359,9 +500,29 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
         )
       : {},
     chairs: Array.isArray(r.chairs)
-      ? r.chairs.filter(
-          (c): c is FreeChair =>
-            !!c && typeof c === "object" && typeof c.id === "string"
+      ? r.chairs
+          .filter(
+            (c): c is FreeChair =>
+              !!c && typeof c === "object" && typeof c.id === "string"
+          )
+          .map((c) => ({ ...c, seat: seatKind(c.seat) }))
+      : [],
+    groups: Array.isArray(r.groups)
+      ? r.groups.filter(
+          (g): g is ItemGroup =>
+            !!g &&
+            typeof g === "object" &&
+            typeof g.id === "string" &&
+            Array.isArray(g.items)
+        )
+      : [],
+    stageItems: Array.isArray(r.stageItems)
+      ? r.stageItems.filter(
+          (s): s is StageItem =>
+            !!s &&
+            typeof s === "object" &&
+            typeof s.id === "string" &&
+            typeof s.stageId === "string"
         )
       : [],
     mood: r.mood === "evening" ? "evening" : "day",
@@ -381,8 +542,44 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
   };
 }
 
+const VENUE_TYPES = Object.keys(VENUE_LABEL) as VenueType[];
+
+/** Read a stored venue profile, defaulting to a plain hall when it is missing or unknown. */
+export function normaliseVenue(raw: unknown): VenueProfile {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return defaultVenue("hall");
+  }
+  const r = raw as Partial<VenueProfile>;
+  const type: VenueType = VENUE_TYPES.includes(r.type as VenueType)
+    ? (r.type as VenueType)
+    : "hall";
+  const environment: Environment =
+    r.environment === "indoor" ||
+    r.environment === "covered" ||
+    r.environment === "outdoor"
+      ? r.environment
+      : VENUE_ENVIRONMENT[type];
+  return {
+    type,
+    environment,
+    structure: r.structure ?? null,
+    services: r.services ?? null,
+    capacity: r.capacity ?? null,
+    climate: r.climate ?? null,
+    cooling: r.cooling ?? null,
+    catering: r.catering ?? null,
+    sun: r.sun ?? null,
+    wind: r.wind ?? null,
+  };
+}
+
 function isRecord<T>(v: T | undefined): v is T {
   return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+/** A stored seat kind, defaulting to an ordinary guest chair. */
+export function seatKind(v: unknown): SeatKind {
+  return v === "couple" || v === "celebrant" || v === "couch" ? v : "guest";
 }
 
 /** Chair names from the first version of the planner, mapped onto the chair types. */
@@ -673,6 +870,133 @@ export function zoneFootprint(z: Zone): Footprint {
     hh: z.h / 2,
     rot: z.rot ?? 0,
   };
+}
+
+/**
+ * Where a chair actually stands. A chair on a stage stores its position relative to that stage
+ * (metres from its top-left) so moving or rotating the stage carries the chair with it; without a
+ * stage the position is already in room metres.
+ */
+export function chairPlacement(
+  chair: FreeChair,
+  zones: Zone[]
+): { x: number; y: number; yaw: number; lift: number } {
+  const stage = chair.stageId
+    ? zones.find((z) => z.id === chair.stageId)
+    : undefined;
+  if (!stage) return { x: chair.x, y: chair.y, yaw: chair.rot, lift: 0 };
+  const rot = ((stage.rot ?? 0) * Math.PI) / 180;
+  const dx = chair.x - stage.w / 2;
+  const dy = chair.y - stage.h / 2;
+  return {
+    x: stage.x + dx * Math.cos(rot) - dy * Math.sin(rot),
+    y: stage.y + dx * Math.sin(rot) + dy * Math.cos(rot),
+    yaw: chair.rot + (stage.rot ?? 0),
+    lift: stage.height ?? 0.8,
+  };
+}
+
+/**
+ * The chair as it should be stored after the host drops it at `to` (room metres). Dropped on a
+ * stage it attaches to that stage, stored from the stage's top-left so it rides with the stage and
+ * stands on the deck; dropped anywhere else it is a floor chair again. It keeps the way it faces
+ * in the room either way.
+ */
+export function chairAfterDrop(
+  chair: FreeChair,
+  to: { x: number; y: number },
+  zones: Zone[]
+): FreeChair {
+  const was = chair.stageId
+    ? zones.find((z) => z.id === chair.stageId)
+    : undefined;
+  const facing = chair.rot + (was?.rot ?? 0);
+  const { stageId: _gone, ...rest } = chair;
+  void _gone;
+  // The last stage in the list is the one drawn on top, so it wins where two overlap.
+  const onto = [...zones].reverse().find((z) => {
+    if (z.kind !== "stage") return false;
+    const r = (-(z.rot ?? 0) * Math.PI) / 180;
+    const dx = to.x - z.x;
+    const dy = to.y - z.y;
+    const lx = dx * Math.cos(r) - dy * Math.sin(r);
+    const ly = dx * Math.sin(r) + dy * Math.cos(r);
+    return Math.abs(lx) <= z.w / 2 && Math.abs(ly) <= z.h / 2;
+  });
+  if (!onto) return { ...rest, x: round2(to.x), y: round2(to.y), rot: facing };
+  const r = (-(onto.rot ?? 0) * Math.PI) / 180;
+  const dx = to.x - onto.x;
+  const dy = to.y - onto.y;
+  return {
+    ...rest,
+    stageId: onto.id,
+    x: round2(dx * Math.cos(r) - dy * Math.sin(r) + onto.w / 2),
+    y: round2(dx * Math.sin(r) + dy * Math.cos(r) + onto.h / 2),
+    rot: facing - (onto.rot ?? 0),
+  };
+}
+
+/** A fixture's place in the room: where it stands, which way it faces, and how high its stage is. */
+export interface StageItemAt {
+  x: number;
+  y: number;
+  /** Degrees, the stage's own turn, so "left of the stage" stays left. */
+  yaw: number;
+  lift: number;
+}
+
+/**
+ * Where a stage fixture actually stands. `across` runs −0.5 to 0.5 over the stage's width and
+ * `depth` 0 (front edge) to 1 (back edge); both are turned by the stage's rotation, the same way
+ * `chairPlacement` turns a chair, so the renderer and the plan can never disagree about it.
+ */
+export function stageItemPlacement(
+  item: Pick<StageItem, "across" | "depth">,
+  stage: Pick<Zone, "x" | "y" | "w" | "h" | "rot" | "height">
+): StageItemAt {
+  const rot = ((stage.rot ?? 0) * Math.PI) / 180;
+  const dx = item.across * stage.w;
+  const dy = (item.depth - 0.5) * stage.h;
+  return {
+    x: stage.x + dx * Math.cos(rot) - dy * Math.sin(rot),
+    y: stage.y + dx * Math.sin(rot) + dy * Math.cos(rot),
+    yaw: stage.rot ?? 0,
+    lift: stage.height ?? 0.8,
+  };
+}
+
+/** Keep every fixture clear of the stage's edges, so none hangs over the deck's rim. */
+export const STAGE_ACROSS_LIMIT = 0.42;
+const STAGE_DEPTH_LIMIT: [number, number] = [0.12, 0.88];
+
+/**
+ * The spot a new fixture takes on a stage. It starts where that kind belongs (a podium to the left,
+ * a lectern to the right, a backdrop at the back) and, if something already stands there, moves
+ * along the row, then to the next row forward, until it finds room. Always inside the stage.
+ */
+export function nextStageSpot(
+  kind: StageItemKind,
+  existing: Pick<StageItem, "across" | "depth">[]
+): { across: number; depth: number } {
+  const backdrop = kind === "arch" || kind === "screen";
+  const home = backdrop ? 0.85 : 0.6;
+  const preferred = kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0;
+  const rows = (backdrop ? [0.85, 0.7, 0.55] : [0.6, 0.38, 0.8, 0.2]).map((d) =>
+    Math.min(STAGE_DEPTH_LIMIT[1], Math.max(STAGE_DEPTH_LIMIT[0], d))
+  );
+  const slots = [preferred, -0.3, 0.3, -0.15, 0.15].map((a) =>
+    Math.min(STAGE_ACROSS_LIMIT, Math.max(-STAGE_ACROSS_LIMIT, a))
+  );
+  const free = (across: number, depth: number) =>
+    existing.every(
+      (e) =>
+        Math.abs(e.across - across) >= 0.14 || Math.abs(e.depth - depth) >= 0.17
+    );
+  for (const depth of rows)
+    for (const across of slots)
+      if (free(across, depth)) return { across, depth };
+  // Every spot is taken: stack on the home spot rather than leave the stage.
+  return { across: preferred, depth: home };
 }
 
 /** How far a footprint sits inside the walls (negative when it pokes through one). */

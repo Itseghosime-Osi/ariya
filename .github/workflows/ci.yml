@@ -49,6 +49,50 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: "1"
 
+  rust:
+    name: Rust core (fmt, clippy, tests, wasm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+
+      - name: Format
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Tests
+        run: cargo test --workspace
+
+      # The budget in research Part K (a 300-table arrange under 150 ms) is a release-build
+      # promise, and the debug run above runs the same arithmetic far too slowly to check it. This
+      # is the job that would actually fail if the search became an order of magnitude slower.
+      - name: Performance budgets
+        run: cargo test --release -p ariya-studio-core --test performance
+
+      # The wire types are generated from Rust. A stale file means the two sides have drifted.
+      - name: Generated TypeScript types are up to date
+        run: |
+          cargo test -p ariya-studio-core --features ts
+          git diff --exit-code -- packages/studio/src/generated
+
+      # The artifacts are committed so Vercel only needs Node. A stale artifact is a silent
+      # behaviour change, so a fresh build must match what is in the tree.
+      - name: Committed wasm matches a fresh build
+        run: |
+          node apps/web/scripts/build-wasm.mjs
+          git diff --exit-code -- apps/web/public/wasm
+
   pgtap:
     name: Database pgTAP tests
     runs-on: ubuntu-latest

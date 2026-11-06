@@ -1,0 +1,246 @@
+[
+  {
+    "path": "/events",
+    "method": "GET",
+    "status": 307,
+    "headers": {
+      "cache-control": "private, no-store",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "date": "Thu, 05 Nov 2026 08:23:11 GMT",
+      "keep-alive": "timeout=5",
+      "location": "/sign-in?next=%2Fevents",
+      "referrer-policy": "no-referrer",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-robots-tag": "noindex, nofollow, noarchive"
+    },
+    "body": "/sign-in?next=%2Fevents"
+  },
+  {
+    "path": "/events/00000000-0000-0000-0000-000000000001",
+    "method": "GET",
+    "status": 307,
+    "headers": {
+      "cache-control": "private, no-store",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "date": "Thu, 05 Nov 2026 08:23:11 GMT",
+      "keep-alive": "timeout=5",
+      "location": "/sign-in?next=%2Fevents%2F00000000-0000-0000-0000-000000000001",
+      "referrer-policy": "no-referrer",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-robots-tag": "noindex, nofollow, noarchive"
+    },
+    "body": "/sign-in?next=%2Fevents%2F00000000-0000-0000-0000-000000000001"
+  },
+  {
+    "path": "/api/cron/reminders",
+    "method": "GET",
+    "status": 401,
+    "headers": {
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/json",
+      "date": "Thu, 05 Nov 2026 08:23:11 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "{\"error\":\"Unauthorized\"}"
+  },
+  {
+    "path": "/api/webhooks/paystack",
+    "method": "POST",
+    "status": 401,
+    "headers": {
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/json",
+      "date": "Thu, 05 Nov 2026 08:23:12 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "{\"error\":\"Invalid signature\"}"
+  },
+  {
+    "path": "/mcp",
+    "method": "POST",
+    "status": 401,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/json",
+      "date": "Thu, 05 Nov 2026 08:23:13 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "www-authenticate": "Bearer resource_metadata=\"http://localhost:3000/.well-known/oauth-protected-resource\"",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32001,\"message\":\"Unauthorized\"},\"id\":null}"
+  },
+  {
+    "path": "/mcp",
+    "method": "POST",
+    "status": 403,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/json",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"That Origin is not allowed to call this endpoint.\"},\"id\":null}"
+  },
+  {
+    "path": "/mcp",
+    "method": "POST",
+    "status": 401,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/json",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "www-authenticate": "Bearer resource_metadata=\"http://localhost:3000/.well-known/oauth-protected-resource\"",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32001,\"message\":\"Unauthorized\"},\"id\":null}"
+  },
+  {
+    "path": "/.env.local",
+    "method": "GET",
+    "status": 404,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-powered-by": "Next.js"
+    },
+    "body": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/%5"
+  },
+  {
+    "path": "/.git/config",
+    "method": "GET",
+    "status": 404,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-powered-by": "Next.js"
+    },
+    "body": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/%5"
+  },
+  {
+    "path": "/robots.txt",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "text/plain",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "User-Agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: https://ariya-two.vercel.app/sitemap.xml\n"
+  },
+  {
+    "path": "/sitemap.xml",
+    "method": "GET",
+    "status": 200,
+    "headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "content-type": "application/xml",
+      "date": "Thu, 05 Nov 2026 08:23:14 GMT",
+      "keep-alive": "timeout=5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n<url>\n<loc>https://ariya-two.vercel.app/</loc>\n</url>\n<url>\n<loc>https://ariya-two.vercel.app/about<"
+  },
+  {
+    "path": "/auth/callback?next=https://attacker.invalid",
+    "method": "GET",
+    "status": 307,
+    "headers": {
+      "connection": "keep-alive",
+      "content-security-policy": "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      "date": "Thu, 05 Nov 2026 08:23:15 GMT",
+      "keep-alive": "timeout=5",
+      "location": "http://localhost:3000/sign-in?error=auth_callback_failed",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "body": ""
+  },
+  {
+    "path": "/rsvp.html?token=audit-invalid",
+    "method": "GET",
+    "status": 307,
+    "headers": {
+      "connection": "keep-alive",
+      "date": "Thu, 05 Nov 2026 08:23:15 GMT",
+      "keep-alive": "timeout=5",
+      "location": "/i/audit-invalid?token=audit-invalid",
+      "transfer-encoding": "chunked"
+    },
+    "body": "/i/audit-invalid?token=audit-invalid"
+  }
+]

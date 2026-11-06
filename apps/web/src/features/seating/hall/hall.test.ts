@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  areaPerDiner,
+  chairAfterDrop,
+  chairPlacement,
+  nextStageSpot,
+  stageItemPlacement,
+  STAGE_ACROSS_LIMIT,
+  type StageItem,
+  type StageItemKind,
   chairPositions,
   footprint,
   defaultLayout,
   gapBetween,
   gapToWalls,
   normaliseLayout,
+  normaliseVenue,
   tableTop,
   styleOf,
   type Zone,
@@ -237,6 +246,38 @@ describe("normaliseLayout for the 3D studio", () => {
   });
 });
 
+describe("venue profile", () => {
+  it("gives a first-version layout a plain hall", () => {
+    const l = normaliseLayout({ version: 1, width: 30, length: 20 })!;
+    expect(l.version).toBe(2);
+    expect(l.venue.type).toBe("hall");
+    expect(l.venue.environment).toBe("indoor");
+    expect(l.venue.structure).toBeNull();
+  });
+
+  it("keeps a venue it already knows", () => {
+    const l = normaliseLayout({
+      width: 30,
+      length: 20,
+      venue: { type: "marquee", environment: "covered" },
+    })!;
+    expect(l.venue.type).toBe("marquee");
+    expect(l.venue.environment).toBe("covered");
+  });
+
+  it("falls back to a hall for an unknown type", () => {
+    expect(normaliseVenue({ type: "spaceship" }).type).toBe("hall");
+    expect(normaliseVenue(null).type).toBe("hall");
+  });
+
+  it("gives each venue its own floor area per guest", () => {
+    expect(areaPerDiner({ type: "church" })).toBeCloseTo(0.65);
+    expect(areaPerDiner({ type: "field" })).toBeCloseTo(1.5);
+    expect(areaPerDiner({ type: "hall" })).toBeCloseTo(1.4);
+    expect(areaPerDiner(undefined)).toBeCloseTo(1.4);
+  });
+});
+
 describe("autoArrange", () => {
   const tables = (n: number) =>
     Array.from({ length: n }, (_, i) => ({
@@ -275,5 +316,219 @@ describe("autoArrange", () => {
   it("reports tables that do not fit", () => {
     const r = autoArrange(defaultLayout(12, 10), tables(40), 0.6);
     expect(r.unplaced.length).toBeGreaterThan(0);
+  });
+});
+
+describe("chairPlacement", () => {
+  const stage: Zone = {
+    id: "st",
+    kind: "stage",
+    label: "Stage",
+    x: 15,
+    y: 2,
+    w: 8,
+    h: 4,
+    rot: 0,
+    height: 0.9,
+  };
+
+  it("leaves a chair on the floor exactly where it is stored", () => {
+    const at = chairPlacement({ id: "c", x: 3, y: 4, rot: 45 }, [stage]);
+    expect(at).toEqual({ x: 3, y: 4, yaw: 45, lift: 0 });
+  });
+
+  it("places a staged chair from the stage's own centre and lifts it to the deck", () => {
+    // The middle of the stage, stored as metres from its top-left.
+    const at = chairPlacement({ id: "c", x: 4, y: 2, rot: 0, stageId: "st" }, [
+      stage,
+    ]);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(2);
+    expect(at.lift).toBe(0.9);
+  });
+
+  it("carries a staged chair with the stage when it rotates", () => {
+    // A quarter turn puts a chair stored to the right of centre at the bottom instead.
+    const turned = { ...stage, rot: 90 };
+    const at = chairPlacement({ id: "c", x: 6, y: 2, rot: 0, stageId: "st" }, [
+      turned,
+    ]);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(4);
+    // The chair turns with the room, so it still faces the audience.
+    expect(at.yaw).toBe(90);
+  });
+
+  it("falls back to the stored position when the stage is gone", () => {
+    const at = chairPlacement(
+      { id: "c", x: 4, y: 2, rot: 0, stageId: "missing" },
+      [stage]
+    );
+    expect(at).toEqual({ x: 4, y: 2, yaw: 0, lift: 0 });
+  });
+});
+
+describe("stage fixtures", () => {
+  const stage: Zone = {
+    id: "st",
+    kind: "stage",
+    label: "Stage",
+    x: 15,
+    y: 2.4,
+    w: 9,
+    h: 4,
+    rot: 0,
+    height: 0.8,
+  };
+  const KINDS: StageItemKind[] = [
+    "couch",
+    "table",
+    "cake",
+    "screen",
+    "podium",
+    "lectern",
+    "arch",
+  ];
+
+  /** Add `kinds` one after another the way the studio does. */
+  function fill(kinds: StageItemKind[]): StageItem[] {
+    const items: StageItem[] = [];
+    kinds.forEach((kind, i) => {
+      items.push({
+        id: `i${i}`,
+        stageId: "st",
+        kind,
+        ...nextStageSpot(kind, items),
+      });
+    });
+    return items;
+  }
+
+  it("never puts two fixtures on the same spot", () => {
+    // The bug this guards: a couch, a table and a cake table all landing at across 0, depth 0.6.
+    const items = fill(["couch", "table", "cake", "screen"]);
+    const spots = items.map((i) => `${i.across}/${i.depth}`);
+    expect(new Set(spots).size).toBe(items.length);
+    const at = items.map((i) => stageItemPlacement(i, stage));
+    for (let a = 0; a < at.length; a++)
+      for (let b = a + 1; b < at.length; b++)
+        expect(
+          Math.hypot(at[a].x - at[b].x, at[a].y - at[b].y)
+        ).toBeGreaterThanOrEqual(0.99);
+  });
+
+  it("keeps every spot inside the stage's width and depth", () => {
+    for (const i of fill([...KINDS, ...KINDS])) {
+      expect(Math.abs(i.across)).toBeLessThanOrEqual(STAGE_ACROSS_LIMIT);
+      expect(i.depth).toBeGreaterThan(0);
+      expect(i.depth).toBeLessThan(1);
+      const at = stageItemPlacement(i, stage);
+      expect(at.x).toBeGreaterThanOrEqual(stage.x - stage.w / 2);
+      expect(at.x).toBeLessThanOrEqual(stage.x + stage.w / 2);
+      expect(at.y).toBeGreaterThanOrEqual(stage.y - stage.h / 2);
+      expect(at.y).toBeLessThanOrEqual(stage.y + stage.h / 2);
+    }
+  });
+
+  it("keeps a fifth item on the row, and sends a sixth to the next one, inside the stage", () => {
+    // Five places fit along the front row without touching.
+    const five = fill(Array(5).fill("couch"));
+    expect(new Set(five.map((i) => i.depth)).size).toBe(1);
+    const across = five.map((i) => i.across).sort((a, b) => a - b);
+    for (let k = 1; k < across.length; k++)
+      expect(across[k] - across[k - 1]).toBeGreaterThanOrEqual(0.14);
+    for (const i of five)
+      expect(Math.abs(i.across)).toBeLessThanOrEqual(STAGE_ACROSS_LIMIT);
+    // The row is full: the next one moves to another row rather than onto a neighbour.
+    const sixth = nextStageSpot("couch", five);
+    expect(sixth.depth).not.toBe(five[0].depth);
+    expect(Math.abs(sixth.across)).toBeLessThanOrEqual(STAGE_ACROSS_LIMIT);
+  });
+
+  it("puts a podium left, a lectern right and a backdrop at the back", () => {
+    expect(nextStageSpot("podium", []).across).toBeLessThan(0);
+    expect(nextStageSpot("lectern", []).across).toBeGreaterThan(0);
+    expect(nextStageSpot("arch", []).depth).toBeGreaterThan(
+      nextStageSpot("couch", []).depth
+    );
+  });
+
+  it("stands an item on the deck at the stage's own height", () => {
+    const at = stageItemPlacement({ across: 0, depth: 0.5 }, stage);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(2.4);
+    expect(at.lift).toBe(0.8);
+  });
+
+  it("carries an item with the stage when it turns", () => {
+    // Right of centre, on the middle line. A quarter turn puts it below the centre instead,
+    // the same place a staged chair at the same offset lands.
+    const turned = { ...stage, rot: 90 };
+    const item = { across: 0.25, depth: 0.5 };
+    const at = stageItemPlacement(item, turned);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(2.4 + 0.25 * 9);
+    expect(at.yaw).toBe(90);
+    const chair = chairPlacement(
+      { id: "c", x: 4.5 + 0.25 * 9, y: 2, rot: 0, stageId: "st" },
+      [turned]
+    );
+    expect(at.x).toBeCloseTo(chair.x);
+    expect(at.y).toBeCloseTo(chair.y);
+  });
+});
+
+describe("chairAfterDrop", () => {
+  const stage: Zone = {
+    id: "st",
+    kind: "stage",
+    label: "Stage",
+    x: 15,
+    y: 2,
+    w: 8,
+    h: 4,
+    rot: 0,
+    height: 0.8,
+  };
+  const chair = { id: "c", x: 3, y: 9, rot: 0 };
+
+  it("attaches a chair dropped on a stage, stored from the stage's top-left", () => {
+    const on = chairAfterDrop(chair, { x: 16, y: 2.5 }, [stage]);
+    expect(on.stageId).toBe("st");
+    expect(on.x).toBeCloseTo(5);
+    expect(on.y).toBeCloseTo(2.5);
+    // And it round-trips: the placement reader puts it back where it was dropped.
+    const at = chairPlacement(on, [stage]);
+    expect(at.x).toBeCloseTo(16);
+    expect(at.y).toBeCloseTo(2.5);
+    expect(at.lift).toBe(0.8);
+  });
+
+  it("clears the stage when the chair is dropped back on the floor", () => {
+    const on = chairAfterDrop(chair, { x: 16, y: 2.5 }, [stage]);
+    const off = chairAfterDrop(on, { x: 10, y: 12 }, [stage]);
+    expect("stageId" in off).toBe(false);
+    expect(off.x).toBe(10);
+    expect(off.y).toBe(12);
+    expect(chairPlacement(off, [stage]).lift).toBe(0);
+  });
+
+  it("keeps the way it faces in the room across a stage that is turned", () => {
+    const turned = { ...stage, rot: 90 };
+    const on = chairAfterDrop({ ...chair, rot: 30 }, { x: 15, y: 3 }, [turned]);
+    expect(on.stageId).toBe("st");
+    expect(chairPlacement(on, [turned]).yaw).toBeCloseTo(30);
+    const at = chairPlacement(on, [turned]);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(3);
+  });
+
+  it("ignores a drop beside the stage and any area that is not a stage", () => {
+    const beside = chairAfterDrop(chair, { x: 20, y: 2 }, [stage]);
+    expect(beside.stageId).toBeUndefined();
+    const dance: Zone = { ...stage, id: "d", kind: "dance" };
+    expect(chairAfterDrop(chair, { x: 15, y: 2 }, [dance]).stageId).toBe(
+      undefined
+    );
   });
 });

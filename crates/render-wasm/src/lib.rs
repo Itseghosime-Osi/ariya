@@ -32,6 +32,11 @@ pub extern "C" fn ariya_alloc(size: u32) -> *mut u8 {
     unsafe { alloc(layout) }
 }
 
+/// Frees a buffer handed out by [`ariya_alloc`].
+///
+/// # Safety
+///
+/// `ptr` must come from `ariya_alloc` with the same `size`, and must not be used afterwards.
 #[no_mangle]
 pub unsafe extern "C" fn ariya_free(ptr: *mut u8, size: u32) {
     if ptr.is_null() {
@@ -41,6 +46,11 @@ pub unsafe extern "C" fn ariya_free(ptr: *mut u8, size: u32) {
     dealloc(ptr, layout);
 }
 
+/// Hashes a UTF-8 string, or returns `INVALID` when the bytes are not UTF-8.
+///
+/// # Safety
+///
+/// `ptr` must point to at least `len` readable bytes for the duration of the call.
 #[no_mangle]
 pub unsafe extern "C" fn ariya_hash_str(ptr: *const u8, len: usize) -> u32 {
     if ptr.is_null() {
@@ -53,6 +63,11 @@ pub unsafe extern "C" fn ariya_hash_str(ptr: *const u8, len: usize) -> u32 {
     }
 }
 
+/// Writes `count` random numbers in `[0, 1)` to `out`.
+///
+/// # Safety
+///
+/// `out` must point to at least `count` writable `f64` slots, or be null.
 #[no_mangle]
 pub unsafe extern "C" fn ariya_rng_fill(seed: u32, count: u32, out: *mut f64) {
     if out.is_null() {
@@ -65,6 +80,10 @@ pub unsafe extern "C" fn ariya_rng_fill(seed: u32, count: u32, out: *mut f64) {
 }
 
 /// Returns the mode index and writes `[p, local, fade, vis, cut]`.
+///
+/// # Safety
+///
+/// `out` must point to at least five writable `f64` slots, or be null.
 #[no_mangle]
 pub unsafe extern "C" fn ariya_scene_at(s: f64, out: *mut f64) -> u32 {
     let scene = story().map_story(s);
@@ -84,6 +103,10 @@ pub extern "C" fn ariya_cut_count() -> u32 {
 }
 
 /// Returns the mode index and writes `[a, b, p0, p1, t0, t1, scroll_sec]`.
+///
+/// # Safety
+///
+/// `out` must point to at least seven writable `f64` slots, or be null.
 #[no_mangle]
 pub unsafe extern "C" fn ariya_cut_at(index: u32, out: *mut f64) -> u32 {
     let Some(cut) = story().cuts().get(index as usize) else {

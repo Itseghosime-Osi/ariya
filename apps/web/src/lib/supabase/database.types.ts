@@ -272,6 +272,33 @@ export type Database = {
           },
         ];
       };
+      digest_log: {
+        Row: {
+          sent_at: string;
+          user_id: string;
+          week_start: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          sent_at?: string;
+          user_id: string;
+          week_start: string;
+        };
+        Update: {
+          sent_at?: string;
+          user_id?: string;
+          week_start?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "digest_log_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       email_log: {
         Row: {
           created_at: string;
@@ -636,6 +663,42 @@ export type Database = {
           },
         ];
       };
+      notification_preferences: {
+        Row: {
+          created_at: string;
+          digest: string;
+          quiet_from: string;
+          quiet_to: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          digest?: string;
+          quiet_from?: string;
+          quiet_to?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          digest?: string;
+          quiet_from?: string;
+          quiet_to?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       payments: {
         Row: {
           amount_kobo: number;
@@ -958,6 +1021,91 @@ export type Database = {
             columns: ["event_id"];
             isOneToOne: false;
             referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tasks: {
+        Row: {
+          advice_source: string | null;
+          completed_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          derivation: Json | null;
+          detail: string | null;
+          due_date: string | null;
+          event_id: string;
+          id: string;
+          mitigation: string | null;
+          owner_id: string | null;
+          phase: string;
+          sort: number;
+          source: string;
+          source_key: string | null;
+          status: string;
+          template_version: number | null;
+          time_slot: string | null;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          advice_source?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          derivation?: Json | null;
+          detail?: string | null;
+          due_date?: string | null;
+          event_id: string;
+          id?: string;
+          mitigation?: string | null;
+          owner_id?: string | null;
+          phase: string;
+          sort?: number;
+          source?: string;
+          source_key?: string | null;
+          status?: string;
+          template_version?: number | null;
+          time_slot?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          advice_source?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          derivation?: Json | null;
+          detail?: string | null;
+          due_date?: string | null;
+          event_id?: string;
+          id?: string;
+          mitigation?: string | null;
+          owner_id?: string | null;
+          phase?: string;
+          sort?: number;
+          source?: string;
+          source_key?: string | null;
+          status?: string;
+          template_version?: number | null;
+          time_slot?: string | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];

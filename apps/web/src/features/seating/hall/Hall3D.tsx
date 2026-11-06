@@ -8,7 +8,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { ChairType, Centrepiece, HallLayout, TableTop } from "./model";
+import type {
+  ChairType,
+  Centrepiece,
+  HallLayout,
+  StageItem,
+  StageItemAt,
+  TableTop,
+} from "./model";
 
 /** What the 3D hall needs to draw one table. */
 export interface SceneTable {
@@ -40,18 +47,32 @@ export interface SceneChair {
   type: ChairType;
   cover: string;
   sash: string | null;
+  /** A couch draws as a couch; the rest draw as chairs. */
+  seat?: "guest" | "couple" | "celebrant" | "couch";
 }
 
-export type PickType = "table" | "zone" | "chair";
+export type PickType = "table" | "zone" | "chair" | "ac";
 export interface Pick {
   type: PickType;
   id: string;
+}
+
+/** One air conditioner, as the 3D hall draws it. */
+export interface SceneUnit {
+  id: string;
+  x: number;
+  y: number;
+  hp: number;
+  mount: "wall" | "cassette" | "floor";
+  inverter: boolean;
 }
 
 export interface Scene {
   layout: HallLayout;
   tables: SceneTable[];
   chairs: SceneChair[];
+  /** Fixtures on stages, already placed in room metres by `stageItemPlacement`. */
+  stageItems: (StageItem & StageItemAt)[];
   selection: Pick[];
   tool: "select" | "hand";
   labels: boolean;
@@ -62,6 +83,22 @@ export interface Scene {
   board: string;
   /** Pixels of the full-screen hall covered on each side by the page's bars and panels. */
   inset: { left: number; top: number; right: number; bottom: number };
+  /** The units the host has placed, drawn where they sit. */
+  units?: SceneUnit[];
+  /** The heat map, when the engine has one. Absent means nothing to paint. */
+  field?: {
+    cell: number;
+    cols: number;
+    rows: number;
+    temps: number[];
+    minC: number;
+    maxC: number;
+    meanC: number;
+  } | null;
+  /** Whether the heat map is painted on the floor. */
+  heat?: boolean;
+  /** Whether the next floor click places a unit. */
+  placing?: boolean;
 }
 
 export type HallCommand =
@@ -74,6 +111,7 @@ export type HallCommand =
   | "rotateRight"
   | "tiltUp"
   | "tiltDown"
+  | "rain"
   | "snapshot";
 
 export interface HallMessage {
@@ -89,13 +127,28 @@ export interface HallMessage {
   alt?: boolean;
   dx?: number;
   dy?: number;
+  /** A floor point, in metres, for a placement. */
+  x?: number;
+  y?: number;
+  /** An area to frame, in metres, with the height of its top surface. */
+  at?: { x: number; y: number; w: number; h: number; height: number };
   pct?: number;
   view?: "top" | "3d";
+  /** Whether the rain is falling, reported back after a `rain` command. */
+  on?: boolean;
 }
 
 export interface Hall3DHandle {
   command: (cmd: HallCommand) => void;
   focus: (key: string) => void;
+  /** Frame an area of the hall at its own height, so a stage's top is what you look at. */
+  frame: (at: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    height: number;
+  }) => void;
 }
 
 /**
@@ -133,6 +186,7 @@ export const Hall3D = forwardRef<
     () => ({
       command: (cmd) => send({ t: "cmd", cmd }),
       focus: (key) => send({ t: "cmd", cmd: "focus", key }),
+      frame: (at) => send({ t: "cmd", cmd: "frame", at }),
     }),
     [send]
   );

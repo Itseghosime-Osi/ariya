@@ -1,0 +1,19 @@
+[package]
+name = "ariya-studio-core"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+name = "ariya_studio_core"
+
+[dependencies]
+ariya-render-core = { path = "../render-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Generates the TypeScript wire types, so the two sides cannot drift. Off by default: the wasm
+# build must not carry it.
+ts-rs = { version = "10", optional = true }
+
+[features]
+ts = ["dep:ts-rs"]

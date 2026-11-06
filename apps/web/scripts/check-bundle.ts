@@ -181,3 +181,71 @@ if (violations.length > 0) {
 console.log(
   "\n✅ Bundle check PASSED: no (app) or auth route downloads Three.js or GSAP."
 );
+
+/**
+ * The studio's Rust core is fetched at runtime from `/wasm/ariya_studio.wasm`, so it must stay a
+ * static asset. If a bundler ever inlines it or emits it as a chunk, every route that touches the
+ * studio pays for 180 kB it may never use. The URL string itself is expected in the loader chunk;
+ * what is forbidden is the bytes.
+ */
+const STUDIO_WASM = "ariya_studio.wasm";
+const publicWasm = path.join(process.cwd(), "public/wasm", STUDIO_WASM);
+
+if (!fs.existsSync(publicWasm)) {
+  die(
+    `public/wasm/${STUDIO_WASM} is missing. Run 'pnpm build:wasm' - the studio cannot load without it.`
+  );
+}
+
+function findFiles(dir: string, suffix: string): string[] {
+  const found: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      found.push(...findFiles(full, suffix));
+    } else if (entry.isFile() && entry.name.endsWith(suffix)) {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+const emittedWasm = findFiles(chunksDir, ".wasm");
+if (emittedWasm.length > 0) {
+  die(
+    "The bundler emitted wasm into .next/static/chunks, so it is being bundled " +
+      `rather than served from public/:\n${emittedWasm
+        .map((f) => ` - ${path.relative(nextDir, f)}`)
+        .join("\n")}`
+  );
+}
+
+const INLINE_PATTERNS = [
+  { name: "base64 wasm data URI", regex: /data:application\/wasm;base64,/ },
+  { name: "base64 wasm module", regex: /AGFzbQ/ },
+];
+
+const inlined: Array<{ chunk: string; pattern: string }> = [];
+for (const chunk of findFiles(chunksDir, ".js")) {
+  const content = fs.readFileSync(chunk, "utf8");
+  for (const pattern of INLINE_PATTERNS) {
+    if (pattern.regex.test(content)) {
+      inlined.push({ chunk: path.basename(chunk), pattern: pattern.name });
+    }
+  }
+}
+
+if (inlined.length > 0) {
+  die(
+    "The studio wasm was inlined into a JavaScript chunk instead of being " +
+      `fetched from /wasm/:\n${inlined
+        .map((i) => ` - ${i.chunk}: matched ${i.pattern}`)
+        .join("\n")}`
+  );
+}
+
+const wasmKb = Math.round(fs.statSync(publicWasm).size / 1024);
+console.log(
+  `✅ Studio wasm stays a static asset: public/wasm/${STUDIO_WASM} (${wasmKb} kB), ` +
+    "not emitted into or inlined in any chunk."
+);
