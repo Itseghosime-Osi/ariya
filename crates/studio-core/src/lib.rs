@@ -12,6 +12,7 @@ pub mod fit;
 pub mod geometry;
 pub mod grid;
 pub mod load;
+pub mod risk;
 pub mod score;
 pub mod search;
 pub mod units;
