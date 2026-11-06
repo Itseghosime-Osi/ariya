@@ -4,6 +4,8 @@ import { Icon } from "@/components/ui/icon";
 import { formatEventDate } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
 import { InvitationDownload } from "./InvitationDownload";
+import { MyInvitation } from "./MyInvitation";
+import type { InvitationDesign } from "@/features/invitations/types";
 import type {
   RsvpAnswers,
   RsvpQuestion,
@@ -17,6 +19,8 @@ interface RsvpSummaryCardProps {
   checkInCode?: string | null;
   qrCodeUrl?: string | null;
   requireAccessCard?: boolean;
+  /** Set when the host's design carries the entry seal: the guest then holds the invitation, not a QR box. */
+  design?: InvitationDesign | null;
   questions?: RsvpQuestion[];
   answers?: RsvpAnswers;
 }
@@ -27,6 +31,7 @@ export function RsvpSummaryCard({
   checkInCode,
   qrCodeUrl,
   requireAccessCard = true,
+  design = null,
   questions = [],
   answers = {},
 }: RsvpSummaryCardProps) {
@@ -171,7 +176,16 @@ export function RsvpSummaryCard({
       )}
 
       {/* Royal Check-In Pass */}
-      {isAccepted && checkInCode && qrCodeUrl && (
+      {isAccepted && design && checkInCode && (
+        <MyInvitation
+          design={design}
+          coupleName={event.couple || event.title}
+          guestName={guest.display_name}
+          entryCode={checkInCode}
+        />
+      )}
+
+      {isAccepted && !design && checkInCode && qrCodeUrl && (
         <section
           className={`bg-white rounded-xl p-5 border text-center space-y-3 shadow-xs ${theme.qrBox}`}
         >
@@ -219,7 +233,7 @@ export function RsvpSummaryCard({
         </section>
       )}
 
-      {isAccepted && (
+      {isAccepted && !design && (
         <InvitationDownload
           guestName={guest.display_name}
           title={event.invitation_headline || event.title}

@@ -5,7 +5,12 @@ import { designFromEvent } from "@/features/invitations/design";
 /** The invitation card the film ends on: the same document and component the guest will hold. */
 export function FilmFinale({
   event,
+  design: savedDesign = null,
+  entryCode = null,
 }: {
+  /** The host's saved studio design; without it the house card is drawn from the words below. */
+  design?: unknown;
+  entryCode?: string | null;
   event: {
     title: string;
     couple: string;
@@ -32,9 +37,13 @@ export function FilmFinale({
     headline: event.headline ?? null,
     subheadline: event.subheadline ?? null,
     message: event.message ?? null,
-    design: null,
+    design: savedDesign,
   });
   return (
-    <InvitationCard design={design} coupleName={event.couple || event.title} />
+    <InvitationCard
+      design={design}
+      coupleName={event.couple || event.title}
+      entryCode={entryCode}
+    />
   );
 }

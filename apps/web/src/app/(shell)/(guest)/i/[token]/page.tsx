@@ -12,6 +12,7 @@ import { FilmGate } from "@/features/event-film/FilmGate";
 import { FilmFinale } from "@/features/event-film/components/FilmFinale";
 import { NotLiveCard } from "@/features/event-film/components/NotLiveCard";
 import { TestModeBanner } from "@/features/event-film/components/TestModeBanner";
+import { designFromEvent, hasEntrySeal } from "@/features/invitations/design";
 import { readFilmDesign } from "@/features/event-film/design";
 import { isEventTeamMember } from "@/features/event-film/queries";
 import { inviteAccess } from "@/features/event-film/visibility";
@@ -54,6 +55,27 @@ export default async function GuestInvitationPage({
       qrCodeUrl = await generateQrDataUrl(checkInCode);
     }
   }
+
+  const savedDesign = data
+    ? designFromEvent({
+        title: data.event.title,
+        couple: data.event.couple,
+        date: data.event.date,
+        venue: data.event.venue,
+        area: data.event.area,
+        dressCode: data.event.dress_code,
+        rsvpBy: data.event.rsvp_by,
+        theme: data.event.invitation_theme ?? null,
+        headline: data.event.invitation_headline ?? null,
+        subheadline: data.event.invitation_subheadline ?? null,
+        message: data.event.invitation_message ?? null,
+        design: rsvpForm.invitationDesign,
+      })
+    : null;
+  const sealedDesign =
+    rsvpForm.requireAccessCard && checkInCode && hasEntrySeal(savedDesign)
+      ? savedDesign
+      : null;
 
   const theme = getGuestTheme(data?.event?.invitation_theme);
 
@@ -98,6 +120,8 @@ export default async function GuestInvitationPage({
           }
           finale={
             <FilmFinale
+              design={rsvpForm.invitationDesign}
+              entryCode={rsvpForm.requireAccessCard ? checkInCode : null}
               event={{
                 title: data.event.title,
                 couple: data.event.couple,
@@ -165,6 +189,7 @@ export default async function GuestInvitationPage({
             checkInCode={checkInCode}
             qrCodeUrl={qrCodeUrl}
             requireAccessCard={rsvpForm.requireAccessCard}
+            design={sealedDesign}
             questions={rsvpForm.questions}
             answers={rsvpForm.answers}
           />

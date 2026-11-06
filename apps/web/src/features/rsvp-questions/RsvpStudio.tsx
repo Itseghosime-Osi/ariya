@@ -27,6 +27,9 @@ interface RsvpStudioProps {
   initialQuestions: RsvpQuestion[];
   initialRequireCard: boolean;
   replies: GuestAnswers[];
+  /** Whether the invitation design already carries the entry seal. */
+  sealPlaced: boolean;
+  invitationsHref: string;
 }
 
 const CARD =
@@ -49,6 +52,8 @@ export function RsvpStudio({
   initialQuestions,
   initialRequireCard,
   replies,
+  sealPlaced,
+  invitationsHref,
 }: RsvpStudioProps) {
   const router = useRouter();
   const [questions, setQuestions] = useState(initialQuestions);
@@ -150,6 +155,42 @@ export function RsvpStudio({
           />
         </div>
       </section>
+
+      {requireCard && (
+        <section className={`${CARD} flex items-start gap-3 px-4 py-4 sm:px-5`}>
+          <span
+            className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full ${
+              sealPlaced
+                ? "bg-emerald-500/15 text-emerald-700"
+                : "bg-burgundy/10 text-burgundy"
+            }`}
+          >
+            <Icon
+              name={sealPlaced ? "verified" : "qr_code_scanner"}
+              size={18}
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-semibold text-night">
+              {sealPlaced
+                ? "The card is woven into your invitation"
+                : "Hide the card inside your invitation"}
+            </p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-label-2">
+              {sealPlaced
+                ? "Each guest gets your design with their own entry seal in it. They never see a QR or a code; your door scanner reads the seal."
+                : "Right now guests are shown a QR box. Add the entry seal to your invitation design and they will hold a beautiful invitation instead, with the card hidden inside it."}
+            </p>
+            <a
+              href={invitationsHref}
+              className="mt-2 inline-flex min-h-10 items-center gap-1.5 text-[13px] font-semibold text-burgundy hover:underline"
+            >
+              {sealPlaced ? "Move or resize the seal" : "Add the entry seal"}
+              <Icon name="arrow_forward" size={14} />
+            </a>
+          </div>
+        </section>
+      )}
 
       <section className={CARD}>
         <div className="flex items-center justify-between gap-3 px-4 pt-4 sm:px-5">

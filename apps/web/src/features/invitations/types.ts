@@ -51,6 +51,8 @@ export const INVITATION_LAYER_KINDS = [
   "dressCode",
   "footer",
   "text",
+  /** Carries a guest's entry code as a pattern in the design; guests are never shown a QR. */
+  "code",
 ] as const;
 
 export type InvitationLayerKind = (typeof INVITATION_LAYER_KINDS)[number];
@@ -66,6 +68,7 @@ export const INVITATION_LAYER_LABELS: Record<InvitationLayerKind, string> = {
   dressCode: "Dress code",
   footer: "Reply line",
   text: "Text",
+  code: "Entry seal",
 };
 
 export type InvitationTextAlign = "left" | "center" | "right";

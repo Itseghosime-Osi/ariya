@@ -246,6 +246,13 @@ export function defaultInvitationLayers(
   ];
 }
 
+/** True when the design carries the entry seal, so guests are given the seal and no QR box. */
+export function hasEntrySeal(design: InvitationDesign | null): boolean {
+  return Boolean(
+    design?.layers.some((layer) => layer.kind === "code" && layer.visible)
+  );
+}
+
 export function createInvitationDesign(
   event: InvitationEventContent
 ): InvitationDesign {
@@ -332,10 +339,24 @@ const BLANK_TEXT_LAYER: Omit<InvitationLayer, "id" | "kind"> = {
 
 /** A fresh layer for the canvas tools. Text lands mid-card; extras sit above the house layout. */
 export function createLayerOfKind(
-  kind: "text" | "seal" | "divider",
+  kind: "text" | "seal" | "divider" | "code",
   existingCount: number
 ): InvitationLayer {
   const id = `${kind}-${Date.now().toString(36)}-${existingCount}`;
+  if (kind === "code") {
+    return {
+      ...BLANK_TEXT_LAYER,
+      id,
+      kind,
+      text: "",
+      x: 5,
+      y: 81,
+      width: 19,
+      size: 3,
+      colorRole: "title",
+      color: null,
+    };
+  }
   if (kind === "seal") {
     return {
       ...BLANK_TEXT_LAYER,

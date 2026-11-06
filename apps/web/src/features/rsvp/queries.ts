@@ -101,6 +101,8 @@ export interface RsvpForm {
   questions: RsvpQuestion[];
   requireAccessCard: boolean;
   answers: RsvpAnswers;
+  /** The host's saved studio design, or null for the house card. */
+  invitationDesign: unknown;
 }
 
 /** The host's questions, the access-card setting, and this guest's saved answers. */
@@ -109,6 +111,7 @@ export async function getRsvpForm(token: string): Promise<RsvpForm> {
     questions: [],
     requireAccessCard: true,
     answers: {},
+    invitationDesign: null,
   };
   const cleanToken = token.trim();
   if (!cleanToken) return empty;
@@ -125,5 +128,6 @@ export async function getRsvpForm(token: string): Promise<RsvpForm> {
     questions: readQuestions(row.questions),
     requireAccessCard: row.require_access_card !== false,
     answers: readAnswers(row.answers),
+    invitationDesign: row.invitation_design ?? null,
   };
 }

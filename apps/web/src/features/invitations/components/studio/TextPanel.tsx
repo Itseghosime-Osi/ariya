@@ -54,7 +54,15 @@ export function TextPanel({ api }: { api: StudioApi }) {
         </button>
       </div>
 
-      {layer.kind !== "divider" && (
+      {layer.kind === "code" && (
+        <p className="rounded-2xl bg-burgundy/[0.06] p-3 text-[12px] leading-relaxed text-label-2">
+          Each guest&apos;s own entry code is woven into this seal. They only
+          see a decorative seal; the door scanner reads it. Place it where it
+          looks natural, and keep it at least 16% wide so it scans.
+        </p>
+      )}
+
+      {layer.kind !== "divider" && layer.kind !== "code" && (
         <div>
           <label htmlFor="layer-text" className={LABEL}>
             Words

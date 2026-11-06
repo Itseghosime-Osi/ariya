@@ -68,6 +68,7 @@ export function InvitationPreview({ event }: { event: Event }) {
         <div className="mt-5 flex flex-1 items-center justify-center rounded-3xl bg-[radial-gradient(circle_at_50%_30%,#3a0f1a,#1c070d_70%)] p-6 sm:p-8">
           <TiltCard max={9} className="w-full max-w-[340px]">
             <InvitationCard
+              sampleEntry
               design={design}
               coupleName={event.couple || event.title}
             />

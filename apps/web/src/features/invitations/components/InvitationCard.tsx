@@ -3,6 +3,7 @@
 import React from "react";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import { resolveLayerColour } from "../design";
+import { EntrySeal, SAMPLE_ENTRY_CODE } from "./EntrySeal";
 import type { InvitationDesign, InvitationLayer } from "../types";
 
 interface InvitationCardProps {
@@ -10,6 +11,10 @@ interface InvitationCardProps {
   /** The names the wax seal is pressed with. */
   coupleName: string;
   className?: string;
+  /** The guest's own entry code. It is drawn into the entry seal, and nowhere else. */
+  entryCode?: string | null;
+  /** Studio and host previews: draw the seal with a sample code so its place can be judged. */
+  sampleEntry?: boolean;
   /** Studio-only: the layer being edited, and the pointer handler that moves it. */
   selectedLayerId?: string | null;
   onLayerPointerDown?: (
@@ -71,6 +76,8 @@ export function InvitationCard({
   design,
   coupleName,
   className = "",
+  entryCode = null,
+  sampleEntry = false,
   selectedLayerId = null,
   onLayerPointerDown,
 }: InvitationCardProps) {
@@ -169,6 +176,36 @@ export function InvitationCard({
                 text={coupleName || layer.text}
                 size="100%"
                 className="drop-shadow-md"
+              />
+            </div>
+          );
+        }
+
+        if (layer.kind === "code") {
+          const value = entryCode ?? (sampleEntry ? SAMPLE_ENTRY_CODE : null);
+          // Without a code (a guest who has not accepted) the seal is simply not on the card.
+          if (!value) return null;
+          return (
+            <div
+              key={layer.id}
+              data-layer-id={layer.id}
+              data-entry-seal
+              style={{
+                position: "absolute",
+                left: `${layer.x}%`,
+                top: `${layer.y}%`,
+                width: `${Math.max(layer.width, 16)}%`,
+                aspectRatio: "1",
+                cursor: interactive ? "move" : undefined,
+                touchAction: interactive ? "none" : undefined,
+                ...selection,
+              }}
+              {...pointerProps}
+            >
+              <EntrySeal
+                value={value}
+                palette={palette}
+                plate={background.kind !== "paper"}
               />
             </div>
           );

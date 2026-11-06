@@ -21,9 +21,14 @@ import { LivePagePreview, type LivePreviewData } from "./LivePagePreview";
 interface EventPageEditorProps {
   event: Event;
   replies?: GuestAnswers[];
+  sealPlaced?: boolean;
 }
 
-export function EventPageEditor({ event, replies = [] }: EventPageEditorProps) {
+export function EventPageEditor({
+  event,
+  replies = [],
+  sealPlaced = false,
+}: EventPageEditorProps) {
   const router = useRouter();
   const [tab, setTab] = useState<"page" | "film" | "rsvp">("page");
 
@@ -225,6 +230,8 @@ export function EventPageEditor({ event, replies = [] }: EventPageEditorProps) {
           initialQuestions={readQuestions(event.rsvp_questions)}
           initialRequireCard={event.require_access_card}
           replies={replies}
+          sealPlaced={sealPlaced}
+          invitationsHref={`/events/${event.id}/invitations`}
         />
       )}
 

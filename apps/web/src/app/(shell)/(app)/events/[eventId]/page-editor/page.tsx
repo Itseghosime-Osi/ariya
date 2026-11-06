@@ -4,6 +4,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
 import { createClient } from "@/lib/supabase/server";
+import { hasEntrySeal, normaliseDesign } from "@/features/invitations/design";
 import { readAnswers } from "@/features/rsvp-questions/model";
 import { EventPageEditor } from "@/features/events/components/editor/EventPageEditor";
 
@@ -46,7 +47,13 @@ export default async function PageEditorRoute({ params }: PageEditorProps) {
   return (
     <>
       <EndedLock ended={isEventExpired(data.event.date)}>
-        <EventPageEditor event={data.event} replies={replies} />
+        <EventPageEditor
+          event={data.event}
+          replies={replies}
+          sealPlaced={hasEntrySeal(
+            normaliseDesign(data.event.invitation_design)
+          )}
+        />
       </EndedLock>
     </>
   );
