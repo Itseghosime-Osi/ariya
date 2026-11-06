@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import { GoBackLink } from "@/features/events/components/GoBackLink";
 
 export default function PublicEventNotFound() {
   return (
@@ -13,12 +13,7 @@ export default function PublicEventNotFound() {
       <p className="text-sm text-on-surface-variant max-w-md mb-6">
         This celebration page is private, unpublished, or has concluded.
       </p>
-      <Link
-        href="/"
-        className="px-6 py-3 rounded-2xl bg-wine text-ivory text-xs font-semibold hover:bg-wine/90 transition-all shadow-md"
-      >
-        Return to Àríyá
-      </Link>
+      <GoBackLink />
     </div>
   );
 }

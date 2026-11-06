@@ -696,7 +696,7 @@ export function FilmStudio({
         <a
           href={`/e/${slug}`}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
           className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-semibold text-burgundy hover:underline"
         >
           Open the public page

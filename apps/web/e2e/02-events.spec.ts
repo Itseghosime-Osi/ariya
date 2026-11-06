@@ -299,3 +299,34 @@ test.describe("Events Creation & Overview", () => {
     }
   });
 });
+
+test.describe("Unpublished public page", () => {
+  test("Go back returns to the page the host came from, not the home page", async ({
+    page,
+    context,
+  }) => {
+    await createAndLoginUser(page, context, "goback_host");
+    const { eventId } = await createTestEvent(page);
+
+    await page.goto(`/events/${eventId}/page-editor`);
+    const [tab] = await Promise.all([
+      context.waitForEvent("page"),
+      page
+        .getByRole("link", { name: /view public page/i })
+        .first()
+        .click(),
+    ]);
+    await expect(tab.getByText(/Celebration Unavailable/i)).toBeVisible();
+
+    await tab.getByRole("button", { name: /go back/i }).click();
+    await expect(tab).toHaveURL(new RegExp(`/events/${eventId}/page-editor`));
+
+    // Arriving by a pasted link has no page to return to, so it offers the home page.
+    const fresh = await context.newPage();
+    await fresh.goto(`/e/${(await page.url()).split("/").pop() ?? "x"}-none`);
+    await expect(fresh.getByText(/Celebration Unavailable/i)).toBeVisible();
+    await expect(
+      fresh.getByRole("button", { name: /return to àríyá/i })
+    ).toBeVisible();
+  });
+});

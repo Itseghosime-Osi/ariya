@@ -154,7 +154,7 @@ export function EventPageEditor({
         <Link
           href={`/e/${event.slug}`}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
           className="inline-flex min-h-11 items-center gap-2 rounded-full border border-hairline bg-white/45 px-4 text-[13px] font-semibold text-burgundy backdrop-blur-sm transition-colors hover:bg-white/70"
         >
           View public page
