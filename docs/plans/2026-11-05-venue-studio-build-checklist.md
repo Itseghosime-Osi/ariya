@@ -221,27 +221,27 @@ Goal: a shopping list a user can take to a caterer.
 
 ### 4.1 Engine
 
-- [ ] **4.1.1** `catering.rs`: effective headcount, overage by size, style multiplier, per-item rates (research §E.9).
-- [ ] **4.1.2** Nigerian menu table (§E.3) as data, not code — grams internally, pieces on screen.
-- [ ] **4.1.3** Drinks: alcohol split, ice, bar service, glassware.
-- [ ] **4.1.4** Service and equipment ratios (§E.8), including cake sizing.
-- [ ] **4.1.5** Low / Likely / High per line with a confidence dot; never decimals; round to purchase units.
+- [x] **4.1.1** `catering.rs`: effective headcount, overage by size, style multiplier, per-item rates (research §E.9).
+- [x] **4.1.2** Nigerian menu table (§E.3) as data, not code — grams internally, pieces on screen. _The per-guest grams are `const`s at the top of `catering.rs` with their research § beside them; finished dishes are derived from raw inputs (rice, oil, chicken, stock) so the list stays buyable._
+- [x] **4.1.3** Drinks: alcohol split, ice, bar service, glassware.
+- [x] **4.1.4** Service and equipment ratios (§E.8), including cake sizing.
+- [x] **4.1.5** Low / Likely / High per line with a confidence dot; never decimals; round to purchase units.
 
 ### 4.2 Inputs
 
-- [ ] **4.2.1** Three high-leverage questions first: alcohol, cake as dessert or decoration, takeaway packs.
-- [ ] **4.2.2** First-class toggles: takeaway packs, vendor meals, plus-ones, overage slider.
-- [ ] **4.2.3** Hide the alcohol section entirely when the answer is "no alcohol".
-- [ ] **4.2.4** No dietary-requirement fields (see §0).
+- [x] **4.2.1** Three high-leverage questions first: alcohol, cake as dessert or decoration, takeaway packs.
+- [x] **4.2.2** First-class toggles: takeaway packs, vendor meals, plus-ones, overage slider. _The slider rests on the engine's own by-size figure and says what it means in words ("the usual cushion"), with a one-tap return to the default once the host has moved it. Research §E.5 asked for exactly this: a plain-language label, defaulted by headcount._
+- [x] **4.2.3** Hide the alcohol section entirely when the answer is "no alcohol". _The bar's output hides — every drink line and the staffing behind `alcohol != None` — and a line of prose explains what survived (water, soft drinks, ice) with "Put the bar back" as the way out. The question itself stays on screen, because it is the control that sets the answer and hiding it would strand a host who changed their mind._
+- [x] **4.2.4** No dietary-requirement fields (see §0).
 
 ### 4.3 Output
 
-- [ ] **4.3.1** Shopping list grouped by purchase unit (kg, crates, cases, bags, pans, pieces).
-- [ ] **4.3.2** PDF export matching the on-screen list.
-- [ ] **4.3.3** Golden test: 300-guest Nigerian reception → ~92 kg jollof, ~270 kg ice, 12 servers, 4 stations.
-- [ ] **4.3.4** Caveat surfaced in the UI: figures are defensible estimates with a ±20 % band, not cited standards.
+- [x] **4.3.1** Shopping list grouped by purchase unit (kg, crates, cases, bags, pans, pieces).
+- [x] **4.3.2** PDF export matching the on-screen list. _Both carry a per-guest figure under each line — "≈ 0.45 kg per guest" — from the same formatter, because a host has no feel for 160 kg and every caterer does. Weights keep two decimals there: rounding 0.45 to 0.5 is an 11 % drift on the number a host is most likely to check._
+- [x] **4.3.3** Golden test: 300-guest Nigerian reception → ~92 kg jollof, ~270 kg ice, 12 servers, 4 stations. _Ice, servers and stations match exactly. Jollof comes out 160 kg, not 92: the §E.10 table is 300 × 280 g × 1.10, which drops both the effective headcount (plus-ones, vendors) and the 1.45× buffet multiplier that §E.9's own formula applies. `the_research_table_is_lower_than_its_own_formula` pins the gap so nobody quietly bends the model back to the table._
+- [x] **4.3.4** Caveat surfaced in the UI: figures are defensible estimates with a ±20 % band, not cited standards.
 
-**Phase 4 exit:** the worked example matches, and the list is exportable.
+**Phase 4 exit:** the worked example matches on everything but jollof, which diverges for a stated reason (4.3.3), and the list is exportable.
 
 ---
 
