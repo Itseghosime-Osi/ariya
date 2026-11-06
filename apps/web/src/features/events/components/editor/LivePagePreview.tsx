@@ -44,14 +44,14 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
               : "Public Page Private (404)"}
           </span>
         </div>
-        <div className="flex items-center bg-surface-container-high p-1 rounded-lg">
+        <div className="flex items-center gap-1 rounded-full border border-hairline p-1">
           <button
             type="button"
             onClick={() => setViewport("desktop")}
-            className={`px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
               viewport === "desktop"
-                ? "bg-white text-wine shadow-sm"
-                : "text-on-surface-variant hover:text-wine"
+                ? "bg-burgundy text-ivory shadow-sm"
+                : "text-label-2 hover:text-burgundy"
             }`}
           >
             <Icon name="space_dashboard" className="text-sm" />
@@ -60,10 +60,10 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
           <button
             type="button"
             onClick={() => setViewport("mobile")}
-            className={`px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
               viewport === "mobile"
-                ? "bg-white text-wine shadow-sm"
-                : "text-on-surface-variant hover:text-wine"
+                ? "bg-burgundy text-ivory shadow-sm"
+                : "text-label-2 hover:text-burgundy"
             }`}
           >
             <Icon name="qr_code_scanner" className="text-sm" />
@@ -73,17 +73,17 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
       </div>
 
       {/* Frame Container */}
-      <div className="flex justify-center bg-surface-container-lowest/60 border border-outline-variant/40 rounded-2xl p-4 sm:p-6 min-h-[500px]">
+      <div className="flex min-h-[500px] justify-center rounded-3xl border border-hairline bg-white/30 p-4 backdrop-blur-sm sm:p-6">
         <div
           className={`w-full transition-all duration-300 ${
             viewport === "mobile" ? "max-w-[390px]" : "max-w-2xl"
           }`}
         >
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-wine via-gold to-wine" />
+          <div className="relative space-y-6 overflow-hidden rounded-3xl border border-hairline bg-ivory p-6 shadow-[0_24px_48px_-28px_rgba(42,10,20,0.45)] sm:p-8">
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-burgundy via-gold to-burgundy" />
 
             <div className="text-center space-y-3 pt-2">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-wine/10 text-wine">
+              <span className="inline-block rounded-full bg-burgundy/10 px-3 py-1 text-xs font-semibold text-burgundy">
                 {daysLeft > 0 ? `${daysLeft} Days Away` : "Celebration Day"}
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl text-wine font-medium leading-tight">
@@ -94,7 +94,7 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
               </p>
             </div>
 
-            <hr className="border-outline-variant/30" />
+            <hr className="border-hairline" />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
@@ -117,14 +117,14 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
             </div>
 
             {data.description && (
-              <div className="bg-paper rounded-xl p-3 border border-outline-variant/30 text-xs italic text-paper-ink text-center">
+              <div className="rounded-2xl border border-hairline p-3 text-center text-xs italic text-night/80">
                 &ldquo;{data.description}&rdquo;
               </div>
             )}
 
             {data.dressCode && (
-              <div className="bg-wine/5 rounded-xl p-3 border border-wine/10 space-y-1 text-xs">
-                <span className="text-[10px] uppercase tracking-wider text-wine font-bold flex items-center gap-1">
+              <div className="space-y-1 rounded-2xl border border-gold/40 bg-gold/10 p-3 text-xs">
+                <span className="text-[10px] uppercase tracking-wider text-gold-ink font-bold flex items-center gap-1">
                   <Icon name="styler" className="text-xs" />
                   Attire & Palette
                 </span>
@@ -132,16 +132,16 @@ export function LivePagePreview({ data }: LivePagePreviewProps) {
               </div>
             )}
 
-            <div className="bg-night text-ivory rounded-xl p-4 border border-outline-variant/20 space-y-2 text-center">
-              <p className="text-xs font-medium text-gold">
-                Personal Invitation Access
+            <div className="profile-card space-y-3 rounded-3xl p-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f3d98f]">
+                Personal invitation access
               </p>
               <div className="flex gap-2">
-                <div className="flex-1 px-3 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-stone-400 font-mono text-left">
+                <div className="flex-1 rounded-full bg-white/10 px-4 py-2.5 text-left font-mono text-xs text-[#f4e8cc]/80">
                   Enter pass code...
                 </div>
-                <div className="px-3 py-2 rounded-lg bg-gold text-night text-xs font-semibold">
-                  Access Pass
+                <div className="rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-4 py-2.5 text-xs font-semibold text-night">
+                  Access pass
                 </div>
               </div>
             </div>

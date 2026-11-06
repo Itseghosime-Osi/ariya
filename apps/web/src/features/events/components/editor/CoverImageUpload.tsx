@@ -99,7 +99,7 @@ export function CoverImageUpload({
       />
 
       {hasValidCover && coverImageUrl ? (
-        <div className="p-3.5 rounded-xl border border-outline-variant/60 bg-white flex items-center justify-between gap-3">
+        <div className="p-3.5 rounded-2xl desk-field flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-surface-container flex-shrink-0 border border-outline-variant/30">
               <Image
@@ -125,7 +125,7 @@ export function CoverImageUpload({
               type="button"
               disabled={disabled || uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg border border-outline-variant text-xs font-semibold text-wine hover:bg-wine/5 disabled:opacity-50 transition-colors"
+              className="desk-chip min-h-9 px-3.5 rounded-full text-xs font-semibold text-burgundy hover:bg-burgundy/10 disabled:opacity-50 transition-colors"
             >
               {uploading ? "Uploading..." : "Replace"}
             </button>
@@ -133,7 +133,7 @@ export function CoverImageUpload({
               type="button"
               disabled={disabled || uploading}
               onClick={handleRemove}
-              className="px-3 py-1.5 rounded-lg border border-error/30 text-xs font-semibold text-error hover:bg-error/5 disabled:opacity-50 transition-colors"
+              className="min-h-9 px-3.5 rounded-full border border-error/30 text-xs font-semibold text-error hover:bg-error/5 disabled:opacity-50 transition-colors"
             >
               Remove
             </button>
@@ -144,7 +144,7 @@ export function CoverImageUpload({
           onClick={() => {
             if (!disabled && !uploading) fileInputRef.current?.click();
           }}
-          className={`p-6 rounded-xl border-2 border-dashed border-outline-variant/60 bg-white hover:bg-surface-container-low transition-colors cursor-pointer text-center space-y-1.5 ${
+          className={`p-6 rounded-3xl border-2 border-dashed border-gold/50 bg-white/30 hover:bg-burgundy/[0.04] transition-colors cursor-pointer text-center space-y-1.5 ${
             uploading ? "opacity-60 pointer-events-none" : ""
           }`}
         >
