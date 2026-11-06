@@ -34,6 +34,7 @@ import {
   Square,
   Sun,
   Thermometer,
+  UtensilsCrossed,
   Keyboard,
   Tag,
   Undo2,
@@ -92,6 +93,8 @@ import { SuggestedLayouts } from "./SuggestedLayouts";
 import { LayoutComparison, type Compared } from "./LayoutComparison";
 import type {
   AcUnit,
+  CateringPlan,
+  CateringReport,
   Cooling,
   LayoutOption,
   ThermalReport,
@@ -105,6 +108,7 @@ import {
 } from "./Hall3D";
 import {
   DecorPanel,
+  CateringPanel,
   FitPanel,
   GuestsPanel,
   RoomPanel,
@@ -118,6 +122,12 @@ import {
   unitId,
   unitsOf,
 } from "./thermal";
+import {
+  cateringRequest,
+  normaliseCatering,
+  type CateringAnswers,
+} from "./catering";
+import { downloadCateringList } from "./catering-pdf";
 import { LayoutSummary } from "./LayoutSummary";
 import {
   ChairInspector,
@@ -130,7 +140,8 @@ import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
 import { Keys, SHORTCUTS } from "./shortcuts";
 
 type Positions = Record<string, { x: number; y: number }>;
-type Deck = "guests" | "room" | "fit" | "seat" | "decor" | "thermal";
+type Deck =
+  "guests" | "room" | "fit" | "seat" | "decor" | "thermal" | "catering";
 type Flyout = "table" | "chair" | "zone" | null;
 type Move = { type: string; id: string; x: number; y: number };
 
@@ -281,6 +292,10 @@ export function HallStudio({
   const [thermal, setThermal] = useState<ThermalReport | null>(null);
   const [placingUnit, setPlacingUnit] = useState(false);
   const [heat, setHeat] = useState(true);
+
+  // ---------- catering ----------
+  const [catering, setCatering] = useState<CateringReport | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
   const [panelOpen, setPanelOpen] = useState(true);
@@ -473,6 +488,21 @@ export function HallStudio({
       setThermal(null);
     }
   }, [studioEngine, studioStatus, layout, guests]);
+
+  // The shopping list follows the same plan: the answers live on the venue profile.
+  const cateringPlan = useMemo(
+    () => normaliseCatering(layout.venue.catering),
+    [layout.venue.catering]
+  );
+  useEffect(() => {
+    if (!studioEngine || studioStatus !== "ready") return;
+    try {
+      setCatering(studioEngine.catering(cateringRequest(cateringPlan, guests)));
+    } catch {
+      setCatering(null);
+    }
+  }, [studioEngine, studioStatus, cateringPlan, guests]);
+
   const seats = data.tables.reduce((a, t) => a + t.capacity, 0);
   const area = layout.width * layout.length;
   const zoneArea = layout.zones.reduce((a, z) => a + z.w * z.h, 0);
@@ -715,6 +745,32 @@ export function HallStudio({
   });
   const patchCooling = (patch: Partial<Cooling>) =>
     updateLayout((l) => withCooling(l, (c) => ({ ...c, ...patch })));
+
+  // ---------- catering edits ----------
+  const patchCatering = (patch: Partial<CateringAnswers>) =>
+    updateLayout((l) => ({
+      ...l,
+      venue: {
+        ...l.venue,
+        catering: {
+          ...normaliseCatering(l.venue.catering),
+          ...patch,
+        } as CateringPlan,
+      },
+    }));
+
+  const exportCatering = async () => {
+    if (!catering) return;
+    setExporting(true);
+    try {
+      await downloadCateringList(catering);
+      say("Shopping list downloaded.");
+    } catch {
+      say("The shopping list could not be prepared on this device.");
+    } finally {
+      setExporting(false);
+    }
+  };
   const addUnit = (x: number, y: number) => {
     const unit: AcUnit = {
       id: unitId(),
@@ -1452,6 +1508,12 @@ export function HallStudio({
             "not-viable": "Not viable",
           }[thermal.advice.level]
         : "—",
+    },
+    {
+      key: "catering",
+      label: "Catering",
+      icon: UtensilsCrossed,
+      stat: catering ? `${catering.portions} portions` : "—",
     },
     {
       key: "decor",
@@ -2365,6 +2427,16 @@ export function HallStudio({
                 }}
                 heat={heat}
                 onToggleHeat={() => setHeat((h) => !h)}
+              />
+            ) : deck === "catering" ? (
+              <CateringPanel
+                report={catering}
+                status={studioStatus}
+                plan={cateringPlan}
+                guests={guests}
+                onPlan={patchCatering}
+                onExport={exportCatering}
+                exporting={exporting}
               />
             ) : (
               <DecorPanel
