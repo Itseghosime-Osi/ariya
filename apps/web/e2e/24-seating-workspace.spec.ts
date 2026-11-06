@@ -153,7 +153,8 @@ test.describe("Seating workspace", () => {
       timeout: 30_000,
     });
     const dock = page.getByTestId("left-dock");
-    await expect(dock).toBeVisible();
+    // The dock opens once the page has hydrated, which under `next dev` can take a while.
+    await expect(dock).toBeVisible({ timeout: 30_000 });
 
     // Two tables to work with.
     for (const name of ["Alpha", "Bravo"]) {

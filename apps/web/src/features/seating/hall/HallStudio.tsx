@@ -2306,7 +2306,7 @@ export function HallStudio({
                       aria-pressed={dockOpen}
                       onClick={() => setDockOpen((v) => !v)}
                       aria-label="Layers and tables"
-                      aria-controls="left-dock"
+                      aria-controls={dockShown ? "left-dock" : undefined}
                     >
                       <LayersIcon size={18} />
                       <RailTip label="Layers and tables" keys={["Y"]} />
