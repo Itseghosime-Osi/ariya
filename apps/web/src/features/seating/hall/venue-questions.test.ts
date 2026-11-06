@@ -40,6 +40,7 @@ function profile(overrides: Partial<VenueProfile> = {}): VenueProfile {
     capacity: null,
     climate: null,
     cooling: null,
+    catering: null,
     sun: null,
     wind: null,
     ...overrides,

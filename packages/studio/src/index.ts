@@ -34,15 +34,22 @@ export type {
   AcUnit,
   Advice,
   AdviceLevel,
+  AlcoholAnswer,
   Archetype,
   AreaTemp,
   ArrangeRequest,
   ArrangeResponse,
   ArrangeTable,
   Arrangement,
+  CakeAnswer,
   Capacity,
+  CateringInput,
+  CateringPlan,
+  CateringReport,
+  CateringStyle,
   ChairPlacement,
   Climate,
+  Confidence,
   Cooling,
   Environment,
   Field,
@@ -58,9 +65,12 @@ export type {
   Placement,
   Plant,
   Prediction,
+  PurchaseUnit,
   ScoreBreakdown,
   ScoreTerm,
   Services,
+  ShoppingGroup,
+  ShoppingLine,
   Side,
   Sizing,
   SplitUnit,
@@ -82,6 +92,8 @@ export type {
 import type {
   ArrangeRequest,
   ArrangeResponse,
+  CateringInput,
+  CateringReport,
   FitRequest,
   FitResult,
   GeometryRequest,
@@ -101,6 +113,8 @@ export interface StudioEngine {
   arrange(request: ArrangeRequest): ArrangeResponse;
   /** The cooling verdict, the plant, and — when units are placed — the heat map. */
   thermal(request: ThermalRequest): ThermalReport;
+  /** The shopping list: what to buy, in the units a caterer quotes. */
+  catering(request: CateringInput): CateringReport;
 }
 
 export interface LoadStudioOptions {
@@ -214,5 +228,6 @@ export async function loadStudio(
     fit: (request) => call<FitResult>(OP.FIT, request),
     arrange: (request) => call<ArrangeResponse>(OP.ARRANGE, request),
     thermal: (request) => call<ThermalReport>(OP.THERMAL, request),
+    catering: (request) => call<CateringReport>(OP.CATERING, request),
   };
 }

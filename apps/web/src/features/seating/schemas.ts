@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { CateringPlan } from "@ariya/studio";
 
 export const tableShapeSchema = z.enum([
   "round",
@@ -180,6 +181,38 @@ export const venueProfileSchema = z.object({
       ach: z.number().min(0).max(60).nullable().default(null),
       targetC: z.number().min(10).max(35).nullable().default(null),
     })
+    .nullable()
+    .default(null),
+  // Every field absent-or-null, because the wire's `CateringPlan` is: a plan saved before the
+  // studio asked a question cannot be required to have answered it.
+  catering: z
+    .object({
+      style: z.enum(["plated", "family", "buffet", "cocktail"]).nullish(),
+      hours: z.number().min(1).max(16).nullish(),
+      alcohol: z.enum(["none", "beer-wine", "full-bar", "unsure"]).nullish(),
+      cake: z.enum(["dessert", "decoration", "ceremonial"]).nullish(),
+      takeaway: z.boolean().nullish(),
+      // Bounded like the rest of the profile: a hand-edited document must not ask the engine for
+      // a 900 % overage or minus four plus-ones.
+      plusOnes: z.number().min(0).max(1).nullish(),
+      vendors: z.number().int().min(0).max(5000).nullish(),
+      overage: z.number().min(0).max(1).nullish(),
+      coldDisplay: z.boolean().nullish(),
+      hotWeather: z.boolean().nullish(),
+    })
+    // Strip `undefined` so the parsed value is the wire type exactly rather than its looser twin.
+    .transform((v): CateringPlan => ({
+      style: v.style ?? null,
+      hours: v.hours ?? null,
+      alcohol: v.alcohol ?? null,
+      cake: v.cake ?? null,
+      takeaway: v.takeaway ?? null,
+      plusOnes: v.plusOnes ?? null,
+      vendors: v.vendors ?? null,
+      overage: v.overage ?? null,
+      coldDisplay: v.coldDisplay ?? null,
+      hotWeather: v.hotWeather ?? null,
+    }))
     .nullable()
     .default(null),
   sun: z
