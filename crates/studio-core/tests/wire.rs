@@ -122,6 +122,30 @@ fn thermal_envelope() {
 }
 
 #[test]
+fn thermal_with_units_envelope() {
+    let request = r#"{
+        "width": 30,
+        "length": 20,
+        "height": 5,
+        "venue": "hall",
+        "headcount": 300,
+        "dancing": 100,
+        "units": [
+            { "id": "ac-0", "x": 3, "y": 3, "hp": 2.5, "mount": "wall" },
+            { "id": "ac-1", "x": 15, "y": 3, "hp": 2.5, "mount": "cassette" },
+            { "id": "ac-2", "x": 27, "y": 3, "hp": 2.5, "mount": "wall" },
+            { "id": "ac-3", "x": 3, "y": 17, "hp": 2.5, "mount": "wall" },
+            { "id": "ac-4", "x": 15, "y": 17, "hp": 2.5, "mount": "cassette" },
+            { "id": "ac-5", "x": 27, "y": 17, "hp": 2.5, "mount": "wall" }
+        ],
+        "zones": [
+            { "id": "dance", "kind": "dance", "label": "Dance floor", "x": 15, "y": 10, "w": 8, "h": 8, "shape": "round" }
+        ]
+    }"#;
+    snapshot("thermal-units", OP_THERMAL, request);
+}
+
+#[test]
 fn unbuilt_operations_share_one_envelope() {
     for (name, op) in [
         ("score", OP_SCORE),

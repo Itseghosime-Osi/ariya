@@ -13,9 +13,10 @@ use crate::fit::{fit_tables, FitOptions, FitResult};
 use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
 };
-use crate::load::{assess, LoadInput};
+use crate::load::{assess_placed, LoadInput};
 use crate::search::{search, LayoutOption, SearchInput};
 use crate::units;
+use crate::venue::AcUnit;
 use crate::venue::VenueType;
 use crate::venue::Zone;
 
@@ -184,6 +185,12 @@ pub struct ThermalRequest {
     pub unit_hp: Option<f64>,
     #[serde(default)]
     pub derate: Option<f64>,
+    /// The units the host has placed. Empty means no heat map — there is nothing to map.
+    #[serde(default)]
+    pub units: Vec<AcUnit>,
+    /// The named areas, so the map can report the dance floor and the head table by name.
+    #[serde(default)]
+    pub zones: Vec<Zone>,
 }
 
 impl ThermalRequest {
@@ -273,7 +280,13 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             Err(message) => err("bad_request", &message),
         },
         OP_THERMAL => match parse::<ThermalRequest>(payload) {
-            Ok(req) => ok(serde_json::to_value(assess(&req.into_input())).unwrap_or(Value::Null)),
+            Ok(req) => {
+                let units = req.units.clone();
+                let zones = req.zones.clone();
+                let input = req.into_input();
+                ok(serde_json::to_value(assess_placed(&input, &units, &zones))
+                    .unwrap_or(Value::Null))
+            }
             Err(message) => err("bad_request", &message),
         },
         OP_SCORE | OP_CATERING | OP_RISK | OP_CHECKLIST => {

@@ -31,7 +31,11 @@ export const OP = {
 export type Op = (typeof OP)[keyof typeof OP];
 
 export type {
+  AcUnit,
+  Advice,
+  AdviceLevel,
   Archetype,
+  AreaTemp,
   ArrangeRequest,
   ArrangeResponse,
   ArrangeTable,
@@ -39,7 +43,9 @@ export type {
   Capacity,
   ChairPlacement,
   Climate,
+  Cooling,
   Environment,
+  Field,
   FitPlacement,
   FitRequest,
   FitResult,
@@ -47,16 +53,24 @@ export type {
   GeometryRequest,
   GeometryResponse,
   LayoutOption,
+  Loads,
+  Mount,
   Placement,
+  Plant,
+  Prediction,
   ScoreBreakdown,
   ScoreTerm,
   Services,
   Side,
+  Sizing,
+  SplitUnit,
   StageWall,
   Structure,
   TableGeometry,
   TableSpec,
   TableTop,
+  ThermalReport,
+  ThermalRequest,
   TopKind,
   VenueProfile,
   VenueType,
@@ -72,6 +86,8 @@ import type {
   FitResult,
   GeometryRequest,
   GeometryResponse,
+  ThermalReport,
+  ThermalRequest,
 } from "./generated";
 
 export interface StudioEngine {
@@ -83,6 +99,8 @@ export interface StudioEngine {
   fit(request: FitRequest): FitResult;
   /** Three ranked, explained arrangements of the whole hall. */
   arrange(request: ArrangeRequest): ArrangeResponse;
+  /** The cooling verdict, the plant, and — when units are placed — the heat map. */
+  thermal(request: ThermalRequest): ThermalReport;
 }
 
 export interface LoadStudioOptions {
@@ -195,5 +213,6 @@ export async function loadStudio(
     geometry: (request) => call<GeometryResponse>(OP.GEOMETRY, request),
     fit: (request) => call<FitResult>(OP.FIT, request),
     arrange: (request) => call<ArrangeResponse>(OP.ARRANGE, request),
+    thermal: (request) => call<ThermalReport>(OP.THERMAL, request),
   };
 }

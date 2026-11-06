@@ -34,4 +34,9 @@ export type SplitUnit = {
    * them starting together will trip the generator.
    */
   surgeFactor: number;
+  /**
+   * Supply airflow at the high fan setting, m³/h. This is what mixes the room: a hall with
+   * more air moving has smaller hot spots, which is why the field model needs it.
+   */
+  airflowM3h: number;
 };

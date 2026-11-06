@@ -13,6 +13,7 @@
       ],
       "wetBulbC": 30.00978663917898
     },
+    "field": null,
     "loads": {
       "equipmentKw": 5.0,
       "glazingKw": 3.132,
@@ -34,6 +35,11 @@
       "wOut": 0.025692082332193403,
       "wallKw": 3.96
     },
+    "plant": {
+      "condensateLph": 60.44996571428571,
+      "runningKw": 41.8,
+      "surgeKw": 146.3
+    },
     "prediction": {
       "damp": true,
       "rhIn": 90.38984034478057,
@@ -48,6 +54,7 @@
       "installedKw": 117.5416,
       "surgeKw": 146.3,
       "unit": {
+        "airflowM3h": 1400.0,
         "amps": 10.0,
         "btu": 24000.0,
         "coolingKw": 7.03,
