@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  enablePublicPage,
+  pickDateTime,
+} from "./fixtures/test-helpers";
 
 test.describe("Events Creation & Overview", () => {
   test("create event wizard, desk metrics, milestones, and public page publishing", async ({
@@ -33,8 +38,7 @@ test.describe("Events Creation & Overview", () => {
 
     // Enable public discovery in Page Editor
     await page.goto(`/events/${eventId}/page-editor`);
-    const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
-    await isPublicCheckbox.check();
+    await enablePublicPage(page);
     await page.getByRole("button", { name: /save changes/i }).click();
     await expect(page.getByText(/updates saved successfully/i)).toBeVisible({
       timeout: 10000,
@@ -91,7 +95,7 @@ test.describe("Events Creation & Overview", () => {
 
     // Publish event
     await page.goto(`/events/${eventId}/page-editor`);
-    await page.locator('input[type="checkbox"]').first().check();
+    await enablePublicPage(page);
     await page.getByRole("button", { name: /save changes/i }).click();
     await expect(page.getByText(/updates saved successfully/i)).toBeVisible({
       timeout: 10000,
@@ -130,22 +134,11 @@ test.describe("Events Creation & Overview", () => {
         ).toBeVisible();
 
         // Enable public access so we can view /e/[slug]
-        const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
-        if (!(await isPublicCheckbox.isChecked())) {
-          await isPublicCheckbox.check();
-        }
+        await enablePublicPage(page);
 
-        // Fill Ceremony Date & Time with 14:00 WAT
-        const ceremonyInput = page
-          .locator('input[type="datetime-local"]')
-          .first();
-        await ceremonyInput.fill("2026-12-12T14:00");
-
-        // Fill RSVP Deadline with 14:00 WAT
-        const rsvpDeadlineInput = page
-          .locator('input[type="datetime-local"]')
-          .nth(1);
-        await rsvpDeadlineInput.fill("2026-12-01T14:00");
+        // Choose the ceremony (14:00 WAT) and the RSVP deadline in our pickers
+        await pickDateTime(page, "editor-date", "2026-12-12T14:00");
+        await pickDateTime(page, "editor-rsvp-by", "2026-12-01T14:00");
 
         // Save changes
         await page.getByRole("button", { name: /save changes/i }).click();
@@ -157,12 +150,12 @@ test.describe("Events Creation & Overview", () => {
 
         // Reload page and verify inputs preserve exact WAT values
         await page.reload();
-        await expect(
-          page.locator('input[type="datetime-local"]').first()
-        ).toHaveValue("2026-12-12T14:00");
-        await expect(
-          page.locator('input[type="datetime-local"]').nth(1)
-        ).toHaveValue("2026-12-01T14:00");
+        await expect(page.locator("#editor-date")).toContainText(
+          "Sat 12 Dec 2026, 2:00 PM"
+        );
+        await expect(page.locator("#editor-rsvp-by")).toContainText(
+          "Tue 1 Dec 2026, 2:00 PM"
+        );
 
         // Verify public page displays 2:00 PM WAT
         const publicPageLink = page.getByRole("link", {
@@ -179,13 +172,13 @@ test.describe("Events Creation & Overview", () => {
     });
   }
 
-  test("page editor datetime-local keyboard segment entry updates preview to 2:00 PM WAT before saving", async ({
+  test("page editor date picker updates the preview to 2:00 PM WAT before saving", async ({
     browser,
   }) => {
     const context = await browser.newContext({ locale: "en-US" });
     const page = await context.newPage();
     try {
-      await createAndLoginUser(page, context, "kbd_segment_user");
+      await createAndLoginUser(page, context, "picker_user");
       const { eventId } = await createTestEvent(page);
 
       await page.goto(`/events/${eventId}/page-editor`);
@@ -193,53 +186,29 @@ test.describe("Events Creation & Overview", () => {
         page.getByRole("heading", { name: /page editor/i })
       ).toBeVisible();
 
-      const ceremonyInput = page
-        .locator('input[type="datetime-local"]')
-        .first();
-      // A date that is always in the future, whatever day this runs and whichever
-      // date the create flow suggested.
+      // A date that is always in the future, whatever day this runs.
       const year = new Date().getFullYear() + 1;
 
-      // Start with 15:00 (3:00 PM WAT). Refill until the preview reacts, so a
-      // fill that lands before hydration doesn't count as the app failing.
-      // Clearing first matters: once hydrated, React only fires onChange when
-      // the value differs from what the field already holds.
-      await expect(async () => {
-        await ceremonyInput.fill("");
-        await ceremonyInput.fill(`${year}-12-12T15:00`);
-        await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible({
-          timeout: 1000,
-        });
-      }).toPass({ timeout: 15000 });
+      await pickDateTime(page, "editor-date", `${year}-12-12T15:00`);
+      await expect(page.getByText(/3:00 PM WAT/i).first()).toBeVisible();
 
-      // Clear input so segments start fresh: --/--/---- --:--
-      await ceremonyInput.clear();
+      // Change the hour in the open picker: the preview follows before saving.
+      await page.locator("#editor-date").click();
+      await page
+        .getByRole("button", { name: "2 o'clock", exact: true })
+        .click();
+      await expect(page.getByText(/2:00 PM WAT/i).first()).toBeVisible();
+      await page.getByRole("button", { name: "Done" }).click();
 
-      // Focus the first segment, then type month and day, the year, Tab out of the
-      // year (it accepts six digits), then hour, minute and PM.
-      await ceremonyInput.focus();
-      await page.keyboard.type("1212");
-      await page.keyboard.type(String(year));
-      await page.keyboard.press("Tab");
-      await page.keyboard.type("0200");
-      await page.keyboard.type("P");
-
-      // Assert that preview reflects 2:00 PM WAT before saving
-      await expect(page.getByText(/2:00 PM WAT/i).first()).toBeVisible({
-        timeout: 5000,
-      });
-
-      // Save changes
       await page.getByRole("button", { name: /save changes/i }).click();
       await expect(page.getByText(/updates saved successfully/i)).toBeVisible({
         timeout: 10000,
       });
 
-      // Reload and assert value persisted
       await page.reload();
-      await expect(
-        page.locator('input[type="datetime-local"]').first()
-      ).toHaveValue(`${year}-12-12T14:00`);
+      await expect(page.locator("#editor-date")).toContainText(
+        `12 Dec ${year}, 2:00 PM`
+      );
     } finally {
       await context.close();
     }
@@ -260,12 +229,7 @@ test.describe("Events Creation & Overview", () => {
       ).toBeVisible();
 
       // Ensure public event discovery is checked
-      const publicCheckbox = ownerPage
-        .locator('input[type="checkbox"]')
-        .first();
-      if (!(await publicCheckbox.isChecked())) {
-        await publicCheckbox.check();
-      }
+      await enablePublicPage(ownerPage);
 
       // Upload a valid 1x1 PNG cover image
       const fileInput = ownerPage.locator(
@@ -333,5 +297,36 @@ test.describe("Events Creation & Overview", () => {
     } finally {
       await ownerContext.close();
     }
+  });
+});
+
+test.describe("Unpublished public page", () => {
+  test("Go back returns to the page the host came from, not the home page", async ({
+    page,
+    context,
+  }) => {
+    await createAndLoginUser(page, context, "goback_host");
+    const { eventId } = await createTestEvent(page);
+
+    await page.goto(`/events/${eventId}/page-editor`);
+    const [tab] = await Promise.all([
+      context.waitForEvent("page"),
+      page
+        .getByRole("link", { name: /view public page/i })
+        .first()
+        .click(),
+    ]);
+    await expect(tab.getByText(/Celebration Unavailable/i)).toBeVisible();
+
+    await tab.getByRole("button", { name: /go back/i }).click();
+    await expect(tab).toHaveURL(new RegExp(`/events/${eventId}/page-editor`));
+
+    // Arriving by a pasted link has no page to return to, so it offers the home page.
+    const fresh = await context.newPage();
+    await fresh.goto(`/e/${(await page.url()).split("/").pop() ?? "x"}-none`);
+    await expect(fresh.getByText(/Celebration Unavailable/i)).toBeVisible();
+    await expect(
+      fresh.getByRole("button", { name: /return to àríyá/i })
+    ).toBeVisible();
   });
 });

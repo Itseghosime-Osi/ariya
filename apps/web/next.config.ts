@@ -110,12 +110,21 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "private, no-store" },
         ],
       },
+      {
+        // The host's own screens tell only this app where a visitor came from, so a page opened from
+        // them can offer "Go back"; nothing is sent to other sites.
+        source: "/events/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Referrer-Policy", value: "same-origin" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
       ...[
         "/i/:path*",
         "/rsvp/:path*",
         "/rsvp.html",
         "/invite/:path*",
-        "/events/:path*",
         "/sign-in",
         "/sign-up",
         "/forgot-password",
