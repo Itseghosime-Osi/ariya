@@ -19,11 +19,14 @@ type SignOutMood = "neutral" | "stay" | "leave";
 interface SignOutConfirmationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Called when the person chooses to stay: a sheet that opened this can close behind it. */
+  onStay?: () => void;
 }
 
 export function SignOutConfirmation({
   open,
   onOpenChange,
+  onStay,
 }: SignOutConfirmationProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
@@ -51,6 +54,7 @@ export function SignOutConfirmation({
     setMood("stay");
     setShowStayToast(true);
     onOpenChange(false);
+    onStay?.();
   };
 
   const handleConfirm = async () => {
@@ -147,7 +151,9 @@ export function SignOutConfirmation({
               <Button
                 type="button"
                 variant="outline"
-                onPointerEnter={() => setMood("stay")}
+                onPointerEnter={(e) =>
+                  e.pointerType === "mouse" && setMood("stay")
+                }
                 onFocus={() => setMood("stay")}
                 onClick={handleStaySignedIn}
                 disabled={isPending}
@@ -158,7 +164,9 @@ export function SignOutConfirmation({
               <Button
                 type="button"
                 data-testid="confirm-sign-out"
-                onPointerEnter={() => setMood("leave")}
+                onPointerEnter={(e) =>
+                  e.pointerType === "mouse" && setMood("leave")
+                }
                 onFocus={() => setMood("leave")}
                 onClick={handleConfirm}
                 disabled={isPending}
@@ -173,7 +181,7 @@ export function SignOutConfirmation({
 
       {showStayToast && (
         <div
-          className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#e9c98a]/35 bg-[#1c070d] px-4 py-3 text-sm text-ivory shadow-[0_18px_48px_-20px_rgba(28,7,13,0.9)]"
+          className="fixed top-[calc(1rem+env(safe-area-inset-top))] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#e9c98a]/35 bg-[#1c070d] px-4 py-3 text-sm text-ivory shadow-[0_18px_48px_-20px_rgba(28,7,13,0.9)]"
           role="status"
           data-testid="sign-out-stay-toast"
         >
