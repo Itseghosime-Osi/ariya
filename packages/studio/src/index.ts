@@ -48,6 +48,8 @@ export type {
   CateringReport,
   CateringStyle,
   ChairPlacement,
+  ChecklistInput,
+  ChecklistPlan,
   Climate,
   Confidence,
   Cooling,
@@ -63,6 +65,7 @@ export type {
   Level,
   Loads,
   Mount,
+  Phase,
   Placement,
   Plant,
   Prediction,
@@ -70,6 +73,7 @@ export type {
   RiskCategory,
   RiskInput,
   RiskItem,
+  Reconciliation,
   RiskReport,
   ScoreBreakdown,
   ScoreTerm,
@@ -99,6 +103,8 @@ import type {
   ArrangeResponse,
   CateringInput,
   CateringReport,
+  ChecklistInput,
+  ChecklistPlan,
   FitRequest,
   FitResult,
   GeometryRequest,
@@ -124,6 +130,8 @@ export interface StudioEngine {
   catering(request: CateringInput): CateringReport;
   /** The risk register, filtered to the plan, with a number and a date on every row. */
   risk(request: RiskInput): RiskReport;
+  /** The checklist this plan earns, with why each row exists and when it is due. */
+  checklist(request: ChecklistInput): ChecklistPlan;
 }
 
 export interface LoadStudioOptions {
@@ -239,5 +247,6 @@ export async function loadStudio(
     thermal: (request) => call<ThermalReport>(OP.THERMAL, request),
     catering: (request) => call<CateringReport>(OP.CATERING, request),
     risk: (request) => call<RiskReport>(OP.RISK, request),
+    checklist: (request) => call<ChecklistPlan>(OP.CHECKLIST, request),
   };
 }

@@ -35,9 +35,9 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
+      ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
-  'authenticated has SELECT privilege on all 17 readable tables'
+  'authenticated has SELECT privilege on all readable tables'
 );
 
 select set_eq(
@@ -53,9 +53,9 @@ select set_eq(
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
+      ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
-  'authenticated has INSERT privilege on all 17 writable tables'
+  'authenticated has INSERT privilege on all writable tables'
 );
 
 -- ai_activity_log is append-only for authenticated: no UPDATE or DELETE.
@@ -72,7 +72,7 @@ select set_eq(
       ('ai_connection_settings'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
-      ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
+      ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'authenticated has DELETE privilege on all deletable tables except ai_activity_log'
 );
@@ -91,9 +91,9 @@ select set_eq(
       ('ai_connection_settings'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('invoices'), ('payments'), ('profiles'),
-      ('rsvps'), ('seat_assignments'), ('tables'), ('vendor_tasks'), ('vendors')
+      ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
-  'authenticated has table-level UPDATE on 14 tables (guests handled via column grants)'
+  'authenticated has table-level UPDATE on every table it can update (guests handled via column grants)'
 );
 
 -- 4. Verify service_role has SELECT, INSERT, UPDATE, DELETE on all 18 tables PLUS rate_limits and
@@ -112,7 +112,7 @@ select set_eq(
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
-      ('vendor_tasks'), ('vendors')
+      ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'service_role has SELECT on all 18 tables plus rate_limits and push_subscriptions'
 );
@@ -131,7 +131,7 @@ select set_eq(
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
-      ('vendor_tasks'), ('vendors')
+      ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'service_role has INSERT on all 18 tables plus rate_limits and push_subscriptions'
 );
@@ -150,7 +150,7 @@ select set_eq(
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
-      ('vendor_tasks'), ('vendors')
+      ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'service_role has UPDATE on all 18 tables plus rate_limits and push_subscriptions'
 );
@@ -169,7 +169,7 @@ select set_eq(
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
-      ('vendor_tasks'), ('vendors')
+      ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'service_role has DELETE on all 18 tables plus rate_limits and push_subscriptions'
 );

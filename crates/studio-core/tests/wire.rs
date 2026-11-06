@@ -147,9 +147,7 @@ fn thermal_with_units_envelope() {
 
 #[test]
 fn unbuilt_operations_share_one_envelope() {
-    for (name, op) in [("score", OP_SCORE), ("checklist", OP_CHECKLIST)] {
-        snapshot(name, op, "{}");
-    }
+    snapshot("score", OP_SCORE, "{}");
 }
 
 /// The 300-guest Nigerian reception from research §E.10.
@@ -193,7 +191,6 @@ fn risk_envelope() {
         "tables": 30,
         "capacity": 250,
         "month": 12,
-        "alcohol": true,
         "power": "generator",
         "generatorKva": 100,
         "toilets": 8,
@@ -204,6 +201,24 @@ fn risk_envelope() {
         ]
     }"#;
     snapshot("risk", OP_RISK, request);
+}
+
+/// The same 300-guest December hall as the checklist reads it: the room, the season and the
+/// generator each add rows, and every row says why it exists and when it is due.
+#[test]
+fn checklist_envelope() {
+    let request = r#"{
+        "eventDate": "2026-12-12",
+        "guests": 300,
+        "venue": "hall",
+        "environment": "indoor",
+        "tables": 30,
+        "zoneKinds": ["dance", "buffet"],
+        "month": 12,
+        "power": "generator",
+        "service": "buffet"
+    }"#;
+    snapshot("checklist", OP_CHECKLIST, request);
 }
 
 #[test]

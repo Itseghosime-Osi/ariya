@@ -907,6 +907,12 @@ fn month_name(m: u32) -> &'static str {
 }
 
 /// The register, filtered to the plan.
+/// Every rule id the register knows, whether or not it fires for a given plan. The checklist uses
+/// this to check that the risk it links a task to exists, without having to guess which rules fire.
+pub fn known_ids() -> Vec<&'static str> {
+    RULES.iter().map(|r| r.id).collect()
+}
+
 pub fn plan(input: &RiskInput) -> RiskReport {
     let items = RULES
         .iter()

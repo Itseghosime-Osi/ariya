@@ -274,10 +274,10 @@ Goal: one place to track everything, generated from the plan.
 
 ### 6.1 Data
 
-- [ ] **6.1.1** Migration: `public.tasks` per research §H.2, with the `unique (event_id, source_key)` constraint.
-- [ ] **6.1.2** RLS: members read; owner and planner write; contributor (if added) sees only their own rows.
-- [ ] **6.1.3** pgTAP tests for the policies and the uniqueness constraint.
-- [ ] **6.1.4** Regenerate `database.types.ts`.
+- [x] **6.1.1** Migration: `public.tasks` per research §H.2, with the `unique (event_id, source_key)` constraint.
+- [x] **6.1.2** RLS: members read; owner and planner write; a couple or staff member reads the whole list but may only move rows assigned to them (open decision 6 stays deferred, so no `contributor` role).
+- [x] **6.1.3** pgTAP tests for the policies and the uniqueness constraint.
+- [x] **6.1.4** Regenerate `database.types.ts`.
 
 ### 6.2 Generation
 

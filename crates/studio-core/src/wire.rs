@@ -10,6 +10,7 @@ use ts_rs::TS;
 
 use crate::archetype::ArrangeTable;
 use crate::catering::{self, CateringInput};
+use crate::checklist::{self, ChecklistInput};
 use crate::fit::{fit_tables, FitOptions, FitResult};
 use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
@@ -299,9 +300,11 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             Ok(req) => ok(serde_json::to_value(risk::plan(&req)).unwrap_or(Value::Null)),
             Err(message) => err("bad_request", &message),
         },
-        OP_SCORE | OP_CHECKLIST => {
-            err("not_implemented", "this operation is not built yet")
-        }
+        OP_CHECKLIST => match parse::<ChecklistInput>(payload) {
+            Ok(req) => ok(serde_json::to_value(checklist::template(&req)).unwrap_or(Value::Null)),
+            Err(message) => err("bad_request", &message),
+        },
+        OP_SCORE => err("not_implemented", "this operation is not built yet"),
         _ => err("unknown_op", "no such operation"),
     }
 }
@@ -408,9 +411,43 @@ mod tests {
 
     #[test]
     fn an_unbuilt_op_says_so() {
-        let out = dispatch(OP_CHECKLIST, b"{}");
+        let out = dispatch(OP_SCORE, b"{}");
         let value: Value = serde_json::from_str(&out).expect("json");
         assert_eq!(value["code"], "not_implemented");
+    }
+
+    #[test]
+    fn checklist_answers_a_plan_with_why_and_when() {
+        let payload = br#"{
+            "eventDate": "2026-12-12",
+            "guests": 300,
+            "venue": "hall",
+            "environment": "indoor",
+            "tables": 30,
+            "month": 12,
+            "power": "generator"
+        }"#;
+        let out = dispatch(OP_CHECKLIST, payload);
+        let value: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(value["ok"], true);
+
+        let tasks = value["data"]["tasks"].as_array().expect("tasks");
+        assert!((25..=40).contains(&tasks.len()), "{} tasks", tasks.len());
+
+        let linens = tasks
+            .iter()
+            .find(|t| t["sourceKey"] == "build.linens")
+            .expect("the table count earns linens");
+        assert_eq!(linens["title"], "Confirm 30 table linens");
+        assert_eq!(linens["derivation"], "because your hall has 30 tables");
+        assert_eq!(linens["dueDate"], "2026-09-13");
+    }
+
+    #[test]
+    fn checklist_refuses_a_payload_it_cannot_read() {
+        let out = dispatch(OP_CHECKLIST, b"{not json");
+        let value: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(value["code"], "bad_request");
     }
 
     #[test]

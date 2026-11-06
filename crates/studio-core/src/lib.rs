@@ -7,12 +7,13 @@
 
 pub mod archetype;
 pub mod catering;
+pub mod checklist;
+pub mod civil;
 pub mod field;
 pub mod fit;
 pub mod geometry;
 pub mod grid;
 pub mod load;
-pub mod civil;
 pub mod risk;
 pub mod score;
 pub mod search;

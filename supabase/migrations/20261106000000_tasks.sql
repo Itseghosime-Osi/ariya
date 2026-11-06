@@ -238,8 +238,8 @@ grant select, insert, update, delete on table public.tasks to authenticated, ser
 -- 5. THE EVENT ENDS WITH ITS DAY
 -- ============================================================================
 --
--- 20261105000000 already lists 'tasks' in its trigger array, against a table that did not exist
--- yet. That trigger is created here instead, now that it does.
+-- 20261105000000 guards guests, vendors, vendor_tasks, tables, seat_assignments and rsvps. tasks
+-- did not exist then, so its trigger is created here instead of added to that array.
 
 -- The after-phase tasks (thank-yous, reviews, accounts) are real work after the day, and the row
 -- guard freezes the table. A change that only moves a task between statuses is bookkeeping, not a
