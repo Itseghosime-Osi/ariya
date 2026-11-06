@@ -35,7 +35,7 @@ export function CheckInVerifyCard({
           <Icon name="verified" size={22} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#f3d98f]">
             Verified invitation
           </p>
           <h3 className="mt-0.5 truncate font-serif text-2xl text-[#fff6dc]">
@@ -46,7 +46,7 @@ export function CheckInVerifyCard({
           type="button"
           onClick={onCancel}
           aria-label="Dismiss"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-champagne/70 hover:bg-white/10"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#f4e8cc] hover:bg-white/10"
         >
           <Icon name="close" size={18} />
         </button>
@@ -54,7 +54,7 @@ export function CheckInVerifyCard({
 
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-2xl bg-white/[0.07] px-2 py-2.5">
-          <dt className="text-[10px] font-bold uppercase tracking-wider text-champagne/60">
+          <dt className="text-[10px] font-bold uppercase tracking-wider text-[#f4e8cc]">
             Party
           </dt>
           <dd className="text-[15px] font-semibold text-[#fff6dc]">
@@ -62,7 +62,7 @@ export function CheckInVerifyCard({
           </dd>
         </div>
         <div className="rounded-2xl bg-white/[0.07] px-2 py-2.5">
-          <dt className="text-[10px] font-bold uppercase tracking-wider text-champagne/60">
+          <dt className="text-[10px] font-bold uppercase tracking-wider text-[#f4e8cc]">
             Arrived
           </dt>
           <dd className="text-[15px] font-semibold text-[#fff6dc]">
@@ -70,7 +70,7 @@ export function CheckInVerifyCard({
           </dd>
         </div>
         <div className="rounded-2xl bg-white/[0.07] px-2 py-2.5">
-          <dt className="text-[10px] font-bold uppercase tracking-wider text-champagne/60">
+          <dt className="text-[10px] font-bold uppercase tracking-wider text-[#f4e8cc]">
             Table
           </dt>
           <dd className="truncate text-[15px] font-semibold text-[#fff6dc]">
@@ -81,7 +81,7 @@ export function CheckInVerifyCard({
 
       {remaining > 1 && (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white/[0.07] px-3 py-2">
-          <span className="text-[13px] text-champagne/80">Admit now</span>
+          <span className="text-[13px] text-[#f4e8cc]">Admit now</span>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -109,7 +109,7 @@ export function CheckInVerifyCard({
       )}
 
       {result.first_checked_in_at && (
-        <p className="mt-3 text-[12px] text-champagne/70">
+        <p className="mt-3 text-[13px] text-[#f4e8cc]">
           First arrived at {formatArrival(result.first_checked_in_at)}.
         </p>
       )}
@@ -127,7 +127,7 @@ export function CheckInVerifyCard({
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-12 rounded-full px-4 text-[13px] font-semibold text-champagne/80 hover:bg-white/10"
+          className="min-h-12 rounded-full px-4 text-[13px] font-semibold text-[#f4e8cc] hover:bg-white/10"
         >
           Not now
         </button>

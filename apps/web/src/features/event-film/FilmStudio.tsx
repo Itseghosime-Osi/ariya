@@ -238,19 +238,19 @@ export function FilmStudio({
         <span aria-hidden="true" className="profile-card__weave" />
         <div className="relative flex items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#f3d98f]">
               The film
             </p>
-            <p className="mt-1 font-display text-xl text-champagne/70">
+            <p className="mt-1 font-display text-xl text-[#f4e8cc]">
               <span className="mr-1.5 text-4xl font-bold tabular-nums text-[#fff6dc] sm:text-5xl">
                 {total}
               </span>
               seconds
             </p>
           </div>
-          <p className="pb-1 text-right text-xs text-champagne/65">
+          <p className="pb-1 text-right text-[13px] text-[#f4e8cc]">
             {totalGuest}s on a guest&rsquo;s own link
-            <span className="block text-gold">
+            <span className="block text-[#f3d98f]">
               never more than {FILM_MAX_SECONDS}s
             </span>
           </p>
@@ -265,7 +265,7 @@ export function FilmStudio({
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="relative mt-1.5 text-[11px] text-champagne/60">
+        <p className="relative mt-1.5 text-[12px] text-[#f4e8cc]">
           {sceneTime}s of {SCENES_MAX_SECONDS}s for your scenes, plus{" "}
           {GUEST_INTRO_SECONDS}s for the guest&rsquo;s name and {FINALE_SECONDS}
           s for the invitation card.
@@ -277,7 +277,7 @@ export function FilmStudio({
               <span className="block text-[14px] font-semibold text-[#fff6dc]">
                 Play the film for guests
               </span>
-              <span className="block text-[12px] text-champagne/65">
+              <span className="block text-[13px] text-[#f4e8cc]">
                 They tap to open, watch, then see the invitation.
               </span>
             </span>
@@ -292,7 +292,7 @@ export function FilmStudio({
               <span className="block text-[14px] font-semibold text-[#fff6dc]">
                 {live ? "Live" : "Test mode"}
               </span>
-              <span className="block text-[12px] text-champagne/65">
+              <span className="block text-[13px] text-[#f4e8cc]">
                 {live
                   ? "Guests can open the page and their own links."
                   : "Only your team can open it. Guests see “not open yet”."}

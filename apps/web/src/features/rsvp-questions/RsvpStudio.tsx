@@ -126,13 +126,15 @@ export function RsvpStudio({
   return (
     <div className="space-y-4">
       <section className="profile-card relative overflow-hidden rounded-3xl p-4 sm:p-5">
-        <p className={EYEBROW}>Access card</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#f3d98f]">
+          Access card
+        </p>
         <div className="mt-2 flex items-center gap-3">
           <span className="min-w-0 flex-1">
             <span className="block text-[14px] font-semibold text-[#fff6dc]">
               Give each guest a personal card
             </span>
-            <span className="block text-[12px] text-champagne/65">
+            <span className="block text-[13px] text-[#f4e8cc]">
               {requireCard
                 ? "An accepted guest gets a QR and code only they can use. Each seat is admitted once."
                 : "No cards. Your team checks guests in by name."}
@@ -347,12 +349,12 @@ export function RsvpStudio({
         <div className="flex items-center gap-3">
           <p
             role="status"
-            className={`min-w-0 flex-1 text-[12px] ${
+            className={`min-w-0 flex-1 text-[13px] font-medium ${
               notice
                 ? notice.ok
-                  ? "text-emerald-700"
-                  : "text-red-700"
-                : "text-label-2"
+                  ? "text-emerald-300"
+                  : "text-red-300"
+                : "text-[#f4e8cc]"
             }`}
           >
             {notice?.text ?? (dirty ? "Unsaved changes" : "All saved")}
@@ -361,7 +363,7 @@ export function RsvpStudio({
             type="button"
             onClick={save}
             disabled={busy || !dirty}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-5 text-[13px] font-semibold text-night disabled:opacity-40"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-5 text-[13px] font-semibold text-night disabled:bg-none disabled:bg-white/15 disabled:text-champagne disabled:opacity-100"
           >
             <Icon name={busy ? "refresh" : "check"} size={16} />
             {busy ? "Saving" : "Save"}
