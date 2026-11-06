@@ -60,6 +60,7 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/settings`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/guests`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/reminders`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/checklist`)).toBe(true);
   });
 
   it("is false everywhere else, including billing's callback", () => {

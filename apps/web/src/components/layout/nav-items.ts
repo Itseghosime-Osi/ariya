@@ -72,6 +72,12 @@ export function getEventSections(eventId?: string | null): NavItem[] {
       group: "plan",
     },
     {
+      name: "Checklist",
+      href: `${baseUrl}/checklist`,
+      icon: "checklist",
+      group: "plan",
+    },
+    {
       name: "Seating",
       href: `${baseUrl}/seating`,
       icon: "table_restaurant",
@@ -160,7 +166,7 @@ export function hasOwnPhoneHeader(pathname: string): boolean {
     pathname === "/profile/archive" ||
     pathname === "/events/new" ||
     pathname === "/approvals" ||
-    /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders)$/.test(
+    /^\/events\/[^/]+\/(billing|team|vendors|settings|guests|reminders|checklist)$/.test(
       pathname
     )
   );
