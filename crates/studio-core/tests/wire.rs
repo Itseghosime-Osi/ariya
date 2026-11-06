@@ -147,11 +147,7 @@ fn thermal_with_units_envelope() {
 
 #[test]
 fn unbuilt_operations_share_one_envelope() {
-    for (name, op) in [
-        ("score", OP_SCORE),
-        ("risk", OP_RISK),
-        ("checklist", OP_CHECKLIST),
-    ] {
+    for (name, op) in [("score", OP_SCORE), ("checklist", OP_CHECKLIST)] {
         snapshot(name, op, "{}");
     }
 }
@@ -183,6 +179,31 @@ fn catering_envelope_without_alcohol() {
         "takeaway": false
     }"#;
     snapshot("catering-dry", OP_CATERING, request);
+}
+
+/// A 300-guest hall in December, certified for 250: the capacity rule fires and every item gets a
+/// date from the event date.
+#[test]
+fn risk_envelope() {
+    let request = r#"{
+        "eventDate": "2026-12-12",
+        "guests": 300,
+        "venue": "hall",
+        "environment": "indoor",
+        "tables": 30,
+        "capacity": 250,
+        "month": 12,
+        "alcohol": true,
+        "power": "generator",
+        "generatorKva": 100,
+        "toilets": 8,
+        "chandeliers": true,
+        "zones": [
+            { "id": "dance", "kind": "dance", "label": "Dance floor", "x": 15, "y": 10, "w": 8, "h": 8 },
+            { "id": "stage", "kind": "stage", "label": "Stage", "x": 15, "y": 2, "w": 9, "h": 4 }
+        ]
+    }"#;
+    snapshot("risk", OP_RISK, request);
 }
 
 #[test]

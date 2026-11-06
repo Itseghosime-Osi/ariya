@@ -15,6 +15,7 @@ use crate::geometry::{
     extents, footprint, gap_between, gap_to_walls, gap_to_zone, table_top, Footprint, TableTop,
 };
 use crate::load::{assess_placed, LoadInput};
+use crate::risk::{self, RiskInput};
 use crate::search::{search, LayoutOption, SearchInput};
 use crate::units;
 use crate::venue::AcUnit;
@@ -294,7 +295,11 @@ pub fn dispatch(op: u32, payload: &[u8]) -> String {
             Ok(req) => ok(serde_json::to_value(catering::plan(&req)).unwrap_or(Value::Null)),
             Err(message) => err("bad_request", &message),
         },
-        OP_SCORE | OP_RISK | OP_CHECKLIST => {
+        OP_RISK => match parse::<RiskInput>(payload) {
+            Ok(req) => ok(serde_json::to_value(risk::plan(&req)).unwrap_or(Value::Null)),
+            Err(message) => err("bad_request", &message),
+        },
+        OP_SCORE | OP_CHECKLIST => {
             err("not_implemented", "this operation is not built yet")
         }
         _ => err("unknown_op", "no such operation"),
@@ -403,9 +408,34 @@ mod tests {
 
     #[test]
     fn an_unbuilt_op_says_so() {
-        let out = dispatch(OP_RISK, b"{}");
+        let out = dispatch(OP_CHECKLIST, b"{}");
         let value: Value = serde_json::from_str(&out).expect("json");
         assert_eq!(value["code"], "not_implemented");
+    }
+
+    #[test]
+    fn risk_answers_a_plan_and_dates_every_item() {
+        let payload = br#"{
+            "eventDate": "2026-12-12",
+            "guests": 300,
+            "venue": "hall",
+            "environment": "indoor",
+            "tables": 30,
+            "capacity": 250,
+            "month": 12
+        }"#;
+        let out = dispatch(OP_RISK, payload);
+        let value: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(value["ok"], true);
+        let items = value["data"]["items"].as_array().expect("items");
+        assert!(!items.is_empty());
+        assert!(items.iter().all(|i| i["due"].is_string()));
+        let capacity = items
+            .iter()
+            .find(|i| i["id"] == "venue.capacity")
+            .expect("the capacity rule fired");
+        assert_eq!(capacity["due"], "2026-11-21");
+        assert_eq!(capacity["safetyCritical"], true);
     }
 
     #[test]
