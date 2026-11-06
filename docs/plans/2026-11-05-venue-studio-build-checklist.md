@@ -193,23 +193,23 @@ Goal: "it will be 29 °C and damp; splits won't fix it" — with the arithmetic 
 
 - [x] **3.1.1** `load.rs`: sensible and latent balances, SHR, room temperature given installed capacity (research §C.4). _(Magnus for the moisture content, Stull for the wet-bulb. The worked example reproduces at 132 kW and SHR 0.57; two rows of the research table do not survive the arithmetic and are noted where they are asserted.)_
 - [x] **3.1.2** `units.rs`: split AC catalogue (1.0–2.5 HP), nameplate derate, starting surge, SHR at rating and in humid air. _(The count is on the sticker, because that is what a supplier quotes; the derate shows up in the room temperature the model then predicts, not in a hidden oversize.)_
-- [ ] **3.1.3** Infiltration ACH as a **visible, adjustable input** with plain-language labels — it is the dominant uncertainty. _(The engine field and the `THERMAL` request both carry it; the control lands with the thermal panel in 3.3.)_
+- [x] **3.1.3** Infiltration ACH as a **visible, adjustable input** with plain-language labels — it is the dominant uncertainty. _(The engine field and the `THERMAL` request both carry it; the Cooling deck's "How leaky is the room?" slider writes it to `venue.cooling.ach`, and the target temperature sits beside it.)_
 - [x] **3.1.4** Marquees: ACH 5–10, and the "mechanical cooling is not viable here" verdict instead of a fantasy number. _(A marquee gets no sizing and no prediction at all — there is no honest number to give.)_
 - [x] **3.1.5** Evaporative cooling: recommend only where outdoor wet-bulb < ~22 °C; Lagos never qualifies. _(Lagos sits at 30 °C wet-bulb, so the advice says evaporative cooling would add moisture rather than cool.)_
 
 ### 3.2 Field and placement
 
-- [ ] **3.2.1** `field.rs`: 0.5 m grid, unit influence `exp(−d²/2σ²)`, local load, local temperature.
-- [ ] **3.2.2** AC placement UI: add, move, delete units; wall / cassette / floor mount; inverter toggle.
-- [ ] **3.2.3** Heat-map overlay in the 3D view, with a legend and a non-visual table equivalent.
-- [ ] **3.2.4** Dance floor modelled as a separate zone, expected 2–3 K warmer.
+- [x] **3.2.1** `field.rs`: 0.5 m grid, unit influence `exp(−d²/2σ²)`, local load, local temperature. _(The map is a perturbation of the lumped room temperature, coupled to the mixed air at a rate set by the units' airflow — without that coupling a cell balances only against the outdoors and a dance floor at three times the average load comes out 70 K hot. Summing the local balances returns the lumped one exactly, so the map's mean is the number the sizing already quotes.)_
+- [x] **3.2.2** AC placement UI: add, move, delete units; wall / cassette / floor mount; inverter toggle. _(The Cooling deck adds a unit either by clicking the floor or with "Add one", which is the keyboard path; units are dragged in the 3D hall, resized 1–2.5 HP, switched between wall, cassette and floor, and deleted. Each is drawn where it sits, so the plan and the map agree.)_
+- [x] **3.2.3** Heat-map overlay in the 3D view, with a legend and a non-visual table equivalent. _(The field is painted on the floor from a canvas texture, with a toggle; the same numbers are read out as a table of mean and peak temperature by area, warmest first.)_
+- [x] **3.2.4** Dance floor modelled as a separate zone, expected 2–3 K warmer. _(The worked hall puts it 2.7 K above the mean, inside the research's band; the test pins it there rather than at "warmer than average".)_
 
 ### 3.3 Output
 
-- [ ] **3.3.1** Verdict copy: target temperature, predicted temperature, humidity verdict, and the SHR sentence in plain language.
-- [ ] **3.3.2** "How we got this" sheet: inputs, rule, source — the research §I.3 example is the template.
-- [ ] **3.3.3** Generator load and condensate volume derived from the AC set (research §C.8).
-- [ ] **3.3.4** Golden test: 30 × 20 × 5 m, 300 guests, Lagos → 130.5 kW, SHR 0.58, 19 × 2.5 HP.
+- [x] **3.3.1** Verdict copy: target temperature, predicted temperature, humidity verdict, and the SHR sentence in plain language. _(The engine writes the headline and the reasons; the deck leads with them and names the target the host set.)_
+- [x] **3.3.2** "How we got this" sheet: inputs, rule, source — the research §I.3 example is the template. _(A disclosure under the verdict: the load split, the rule the model applies, and the research sections it comes from.)_
+- [x] **3.3.3** Generator load and condensate volume derived from the AC set (research §C.8). _(The plant panel shows running and starting draw and litres an hour, computed from the units actually placed — the research's 22–38 L/h does not follow from its own latent heat, so the model does the multiplication and lands near 60 L/h.)_
+- [x] **3.3.4** Golden test: 30 × 20 × 5 m, 300 guests, Lagos → 130.5 kW, SHR 0.58, 19 × 2.5 HP. _(`the_worked_example_lands_on_130_kw_and_nineteen_units` asserts 130.5 ± 2 kW and SHR 0.58 ± 0.02; the model lands at 132.2 kW and 0.57 because two rows of the research table do not survive their own arithmetic, as noted in `load.rs`.)_
 
 **Phase 3 exit:** the worked example reproduces exactly, and the page says "splits are the wrong technology" rather than "19 units".
 
