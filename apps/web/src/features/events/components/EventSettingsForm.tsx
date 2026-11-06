@@ -1,5 +1,6 @@
 "use client";
 
+import { DateTimeField } from "@/components/ui/date-time-field";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
@@ -247,9 +248,17 @@ export function EventSettingsForm({
                 {field("setting-title", "Celebration title", title, setTitle)}
                 {field("setting-couple", "Couple names", couple, setCouple)}
               </div>
-              {field("setting-date", "Date & time", date, setDate, {
-                type: "datetime-local",
-              })}
+              <div className="min-w-0">
+                <label htmlFor="setting-date" className={LABEL}>
+                  Date &amp; time
+                </label>
+                <DateTimeField
+                  id="setting-date"
+                  disabled={ended}
+                  value={date}
+                  onChange={setDate}
+                />
+              </div>
               <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-3 sm:gap-4">
                 {field("setting-venue", "Venue", venue, setVenue)}
                 {field("setting-area", "City / state", area, setArea, {

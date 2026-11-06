@@ -1,4 +1,4 @@
--- Migration: the checklist, as a table rather than a jsonb blob (20261106000000)
+-- Migration: the checklist, as a table rather than a jsonb blob (20261106010000)
 --
 -- The checklist is queried (what is mine, what is late, what this week), shared, and written back
 -- one row at a time. jsonb cannot do any of that, so it gets a table (research §H.2).

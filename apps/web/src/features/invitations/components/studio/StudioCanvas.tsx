@@ -185,6 +185,11 @@ export function StudioCanvas({
               label="Add rule"
               onClick={() => api.addLayer("divider")}
             />
+            <ToolButton
+              icon="qr_code_scanner"
+              label="Add entry seal"
+              onClick={() => api.addLayer("code")}
+            />
             <span aria-hidden="true" className="mx-1 h-5 w-px bg-white/15" />
             <ToolButton
               icon="undo"
@@ -240,6 +245,7 @@ export function StudioCanvas({
             <InvitationCard
               design={api.design}
               coupleName={coupleName}
+              sampleEntry
               selectedLayerId={api.selectedId}
               onLayerPointerDown={handleLayerPointerDown}
             />

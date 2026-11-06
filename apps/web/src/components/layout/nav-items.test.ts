@@ -55,6 +55,8 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader("/profile/archive")).toBe(true);
     expect(hasOwnPhoneHeader("/events/new")).toBe(true);
     expect(hasOwnPhoneHeader("/approvals")).toBe(true);
+    expect(hasOwnPhoneHeader("/connect-ai")).toBe(true);
+    expect(hasOwnPhoneHeader("/connect-ai/guide")).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/billing`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/team`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/vendors`)).toBe(true);
@@ -63,6 +65,7 @@ describe("hasOwnPhoneHeader", () => {
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/reminders`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/checklist`)).toBe(true);
     expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/day-of`)).toBe(true);
+    expect(hasOwnPhoneHeader(`/events/${EVENT_ID}/page-editor`)).toBe(true);
   });
 
   it("is false everywhere else, including billing's callback", () => {

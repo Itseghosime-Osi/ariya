@@ -294,7 +294,7 @@ export function SettingsDesk({
               icon="styler"
               tone="gold"
               label="AI connections"
-              hint="Claude, ChatGPT or Codex on your celebration desk"
+              hint="Claude, ChatGPT or Gemini on your celebration desk"
               href="/connect-ai"
             />
             <Row

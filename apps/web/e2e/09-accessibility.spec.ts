@@ -124,9 +124,11 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
 
     // 8. Public Celebration Page & Confirm Your Attendance panel
     await page.goto(`/events/${eventId}/page-editor`);
-    const isPublicCheckbox = page.locator('input[type="checkbox"]').first();
-    if (!(await isPublicCheckbox.isChecked())) {
-      await isPublicCheckbox.check();
+    const publicSwitch = page.getByRole("switch", {
+      name: /public event page/i,
+    });
+    if ((await publicSwitch.getAttribute("aria-checked")) !== "true") {
+      await publicSwitch.click();
       await page.getByRole("button", { name: /save changes/i }).click();
       await expect(page.getByText(/updates saved successfully/i)).toBeVisible();
     }

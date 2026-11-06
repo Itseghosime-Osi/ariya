@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  ERROR_PRIMARY,
+  ERROR_SECONDARY,
+  ErrorScreen,
+} from "@/components/errors/error-screen";
 
 export default function Error({
   error,
@@ -15,20 +20,26 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-error-container/40 flex items-center justify-center text-error text-2xl font-display mb-4">
-        !
-      </div>
-      <h1 className="font-display text-3xl font-semibold text-primary mb-2">
-        Something went wrong
-      </h1>
-      <p className="text-on-surface-variant max-w-md mb-6 text-sm">
-        We encountered an unexpected error while loading this page. Please try
-        again.
-      </p>
-      <Button onClick={() => reset()} variant="primary">
-        Try again
-      </Button>
-    </div>
+    <ErrorScreen
+      alert
+      eyebrow="Something went wrong"
+      title="We hit a snag"
+      message="Nothing you saved was lost. Try again, and if it keeps happening, quote the reference below when you ask for help."
+      reference={error.digest}
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={() => reset()}
+            className={ERROR_PRIMARY}
+          >
+            Try again
+          </button>
+          <Link href="/" className={ERROR_SECONDARY}>
+            Back to home
+          </Link>
+        </>
+      }
+    />
   );
 }

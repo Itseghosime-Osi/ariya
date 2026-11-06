@@ -157,7 +157,7 @@ export function InvitationStudio({
   const layerCount = doc.present.layers.length;
 
   const addLayer = useCallback(
-    (kind: "text" | "seal" | "divider") => {
+    (kind: "text" | "seal" | "divider" | "code") => {
       const layer = createLayerOfKind(kind, layerCount);
       commit((design) => ({ ...design, layers: [...design.layers, layer] }));
       setSelectedId(layer.id);

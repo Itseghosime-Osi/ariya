@@ -240,3 +240,71 @@ export function signPayload(
 ): string {
   return crypto.createHmac("sha512", secret).update(payload).digest("hex");
 }
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** Turns the page editor's "Public event page" switch on, if it is off. */
+export async function enablePublicPage(page: Page) {
+  const toggle = page.getByRole("switch", { name: /public event page/i });
+  if ((await toggle.getAttribute("aria-checked")) !== "true") {
+    await toggle.click();
+  }
+}
+
+/**
+ * Sets one of our date and time pickers ("2026-12-12T14:00"): opens it, walks to the month,
+ * taps the day, the hour, the minute and AM or PM, then Done.
+ */
+export async function pickDateTime(page: Page, triggerId: string, iso: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(iso);
+  if (!m) throw new Error(`pickDateTime wants YYYY-MM-DDTHH:mm, got ${iso}`);
+  const [year, month, day, hour, minute] = m.slice(1).map(Number);
+
+  await page.locator(`#${triggerId}`).click();
+  const sheet = page.getByRole("dialog");
+  const heading = `${MONTHS[month - 1]} ${year}`;
+  for (let i = 0; i < 48; i += 1) {
+    if (await sheet.getByText(heading, { exact: true }).isVisible()) break;
+    const shown = (await sheet.locator("p[aria-live]").textContent()) ?? "";
+    const [name, y] = shown.split(" ");
+    const here = Number(y) * 12 + MONTHS.indexOf(name);
+    const want = year * 12 + (month - 1);
+    await sheet
+      .getByRole("button", {
+        name: want > here ? "Next month" : "Previous month",
+      })
+      .click();
+  }
+  await sheet
+    .getByRole("button", {
+      name: new RegExp(
+        `^\\w{3} ${day} ${MONTHS[month - 1].slice(0, 3)} ${year}$`
+      ),
+    })
+    .click();
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
+  await sheet
+    .getByRole("button", { name: `${h12} o'clock`, exact: true })
+    .click();
+  await sheet
+    .getByRole("button", { name: `${minute} minutes`, exact: true })
+    .click();
+  await sheet
+    .getByRole("button", { name: hour >= 12 ? "PM" : "AM", exact: true })
+    .click();
+  await sheet.getByRole("button", { name: "Done" }).click();
+  await expect(sheet).toBeHidden();
+}

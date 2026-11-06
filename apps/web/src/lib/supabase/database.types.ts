@@ -454,17 +454,21 @@ export type Database = {
           date: string;
           description: string | null;
           dress_code: string | null;
+          film_design: Json | null;
           hall_layout: Json | null;
           id: string;
           invitation_design: Json | null;
           invitation_headline: string | null;
+          invitation_live: boolean;
           invitation_message: string | null;
           invitation_subheadline: string | null;
           invitation_theme: string | null;
           is_public: boolean;
           paid_at: string | null;
           registry_code: string | null;
+          require_access_card: boolean;
           rsvp_by: string | null;
+          rsvp_questions: NonNullable<Json>;
           schedule: Json | null;
           slug: string;
           status: string;
@@ -481,17 +485,21 @@ export type Database = {
           date: string;
           description?: string | null;
           dress_code?: string | null;
+          film_design?: Json | null;
           hall_layout?: Json | null;
           id?: string;
           invitation_design?: Json | null;
           invitation_headline?: string | null;
+          invitation_live?: boolean;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;
           invitation_theme?: string | null;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
+          require_access_card?: boolean;
           rsvp_by?: string | null;
+          rsvp_questions?: NonNullable<Json>;
           schedule?: Json | null;
           slug: string;
           status?: string;
@@ -507,17 +515,21 @@ export type Database = {
           date?: string;
           description?: string | null;
           dress_code?: string | null;
+          film_design?: Json | null;
           hall_layout?: Json | null;
           id?: string;
           invitation_design?: Json | null;
           invitation_headline?: string | null;
+          invitation_live?: boolean;
           invitation_message?: string | null;
           invitation_subheadline?: string | null;
           invitation_theme?: string | null;
           is_public?: boolean;
           paid_at?: string | null;
           registry_code?: string | null;
+          require_access_card?: boolean;
           rsvp_by?: string | null;
+          rsvp_questions?: NonNullable<Json>;
           schedule?: Json | null;
           slug?: string;
           status?: string;
@@ -836,6 +848,43 @@ export type Database = {
           reset_at?: string;
         };
         Relationships: [];
+      };
+      rsvp_answers: {
+        Row: {
+          answers: NonNullable<Json>;
+          event_id: string;
+          guest_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          answers?: NonNullable<Json>;
+          event_id: string;
+          guest_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          answers?: NonNullable<Json>;
+          event_id?: string;
+          guest_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rsvp_answers_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rsvp_answers_guest_id_fkey";
+            columns: ["guest_id"];
+            isOneToOne: true;
+            referencedRelation: "guests";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       rsvps: {
         Row: {
@@ -1253,6 +1302,7 @@ export type Database = {
       get_check_in_code: { Args: { p_token: string }; Returns: string };
       get_invitation: { Args: { p_token: string }; Returns: Json };
       get_public_event: { Args: { p_slug: string }; Returns: Json };
+      get_rsvp_form: { Args: { p_token: string }; Returns: Json };
       get_user_events_with_metrics: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -1300,6 +1350,10 @@ export type Database = {
       };
       restore_ai_proposal_result: {
         Args: { p_id: string; p_result: Json };
+        Returns: Json;
+      };
+      save_rsvp_answers: {
+        Args: { p_answers: Json; p_token: string };
         Returns: Json;
       };
       search_guests: {
@@ -1370,6 +1424,10 @@ export type Database = {
           p_target_user_id: string;
         };
         Returns: boolean;
+      };
+      verify_check_in: {
+        Args: { p_code: string; p_event_id: string };
+        Returns: Json;
       };
     };
     Enums: {

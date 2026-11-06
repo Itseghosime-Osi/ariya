@@ -1,5 +1,7 @@
 "use client";
 
+import { DateTimeField } from "@/components/ui/date-time-field";
+import { Switch } from "@/components/ui/switch";
 import React from "react";
 import type { LivePreviewData } from "./LivePagePreview";
 import { CoverImageUpload } from "./CoverImageUpload";
@@ -26,7 +28,7 @@ export function EditorControlsForm({
   disabled = false,
 }: EditorControlsFormProps) {
   return (
-    <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 space-y-5">
+    <div className="rounded-3xl border border-hairline bg-white/40 p-4 backdrop-blur-sm sm:p-6 space-y-5">
       <div className="space-y-1">
         <h3 className="font-serif text-lg text-wine font-medium">
           Event details
@@ -38,22 +40,21 @@ export function EditorControlsForm({
 
       <div className="space-y-4">
         {/* Public Discovery Toggle */}
-        <div className="flex items-center justify-between p-3.5 rounded-xl border border-outline-variant/60 bg-white">
-          <div className="space-y-0.5">
-            <label className="text-xs font-semibold text-wine block">
-              Public Event Page (/e/{data.slug || "..."})
-            </label>
+        <div className="flex items-center justify-between gap-3 rounded-2xl desk-field p-3.5">
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-xs font-semibold text-wine">
+              Public event page (/e/{data.slug || "..."})
+            </p>
             <p className="text-[11px] text-on-surface-variant">
-              When disabled, /e/[slug] returns 404. Direct invitation passes
-              (/i/token) remain active.
+              When off, /e/[slug] returns 404. Direct invitation passes
+              (/i/token) stay active.
             </p>
           </div>
-          <input
-            type="checkbox"
+          <Switch
+            on={data.isPublic}
+            onChange={(on) => onChange("isPublic", on)}
             disabled={disabled}
-            checked={data.isPublic}
-            onChange={(e) => onChange("isPublic", e.target.checked)}
-            className="h-4 w-4 rounded border-outline-variant text-wine focus:ring-wine/40"
+            label="Public event page"
           />
         </div>
 
@@ -68,7 +69,7 @@ export function EditorControlsForm({
             value={data.title}
             onChange={(e) => onChange("title", e.target.value)}
             placeholder="e.g. Adebayo & Folashade's Wedding"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className="w-full px-3.5 py-2.5 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           />
         </div>
 
@@ -83,40 +84,46 @@ export function EditorControlsForm({
             value={data.couple}
             onChange={(e) => onChange("couple", e.target.value)}
             placeholder="e.g. Folashade & Adebayo"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+            className="w-full px-3.5 py-2.5 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
           />
         </div>
 
         {/* Date and RSVP By */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
+            <label
+              htmlFor="editor-date"
+              className="text-xs font-semibold uppercase tracking-wider text-wine/80"
+            >
               Ceremony Date & Time
             </label>
-            <input
-              type="datetime-local"
+            <DateTimeField
+              id="editor-date"
               disabled={disabled}
               value={watDate}
-              onChange={(e) => onChangeWatDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              onChange={onChangeWatDate}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
+            <label
+              htmlFor="editor-rsvp-by"
+              className="text-xs font-semibold uppercase tracking-wider text-wine/80"
+            >
               RSVP Deadline
             </label>
-            <input
-              type="datetime-local"
+            <DateTimeField
+              id="editor-rsvp-by"
+              clearable
               disabled={disabled}
               value={watRsvpBy}
-              onChange={(e) => onChangeWatRsvpBy(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              onChange={onChangeWatRsvpBy}
+              placeholder="No deadline"
             />
           </div>
         </div>
 
         {/* Venue & Area */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
               Venue Location
@@ -127,7 +134,7 @@ export function EditorControlsForm({
               value={data.venue}
               onChange={(e) => onChange("venue", e.target.value)}
               placeholder="e.g. The Grand Ballroom, Eko Hotel"
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
           <div className="space-y-1.5">
@@ -140,7 +147,7 @@ export function EditorControlsForm({
               value={data.area}
               onChange={(e) => onChange("area", e.target.value)}
               placeholder="e.g. Victoria Island, Lagos"
-              className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+              className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
             />
           </div>
         </div>
@@ -156,7 +163,7 @@ export function EditorControlsForm({
             value={data.description || ""}
             onChange={(e) => onChange("description", e.target.value)}
             placeholder="Share your story or a welcome message for your guests..."
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+            className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>
 
@@ -179,25 +186,57 @@ export function EditorControlsForm({
             value={data.dressCode}
             onChange={(e) => onChange("dressCode", e.target.value)}
             placeholder="e.g. Wine Velvet & Champagne Gold."
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
+            className="w-full px-3.5 py-2 rounded-2xl desk-field text-base sm:text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40 resize-none"
           />
         </div>
 
         {/* Status */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">
-            Publication Status
-          </label>
-          <select
-            disabled={disabled}
-            value={data.status}
-            onChange={(e) => onChange("status", e.target.value)}
-            className="w-full px-3.5 py-2 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 focus:ring-wine/40"
+          <p
+            id="editor-status-label"
+            className="text-xs font-semibold uppercase tracking-wider text-wine/80"
           >
-            <option value="draft">Draft (Private)</option>
-            <option value="active">Active (Published to Guests)</option>
-            <option value="archived">Archived (Concluded)</option>
-          </select>
+            Publication Status
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby="editor-status-label"
+            className="grid grid-cols-3 gap-1.5"
+          >
+            {(
+              [
+                ["draft", "Draft", "Private"],
+                ["active", "Active", "Published"],
+                ["archived", "Archived", "Concluded"],
+              ] as const
+            ).map(([value, label, hint]) => {
+              const on = data.status === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  disabled={disabled}
+                  onClick={() => onChange("status", value)}
+                  className={`min-h-[52px] rounded-2xl px-2 py-1.5 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-60 ${
+                    on
+                      ? "bg-burgundy text-ivory shadow-sm"
+                      : "desk-chip text-night"
+                  }`}
+                >
+                  <span className="block text-[13px] font-semibold">
+                    {label}
+                  </span>
+                  <span
+                    className={`block text-[11px] ${on ? "text-ivory/80" : "text-label-2"}`}
+                  >
+                    {hint}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

@@ -214,8 +214,8 @@ select.desk-field {
 /* The app bar: one material for the top bar and a screen's own header, so moving between a screen with
    a Back button and one without never changes the chrome. Its colour matches the manifest and the
    phone's status bar (theme-color), so an installed app reads as one piece with the system. */
+/* No `position` here on purpose: an unlayered rule would beat the `fixed`/`sticky` utilities that place it. */
 .app-bar {
-  position: relative;
   background-color: color-mix(in srgb, var(--chrome, #f7f2ea) 94%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);

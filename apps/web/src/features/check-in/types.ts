@@ -1,4 +1,5 @@
 export type CheckInStatus =
+  | "verified"
   | "checked_in"
   | "already_checked_in"
   | "not_attending"
@@ -16,6 +17,9 @@ export interface CheckInResult {
   table_name?: string | null;
   rsvp_status?: string;
   checked_in_count?: number;
+  remaining?: number;
+  first_checked_in_at?: string | null;
+  last_checked_in_at?: string | null;
 }
 
 export interface CheckInStats {

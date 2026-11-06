@@ -17,8 +17,10 @@ select set_eq(
       ('get_check_in_code'),
       ('get_invitation'),
       ('get_public_event'),
+      ('get_rsvp_form'),
       ('has_event_role'),
       ('is_event_member'),
+      ('save_rsvp_answers'),
       ('submit_rsvp')
   $$,
   'Privilege audit: Only explicitly allowed functions are executable by anon'
@@ -49,6 +51,7 @@ select set_eq(
       ('get_check_in_code'),
       ('get_invitation'),
       ('get_public_event'),
+      ('get_rsvp_form'),
       ('get_user_events_with_metrics'),
       ('global_search'),
       ('has_event_role'),
@@ -63,9 +66,11 @@ select set_eq(
       ('restore_ai_proposal_result'),
       ('search_guests'),
       ('shares_event_with'),
+      ('save_rsvp_answers'),
       ('submit_rsvp'),
       ('track_invitations_sent'),
-      ('update_team_member_role')
+      ('update_team_member_role'),
+      ('verify_check_in')
   $$,
   'Privilege audit: Only explicitly allowed functions are executable by authenticated'
 );
