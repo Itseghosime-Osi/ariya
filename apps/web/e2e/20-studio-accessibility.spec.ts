@@ -152,11 +152,12 @@ test.describe("Studio accessibility", () => {
     await audit(page, "checklist (phone)");
 
     await page.goto(`/events/${eventId}/day-of`);
-    // Scope to the page: "Run sheet" is also a hidden label in the collapsed phone navigation.
+    // Look for the page's own heading: "Run sheet" is also the installed app's header (hidden in a
+    // browser) and a hidden label in the collapsed phone navigation.
     await expect(
       page
         .locator("main")
-        .getByText(/Run sheet|Nothing is scheduled for the day/i)
+        .getByText(/The order of the day|Nothing is scheduled for the day/i)
         .first()
     ).toBeVisible({ timeout: 15_000 });
     await audit(page, "run sheet (phone)");
