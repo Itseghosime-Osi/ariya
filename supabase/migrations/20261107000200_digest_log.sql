@@ -24,7 +24,9 @@ comment on table public.digest_log is
 alter table public.digest_log enable row level security;
 
 -- Read-only to the person themselves, and nobody writes it from a client: the cron is the only
--- writer, and it uses the service role.
+-- writer, and it uses the service role. The cron claims a week with an insert and releases the
+-- claim with a delete when nothing reached a device, so the service role gets exactly those two
+-- (and never an update: a claim is made or released, not edited).
 drop policy if exists "digest_log_select_own" on public.digest_log;
 create policy "digest_log_select_own" on public.digest_log
   for select using (user_id = auth.uid());
@@ -32,4 +34,5 @@ create policy "digest_log_select_own" on public.digest_log
 revoke all on table public.digest_log from anon;
 revoke insert, update, delete, truncate, references, trigger on table public.digest_log
   from authenticated, service_role;
-grant select on table public.digest_log to authenticated, service_role;
+grant select on table public.digest_log to authenticated;
+grant select, insert, delete on table public.digest_log to service_role;

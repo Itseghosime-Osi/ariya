@@ -132,7 +132,7 @@ select set_eq(
   $$
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
-      ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
+      ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('notification_preferences'),
       ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvp_answers'), ('rsvps'), ('seat_assignments'), ('tables'),
@@ -172,7 +172,7 @@ select set_eq(
   $$
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
-      ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
+      ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvp_answers'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('tasks'), ('vendor_tasks'), ('vendors')

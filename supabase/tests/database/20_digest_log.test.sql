@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(9);
+select plan(11);
 
 -- 1. The table exists, is protected, and is readable only by its own person.
 
@@ -26,10 +26,27 @@ select is_empty(
   $$
     select privilege_type from information_schema.role_table_grants
     where table_schema = 'public' and table_name = 'digest_log'
-      and grantee in ('authenticated', 'service_role')
+      and grantee = 'authenticated'
       and privilege_type in ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE')
   $$,
-  'only the cron writes digest_log, so no client role may insert, update, delete or truncate'
+  'a signed-in client can only read digest_log: it may not insert, update, delete or truncate'
+);
+
+select is_empty(
+  $$
+    select privilege_type from information_schema.role_table_grants
+    where table_schema = 'public' and table_name = 'digest_log'
+      and grantee = 'service_role'
+      and privilege_type in ('UPDATE', 'TRUNCATE')
+  $$,
+  'the cron claims and releases a week, it never edits or empties the ledger'
+);
+
+select ok(
+  has_table_privilege('service_role', 'public.digest_log', 'insert')
+    and has_table_privilege('service_role', 'public.digest_log', 'delete')
+    and has_table_privilege('service_role', 'public.digest_log', 'select'),
+  'the cron, which runs as the service role, can claim a week, release it, and read what is claimed'
 );
 
 -- 2. One row per person per week, which is the whole point of the table.
