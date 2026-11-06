@@ -27,6 +27,7 @@ import {
   Plus,
   Printer,
   Redo2,
+  SunMoon,
   RotateCcw,
   RotateCw,
   Ruler,
@@ -52,7 +53,13 @@ import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
-import { renameLayer } from "./layers";
+import {
+  moveLayer,
+  nudgeLayer,
+  renameLayer,
+  setLayersHidden,
+  setLayersLocked,
+} from "./layers";
 import {
   areaPerDiner,
   SPACING_GAP,
@@ -530,6 +537,37 @@ export function HallStudio({
             .join("")
       );
   }, []);
+  // The interface can be light or dark, whatever the hall's own lighting is. Remembered per device.
+  const [theme, setThemeRaw] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("ariya:hall-theme") === "dark")
+        setThemeRaw("dark");
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const toggleTheme = () =>
+    setThemeRaw((cur) => {
+      const next = cur === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("ariya:hall-theme", next);
+      } catch {
+        /* not remembered */
+      }
+      return next;
+    });
+  const dark = theme === "dark";
+  // The hall is transparent by day and shows the page behind it, so the page goes dark with the UI.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (dark) html.dataset.studioTheme = "dark";
+    else delete html.dataset.studioTheme;
+    return () => {
+      delete html.dataset.studioTheme;
+    };
+  }, [dark]);
+
   // Evening darkens the whole page, not just the hall, while the studio is open.
   useEffect(() => {
     const html = document.documentElement;
@@ -828,7 +866,7 @@ export function HallStudio({
             }))
           : [],
       assigning: assigning !== null,
-      board: pageBg,
+      board: dark ? "#1c1317" : pageBg,
       inset,
       units: unitsOf(layout),
       field: thermal?.field ?? null,
@@ -849,6 +887,7 @@ export function HallStudio({
       preset,
       assigning,
       pageBg,
+      dark,
       inset,
       thermal,
       heat,
@@ -861,6 +900,23 @@ export function HallStudio({
     // Any edit makes the "new" side of a comparison stale, so stop comparing.
     setCompare(null);
     hall.update(fn, positions);
+  };
+
+  // ---------- layers: hidden, locked, ordered ----------
+  const lockedKeys = new Set(layout.layers.locked);
+  const isLocked = (p: Pick) => lockedKeys.has(`${p.type}:${p.id}`);
+  const hideLayers = (keys: string[], hide: boolean) => {
+    updateLayout((l) => setLayersHidden(l, keys, hide));
+    // A hidden layer cannot stay selected: there would be nothing to see it by.
+    if (hide)
+      setSelection((cur) =>
+        cur.filter((p) => !keys.includes(`${p.type}:${p.id}`))
+      );
+    say(hide ? "Hidden from the hall" : "Shown in the hall");
+  };
+  const lockLayers = (keys: string[], lock: boolean) => {
+    updateLayout((l) => setLayersLocked(l, keys, lock));
+    say(lock ? "Locked: it will not move" : "Unlocked");
   };
 
   const restorePositions = (snap: Positions) => {
@@ -1011,6 +1067,10 @@ export function HallStudio({
   };
   const rotateBy = (delta: number) => {
     if (!single) return;
+    if (isLocked(single)) {
+      say("Locked: unlock it to turn it");
+      return;
+    }
     const cur =
       single.type === "table"
         ? rotationOf(single.id)
@@ -1080,6 +1140,7 @@ export function HallStudio({
   const nudge = (dx: number, dy: number) => {
     const items: Move[] = [];
     for (const p of selection) {
+      if (isLocked(p)) continue;
       const at = posOf(p);
       if (at)
         items.push({
@@ -1090,6 +1151,7 @@ export function HallStudio({
         });
     }
     if (items.length) moveItems(items);
+    else if (selection.some(isLocked)) say("Locked: unlock it to move it");
   };
 
   const align = (a: Align) => {
@@ -1397,11 +1459,17 @@ export function HallStudio({
 
   const remove = () => {
     if (selection.length === 0) return;
+    // A locked layer is protected from the Delete key and the bin alike.
+    const doomed = selection.filter((p) => !isLocked(p));
+    if (doomed.length < selection.length) {
+      say("Locked layers stay: unlock them to delete them");
+      if (doomed.length === 0) return;
+    }
     const zones = new Set(
-      selection.filter((s) => s.type === "zone").map((s) => s.id)
+      doomed.filter((s) => s.type === "zone").map((s) => s.id)
     );
     const chairs = new Set(
-      selection.filter((s) => s.type === "chair").map((s) => s.id)
+      doomed.filter((s) => s.type === "chair").map((s) => s.id)
     );
     if (zones.size || chairs.size) {
       const gone = new Set([...zones, ...chairs]);
@@ -1414,11 +1482,11 @@ export function HallStudio({
         groups: forgetItems(l.groups, gone),
       }));
     }
-    const tables = selection.filter((s) => s.type === "table");
+    const tables = doomed.filter((s) => s.type === "table");
     if (tables.length === 1) onDeleteTable(tables[0].id);
     else if (tables.length > 1)
       say("Delete tables one at a time, so nobody loses a seat by accident.");
-    setSelection([]);
+    setSelection((cur) => cur.filter(isLocked));
   };
 
   const fill = async (onlyNeeded: boolean, count?: number) => {
@@ -1944,7 +2012,10 @@ export function HallStudio({
     <section
       ref={studio}
       aria-label="Hall studio"
-      className={cn("relative flex h-full min-h-0 flex-1 flex-col text-night")}
+      className={cn(
+        "relative flex h-full min-h-0 flex-1 flex-col text-night",
+        dark && "dark studio-dark"
+      )}
       data-testid="hall-studio"
     >
       <p className="sr-only" aria-live="polite">
@@ -1997,7 +2068,7 @@ export function HallStudio({
                 )}
               >
                 {/* Below a wide screen the bar has no room for the switch, so it sits here. */}
-                <div className="pointer-events-auto min-[1280px]:hidden">
+                <div className="pointer-events-auto min-[1440px]:hidden">
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </div>
                 {/* Below the hall numbers rather than centred on the top edge: at the widths the
@@ -2137,6 +2208,20 @@ export function HallStudio({
                 >
                   <Printer size={17} />
                 </Link>
+                <button
+                  type="button"
+                  className={chip}
+                  onClick={toggleTheme}
+                  aria-pressed={dark}
+                  aria-label={dark ? "Light interface" : "Dark interface"}
+                  title={
+                    dark
+                      ? "Switch to the light interface"
+                      : "Switch to the dark interface"
+                  }
+                >
+                  <SunMoon size={17} />
+                </button>
                 {mode === "studio" && (
                   <span
                     className="mx-0.5 h-5 w-px bg-hairline"
@@ -2621,6 +2706,16 @@ export function HallStudio({
                         }
                         onAssign={onAssignTable}
                         onHover={(key) => view3d.current?.hover(key)}
+                        onToggleHidden={hideLayers}
+                        onToggleLocked={lockLayers}
+                        onReorder={(listed, moving, onto) =>
+                          updateLayout((l) =>
+                            moveLayer(l, listed, moving, onto)
+                          )
+                        }
+                        onNudge={(listed, key, by) =>
+                          updateLayout((l) => nudgeLayer(l, listed, key, by))
+                        }
                         onNewTable={() => onNewTable?.()}
                         onAutoSeat={() => {
                           setSelection([]);

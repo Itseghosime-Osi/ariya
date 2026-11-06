@@ -593,6 +593,7 @@ function pushChair(m, type, cover, sash, settings, sashOn = true) {
 function rebuildInstances() {
   for (const b of batches.values()) b.reset();
   for (const t of state.tables) {
+    if (hiddenSet.has("table:" + t.id)) continue;
     const item = items.get("table:" + t.id);
     if (!item) continue;
     const o = item.obj;
@@ -618,6 +619,7 @@ function rebuildInstances() {
   }
   couchMeshes.length = 0;
   for (const c of state.chairs) {
+    if (hiddenSet.has("chair:" + c.id)) continue;
     const item = items.get("chair:" + c.id);
     if (!item) continue;
     const o = item.obj;
@@ -2825,8 +2827,16 @@ function applyMood() {
   // By day the board is the page's own background, with dots a shade darker.
   const day = state.board || "#f2f2f0";
   boardMat.uniforms.uBg.value.set(evening ? EVENING_BG : day);
+  // A dark page (the dark interface) gets a lighter grid of dots, a light page a darker one.
+  const dayColor = new THREE.Color(day);
+  const dayHsl = { h: 0, s: 0, l: 0 };
+  dayColor.getHSL(dayHsl);
   boardMat.uniforms.uDot.value.set(
-    evening ? EVENING_DOT : new THREE.Color(day).offsetHSL(0, -0.05, -0.16)
+    evening
+      ? EVENING_DOT
+      : dayHsl.l < 0.3
+        ? dayColor.clone().offsetHSL(0, 0, 0.14)
+        : dayColor.clone().offsetHSL(0, -0.05, -0.16)
   );
   boardMat.uniforms.uOpaque.value = evening ? 1 : 0;
   scene.background = evening ? new THREE.Color(EVENING_BG) : null;
@@ -3037,6 +3047,10 @@ function floorPoint(e) {
   const p = new THREE.Vector3();
   return ray.ray.intersectPlane(floorPlane, p) ? p : null;
 }
+/** What the layers panel hid and locked, as `kind:id` keys. Refreshed with every scene. */
+let hiddenSet = new Set();
+let lockedSet = new Set();
+
 function pick(e) {
   setNdc(e);
   const targets = [
@@ -3049,7 +3063,9 @@ function pick(e) {
   for (const h of hits) {
     let o = h.object;
     while (o && !o.userData.pick) o = o.parent;
-    if (o) return o.userData.pick;
+    // A hidden layer is not there to click: the pointer goes through to whatever is behind it.
+    if (o && !hiddenSet.has(o.userData.pick.type + ":" + o.userData.pick.id))
+      return o.userData.pick;
   }
   return null;
 }
@@ -3117,7 +3133,7 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
   // A unit is dragged, never selected: it has no inspector, and selecting it would empty the deck.
   if (p?.type === "ac") {
     const item = items.get("ac:" + p.id);
-    if (item) {
+    if (item && !lockedSet.has("ac:" + p.id)) {
       drag = {
         kind: "move",
         p0: floorPoint(e),
@@ -3130,6 +3146,8 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     return;
   }
   if (p?.type === "rotate") {
+    // A locked layer keeps its handle for show but will not turn.
+    if (lockedSet.has(p.kind + ":" + p.id)) return;
     const item = items.get(p.kind + ":" + p.id);
     drag = { kind: "rotate", item, moved: false };
     return;
@@ -3147,7 +3165,9 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
       post({ t: "duplicate", items: state.selection });
       return;
     }
+    // A locked layer can be picked but not dragged.
     const moving = state.selection
+      .filter((s) => !lockedSet.has(s.type + ":" + s.id))
       .map((s) => items.get(s.type + ":" + s.id))
       .filter(Boolean);
     // A chair set on a stage travels with it, so dragging the stage does not leave it behind.
@@ -3158,7 +3178,8 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
       for (const c of state.chairs) {
         if (!c.stageId || !staged.has(c.stageId)) continue;
         const item = items.get("chair:" + c.id);
-        if (item && !moving.includes(item)) moving.push(item);
+        if (item && !lockedSet.has("chair:" + c.id) && !moving.includes(item))
+          moving.push(item);
       }
     }
     drag = {
@@ -3352,6 +3373,7 @@ function endDrag(e) {
     const r = renderer.domElement.getBoundingClientRect();
     const picked = [];
     for (const item of items.values()) {
+      if (hiddenSet.has(item.type + ":" + item.id)) continue;
       const v = item.obj.position.clone().project(camera);
       const sx = r.left + ((v.x + 1) / 2) * r.width;
       const sy = r.top + ((1 - v.y) / 2) * r.height;
@@ -3525,11 +3547,34 @@ const state = {
 let pendingScene = null;
 let first = true;
 
+/**
+ * Show or hide what the layers panel switched off. Tables and chairs are instanced, so they are
+ * left out of `rebuildInstances` instead; everything else is a group that is simply turned off,
+ * along with its label.
+ */
+function applyVisibility() {
+  for (const [id, entry] of zoneCache)
+    entry.obj.visible = !hiddenSet.has("zone:" + id);
+  const stageOf = new Map(
+    (state.stageItems || []).map((i) => [i.id, i.stageId])
+  );
+  for (const [id, entry] of stageCache)
+    entry.obj.visible =
+      !hiddenSet.has("stageItem:" + id) &&
+      !hiddenSet.has("zone:" + stageOf.get(id));
+  for (const [id, entry] of acCache)
+    entry.obj.visible = !hiddenSet.has("ac:" + id);
+  for (const [key, l] of labels) l.obj.visible = !hiddenSet.has(key);
+}
+
 function applyScene(s) {
   const moodChanged = !state.layout || state.layout.mood !== s.layout.mood;
   const insetChanged =
     JSON.stringify(state.inset || {}) !== JSON.stringify(s.inset || {});
   Object.assign(state, s);
+  const layers = state.layout.layers || {};
+  hiddenSet = new Set(layers.hidden || []);
+  lockedSet = new Set(layers.locked || []);
   buildShell(state.layout);
   // New walls start opaque; fade the ones in front of the camera again.
   applyCamera();
@@ -3542,6 +3587,7 @@ function applyScene(s) {
   syncTables();
   syncUnits();
   syncHeat();
+  applyVisibility();
   rebuildInstances();
   syncSelection();
   labelRenderer.domElement.style.display = state.labels ? "" : "none";
@@ -3668,8 +3714,29 @@ window.addEventListener("message", (e) => {
             sy: Math.round(rect.top + ((1 - v.y) / 2) * rect.height),
           };
         };
+        let clothDrawn = 0;
+        for (const [k, b] of batches)
+          if (k.startsWith("cloth:") && b.mesh) clothDrawn += b.mesh.count;
         post({
           t: "inspect",
+          // How many table cloths are on screen, which zones and labels are showing, and what
+          // is locked: what a test needs to tell "hidden" from "gone".
+          drawn: {
+            tables: clothDrawn,
+            zones: [...zoneCache].map(([id, e]) => ({
+              id,
+              visible: e.obj.visible,
+            })),
+            labels: [...labels].map(([key, l]) => ({
+              key,
+              visible: l.obj.visible,
+            })),
+            acs: [...acCache].map(([id, e]) => ({
+              id,
+              visible: e.obj.visible,
+            })),
+          },
+          locked: [...lockedSet],
           points: (m.points || []).map((p) => ({
             ...p,
             ...onScreen(p.x, p.y || 0, p.z),

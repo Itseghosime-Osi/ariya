@@ -39,7 +39,7 @@ export function WorkspaceBar({
         </p>
       </div>
       {children && (
-        <div className="ml-3 hidden border-l border-hairline pl-3 min-[1280px]:block">
+        <div className="ml-3 hidden border-l border-hairline pl-3 min-[1440px]:block">
           {children}
         </div>
       )}

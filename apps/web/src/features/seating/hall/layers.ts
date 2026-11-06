@@ -1,5 +1,6 @@
 import type { TableWithGuests } from "../types";
 import {
+  LAYER_STATE_MAX,
   ZONE_DEFAULTS,
   type FreeChair,
   type HallLayout,
@@ -32,6 +33,12 @@ export interface LayerRow {
   stageId?: string;
   /** Whether the panel can rename it (cooling units are numbered, not named). */
   renamable: boolean;
+  /** Hidden from the hall, by its own switch or because its stage is hidden. */
+  hidden: boolean;
+  /** Hidden only because the stage it stands on is: it follows the stage's switch. */
+  hiddenByStage: boolean;
+  /** Kept from being dragged on the canvas. */
+  locked: boolean;
 }
 
 export interface LayerGroup {
@@ -71,7 +78,7 @@ export function buildLayers(
   layout: HallLayout,
   tables: Pick<TableWithGuests, "id" | "name" | "capacity" | "occupiedSeats">[]
 ): LayerGroup[] {
-  const areas: LayerRow[] = [];
+  const areas: Bare[] = [];
   for (const z of layout.zones) {
     areas.push({
       key: `zone:${z.id}`,
@@ -96,7 +103,7 @@ export function buildLayers(
     }
   }
 
-  const tableRows: LayerRow[] = tables.map((t) => ({
+  const tableRows: Bare[] = tables.map((t) => ({
     key: `table:${t.id}`,
     kind: "table",
     id: t.id,
@@ -107,7 +114,7 @@ export function buildLayers(
   }));
 
   const seen: Record<string, number> = {};
-  const chairRows: LayerRow[] = layout.chairs.map((c) => {
+  const chairRows: Bare[] = layout.chairs.map((c) => {
     const kind = c.seat ?? "guest";
     seen[kind] = (seen[kind] ?? 0) + 1;
     return {
@@ -121,7 +128,7 @@ export function buildLayers(
     };
   });
 
-  const coolingRows: LayerRow[] = unitsOf(layout).map((u, i) => ({
+  const coolingRows: Bare[] = unitsOf(layout).map((u, i) => ({
     key: `ac:${u.id}`,
     kind: "ac",
     id: u.id,
@@ -131,14 +138,118 @@ export function buildLayers(
     renamable: false,
   }));
 
+  const hidden = new Set(layout.layers.hidden);
+  const locked = new Set(layout.layers.locked);
+  const rank = new Map(layout.layers.order.map((k, i) => [k, i]));
+  const decorate = (rows: Bare[], ordered: boolean): LayerRow[] => {
+    const full = rows.map((r) => {
+      const byStage = r.kind === "stageItem" && hidden.has(`zone:${r.stageId}`);
+      return {
+        ...r,
+        hidden: hidden.has(r.key) || byStage,
+        hiddenByStage: byStage && !hidden.has(r.key),
+        locked: locked.has(r.key),
+      };
+    });
+    // The host's order wins; anything they never moved keeps its place after the ones they did.
+    return ordered
+      ? full
+          .map((r, i) => ({ r, i }))
+          .sort(
+            (a, b) =>
+              (rank.get(a.r.key) ?? LAYER_STATE_MAX + a.i) -
+              (rank.get(b.r.key) ?? LAYER_STATE_MAX + b.i)
+          )
+          .map(({ r }) => r)
+      : full;
+  };
+
   return (
     [
-      { key: "areas", label: "Areas", rows: areas },
-      { key: "tables", label: "Tables", rows: tableRows },
-      { key: "chairs", label: "Chairs", rows: chairRows },
-      { key: "cooling", label: "Cooling", rows: coolingRows },
+      // Fixtures sit under their stage, so the areas keep the layout's order.
+      { key: "areas", label: "Areas", rows: decorate(areas, false) },
+      { key: "tables", label: "Tables", rows: decorate(tableRows, true) },
+      { key: "chairs", label: "Chairs", rows: decorate(chairRows, true) },
+      { key: "cooling", label: "Cooling", rows: decorate(coolingRows, true) },
     ] satisfies LayerGroup[]
   ).filter((g) => g.rows.length > 0);
+}
+
+type Bare = Omit<LayerRow, "hidden" | "hiddenByStage" | "locked">;
+
+/** The layout with these layers hidden or shown. Selecting nothing changes nothing. */
+export function setLayersHidden(
+  layout: HallLayout,
+  keys: string[],
+  hide: boolean
+): HallLayout {
+  const next = new Set(layout.layers.hidden);
+  for (const k of keys) {
+    if (hide) next.add(k);
+    else next.delete(k);
+  }
+  return {
+    ...layout,
+    layers: { ...layout.layers, hidden: [...next].slice(0, LAYER_STATE_MAX) },
+  };
+}
+
+export function setLayersLocked(
+  layout: HallLayout,
+  keys: string[],
+  lock: boolean
+): HallLayout {
+  const next = new Set(layout.layers.locked);
+  for (const k of keys) {
+    if (lock) next.add(k);
+    else next.delete(k);
+  }
+  return {
+    ...layout,
+    layers: { ...layout.layers, locked: [...next].slice(0, LAYER_STATE_MAX) },
+  };
+}
+
+/**
+ * Move one row to the place another row holds, within the group's rows as they are listed now:
+ * dragging down lands it after the target, dragging up lands it before. Dropping a row on itself,
+ * or on a key not in the list, changes nothing.
+ */
+export function moveLayer(
+  layout: HallLayout,
+  listed: string[],
+  moving: string,
+  onto: string
+): HallLayout {
+  if (moving === onto) return layout;
+  const from = listed.indexOf(moving);
+  const to = listed.indexOf(onto);
+  if (from < 0 || to < 0) return layout;
+  const next = listed.slice();
+  next.splice(from, 1);
+  next.splice(to, 0, moving);
+  // Other groups keep their order; this group's new order goes after it.
+  const rest = layout.layers.order.filter((k) => !listed.includes(k));
+  return {
+    ...layout,
+    layers: {
+      ...layout.layers,
+      order: [...rest, ...next].slice(0, LAYER_STATE_MAX),
+    },
+  };
+}
+
+/** One step up or down, for the keyboard. Stops at the ends. */
+export function nudgeLayer(
+  layout: HallLayout,
+  listed: string[],
+  key: string,
+  by: -1 | 1
+): HallLayout {
+  const at = listed.indexOf(key);
+  const target = listed[at + by];
+  if (at < 0 || target === undefined) return layout;
+  return moveLayer(layout, listed, key, target);
 }
 
 /** Keep the rows whose name or detail contain the search, and drop the groups left empty. */

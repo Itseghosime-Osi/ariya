@@ -333,6 +333,13 @@ export const hallLayoutSchema = z.object({
     )
     .max(HALL_MAX_STAGE_ITEMS)
     .default([]),
+  layers: z
+    .object({
+      hidden: z.array(z.string().min(1).max(60)).max(600).default([]),
+      locked: z.array(z.string().min(1).max(60)).max(600).default([]),
+      order: z.array(z.string().min(1).max(60)).max(600).default([]),
+    })
+    .default({ hidden: [], locked: [], order: [] }),
   mood: z.enum(["day", "evening"]),
   chandeliers: z.boolean(),
   ceiling: z.number().min(HALL_CEILING_MIN).max(HALL_CEILING_MAX),

@@ -236,3 +236,119 @@ select.desk-field {
     transparent
   );
 }
+
+/* The seating studio's dark interface (HallStudio's theme switch). `.dark` flips the app's colour
+   tokens for everything inside; this finishes the job for the studio's hard-coded light surfaces,
+   its dark pills (which would turn light with the token) and its accent text (too dim on dark).
+   Scoped to `.studio-dark` so nothing else in the app is touched. */
+.studio-dark {
+  color-scheme: dark;
+  /* Tailwind resolves its colour tokens once, at the root, so the app's .dark flip never reaches the
+     utilities (text-night, text-label-2…). Redefine them here, where the utilities read them. */
+  --color-ivory: #140c10;
+  --color-surface: #1d1418;
+  --color-night: #faf6ee;
+  --color-label-2: #d8c8ce;
+  --color-label-3: #b8a4ab;
+  --color-gold-ink: #e8d2a6;
+  --color-hairline: rgba(232, 210, 166, 0.16);
+  --color-on-surface: #faf6ee;
+  --color-on-surface-variant: #d8c8ce;
+  --color-background: #140c10;
+  --color-on-background: #faf6ee;
+}
+.studio-dark .bg-white,
+.studio-dark .bg-\[\#fbf9f5\],
+.studio-dark .bg-\[\#faf7f2\] {
+  background-color: #1f1619 !important;
+}
+.studio-dark .bg-white\/95,
+.studio-dark .bg-white\/90,
+.studio-dark .bg-white\/70,
+.studio-dark .bg-white\/60 {
+  background-color: rgb(31 22 25 / 0.94) !important;
+}
+.studio-dark .bg-\[\#f1ece4\],
+.studio-dark .bg-\[\#f6f1e8\] {
+  background-color: #2b1f24 !important;
+}
+.studio-dark .hover\:bg-\[\#f1ece4\]:hover,
+.studio-dark .hover\:bg-white:hover,
+.studio-dark .hover\:bg-burgundy\/10:hover {
+  background-color: #35262c !important;
+}
+.studio-dark .bg-\[\#f3ead8\] {
+  background-color: #3b301f !important;
+}
+.studio-dark .border-black\/\[0\.06\],
+.studio-dark .border-black\/10 {
+  border-color: rgb(255 255 255 / 0.1) !important;
+}
+/* Dark pills stay dark: the night token is light in here, so they become wine. */
+.studio-dark .bg-night,
+.studio-dark .aria-checked\:bg-night[aria-checked="true"],
+.studio-dark .aria-pressed\:bg-night[aria-pressed="true"],
+.studio-dark .aria-expanded\:bg-night[aria-expanded="true"] {
+  background-color: #7a2236 !important;
+  color: #fff !important;
+}
+.studio-dark .text-ivory {
+  color: #fff6dc !important;
+}
+.studio-dark .text-burgundy,
+.studio-dark .hover\:text-burgundy:hover {
+  color: #e9a3b4 !important;
+}
+.studio-dark .border-burgundy {
+  border-color: #c86a82 !important;
+}
+.studio-dark :focus-visible {
+  outline-color: #e9c98a !important;
+}
+.studio-dark .text-\[\#9e2a2b\],
+.studio-dark .text-\[\#7a1f20\],
+.studio-dark .text-\[\#b4483a\] {
+  color: #f3a3a4 !important;
+}
+.studio-dark .text-\[\#5c4013\],
+.studio-dark .text-\[\#8a6608\],
+.studio-dark .text-\[\#7a4a06\],
+.studio-dark .text-\[\#3a2410\] {
+  color: #efd6a0 !important;
+}
+.studio-dark .text-\[\#1f6b4a\] {
+  color: #84d6ad !important;
+}
+/* The studio's remaining light tints: notices, fields and the selected state of its segmented controls. */
+.studio-dark .bg-\[\#fbf8f2\],
+.studio-dark .bg-\[\#faf6ee\] {
+  background-color: #1f1619 !important;
+}
+.studio-dark .bg-\[\#fdf6e8\],
+.studio-dark .bg-\[\#fdf1d8\] {
+  background-color: #3b301f !important;
+}
+.studio-dark .bg-\[\#fdf4f2\],
+.studio-dark .bg-\[\#fbeeee\],
+.studio-dark .bg-\[\#fbe9ea\] {
+  background-color: #3a1f22 !important;
+}
+.studio-dark .bg-\[\#efe7d8\],
+.studio-dark .bg-\[\#d9d2c6\] {
+  background-color: #3a2d33 !important;
+}
+.studio-dark .aria-checked\:bg-white[aria-checked="true"] {
+  background-color: #7a2236 !important;
+  color: #fff !important;
+}
+.studio-dark [class*="text-ivory/"] {
+  color: rgb(255 246 220 / 0.85) !important;
+}
+
+/* The studio's dark interface also darkens the page behind the transparent daytime hall. */
+html[data-studio-theme="dark"],
+html[data-studio-theme="dark"] body,
+html[data-studio-theme="dark"] [data-app-shell] {
+  background-color: #1c1317;
+  transition: background-color 0.4s ease;
+}

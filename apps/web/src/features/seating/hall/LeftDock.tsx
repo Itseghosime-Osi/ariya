@@ -12,6 +12,11 @@ import {
   Armchair,
   Box,
   ChevronDown,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Lock,
+  LockOpen,
   ChevronRight,
   Layers,
   Pencil,
@@ -73,6 +78,14 @@ export interface LeftDockProps {
   meter?: ReactNode;
   /** The layer under the pointer or keyboard focus, as a hall key like `table:id`, or null. */
   onHover?: (key: string | null) => void;
+  /** Hide or show these layers (`kind:id` keys). */
+  onToggleHidden: (keys: string[], hide: boolean) => void;
+  /** Lock or unlock these layers. */
+  onToggleLocked: (keys: string[], lock: boolean) => void;
+  /** Drop one row onto another's place; `listed` is the group's keys in the order shown. */
+  onReorder: (listed: string[], moving: string, onto: string) => void;
+  /** Move one row a step with the keyboard. */
+  onNudge: (listed: string[], key: string, by: -1 | 1) => void;
   onClose: () => void;
 }
 
@@ -90,6 +103,10 @@ export function LeftDock({
   stats,
   meter,
   onHover,
+  onToggleHidden,
+  onToggleLocked,
+  onReorder,
+  onNudge,
   onClose,
 }: LeftDockProps) {
   const [tab, setTab] = useState<Tab>("layers");
@@ -193,6 +210,10 @@ export function LeftDock({
             onRenameTable={onRenameTable}
             onRenameLayer={onRenameLayer}
             onHover={onHover}
+            onToggleHidden={onToggleHidden}
+            onToggleLocked={onToggleLocked}
+            onReorder={onReorder}
+            onNudge={onNudge}
           />
         ) : (
           <TablesTab
@@ -223,6 +244,10 @@ function LayersTab({
   onRenameTable,
   onRenameLayer,
   onHover,
+  onToggleHidden,
+  onToggleLocked,
+  onReorder,
+  onNudge,
 }: Pick<
   LeftDockProps,
   | "layout"
@@ -232,20 +257,30 @@ function LayersTab({
   | "onRenameTable"
   | "onRenameLayer"
   | "onHover"
+  | "onToggleHidden"
+  | "onToggleLocked"
+  | "onReorder"
+  | "onNudge"
 >) {
   const [query, setQuery] = useState("");
   const list = useRef<HTMLDivElement>(null);
   const [folded, setFolded] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<string | null>(null);
-
-  const groups = useMemo(
-    () => filterLayers(buildLayers(layout, tables), query),
-    [layout, tables, query]
+  // Dragging a row: which one, and which row it is over (with which edge the line goes on).
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  const [over, setOver] = useState<{ key: string; after: boolean } | null>(
+    null
   );
+  const [said, setSaid] = useState("");
+
+  const all = useMemo(() => buildLayers(layout, tables), [layout, tables]);
+  const groups = useMemo(() => filterLayers(all, query), [all, query]);
   const selected = useMemo(
     () => new Set(selection.map((p) => `${p.type}:${p.id}`)),
     [selection]
   );
+  const keysOf = (groupKey: string) =>
+    all.find((g) => g.key === groupKey)?.rows.map((r) => r.key) ?? [];
 
   const commit = (row: LayerRow, name: string) => {
     setEditing(null);
@@ -260,6 +295,7 @@ function LayersTab({
 
   // Arrow keys walk the rows, Home and End jump to the ends: a long list is never a mouse-only job.
   const walk = (e: ReactKeyboardEvent) => {
+    if (e.altKey) return;
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
     const rows = Array.from(
       list.current?.querySelectorAll<HTMLElement>("[data-layer-row]") ?? []
@@ -282,6 +318,9 @@ function LayersTab({
 
   return (
     <div className="p-2" ref={list} onKeyDown={walk}>
+      <p className="sr-only" role="status" aria-live="polite">
+        {said}
+      </p>
       <label className="relative block">
         <span className="sr-only">Search layers</span>
         <Search
@@ -306,22 +345,52 @@ function LayersTab({
 
       {groups.map((g) => {
         const isFolded = folded[g.key] && !query;
+        // The group's own switches act on every layer in it (a stage's fixtures follow the stage).
+        const own = (all.find((x) => x.key === g.key)?.rows ?? []).filter(
+          (r) => r.kind !== "stageItem"
+        );
+        const keys = own.map((r) => r.key);
+        const allHidden = own.length > 0 && own.every((r) => r.hidden);
+        const allLocked = own.length > 0 && own.every((r) => r.locked);
+        // Reordering means something only where the order is the host's: not areas, and not
+        // while a search is narrowing the list.
+        const reorderable = g.key !== "areas" && !query;
         return (
           <section key={g.key} className="mt-3" aria-label={g.label}>
-            <button
-              type="button"
-              aria-expanded={!isFolded}
-              onClick={() => setFolded((f) => ({ ...f, [g.key]: !f[g.key] }))}
-              className="flex min-h-9 w-full items-center gap-1.5 rounded-lg px-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-label-2 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-            >
-              {isFolded ? (
-                <ChevronRight size={13} aria-hidden="true" />
-              ) : (
-                <ChevronDown size={13} aria-hidden="true" />
-              )}
-              {g.label}
-              <span className="font-normal tabular-nums">{g.rows.length}</span>
-            </button>
+            <div className="group flex items-center">
+              <button
+                type="button"
+                aria-expanded={!isFolded}
+                onClick={() => setFolded((f) => ({ ...f, [g.key]: !f[g.key] }))}
+                className="flex min-h-9 min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-label-2 hover:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              >
+                {isFolded ? (
+                  <ChevronRight size={13} aria-hidden="true" />
+                ) : (
+                  <ChevronDown size={13} aria-hidden="true" />
+                )}
+                {g.label}
+                <span className="font-normal tabular-nums">
+                  {g.rows.length}
+                </span>
+              </button>
+              <Switch
+                on={allHidden}
+                onLabel={`Show all ${g.label.toLowerCase()}`}
+                offLabel={`Hide all ${g.label.toLowerCase()}`}
+                onIcon={EyeOff}
+                offIcon={Eye}
+                onClick={() => onToggleHidden(keys, !allHidden)}
+              />
+              <Switch
+                on={allLocked}
+                onLabel={`Unlock all ${g.label.toLowerCase()}`}
+                offLabel={`Lock all ${g.label.toLowerCase()}`}
+                onIcon={Lock}
+                offIcon={LockOpen}
+                onClick={() => onToggleLocked(keys, !allLocked)}
+              />
+            </div>
             {!isFolded && (
               <ul className="mt-0.5 space-y-0.5">
                 {g.rows.map((row) => (
@@ -338,6 +407,37 @@ function LayersTab({
                     onEdit={() => setEditing(row.key)}
                     onCancel={() => setEditing(null)}
                     onCommit={(name) => commit(row, name)}
+                    onToggleHidden={() =>
+                      onToggleHidden([row.key], !row.hidden)
+                    }
+                    onToggleLocked={() =>
+                      onToggleLocked([row.key], !row.locked)
+                    }
+                    reorderable={reorderable}
+                    dragging={dragKey === row.key}
+                    dropEdge={
+                      over?.key === row.key && dragKey && dragKey !== row.key
+                        ? over.after
+                          ? "after"
+                          : "before"
+                        : null
+                    }
+                    onDragStart={() => setDragKey(row.key)}
+                    onDragEnd={() => {
+                      setDragKey(null);
+                      setOver(null);
+                    }}
+                    onDragOver={(after) => setOver({ key: row.key, after })}
+                    onDrop={() => {
+                      if (dragKey && dragKey !== row.key)
+                        onReorder(keysOf(g.key), dragKey, row.key);
+                      setDragKey(null);
+                      setOver(null);
+                    }}
+                    onNudge={(by) => {
+                      onNudge(keysOf(g.key), row.key, by);
+                      setSaid(`${row.name} moved ${by < 0 ? "up" : "down"}`);
+                    }}
                     onPick={(additive) =>
                       onSelect(
                         [
@@ -364,10 +464,51 @@ function LayersTab({
         );
       })}
       <p className="px-2 pb-3 pt-4 text-[11px] leading-snug text-label-2">
-        Click a layer to select it in the hall. Double-click, or use the pencil,
-        to rename it.
+        Click a layer to select it. Double-click or F2 renames. Drag a row, or
+        press Alt with the arrow keys, to reorder. The eye hides a layer; the
+        padlock keeps it from being dragged.
       </p>
     </div>
+  );
+}
+
+/** A small on/off icon button: the eye and the padlock, on a row or on a group. */
+function Switch({
+  on,
+  onLabel,
+  offLabel,
+  onIcon: OnIcon,
+  offIcon: OffIcon,
+  onClick,
+  quiet = false,
+}: {
+  on: boolean;
+  onLabel: string;
+  offLabel: string;
+  onIcon: typeof Eye;
+  offIcon: typeof Eye;
+  onClick: () => void;
+  /** On a row, the off state stays out of sight until the row is pointed at. */
+  quiet?: boolean;
+}) {
+  const I = on ? OnIcon : OffIcon;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={on ? onLabel : offLabel}
+      aria-pressed={on}
+      title={on ? onLabel : offLabel}
+      className={cn(
+        "grid h-11 w-9 shrink-0 place-items-center rounded-lg transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy",
+        on ? "text-burgundy opacity-100" : "text-label-2 hover:text-night",
+        quiet &&
+          !on &&
+          "opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 pointer-coarse:opacity-100"
+      )}
+    >
+      <I size={14} />
+    </button>
   );
 }
 
@@ -379,6 +520,16 @@ function LayerItem({
   onEdit,
   onCancel,
   onCommit,
+  onToggleHidden,
+  onToggleLocked,
+  reorderable,
+  dragging,
+  dropEdge,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
+  onNudge,
   onPick,
 }: {
   row: LayerRow;
@@ -388,6 +539,16 @@ function LayerItem({
   onEdit: () => void;
   onCancel: () => void;
   onCommit: (name: string) => void;
+  onToggleHidden: () => void;
+  onToggleLocked: () => void;
+  reorderable: boolean;
+  dragging: boolean;
+  dropEdge: "before" | "after" | null;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDragOver: (after: boolean) => void;
+  onDrop: () => void;
+  onNudge: (by: -1 | 1) => void;
   onPick: (additive: boolean) => void;
 }) {
   const I = KIND_ICON[row.kind];
@@ -404,21 +565,61 @@ function LayerItem({
   }, [editing]);
 
   return (
-    <li>
+    <li
+      draggable={reorderable && !editing}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", row.key);
+        onDragStart();
+      }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => {
+        if (!reorderable) return;
+        e.preventDefault();
+        const r = e.currentTarget.getBoundingClientRect();
+        onDragOver(e.clientY > r.top + r.height / 2);
+      }}
+      onDrop={(e) => {
+        if (!reorderable) return;
+        e.preventDefault();
+        onDrop();
+      }}
+      className={cn(
+        "relative",
+        dragging && "opacity-40",
+        dropEdge === "before" &&
+          "before:absolute before:inset-x-2 before:-top-px before:h-0.5 before:rounded-full before:bg-burgundy",
+        dropEdge === "after" &&
+          "after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-burgundy"
+      )}
+    >
       <div
         onMouseEnter={() => onHover?.(hallKey)}
         onMouseLeave={() => onHover?.(null)}
         onFocus={() => onHover?.(hallKey)}
         onBlur={() => onHover?.(null)}
         className={cn(
-          "flex items-center gap-1 rounded-xl pl-2 pr-1 transition-colors",
+          "group/row flex items-center rounded-xl pl-1 pr-0.5 transition-colors",
           row.kind === "stageItem" && "ml-5",
           selected ? "bg-night text-white" : "text-night hover:bg-white"
         )}
       >
+        {reorderable ? (
+          <GripVertical
+            size={13}
+            aria-hidden="true"
+            className="shrink-0 cursor-grab opacity-0 group-hover/row:opacity-50 pointer-coarse:hidden"
+          />
+        ) : (
+          <span className="w-[13px] shrink-0" aria-hidden="true" />
+        )}
         {editing ? (
           <>
-            <I size={15} aria-hidden="true" className="shrink-0 opacity-70" />
+            <I
+              size={15}
+              aria-hidden="true"
+              className="ml-1 shrink-0 opacity-70"
+            />
             <input
               ref={input}
               value={draft}
@@ -434,7 +635,7 @@ function LayerItem({
                 }
                 e.stopPropagation();
               }}
-              className="my-1 min-h-9 min-w-0 flex-1 rounded-lg border border-burgundy bg-white px-2 text-sm font-semibold text-night focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
+              className="mx-1 my-1 min-h-9 min-w-0 flex-1 rounded-lg border border-burgundy bg-white px-2 text-sm font-semibold text-night focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
             />
           </>
         ) : (
@@ -451,26 +652,69 @@ function LayerItem({
                   e.preventDefault();
                   onEdit();
                 }
+                // Alt with an arrow moves the row; a plain arrow only moves the focus.
+                if (
+                  reorderable &&
+                  e.altKey &&
+                  (e.key === "ArrowUp" || e.key === "ArrowDown")
+                ) {
+                  e.preventDefault();
+                  onNudge(e.key === "ArrowUp" ? -1 : 1);
+                }
               }}
-              className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
+              className={cn(
+                "flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-1 text-left focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy",
+                row.hidden && "opacity-50"
+              )}
             >
               <I size={15} aria-hidden="true" className="shrink-0 opacity-70" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold leading-tight">
+                <span
+                  className={cn(
+                    "block truncate text-sm font-semibold leading-tight",
+                    row.hidden && "italic"
+                  )}
+                >
                   {row.name}
                 </span>
-                {row.detail && (
-                  <span
-                    className={cn(
-                      "block truncate text-[11px] leading-tight",
-                      selected ? "text-white/80" : "text-label-2"
-                    )}
-                  >
-                    {row.detail}
-                  </span>
-                )}
+                <span
+                  className={cn(
+                    "block truncate text-[11px] leading-tight",
+                    selected ? "text-white/80" : "text-label-2"
+                  )}
+                >
+                  {row.hiddenByStage
+                    ? "Hidden with its stage"
+                    : row.hidden
+                      ? "Hidden"
+                      : row.locked
+                        ? "Locked"
+                        : row.detail}
+                </span>
               </span>
             </button>
+            {row.kind !== "stageItem" || !row.hiddenByStage ? (
+              <Switch
+                quiet
+                on={row.hidden}
+                onLabel={`Show ${row.name}`}
+                offLabel={`Hide ${row.name}`}
+                onIcon={EyeOff}
+                offIcon={Eye}
+                onClick={onToggleHidden}
+              />
+            ) : null}
+            {row.kind !== "stageItem" && (
+              <Switch
+                quiet
+                on={row.locked}
+                onLabel={`Unlock ${row.name}`}
+                offLabel={`Lock ${row.name}`}
+                onIcon={Lock}
+                offIcon={LockOpen}
+                onClick={onToggleLocked}
+              />
+            )}
             {row.renamable && (
               <button
                 type="button"
@@ -478,7 +722,7 @@ function LayerItem({
                 aria-label={`Rename ${row.name}`}
                 title="Rename"
                 className={cn(
-                  "grid h-11 w-9 shrink-0 place-items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy",
+                  "grid h-11 w-8 shrink-0 place-items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy",
                   selected
                     ? "text-white/80 hover:text-white"
                     : "text-label-2 hover:text-night"

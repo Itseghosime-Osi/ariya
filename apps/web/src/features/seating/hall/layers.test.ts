@@ -4,7 +4,11 @@ import {
   chairDefaultName,
   cleanLayerName,
   filterLayers,
+  moveLayer,
+  nudgeLayer,
   renameLayer,
+  setLayersHidden,
+  setLayersLocked,
 } from "./layers";
 import { defaultLayout, type HallLayout } from "./model";
 
@@ -129,5 +133,100 @@ describe("renameLayer", () => {
   it("cleans a name to one line within the schema's limit", () => {
     expect(cleanLayerName("a\n b\t c")).toBe("a b c");
     expect(cleanLayerName("x".repeat(100))).toHaveLength(60);
+  });
+});
+
+describe("hiding, locking and ordering", () => {
+  const rows = (layout: HallLayout, group: "tables" | "chairs" | "areas") =>
+    buildLayers(layout, tables).find((g) => g.key === group)!.rows;
+
+  it("hides and shows layers, and the rows say so", () => {
+    const hidden = setLayersHidden(layoutWith(), ["table:t1"], true);
+    expect(rows(hidden, "tables").map((r) => r.hidden)).toEqual([true, false]);
+    const shown = setLayersHidden(hidden, ["table:t1"], false);
+    expect(shown.layers.hidden).toEqual([]);
+  });
+
+  it("hides a stage's fixtures with it, and says they follow the stage", () => {
+    const base = layoutWith();
+    const stage = base.zones.find((z) => z.kind === "stage")!;
+    const layout = {
+      ...base,
+      stageItems: [
+        {
+          id: "i",
+          stageId: stage.id,
+          kind: "arch" as const,
+          across: 0,
+          depth: 0.8,
+        },
+      ],
+    };
+    const gone = setLayersHidden(layout, [`zone:${stage.id}`], true);
+    const fixture = rows(gone, "areas").find((r) => r.id === "i")!;
+    expect(fixture).toMatchObject({ hidden: true, hiddenByStage: true });
+    // A fixture hidden on its own is not "by stage".
+    const own = setLayersHidden(layout, ["stageItem:i"], true);
+    expect(rows(own, "areas").find((r) => r.id === "i")).toMatchObject({
+      hidden: true,
+      hiddenByStage: false,
+    });
+  });
+
+  it("locks and unlocks, without repeating a key", () => {
+    const once = setLayersLocked(layoutWith(), ["table:t1", "table:t1"], true);
+    expect(once.layers.locked).toEqual(["table:t1"]);
+    expect(rows(once, "tables")[0].locked).toBe(true);
+    expect(setLayersLocked(once, ["table:t1"], false).layers.locked).toEqual(
+      []
+    );
+  });
+
+  it("moves a row onto another's place, and lists it there", () => {
+    const keys = ["table:t1", "table:t2"];
+    const moved = moveLayer(layoutWith(), keys, "table:t2", "table:t1");
+    expect(rows(moved, "tables").map((r) => r.id)).toEqual(["t2", "t1"]);
+    expect(
+      moveLayer(layoutWith(), keys, "table:t1", "table:t1").layers.order
+    ).toEqual([]);
+    expect(
+      moveLayer(layoutWith(), keys, "table:t1", "table:zz").layers.order
+    ).toEqual([]);
+  });
+
+  it("drags down to land after the target and up to land before", () => {
+    const layout = layoutWith({
+      chairs: ["a", "b", "c"].map((id, i) => ({ id, x: i, y: 0, rot: 0 })),
+    });
+    const keys = ["chair:a", "chair:b", "chair:c"];
+    const down = moveLayer(layout, keys, "chair:a", "chair:c");
+    expect(rows(down, "chairs").map((r) => r.id)).toEqual(["b", "c", "a"]);
+    const up = moveLayer(layout, keys, "chair:c", "chair:a");
+    expect(rows(up, "chairs").map((r) => r.id)).toEqual(["c", "a", "b"]);
+  });
+
+  it("keeps a chair's name when it is moved, because the number follows the chair not the row", () => {
+    const layout = layoutWith({
+      chairs: ["a", "b"].map((id, i) => ({ id, x: i, y: 0, rot: 0 })),
+    });
+    const moved = moveLayer(
+      layout,
+      ["chair:a", "chair:b"],
+      "chair:b",
+      "chair:a"
+    );
+    expect(rows(moved, "chairs").map((r) => r.name)).toEqual([
+      "Guest chair 2",
+      "Guest chair 1",
+    ]);
+  });
+
+  it("nudges one step and stops at the ends", () => {
+    const layout = layoutWith();
+    const keys = ["table:t1", "table:t2"];
+    expect(nudgeLayer(layout, keys, "table:t1", -1)).toBe(layout);
+    expect(nudgeLayer(layout, keys, "table:t2", 1)).toBe(layout);
+    const down = nudgeLayer(layout, keys, "table:t1", 1);
+    expect(rows(down, "tables").map((r) => r.id)).toEqual(["t2", "t1"]);
   });
 });
