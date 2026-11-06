@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { ChecklistPlan, Reconciliation } from "@ariya/studio";
 import { createClient } from "@/lib/supabase/server";
-import type { TaskStatus } from "./types";
+import { RISK_KEY_PREFIX, type TaskStatus } from "./types";
 
 export interface SeedResult {
   success?: boolean;
@@ -126,6 +126,80 @@ export async function seedChecklistAction(
   };
 }
 
+/**
+ * Turn one risk row into a checklist task (5.2.3).
+ *
+ * The key is derived from the rule's own id, so asking twice is a no-op rather than a duplicate,
+ * and a row the host deleted stays deleted: the tombstone keeps the key, the partial unique index
+ * covers live rows only, and this never resurrects one.
+ */
+export async function addRiskToChecklistAction(
+  eventId: string,
+  risk: {
+    id: string;
+    title: string;
+    mitigation: string;
+    derivation: string;
+    source: string;
+    due: string | null;
+  }
+): Promise<{ success?: boolean; error?: string; already?: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const ruleId = risk.id?.trim();
+  if (!ruleId) return { error: "That risk has no rule key to remember it by." };
+  const title = risk.title?.trim();
+  if (!title) return { error: "That risk has no title to make a task from." };
+
+  // Same read as the seed, so the action sees the event rather than trusting the caller.
+  const { data: event } = await supabase
+    .from("events")
+    .select("id")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event) return { error: "This celebration could not be found." };
+
+  const sourceKey = `${RISK_KEY_PREFIX}${ruleId}`;
+
+  const { data: existing } = await supabase
+    .from("tasks")
+    .select("id, deleted_at")
+    .eq("event_id", eventId)
+    .eq("source_key", sourceKey)
+    .maybeSingle();
+  if (existing) {
+    return {
+      success: true,
+      already: true,
+    };
+  }
+
+  const { error } = await supabase.from("tasks").insert({
+    event_id: eventId,
+    title,
+    detail: risk.mitigation ?? null,
+    // A risk is reader-facing advice, so it belongs with the detail that shapes the day.
+    phase: "detail",
+    due_date: risk.due ?? null,
+    source: "generated" as const,
+    source_key: sourceKey,
+    derivation: { kind: "risk", rule: ruleId, why: risk.derivation },
+    sort: 0,
+  });
+  if (error) {
+    console.error("[addRiskToChecklistAction] insert failed:", error);
+    return { error: `Could not add the task: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}/seating`);
+  return { success: true };
+}
+
 export interface StatusResult {
   success?: boolean;
   error?: string;
@@ -197,4 +271,90 @@ export async function deleteTaskAction(
 
   revalidatePath(`/events/${eventId}/checklist`);
   return { success: true };
+}
+
+/**
+ * Take back a delete inside the undo window. Clearing the tombstone restores the row as it was —
+ * status, title and derivation are untouched by the delete — and the partial unique index lets
+ * its key live again because the row is no longer tombstoned.
+ */
+export async function restoreTaskAction(
+  eventId: string,
+  taskId: string
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const { error } = await supabase
+    .from("tasks")
+    .update({ deleted_at: null })
+    .eq("id", taskId)
+    .eq("event_id", eventId);
+  if (error) {
+    console.error("[restoreTaskAction] update failed:", error);
+    return { error: `Could not undo the delete: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  return { success: true };
+}
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Move the open work into the week ahead (6.3.5).
+ *
+ * Only todo and waiting rows move, and only when their date is missing or beyond the window. A
+ * task already due tomorrow is left where it is — pulling it forward would lose the date someone
+ * chose — and the window is capped at a week from now so a stale tab cannot drag the list into
+ * the past.
+ */
+export async function moveOpenToThisWeekAction(
+  eventId: string,
+  weekEnd: string
+): Promise<{ success?: boolean; error?: string; moved?: number }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const target = weekEnd.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(target)) {
+    return { error: "That is not a date we can move a task to." };
+  }
+  const horizon = new Date(Date.now() + 7 * DAY_MS).toISOString().slice(0, 10);
+  const date = target < horizon ? target : horizon;
+
+  const { data: open, error: readError } = await supabase
+    .from("tasks")
+    .select("id, due_date")
+    .eq("event_id", eventId)
+    .is("deleted_at", null)
+    .in("status", ["todo", "waiting"]);
+  if (readError) {
+    console.error("[moveOpenToThisWeekAction] read failed:", readError);
+    return { error: `Could not read the list: ${readError.message}` };
+  }
+
+  const ids = (open ?? [])
+    .filter((t) => !t.due_date || t.due_date > date)
+    .map((t) => t.id);
+  if (ids.length === 0) return { success: true, moved: 0 };
+
+  const { error } = await supabase
+    .from("tasks")
+    .update({ due_date: date })
+    .eq("event_id", eventId)
+    .in("id", ids);
+  if (error) {
+    console.error("[moveOpenToThisWeekAction] update failed:", error);
+    return { error: `Could not move the tasks: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  return { success: true, moved: ids.length };
 }

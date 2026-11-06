@@ -23,6 +23,8 @@ import type { StudioEngine } from "@ariya/studio";
 import { useStudioEngine } from "@/features/seating/hall/useStudioEngine";
 import {
   deleteTaskAction,
+  moveOpenToThisWeekAction,
+  restoreTaskAction,
   seedChecklistAction,
   setTaskStatusAction,
 } from "@/features/checklist/actions";
@@ -162,6 +164,17 @@ export function ChecklistClient({
   const done = tasks.filter((t) => t.status === "done").length;
   const total = tasks.length;
 
+  // Rows the one-tap move would actually touch: open, and dated past the window or not at all.
+  const openBeyondWeek = useMemo(
+    () =>
+      tasks.filter(
+        (t) =>
+          (t.status === "todo" || t.status === "waiting") &&
+          (!t.dueDate || t.dueDate > weekEnd)
+      ).length,
+    [tasks, weekEnd]
+  );
+
   const currentPhase = useMemo<Phase>(() => {
     const phase = PHASE_ORDER.find((p) =>
       visible.some((t) => t.phase === p && t.status !== "done")
@@ -228,14 +241,45 @@ export function ChecklistClient({
     async (task: ChecklistTask) => {
       setTasks((list) => list.filter((t) => t.id !== task.id));
       const result = await deleteTaskAction(eventId, task.id);
-      setToast(
-        result.error
-          ? { kind: "error", message: result.error }
-          : { kind: "info", message: "Deleted. It will not come back." }
-      );
+      if (result.error) {
+        setTasks((list) =>
+          list.some((t) => t.id === task.id) ? list : [...list, task]
+        );
+        setToast({ kind: "error", message: result.error });
+        return;
+      }
+      setToast({
+        kind: "undo",
+        message: "Deleted",
+        undo: async () => {
+          const back = await restoreTaskAction(eventId, task.id);
+          if (back.success) {
+            setTasks((list) =>
+              list.some((t) => t.id === task.id) ? list : [...list, task]
+            );
+          }
+        },
+      });
     },
     [eventId]
   );
+
+  const moveToThisWeek = useCallback(async () => {
+    const result = await moveOpenToThisWeekAction(eventId, weekEnd);
+    if (result.error) {
+      setToast({ kind: "error", message: result.error });
+      return;
+    }
+    if (result.moved === 0) {
+      setToast({
+        kind: "info",
+        message: "Everything open is already this week.",
+      });
+      return;
+    }
+    // The new dates come back with the revalidated page; a refetch here would race the reload.
+    window.location.reload();
+  }, [eventId, weekEnd]);
 
   if (!data.seeded && (seeding || seedAttempted || tasks.length === 0)) {
     return (
@@ -300,6 +344,15 @@ export function ChecklistClient({
               {f.label}
             </button>
           ))}
+          {openBeyondWeek > 0 && (
+            <button
+              type="button"
+              onClick={() => void moveToThisWeek()}
+              className="shrink-0 rounded-full border border-gold/60 bg-gold/10 px-3.5 py-2 text-xs font-semibold text-night hover:bg-gold/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-ink"
+            >
+              Move {openBeyondWeek} open to this week
+            </button>
+          )}
         </div>
       </div>
 
