@@ -129,7 +129,7 @@ function ConsentPage({ children }: { children: React.ReactNode }) {
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="w-full max-w-md rounded-[28px] border border-wine/10 bg-surface-container-lowest p-7 text-center shadow-[0_18px_50px_-30px_rgba(28,7,13,0.4)]">
+    <div className="w-full max-w-md rounded-[28px] border border-hairline bg-white/40 p-7 text-center shadow-[0_24px_48px_-30px_rgba(42,10,20,0.4)] backdrop-blur-sm">
       <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-wine/10 text-wine">
         <Icon name="error" size={20} />
       </span>
