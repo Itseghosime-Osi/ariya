@@ -5,6 +5,9 @@ export type TaskStatus = "todo" | "waiting" | "done" | "skipped";
 /** Where a row came from: the template, a rule that fired on this plan, or the host's own typing. */
 export type ChecklistTaskSource = "template" | "generated" | "manual";
 
+/** A risk-added row's source_key is this prefix plus the rule's own id (5.2.3). */
+export const RISK_KEY_PREFIX = "risk:";
+
 /** The derivation the generator writes: why a row exists, as data rather than a sentence. */
 export interface TaskDerivation {
   kind?: string;

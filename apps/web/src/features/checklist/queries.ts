@@ -5,11 +5,41 @@ import type { HallLayout } from "@/features/seating/hall/model";
 import type { Phase } from "@ariya/studio";
 import {
   PHASE_ORDER,
+  RISK_KEY_PREFIX,
   type ChecklistData,
   type ChecklistTask,
   type ChecklistTaskSource,
   type TaskStatus,
 } from "./types";
+
+/**
+ * The rule ids that already have a live checklist row, so the risk panel can show "on the
+ * checklist" after a reload rather than offering to add the same one twice.
+ */
+export async function getAddedRiskIds(eventId: string): Promise<string[]> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("source_key")
+    .eq("event_id", cleanId)
+    .like("source_key", `${RISK_KEY_PREFIX}%`)
+    .is("deleted_at", null);
+
+  if (error) {
+    console.error("[getAddedRiskIds] Database error loading tasks:", {
+      code: error.code,
+      message: error.message,
+    });
+    return [];
+  }
+
+  return (data ?? [])
+    .map((t) => t.source_key?.slice(RISK_KEY_PREFIX.length))
+    .filter((id): id is string => Boolean(id));
+}
 
 /**
  * The checklist page's rows, the event it belongs to, and the plan facts the generator reads.
