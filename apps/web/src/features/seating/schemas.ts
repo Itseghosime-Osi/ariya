@@ -287,6 +287,9 @@ export const hallLayoutSchema = z.object({
         chair: chairTypeSchema.optional(),
         seat: z.enum(["guest", "couple", "celebrant", "couch"]).optional(),
         seats: z.number().int().min(1).max(4).optional(),
+        cover: hexColour.optional(),
+        sash: hexColour.nullable().optional(),
+        stageId: z.string().min(1).max(40).optional(),
       })
     )
     .max(HALL_MAX_CHAIRS),
@@ -313,7 +316,15 @@ export const hallLayoutSchema = z.object({
       z.object({
         id: z.string().min(1).max(40),
         stageId: z.string().min(1).max(40),
-        kind: z.enum(["podium", "lectern", "arch"]),
+        kind: z.enum([
+          "podium",
+          "lectern",
+          "arch",
+          "couch",
+          "table",
+          "cake",
+          "screen",
+        ]),
         across: z.number().min(-0.5).max(0.5),
         depth: z.number().min(0).max(1),
         label: z.string().max(60).optional(),

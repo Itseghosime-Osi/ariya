@@ -51,6 +51,7 @@ import {
   areaPerDiner,
   SPACING_GAP,
   ZONE_DEFAULTS,
+  chairPlacement,
   chairPositions,
   chairType,
   clamp,
@@ -242,6 +243,17 @@ const TABLE_ROWS: { key: string; label: string; n: number; perRow: number }[] =
     { key: "block6", label: "2 rows of 3", n: 6, perRow: 3 },
     { key: "block12", label: "3 rows of 4", n: 12, perRow: 4 },
   ];
+
+/** The words a host would use, for the line that confirms what was just added. */
+const STAGE_ITEM_WORD: Record<StageItem["kind"], string> = {
+  podium: "A podium",
+  lectern: "A lectern",
+  arch: "An arch",
+  couch: "A couch",
+  table: "A table",
+  cake: "A cake table",
+  screen: "A screen",
+};
 
 interface HallStudioProps {
   eventId: string;
@@ -728,16 +740,20 @@ export function HallStudio({
         })),
         style: styleOf(layout, t.id),
       })),
-      chairs: layout.chairs.map((c) => ({
-        id: c.id,
-        x: c.x,
-        y: c.y,
-        rot: c.rot,
-        type: chairType(c.chair ?? layout.decor.chair),
-        cover: layout.decor.cover,
-        sash: layout.decor.sash,
-        seat: c.seat ?? "guest",
-      })),
+      chairs: layout.chairs.map((c) => {
+        const at = chairPlacement(c, layout.zones);
+        return {
+          id: c.id,
+          x: at.x,
+          y: at.y,
+          rot: at.yaw,
+          lift: at.lift,
+          type: chairType(c.chair ?? layout.decor.chair),
+          cover: c.cover ?? layout.decor.cover,
+          sash: c.sash !== undefined ? c.sash : layout.decor.sash,
+          seat: c.seat ?? "guest",
+        };
+      }),
       selection,
       tool,
       labels,
@@ -964,7 +980,21 @@ export function HallStudio({
           }),
           chairs: l.chairs.map((c) => {
             const m = chairs.get(c.id);
-            return m ? { ...c, x: round2(m.x), y: round2(m.y) } : c;
+            if (!m) return c;
+            // The hall reports room metres; a staged chair stores metres from its stage's
+            // top-left, so turn the drag back into stage space.
+            const stage = c.stageId
+              ? l.zones.find((z) => z.id === c.stageId)
+              : undefined;
+            if (!stage) return { ...c, x: round2(m.x), y: round2(m.y) };
+            const rot = (-(stage.rot ?? 0) * Math.PI) / 180;
+            const dx = m.x - stage.x;
+            const dy = m.y - stage.y;
+            return {
+              ...c,
+              x: round2(dx * Math.cos(rot) - dy * Math.sin(rot) + stage.w / 2),
+              y: round2(dx * Math.sin(rot) + dy * Math.cos(rot) + stage.h / 2),
+            };
           }),
           venue: acs.size
             ? {
@@ -1118,8 +1148,12 @@ export function HallStudio({
   };
 
   /** Put a podium, lectern or arch on a stage. It moves when the stage moves. */
-  const addStageItem = (kind: StageItem["kind"]) => {
-    const stage = layout.zones.find((z) => z.kind === "stage");
+  const addStageItem = (kind: StageItem["kind"], onStageId?: string) => {
+    // Read the stage from the live layout, not this render's copy: the stage it names may have
+    // been added moments ago, and attaching to the version before that edit loses the fixture.
+    const stage = hall.latest.current.zones.find((z) =>
+      onStageId ? z.id === onStageId : z.kind === "stage"
+    );
     if (!stage) {
       say("Add a stage first, then the items go on it.");
       return;
@@ -1130,17 +1164,36 @@ export function HallStudio({
       kind,
       // A podium stands at the left of the stage, a lectern at the right, an arch in the middle.
       across: kind === "podium" ? -0.28 : kind === "lectern" ? 0.28 : 0,
-      depth: 0.7,
+      // A backdrop sits at the back; anything a host uses stands near the front.
+      depth: kind === "arch" || kind === "screen" ? 0.85 : 0.6,
     };
     updateLayout((l) => ({ ...l, stageItems: [...l.stageItems, item] }));
     setSelection([{ type: "zone", id: stage.id }]);
-    say(`${kind[0].toUpperCase()}${kind.slice(1)} added to the stage`);
+    // Otherwise the stage top is a speck from the whole-room view and the host cannot see it land.
+    // `frame` aims at the centre of the area, and a zone's x and y are already its centre.
+    view3d.current?.frame({
+      x: stage.x,
+      y: stage.y,
+      w: stage.w,
+      h: stage.h,
+      height: stage.height ?? 0.8,
+    });
+    say(`${STAGE_ITEM_WORD[kind]} added to the stage`);
   };
 
   const addZone = (g: (typeof ZONE_GALLERY)[number]) => {
     const def = ZONE_DEFAULTS[g.kind];
+    // The custom variants below carry their own `kind`, so they go before `kind` so it always
+    // wins; spreading them after would turn every gallery entry into a custom block.
+    const custom =
+      g.kind === "custom"
+        ? g.label === "Custom table"
+          ? { variant: "table" as const, height: 0.76 }
+          : { variant: "block" as const, height: 1 }
+        : {};
     const z: Zone = {
       id: zoneId(),
+      ...custom,
       kind: g.kind,
       label:
         g.kind === "dance"
@@ -1150,17 +1203,12 @@ export function HallStudio({
               ? "Custom table"
               : "Item"
             : def.label,
-      x: round2(layout.width / 2),
-      y: round2(layout.length / 2),
+      x: round2(hall.latest.current.width / 2),
+      y: round2(hall.latest.current.length / 2),
       w: g.w ?? def.w,
       h: g.h ?? def.h,
       ...(g.shape ? { shape: g.shape } : {}),
       ...(g.kind === "stage" ? { height: 0.8 } : {}),
-      ...(g.kind === "custom"
-        ? g.label === "Custom table"
-          ? { variant: "table" as const, height: 0.76 }
-          : { variant: "block" as const, height: 1 }
-        : {}),
     };
     updateLayout((l) => ({ ...l, zones: [...l.zones, z] }));
     setSelection([{ type: "zone", id: z.id }]);
@@ -2667,6 +2715,7 @@ export function HallStudio({
                         stageItems: l.stageItems.filter((s) => s.id !== id),
                       }))
                     }
+                    onAddStageItem={(kind) => addStageItem(kind, selZone.id)}
                   />
                 ) : selChair ? (
                   <ChairInspector

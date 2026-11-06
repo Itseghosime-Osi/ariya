@@ -101,6 +101,15 @@ export interface FreeChair {
   seat?: SeatKind;
   /** How many people it holds: two on a couple's seat or a couch, one otherwise. */
   seats?: number;
+  /** Its own fabric colour, overriding the room's. Absent means follow the décor. */
+  cover?: string;
+  /** Its own sash colour, overriding the room's. Absent means follow the décor. */
+  sash?: string | null;
+  /**
+   * A stage it stands on, so it rides with the stage and is lifted onto its deck. Absent means it
+   * stands on the floor. `x` and `y` are then metres from the stage's top-left, not the room's.
+   */
+  stageId?: string;
 }
 
 /** A named group of items the host can select and move as one. */
@@ -110,11 +119,18 @@ export interface ItemGroup {
   items: { type: "table" | "zone" | "chair"; id: string }[];
 }
 
-/** A fixture that belongs to a stage and moves with it: a podium, a lectern, an arch. */
+/**
+ * Things a stage can carry: the speaker's furniture, the ceremony's backdrop, and the tables a
+ * host actually puts up there — a cake table, a gift table, the couple's sofa, a screen.
+ */
+export type StageItemKind =
+  "podium" | "lectern" | "arch" | "couch" | "table" | "cake" | "screen";
+
+/** A fixture that belongs to a stage and moves with it. */
 export interface StageItem {
   id: string;
   stageId: string;
-  kind: "podium" | "lectern" | "arch";
+  kind: StageItemKind;
   /** −0.5 to 0.5 across the stage, left to right. */
   across: number;
   /** 0 at the stage's front edge, 1 at its back. */
@@ -853,6 +869,30 @@ export function zoneFootprint(z: Zone): Footprint {
     hw: z.w / 2,
     hh: z.h / 2,
     rot: z.rot ?? 0,
+  };
+}
+
+/**
+ * Where a chair actually stands. A chair on a stage stores its position relative to that stage
+ * (metres from its top-left) so moving or rotating the stage carries the chair with it; without a
+ * stage the position is already in room metres.
+ */
+export function chairPlacement(
+  chair: FreeChair,
+  zones: Zone[]
+): { x: number; y: number; yaw: number; lift: number } {
+  const stage = chair.stageId
+    ? zones.find((z) => z.id === chair.stageId)
+    : undefined;
+  if (!stage) return { x: chair.x, y: chair.y, yaw: chair.rot, lift: 0 };
+  const rot = ((stage.rot ?? 0) * Math.PI) / 180;
+  const dx = chair.x - stage.w / 2;
+  const dy = chair.y - stage.h / 2;
+  return {
+    x: stage.x + dx * Math.cos(rot) - dy * Math.sin(rot),
+    y: stage.y + dx * Math.sin(rot) + dy * Math.cos(rot),
+    yaw: chair.rot + (stage.rot ?? 0),
+    lift: stage.height ?? 0.8,
   };
 }
 

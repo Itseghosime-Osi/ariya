@@ -189,6 +189,8 @@ export function useHallLayout({
 
   return {
     layout,
+    /** The latest layout, including edits made since the last render. */
+    latest: current,
     update,
     replace,
     remember,

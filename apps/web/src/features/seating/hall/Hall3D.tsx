@@ -121,6 +121,8 @@ export interface HallMessage {
   /** A floor point, in metres, for a placement. */
   x?: number;
   y?: number;
+  /** An area to frame, in metres, with the height of its top surface. */
+  at?: { x: number; y: number; w: number; h: number; height: number };
   pct?: number;
   view?: "top" | "3d";
   /** Whether the rain is falling, reported back after a `rain` command. */
@@ -130,6 +132,14 @@ export interface HallMessage {
 export interface Hall3DHandle {
   command: (cmd: HallCommand) => void;
   focus: (key: string) => void;
+  /** Frame an area of the hall at its own height, so a stage's top is what you look at. */
+  frame: (at: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    height: number;
+  }) => void;
 }
 
 /**
@@ -167,6 +177,7 @@ export const Hall3D = forwardRef<
     () => ({
       command: (cmd) => send({ t: "cmd", cmd }),
       focus: (key) => send({ t: "cmd", cmd: "focus", key }),
+      frame: (at) => send({ t: "cmd", cmd: "frame", at }),
     }),
     [send]
   );

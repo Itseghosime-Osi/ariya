@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   areaPerDiner,
+  chairPlacement,
   chairPositions,
   footprint,
   defaultLayout,
@@ -309,5 +310,54 @@ describe("autoArrange", () => {
   it("reports tables that do not fit", () => {
     const r = autoArrange(defaultLayout(12, 10), tables(40), 0.6);
     expect(r.unplaced.length).toBeGreaterThan(0);
+  });
+});
+
+describe("chairPlacement", () => {
+  const stage: Zone = {
+    id: "st",
+    kind: "stage",
+    label: "Stage",
+    x: 15,
+    y: 2,
+    w: 8,
+    h: 4,
+    rot: 0,
+    height: 0.9,
+  };
+
+  it("leaves a chair on the floor exactly where it is stored", () => {
+    const at = chairPlacement({ id: "c", x: 3, y: 4, rot: 45 }, [stage]);
+    expect(at).toEqual({ x: 3, y: 4, yaw: 45, lift: 0 });
+  });
+
+  it("places a staged chair from the stage's own centre and lifts it to the deck", () => {
+    // The middle of the stage, stored as metres from its top-left.
+    const at = chairPlacement({ id: "c", x: 4, y: 2, rot: 0, stageId: "st" }, [
+      stage,
+    ]);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(2);
+    expect(at.lift).toBe(0.9);
+  });
+
+  it("carries a staged chair with the stage when it rotates", () => {
+    // A quarter turn puts a chair stored to the right of centre at the bottom instead.
+    const turned = { ...stage, rot: 90 };
+    const at = chairPlacement({ id: "c", x: 6, y: 2, rot: 0, stageId: "st" }, [
+      turned,
+    ]);
+    expect(at.x).toBeCloseTo(15);
+    expect(at.y).toBeCloseTo(4);
+    // The chair turns with the room, so it still faces the audience.
+    expect(at.yaw).toBe(90);
+  });
+
+  it("falls back to the stored position when the stage is gone", () => {
+    const at = chairPlacement(
+      { id: "c", x: 4, y: 2, rot: 0, stageId: "missing" },
+      [stage]
+    );
+    expect(at).toEqual({ x: 4, y: 2, yaw: 0, lift: 0 });
   });
 });

@@ -621,7 +621,8 @@ function rebuildInstances() {
     const item = items.get("chair:" + c.id);
     if (!item) continue;
     const o = item.obj;
-    const m = mat(o.position.x, 0, o.position.z, o.rotation.y);
+    // `lift` is the deck a chair stands on, so a chair on a stage is not sunk into it.
+    const m = mat(o.position.x, c.lift || 0, o.position.z, o.rotation.y);
     if (c.seat === "couch") pushCouch(m, c.cover);
     else pushChair(m, c.type, c.cover, c.sash, null);
   }
@@ -2051,6 +2052,68 @@ function buildStageItem(item, stage) {
       f.scale.setScalar(1.6);
       g.add(f);
     }
+  } else if (item.kind === "couch") {
+    // The couple's sofa: a seat, a back and two arms, in the room's cover colour.
+    const w = Math.min(stage.w * 0.4, 2.2);
+    const seatH = 0.42;
+    const seat = new THREE.Mesh(
+      new THREE.BoxGeometry(w, seatH, 0.85),
+      M.fabric.clone()
+    );
+    seat.position.y = seatH / 2;
+    seat.castShadow = true;
+    g.add(seat);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(w, 0.55, 0.18), M.fabric);
+    back.position.set(0, seatH + 0.275, -0.335);
+    g.add(back);
+    for (const side of [-1, 1]) {
+      const arm = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.3, 0.85),
+        M.fabric
+      );
+      arm.position.set((side * (w - 0.18)) / 2, seatH + 0.15, 0);
+      g.add(arm);
+    }
+  } else if (item.kind === "table" || item.kind === "cake") {
+    const round = item.kind === "cake";
+    const r = round ? 0.5 : 0.75;
+    const top = new THREE.Mesh(
+      round
+        ? new THREE.CylinderGeometry(r, r, 0.06, 24)
+        : new THREE.BoxGeometry(r * 2, 0.06, r * 2),
+      M.fabric.clone()
+    );
+    top.position.y = 0.75;
+    top.castShadow = true;
+    g.add(top);
+    for (const [sx, sz] of [
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1],
+    ]) {
+      const leg = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.75, 0.05),
+        M.wood
+      );
+      leg.position.set((sx * r) / 1.4, 0.375, (sz * r) / 1.4);
+      g.add(leg);
+    }
+    if (round) {
+      const cake = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.22, 0.3, 20),
+        M.porcelain
+      );
+      cake.position.y = 0.93;
+      g.add(cake);
+    }
+  } else if (item.kind === "screen") {
+    const w = Math.min(stage.w * 0.5, 3);
+    const h = 1.7;
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.06), M.hit);
+    panel.position.set(0, h / 2 + 0.1, -0.1);
+    panel.castShadow = true;
+    g.add(panel);
   } else {
     const w = item.kind === "podium" ? 0.7 : 0.5;
     const h = item.kind === "podium" ? 1.1 : 1.15;
@@ -2105,6 +2168,8 @@ function syncStageItems() {
     // The stage's own rotation turns the item with it, so "left of the stage" stays left.
     const rot = -(stage.rot ?? 0) * DEG;
     const dx = item.across * stage.w;
+    // `stage.y` is the zone's centre, the same as every other box, so depth 0 sits on the front
+    // edge and depth 1 on the back edge.
     const dz = (item.depth - 0.5) * stage.h;
     entry.obj.position.set(
       stage.x + dx * Math.cos(rot) - dz * Math.sin(rot),
@@ -2193,7 +2258,8 @@ function syncTables() {
       item = { type: "chair", id: c.id, obj };
       items.set(k, item);
     }
-    item.obj.position.set(c.x, 0, c.y);
+    // The pick box rises with the chair, or a chair on a stage is unclickable from above the deck.
+    item.obj.position.set(c.x, c.lift || 0, c.y);
     item.obj.rotation.y = -c.rot * DEG;
   }
   for (const [k, item] of items)
@@ -2504,7 +2570,7 @@ function syncSelection() {
 
 // ---------------------------------------------------------------- camera
 
-const cam = { tx: 15, tz: 10, az: 0, pol: 0.95, dist: 50 };
+const cam = { tx: 15, ty: 0, tz: 10, az: 0, pol: 0.95, dist: 50 };
 let goal = null;
 let fitDist = 50;
 
@@ -2515,10 +2581,10 @@ function maxPolar(dist) {
 
 function applyCamera() {
   cam.pol = Math.min(cam.pol, maxPolar(cam.dist));
-  const { tx, tz, az, pol, dist } = cam;
+  const { tx, ty, tz, az, pol, dist } = cam;
   camera.position.set(
     tx + dist * Math.sin(pol) * Math.sin(az),
-    dist * Math.cos(pol),
+    ty + dist * Math.cos(pol),
     tz + dist * Math.sin(pol) * Math.cos(az)
   );
   const f = new THREE.Vector3(-Math.sin(az), 0, -Math.cos(az));
@@ -2528,7 +2594,7 @@ function applyCamera() {
       .add(new THREE.Vector3(0, Math.sin(pol), 0))
       .normalize()
   );
-  camera.lookAt(tx, 0, tz);
+  camera.lookAt(tx, ty, tz);
   camera.near = Math.max(0.05, dist / 200);
   camera.far = dist * 20 + 200;
   camera.updateProjectionMatrix();
@@ -2643,6 +2709,7 @@ function fitView(pol = cam.pol) {
   fitDist = hallFitDistance(pol);
   tweenTo({
     tx: L.width / 2,
+    ty: 0,
     tz: L.length / 2 + (pol < 0.1 ? 0 : 0.6),
     pol,
     dist: fitDist,
@@ -3092,6 +3159,17 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     const moving = state.selection
       .map((s) => items.get(s.type + ":" + s.id))
       .filter(Boolean);
+    // A chair set on a stage travels with it, so dragging the stage does not leave it behind.
+    const staged = new Set(
+      state.selection.filter((s) => s.type === "zone").map((s) => s.id)
+    );
+    if (staged.size) {
+      for (const c of state.chairs) {
+        if (!c.stageId || !staged.has(c.stageId)) continue;
+        const item = items.get("chair:" + c.id);
+        if (item && !moving.includes(item)) moving.push(item);
+      }
+    }
     drag = {
       kind: "move",
       p0: floorPoint(e),
@@ -3550,9 +3628,23 @@ window.addEventListener("message", (e) => {
         if (item)
           tweenTo({
             tx: item.obj.position.x,
+            ty: item.obj.position.y || 0,
             tz: item.obj.position.z,
             dist: Math.min(cam.dist, 14),
           });
+        break;
+      }
+      case "frame": {
+        // Look at the top of an area rather than the floor, so a stage's furniture is in view.
+        const at = m.at;
+        if (!at) break;
+        const span = Math.max(at.w, at.h);
+        tweenTo({
+          tx: at.x,
+          tz: at.y,
+          ty: at.height || 0,
+          dist: Math.max(6, span * 2.6),
+        });
         break;
       }
       case "rain":
