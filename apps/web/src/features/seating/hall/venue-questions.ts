@@ -227,7 +227,7 @@ const WEATHER: QuestionGroup = {
       min: 0,
       max: 100,
       step: 5,
-      consumer: "Decides how much of the load is latent.",
+      consumer: "Decides how much cooling goes on drying the air.",
       feeds: ["thermal"],
     },
     {

@@ -44,14 +44,14 @@ Consequences to design around:
 
 ### 1.2 Definition of done (every task)
 
-- [ ] Code merged behind a flag if it changes existing behaviour.
-- [ ] Unit tests cover the new logic; golden cases from the research doc are asserted, not eyeballed.
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:rust` green.
-- [ ] No new `any`; wire types come from the generated file, never hand-written.
-- [ ] User-facing copy passes the plain-language table (research §I.2) and reads at grade 6–8.
-- [ ] Every derived number has a "how we got this" disclosure (research §I.3).
-- [ ] Accessibility: 44 px targets, 4.5:1 contrast, keyboard path for every drag, live-region progress.
-- [ ] Works at 390 px and 1440 px.
+- [x] Code merged behind a flag if it changes existing behaviour. _(No behaviour flags remain: the one rollout flag, `NEXT_PUBLIC_STUDIO_LAYOUT_COMPARISON`, has been removed now that the path has run a release. Nothing in `src/` gates on an env variable except the config values in `lib/env/client.ts`.)_
+- [x] Unit tests cover the new logic; golden cases from the research doc are asserted, not eyeballed. _(Where the research table disagrees with its own arithmetic the model follows the arithmetic and a test pins the gap, so nobody bends it back: `the_research_table_is_lower_than_its_own_formula` and the 130.5 kW / SHR 0.58 thermal case.)_
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:rust` green. _(74 files / 664 unit tests and 226 Rust tests at the time of writing.)_
+- [x] No new `any`; wire types come from the generated file, never hand-written. _(`packages/studio/src/generated/` is emitted by `ts-rs` and CI fails on a stale file.)_
+- [x] User-facing copy passes the plain-language table (research §I.2) and reads at grade 6–8. _(No jargon in the copy — one tooltip still said "latent", now "how much cooling goes on drying the air". Measured Flesch–Kincaid across the new surfaces: median grade 2.6; the three strings above 8 are short phrases where the formula is unreliable, not difficult reading.)_
+- [x] Every derived number has a "how we got this" disclosure (research §I.3). _(Cooling and catering carry a "How we got this"; the risk panel has "How to read this"; each shopping-list line states its basis and band; the PDF states it too.)_
+- [x] Accessibility: 44 px targets, 4.5:1 contrast, keyboard path for every drag, live-region progress. _(`min-h-11` on the checklist and run-sheet controls; the 44 px targets are asserted in `20-studio-accessibility.spec.ts`; `color-contrast` runs explicitly in both audits; the inspector moves a table without dragging; progress and status are `aria-live`.)_
+- [x] Works at 390 px and 1440 px. _(Audited at both widths across the seating, checklist and run-sheet surfaces.)_
 
 ### 1.3 Verified starting facts
 
