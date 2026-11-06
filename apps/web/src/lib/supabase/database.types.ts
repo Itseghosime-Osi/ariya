@@ -418,6 +418,45 @@ export type Database = {
           },
         ];
       };
+      event_weather: {
+        Row: {
+          event_id: string;
+          fetched_at: string;
+          latitude: number | null;
+          longitude: number | null;
+          payload: NonNullable<Json>;
+          resolved_name: string | null;
+          source: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          event_id: string;
+          fetched_at?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          payload: NonNullable<Json>;
+          resolved_name?: string | null;
+          source: string;
+        };
+        Update: {
+          event_id?: string;
+          fetched_at?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          payload?: NonNullable<Json>;
+          resolved_name?: string | null;
+          source?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_weather_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: true;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       events: {
         Row: {
           area: string | null;
@@ -913,6 +952,82 @@ export type Database = {
           },
         ];
       };
+      tasks: {
+        Row: {
+          completed_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          derivation: Json | null;
+          detail: string | null;
+          due_date: string | null;
+          event_id: string;
+          id: string;
+          owner_id: string | null;
+          phase: string;
+          sort: number;
+          source: string;
+          source_key: string | null;
+          status: string;
+          template_version: number | null;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          completed_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          derivation?: Json | null;
+          detail?: string | null;
+          due_date?: string | null;
+          event_id: string;
+          id?: string;
+          owner_id?: string | null;
+          phase: string;
+          sort?: number;
+          source?: string;
+          source_key?: string | null;
+          status?: string;
+          template_version?: number | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          derivation?: Json | null;
+          detail?: string | null;
+          due_date?: string | null;
+          event_id?: string;
+          id?: string;
+          owner_id?: string | null;
+          phase?: string;
+          sort?: number;
+          source?: string;
+          source_key?: string | null;
+          status?: string;
+          template_version?: number | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       vendor_tasks: {
         Row: {
           created_at: string;
@@ -1085,6 +1200,7 @@ export type Database = {
         Args: { p_decision: string; p_id: string };
         Returns: Json;
       };
+      event_is_expired: { Args: { p_date: string }; Returns: boolean };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
         Returns: {
