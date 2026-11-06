@@ -49,6 +49,10 @@ pub struct SplitUnit {
     /// them starting together will trip the generator.
     #[serde(rename = "surgeFactor")]
     pub surge_factor: f64,
+    /// Supply airflow at the high fan setting, m³/h. This is what mixes the room: a hall with
+    /// more air moving has smaller hot spots, which is why the field model needs it.
+    #[serde(rename = "airflowM3h")]
+    pub airflow_m3h: f64,
 }
 
 impl SplitUnit {
@@ -78,6 +82,7 @@ pub const CATALOGUE: [SplitUnit; 4] = [
         shr_rated: 0.78,
         shr_humid: 0.68,
         surge_factor: 4.0,
+        airflow_m3h: 600.0,
     },
     SplitUnit {
         hp: 1.5,
@@ -88,6 +93,7 @@ pub const CATALOGUE: [SplitUnit; 4] = [
         shr_rated: 0.77,
         shr_humid: 0.67,
         surge_factor: 4.0,
+        airflow_m3h: 800.0,
     },
     SplitUnit {
         hp: 2.0,
@@ -98,6 +104,7 @@ pub const CATALOGUE: [SplitUnit; 4] = [
         shr_rated: 0.76,
         shr_humid: 0.66,
         surge_factor: 4.0,
+        airflow_m3h: 1100.0,
     },
     SplitUnit {
         hp: 2.5,
@@ -108,6 +115,7 @@ pub const CATALOGUE: [SplitUnit; 4] = [
         shr_rated: 0.75,
         shr_humid: 0.65,
         surge_factor: 3.5,
+        airflow_m3h: 1400.0,
     },
 ];
 

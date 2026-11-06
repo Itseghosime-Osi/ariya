@@ -207,6 +207,80 @@ impl Zone {
     }
 }
 
+/// How a unit is fixed to the room, which decides how far its air reaches.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub enum Mount {
+    /// High on a wall, throwing along the ceiling.
+    Wall,
+    /// In the ceiling, throwing in four directions.
+    Cassette,
+    /// Standing on the floor, which is what a hall with no wall space ends up with.
+    Floor,
+}
+
+impl Mount {
+    /// How far the supply jet carries, in metres. Research §C.6: no occupied zone should be more
+    /// than about 5–6 m from a jet, and a cassette reaches further than a wall unit.
+    pub fn throw_m(self) -> f64 {
+        match self {
+            Mount::Wall => 6.0,
+            Mount::Cassette => 8.0,
+            Mount::Floor => 5.0,
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Mount::Wall => "Wall",
+            Mount::Cassette => "Ceiling cassette",
+            Mount::Floor => "Floor standing",
+        }
+    }
+}
+
+/// One air conditioner, where the host put it.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct AcUnit {
+    pub id: String,
+    /// Centre, in metres from the top-left corner of the room.
+    pub x: f64,
+    pub y: f64,
+    /// The size, in "HP".
+    pub hp: f64,
+    pub mount: Mount,
+    /// An inverter unit starts gently, so a roomful of them does not need a bigger generator.
+    #[serde(default)]
+    pub inverter: bool,
+}
+
+/// The cooling the host has planned: the units, and the two numbers they can move.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct Cooling {
+    #[serde(default)]
+    pub units: Vec<AcUnit>,
+    /// Air changes per hour. The dominant uncertainty in the load, so it is the host's to move.
+    #[serde(default)]
+    pub ach: Option<f64>,
+    #[serde(default, rename = "targetC")]
+    pub target_c: Option<f64>,
+}
+
 /// The venue facts a plan carries. Everything is optional except the type, so a document written
 /// before the studio knew about venues still reads.
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -228,6 +302,8 @@ pub struct VenueProfile {
     #[serde(default)]
     pub climate: Option<Climate>,
     #[serde(default)]
+    pub cooling: Option<Cooling>,
+    #[serde(default)]
     pub sun: Option<Sun>,
     #[serde(default)]
     pub wind: Option<Wind>,
@@ -242,6 +318,7 @@ impl Default for VenueProfile {
             services: None,
             capacity: None,
             climate: None,
+            cooling: None,
             sun: None,
             wind: None,
         }

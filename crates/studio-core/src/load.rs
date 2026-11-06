@@ -17,8 +17,9 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "ts")]
 use ts_rs::TS;
 
+use crate::field::{self, Field};
 use crate::units::{self, SplitUnit, DERATE};
-use crate::venue::VenueType;
+use crate::venue::{AcUnit, VenueType, Zone};
 
 /// Standard atmospheric pressure, in pascals. Lagos is near sea level; the model ignores altitude.
 pub const P_ATM: f64 = 101_325.0;
@@ -335,6 +336,49 @@ pub fn size(loads: &Loads, unit: SplitUnit, derate: f64) -> Sizing {
     }
 }
 
+/// What a set of units delivers, once the sun and the coil are accounted for. The sized set and
+/// the placed set both reduce to this, so the prediction cannot disagree with the map.
+#[derive(Clone, Copy, Debug)]
+pub struct Delivered {
+    pub count: u32,
+    pub sensible_kw: f64,
+    pub latent_kw: f64,
+    pub input_kw: f64,
+    pub surge_kw: f64,
+}
+
+impl Sizing {
+    fn delivered(&self) -> Delivered {
+        Delivered {
+            count: self.count,
+            sensible_kw: self.delivered_sensible_kw,
+            latent_kw: self.delivered_latent_kw,
+            input_kw: self.input_kw,
+            surge_kw: self.surge_kw,
+        }
+    }
+}
+
+/// What the units the host has actually placed deliver. Mixed sizes are allowed; the count is how
+/// many are on the wall, which is the number the host can see.
+pub fn placed_delivered(units: &[AcUnit], derate: f64) -> Delivered {
+    let mut d = Delivered {
+        count: units.len() as u32,
+        sensible_kw: 0.0,
+        latent_kw: 0.0,
+        input_kw: 0.0,
+        surge_kw: 0.0,
+    };
+    for u in units {
+        let unit = units::for_hp(u.hp);
+        d.sensible_kw += unit.installed_sensible_kw(derate);
+        d.latent_kw += unit.installed_latent_kw(derate);
+        d.input_kw += unit.input_kw;
+        d.surge_kw += unit.input_kw * unit.surge_factor;
+    }
+    d
+}
+
 /// What the room does with that set running flat out.
 #[cfg_attr(feature = "ts", derive(TS))]
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -362,17 +406,31 @@ pub struct Prediction {
 /// the leaking air are the baseline the room drifts back to, and the cooling is what holds it
 /// short of that.
 pub fn predict(input: &LoadInput, loads: &Loads, sizing: &Sizing) -> Prediction {
+    predict_delivered(
+        input,
+        loads,
+        sizing.delivered_sensible_kw,
+        sizing.delivered_latent_kw,
+    )
+}
+
+/// The same balance, for any set of units — the sized one or the one on the wall.
+pub fn predict_delivered(
+    input: &LoadInput,
+    loads: &Loads,
+    delivered_sensible_kw: f64,
+    delivered_latent_kw: f64,
+) -> Prediction {
     let capacity = loads.ua_w_per_k + loads.mass_flow_kg_s * CP_AIR;
     let room_c = if capacity > 0.0 {
-        input.outdoor_c
-            + (loads.internal_sensible_kw - sizing.delivered_sensible_kw) * 1000.0 / capacity
+        input.outdoor_c + (loads.internal_sensible_kw - delivered_sensible_kw) * 1000.0 / capacity
     } else {
         input.outdoor_c
     };
 
     let w_in = if loads.mass_flow_kg_s > 0.0 {
         loads.w_out
-            + (loads.people_latent_kw - sizing.delivered_latent_kw) * 1000.0
+            + (loads.people_latent_kw - delivered_latent_kw) * 1000.0
                 / (loads.mass_flow_kg_s * H_FG)
     } else {
         loads.w_out
@@ -402,6 +460,9 @@ pub enum AdviceLevel {
     Damp,
     /// It would take more units than a room can hold or a generator can start.
     TooMany,
+    /// The units placed cannot hold the target — the room stays hot. Only reachable when the host
+    /// has placed fewer (or smaller) units than the room needs.
+    UnderCooled,
     /// The building cannot be closed, so there is nothing to size.
     NotViable,
 }
@@ -426,6 +487,25 @@ pub struct Advice {
     pub evaporative: bool,
 }
 
+/// What the AC set asks of the plant: the generator, and the water it pulls out of the air.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/studio/src/generated/")
+)]
+pub struct Plant {
+    /// Running draw of the whole set, kW.
+    #[serde(rename = "runningKw")]
+    pub running_kw: f64,
+    /// Draw with every compressor starting at once, kW — what trips a generator.
+    #[serde(rename = "surgeKw")]
+    pub surge_kw: f64,
+    /// Condensate the coils pull out, litres per hour. Research §C.8: this is a drain, not a tray.
+    #[serde(rename = "condensateLph")]
+    pub condensate_lph: f64,
+}
+
 /// The whole answer the studio renders.
 #[cfg_attr(feature = "ts", derive(TS))]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -439,6 +519,10 @@ pub struct ThermalReport {
     pub sizing: Option<Sizing>,
     pub prediction: Option<Prediction>,
     pub advice: Advice,
+    /// The heat map, when the host has placed units. Absent otherwise — there is nothing to map.
+    pub field: Option<Field>,
+    /// What the set asks of the generator and the drain. Absent where there is no set.
+    pub plant: Option<Plant>,
 }
 
 /// Units beyond this are not a design, whatever the arithmetic says.
@@ -446,6 +530,15 @@ pub const MAX_SENSIBLE_UNITS: u32 = 12;
 
 /// Assess a room and print a verdict with its workings.
 pub fn assess(input: &LoadInput) -> ThermalReport {
+    assess_placed(input, &[], &[])
+}
+
+/// Assess a room with the units the host has actually placed, and map where the cold lands.
+///
+/// The sizing is the same either way — it is a property of the room and the crowd. The field is
+/// only there when there are units to place, because a map of a room with no cooling is a map of
+/// the outdoors.
+pub fn assess_placed(input: &LoadInput, units: &[AcUnit], zones: &[Zone]) -> ThermalReport {
     let l = loads(input);
     let wb = wet_bulb(input.outdoor_c, input.outdoor_rh);
     let evaporative = wb < EVAPORATIVE_WET_BULB_C;
@@ -482,11 +575,48 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
             loads: l,
             sizing: None,
             prediction: None,
+            field: None,
+            plant: None,
         };
     }
 
     let sizing = size(&l, input.unit, input.derate);
-    let prediction = predict(input, &l, &sizing);
+    // What the room actually gets: the placed set if the host has placed one, else the sized set.
+    // The prediction and the map then describe the same units, so the report cannot contradict
+    // itself — a host who has placed six of the nineteen the room needs sees a hot room, not a
+    // cool one with a hot map.
+    let delivered = if units.is_empty() {
+        sizing.delivered()
+    } else {
+        placed_delivered(units, input.derate)
+    };
+    let prediction = predict_delivered(input, &l, delivered.sensible_kw, delivered.latent_kw);
+
+    // The coils pull out the latent load up to their capacity; whatever is left stays in the air.
+    // Research §C.8 quotes 22–38 L/h for 55 kW, which does not follow from its own latent heat —
+    // 55 kW is nearer 80 L/h. The model does the multiplication and lands where the physics does.
+    let latent_removed_kw = delivered.latent_kw.min(l.latent_kw);
+    let plant = Plant {
+        running_kw: delivered.input_kw,
+        surge_kw: delivered.surge_kw,
+        condensate_lph: latent_removed_kw * 1000.0 / H_FG * 3600.0,
+    };
+
+    let field = (!units.is_empty()).then(|| {
+        field::field(&field::FieldInput {
+            width: input.width,
+            length: input.length,
+            units,
+            zones,
+            headcount: input.headcount,
+            dancing: input.dancing,
+            outdoor_c: input.outdoor_c,
+            ua_w_per_k: l.ua_w_per_k,
+            mass_flow_kg_s: l.mass_flow_kg_s,
+            ambient_kw: l.solar_kw + l.lighting_kw + l.equipment_kw,
+            derate: input.derate,
+        })
+    });
 
     let mut reasons = Vec::new();
     reasons.push(format!(
@@ -503,7 +633,11 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
         round2(sizing.unit.shr_humid)
     ));
 
-    let level = if prediction.damp {
+    // A room that never reaches the target is hot, not damp, whatever its moisture content — the
+    // damp verdict is about what happens once the air is cold enough to feel it.
+    let level = if prediction.room_c > input.target_c + 1.5 {
+        AdviceLevel::UnderCooled
+    } else if prediction.damp {
         AdviceLevel::Damp
     } else if sizing.count > MAX_SENSIBLE_UNITS {
         AdviceLevel::TooMany
@@ -512,9 +646,16 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
     };
 
     let headline = match level {
+        AdviceLevel::UnderCooled => format!(
+            "{} splits would leave the room at {} °C, well above the {} °C target. The room needs about {}.",
+            delivered.count,
+            trim(prediction.room_c),
+            trim(input.target_c),
+            sizing.count
+        ),
         AdviceLevel::Damp => format!(
             "{} splits would bring the room to {} °C and {} % humidity. They chill the air but cannot dry it.",
-            sizing.count,
+            delivered.count,
             trim(prediction.room_c),
             trim(prediction.rh_in)
         ),
@@ -526,17 +667,29 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
         ),
         _ => format!(
             "{} splits should hold the room near {} °C and {} % humidity.",
-            sizing.count,
+            delivered.count,
             trim(prediction.room_c),
             trim(prediction.rh_in)
         ),
     };
 
-    if prediction.damp {
+    if level == AdviceLevel::UnderCooled {
+        let needed_kw = l.internal_sensible_kw
+            - (input.target_c - input.outdoor_c) * (l.ua_w_per_k + l.mass_flow_kg_s * CP_AIR)
+                / 1000.0;
+        reasons.push(format!(
+            "The {} units placed deliver {} kW of sensible cooling; the room needs about {} kW to hold {} °C.",
+            delivered.count,
+            trim(delivered.sensible_kw),
+            trim(needed_kw),
+            trim(input.target_c)
+        ));
+    }
+    if level == AdviceLevel::Damp {
         reasons.push(format!(
             "The room takes on {} kW of moisture; the splits can take out {}. The rest stays in the air, so it gets cold and stays damp.",
             trim(l.latent_kw),
-            trim(sizing.delivered_latent_kw)
+            trim(delivered.latent_kw)
         ));
         reasons.push(
             "The answer is a packaged unit or a chiller with outdoor air and a reheat or desiccant coil, not more splits."
@@ -552,6 +705,21 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
         ));
     }
 
+    // Where the host has placed the units, say where the room is warmest — the map is the point.
+    if let Some(f) = &field {
+        if let Some(warmest) = f.areas.first() {
+            let delta = warmest.mean_c - f.mean_c;
+            if delta >= 1.0 {
+                reasons.push(format!(
+                    "The {} runs {} K warmer than the room at {} °C, because the crowd is the load and the cold air thins out before it gets there.",
+                    warmest.label.to_lowercase(),
+                    trim(delta),
+                    trim(warmest.mean_c)
+                ));
+            }
+        }
+    }
+
     ThermalReport {
         loads: l,
         sizing: Some(sizing),
@@ -563,6 +731,8 @@ pub fn assess(input: &LoadInput) -> ThermalReport {
             wet_bulb_c: wb,
             evaporative,
         },
+        field,
+        plant: Some(plant),
     }
 }
 
@@ -580,6 +750,34 @@ fn round2(v: f64) -> f64 {
 mod tests {
     use super::*;
     use crate::units::{largest, CATALOGUE};
+    use crate::venue::{Mount, ZoneKind, ZoneShape};
+
+    fn placed_units(count: u32) -> Vec<AcUnit> {
+        (0..count)
+            .map(|i| AcUnit {
+                id: format!("ac-{i}"),
+                x: 3.0 + (i % 5) as f64 * 6.0,
+                y: 3.0 + (i / 5) as f64 * 5.0,
+                hp: 2.5,
+                mount: Mount::Wall,
+                inverter: false,
+            })
+            .collect()
+    }
+
+    fn dance_floor() -> Zone {
+        Zone {
+            id: "dance".into(),
+            kind: ZoneKind::Dance,
+            label: "Dance floor".into(),
+            x: 15.0,
+            y: 10.0,
+            w: 8.0,
+            h: 8.0,
+            shape: Some(ZoneShape::Round),
+            rot: None,
+        }
+    }
 
     /// The worked example from research §C.5: 30 × 20 × 5 m, 300 guests, Lagos.
     fn worked_example() -> LoadInput {
@@ -769,5 +967,79 @@ mod tests {
         let s = size(&l, largest(), DERATE);
         let p = predict(&i, &l, &s);
         assert!(p.room_c.is_finite() && p.w_in.is_finite());
+    }
+
+    /// Research §C.8: the set draws ~42 kW running and ~146 kW starting, and the coils pull out
+    /// enough water to need a drain, not a tray.
+    #[test]
+    fn the_plant_reports_the_generator_and_the_drain() {
+        let report = assess(&worked_example());
+        let plant = report.plant.expect("a sized hall has a plant");
+        assert!((plant.running_kw - 41.8).abs() < 0.5, "{}", plant.running_kw);
+        assert!((plant.surge_kw - 146.3).abs() < 1.0, "{}", plant.surge_kw);
+        // 41.1 kW of latent removal is ~60 L/h. The research's 22–38 L/h does not follow from its
+        // own 55 kW; the model does the multiplication.
+        assert!(
+            (plant.condensate_lph - 60.0).abs() < 5.0,
+            "{} L/h",
+            plant.condensate_lph
+        );
+    }
+
+    #[test]
+    fn a_room_with_no_units_has_no_heat_map() {
+        let report = assess(&worked_example());
+        assert!(report.field.is_none(), "nothing placed, nothing to map");
+    }
+
+    #[test]
+    fn a_placed_set_puts_a_heat_map_in_the_report() {
+        let units = placed_units(19);
+        let zones = vec![dance_floor()];
+        let report = assess_placed(&worked_example(), &units, &zones);
+        let f = report.field.expect("placed units get a map");
+        assert_eq!(f.cols, 60);
+        assert_eq!(f.rows, 40);
+        assert_eq!(f.areas[0].id, "dance", "the dance floor is warmest");
+        assert!(
+            report
+                .advice
+                .reasons
+                .iter()
+                .any(|r| r.contains("dance floor")),
+            "the verdict names the warmest place: {:?}",
+            report.advice.reasons
+        );
+    }
+
+    /// A host who has placed six of the nineteen the room needs is told the room is hot, not that
+    /// it is damp — and the map agrees with the prediction, because both describe the same six.
+    #[test]
+    fn too_few_units_reads_as_under_cooled_not_damp() {
+        let report = assess_placed(&worked_example(), &placed_units(6), &[]);
+        assert_eq!(report.advice.level, AdviceLevel::UnderCooled);
+        assert!(
+            report.advice.headline.contains("above the 24 °C target"),
+            "{}",
+            report.advice.headline
+        );
+        let p = report.prediction.expect("a placed set gets a prediction");
+        assert!(p.room_c > 40.0, "{} °C", p.room_c);
+        let f = report.field.expect("a placed set gets a map");
+        assert!(
+            (f.mean_c - p.room_c).abs() < 1.0,
+            "map {} vs prediction {}",
+            f.mean_c,
+            p.room_c
+        );
+    }
+
+    #[test]
+    fn a_marquee_gets_no_heat_map_even_with_units_placed() {
+        let mut i = LoadInput::new(30.0, 20.0, 5.0, VenueType::Marquee);
+        i.headcount = 300;
+        let report = assess_placed(&i, &placed_units(19), &[]);
+        assert!(report.field.is_none());
+        assert!(report.plant.is_none());
     }
 }

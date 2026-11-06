@@ -6,6 +6,7 @@
 //! database or the clock.
 
 pub mod archetype;
+pub mod field;
 pub mod fit;
 pub mod geometry;
 pub mod grid;
