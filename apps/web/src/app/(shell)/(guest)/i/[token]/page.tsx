@@ -99,7 +99,7 @@ export default async function GuestInvitationPage({
     (state === "active" || state === "revise" || state === "already_replied");
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-ivory flex flex-col justify-between py-10 px-4 sm:px-6">
       {showFilm && data && film && (
         <FilmGate
           design={film}

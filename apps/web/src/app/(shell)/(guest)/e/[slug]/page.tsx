@@ -92,7 +92,7 @@ export default async function PublicCelebrationPage({
   const film = readFilmDesign(event.filmDesign);
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between py-8 px-4 sm:px-6 antialiased">
+    <div className="min-h-screen bg-ivory flex flex-col justify-between py-8 px-4 sm:px-6 antialiased">
       {film.enabled && (
         <FilmGate
           design={film}
