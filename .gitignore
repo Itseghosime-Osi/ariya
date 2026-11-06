@@ -60,3 +60,11 @@ AGENTS.md
 *.zip
 backup-*.sql
 *.dump
+
+# Local browser-test scratch
+/.eval.json
+/.snapshot.txt
+
+# Claude Code local state; worktrees/ holds a full nested checkout
+.claude/worktrees/
+.claude/settings.local.json
