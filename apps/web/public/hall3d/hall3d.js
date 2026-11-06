@@ -3649,8 +3649,21 @@ window.addEventListener("message", (e) => {
         // Where things really are in the scene, in metres, so a test can read the drawn room
         // instead of judging a picture of it.
         const r = (n) => Math.round(n * 100) / 100;
+        // Where a point of the room lands on the page, so a test can aim a real pointer at it.
+        const rect = renderer.domElement.getBoundingClientRect();
+        const onScreen = (x, y, z) => {
+          const v = new THREE.Vector3(x, y, z).project(camera);
+          return {
+            sx: Math.round(rect.left + ((v.x + 1) / 2) * rect.width),
+            sy: Math.round(rect.top + ((1 - v.y) / 2) * rect.height),
+          };
+        };
         post({
           t: "inspect",
+          points: (m.points || []).map((p) => ({
+            ...p,
+            ...onScreen(p.x, p.y || 0, p.z),
+          })),
           stageItems: [...stageCache].map(([id, e]) => ({
             id,
             x: r(e.obj.position.x),
@@ -3665,6 +3678,12 @@ window.addEventListener("message", (e) => {
               x: r(i.obj.position.x),
               y: r(i.obj.position.y),
               z: r(i.obj.position.z),
+              // The middle of its pick box, which is what a pointer has to land on.
+              ...onScreen(
+                i.obj.position.x,
+                i.obj.position.y + 0.5,
+                i.obj.position.z
+              ),
             })),
         });
         break;
