@@ -56,7 +56,7 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
 
   return (
     <div className="w-full max-w-lg">
-      <div className="rounded-[28px] border border-wine/10 bg-surface-container-lowest p-7 shadow-[0_18px_50px_-30px_rgba(28,7,13,0.4)] sm:p-9">
+      <div className="rounded-[28px] border border-hairline bg-white/40 p-7 shadow-[0_24px_48px_-30px_rgba(42,10,20,0.4)] backdrop-blur-sm sm:p-9">
         <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink">
           <Icon name="link" size={14} />
           Connection request
@@ -97,7 +97,7 @@ export function ConsentCard({ request }: { request: ConsentRequest }) {
               Anyone can register an app and choose its name and logo. What you
               approve here will be handed to whoever controls this address:
             </p>
-            <p className="mt-2.5 break-all rounded-xl border border-error/25 bg-surface-container-lowest px-3 py-2 font-mono text-xs text-night">
+            <p className="mt-2.5 break-all rounded-xl border border-error/25 bg-ivory px-3 py-2 font-mono text-xs text-night">
               {request.trust.redirectUri}
             </p>
             <p className="mt-2.5 text-xs leading-relaxed text-on-surface-variant">

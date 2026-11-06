@@ -10,7 +10,7 @@ import {
 } from "@/features/events/components/desk/DeskMotion";
 import { ActivityList } from "@/features/mcp/components/ActivityList";
 import { ConnectedApps } from "@/features/mcp/components/ConnectedApps";
-import { CopyButton } from "@/features/mcp/components/CopyButton";
+import { ConnectWizard } from "@/features/mcp/components/ConnectWizard";
 import { listConnectedApps } from "@/features/mcp/grants";
 import { mcpResourceUrl } from "@/features/mcp/metadata";
 
@@ -21,12 +21,9 @@ export const metadata: Metadata = {
 };
 
 const CARD =
-  "rounded-3xl border border-outline-variant/60 bg-surface-container-low px-4 pt-5 pb-6 sm:px-7";
+  "rounded-3xl border border-hairline bg-white/40 px-4 pt-5 pb-6 backdrop-blur-sm sm:px-7";
 const EYEBROW =
   "text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink";
-// Phones wrap the command rather than hiding half of it; there is room to scroll from sm up.
-const CODE =
-  "block min-w-0 overflow-x-auto whitespace-pre-wrap break-words rounded-2xl border border-wine/10 bg-ivory px-4 py-3 font-mono text-xs leading-relaxed text-on-surface sm:whitespace-pre sm:break-normal";
 
 export default async function ConnectAiPage() {
   const user = await getCurrentUser();
@@ -38,6 +35,10 @@ export default async function ConnectAiPage() {
     listRecentActivity(),
   ]);
 
+  const connectedIds = connected.ok
+    ? connected.data.map((app) => app.clientId)
+    : [];
+
   return (
     <DeskMotion className="flex flex-col gap-6 pb-16 lg:gap-8">
       <DeskItem>
@@ -46,181 +47,17 @@ export default async function ConnectAiPage() {
           Connect your AI
         </h1>
         <p className="mt-2 max-w-xl text-sm text-on-surface-variant">
-          Your celebration desk speaks MCP, so Claude, ChatGPT or Codex can read
-          your guest list and make changes for you. It runs as you: same
-          celebrations, same permissions.
+          Let Claude, ChatGPT or another AI read your guest list and prepare
+          work for you. It runs as you, and anything that sends something waits
+          for your approval.
         </p>
       </DeskItem>
 
-      <DeskItem className={CARD}>
-        <p className={EYEBROW}>New to this?</p>
-        <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
-          The guide shows how to connect an app, prompts that work well —
-          including designing a hall or a seating plan in your own words — what
-          waits for your approval, how to undo a change, and how to disconnect.
-        </p>
-        <Link
-          href="/connect-ai/guide"
-          className="desk-chip mt-4 inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-        >
-          Read the guide
-          <Icon name="arrow_forward" size={16} />
-        </Link>
+      <DeskItem>
+        <ConnectWizard address={address} connectedIds={connectedIds} />
       </DeskItem>
 
-      <DeskItem className={CARD}>
-        <p className={EYEBROW}>Your address</p>
-        <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
-          Every app below asks for this one URL. It is the same for everyone you
-          connect.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <code
-            data-testid="mcp-address"
-            className="min-w-0 flex-1 break-all rounded-2xl border border-wine/10 bg-ivory px-4 py-3 font-mono text-xs text-on-surface"
-          >
-            {address}
-          </code>
-          <CopyButton value={address} label="Copy address" />
-        </div>
-      </DeskItem>
-
-      <DeskItem className={CARD}>
-        <div className="flex items-center gap-2">
-          <Icon name="check_circle" size={16} className="text-gold-ink" />
-          <p className={EYEBROW}>Claude Code</p>
-        </div>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          Paste this into your terminal once. Claude Code keeps the connection
-          between sessions.
-        </p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
-          <code
-            className={CODE}
-          >{`claude mcp add --transport http ariya ${address}`}</code>
-          <CopyButton
-            value={`claude mcp add --transport http ariya ${address}`}
-            label="Copy command"
-          />
-        </div>
-      </DeskItem>
-
-      <DeskItem className={CARD}>
-        <p className={EYEBROW}>Claude.ai and ChatGPT</p>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          In the app, open the connectors settings (ChatGPT: Settings →
-          Connectors; Claude: Settings → Connectors), add a custom or remote MCP
-          server, and give it the address above.
-        </p>
-        <p className="mt-3 text-sm text-on-surface-variant">
-          Connecting grants nothing on its own. Àríyá sends you to a sign-in
-          screen and an approval card first, and the app gets nothing until you
-          approve it there.
-        </p>
-      </DeskItem>
-
-      <DeskItem className={CARD}>
-        <p className={EYEBROW}>Codex</p>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          Add a server block to{" "}
-          <code className="font-mono">~/.codex/config.toml</code>:
-        </p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
-          <code
-            className={CODE}
-          >{`[mcp_servers.ariya]\nurl = "${address}"`}</code>
-          <CopyButton
-            value={`[mcp_servers.ariya]\nurl = "${address}"`}
-            label="Copy config"
-          />
-        </div>
-      </DeskItem>
-
-      <DeskItem className={CARD}>
-        <p className={EYEBROW}>What it can and cannot do</p>
-        <div className="mt-3 grid gap-5 sm:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface">
-              Allowed
-            </p>
-            <ul className="mt-2 space-y-2 text-sm text-on-surface-variant">
-              <li className="flex gap-2">
-                <Icon
-                  name="check"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>Read celebrations, guests, RSVP counts and seating</span>
-              </li>
-              <li className="flex gap-2">
-                <Icon
-                  name="check"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>
-                  Create and edit celebrations, add or import guests, adjust
-                  invitation wording
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <Icon
-                  name="check"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>
-                  Prepare an invitation send, a hall layout or a seating plan
-                  for you to approve
-                </span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface">
-              Never
-            </p>
-            <ul className="mt-2 space-y-2 text-sm text-on-surface-variant">
-              <li className="flex gap-2">
-                <Icon
-                  name="lock"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>Send email or invitations, or use invitation quota</span>
-              </li>
-              <li className="flex gap-2">
-                <Icon
-                  name="lock"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>
-                  Delete anything, touch billing or payments, or change team
-                  members and sign-in
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <Icon
-                  name="lock"
-                  size={15}
-                  className="mt-0.5 shrink-0 text-gold-ink"
-                />
-                <span>
-                  Apply a hall or seating change, or approve its own request —
-                  those wait for you
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <p className="mt-4 text-xs leading-relaxed text-on-surface-variant">
-          Guest names and RSVP notes are written by guests, so the tools treat
-          them as text to report, never as instructions to follow.
-        </p>
-      </DeskItem>
-
-      <DeskItem className={CARD} as="section">
+      <DeskItem as="section" className={CARD}>
         <p className={EYEBROW}>Connected apps</p>
         <p className="mb-4 mt-2 text-sm text-on-surface-variant">
           Disconnecting cuts an app off immediately. It can ask to come back,
@@ -229,10 +66,78 @@ export default async function ConnectAiPage() {
         {connected.ok ? (
           <ConnectedApps initialApps={connected.data} />
         ) : (
-          <p className="rounded-[22px] border border-dashed border-outline-variant bg-ivory p-5 text-sm text-on-surface-variant">
+          <p className="rounded-[22px] border border-dashed border-gold/50 p-5 text-sm text-on-surface-variant">
             {connected.error}
           </p>
         )}
+      </DeskItem>
+
+      <DeskItem>
+        <details className={`group ${CARD} !py-4`}>
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-semibold text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy">
+            <span>What it can and cannot do</span>
+            <Icon
+              name="expand_more"
+              size={18}
+              className="shrink-0 text-burgundy transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface">
+                Allowed
+              </p>
+              <ul className="mt-2 space-y-2 text-sm text-on-surface-variant">
+                {[
+                  "Read celebrations, guests, RSVP counts and seating",
+                  "Create and edit celebrations, add or import guests, adjust invitation wording",
+                  "Prepare an invitation send, a hall layout or a seating plan for you to approve",
+                ].map((line) => (
+                  <li key={line} className="flex gap-2">
+                    <Icon
+                      name="check"
+                      size={15}
+                      className="mt-0.5 shrink-0 text-gold-ink"
+                    />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-on-surface">
+                Never
+              </p>
+              <ul className="mt-2 space-y-2 text-sm text-on-surface-variant">
+                {[
+                  "Send email or invitations, or use invitation quota",
+                  "Delete anything, touch billing or payments, or change team members and sign-in",
+                  "Apply a hall or seating change, or approve its own request: those wait for you",
+                ].map((line) => (
+                  <li key={line} className="flex gap-2">
+                    <Icon
+                      name="lock"
+                      size={15}
+                      className="mt-0.5 shrink-0 text-gold-ink"
+                    />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-on-surface-variant">
+            Guest names and RSVP notes are written by guests, so the tools treat
+            them as text to report, never as instructions to follow.
+          </p>
+          <Link
+            href="/connect-ai/guide"
+            className="desk-chip mt-4 inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            Read the full guide
+            <Icon name="arrow_forward" size={16} />
+          </Link>
+        </details>
       </DeskItem>
 
       <DeskItem className={CARD} as="section">
@@ -244,7 +149,7 @@ export default async function ConnectAiPage() {
         {activity.ok ? (
           <ActivityList entries={activity.data} />
         ) : (
-          <p className="rounded-[22px] border border-dashed border-outline-variant bg-surface-container-low p-5 text-sm text-on-surface-variant">
+          <p className="rounded-[22px] border border-dashed border-gold/50 p-5 text-sm text-on-surface-variant">
             {activity.error}
           </p>
         )}

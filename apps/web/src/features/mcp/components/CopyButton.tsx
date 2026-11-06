@@ -10,9 +10,12 @@ import { Icon } from "@/components/ui/icon";
 export function CopyButton({
   value,
   label = "Copy",
+  tone = "light",
 }: {
   value: string;
   label?: string;
+  /** "dark" for use on a burgundy card. */
+  tone?: "light" | "dark";
 }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,12 +42,16 @@ export function CopyButton({
       type="button"
       onClick={copy}
       aria-label={copied ? `${label}d` : label}
-      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/50 bg-transparent px-4 text-xs font-semibold text-wine transition-colors hover:border-gold hover:bg-gold/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+      className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        tone === "dark"
+          ? "border-[#f6e2ad]/60 text-[#fff6dc] hover:bg-white/10 focus-visible:outline-[#f6e2ad]"
+          : "border-gold/50 bg-transparent text-wine hover:border-gold hover:bg-gold/10 focus-visible:outline-burgundy"
+      }`}
     >
       <Icon
         name={copied ? "check" : "copy"}
         size={15}
-        className="text-gold-ink"
+        className={tone === "dark" ? "text-[#f6e2ad]" : "text-gold-ink"}
       />
       {copied ? "Copied" : label}
     </button>
