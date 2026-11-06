@@ -362,6 +362,7 @@ export function defaultVenue(type: VenueType = "hall"): VenueProfile {
     services: null,
     capacity: null,
     climate: null,
+    cooling: null,
     sun: null,
     wind: null,
   };
@@ -493,6 +494,7 @@ export function normaliseVenue(raw: unknown): VenueProfile {
     services: r.services ?? null,
     capacity: r.capacity ?? null,
     climate: r.climate ?? null,
+    cooling: r.cooling ?? null,
     sun: r.sun ?? null,
     wind: r.wind ?? null,
   };

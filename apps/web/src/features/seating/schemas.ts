@@ -162,6 +162,26 @@ export const venueProfileSchema = z.object({
     })
     .nullable()
     .default(null),
+  cooling: z
+    .object({
+      units: z
+        .array(
+          z.object({
+            id: z.string().max(120),
+            x: z.number().min(0),
+            y: z.number().min(0),
+            hp: z.number().min(0.5).max(5),
+            mount: z.enum(["wall", "cassette", "floor"]),
+            inverter: z.boolean().default(false),
+          })
+        )
+        .max(64)
+        .default([]),
+      ach: z.number().min(0).max(60).nullable().default(null),
+      targetC: z.number().min(10).max(35).nullable().default(null),
+    })
+    .nullable()
+    .default(null),
   sun: z
     .object({
       azimuth: z.number().nullable().default(null),
