@@ -38,6 +38,16 @@ const TARGETS = [
   },
 ];
 
+// A wasm binary carries the path of every source file it was built from, panic messages included.
+// Left alone, a build on /root and a build on /home/runner differ by bytes for the same source,
+// and the CI check that compares the committed artifacts with a fresh build can never pass. Map
+// the checkout and cargo's home to fixed names so the output depends on the source alone.
+const cargoHome = process.env.CARGO_HOME ?? path.join(homedir(), ".cargo");
+const rustflags = [
+  `--remap-path-prefix=${repoRoot}=/src`,
+  `--remap-path-prefix=${cargoHome}=/cargo`,
+].join("\x1f");
+
 mkdirSync(outDir, { recursive: true });
 
 for (const target of TARGETS) {
@@ -53,7 +63,10 @@ for (const target of TARGETS) {
         "wasm32-unknown-unknown",
         "--release",
       ],
-      { stdio: "inherit" }
+      {
+        stdio: "inherit",
+        env: { ...process.env, CARGO_ENCODED_RUSTFLAGS: rustflags },
+      }
     );
   } catch {
     console.error(
