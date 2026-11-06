@@ -14,10 +14,10 @@ select is_empty(
         'ai_activity_log', 'ai_connection_settings', 'ai_proposals', 'ai_quota_usage',
         'check_ins', 'email_log', 'event_invites', 'event_members',
         'events', 'guests', 'invoices', 'payments', 'profiles',
-        'rsvps', 'seat_assignments', 'tables', 'vendor_tasks', 'vendors'
+        'rsvps', 'seat_assignments', 'tables', 'tasks', 'vendor_tasks', 'vendors'
       )
   $$,
-  'anon has NO table privileges on any of the 18 public tables'
+  'anon has NO table privileges on any public table'
 );
 
 -- 2. Verify authenticated has SELECT, INSERT on all 17 readable tables
@@ -34,7 +34,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'authenticated has SELECT privilege on all readable tables'
@@ -52,7 +52,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'authenticated has INSERT privilege on all writable tables'
@@ -71,7 +71,7 @@ select set_eq(
     values
       ('ai_connection_settings'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'authenticated has DELETE privilege on all deletable tables except ai_activity_log'
@@ -90,7 +90,7 @@ select set_eq(
     values
       ('ai_connection_settings'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('invoices'), ('payments'), ('profiles'),
       ('rsvps'), ('seat_assignments'), ('tables'), ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
   'authenticated has table-level UPDATE on every table it can update (guests handled via column grants)'
@@ -110,7 +110,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
@@ -129,7 +129,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
@@ -148,7 +148,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
@@ -167,7 +167,7 @@ select set_eq(
     values
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
-      ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
+      ('event_weather'), ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
       ('push_subscriptions'), ('rate_limits'), ('rsvps'), ('seat_assignments'), ('tables'),
       ('tasks'), ('vendor_tasks'), ('vendors')
   $$,
