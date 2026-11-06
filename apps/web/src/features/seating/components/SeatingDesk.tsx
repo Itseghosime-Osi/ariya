@@ -41,6 +41,8 @@ interface SeatingDeskProps {
   initialData: SeatingDeskData;
   hallLayout?: unknown;
   hallLayoutAvailable?: boolean;
+  /** The event date, so the risk register can turn "3 weeks before" into a real day. */
+  eventDate?: string | null;
 }
 
 const VIEW_KEY = "ariya:seating-view";
@@ -93,6 +95,7 @@ export function SeatingDesk({
   initialData,
   hallLayout = null,
   hallLayoutAvailable = false,
+  eventDate = null,
 }: SeatingDeskProps) {
   // The hall studio is for tablets and laptops; phones get the table list, which suits them.
   const [chosen, setView] = useState<"hall" | "list">("hall");
@@ -276,6 +279,7 @@ export function SeatingDesk({
             data={data}
             initialLayout={hallLayout}
             layoutAvailable={hallLayoutAvailable}
+            eventDate={eventDate}
             addTables={addTables}
             updateTable={updateTable}
             setTablePositions={setTablePositions}

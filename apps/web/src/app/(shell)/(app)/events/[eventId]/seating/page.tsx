@@ -38,6 +38,7 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
           initialData={seatingData}
           hallLayout={hall.layout}
           hallLayoutAvailable={hall.available}
+          eventDate={eventData.event.date ?? null}
         />
       </EndedLock>
     </>

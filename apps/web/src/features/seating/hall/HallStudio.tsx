@@ -32,6 +32,7 @@ import {
   Shapes,
   Sparkles,
   Square,
+  ShieldAlert,
   Sun,
   Thermometer,
   UtensilsCrossed,
@@ -97,6 +98,7 @@ import type {
   CateringReport,
   Cooling,
   LayoutOption,
+  RiskReport,
   ThermalReport,
 } from "@ariya/studio";
 import {
@@ -111,6 +113,7 @@ import {
   CateringPanel,
   FitPanel,
   GuestsPanel,
+  RiskPanel,
   RoomPanel,
   SeatPanel,
   ThermalPanel,
@@ -128,6 +131,7 @@ import {
   type CateringAnswers,
 } from "./catering";
 import { downloadCateringList } from "./catering-pdf";
+import { riskRequest } from "./risk";
 import { LayoutSummary } from "./LayoutSummary";
 import {
   ChairInspector,
@@ -141,7 +145,14 @@ import { Keys, SHORTCUTS } from "./shortcuts";
 
 type Positions = Record<string, { x: number; y: number }>;
 type Deck =
-  "guests" | "room" | "fit" | "seat" | "decor" | "thermal" | "catering";
+  | "guests"
+  | "room"
+  | "fit"
+  | "seat"
+  | "decor"
+  | "thermal"
+  | "catering"
+  | "risk";
 type Flyout = "table" | "chair" | "zone" | null;
 type Move = { type: string; id: string; x: number; y: number };
 
@@ -197,6 +208,8 @@ interface HallStudioProps {
   data: SeatingDeskData;
   initialLayout: unknown;
   layoutAvailable: boolean;
+  /** The event date, `yyyy-mm-dd`, so every risk gets a real deadline. */
+  eventDate?: string | null;
   addTables: (items: CreateTableInput[]) => Promise<TableWithGuests[]>;
   updateTable: (
     id: string,
@@ -246,6 +259,7 @@ export function HallStudio({
   data,
   initialLayout,
   layoutAvailable,
+  eventDate = null,
   addTables,
   updateTable,
   setTablePositions,
@@ -296,6 +310,9 @@ export function HallStudio({
   // ---------- catering ----------
   const [catering, setCatering] = useState<CateringReport | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  // ---------- risk ----------
+  const [risk, setRisk] = useState<RiskReport | null>(null);
 
   // The side panel can be tucked away for a bigger hall; the choice is remembered.
   const [panelOpen, setPanelOpen] = useState(true);
@@ -502,6 +519,27 @@ export function HallStudio({
       setCatering(null);
     }
   }, [studioEngine, studioStatus, cateringPlan, guests]);
+
+  // The register follows the plan and the date: change either and the deadlines move with it.
+  useEffect(() => {
+    if (!studioEngine || studioStatus !== "ready") return;
+    try {
+      setRisk(
+        studioEngine.risk(
+          riskRequest(layout, data.tables.length, guests, eventDate)
+        )
+      );
+    } catch {
+      setRisk(null);
+    }
+  }, [
+    studioEngine,
+    studioStatus,
+    layout,
+    data.tables.length,
+    guests,
+    eventDate,
+  ]);
 
   const seats = data.tables.reduce((a, t) => a + t.capacity, 0);
   const area = layout.width * layout.length;
@@ -1516,6 +1554,14 @@ export function HallStudio({
       stat: catering ? `${catering.portions} portions` : "—",
     },
     {
+      key: "risk",
+      label: "Risks",
+      icon: ShieldAlert,
+      stat: risk
+        ? `${risk.items.filter((i) => i.safetyCritical).length} safety`
+        : "—",
+    },
+    {
       key: "decor",
       label: "Décor",
       icon: Palette,
@@ -2437,6 +2483,12 @@ export function HallStudio({
                 onPlan={patchCatering}
                 onExport={exportCatering}
                 exporting={exporting}
+              />
+            ) : deck === "risk" ? (
+              <RiskPanel
+                report={risk}
+                status={studioStatus}
+                eventDate={eventDate}
               />
             ) : (
               <DecorPanel
