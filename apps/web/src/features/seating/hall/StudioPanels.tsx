@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  Check,
   ChevronDown,
   Crown,
   Hand,
+  Loader2,
   Moon,
+  Plus,
   Search,
   Sparkles,
   Sun,
@@ -40,6 +43,7 @@ import type {
   Cooling,
   Level,
   Mount,
+  RiskItem,
   RiskReport,
   ThermalReport,
   VenueProfile,
@@ -61,6 +65,7 @@ import {
   type VenueQuestion,
 } from "./venue-questions";
 import type { FitResult } from "./fit";
+import { addRiskToChecklistAction } from "@/features/checklist/actions";
 import { dueWords, groupRisks } from "./risk";
 import type { SeatPlan, SeatUnit } from "./autoseat";
 import {
@@ -1992,12 +1997,47 @@ export function RiskPanel({
   report,
   status,
   eventDate,
+  eventId,
+  addedRiskIds,
 }: {
   report: RiskReport | null;
   status: "loading" | "ready" | "unavailable";
   eventDate: string | null;
+  eventId: string;
+  addedRiskIds: string[];
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [added, setAdded] = useState<Record<string, "adding" | "added">>(() =>
+    Object.fromEntries(addedRiskIds.map((id) => [id, "added" as const]))
+  );
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const addToChecklist = useCallback(
+    async (item: RiskItem) => {
+      if (added[item.id]) return;
+      setAddError(null);
+      setAdded((a) => ({ ...a, [item.id]: "adding" }));
+      const result = await addRiskToChecklistAction(eventId, {
+        id: item.id,
+        title: item.title,
+        mitigation: item.mitigation,
+        derivation: item.derivation,
+        source: item.source,
+        due: item.due,
+      });
+      if (result.error) {
+        setAdded((a) => {
+          const next = { ...a };
+          delete next[item.id];
+          return next;
+        });
+        setAddError(result.error);
+        return;
+      }
+      setAdded((a) => ({ ...a, [item.id]: "added" }));
+    },
+    [added, eventId]
+  );
 
   if (status !== "ready") {
     return (
@@ -2047,6 +2087,14 @@ export function RiskPanel({
             ? "Each one is dated from your event."
             : "Add the event date and each one gets a deadline."}
         </p>
+        {addError && (
+          <p
+            role="status"
+            className="mt-2 text-[11px] leading-snug text-[#b4483a]"
+          >
+            {addError}
+          </p>
+        )}
       </Section>
 
       {groups.map((g) => (
@@ -2131,6 +2179,35 @@ export function RiskPanel({
                           : `${item.when}.`}{" "}
                         Source: {item.source}.
                       </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void addToChecklist(item)}
+                          disabled={Boolean(added[item.id])}
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-hairline bg-ivory px-3 text-[11px] font-semibold text-night transition-colors hover:bg-white disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                        >
+                          {added[item.id] === "added" ? (
+                            <>
+                              <Check size={12} aria-hidden="true" /> On the
+                              checklist
+                            </>
+                          ) : added[item.id] === "adding" ? (
+                            <>
+                              <Loader2
+                                size={12}
+                                aria-hidden="true"
+                                className="animate-spin motion-reduce:animate-none"
+                              />
+                              Adding…
+                            </>
+                          ) : (
+                            <>
+                              <Plus size={12} aria-hidden="true" /> Add to
+                              checklist
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </li>

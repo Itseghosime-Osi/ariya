@@ -210,6 +210,8 @@ interface HallStudioProps {
   layoutAvailable: boolean;
   /** The event date, `yyyy-mm-dd`, so every risk gets a real deadline. */
   eventDate?: string | null;
+  /** Risk rules that already have a checklist task, so the button does not offer them twice. */
+  addedRiskIds?: string[];
   addTables: (items: CreateTableInput[]) => Promise<TableWithGuests[]>;
   updateTable: (
     id: string,
@@ -260,6 +262,7 @@ export function HallStudio({
   initialLayout,
   layoutAvailable,
   eventDate = null,
+  addedRiskIds = [],
   addTables,
   updateTable,
   setTablePositions,
@@ -2489,6 +2492,8 @@ export function HallStudio({
                 report={risk}
                 status={studioStatus}
                 eventDate={eventDate}
+                eventId={eventId}
+                addedRiskIds={addedRiskIds}
               />
             ) : (
               <DecorPanel

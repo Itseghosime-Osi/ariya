@@ -2,6 +2,7 @@ import { EndedLock } from "@/components/layout/ended-lock";
 import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
+import { getAddedRiskIds } from "@/features/checklist/queries";
 import { getEventById } from "@/features/events/queries";
 import { getEventSeatingData, getHallLayout } from "@/features/seating/queries";
 import { SeatingDesk } from "@/features/seating/components/SeatingDesk";
@@ -20,10 +21,11 @@ export async function generateMetadata({ params }: SeatingPageProps) {
 
 export default async function SeatingPageRoute({ params }: SeatingPageProps) {
   const { eventId } = await params;
-  const [eventData, seatingData, hall] = await Promise.all([
+  const [eventData, seatingData, hall, addedRiskIds] = await Promise.all([
     getEventById(eventId),
     getEventSeatingData(eventId),
     getHallLayout(eventId),
+    getAddedRiskIds(eventId),
   ]);
 
   if (!eventData) {
@@ -39,6 +41,7 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
           hallLayout={hall.layout}
           hallLayoutAvailable={hall.available}
           eventDate={eventData.event.date ?? null}
+          addedRiskIds={addedRiskIds}
         />
       </EndedLock>
     </>
