@@ -6,6 +6,8 @@ import { Icon } from "@/components/ui/icon";
 import {
   FIRST_PROMPTS,
   aiClients,
+  claudeCodeCommand,
+  codexConfig,
   findNewApp,
   type AiClient,
   type AiClientId,
@@ -77,22 +79,20 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
   async function press(client: AiClient) {
     const action = client.action;
     setStarted(true);
-    if (action.kind === "link") {
-      window.location.href = action.href;
-      return;
+
+    let note: string | null = null;
+    if (action.copy) {
+      try {
+        await navigator.clipboard.writeText(action.copy);
+        note = "Copied. Paste it where the steps below say.";
+      } catch {
+        note =
+          "Could not copy automatically. Use the link under “Prefer to do it yourself”.";
+      }
+    } else if (action.kind === "open") {
+      note = `${client.name} is opening with Àríyá already filled in.`;
     }
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(action.copy);
-      copied = true;
-    } catch {
-      // The address stays on screen below, selectable, if the clipboard is refused.
-    }
-    setCopiedNote(
-      copied
-        ? "Copied. Paste it where the steps below say."
-        : "Could not copy automatically. Use the link under “Prefer to do it yourself”."
-    );
+    setCopiedNote(note);
     if (action.kind === "open") {
       window.open(action.url, "_blank", "noopener");
     }
@@ -188,7 +188,7 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
                   >
                     <Icon
                       name={
-                        selected.action.kind === "link"
+                        selected.action.kind === "open" && !selected.action.copy
                           ? "arrow_forward"
                           : "copy"
                       }
@@ -272,7 +272,48 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
           </code>
           <CopyButton value={address} label="Copy link" />
         </div>
+
+        <div className="mt-5 border-t border-hairline pt-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
+            For developers
+          </p>
+          <p className="mt-1.5 text-sm text-label-2">
+            Coding tools take a command or a setting instead.
+          </p>
+          <DevSnippet
+            title="Claude Code"
+            value={claudeCodeCommand(address)}
+            label="Copy command"
+          />
+          <DevSnippet
+            title="Codex"
+            value={codexConfig(address)}
+            label="Copy setting"
+          />
+        </div>
       </details>
+    </div>
+  );
+}
+
+function DevSnippet({
+  title,
+  value,
+  label,
+}: {
+  title: string;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="mt-3">
+      <p className="mb-1.5 text-xs font-semibold text-night">{title}</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+        <code className="block min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-words rounded-2xl border border-hairline bg-ivory px-4 py-3 font-mono text-xs leading-relaxed text-night">
+          {value}
+        </code>
+        <CopyButton value={value} label={label} />
+      </div>
     </div>
   );
 }

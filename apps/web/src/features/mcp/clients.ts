@@ -2,24 +2,16 @@ import type { ConnectedApp } from "./types";
 
 export const SERVER_NAME = "ariya";
 
-export type AiClientId =
-  | "claude"
-  | "chatgpt"
-  | "claude-code"
-  | "codex"
-  | "cursor"
-  | "vscode"
-  | "other";
+export type AiClientId = "claude" | "chatgpt" | "gemini" | "other";
 
 /**
  * What the big button does:
- *  - "open": copies the address, then opens the app's own connectors page in a new tab
- *  - "link": a one-click install link the app handles itself (Cursor, VS Code)
- *  - "copy": copies a command or a setting to paste
+ *  - "open": opens the app's connectors page in a new tab. When the app accepts a prefilled link
+ *    (Claude does) nothing needs copying; otherwise `copy` is put on the clipboard first.
+ *  - "copy": copies a value to paste
  */
 export type PrimaryAction =
-  | { kind: "open"; label: string; url: string; copy: string }
-  | { kind: "link"; label: string; href: string }
+  | { kind: "open"; label: string; url: string; copy?: string }
   | { kind: "copy"; label: string; copy: string };
 
 export interface AiClient {
@@ -36,24 +28,13 @@ export interface AiClient {
   steps: string[];
 }
 
-/** Cursor takes the same entry as its mcp.json, base64 encoded, in a cursor:// link. */
-export function cursorInstallLink(address: string): string {
-  const config = JSON.stringify({ url: address });
-  const encoded =
-    typeof Buffer !== "undefined"
-      ? Buffer.from(config, "utf8").toString("base64")
-      : btoa(config);
-  return `cursor://anysphere.cursor-deeplink/mcp/install?name=${SERVER_NAME}&config=${encodeURIComponent(encoded)}`;
-}
-
-/** VS Code takes URL-encoded JSON after vscode:mcp/install. */
-export function vscodeInstallLink(address: string): string {
-  const payload = JSON.stringify({
-    name: SERVER_NAME,
-    type: "http",
-    url: address,
-  });
-  return `vscode:mcp/install?${encodeURIComponent(payload)}`;
+/**
+ * Claude's own install link: the Add custom connector dialog opens with the name and address
+ * already filled in, and the person only has to review and press Add. Anthropic documents the
+ * parameters (modal, connectorName, connectorUrl); the link grants nothing by itself.
+ */
+export function claudeInstallLink(address: string): string {
+  return `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=${encodeURIComponent("Àríyá")}&connectorUrl=${encodeURIComponent(address)}`;
 }
 
 export function claudeCodeCommand(address: string): string {
@@ -69,26 +50,25 @@ export function aiClients(address: string): AiClient[] {
     {
       id: "claude",
       name: "Claude",
-      tagline: "Chat app, web or desktop",
+      tagline: "Opens with Àríyá filled in",
       kind: "app",
       glyph: "C",
       action: {
         kind: "open",
-        label: "Copy link and open Claude",
-        url: "https://claude.ai/settings/connectors",
-        copy: address,
+        label: "Open Claude and connect",
+        url: claudeInstallLink(address),
       },
       steps: [
-        "Press the button. We copy your Àríyá link and open Claude in a new tab.",
-        "In Claude, open Settings, then Connectors, and choose Add custom connector.",
-        "Name it Àríyá, paste the link (it is already copied) and press Add.",
-        "Press Connect. Sign in to Àríyá if asked, then press Approve on the card you see.",
+        "Press the button. Claude opens in a new tab with Àríyá already filled in, so there is nothing to copy.",
+        "Check the name and press Add.",
+        "Press Connect and sign in to Àríyá if asked.",
+        "Press Approve on the card you see. That is the whole connection.",
       ],
     },
     {
       id: "chatgpt",
       name: "ChatGPT",
-      tagline: "Chat app, web or desktop",
+      tagline: "We copy the link for you",
       kind: "app",
       glyph: "G",
       action: {
@@ -105,75 +85,22 @@ export function aiClients(address: string): AiClient[] {
       ],
     },
     {
-      id: "cursor",
-      name: "Cursor",
-      tagline: "One click, no copying",
-      kind: "tool",
-      glyph: "Cu",
+      id: "gemini",
+      name: "Gemini",
+      tagline: "We copy the link for you",
+      kind: "app",
+      glyph: "Ge",
       action: {
-        kind: "link",
-        label: "Add to Cursor",
-        href: cursorInstallLink(address),
+        kind: "open",
+        label: "Copy link and open Gemini",
+        url: "https://gemini.google.com/",
+        copy: address,
       },
       steps: [
-        "Press the button. Cursor opens and asks to add Àríyá.",
-        "Confirm the install in Cursor.",
-        "When Cursor shows Needs login next to Àríyá, press it.",
+        "Press the button. We copy your Àríyá link and open Gemini in a new tab.",
+        "Open Settings and find Connected apps (it can also be called Connectors), then choose Add a custom app.",
+        "Paste the link and press Next.",
         "Sign in to Àríyá if asked, then press Approve on the card you see.",
-      ],
-    },
-    {
-      id: "vscode",
-      name: "VS Code",
-      tagline: "One click, no copying",
-      kind: "tool",
-      glyph: "VS",
-      action: {
-        kind: "link",
-        label: "Add to VS Code",
-        href: vscodeInstallLink(address),
-      },
-      steps: [
-        "Press the button. VS Code opens and asks to install Àríyá.",
-        "Confirm the install in VS Code.",
-        "Start the server when VS Code offers to, and sign in to Àríyá if asked.",
-        "Press Approve on the card you see.",
-      ],
-    },
-    {
-      id: "claude-code",
-      name: "Claude Code",
-      tagline: "Terminal, one command",
-      kind: "tool",
-      glyph: ">_",
-      action: {
-        kind: "copy",
-        label: "Copy the command",
-        copy: claudeCodeCommand(address),
-      },
-      steps: [
-        "Press the button to copy the command.",
-        "Open your terminal, paste it and press Enter.",
-        "In Claude Code, type /mcp, choose ariya and sign in.",
-        "Press Approve on the Àríyá card that opens.",
-      ],
-    },
-    {
-      id: "codex",
-      name: "Codex",
-      tagline: "One setting to paste",
-      kind: "tool",
-      glyph: "Cx",
-      action: {
-        kind: "copy",
-        label: "Copy the setting",
-        copy: codexConfig(address),
-      },
-      steps: [
-        "Press the button to copy the setting.",
-        "Open ~/.codex/config.toml, paste it at the end and save.",
-        "Restart Codex, then sign in to Àríyá when it asks.",
-        "Press Approve on the card you see.",
       ],
     },
     {

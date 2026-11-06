@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   aiClients,
+  claudeInstallLink,
   claudeCodeCommand,
   codexConfig,
-  cursorInstallLink,
   findNewApp,
-  vscodeInstallLink,
 } from "./clients";
 import type { ConnectedApp } from "./types";
 
@@ -19,28 +18,21 @@ const app = (clientId: string): ConnectedApp => ({
   scopes: [],
 });
 
-describe("one-click install links", () => {
-  it("builds a Cursor link whose config decodes to the address", () => {
-    const link = cursorInstallLink(ADDRESS);
-    expect(
-      link.startsWith("cursor://anysphere.cursor-deeplink/mcp/install?")
-    ).toBe(true);
+describe("install links and commands", () => {
+  it("builds Claude's prefilled link exactly as Anthropic documents it", () => {
+    const link = claudeInstallLink(ADDRESS);
     const url = new URL(link);
-    expect(url.searchParams.get("name")).toBe("ariya");
-    const config = JSON.parse(
-      Buffer.from(url.searchParams.get("config")!, "base64").toString("utf8")
+    expect(url.origin + url.pathname).toBe(
+      "https://claude.ai/customize/connectors"
     );
-    expect(config).toEqual({ url: ADDRESS });
+    expect(url.searchParams.get("modal")).toBe("add-custom-connector");
+    expect(url.searchParams.get("connectorName")).toBe("Àríyá");
+    expect(url.searchParams.get("connectorUrl")).toBe(ADDRESS);
+    // The address is percent-encoded, not left raw in the query.
+    expect(link).toContain(encodeURIComponent(ADDRESS));
   });
 
-  it("builds a VS Code link with URL-encoded JSON", () => {
-    const link = vscodeInstallLink(ADDRESS);
-    expect(link.startsWith("vscode:mcp/install?")).toBe(true);
-    const json = JSON.parse(decodeURIComponent(link.split("?")[1]));
-    expect(json).toEqual({ name: "ariya", type: "http", url: ADDRESS });
-  });
-
-  it("gives the exact command and setting to paste", () => {
+  it("gives the exact command and setting for developer tools", () => {
     expect(claudeCodeCommand(ADDRESS)).toBe(
       `claude mcp add --transport http ariya ${ADDRESS}`
     );
@@ -61,8 +53,27 @@ describe("aiClients", () => {
     }
   });
 
-  it("copies the address for the chat apps and opens their connectors page", () => {
-    for (const id of ["claude", "chatgpt"]) {
+  it("offers everyday AI assistants, not coding tools", () => {
+    expect(clients.map((c) => c.id)).toEqual([
+      "claude",
+      "chatgpt",
+      "gemini",
+      "other",
+    ]);
+    expect(clients.every((c) => c.kind === "app")).toBe(true);
+  });
+
+  it("needs no copying for Claude, which takes a prefilled link", () => {
+    const action = clients.find((c) => c.id === "claude")!.action;
+    expect(action.kind).toBe("open");
+    if (action.kind === "open") {
+      expect(action.copy).toBeUndefined();
+      expect(action.url).toBe(claudeInstallLink(ADDRESS));
+    }
+  });
+
+  it("copies the link and opens ChatGPT and Gemini, which have no prefilled link", () => {
+    for (const id of ["chatgpt", "gemini"]) {
       const action = clients.find((c) => c.id === id)!.action;
       expect(action.kind).toBe("open");
       if (action.kind === "open") {
