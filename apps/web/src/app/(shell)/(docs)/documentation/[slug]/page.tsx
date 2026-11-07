@@ -12,6 +12,9 @@ import {
 import { DocBlocks } from "@/components/docs/DocBlocks";
 import { DocsToc } from "@/components/docs/DocsToc";
 
+// Every page is known at build time, so an unknown address is a real 404, not a streamed 200.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return DOC_PAGES.map((p) => ({ slug: p.slug }));
 }

@@ -39,7 +39,9 @@ test.describe("Documentation", () => {
       .getByRole("searchbox", { name: "Search the manual" })
       .fill("webhook");
     await expect(
-      page.getByRole("link", { name: /Billing and the Celebration Pass/ })
+      page
+        .getByRole("search")
+        .getByRole("link", { name: /Billing and the Celebration Pass/ })
     ).toBeVisible();
   });
 
