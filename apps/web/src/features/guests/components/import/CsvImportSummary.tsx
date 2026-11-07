@@ -20,27 +20,27 @@ export function CsvImportSummary({
         <CheckCircle2 className="h-8 w-8" />
       </div>
 
-      <h3 className="font-serif text-2xl font-bold text-on-surface">
+      <h3 className="font-display text-2xl font-bold text-night">
         Import Completed!
       </h3>
-      <p className="mt-1 text-sm text-on-surface-variant max-w-sm">
+      <p className="mt-1 text-sm text-label-2 max-w-sm">
         Successfully imported guests into your event registry. Unique RSVP
         tokens have been automatically generated.
       </p>
 
       <div className="my-6 grid grid-cols-2 gap-4 w-full max-w-xs">
-        <div className="p-4 rounded-2xl bg-surface-container/60 border border-outline-variant/40">
-          <div className="font-serif text-3xl font-bold text-wine">
+        <div className="p-4 rounded-2xl desk-field border border-hairline">
+          <div className="font-display text-3xl font-bold text-burgundy">
             {importedCount}
           </div>
-          <div className="text-xs text-mist mt-1">Guests Added</div>
+          <div className="text-xs text-label-2 mt-1">Guests Added</div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-container/60 border border-outline-variant/40">
-          <div className="font-serif text-3xl font-bold text-on-surface">
+        <div className="p-4 rounded-2xl desk-field border border-hairline">
+          <div className="font-display text-3xl font-bold text-night">
             {skippedCount}
           </div>
-          <div className="text-xs text-mist mt-1">Rows Skipped</div>
+          <div className="text-xs text-label-2 mt-1">Rows Skipped</div>
         </div>
       </div>
 

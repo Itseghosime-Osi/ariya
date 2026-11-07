@@ -24,49 +24,50 @@ export function ManualCheckInForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-4"
-    >
-      <div className="flex items-center gap-2 border-b border-outline-variant/20 pb-3">
-        <Icon name="edit" className="text-wine text-base" />
-        <h3 className="font-serif text-base font-bold text-wine">
+    <form onSubmit={handleSubmit} className="bento-card space-y-4 p-5 sm:p-6">
+      <div className="flex items-center gap-2">
+        <Icon name="edit" className="text-base text-gold-ink" />
+        <h2 className="font-display text-lg font-bold text-night">
           Manual Code &amp; Pass Lookup
-        </h3>
+        </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
-        <div className="sm:col-span-12">
-          <label className="block font-semibold text-wine mb-1">
-            Personal Entry Code / Pass Token
-          </label>
-          <input
-            type="text"
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="e.g. ARY-7K2M-99NP"
-            className="w-full px-3 py-2.5 rounded-xl border border-outline-variant/50 focus:border-wine font-mono text-sm tracking-wider uppercase outline-hidden"
-          />
-        </div>
+      <div>
+        <label
+          htmlFor="entry-code"
+          className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-ink"
+        >
+          Personal Entry Code / Pass Token
+        </label>
+        <input
+          id="entry-code"
+          type="text"
+          required
+          autoComplete="off"
+          autoCapitalize="characters"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="e.g. ARY-7K2M-99NP"
+          className="desk-field min-h-12 w-full rounded-2xl px-4 font-mono text-base uppercase tracking-wider text-night outline-hidden placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        />
       </div>
 
-      <div className="flex items-center justify-between pt-1">
-        <span className="text-[11px] text-on-surface-variant flex items-center gap-1">
-          <Icon name="info" className="text-xs text-wine/60" />
-          <span>Press Enter to verify the pass</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="flex items-center gap-1.5 text-[13px] text-label-2">
+          <Icon name="info" className="text-sm text-gold-ink" />
+          Press Enter to verify the pass
         </span>
         <button
           type="submit"
           disabled={loading || !code.trim()}
-          className="px-5 py-2.5 rounded-xl bg-wine text-ivory font-semibold text-xs hover:bg-wine/90 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xs"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-6 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-50"
         >
           {loading ? (
-            <span>Checking...</span>
+            "Checking…"
           ) : (
             <>
-              <Icon name="verified" className="text-sm text-gold" />
-              <span>Verify pass</span>
+              <Icon name="verified" className="text-base text-gold" />
+              Verify pass
             </>
           )}
         </button>

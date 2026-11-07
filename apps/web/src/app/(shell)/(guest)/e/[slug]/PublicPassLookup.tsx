@@ -28,7 +28,7 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
         <h3 className="font-serif text-2xl text-gold font-medium">
           Confirm Your Attendance
         </h3>
-        <p className="text-xs sm:text-sm text-ivory/80 leading-relaxed">
+        <p className="text-sm sm:text-base text-ivory/80 leading-relaxed">
           {rsvpDeadline
             ? `Please respond by ${rsvpDeadline} to ensure personalized table seating.`
             : "Enter your private invitation passcode sent via WhatsApp or email to access your pass and RSVP."}
@@ -39,17 +39,22 @@ export function PublicPassLookup({ event }: { event: PublicCelebration }) {
         action={handlePassLookup}
         className="max-w-md mx-auto flex flex-col sm:flex-row gap-3 pt-2"
       >
+        <label htmlFor="pass-code" className="sr-only">
+          Invitation code
+        </label>
         <input
+          id="pass-code"
           type="text"
+          autoComplete="off"
           name="token"
           required
           maxLength={40}
           placeholder="Enter invitation code..."
-          className="flex-1 px-4 py-3 rounded-xl bg-surface-container-lowest text-paper-ink text-sm font-mono placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-gold border border-outline-variant/40"
+          className="min-h-12 flex-1 px-4 py-3 rounded-2xl bg-surface-container-lowest text-paper-ink text-base font-mono placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-gold border border-outline-variant/40"
         />
         <button
           type="submit"
-          className="px-6 py-3 rounded-xl bg-gold hover:bg-gold/90 text-night font-semibold text-sm transition-all shadow-md flex items-center justify-center gap-2"
+          className="min-h-12 px-6 py-3 rounded-full bg-gold hover:bg-gold/90 text-night font-semibold text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold transition-all shadow-md flex items-center justify-center gap-2"
         >
           <span>Access Pass</span>
           <Icon name="arrow_forward" className="text-base" />

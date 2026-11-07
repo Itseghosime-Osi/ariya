@@ -102,7 +102,7 @@ export function CsvValidationPreview({
       </div>
 
       {duplicateRows.length > 0 && (
-        <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container/50 border border-outline-variant/40">
+        <div className="flex items-center justify-between p-3 rounded-xl desk-field border border-hairline">
           <div className="flex items-center gap-2">
             <Checkbox
               id="skip-all-dupes"
@@ -111,12 +111,12 @@ export function CsvValidationPreview({
             />
             <label
               htmlFor="skip-all-dupes"
-              className="text-xs cursor-pointer text-on-surface"
+              className="text-xs cursor-pointer text-night"
             >
               Skip all duplicate entries (default)
             </label>
           </div>
-          <span className="text-[11px] text-mist">
+          <span className="text-[11px] text-label-2">
             {allDuplicatesSkipped
               ? "All duplicates skipped"
               : `${keptDuplicates.length} kept`}
@@ -124,9 +124,9 @@ export function CsvValidationPreview({
         </div>
       )}
 
-      <div className="max-h-[260px] overflow-y-auto rounded-xl border border-outline-variant/40 bg-surface-container-lowest">
+      <div className="max-h-[260px] overflow-y-auto rounded-xl border border-hairline desk-field">
         <Table>
-          <TableHeader className="bg-surface-container/60 sticky top-0 z-10">
+          <TableHeader className="desk-field sticky top-0 z-10">
             <TableRow>
               <TableHead className="text-xs font-semibold">Row #</TableHead>
               <TableHead className="text-xs font-semibold">Name</TableHead>
@@ -142,13 +142,13 @@ export function CsvValidationPreview({
           <TableBody>
             {validRows.slice(0, 15).map((row, idx) => (
               <TableRow key={`valid-${idx}`}>
-                <TableCell className="text-xs text-mist font-mono">
+                <TableCell className="text-xs text-label-2 font-mono">
                   {idx + 1}
                 </TableCell>
-                <TableCell className="text-xs font-medium text-on-surface">
+                <TableCell className="text-xs font-medium text-night">
                   {row.name}
                 </TableCell>
-                <TableCell className="text-xs text-mist">
+                <TableCell className="text-xs text-label-2">
                   {row.phone || row.email || "-"}
                 </TableCell>
                 <TableCell>
@@ -156,7 +156,7 @@ export function CsvValidationPreview({
                     Valid
                   </Badge>
                 </TableCell>
-                <TableCell className="text-xs text-mist">
+                <TableCell className="text-xs text-label-2">
                   Ready to import
                 </TableCell>
               </TableRow>
@@ -176,13 +176,13 @@ export function CsvValidationPreview({
 
             {errorRows.slice(0, 10).map((row) => (
               <TableRow key={`err-${row.rowIndex}`} className="bg-red-50/30">
-                <TableCell className="text-xs text-mist font-mono">
+                <TableCell className="text-xs text-label-2 font-mono">
                   {row.rowIndex}
                 </TableCell>
-                <TableCell className="text-xs font-medium text-on-surface">
+                <TableCell className="text-xs font-medium text-night">
                   Row #{row.rowIndex}
                 </TableCell>
-                <TableCell className="text-xs text-mist">-</TableCell>
+                <TableCell className="text-xs text-label-2">-</TableCell>
                 <TableCell>
                   <Badge variant="declined" className="text-[10px]">
                     Error
@@ -197,7 +197,7 @@ export function CsvValidationPreview({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-outline-variant/40">
+      <div className="flex items-center justify-between pt-3 border-t border-hairline">
         <Button
           variant="outline"
           size="sm"

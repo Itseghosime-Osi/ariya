@@ -30,10 +30,10 @@ test.describe("The entry seal", () => {
       .click();
     const inviteUrl = await page.evaluate(() => navigator.clipboard.readText());
 
-    // The host places the seal in the invitation design.
-    await page.goto(`/events/${eventId}/invitations`);
-    await page.getByRole("button", { name: /add entry seal/i }).click();
-    await expect(page.getByText(/Design saved/i)).toBeVisible({
+    // The host opens the designer; the seal is placed for them.
+    // The access pass is on by default, so the designer puts the seal on the card for the host.
+    await page.goto(`/events/${eventId}/invitations/design`);
+    await expect(page.getByText(/· saved$/i)).toBeVisible({
       timeout: 15000,
     });
 
@@ -46,6 +46,10 @@ test.describe("The entry seal", () => {
     });
     await expect(page.getByText(/Personal Entry Code/i)).toHaveCount(0);
     await expect(page.getByAltText(/QR Pass/i)).toHaveCount(0);
+    // The code is not on the card, but a guest whose seal will not scan can read it out at the desk.
+    await expect(
+      page.getByText(/if the seal will not scan, give this code at the desk/i)
+    ).toBeVisible();
     const seal = page.locator("[data-entry-seal]").first();
     await expect(seal).toBeVisible();
     await expect(

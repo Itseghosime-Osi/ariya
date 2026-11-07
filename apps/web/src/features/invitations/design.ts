@@ -253,6 +253,26 @@ export function hasEntrySeal(design: InvitationDesign | null): boolean {
   );
 }
 
+/**
+ * The card as a guest receives it when the host has switched the access pass on: if the host did
+ * not place an entry seal, one is added in the house spot, so a pass is never missing from a card
+ * that needs one. A seal the host did place (and moved) is left exactly where they put it.
+ */
+export function ensureEntrySeal(design: InvitationDesign): InvitationDesign {
+  if (design.layers.some((layer) => layer.kind === "code")) {
+    return {
+      ...design,
+      layers: design.layers.map((layer) =>
+        layer.kind === "code" ? { ...layer, visible: true } : layer
+      ),
+    };
+  }
+  return {
+    ...design,
+    layers: [...design.layers, createLayerOfKind("code", design.layers.length)],
+  };
+}
+
 export function createInvitationDesign(
   event: InvitationEventContent
 ): InvitationDesign {

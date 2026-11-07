@@ -51,7 +51,12 @@ test.describe("RSVP questions and the access card", () => {
       timeout: 10000,
     });
     await expect(page.getByText("Fried rice")).toBeVisible();
-    await expect(page.getByText(/Personal Entry Code/i)).toBeVisible();
+    // With the access card on, the guest's own card carries their entry seal, and the code is a
+    // plain line under it for a seal that will not scan.
+    await expect(
+      page.getByText(/if the seal will not scan, give this code at the desk/i)
+    ).toBeVisible();
+    await expect(page.locator("[data-entry-seal]").first()).toBeVisible();
 
     // The guest can save their invitation, with the card on it.
     const [download] = await Promise.all([

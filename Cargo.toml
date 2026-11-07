@@ -4,6 +4,8 @@ members = [
     "crates/render-wasm",
     "crates/studio-core",
     "crates/studio-wasm",
+    "crates/design-core",
+    "crates/design-wasm",
 ]
 resolver = "2"
 

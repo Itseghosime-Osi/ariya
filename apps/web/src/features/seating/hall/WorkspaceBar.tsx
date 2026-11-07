@@ -11,9 +11,12 @@ export function WorkspaceBar({
   backHref,
   eventTitle,
   detail,
+  title = "Seating & Floor Plan",
   children,
 }: {
   backHref: string;
+  /** The page's own name. The workspace keeps it as the screen's heading. */
+  title?: string;
   eventTitle?: string;
   /** A short line after the event name: the hall's size and whether it has saved. */
   detail?: string;
@@ -32,7 +35,7 @@ export function WorkspaceBar({
       </BackLink>
       <div className="ml-2 min-w-0">
         <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
-          Seating &amp; Floor Plan
+          {title}
         </h1>
         <p className="truncate text-[11px] leading-tight text-label-2">
           {[eventTitle, detail].filter(Boolean).join(" · ")}

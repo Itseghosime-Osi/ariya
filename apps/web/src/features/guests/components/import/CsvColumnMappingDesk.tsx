@@ -86,27 +86,27 @@ export function CsvColumnMappingDesk({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="bg-surface-container/30 p-3 rounded-xl border border-outline-variant/40">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-wine">
+      <div className="desk-field p-3 rounded-xl border border-hairline">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-burgundy">
           Column Field Mapping
         </h4>
-        <p className="text-xs text-mist mt-0.5">
+        <p className="text-xs text-label-2 mt-0.5">
           Match columns from your uploaded CSV to Àríyá's guest registry fields.
         </p>
       </div>
 
-      <div className="flex flex-col gap-2.5 max-h-[360px] overflow-y-auto pr-1">
+      <div className="flex flex-col gap-2.5 max-h-[420px] overflow-y-auto pr-1">
         {TARGET_FIELDS.map((field) => (
           <div
             key={field.key}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl desk-field border border-hairline"
           >
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-on-surface">
+              <span className="text-xs font-semibold text-night">
                 {field.label}{" "}
-                {field.required && <span className="text-wine">*</span>}
+                {field.required && <span className="text-burgundy">*</span>}
               </span>
-              <span className="text-[11px] text-mist">{field.help}</span>
+              <span className="text-[11px] text-label-2">{field.help}</span>
             </div>
 
             <div className="w-full sm:w-[220px]">
@@ -114,12 +114,14 @@ export function CsvColumnMappingDesk({
                 value={mapping[field.key] || "__unmapped__"}
                 onValueChange={(val) => handleFieldChange(field.key, val)}
               >
-                <SelectTrigger className="h-9 text-xs">
+                <SelectTrigger className="min-h-11 text-sm">
                   <SelectValue placeholder="Do not map" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__unmapped__">
-                    <span className="italic text-mist">-- Do not map --</span>
+                    <span className="italic text-label-2">
+                      -- Do not map --
+                    </span>
                   </SelectItem>
                   {csvHeaders.map((hdr) => (
                     <SelectItem key={hdr} value={hdr}>
@@ -139,11 +141,21 @@ export function CsvColumnMappingDesk({
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-outline-variant/40">
-        <Button variant="outline" size="sm" onClick={onBack}>
+      <div className="flex items-center justify-between pt-3 border-t border-hairline">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onBack}
+          className="min-h-11 rounded-full px-5"
+        >
           Back to Upload
         </Button>
-        <Button size="sm" onClick={onProceed} disabled={!isNameMapped}>
+        <Button
+          size="sm"
+          onClick={onProceed}
+          disabled={!isNameMapped}
+          className="min-h-11 rounded-full px-5"
+        >
           Continue to Validation
         </Button>
       </div>

@@ -1356,6 +1356,10 @@ export type Database = {
         Args: { p_answers: Json; p_token: string };
         Returns: Json;
       };
+      search_check_in_guests: {
+        Args: { p_event_id: string; p_query: string };
+        Returns: Json;
+      };
       search_guests: {
         Args: {
           p_event_id: string;

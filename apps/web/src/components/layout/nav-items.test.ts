@@ -80,8 +80,10 @@ describe("hasOwnPhoneHeader", () => {
 });
 
 describe("isWorkspaceRoute", () => {
-  it("is the seating studio and nothing else", () => {
+  it("is the seating studio and the invitation designer, nothing else", () => {
     expect(isWorkspaceRoute("/events/abc/seating")).toBe(true);
+    expect(isWorkspaceRoute("/events/abc/invitations/design")).toBe(true);
+    expect(isWorkspaceRoute("/events/abc/invitations")).toBe(false);
     expect(isWorkspaceRoute("/events/abc/seating/print")).toBe(false);
     expect(isWorkspaceRoute("/events/abc/guests")).toBe(false);
     expect(isWorkspaceRoute("/events/abc")).toBe(false);

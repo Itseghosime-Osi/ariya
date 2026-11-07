@@ -31,10 +31,12 @@ export interface InvitationPalette {
   stageTo: string;
 }
 
-export type InvitationBackgroundKind = "paper" | "velvet" | "image";
+export type InvitationBackgroundKind = "paper" | "velvet" | "image" | "color";
 
 export interface InvitationBackground {
   kind: InvitationBackgroundKind;
+  /** The flat colour when kind is "color". */
+  color?: string | null;
   imageUrl: string | null;
   /** How much paper tint sits over an imported image, 0 to 0.9. */
   overlay: number;
@@ -53,6 +55,10 @@ export const INVITATION_LAYER_KINDS = [
   "text",
   /** Carries a guest's entry code as a pattern in the design; guests are never shown a QR. */
   "code",
+  /** A drawn rectangle, ellipse or line. */
+  "shape",
+  /** A picture: a photo, a logo, or an imported card. */
+  "image",
 ] as const;
 
 export type InvitationLayerKind = (typeof INVITATION_LAYER_KINDS)[number];
@@ -69,7 +75,12 @@ export const INVITATION_LAYER_LABELS: Record<InvitationLayerKind, string> = {
   footer: "Reply line",
   text: "Text",
   code: "Entry seal",
+  shape: "Shape",
+  image: "Image",
 };
+
+export const INVITATION_SHAPES = ["rect", "ellipse", "line"] as const;
+export type InvitationShape = (typeof INVITATION_SHAPES)[number];
 
 export type InvitationTextAlign = "left" | "center" | "right";
 
@@ -97,10 +108,43 @@ export interface InvitationLayer {
   colorRole: InvitationColorRole;
   color: string | null;
   visible: boolean;
+
+  // Everything below arrived with the free-form designer. All of it is optional, so a design
+  // saved before it existed still loads and draws exactly as it did.
+  /** The name the host gave the layer in the layers panel. */
+  name?: string;
+  /** Box height as a percentage of the card's height. Shapes and images; text grows with its words. */
+  height?: number;
+  /** Degrees, clockwise, about the layer's centre. */
+  rotation?: number;
+  /** 0 to 1. */
+  opacity?: number;
+  /** Shape fill, or null for none. */
+  fill?: string | null;
+  /** Shape outline, or null for none. */
+  stroke?: string | null;
+  /** Outline thickness in container-query width units. */
+  strokeWidth?: number;
+  /** Corner rounding in container-query width units. */
+  radius?: number;
+  shape?: InvitationShape;
+  imageUrl?: string | null;
+  fit?: "cover" | "contain";
+  /** A locked layer cannot be moved or deleted from the canvas. */
+  locked?: boolean;
+}
+
+export interface InvitationCanvas {
+  /** Width divided by height. 5:7 portrait stationery is 0.714. */
+  ratio: number;
 }
 
 export interface InvitationDesign {
   version: 1;
+  /** The card's shape. Absent means the house 5:7 portrait card. */
+  canvas?: InvitationCanvas;
+  /** False hides the house ribbon, inner border and foil sheen, for a card drawn from scratch. */
+  chrome?: boolean;
   theme: InvitationTheme;
   palette: InvitationPalette;
   background: InvitationBackground;

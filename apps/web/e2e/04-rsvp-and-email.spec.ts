@@ -97,8 +97,11 @@ test.describe("RSVP & Email Dispatch", () => {
       page.getByText(/Invitations & Delivery/i).first()
     ).toBeVisible();
 
+    // The designer opens in Simple mode: plain questions, no layers.
+    await page.getByRole("link", { name: /open the designer/i }).click();
+    await expect(page.getByTestId("invitation-designer")).toBeVisible();
+
     // Select emerald_regal theme
-    await page.getByRole("tab", { name: "Design" }).click();
     await page
       .getByRole("button", { name: /Emerald Regal/i })
       .first()
@@ -109,20 +112,13 @@ test.describe("RSVP & Email Dispatch", () => {
     const customMessage =
       "We warmly welcome you to share this sacred milestone with us.";
 
-    // The studio edits the card's own layers: names, eyebrow and message.
-    const setLayerText = async (kind: string, text: string) => {
-      await page.getByRole("tab", { name: "Layers" }).click();
-      await page.locator(`[data-layer-kind="${kind}"]`).click();
-      await page.getByRole("tab", { name: "Text" }).click();
-      await page.locator("#layer-text").fill(text);
-    };
+    // Names, the line above them and the message are ordinary fields.
+    await page.locator("#simple-names").fill(customHeadline);
+    await page.locator("#simple-kicker").fill(customSubheadline);
+    await page.locator("#simple-message").fill(customMessage);
 
-    await setLayerText("names", customHeadline);
-    await setLayerText("kicker", customSubheadline);
-    await setLayerText("message", customMessage);
-
-    // The studio saves itself once the typing settles.
-    await expect(page.getByText(/Design saved/i)).toBeVisible({
+    // The designer saves itself once the typing settles.
+    await expect(page.getByText(/· saved$/i)).toBeVisible({
       timeout: 15000,
     });
 

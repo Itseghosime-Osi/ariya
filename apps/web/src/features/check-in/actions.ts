@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { checkInInputSchema, type CheckInInput } from "./schemas";
-import type { CheckInResult } from "./types";
+import type { CheckInMatch, CheckInResult } from "./types";
 
 export type CheckInActionResult = {
   ok: boolean;
@@ -87,4 +87,37 @@ export async function verifyCheckInAction(
     return { ok: false, error: error?.message || "Could not verify that pass" };
   }
   return { ok: true, result: data as unknown as CheckInResult };
+}
+
+/** Finds guests who have accepted by part of their name, for a seal that will not scan. */
+export async function searchCheckInGuestsAction(
+  eventId: string,
+  query: string
+): Promise<{ ok: boolean; guests: CheckInMatch[]; error?: string }> {
+  const text = query.trim().slice(0, 60);
+  if (text.length < 2) return { ok: true, guests: [] };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      guests: [],
+      error: "Authentication required to access check-in desk",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("search_check_in_guests", {
+    p_event_id: eventId,
+    p_query: text,
+  });
+  if (error) {
+    return { ok: false, guests: [], error: "Could not search the guest list" };
+  }
+  return {
+    ok: true,
+    guests: Array.isArray(data) ? (data as unknown as CheckInMatch[]) : [],
+  };
 }

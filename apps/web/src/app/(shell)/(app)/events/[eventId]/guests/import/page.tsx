@@ -3,7 +3,6 @@ import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/components/layout/page-header";
 import { getEventById } from "@/features/events/queries";
 import { CsvImportPageFlow } from "@/features/guests/components/import/CsvImportPageFlow";
 
@@ -34,15 +33,9 @@ export default async function ImportGuestsPage({
 
   return (
     <>
-      <div className="space-y-6">
-        <PageHeader
-          title="Import Guest Registry"
-          description="Upload CSV spreadsheets, map columns, detect duplicates, and import guests."
-        />
-        <EndedLock ended={isEventExpired(data.event.date)}>
-          <CsvImportPageFlow eventId={data.event.id} />
-        </EndedLock>
-      </div>
+      <EndedLock ended={isEventExpired(data.event.date)}>
+        <CsvImportPageFlow eventId={data.event.id} />
+      </EndedLock>
     </>
   );
 }

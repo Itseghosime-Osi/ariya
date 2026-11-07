@@ -11,63 +11,61 @@ interface RecentCheckInsListProps {
 
 export function RecentCheckInsList({ checkIns }: RecentCheckInsListProps) {
   return (
-    <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-3">
-      <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+    <section className="bento-card space-y-3 p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Icon name="schedule" className="text-wine text-base" />
-          <h3 className="font-serif text-base font-bold text-wine">
+          <Icon name="schedule" className="text-base text-gold-ink" />
+          <h2 className="font-display text-lg font-bold text-night">
             Admissions Activity Log
-          </h3>
+          </h2>
         </div>
-        <span className="text-[11px] text-on-surface-variant font-mono">
-          Last {checkIns.length} check-ins
-        </span>
+        <span className="text-[12px] text-label-2">Last {checkIns.length}</span>
       </div>
 
       {checkIns.length === 0 ? (
-        <div className="p-8 text-center space-y-1">
+        <div className="space-y-1 px-2 py-8 text-center">
           <Icon
             name="diversity_3"
-            className="text-3xl text-wine/40 block mx-auto"
+            className="mx-auto block text-3xl text-gold-ink"
           />
-          <p className="text-xs text-wine font-medium">No admissions yet</p>
-          <p className="text-[11px] text-on-surface-variant">
-            Guests admitted via camera scan or manual code will appear here in
-            real time.
+          <p className="text-sm font-semibold text-night">No admissions yet</p>
+          <p className="text-[13px] text-label-2">
+            Guests you admit will appear here as they arrive.
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-outline-variant/20 max-h-96 overflow-y-auto">
+        <ul className="max-h-96 divide-y divide-hairline overflow-y-auto">
           {checkIns.map((ci) => (
-            <div
+            <li
               key={ci.id}
-              className="py-3 flex items-center justify-between gap-3 text-xs"
+              className="flex items-center justify-between gap-3 py-3"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 font-bold text-xs">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] text-[13px] font-bold text-night">
                   +{ci.count}
-                </div>
+                </span>
                 <div className="min-w-0">
-                  <p className="font-semibold text-wine truncate">
+                  <p className="truncate text-sm font-semibold text-night">
                     {ci.guest_name}
                   </p>
-                  <p className="text-[11px] text-on-surface-variant flex items-center gap-1">
+                  <p className="flex items-center gap-1 text-[13px] text-label-2">
                     <Icon
                       name="table_restaurant"
-                      className="text-xs text-wine/60"
+                      className="text-sm text-gold-ink"
                     />
-                    <span>{ci.table_name || "Unseated"}</span>
+                    <span className="truncate">
+                      {ci.table_name || "Unseated"}
+                    </span>
                   </p>
                 </div>
               </div>
-
-              <span className="text-[11px] text-on-surface-variant font-mono shrink-0">
+              <span className="shrink-0 text-[13px] text-label-2">
                 {formatLagosTime(ci.checked_in_at)}
               </span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-    </div>
+    </section>
   );
 }

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { Icon } from "@/components/ui/icon";
+import { ScreenHeader } from "@/components/layout/screen-header";
+import { DeskPageHeader } from "@/components/ui/desk-page-header";
 import { CsvUploadDropzone } from "./CsvUploadDropzone";
 import { CsvColumnMappingDesk } from "./CsvColumnMappingDesk";
 import { CsvValidationPreview } from "./CsvValidationPreview";
@@ -47,7 +49,17 @@ export function CsvImportPageFlow({ eventId }: { eventId: string }) {
 
   const handleFileSelected = async (file: File) => {
     try {
-      const text = await file.text();
+      handleCsvText(await file.text());
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Failed to parse CSV file"
+      );
+    }
+  };
+
+  // A file and a phonebook both arrive here as CSV text, so they share the mapping and checks.
+  const handleCsvText = (text: string) => {
+    try {
       setCsvText(text);
       const preview = Papa.parse<Record<string, string>>(text, {
         header: true,
@@ -118,39 +130,81 @@ export function CsvImportPageFlow({ eventId }: { eventId: string }) {
     }
   };
 
+  const stepNo =
+    step === "upload"
+      ? 1
+      : step === "mapping"
+        ? 2
+        : step === "validation"
+          ? 3
+          : 4;
+  const STEPS = ["Upload", "Match", "Check", "Done"];
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/events/${eventId}/guests`}
-          className="text-xs text-wine hover:underline flex items-center gap-1 font-semibold"
+    <div className="mx-auto max-w-4xl space-y-5 pb-24 sm:space-y-6 sm:pb-8">
+      <ScreenHeader
+        title="Import guests"
+        subtitle="From a spreadsheet"
+        backHref={`/events/${eventId}/guests`}
+      />
+      <div className="standalone:max-md:hidden">
+        <DeskPageHeader
+          eyebrow="Guest list"
+          title="Import Guest Registry"
+          description="Upload CSV spreadsheets, map columns, detect duplicates, and import guests."
         >
-          <Icon name="arrow_back" className="text-sm" />
-          <span>Back to Guest Roster</span>
-        </Link>
-        <span className="text-xs text-on-surface-variant font-medium">
-          Step{" "}
-          {step === "upload"
-            ? "1"
-            : step === "mapping"
-              ? "2"
-              : step === "validation"
-                ? "3"
-                : "4"}{" "}
-          of 4
-        </span>
+          <Link
+            href={`/events/${eventId}/guests`}
+            className="desk-chip inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            <Icon name="arrow_back" className="text-sm" />
+            Back to Guest Roster
+          </Link>
+        </DeskPageHeader>
       </div>
 
+      <ol aria-label={`Step ${stepNo} of 4`} className="grid grid-cols-4 gap-2">
+        {STEPS.map((label, i) => (
+          <li
+            key={label}
+            aria-current={i + 1 === stepNo ? "step" : undefined}
+            className="min-w-0"
+          >
+            <span
+              aria-hidden="true"
+              className={`block h-1.5 rounded-full ${
+                i + 1 <= stepNo
+                  ? "bg-gradient-to-r from-[#f6e2ad] to-[#d4a85a]"
+                  : "bg-hairline"
+              }`}
+            />
+            <span
+              className={`mt-1.5 block truncate text-[12px] font-semibold ${
+                i + 1 === stepNo ? "text-burgundy" : "text-label-2"
+              }`}
+            >
+              {i + 1}. {label}
+            </span>
+          </li>
+        ))}
+      </ol>
+
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-error-container text-on-error-container text-xs font-semibold flex items-center gap-2">
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-2xl border border-red-300 bg-red-50 p-4 text-[13px] font-semibold text-red-900"
+        >
           <Icon name="error" className="text-base" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      <div className="bg-surface-container-low p-6 sm:p-8 rounded-2xl border border-outline-variant/30 shadow-sm">
+      <div className="bento-card p-5 sm:p-8">
         {step === "upload" && (
-          <CsvUploadDropzone onFileSelected={handleFileSelected} />
+          <CsvUploadDropzone
+            onFileSelected={handleFileSelected}
+            onCsvText={handleCsvText}
+          />
         )}
 
         {step === "mapping" && (

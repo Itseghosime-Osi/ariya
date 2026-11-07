@@ -3,6 +3,7 @@
 import React from "react";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import { resolveLayerColour } from "../design";
+import { designRatio } from "../layer-ops";
 import { EntrySeal, SAMPLE_ENTRY_CODE } from "./EntrySeal";
 import type { InvitationDesign, InvitationLayer } from "../types";
 
@@ -21,6 +22,13 @@ interface InvitationCardProps {
     event: React.PointerEvent<HTMLDivElement>,
     layer: InvitationLayer
   ) => void;
+}
+
+/** A quoted CSS url(), so a link with brackets or spaces in it cannot break the rule. */
+function cssUrl(url: string | null | undefined): string | undefined {
+  return url
+    ? `url("${url.replace(/["\\\n]/g, encodeURIComponent)}")`
+    : undefined;
 }
 
 function colourFor(layer: InvitationLayer, design: InvitationDesign): string {
@@ -62,7 +70,7 @@ function textStyle(
         : undefined,
     whiteSpace: "pre-wrap",
     overflowWrap: "anywhere",
-    cursor: interactive ? "move" : undefined,
+    cursor: interactive && !layer.locked ? "move" : undefined,
     touchAction: interactive ? "none" : undefined,
     userSelect: interactive ? "none" : undefined,
   };
@@ -86,7 +94,13 @@ export function InvitationCard({
   const paper = `radial-gradient(120% 90% at 20% 0%, ${palette.paper} 0%, ${palette.paper} 55%, ${palette.paperEdge} 100%)`;
   const velvet = `linear-gradient(160deg, ${palette.stageFrom}, ${palette.stageTo})`;
   const hasImage = background.kind === "image" && Boolean(background.imageUrl);
-  const surface = background.kind === "velvet" ? velvet : paper;
+  const flat = background.kind === "color" && background.color;
+  const surface = flat
+    ? (background.color as string)
+    : background.kind === "velvet"
+      ? velvet
+      : paper;
+  const chrome = design.chrome !== false;
 
   return (
     <div
@@ -94,12 +108,14 @@ export function InvitationCard({
       data-invitation-canvas
       role="group"
       aria-label="Invitation design"
-      className={`relative aspect-[5/7] w-full overflow-hidden rounded-[20px] ${className}`}
+      className={`relative w-full overflow-hidden rounded-[20px] ${className}`}
       style={{
+        aspectRatio: String(designRatio(design)),
         containerType: "inline-size",
         background: surface,
-        boxShadow:
-          background.kind === "velvet"
+        boxShadow: !chrome
+          ? "0 24px 48px -28px rgba(0,0,0,0.6)"
+          : background.kind === "velvet"
             ? `inset 0 0 0 1px ${palette.foil}66, 0 24px 48px -28px rgba(0,0,0,0.6)`
             : `inset 0 0 0 1px ${palette.foil}59, inset 0 0 0 6px ${palette.paper}, inset 0 0 0 7px ${palette.foil}73, 0 24px 48px -28px rgba(28,7,13,0.55)`,
       }}
@@ -110,7 +126,7 @@ export function InvitationCard({
             aria-hidden="true"
             className="absolute inset-0"
             style={{
-              backgroundImage: `url(${background.imageUrl})`,
+              backgroundImage: cssUrl(background.imageUrl),
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -123,20 +139,24 @@ export function InvitationCard({
         </>
       )}
 
-      <span className="foil-sheen" aria-hidden="true" />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0"
-        style={{
-          height: "3.2%",
-          background: `linear-gradient(90deg, ${palette.ribbonA} 0 70%, ${palette.ribbonB} 70% 100%)`,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="weave absolute inset-x-0 top-0 opacity-30 mix-blend-overlay"
-        style={{ height: "3.2%" }}
-      />
+      {chrome && (
+        <>
+          <span className="foil-sheen" aria-hidden="true" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 top-0"
+            style={{
+              height: "3.2%",
+              background: `linear-gradient(90deg, ${palette.ribbonA} 0 70%, ${palette.ribbonB} 70% 100%)`,
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="weave absolute inset-x-0 top-0 opacity-30 mix-blend-overlay"
+            style={{ height: "3.2%" }}
+          />
+        </>
+      )}
 
       {design.layers.map((layer) => {
         if (!layer.visible) return null;
@@ -148,6 +168,16 @@ export function InvitationCard({
               borderRadius: "2px",
             }
           : {};
+        const movable = interactive && !layer.locked;
+        const common: React.CSSProperties = {
+          ...(layer.rotation
+            ? { transform: `rotate(${layer.rotation}deg)` }
+            : {}),
+          ...(layer.opacity != null && layer.opacity < 1
+            ? { opacity: layer.opacity }
+            : {}),
+          ...selection,
+        };
         const pointerProps = interactive
           ? {
               onPointerDown: (event: React.PointerEvent<HTMLDivElement>) =>
@@ -166,9 +196,9 @@ export function InvitationCard({
                 top: `${layer.y}%`,
                 width: `${layer.width}%`,
                 aspectRatio: "1",
-                cursor: interactive ? "move" : undefined,
+                cursor: movable ? "move" : interactive ? "default" : undefined,
                 touchAction: interactive ? "none" : undefined,
-                ...selection,
+                ...common,
               }}
               {...pointerProps}
             >
@@ -196,9 +226,9 @@ export function InvitationCard({
                 top: `${layer.y}%`,
                 width: `${Math.max(layer.width, 16)}%`,
                 aspectRatio: "1",
-                cursor: interactive ? "move" : undefined,
+                cursor: movable ? "move" : interactive ? "default" : undefined,
                 touchAction: interactive ? "none" : undefined,
-                ...selection,
+                ...common,
               }}
               {...pointerProps}
             >
@@ -226,9 +256,9 @@ export function InvitationCard({
                 alignItems: "center",
                 gap: "2cqw",
                 color: colourFor(layer, design),
-                cursor: interactive ? "move" : undefined,
+                cursor: movable ? "move" : interactive ? "default" : undefined,
                 touchAction: interactive ? "none" : undefined,
-                ...selection,
+                ...common,
               }}
               {...pointerProps}
             >
@@ -253,11 +283,71 @@ export function InvitationCard({
           );
         }
 
+        if (layer.kind === "shape") {
+          const line = layer.shape === "line";
+          const stroke = layer.stroke ?? null;
+          return (
+            <div
+              key={layer.id}
+              data-layer-id={layer.id}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: `${layer.x}%`,
+                top: `${layer.y}%`,
+                width: `${layer.width}%`,
+                height: `${layer.height ?? 20}%`,
+                background: line
+                  ? (stroke ?? layer.fill ?? "#b8864b")
+                  : (layer.fill ?? "transparent"),
+                border:
+                  !line && stroke
+                    ? `${layer.strokeWidth ?? 0.4}cqw solid ${stroke}`
+                    : undefined,
+                borderRadius:
+                  layer.shape === "ellipse" ? "50%" : `${layer.radius ?? 0}cqw`,
+                cursor: movable ? "move" : interactive ? "default" : undefined,
+                touchAction: interactive ? "none" : undefined,
+                ...common,
+              }}
+              {...pointerProps}
+            />
+          );
+        }
+
+        if (layer.kind === "image") {
+          if (!layer.imageUrl) return null;
+          return (
+            <div
+              key={layer.id}
+              data-layer-id={layer.id}
+              role="img"
+              aria-label={layer.name || "Image"}
+              style={{
+                position: "absolute",
+                left: `${layer.x}%`,
+                top: `${layer.y}%`,
+                width: `${layer.width}%`,
+                height: `${layer.height ?? 30}%`,
+                backgroundImage: cssUrl(layer.imageUrl),
+                backgroundSize: layer.fit === "contain" ? "contain" : "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                borderRadius: `${layer.radius ?? 0}cqw`,
+                cursor: movable ? "move" : interactive ? "default" : undefined,
+                touchAction: interactive ? "none" : undefined,
+                ...common,
+              }}
+              {...pointerProps}
+            />
+          );
+        }
+
         return (
           <div
             key={layer.id}
             data-layer-id={layer.id}
-            style={{ ...textStyle(layer, design, interactive), ...selection }}
+            style={{ ...textStyle(layer, design, interactive), ...common }}
             {...pointerProps}
           >
             {layer.text}

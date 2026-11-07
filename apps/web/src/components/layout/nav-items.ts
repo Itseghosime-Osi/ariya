@@ -166,7 +166,7 @@ export function getPhoneMoreSections(eventId?: string | null): NavItem[] {
  * and carries its own Back button, so the app's sidebar, top bar and phone dock step aside.
  */
 export function isWorkspaceRoute(pathname: string): boolean {
-  return /^\/events\/[^/]+\/seating$/.test(pathname);
+  return /^\/events\/[^/]+\/(seating|invitations\/design)$/.test(pathname);
 }
 
 /**

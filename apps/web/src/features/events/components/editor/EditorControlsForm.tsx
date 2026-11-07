@@ -47,7 +47,8 @@ export function EditorControlsForm({
             </p>
             <p className="text-[11px] text-on-surface-variant">
               When off, /e/[slug] returns 404. Direct invitation passes
-              (/i/token) stay active.
+              (/i/token) stay active. After the event date, both close and
+              guests see “this celebration has ended”.
             </p>
           </div>
           <Switch

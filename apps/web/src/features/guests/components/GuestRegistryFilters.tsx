@@ -52,7 +52,7 @@ export function GuestRegistryFilters({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-outline-variant/70">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b border-hairline">
         <div
           role="group"
           aria-label="Filter by reply"
@@ -66,8 +66,8 @@ export function GuestRegistryFilters({
               onClick={() => onChange({ ...filters, rsvpStatus: t.value })}
               className={`relative min-h-11 whitespace-nowrap pb-2 pt-2 text-sm font-semibold transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:origin-left after:scale-x-0 after:bg-gold after:transition-transform after:duration-300 aria-pressed:after:scale-x-100 ${
                 status === t.value
-                  ? "text-on-surface"
-                  : "text-on-surface-variant hover:text-on-surface"
+                  ? "text-night"
+                  : "text-label-2 hover:text-night"
               }`}
             >
               {t.label}
@@ -79,20 +79,20 @@ export function GuestRegistryFilters({
         <div className="relative mb-2 w-full sm:w-72">
           <Search
             aria-hidden="true"
-            className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant"
+            className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-label-2"
           />
           <Input
             aria-label="Search guests"
             placeholder="Search by name, phone or email"
             value={filters.search || ""}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
-            className="h-11 rounded-full border-outline-variant/70 bg-ivory pl-10 pr-9 shadow-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/30"
+            className="h-11 rounded-full border-hairline bg-ivory pl-10 pr-9 shadow-none transition-colors focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/30"
           />
           {filters.search && (
             <button
               type="button"
               onClick={() => onChange({ ...filters, search: "" })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-label-2 hover:text-night"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function GuestRegistryFilters({
           type="button"
           aria-expanded={showMore}
           onClick={() => setMoreOpen((v) => !v)}
-          className="min-h-11 font-semibold text-on-surface-variant underline decoration-outline-variant underline-offset-4 hover:text-wine"
+          className="min-h-11 font-semibold text-label-2 underline decoration-hairline underline-offset-4 hover:text-burgundy"
         >
           {showMore ? "Hide filters" : "More filters"}
         </button>
@@ -114,7 +114,7 @@ export function GuestRegistryFilters({
           <button
             type="button"
             onClick={onReset}
-            className="min-h-11 font-semibold text-on-surface-variant underline decoration-outline-variant underline-offset-4 hover:text-wine"
+            className="min-h-11 font-semibold text-label-2 underline decoration-hairline underline-offset-4 hover:text-burgundy"
           >
             Reset
           </button>
@@ -188,16 +188,14 @@ export function GuestRegistryFilters({
             type="button"
             variant={filters.isVip ? "gold" : "outline"}
             size="sm"
-            className="h-11 px-3 border-outline-variant"
+            className="h-11 px-3 border-hairline"
             onClick={() =>
               onChange({ ...filters, isVip: filters.isVip ? undefined : true })
             }
           >
             <Star
               className={`mr-1.5 h-4 w-4 ${
-                filters.isVip
-                  ? "fill-amber-500 text-amber-500"
-                  : "text-on-surface-variant"
+                filters.isVip ? "fill-amber-500 text-amber-500" : "text-label-2"
               }`}
             />
             VIP

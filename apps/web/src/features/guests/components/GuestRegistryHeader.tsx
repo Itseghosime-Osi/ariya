@@ -22,10 +22,10 @@ export function GuestRegistryHeader({
         <p className="truncate text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
           {eventName}
         </p>
-        <h1 className="mt-1 font-serif text-3xl font-bold leading-tight text-on-surface sm:mt-2 sm:text-5xl">
+        <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-night sm:mt-2 sm:text-5xl">
           Guest Registry
         </h1>
-        <p className="mt-2 hidden max-w-xl text-sm text-on-surface-variant sm:block">
+        <p className="mt-2 hidden max-w-xl text-sm text-label-2 sm:block">
           Who is coming, who still owes a reply, and who needs a seat.
         </p>
       </div>

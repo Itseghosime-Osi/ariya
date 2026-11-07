@@ -3,6 +3,22 @@
 version = 4
 
 [[package]]
+name = "ariya-design-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "ts-rs",
+]
+
+[[package]]
+name = "ariya-design-wasm"
+version = "0.1.0"
+dependencies = [
+ "ariya-design-core",
+]
+
+[[package]]
 name = "ariya-render-core"
 version = "0.1.0"
 

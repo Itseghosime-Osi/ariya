@@ -41,3 +41,14 @@ export interface CheckInDeskData {
   stats: CheckInStats;
   recentCheckIns: RecentCheckIn[];
 }
+
+/** One guest the desk found by name. Only guests who have accepted are ever offered. */
+export interface CheckInMatch {
+  guest_id: string;
+  guest_name: string;
+  attending_count: number;
+  checked_in_count: number;
+  table_name: string | null;
+  /** The pass code, so choosing a guest continues exactly as a scan does: verify, then Admit. */
+  code: string;
+}

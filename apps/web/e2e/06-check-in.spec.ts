@@ -58,6 +58,12 @@ test.describe("Reception Check-in Desk", () => {
       page.getByText(/Check-In Desk & Reception Concierge/i)
     ).toBeVisible();
 
+    // A seal that will not scan: the desk finds the guest by name and verifies the same way.
+    await page.getByLabel(/name, or part of it/i).fill("Kayode");
+    await page.getByRole("button", { name: /Kayode Fayemi/i }).click();
+    await expect(page.getByText(/Verified invitation/i)).toBeVisible();
+    await page.getByRole("button", { name: /not now/i }).click();
+
     // Perform check-in via security code
     await page.locator('input[placeholder*="ARY-"]').fill(checkInCode!);
     await page.getByRole("button", { name: /verify pass/i }).click();

@@ -94,7 +94,8 @@ Yetunde Adeleke,08098765432,yetunde@lagos.ng,Bride,Bridal Party,No,1`;
     // Step 1: Upload Dropzone
     await expect(page.getByText(/Upload Guest CSV Roster/i)).toBeVisible();
     await expect(page.getByText(/Upload Guest CSV Roster/i)).toBeVisible();
-    const fileInput = page.locator('input[type="file"]');
+    // The page also has a contacts-file picker (.vcf); this is the spreadsheet one.
+    const fileInput = page.locator('input[type="file"][accept*="csv"]');
     console.log("File input count:", await fileInput.count());
     await fileInput.setInputFiles({
       name: "guests_roster.csv",
