@@ -64,7 +64,7 @@ export function PasswordStrengthMeter({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-body-sm text-body-sm">
         <div
           className={`flex items-center gap-1.5 ${
-            hasMinLength ? "text-success font-semibold" : "text-mist"
+            hasMinLength ? "text-success font-semibold" : "text-label-2"
           }`}
         >
           <Icon
@@ -75,7 +75,7 @@ export function PasswordStrengthMeter({
         </div>
         <div
           className={`flex items-center gap-1.5 ${
-            hasNumber ? "text-success font-semibold" : "text-mist"
+            hasNumber ? "text-success font-semibold" : "text-label-2"
           }`}
         >
           <Icon
@@ -86,7 +86,7 @@ export function PasswordStrengthMeter({
         </div>
         <div
           className={`flex items-center gap-1.5 ${
-            hasSpecial ? "text-success font-semibold" : "text-mist"
+            hasSpecial ? "text-success font-semibold" : "text-label-2"
           }`}
         >
           <Icon

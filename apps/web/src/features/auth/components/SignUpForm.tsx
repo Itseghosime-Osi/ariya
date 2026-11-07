@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { signUpAction } from "../actions";
+import { GoogleButton, OrDivider } from "./GoogleButton";
+import { clientEnv } from "@/lib/env/client";
+import { googleSignInEnabled } from "@/lib/auth/oauth";
 import { RoleSelector } from "./RoleSelector";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import { PasswordField } from "./PasswordField";
@@ -199,7 +202,7 @@ export function SignUpForm() {
 
       <section aria-label={`Step ${step} of ${STEPS.length}`}>
         <div className="mb-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-ink">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-ink">
             {stepInfo.eyebrow}
           </p>
           <h2
@@ -226,6 +229,14 @@ export function SignUpForm() {
 
         <AuthFeedbackAlert error={errorMessage} />
 
+        {step === 1 &&
+          googleSignInEnabled(clientEnv.NEXT_PUBLIC_GOOGLE_SIGN_IN) && (
+            <>
+              <GoogleButton label="Sign up with Google" />
+              <OrDivider>or fill in your details</OrDivider>
+            </>
+          )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
           {step === 1 && (
             <div className="space-y-5">
@@ -248,7 +259,7 @@ export function SignUpForm() {
                     aria-hidden="true"
                   />
                   <input
-                    className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-4 text-sm text-night shadow-inner outline-none transition-all placeholder:text-mist focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
+                    className="desk-field min-h-12 w-full rounded-2xl py-3 pl-11 pr-4 text-base text-night outline-none placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
                     id="fullName"
                     placeholder="First & Last Name"
                     type="text"
@@ -278,7 +289,7 @@ export function SignUpForm() {
                   aria-hidden="true"
                 />
                 <input
-                  className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-4 text-sm text-night shadow-inner outline-none transition-all placeholder:text-mist focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
+                  className="desk-field min-h-12 w-full rounded-2xl py-3 pl-11 pr-4 text-base text-night outline-none placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
                   id="emailInput"
                   placeholder="you@example.com"
                   type="email"

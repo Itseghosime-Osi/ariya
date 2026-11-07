@@ -7,6 +7,9 @@ import { Icon } from "@/components/ui/icon";
 import { signInAction } from "../actions";
 import { PasswordField } from "./PasswordField";
 import { AuthFeedbackAlert } from "./AuthFeedbackAlert";
+import { GoogleButton, OrDivider } from "./GoogleButton";
+import { clientEnv } from "@/lib/env/client";
+import { googleSignInEnabled, oauthFailureMessage } from "@/lib/auth/oauth";
 
 export function SignInForm() {
   const router = useRouter();
@@ -15,11 +18,14 @@ export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
-    searchParams?.get("error") === "auth_callback_failed"
-      ? "That link has expired or was already used. Sign in, or ask for a new link."
-      : null
-  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(() => {
+    const code = searchParams?.get("error") ?? null;
+    if (code === "auth_callback_failed") {
+      return "That link has expired or was already used. Sign in, or ask for a new link.";
+    }
+    return oauthFailureMessage(code);
+  });
+  const showGoogle = googleSignInEnabled(clientEnv.NEXT_PUBLIC_GOOGLE_SIGN_IN);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const welcomed = useRef(false);
 
@@ -87,6 +93,16 @@ export function SignInForm() {
 
         <AuthFeedbackAlert error={errorMessage} success={welcomeMessage} />
 
+        {showGoogle && (
+          <>
+            <GoogleButton
+              next={searchParams?.get("next")}
+              label="Continue with Google"
+            />
+            <OrDivider>or use your email</OrDivider>
+          </>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
@@ -104,7 +120,7 @@ export function SignInForm() {
                 aria-hidden="true"
               />
               <input
-                className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-4 text-sm text-night shadow-inner outline-none transition-all placeholder:text-mist focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
+                className="desk-field min-h-12 w-full rounded-2xl py-3 pl-11 pr-4 text-base text-night outline-none placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
                 id="signin-email"
                 placeholder="you@example.com"
                 type="email"

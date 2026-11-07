@@ -52,14 +52,14 @@ export function ResetPasswordForm() {
     <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-wine">
+          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-wine">
             Step 2: Set New Password
           </span>
           <span className="text-xs text-label-2">Step 2 of 2</span>
         </div>
 
         <div className="mb-6">
-          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-gold-ink">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.2em] text-gold-ink">
             PASSWORD RESET
           </span>
           <h1 className="font-display text-4xl font-semibold leading-tight text-wine sm:text-5xl">
@@ -102,7 +102,7 @@ export function ResetPasswordForm() {
             </span>
             <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
               <span
-                className={`flex items-center gap-1.5 ${hasMinLength ? "text-success font-semibold" : "text-mist"}`}
+                className={`flex items-center gap-1.5 ${hasMinLength ? "text-success font-semibold" : "text-label-2"}`}
               >
                 <Icon
                   name={hasMinLength ? "check_circle" : "pending"}
@@ -111,7 +111,7 @@ export function ResetPasswordForm() {
                 8+ Characters
               </span>
               <span
-                className={`flex items-center gap-1.5 ${hasUppercase ? "text-success font-semibold" : "text-mist"}`}
+                className={`flex items-center gap-1.5 ${hasUppercase ? "text-success font-semibold" : "text-label-2"}`}
               >
                 <Icon
                   name={hasUppercase ? "check_circle" : "pending"}
@@ -120,7 +120,7 @@ export function ResetPasswordForm() {
                 Uppercase Letter
               </span>
               <span
-                className={`flex items-center gap-1.5 ${hasNumber ? "text-success font-semibold" : "text-mist"}`}
+                className={`flex items-center gap-1.5 ${hasNumber ? "text-success font-semibold" : "text-label-2"}`}
               >
                 <Icon
                   name={hasNumber ? "check_circle" : "pending"}
@@ -129,7 +129,7 @@ export function ResetPasswordForm() {
                 One Number
               </span>
               <span
-                className={`flex items-center gap-1.5 ${hasSpecial ? "text-success font-semibold" : "text-mist"}`}
+                className={`flex items-center gap-1.5 ${hasSpecial ? "text-success font-semibold" : "text-label-2"}`}
               >
                 <Icon
                   name={hasSpecial ? "check_circle" : "pending"}

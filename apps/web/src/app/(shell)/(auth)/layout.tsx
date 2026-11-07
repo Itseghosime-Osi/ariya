@@ -30,18 +30,18 @@ export default function AuthLayout({
                 <span className="font-display text-2xl leading-none text-wine">
                   Àríyá
                 </span>
-                <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-label-2">
+                <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-label-2">
                   Celebration desk
                 </span>
               </span>
             </Link>
-            <span className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gold-ink sm:inline-flex">
+            <span className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-ink sm:inline-flex">
               <Icon name="verified" size={15} />A suite for hosts
             </span>
           </header>
 
           <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center py-7 sm:py-10 lg:py-8">
-            <p className="mb-4 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-ink lg:hidden">
+            <p className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-ink lg:hidden">
               <Icon name="celebration" size={15} />
               Every yes, together
             </p>

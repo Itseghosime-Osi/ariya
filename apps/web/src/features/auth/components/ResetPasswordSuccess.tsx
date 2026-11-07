@@ -11,7 +11,7 @@ export function ResetPasswordSuccess() {
     <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="rounded-full bg-success-surface px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success">
+          <span className="rounded-full bg-success-surface px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-success">
             Password Updated
           </span>
           <span className="text-xs font-semibold text-success">Complete</span>
@@ -21,7 +21,7 @@ export function ResetPasswordSuccess() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-surface text-success shadow-sm">
             <Icon name="check_circle" className="text-4xl" />
           </div>
-          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-success">
+          <span className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-success">
             Password Changed
           </span>
           <h2 className="mb-2 font-display text-2xl font-semibold text-night">

@@ -46,14 +46,14 @@ export function ForgotPasswordForm() {
     <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-wine">
+          <span className="rounded-full bg-[#eee5d9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-wine">
             Account Recovery
           </span>
           <span className="text-xs text-label-2">Step 1 of 2</span>
         </div>
 
         <div className="mb-6">
-          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-gold-ink">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.2em] text-gold-ink">
             PASSWORD RECOVERY
           </span>
           <h1 className="font-display text-4xl font-semibold leading-tight text-wine sm:text-5xl">
@@ -82,7 +82,7 @@ export function ForgotPasswordForm() {
                 aria-hidden="true"
               />
               <input
-                className="w-full rounded-xl border border-outline-variant/60 bg-paper py-3 pl-11 pr-4 text-sm text-night shadow-inner outline-none transition-all placeholder:text-mist focus:border-gold focus:bg-surface-container-lowest focus:ring-4 focus:ring-gold/15"
+                className="desk-field min-h-12 w-full rounded-2xl py-3 pl-11 pr-4 text-base text-night outline-none placeholder:text-label-3 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
                 id="reset-email"
                 placeholder="you@example.com"
                 type="email"
@@ -92,7 +92,7 @@ export function ForgotPasswordForm() {
                 disabled={isPending}
               />
             </div>
-            <span className="font-body-sm text-body-sm text-mist block pt-0.5">
+            <span className="font-body-sm text-body-sm text-label-2 block pt-0.5">
               Must match the email used on your account.
             </span>
           </div>
