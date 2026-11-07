@@ -17,7 +17,7 @@ export default function DocumentationLayout({
   }));
   return (
     <div className="min-h-screen bg-ivory text-night antialiased selection:bg-gold/30">
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 pb-2 pt-[calc(1.25rem+env(safe-area-inset-top))] sm:px-8">
+      <header className="mx-auto flex max-w-[88rem] items-center justify-between gap-4 px-5 pb-2 pt-[calc(1.25rem+env(safe-area-inset-top))] sm:px-8">
         <Link
           href="/documentation"
           className="flex min-h-11 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-burgundy"
@@ -42,8 +42,8 @@ export default function DocumentationLayout({
         </nav>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 pb-16 pt-4 sm:px-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside className="lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto lg:pr-2">
+      <div className="mx-auto grid max-w-[88rem] gap-8 px-5 pb-16 pt-4 sm:px-8 lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <aside className="lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto lg:border-r lg:border-hairline lg:pr-5">
           <DocsSearch index={searchIndex()} />
           <details className="mt-4 lg:hidden">
             <summary className="flex min-h-11 cursor-pointer items-center rounded-full border border-hairline bg-white px-4 text-sm font-semibold text-burgundy">
@@ -62,7 +62,7 @@ export default function DocumentationLayout({
         </main>
       </div>
 
-      <footer className="mx-auto max-w-6xl border-t border-hairline px-5 py-6 text-[13px] text-label-2 sm:px-8">
+      <footer className="mx-auto max-w-[88rem] border-t border-hairline px-5 py-6 text-[13px] text-label-2 sm:px-8">
         © 2026 {LEGAL.operator}. Spotted a mistake? Write to{" "}
         <a
           className="font-semibold text-burgundy underline underline-offset-2"
