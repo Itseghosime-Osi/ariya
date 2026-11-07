@@ -78,7 +78,7 @@ test.describe("Seating workspace", () => {
       page.getByRole("heading", { name: /Seating & Floor Plan/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Back to the event" })
+      page.getByRole("link", { name: "Back", exact: true })
     ).toHaveAttribute("href", `/events/${eventId}`);
 
     // Add a table from the always-there New table button.
@@ -135,7 +135,7 @@ test.describe("Seating workspace", () => {
     await expect(page.getByTestId("left-dock")).toBeVisible();
 
     // Back returns to the event, with the app's navigation back around it.
-    await page.getByRole("link", { name: "Back to the event" }).click();
+    await page.getByRole("link", { name: "Back", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/events/${eventId}$`));
     await expect(page.getByTestId("desktop-sidebar")).toBeVisible();
   });

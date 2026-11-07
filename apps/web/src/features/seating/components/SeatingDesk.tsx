@@ -3,6 +3,7 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { BackLink } from "@/components/layout/back-link";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -169,14 +170,14 @@ export function SeatingDesk({
         {view === "list" && (
           // On a phone there is no studio: the list is the page, so it brings its own Back and heading.
           <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-hairline bg-ivory/95 px-3 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur">
-            <Link
+            <BackLink
               href={`/events/${eventId}`}
-              aria-label="Back to the event"
+              aria-label="Back"
               className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
             >
               <ArrowLeft size={15} aria-hidden="true" />
               Back
-            </Link>
+            </BackLink>
             <div className="min-w-0 flex-1">
               <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
                 Seating &amp; Floor Plan
