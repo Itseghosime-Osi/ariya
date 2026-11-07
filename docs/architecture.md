@@ -316,3 +316,7 @@ The seating route is two things in one shell: a **3D hall** rendered in `public/
   - Queries events, guests, and vendors simultaneously within the caller's authorized celebrations.
   - Strict parameter escaping of special characters (`%`, `_`, `\`) prevents query injection.
   - Returns categorized results (`event`, `guest`, `vendor`) with instant deep-linking.
+
+## 15. The manual
+
+The full user and engineering manual is served at `/documentation` (35 pages in five sections: Start here, Host guide, Team/safety/data, Engineering, Reference). Content is plain typed data in `apps/web/src/lib/docs/content/*`, rendered by `components/docs/*` under the `(shell)/(docs)` route group. It is public (bypassed in `proxy.ts`), listed in `sitemap.ts`, searchable in the browser, and guarded by `lib/docs/docs.test.ts` (unique slugs, resolving links, rectangular tables, required facts) and `e2e/26-documentation.spec.ts`. Update the matching page whenever behaviour changes. This file, `docs/mcp.md`, the ADRs and `DESIGN.md` remain the engineering sources of record.
