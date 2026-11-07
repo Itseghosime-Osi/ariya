@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CheckInHeader } from "./CheckInHeader";
 import { CheckInCameraScanner } from "./CheckInCameraScanner";
+import { GuestNameSearch } from "./GuestNameSearch";
 import { ManualCheckInForm } from "./ManualCheckInForm";
 import { CheckInResultCard } from "./CheckInResultCard";
 import { CheckInVerifyCard } from "./CheckInVerifyCard";
@@ -186,6 +187,12 @@ export function CheckInDesk({ eventId, initialData }: CheckInDeskProps) {
 
       <div className="grid grid-cols-1 items-start gap-5 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-7 space-y-6">
+          <GuestNameSearch
+            eventId={eventId}
+            disabled={loading}
+            onPick={(code) => handleVerify(code)}
+          />
+
           <ManualCheckInForm
             loading={loading}
             onCheckIn={(code) => handleVerify(code)}

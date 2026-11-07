@@ -185,6 +185,19 @@ export function RsvpSummaryCard({
         />
       )}
 
+      {/* The seal is the pass. This line is only for a seal that will not scan: the code stays off
+          the card itself, and the desk can find the guest by name as well. */}
+      {isAccepted && design && checkInCode && (
+        <p className={`text-center text-[13px] ${theme.subheadline}`}>
+          If the seal will not scan, give this code at the desk:{" "}
+          <span
+            className={`inline-block rounded-md border px-2 py-0.5 font-mono text-sm font-bold tracking-wider ${theme.codeBadge}`}
+          >
+            {checkInCode}
+          </span>
+        </p>
+      )}
+
       {isAccepted && !design && checkInCode && qrCodeUrl && (
         <section
           className={`bg-white rounded-xl p-5 border text-center space-y-3 shadow-xs ${theme.qrBox}`}

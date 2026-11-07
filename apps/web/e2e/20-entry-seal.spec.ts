@@ -46,6 +46,10 @@ test.describe("The entry seal", () => {
     });
     await expect(page.getByText(/Personal Entry Code/i)).toHaveCount(0);
     await expect(page.getByAltText(/QR Pass/i)).toHaveCount(0);
+    // The code is not on the card, but a guest whose seal will not scan can read it out at the desk.
+    await expect(
+      page.getByText(/if the seal will not scan, give this code at the desk/i)
+    ).toBeVisible();
     const seal = page.locator("[data-entry-seal]").first();
     await expect(seal).toBeVisible();
     await expect(
