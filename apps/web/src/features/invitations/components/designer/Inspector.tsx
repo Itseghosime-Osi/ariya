@@ -389,7 +389,7 @@ export function Inspector({
             label="Width"
             suffix="%"
             value={layer.width}
-            min={2}
+            min={5}
             max={100}
             step={0.5}
             onChange={(v) => patch({ width: v })}

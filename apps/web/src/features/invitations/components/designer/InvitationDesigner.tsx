@@ -6,24 +6,20 @@ import { cn } from "@/lib/utils";
 import { Segmented } from "@/features/seating/hall/studio-ui";
 import { WorkspaceBar } from "@/features/seating/hall/WorkspaceBar";
 import { uploadInvitationImageAction } from "../../actions";
+import { normaliseDesign } from "../../design";
 import {
-  createLayerOfKind,
-  ensureEntrySeal,
-  normaliseDesign,
-} from "../../design";
-import {
-  alignLayer,
-  applyImportedCard,
-  createImageLayer,
-  createShapeLayer,
-  designRatio,
-  duplicateLayer,
-  isEditable,
-  moveLayerStack,
-  removeImportedCard,
-  type Alignment,
-  type StackMove,
-} from "../../layer-ops";
+  addImage,
+  addLayerOfKind,
+  addShape,
+  align as alignViaEngine,
+  duplicate as duplicateViaEngine,
+  importCard,
+  removeCard,
+  stack as stackViaEngine,
+  startDesignEngine,
+  withEntrySeal,
+} from "../../engine";
+import { isEditable, type Alignment, type StackMove } from "../../layer-ops";
 import type {
   InvitationDesign,
   InvitationEventContent,
@@ -164,12 +160,18 @@ export function InvitationDesigner({
   const designRef = useRef(design);
   designRef.current = design;
 
+  // The Rust design engine loads in the background. Until it is ready, the TypeScript twin of
+  // every operation answers, so nothing waits on it.
+  useEffect(() => {
+    void startDesignEngine();
+  }, []);
+
   // A pass that is on belongs on the card. Show the host the seal, in its house place, so they can
   // move it; guests get one even if this never runs.
   useEffect(() => {
     if (!requireAccessCard) return;
     if (designRef.current.layers.some((l) => l.kind === "code")) return;
-    commit((d) => ensureEntrySeal(d), false);
+    commit((d) => withEntrySeal(d), false);
   }, [requireAccessCard, commit]);
 
   const canDelete = useCallback(
@@ -253,35 +255,26 @@ export function InvitationDesigner({
     [commit]
   );
 
-  const addLayer = useCallback(
-    (layer: InvitationLayer) => {
-      commit((d) => ({ ...d, layers: [...d.layers, layer] }));
-      setSelectedId(layer.id);
-      setSheetTab("properties");
-    },
-    [commit]
-  );
-
   const add = useCallback(
     (kind: AddKind) => {
       const d = designRef.current;
-      const n = d.layers.length;
-      if (d.layers.length >= 60) {
+      if (kind === "code" && d.layers.some((l) => l.kind === "code")) return;
+      const out =
+        kind === "rect" || kind === "ellipse" || kind === "line"
+          ? addShape(d, kind)
+          : addLayerOfKind(d, kind);
+      if (!out) {
         setNotice({
           tone: "bad",
           text: "That is the most layers a card can hold.",
         });
         return;
       }
-      if (kind === "text") return addLayer(createLayerOfKind("text", n));
-      if (kind === "seal") return addLayer(createLayerOfKind("seal", n));
-      if (kind === "code") {
-        if (d.layers.some((l) => l.kind === "code")) return;
-        return addLayer(createLayerOfKind("code", n));
-      }
-      addLayer(createShapeLayer(kind, n, designRatio(d)));
+      commit(out.design);
+      setSelectedId(out.id);
+      setSheetTab("properties");
     },
-    [addLayer]
+    [commit]
   );
 
   const deleteLayer = useCallback(
@@ -296,7 +289,7 @@ export function InvitationDesigner({
 
   const duplicate = useCallback(
     (id: string) => {
-      const out = duplicateLayer(designRef.current, id);
+      const out = duplicateViaEngine(designRef.current, id);
       if (!out) return;
       commit(out.design);
       setSelectedId(out.id);
@@ -305,11 +298,11 @@ export function InvitationDesigner({
   );
 
   const stack = useCallback(
-    (id: string, move: StackMove) => commit((d) => moveLayerStack(d, id, move)),
+    (id: string, move: StackMove) => commit((d) => stackViaEngine(d, id, move)),
     [commit]
   );
   const align = useCallback(
-    (id: string, how: Alignment) => commit((d) => alignLayer(d, id, how)),
+    (id: string, how: Alignment) => commit((d) => alignViaEngine(d, id, how)),
     [commit]
   );
 
@@ -355,7 +348,7 @@ export function InvitationDesigner({
     const url = result.url;
     const d = designRef.current;
     if (purpose.purpose === "card") {
-      commit(applyImportedCard(d, url, ratio));
+      commit(importCard(d, url, ratio));
       setSelectedId(null);
       setNotice({
         tone: "ok",
@@ -375,12 +368,17 @@ export function InvitationDesigner({
         ),
       }));
     } else {
-      addLayer(
-        createImageLayer(url, d.layers.length, {
-          ratio: designRatio(d),
-          imageRatio: ratio,
-        })
-      );
+      const out = addImage(d, url, ratio);
+      if (!out) {
+        setNotice({
+          tone: "bad",
+          text: "That is the most layers a card can hold.",
+        });
+        return;
+      }
+      commit(out.design);
+      setSelectedId(out.id);
+      setSheetTab("properties");
     }
   }
 
@@ -792,7 +790,7 @@ export function InvitationDesigner({
               setSelectedId(null);
             }}
             onImportCard={() => choose({ purpose: "card" })}
-            onRemoveCard={() => commit((d) => removeImportedCard(d))}
+            onRemoveCard={() => commit((d) => removeCard(d))}
             onAddPhoto={() => choose({ purpose: "layer" })}
             onAddText={() => add("text")}
             onDeleteLayer={deleteLayer}

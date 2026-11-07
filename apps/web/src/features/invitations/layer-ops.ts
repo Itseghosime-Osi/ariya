@@ -221,7 +221,9 @@ export interface Box {
   height: number;
 }
 
-const MIN_BOX = 2;
+/** The narrowest a box can be (the server refuses less) and the shortest a drag can make it. */
+const MIN_W = 5;
+const MIN_H = 1;
 
 /**
  * Drags one handle by (dx, dy) percent of the card. Corner handles keep the box's shape when
@@ -238,24 +240,24 @@ export function resizeBox(
   const right = x + width;
   const bottom = y + height;
   if (handle.includes("w")) {
-    x = clamp(x + dx, 0, right - MIN_BOX);
+    x = clamp(x + dx, 0, right - MIN_W);
     width = right - x;
   }
   if (handle.includes("e")) {
-    width = clamp(width + dx, MIN_BOX, 100 - x);
+    width = clamp(width + dx, MIN_W, 100 - x);
   }
   if (handle.includes("n")) {
-    y = clamp(y + dy, 0, bottom - MIN_BOX);
+    y = clamp(y + dy, 0, bottom - MIN_H);
     height = bottom - y;
   }
   if (handle.includes("s")) {
-    height = clamp(height + dy, MIN_BOX, 100 - y);
+    height = clamp(height + dy, MIN_H, 100 - y);
   }
   if (keepShape && handle.length === 2 && start.height > 0) {
     const aspect = start.width / start.height;
     const byWidth = width / aspect;
     if (Math.abs(byWidth - height) > 0.01) {
-      height = clamp(byWidth, MIN_BOX, 100);
+      height = clamp(byWidth, MIN_H, 100);
       if (handle.includes("n")) y = bottom - height;
     }
   }

@@ -36,6 +36,11 @@ const TARGETS = [
     built: "ariya_studio_wasm.wasm",
     out: "ariya_studio.wasm",
   },
+  {
+    crate: "design-wasm",
+    built: "ariya_design_wasm.wasm",
+    out: "ariya_design.wasm",
+  },
 ];
 
 // A wasm binary carries the path of every source file it was built from, panic messages included.

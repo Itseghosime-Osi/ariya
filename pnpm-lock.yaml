@@ -265,6 +265,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@ariya/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@ariya/render':
         specifier: workspace:*
         version: link:../../packages/render
@@ -404,6 +407,8 @@ importers:
       '@types/web-push':
         specifier: 3.6.4
         version: 3.6.4
+
+  packages/design: {}
 
   packages/render: {}
 

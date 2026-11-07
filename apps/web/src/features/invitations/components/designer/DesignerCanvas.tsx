@@ -8,13 +8,8 @@ import React, {
   useState,
 } from "react";
 import { InvitationCard } from "../InvitationCard";
-import {
-  designRatio,
-  isEditable,
-  resizeBox,
-  snapRotation,
-  type Handle,
-} from "../../layer-ops";
+import { designRatio, isEditable, type Handle } from "../../layer-ops";
+import { resizeBoxFast, snapRotationFast } from "../../engine";
 import type { InvitationDesign, InvitationLayer } from "../../types";
 
 const PAD = 28;
@@ -155,7 +150,7 @@ export function DesignerCanvas({
           (Math.atan2(e.clientY - g.centre.y, e.clientX - g.centre.x) * 180) /
             Math.PI +
           90;
-        update(g.id, { rotation: snapRotation(deg) }, { commit: false });
+        update(g.id, { rotation: snapRotationFast(deg) }, { commit: false });
         return;
       }
 
@@ -177,12 +172,12 @@ export function DesignerCanvas({
       const layer = props.current.design.layers.find((l) => l.id === g.id);
       if (!layer || !g.handle) return;
       if (hasBox(layer)) {
-        const next = resizeBox(g.origin, g.handle, dx, dy, e.shiftKey);
+        const next = resizeBoxFast(g.origin, g.handle, dx, dy, e.shiftKey);
         update(g.id, next, { commit: false });
       } else {
         // Text, seal, rule and entry seal change width only; height follows.
         const side: Handle = g.handle.includes("w") ? "w" : "e";
-        const next = resizeBox(g.origin, side, dx, 0);
+        const next = resizeBoxFast(g.origin, side, dx, 0, false);
         update(g.id, { x: next.x, width: next.width }, { commit: false });
       }
     }
