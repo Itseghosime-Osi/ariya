@@ -159,6 +159,28 @@ export default function ProductPage() {
             </div>
           </div>
         </section>
+
+        <section className="sec linen" id="data" aria-labelledby="dTitle">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="caps">Your data</span>
+              <h2 id="dTitle">
+                What we use, and <em>why.</em>
+              </h2>
+            </div>
+            <p>
+              You can sign in to Àríyá with an email and password or with
+              Google. If you choose Google, we receive only your name, email
+              address and profile picture, and we use them solely to create and
+              recognise your account. We never see your Google password, never
+              read your email, contacts or files, and never sell your data.
+              Guest details that hosts add are used only to run that
+              host&rsquo;s celebration. Read the full{" "}
+              <Link href="/privacy">Privacy Policy</Link> and{" "}
+              <Link href="/terms">Terms of Service</Link>.
+            </p>
+          </div>
+        </section>
       </main>
     </>
   );
