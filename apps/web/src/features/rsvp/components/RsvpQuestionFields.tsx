@@ -44,7 +44,6 @@ export function RsvpQuestionFields({
                 id={id}
                 name={name}
                 type="text"
-                required={q.required}
                 maxLength={300}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
@@ -54,7 +53,6 @@ export function RsvpQuestionFields({
               <select
                 id={id}
                 name={name}
-                required={q.required}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
               >
@@ -70,7 +68,6 @@ export function RsvpQuestionFields({
               <select
                 id={id}
                 name={name}
-                required={q.required}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
               >
