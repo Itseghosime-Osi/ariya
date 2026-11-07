@@ -22,7 +22,7 @@ export function MusicToggle() {
     <button
       className="music head-music"
       type="button"
-      aria-label="Music (Forever Sweet by Dotti)"
+      aria-label="Music"
       aria-pressed={playing}
       onClick={() => {
         if (playing) stop();
@@ -36,7 +36,6 @@ export function MusicToggle() {
         <i />
       </span>
       <span className="lbl">Music</span>
-      <span className="sr-only"> (Forever Sweet by Dotti)</span>
     </button>,
     target
   );
