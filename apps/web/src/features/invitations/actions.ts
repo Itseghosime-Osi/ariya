@@ -214,3 +214,40 @@ export async function sendGuestInvitationEmailAction(
   revalidatePath(`/events/${eventId}/invitations`);
   return { success: true };
 }
+
+/** The most one "send to selected" will email in a single go. */
+const MAX_BULK_INVITATION_EMAILS = 100;
+
+/**
+ * Emails every chosen guest their personal link, one after another, and says who it did not reach.
+ * Each send runs the same quota check, email log and "invited" mark as a single send does.
+ */
+export async function sendBulkInvitationEmailsAction(
+  eventId: string,
+  guestIds: string[]
+): Promise<{
+  sent: number;
+  failed: { guestId: string; error: string }[];
+  error?: string;
+}> {
+  const ids = [...new Set(guestIds)];
+  if (ids.length === 0) return { sent: 0, failed: [] };
+  if (ids.length > MAX_BULK_INVITATION_EMAILS) {
+    return {
+      sent: 0,
+      failed: [],
+      error: `Send to at most ${MAX_BULK_INVITATION_EMAILS} guests at a time.`,
+    };
+  }
+
+  let sent = 0;
+  const failed: { guestId: string; error: string }[] = [];
+  for (const guestId of ids) {
+    const res = await sendGuestInvitationEmailAction(eventId, guestId);
+    if (res.success) sent += 1;
+    else failed.push({ guestId, error: res.error ?? "Could not send" });
+    // A full quota will not clear halfway through; stop instead of failing every guest.
+    if (res.error && /quota|limit|upgrade/i.test(res.error)) break;
+  }
+  return { sent, failed };
+}
