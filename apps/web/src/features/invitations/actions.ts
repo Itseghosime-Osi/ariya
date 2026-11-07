@@ -8,6 +8,12 @@ import { mapError } from "@/lib/errors";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
 import { isValidCoverImage } from "@/features/events/validate-cover";
 import { designColumns } from "./design";
+import { formatLagosDate } from "@/lib/format";
+import {
+  buildInvitationEmail,
+  describeEmailError,
+  invitationEmailSubject,
+} from "./email";
 import { invitationDesignSchema, trackInvitationsSchema } from "./schemas";
 import type { InvitationDesign } from "./types";
 
@@ -183,27 +189,38 @@ export async function sendGuestInvitationEmailAction(
 
   const { data: event } = await supabase
     .from("events")
-    .select("title, couple, date, venue")
+    .select("title, couple, date, venue, area, dress_code")
     .eq("id", eventId)
     .single();
 
   if (!event) return { error: "Event not found" };
 
   const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const rsvpUrl = `${origin}/i/${guest.rsvp_token}`;
+  const rsvpUrl = `${origin.replace(/\/$/, "")}/i/${guest.rsvp_token}`;
 
   // 3. Dispatch Email
+  const { html, text } = buildInvitationEmail({
+    guestName: guest.name,
+    couple: event.couple,
+    title: event.title,
+    dateLabel: formatLagosDate(event.date),
+    venue: event.venue,
+    area: event.area,
+    dressCode: event.dress_code,
+    rsvpUrl,
+  });
   const emailRes = await dispatchRsvpEmail({
     eventId,
     guestId,
     recipientEmail: guest.email,
-    subject: `You are cordially invited: ${event.title}`,
+    subject: invitationEmailSubject(event.title),
     templateType: "reminder",
-    html: `<p>Hello ${guest.name},</p><p>You are joyfully invited to celebrate the union of <strong>${event.couple}</strong>.</p><p>Date: ${event.date}<br/>Venue: ${event.venue}</p><p><a href="${rsvpUrl}">Please honour us with your RSVP here</a></p>`,
+    html,
+    text,
   });
 
   if (!emailRes.success) {
-    return { error: "Failed to dispatch email. Please retry." };
+    return { error: describeEmailError(emailRes.error) };
   }
 
   // 4. Track guest invited
@@ -215,8 +232,8 @@ export async function sendGuestInvitationEmailAction(
   return { success: true };
 }
 
-/** The most one "send to selected" will email in a single go. */
-const MAX_BULK_INVITATION_EMAILS = 100;
+/** One call emails a small batch; the screen sends a long list as several, so no call runs long. */
+const MAX_BULK_INVITATION_EMAILS = 10;
 
 /**
  * Emails every chosen guest their personal link, one after another, and says who it did not reach.
@@ -242,12 +259,18 @@ export async function sendBulkInvitationEmailsAction(
 
   let sent = 0;
   const failed: { guestId: string; error: string }[] = [];
-  for (const guestId of ids) {
+  for (const [i, guestId] of ids.entries()) {
+    // The provider allows a couple of sends a second; a short pause keeps a batch under it.
+    if (i > 0) await new Promise((r) => setTimeout(r, 600));
     const res = await sendGuestInvitationEmailAction(eventId, guestId);
     if (res.success) sent += 1;
     else failed.push({ guestId, error: res.error ?? "Could not send" });
     // A full quota will not clear halfway through; stop instead of failing every guest.
-    if (res.error && /quota|limit|upgrade/i.test(res.error)) break;
+    if (res.error && /limit|quota|not fully set up|key/i.test(res.error)) {
+      for (const rest of ids.slice(i + 1))
+        failed.push({ guestId: rest, error: res.error });
+      break;
+    }
   }
   return { sent, failed };
 }

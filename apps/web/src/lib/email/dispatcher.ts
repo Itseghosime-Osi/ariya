@@ -10,6 +10,8 @@ interface DispatchEmailParams {
   subject: string;
   templateType: "accepted" | "declined" | "revised" | "reminder";
   html: string;
+  /** A plain-text twin of the HTML. Mail clients and spam filters both like to have one. */
+  text?: string;
 }
 
 export interface EmailDispatchResult {
@@ -25,6 +27,7 @@ export async function dispatchRsvpEmail({
   subject,
   templateType,
   html,
+  text,
 }: DispatchEmailParams): Promise<EmailDispatchResult> {
   let providerId: string | undefined;
   let status: "sent" | "failed" = "sent";
@@ -38,6 +41,7 @@ export async function dispatchRsvpEmail({
         to: recipientEmail,
         subject,
         html,
+        ...(text ? { text } : {}),
       });
 
       if (res.error) {
@@ -60,6 +64,7 @@ export async function dispatchRsvpEmail({
           To: [{ Address: recipientEmail }],
           Subject: subject,
           HTML: html,
+          ...(text ? { Text: text } : {}),
         }),
       });
 

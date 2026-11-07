@@ -24,6 +24,8 @@ const CHANNELS: { key: Channel; label: string; icon: string }[] = [
   { key: "whatsapp", label: "WhatsApp", icon: "share" },
 ];
 
+const EMAIL_BATCH = 10;
+
 const DEFAULT_MESSAGE =
   "Hello {name}! You are invited to {event}. Your personal invitation and RSVP: {link}";
 
@@ -124,24 +126,42 @@ export function InvitationGuestTracker({
     });
   };
 
+  const [progress, setProgress] = useState<{ done: number; of: number } | null>(
+    null
+  );
+
   const sendEmails = () => {
     const ids = chosen.filter((g) => g.email).map((g) => g.id);
     setNotice(null);
     startTransition(async () => {
-      const res = await sendBulkInvitationEmailsAction(eventId, ids);
-      setSheet(null);
-      if (res.error) {
-        setNotice({ tone: "bad", text: res.error });
-        return;
+      // A long list goes as small batches so no single request runs long.
+      let sent = 0;
+      const failed: { guestId: string; error: string }[] = [];
+      for (let i = 0; i < ids.length; i += EMAIL_BATCH) {
+        setProgress({ done: i, of: ids.length });
+        const res = await sendBulkInvitationEmailsAction(
+          eventId,
+          ids.slice(i, i + EMAIL_BATCH)
+        );
+        sent += res.sent;
+        failed.push(...res.failed);
+        if (res.error) {
+          failed.push({ guestId: "", error: res.error });
+          break;
+        }
+        // The same problem would fail every remaining batch; stop and say so.
+        if (res.failed.length === ids.slice(i, i + EMAIL_BATCH).length) break;
       }
-      const missed = res.failed.length;
+      setProgress(null);
+      setSheet(null);
+      const missed = failed.length;
       setNotice({
         tone: missed ? "bad" : "ok",
         text: missed
-          ? `${res.sent} sent, ${missed} not sent: ${res.failed[0].error}`
-          : `${pluralise(res.sent, "email")} sent.`,
+          ? `${sent} sent, ${missed} not sent. ${failed[0].error}`
+          : `${pluralise(sent, "email")} sent.`,
       });
-      setSelected(new Set());
+      if (!missed) setSelected(new Set());
     });
   };
 
@@ -445,7 +465,9 @@ export function InvitationGuestTracker({
                     className="text-lg"
                   />
                   {isPending
-                    ? "Sending"
+                    ? progress
+                      ? `Sending ${Math.min(progress.done + EMAIL_BATCH, progress.of)} of ${progress.of}`
+                      : "Sending"
                     : `Send ${pluralise(reach.email, "email")}`}
                 </button>
               </div>
