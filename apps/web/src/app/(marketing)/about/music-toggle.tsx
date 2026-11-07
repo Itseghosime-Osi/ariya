@@ -22,7 +22,7 @@ export function MusicToggle() {
     <button
       className="music head-music"
       type="button"
-      aria-label="Music"
+      aria-label="Music (With You I Say Yes)"
       aria-pressed={playing}
       onClick={() => {
         if (playing) stop();
