@@ -49,7 +49,17 @@ export function CsvImportPageFlow({ eventId }: { eventId: string }) {
 
   const handleFileSelected = async (file: File) => {
     try {
-      const text = await file.text();
+      handleCsvText(await file.text());
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Failed to parse CSV file"
+      );
+    }
+  };
+
+  // A file and a phonebook both arrive here as CSV text, so they share the mapping and checks.
+  const handleCsvText = (text: string) => {
+    try {
       setCsvText(text);
       const preview = Papa.parse<Record<string, string>>(text, {
         header: true,
@@ -128,7 +138,7 @@ export function CsvImportPageFlow({ eventId }: { eventId: string }) {
         : step === "validation"
           ? 3
           : 4;
-  const STEPS = ["Upload", "Match columns", "Check", "Done"];
+  const STEPS = ["Upload", "Match", "Check", "Done"];
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 pb-24 sm:space-y-6 sm:pb-8">
@@ -191,7 +201,10 @@ export function CsvImportPageFlow({ eventId }: { eventId: string }) {
 
       <div className="bento-card p-5 sm:p-8">
         {step === "upload" && (
-          <CsvUploadDropzone onFileSelected={handleFileSelected} />
+          <CsvUploadDropzone
+            onFileSelected={handleFileSelected}
+            onCsvText={handleCsvText}
+          />
         )}
 
         {step === "mapping" && (

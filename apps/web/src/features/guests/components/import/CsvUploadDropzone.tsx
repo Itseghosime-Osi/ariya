@@ -1,22 +1,72 @@
 "use client";
 
 import * as React from "react";
-import { UploadCloud, FileText, AlertCircle, Download } from "lucide-react";
+import {
+  UploadCloud,
+  FileText,
+  AlertCircle,
+  Download,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MAX_FILE_SIZE_BYTES } from "../../csv-parser";
+import {
+  canPickContacts,
+  contactsToCsv,
+  parseVcf,
+  pickContacts,
+} from "../../contacts";
 
 interface CsvUploadDropzoneProps {
   onFileSelected: (file: File) => void;
+  /** Contacts from the phonebook or a .vcf file, already turned into CSV text. */
+  onCsvText?: (csv: string) => void;
   isLoading?: boolean;
 }
 
 export function CsvUploadDropzone({
   onFileSelected,
+  onCsvText,
   isLoading,
 }: CsvUploadDropzoneProps) {
   const [dragOver, setDragOver] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const vcfRef = React.useRef<HTMLInputElement>(null);
+  const [canPick, setCanPick] = React.useState(false);
+  React.useEffect(() => setCanPick(canPickContacts()), []);
+
+  const fromContacts = (
+    list: { name: string; phone?: string; email?: string }[]
+  ) => {
+    if (list.length === 0) {
+      setError("No contacts with a name were found.");
+      return;
+    }
+    onCsvText?.(contactsToCsv(list));
+  };
+
+  const handlePhonebook = async () => {
+    setError(null);
+    try {
+      fromContacts(await pickContacts());
+    } catch (err) {
+      // Closing the picker is not an error worth showing.
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setError(
+        "Your phone would not share its contacts. Try a contacts file instead."
+      );
+    }
+  };
+
+  const handleVcf = async (file: File) => {
+    setError(null);
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setError("File size exceeds 2MB limit. Please upload a smaller file.");
+      return;
+    }
+    fromContacts(parseVcf(await file.text()));
+  };
 
   const validateAndHandleFile = (file: File) => {
     setError(null);
@@ -123,6 +173,54 @@ export function CsvUploadDropzone({
           Browse CSV File
         </Button>
       </div>
+
+      {onCsvText && (
+        <div className="space-y-3 rounded-2xl border border-hairline p-4 sm:p-5">
+          <div>
+            <h3 className="font-display text-lg font-bold text-night">
+              Or bring them from your phonebook
+            </h3>
+            <p className="mt-0.5 text-[13px] text-label-2">
+              {canPick
+                ? "Pick the people you want to invite. Nothing leaves your phone until you confirm."
+                : "Export your contacts as a .vcf file (iPhone: Contacts, then Share; Android and Google Contacts: Export) and add it here."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {canPick && (
+              <Button
+                type="button"
+                onClick={handlePhonebook}
+                className="min-h-11 rounded-full px-5"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Choose from contacts
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => vcfRef.current?.click()}
+              className="min-h-11 rounded-full border-gold/50 px-5"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Add a contacts file (.vcf)
+            </Button>
+            <input
+              ref={vcfRef}
+              type="file"
+              accept=".vcf,text/vcard,text/x-vcard"
+              className="hidden"
+              aria-label="Contacts file"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void handleVcf(f);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
