@@ -19,7 +19,7 @@ export function ForgotPasswordDispatched({
     <section className="w-full">
       <div>
         <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="rounded-full bg-secondary text-surface-container-lowest px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em]">
+          <span className="rounded-full bg-secondary text-surface-container-lowest px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]">
             Check Your Email
           </span>
           <span className="text-xs font-semibold text-secondary">
@@ -32,7 +32,7 @@ export function ForgotPasswordDispatched({
             <Icon name="mail" className="text-2xl text-wine" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-secondary">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary">
               Email Sent
             </span>
             <h2 className="font-display text-2xl font-semibold text-night">

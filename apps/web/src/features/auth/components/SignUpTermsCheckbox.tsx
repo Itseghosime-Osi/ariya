@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 interface SignUpTermsCheckboxProps {
   checked: boolean;
@@ -23,8 +24,23 @@ export function SignUpTermsCheckbox({
         disabled={disabled}
       />
       <span className="text-xs leading-relaxed text-label-2">
-        I agree to the Terms of Service and Privacy Policy for event and guest
-        data handling.
+        I agree to the{" "}
+        <Link
+          href="/terms"
+          target="_blank"
+          className="font-semibold text-burgundy underline underline-offset-2"
+        >
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/privacy"
+          target="_blank"
+          className="font-semibold text-burgundy underline underline-offset-2"
+        >
+          Privacy Policy
+        </Link>{" "}
+        for event and guest data handling.
       </span>
     </label>
   );

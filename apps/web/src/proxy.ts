@@ -20,6 +20,8 @@ export async function proxy(request: NextRequest) {
       "/docs",
       "/story",
       "/film",
+      "/privacy",
+      "/terms",
       "/robots.txt",
       "/sitemap.xml",
       "/sw.js",
