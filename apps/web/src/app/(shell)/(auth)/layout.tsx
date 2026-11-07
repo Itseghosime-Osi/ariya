@@ -60,6 +60,15 @@ export default function AuthLayout({
               >
                 About Àríyá
               </Link>
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-wine"
+              >
+                Privacy
+              </Link>
+              <Link href="/terms" className="transition-colors hover:text-wine">
+                Terms
+              </Link>
               <span>© 2026</span>
             </div>
           </footer>
