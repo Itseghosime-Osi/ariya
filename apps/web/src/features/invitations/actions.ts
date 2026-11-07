@@ -102,6 +102,33 @@ export async function uploadInvitationArtAction(
   eventId: string,
   formData: FormData
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  return storeInvitationImage(
+    eventId,
+    formData,
+    (ext) => `invitation-art.${ext}`
+  );
+}
+
+/**
+ * Stores a picture for the designer: a photo, a logo or an imported card. Each gets its own file,
+ * so several can sit on one design and none overwrites another.
+ */
+export async function uploadInvitationImageAction(
+  eventId: string,
+  formData: FormData
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  return storeInvitationImage(
+    eventId,
+    formData,
+    (ext) => `design/${crypto.randomUUID()}.${ext}`
+  );
+}
+
+async function storeInvitationImage(
+  eventId: string,
+  formData: FormData,
+  fileName: (ext: string) => string
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const file = formData.get("file");
   if (!file || !(file instanceof File)) {
     return { ok: false, error: "Please choose an image to import" };
@@ -141,7 +168,7 @@ export async function uploadInvitationArtAction(
       : file.type === "image/webp"
         ? "webp"
         : "jpg";
-  const path = `${eventId}/invitation-art.${ext}`;
+  const path = `${eventId}/${fileName(ext)}`;
   const { data, error } = await supabase.storage
     .from("event-covers")
     .upload(path, buffer, { contentType: file.type, upsert: true });

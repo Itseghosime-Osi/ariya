@@ -24,6 +24,13 @@ interface InvitationCardProps {
   ) => void;
 }
 
+/** A quoted CSS url(), so a link with brackets or spaces in it cannot break the rule. */
+function cssUrl(url: string | null | undefined): string | undefined {
+  return url
+    ? `url("${url.replace(/["\\\n]/g, encodeURIComponent)}")`
+    : undefined;
+}
+
 function colourFor(layer: InvitationLayer, design: InvitationDesign): string {
   if (design.background.kind === "velvet") {
     if (layer.colorRole === "custom" && layer.color) return layer.color;
@@ -119,7 +126,7 @@ export function InvitationCard({
             aria-hidden="true"
             className="absolute inset-0"
             style={{
-              backgroundImage: `url(${background.imageUrl})`,
+              backgroundImage: cssUrl(background.imageUrl),
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -322,7 +329,7 @@ export function InvitationCard({
                 top: `${layer.y}%`,
                 width: `${layer.width}%`,
                 height: `${layer.height ?? 30}%`,
-                backgroundImage: `url(${layer.imageUrl})`,
+                backgroundImage: cssUrl(layer.imageUrl),
                 backgroundSize: layer.fit === "contain" ? "contain" : "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",

@@ -12,7 +12,10 @@ import { FilmGate } from "@/features/event-film/FilmGate";
 import { FilmFinale } from "@/features/event-film/components/FilmFinale";
 import { NotLiveCard } from "@/features/event-film/components/NotLiveCard";
 import { TestModeBanner } from "@/features/event-film/components/TestModeBanner";
-import { designFromEvent, hasEntrySeal } from "@/features/invitations/design";
+import {
+  designFromEvent,
+  ensureEntrySeal,
+} from "@/features/invitations/design";
 import { readFilmDesign } from "@/features/event-film/design";
 import { isEventTeamMember } from "@/features/event-film/queries";
 import { inviteAccess } from "@/features/event-film/visibility";
@@ -72,9 +75,11 @@ export default async function GuestInvitationPage({
         design: rsvpForm.invitationDesign,
       })
     : null;
+  // With the access pass on, the guest's card carries it: where the host put the entry seal, or in
+  // the house spot if they never placed one. Without a pass the card is just the card.
   const sealedDesign =
-    rsvpForm.requireAccessCard && checkInCode && hasEntrySeal(savedDesign)
-      ? savedDesign
+    rsvpForm.requireAccessCard && checkInCode && savedDesign
+      ? ensureEntrySeal(savedDesign)
       : null;
 
   const theme = getGuestTheme(data?.event?.invitation_theme);
@@ -120,7 +125,7 @@ export default async function GuestInvitationPage({
           }
           finale={
             <FilmFinale
-              design={rsvpForm.invitationDesign}
+              design={sealedDesign ?? rsvpForm.invitationDesign}
               entryCode={rsvpForm.requireAccessCard ? checkInCode : null}
               event={{
                 title: data.event.title,

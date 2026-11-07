@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createInvitationDesign, normaliseDesign } from "./design";
+import {
+  createInvitationDesign,
+  ensureEntrySeal,
+  hasEntrySeal,
+  normaliseDesign,
+} from "./design";
 import {
   alignLayer,
   applyImportedCard,
@@ -7,7 +12,9 @@ import {
   createShapeLayer,
   designRatio,
   duplicateLayer,
+  hasImportedCard,
   moveLayerStack,
+  removeImportedCard,
   resizeBox,
   snapRotation,
 } from "./layer-ops";
@@ -117,5 +124,36 @@ describe("layer operations", () => {
     // Importing again replaces the old card instead of stacking a second one.
     const again = applyImportedCard(out, "https://example.com/b.png", 1);
     expect(again.layers.filter((l) => l.name === "Your card")).toHaveLength(1);
+  });
+
+  it("taking the card off brings the host's own design back", () => {
+    const d = base();
+    const on = applyImportedCard(d, "https://example.com/card.png", 0.9);
+    expect(hasImportedCard(on)).toBe(true);
+    const off = removeImportedCard(on);
+    expect(hasImportedCard(off)).toBe(false);
+    expect(off.canvas).toBeUndefined();
+    expect(off.chrome).toBe(true);
+    expect(off.layers.find((l) => l.kind === "names")!.visible).toBe(true);
+    expect(removeImportedCard(d)).toBe(d);
+  });
+
+  it("puts the pass on the card when the host did not place one, and respects one they did", () => {
+    const d = base();
+    expect(hasEntrySeal(d)).toBe(false);
+    const sealed = ensureEntrySeal(d);
+    expect(hasEntrySeal(sealed)).toBe(true);
+    expect(sealed.layers.filter((l) => l.kind === "code")).toHaveLength(1);
+    // Asking again changes nothing, and a hidden seal is brought back, never doubled.
+    const hidden = {
+      ...sealed,
+      layers: sealed.layers.map((l) =>
+        l.kind === "code" ? { ...l, x: 60, y: 70, visible: false } : l
+      ),
+    };
+    const again = ensureEntrySeal(hidden);
+    const seal = again.layers.filter((l) => l.kind === "code");
+    expect(seal).toHaveLength(1);
+    expect(seal[0]).toMatchObject({ x: 60, y: 70, visible: true });
   });
 });

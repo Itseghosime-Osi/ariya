@@ -299,3 +299,37 @@ export function applyImportedCard(
 export function isEditable(layer: InvitationLayer): boolean {
   return layer.visible && !layer.locked;
 }
+
+/** Puts the host's own design back after an imported card is taken off. */
+export function removeImportedCard(design: InvitationDesign): InvitationDesign {
+  if (
+    !design.layers.some((l) => l.kind === "image" && l.name === "Your card")
+  ) {
+    return design;
+  }
+  const { canvas: _canvas, ...rest } = design;
+  void _canvas;
+  return {
+    ...rest,
+    chrome: true,
+    layers: design.layers
+      .filter((l) => !(l.kind === "image" && l.name === "Your card"))
+      .map((l) =>
+        l.visible || l.kind === "code"
+          ? l
+          : {
+              ...l,
+              visible:
+                l.text.trim().length > 0 ||
+                l.kind === "divider" ||
+                l.kind === "seal",
+            }
+      ),
+  };
+}
+
+export function hasImportedCard(design: InvitationDesign): boolean {
+  return design.layers.some(
+    (l) => l.kind === "image" && l.name === "Your card"
+  );
+}

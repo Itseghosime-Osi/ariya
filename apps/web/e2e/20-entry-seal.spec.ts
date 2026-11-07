@@ -30,10 +30,10 @@ test.describe("The entry seal", () => {
       .click();
     const inviteUrl = await page.evaluate(() => navigator.clipboard.readText());
 
-    // The host places the seal in the invitation design.
-    await page.goto(`/events/${eventId}/invitations`);
-    await page.getByRole("button", { name: /add entry seal/i }).click();
-    await expect(page.getByText(/Design saved/i)).toBeVisible({
+    // The host opens the designer; the seal is placed for them.
+    // The access pass is on by default, so the designer puts the seal on the card for the host.
+    await page.goto(`/events/${eventId}/invitations/design`);
+    await expect(page.getByText(/· saved$/i)).toBeVisible({
       timeout: 15000,
     });
 
