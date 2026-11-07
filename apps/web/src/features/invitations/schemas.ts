@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { INVITATION_LAYER_KINDS, INVITATION_THEMES } from "./types";
+import {
+  INVITATION_LAYER_KINDS,
+  INVITATION_SHAPES,
+  INVITATION_THEMES,
+} from "./types";
 
 const hexColour = z
   .string()
@@ -49,18 +53,33 @@ export const invitationLayerSchema = z.object({
   colorRole: z.enum(["ink", "title", "body", "accent", "foil", "custom"]),
   color: hexColour.nullable(),
   visible: z.boolean(),
+  name: z.string().trim().max(60).optional(),
+  height: z.number().finite().min(0.2).max(100).optional(),
+  rotation: z.number().finite().min(-360).max(360).optional(),
+  opacity: z.number().finite().min(0).max(1).optional(),
+  fill: hexColour.nullable().optional(),
+  stroke: hexColour.nullable().optional(),
+  strokeWidth: z.number().finite().min(0).max(10).optional(),
+  radius: z.number().finite().min(0).max(50).optional(),
+  shape: z.enum(INVITATION_SHAPES).optional(),
+  imageUrl: imageUrl.nullable().optional(),
+  fit: z.enum(["cover", "contain"]).optional(),
+  locked: z.boolean().optional(),
 });
 
 export const invitationDesignSchema = z.object({
   version: z.literal(1),
+  canvas: z.object({ ratio: z.number().finite().min(0.4).max(2.5) }).optional(),
+  chrome: z.boolean().optional(),
   theme: z.enum(INVITATION_THEMES),
   palette: invitationPaletteSchema,
   background: z.object({
-    kind: z.enum(["paper", "velvet", "image"]),
+    kind: z.enum(["paper", "velvet", "image", "color"]),
+    color: hexColour.nullable().optional(),
     imageUrl: imageUrl.nullable(),
     overlay: z.number().finite().min(0).max(0.9),
   }),
-  layers: z.array(invitationLayerSchema).min(1).max(24),
+  layers: z.array(invitationLayerSchema).max(60),
 });
 
 export type InvitationDesignInput = z.infer<typeof invitationDesignSchema>;
