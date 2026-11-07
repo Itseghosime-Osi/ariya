@@ -120,21 +120,21 @@ Matching regions minimizes round-trip latency for database operations, authentic
 
 All production environment variables are strictly validated at application startup using Zod schemas (`src/lib/env/server.ts` and `src/lib/env/client.ts`). The application will refuse to boot in production if required variables are missing or invalid (for instance, if `EMAIL_TRANSPORT` is set to `mailpit`).
 
-| Variable                          | Description                             | Required?    | Production Rule / Safe Default                                                                                 |
-| :-------------------------------- | :-------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_URL`             | Canonical public application URL        | **Required** | `https://ariya-two.vercel.app` (used for personal RSVP links in emails)                                        |
-| `NEXT_PUBLIC_SUPABASE_URL`        | Hosted Supabase project URL             | **Required** | `https://<project-ref>.supabase.co`                                                                            |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase public anonymous API key       | **Required** | Hosted project anon key                                                                                        |
-| `SUPABASE_SERVICE_ROLE_KEY`       | Supabase service-role admin key         | **Required** | Hosted project service-role key (server-only; used for rate limit enforcement, billing triggers, and webhooks) |
-| `PAYSTACK_SECRET_KEY`             | Paystack merchant secret key            | **Required** | Must start with `sk_live_` (or `sk_test_` in test mode)                                                        |
-| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key for client checkout | **Required** | Must start with `pk_live_` (or `pk_test_` in test mode)                                                        |
-| `PAYSTACK_API_BASE`               | Paystack API base URL                   | Optional     | Defaults to `https://api.paystack.co` (strictly required to match `https://api.paystack.co` in production)     |
-| `EMAIL_TRANSPORT`                 | Email dispatcher transport              | **Required** | Must be strictly `resend` in production (setting `mailpit` causes startup boot failure)                        |
-| `RESEND_API_KEY`                  | Resend transactional email API key      | **Required** | Non-placeholder production key (must start with `re_`)                                                         |
-| `RESEND_FROM_EMAIL`               | Sender email address for invitations    | **Required** | Set a sender allowed by your Resend account; there is no runtime default                                       |
-| `RATE_LIMIT_SECRET`               | HMAC salt for IP anonymization          | **Required** | Minimum 32 characters, no default (`openssl rand -hex 32`)                                                     |
-| `CRON_SECRET`                     | Secret bearer token for Vercel Cron     | **Required** | Bearer token authenticating `/api/cron/reminders`                                                              |
-| `MAILPIT_URL`                     | Mailpit HTTP API endpoint               | Local only   | Ignored in production (default: `http://127.0.0.1:57324`)                                                      |
+| Variable                          | Description                             | Required?    | Production Rule / Safe Default                                                                                                                              |
+| :-------------------------------- | :-------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`             | Canonical public application URL        | **Required** | `https://ariya-two.vercel.app` (used for personal RSVP links in emails)                                                                                     |
+| `NEXT_PUBLIC_SUPABASE_URL`        | Hosted Supabase project URL             | **Required** | `https://<project-ref>.supabase.co`                                                                                                                         |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase public anonymous API key       | **Required** | Hosted project anon key                                                                                                                                     |
+| `SUPABASE_SERVICE_ROLE_KEY`       | Supabase service-role admin key         | **Required** | Hosted project service-role key (server-only; used for rate limit enforcement, billing triggers, and webhooks)                                              |
+| `PAYSTACK_SECRET_KEY`             | Paystack merchant secret key            | **Required** | Must start with `sk_live_` (or `sk_test_` in test mode)                                                                                                     |
+| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key for client checkout | **Required** | Must start with `pk_live_` (or `pk_test_` in test mode)                                                                                                     |
+| `PAYSTACK_API_BASE`               | Paystack API base URL                   | Optional     | Defaults to `https://api.paystack.co` (strictly required to match `https://api.paystack.co` in production)                                                  |
+| `EMAIL_TRANSPORT`                 | Email dispatcher transport              | **Required** | Must be strictly `resend` in production (setting `mailpit` causes startup boot failure)                                                                     |
+| `RESEND_API_KEY`                  | Resend transactional email API key      | **Required** | Non-placeholder production key (must start with `re_`)                                                                                                      |
+| `RESEND_FROM_EMAIL`               | Sender email address for invitations    | **Required** | Set a sender allowed by your Resend account; there is no runtime default                                                                                    |
+| `RATE_LIMIT_SECRET`               | HMAC salt for IP anonymization          | **Required** | Minimum 32 characters, no default (`openssl rand -hex 32`)                                                                                                  |
+| `CRON_SECRET`                     | Secret bearer token for scheduled jobs  | **Required** | Bearer token authenticating `/api/cron/reminders` (Vercel Cron) and `/api/cron/digest` (GitHub Actions; also set it as the `CRON_SECRET` repository secret) |
+| `MAILPIT_URL`                     | Mailpit HTTP API endpoint               | Local only   | Ignored in production (default: `http://127.0.0.1:57324`)                                                                                                   |
 
 ### Webhook Setup
 

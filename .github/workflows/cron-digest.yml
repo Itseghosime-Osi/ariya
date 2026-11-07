@@ -1,0 +1,45 @@
+name: Weekly checklist digest
+
+# Vercel's Hobby plan only allows daily crons, and a cron it refuses fails the whole deployment, so
+# the hourly digest runs from here instead. Each run just calls the app's own endpoint, which does the
+# work and is safe to call repeatedly: `digest_log` allows one digest per person per week, and quiet
+# hours are honoured by the endpoint (a send held back is picked up by a later run).
+#
+# Needs one repository secret, CRON_SECRET (the same value the app has in its environment), and,
+# optionally, a repository variable APP_URL if the app is not at the default address below.
+# GitHub only runs scheduled workflows from the default branch, and may start one a few minutes late.
+
+on:
+  schedule:
+    # Off the hour: GitHub's scheduler is busiest at :00.
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: cron-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    name: Call the digest endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call /api/cron/digest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://ariya-two.vercel.app' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::The CRON_SECRET repository secret is not set, so the digest cannot run."
+            exit 1
+          fi
+          # A failed call fails the job, so a broken digest shows up red instead of silently not sending.
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-delay 10 --retry-all-errors \
+            --max-time 120 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL%/}/api/cron/digest"
+          echo
