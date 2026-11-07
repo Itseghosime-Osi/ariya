@@ -64,6 +64,7 @@ select set_eq(
       ('regenerate_guest_token'),
       ('remove_team_member'),
       ('restore_ai_proposal_result'),
+      ('search_check_in_guests'),
       ('search_guests'),
       ('shares_event_with'),
       ('save_rsvp_answers'),
