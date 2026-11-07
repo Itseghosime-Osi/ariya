@@ -39,7 +39,8 @@ export function CheckInResultCard({
           <button
             type="button"
             onClick={onDismiss}
-            className="text-emerald-800 hover:text-emerald-950 p-1"
+            aria-label="Dismiss"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-emerald-800 hover:bg-emerald-100"
           >
             <Icon name="close" className="text-lg" />
           </button>
@@ -104,7 +105,12 @@ export function CheckInResultCard({
               </h4>
             </div>
           </div>
-          <button type="button" onClick={onDismiss} className="text-amber-800">
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Dismiss"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-amber-800 hover:bg-amber-100"
+          >
             <Icon name="close" className="text-base" />
           </button>
         </div>
@@ -139,7 +145,12 @@ export function CheckInResultCard({
             </h4>
           </div>
         </div>
-        <button type="button" onClick={onDismiss} className="text-red-800">
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-red-800 hover:bg-red-100"
+        >
           <Icon name="close" className="text-base" />
         </button>
       </div>

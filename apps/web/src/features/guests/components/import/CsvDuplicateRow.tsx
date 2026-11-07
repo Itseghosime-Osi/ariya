@@ -23,11 +23,13 @@ export function CsvDuplicateRow({
 }: CsvDuplicateRowProps) {
   return (
     <TableRow className="bg-amber-50/30">
-      <TableCell className="text-xs text-mist font-mono">{rowIndex}</TableCell>
-      <TableCell className="text-xs font-medium text-on-surface">
+      <TableCell className="text-xs text-label-2 font-mono">
+        {rowIndex}
+      </TableCell>
+      <TableCell className="text-xs font-medium text-night">
         {guest.name}
       </TableCell>
-      <TableCell className="text-xs text-mist">
+      <TableCell className="text-xs text-label-2">
         {guest.phone || guest.email || "-"}
       </TableCell>
       <TableCell>

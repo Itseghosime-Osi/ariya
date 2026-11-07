@@ -68,8 +68,8 @@ export function CsvUploadDropzone({
         onClick={() => inputRef.current?.click()}
         className={`group flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-200 ${
           dragOver
-            ? "scale-[1.01] border-wine bg-wine/5"
-            : "border-gold/50 bg-surface-container-low hover:border-gold hover:bg-gold/5"
+            ? "scale-[1.01] border-burgundy bg-burgundy/5"
+            : "border-gold/50 bg-transparent hover:border-gold hover:bg-gold/5"
         }`}
       >
         <input
@@ -84,7 +84,7 @@ export function CsvUploadDropzone({
           }}
         />
 
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-wine text-ivory shadow-[0_8px_20px_-8px_rgba(74,17,29,0.6)] ring-4 ring-gold/30 transition-transform duration-200 group-hover:-translate-y-0.5">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-burgundy text-ivory shadow-[0_8px_20px_-8px_rgba(74,17,29,0.6)] ring-4 ring-gold/30 transition-transform duration-200 group-hover:-translate-y-0.5">
           {isLoading ? (
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-ivory border-t-transparent" />
           ) : (
@@ -92,10 +92,10 @@ export function CsvUploadDropzone({
           )}
         </div>
 
-        <h3 className="font-serif text-2xl font-bold text-on-surface">
+        <h3 className="font-display text-2xl font-bold text-night">
           Upload Guest CSV Roster
         </h3>
-        <p className="mt-1 text-xs text-mist max-w-sm">
+        <p className="mt-1 text-xs text-label-2 max-w-sm">
           Drag and drop your spreadsheet here, or browse files. Max 500 rows and
           2MB per upload.
         </p>
@@ -105,7 +105,7 @@ export function CsvUploadDropzone({
             (field) => (
               <li
                 key={field}
-                className="rounded-full border border-outline-variant/70 bg-ivory px-2.5 py-0.5 text-[11px] font-medium text-on-surface-variant"
+                className="rounded-full border border-hairline bg-ivory px-2.5 py-0.5 text-[11px] font-medium text-label-2"
               >
                 {field}
               </li>
@@ -117,7 +117,7 @@ export function CsvUploadDropzone({
           type="button"
           variant="outline"
           size="sm"
-          className="pointer-events-none mt-5 rounded-full border-gold/50 px-5"
+          className="pointer-events-none mt-5 min-h-11 rounded-full border-gold/50 px-5"
         >
           <FileText className="h-4 w-4 mr-2" />
           Browse CSV File
@@ -138,7 +138,7 @@ export function CsvUploadDropzone({
           variant="ghost"
           size="sm"
           onClick={handleDownloadTemplate}
-          className="h-9 text-xs text-wine hover:bg-wine/10 hover:text-wine"
+          className="min-h-11 text-xs text-burgundy hover:bg-burgundy/10 hover:text-burgundy"
         >
           <Download className="h-3.5 w-3.5 mr-1" />
           Download Sample Template (.csv)

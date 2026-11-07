@@ -112,22 +112,22 @@ export function CheckInCameraScanner({
   }, [stopCamera]);
 
   return (
-    <div className="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-xs space-y-4">
-      <div className="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+    <section className="bento-card space-y-4 p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Icon name="camera" className="text-wine text-base" />
-          <h3 className="font-serif text-base font-bold text-wine">
+          <Icon name="camera" className="text-base text-gold-ink" />
+          <h2 className="font-display text-lg font-bold text-night">
             Camera QR &amp; Pass Scanner
-          </h3>
+          </h2>
         </div>
         <button
           type="button"
           onClick={isActive ? stopCamera : startCamera}
           disabled={disabled}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy ${
             isActive
-              ? "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
-              : "bg-wine text-ivory hover:bg-wine/90"
+              ? "desk-chip text-burgundy"
+              : "bg-burgundy text-ivory hover:bg-night"
           }`}
         >
           <Icon name={isActive ? "close" : "camera"} className="text-sm" />
@@ -136,7 +136,10 @@ export function CheckInCameraScanner({
       </div>
 
       {cameraError && (
-        <div className="p-3 bg-red-50 text-red-800 text-xs rounded-xl border border-red-200 flex items-center gap-2">
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-2xl border border-red-300 bg-red-50 p-3 text-[13px] text-red-900"
+        >
           <Icon name="close" className="text-sm shrink-0" />
           <span>
             {cameraError} (Use manual code entry below if camera is
@@ -146,7 +149,7 @@ export function CheckInCameraScanner({
       )}
 
       {isActive ? (
-        <div className="relative rounded-2xl overflow-hidden bg-black aspect-video max-h-72 mx-auto flex items-center justify-center border-2 border-wine/30">
+        <div className="relative rounded-2xl overflow-hidden bg-black aspect-video max-h-72 mx-auto flex items-center justify-center border border-hairline">
           <video
             ref={videoRef}
             playsInline
@@ -164,20 +167,20 @@ export function CheckInCameraScanner({
           </div>
         </div>
       ) : (
-        <div className="bg-surface-container-low/50 border border-dashed border-outline-variant/40 rounded-2xl p-6 text-center space-y-2">
+        <div className="space-y-2 rounded-2xl border border-dashed border-hairline px-6 py-8 text-center">
           <Icon
             name="qr_code_scanner"
-            className="text-3xl text-wine/50 block mx-auto"
+            className="mx-auto block text-3xl text-gold-ink"
           />
-          <p className="text-xs font-semibold text-wine">
+          <p className="text-sm font-semibold text-night">
             Camera Scanner Standby
           </p>
-          <p className="text-[11px] text-on-surface-variant max-w-xs mx-auto">
+          <p className="mx-auto max-w-xs text-[13px] text-label-2">
             Scan attendee passes directly with your phone, tablet, or laptop
             webcam.
           </p>
         </div>
       )}
-    </div>
+    </section>
   );
 }

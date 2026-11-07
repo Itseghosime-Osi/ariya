@@ -19,7 +19,7 @@ export function RsvpQuestionFields({
   focusRing,
 }: RsvpQuestionFieldsProps) {
   if (questions.length === 0) return null;
-  const field = `w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/60 bg-white text-sm text-night focus:outline-none focus:ring-2 ${focusRing}`;
+  const field = `min-h-12 w-full rounded-2xl border border-outline-variant/60 bg-white px-4 text-base text-night focus:outline-none focus:ring-2 ${focusRing}`;
 
   return (
     <div className="space-y-4 pt-2 border-t border-outline-variant/30">
@@ -30,7 +30,7 @@ export function RsvpQuestionFields({
           <div key={q.id} className="space-y-1.5">
             <label
               htmlFor={id}
-              className={`text-xs font-semibold uppercase tracking-wider block ${labelClass}`}
+              className={`text-[13px] font-semibold uppercase tracking-wider block ${labelClass}`}
             >
               {q.label}
               {!q.required && (
@@ -44,6 +44,7 @@ export function RsvpQuestionFields({
                 id={id}
                 name={name}
                 type="text"
+                required={q.required}
                 maxLength={300}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
@@ -53,6 +54,7 @@ export function RsvpQuestionFields({
               <select
                 id={id}
                 name={name}
+                required={q.required}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
               >
@@ -68,6 +70,7 @@ export function RsvpQuestionFields({
               <select
                 id={id}
                 name={name}
+                required={q.required}
                 defaultValue={answers[q.id] ?? ""}
                 className={field}
               >
