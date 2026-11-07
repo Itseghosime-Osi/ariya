@@ -11,6 +11,9 @@ const AUTH_PATHS = ["/sign-in", "/sign-up", "/forgot-password"];
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   // Static marketing pages do not need an authentication round trip.
+  if (pathname === "/documentation" || pathname.startsWith("/documentation/")) {
+    return NextResponse.next();
+  }
   if (
     [
       "/",
