@@ -66,7 +66,8 @@ test.describe("Connect your AI", () => {
           name: new RegExp(`copy link and open ${name}`, "i"),
         })
         .click();
-      expect(await lastOpened()).toContain(host);
+      // The link is opened after the copy finishes, so wait for it rather than reading it at once.
+      await expect.poll(lastOpened).toContain(host);
       await expect(page.getByText(/^Copied\./)).toBeVisible();
       expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
         /\/mcp$/
