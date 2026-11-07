@@ -494,8 +494,19 @@ export function HallStudio({
       const outRight = Math.max(0, window.innerWidth - r.right);
       const outBottom = Math.max(0, window.innerHeight - r.bottom);
       const next = {
+        // The tool rail covers the left edge at every width, so the hall is centred in what is left
+        // of it, not in the whole screen.
         left: Math.round(
-          r.left + (wide ? (dockShown ? 392 : mode === "studio" ? 76 : 12) : 0)
+          r.left +
+            (wide
+              ? dockShown
+                ? 392
+                : mode === "studio"
+                  ? 76
+                  : 12
+              : mode === "studio"
+                ? 72
+                : 12)
         ),
         top: Math.round(r.top + 64),
         right: Math.round(
@@ -2045,7 +2056,7 @@ export function HallStudio({
               )}
             >
               {/* Back, the page's name and the mode switch: the only chrome the app leaves. */}
-              <div className="pointer-events-auto absolute left-3 top-3">
+              <div className="pointer-events-auto absolute left-3 top-3 max-w-[calc(100%-23.5rem)]">
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
@@ -2290,14 +2301,14 @@ export function HallStudio({
 
               {mode === "studio" && (
                 <>
-                  {/* Tool rail */}
+                  {/* Tool rail: centred on the page on a desktop; under the Back bar and scrollable on a tablet or phone, where the panel and camera controls take the rest of the height. */}
                   <div
                     role="toolbar"
                     aria-label="Hall tools"
                     aria-orientation="vertical"
                     className={cn(
                       float,
-                      "pointer-events-auto absolute left-3 top-[68px] flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:max-h-[calc(100%-5rem)] max-lg:overflow-y-auto"
+                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[68px] max-lg:max-h-[calc(100%-5rem)] max-lg:overflow-y-auto lg:top-1/2 lg:max-h-[calc(100%-9rem)] lg:-translate-y-1/2"
                     )}
                   >
                     <button
@@ -2733,12 +2744,19 @@ export function HallStudio({
 
               {/* Zoom and camera */}
               <div
+                // Centred in the free space between the rail (or dock) and the panel, and wrapping
+                // rather than running off the edge when that space is narrow.
                 className={cn(
-                  "pointer-events-auto absolute bottom-3 left-3 flex flex-wrap items-center gap-2",
+                  "pointer-events-none absolute bottom-3 right-3 flex flex-wrap items-center justify-center gap-2",
                   leftEdge
                 )}
               >
-                <div className={cn(float, "flex items-center gap-0.5 p-1")}>
+                <div
+                  className={cn(
+                    float,
+                    "pointer-events-auto flex items-center gap-0.5 p-1"
+                  )}
+                >
                   <button
                     type="button"
                     className={chip}
@@ -2778,7 +2796,10 @@ export function HallStudio({
                   </button>
                 </div>
                 <div
-                  className={cn(float, "flex items-center gap-0.5 p-1")}
+                  className={cn(
+                    float,
+                    "pointer-events-auto flex items-center gap-0.5 p-1"
+                  )}
                   role="radiogroup"
                   aria-label="Camera"
                 >

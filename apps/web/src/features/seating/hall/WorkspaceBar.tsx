@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { BackLink } from "@/components/layout/back-link";
 import { ArrowLeft } from "lucide-react";
 
 /**
@@ -21,15 +21,15 @@ export function WorkspaceBar({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex max-w-[calc(100vw-1.5rem)] items-center gap-1 rounded-full border border-black/[0.06] bg-white/95 p-1 pr-4 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
-      <Link
+    <div className="flex max-w-full items-center gap-1 rounded-full border border-black/[0.06] bg-white/95 p-1 pr-4 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
+      <BackLink
         href={backHref}
-        aria-label="Back to the event"
+        aria-label="Back"
         className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
         <ArrowLeft size={15} aria-hidden="true" />
         Back
-      </Link>
+      </BackLink>
       <div className="ml-2 min-w-0">
         <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
           Seating &amp; Floor Plan

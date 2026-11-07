@@ -78,7 +78,7 @@ test.describe("Seating workspace", () => {
       page.getByRole("heading", { name: /Seating & Floor Plan/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Back to the event" })
+      page.getByRole("link", { name: "Back", exact: true })
     ).toHaveAttribute("href", `/events/${eventId}`);
 
     // Add a table from the always-there New table button.
@@ -134,10 +134,32 @@ test.describe("Seating workspace", () => {
     await page.getByRole("radio", { name: "Full studio", exact: true }).click();
     await expect(page.getByTestId("left-dock")).toBeVisible();
 
-    // Back returns to the event, with the app's navigation back around it.
-    await page.getByRole("link", { name: "Back to the event" }).click();
-    await expect(page).toHaveURL(new RegExp(`/events/${eventId}$`));
+    // Back returns to the page the person came from (the guest list, here), with the app's
+    // navigation back around it.
+    await page.getByRole("link", { name: "Back", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/events/${eventId}/guests$`));
     await expect(page.getByTestId("desktop-sidebar")).toBeVisible();
+  });
+
+  test("Back goes to the event overview when there is no earlier page to return to", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await createAndLoginUser(page, context, "ws_back");
+    const { eventId } = await createTestEvent(page);
+
+    // A fresh tab opened straight on the studio, as a pasted link would be.
+    const tab = await context.newPage();
+    await tab.setViewportSize({ width: 1440, height: 900 });
+    await tab.goto(`/events/${eventId}/seating`);
+    await expect(tab.getByTestId("hall-studio")).toBeVisible({
+      timeout: 30_000,
+    });
+    await tab.getByRole("link", { name: "Back", exact: true }).click();
+    await expect(tab).toHaveURL(new RegExp(`/events/${eventId}$`));
+    await expect(tab.getByTestId("desktop-sidebar")).toBeVisible();
   });
 
   test("layers can be hidden, locked and reordered, and the interface can go dark", async ({

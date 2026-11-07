@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
@@ -17,6 +23,7 @@ import { isEventExpired } from "@/lib/event-expiry";
 import { EventArchivedBanner, EventEndedBanner } from "./event-ended-banner";
 import { cn } from "@/lib/utils";
 import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
+import { PREVIOUS_PAGE_KEY } from "@/lib/previous-page";
 
 const SIDEBAR_KEY = "ariya-sidebar";
 
@@ -89,6 +96,19 @@ export function AppShell({
   }, [pathname]);
 
   useEffect(() => enableFireworkAudioOnInteraction(), []);
+
+  // Remember the page being left, so a Back button (the seating studio's) can return to it.
+  const lastPath = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastPath.current !== null && lastPath.current !== pathname) {
+      try {
+        sessionStorage.setItem(PREVIOUS_PAGE_KEY, lastPath.current);
+      } catch {
+        /* not remembered */
+      }
+    }
+    lastPath.current = pathname;
+  }, [pathname]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
