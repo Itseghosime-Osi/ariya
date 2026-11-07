@@ -76,9 +76,7 @@ export function GuestLedger({
   return (
     <div className="flex flex-col gap-4">
       {isLoading ? (
-        <p className="py-10 text-center text-on-surface-variant">
-          Loading guests...
-        </p>
+        <p className="py-10 text-center text-label-2">Loading guests...</p>
       ) : guests.length === 0 ? (
         <EmptyState
           hasFilters={hasFilters}
@@ -110,7 +108,7 @@ export function GuestLedger({
                   bounce: 0.1,
                   delay: Math.min(index, 12) * 0.03,
                 }}
-                className="group flex items-center rounded-2xl border-t border-outline-variant/60 first:border-t-0"
+                className="group flex items-center rounded-2xl border-t border-hairline first:border-t-0"
               >
                 <button
                   type="button"
@@ -119,20 +117,20 @@ export function GuestLedger({
                 >
                   <span
                     aria-hidden="true"
-                    className="row-span-1 flex h-11 w-11 items-center justify-center rounded-full bg-wine/10 font-serif text-base font-bold text-wine transition-colors group-hover:bg-wine group-hover:text-ivory sm:row-span-1"
+                    className="row-span-1 flex h-11 w-11 items-center justify-center rounded-full bg-burgundy/10 font-display text-base font-bold text-burgundy transition-colors group-hover:bg-burgundy group-hover:text-ivory sm:row-span-1"
                   >
                     {initials(guest.name)}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate font-serif text-lg font-medium leading-tight text-on-surface transition-colors group-hover:text-wine">
+                    <span className="block truncate font-display text-lg font-medium leading-tight text-night transition-colors group-hover:text-burgundy">
                       {guest.name}
                       {guest.is_vip && (
-                        <span className="ml-2 align-[2px] font-sans text-[10px] font-bold tracking-[0.12em] text-gold-ink">
+                        <span className="ml-2 align-[2px] font-sans text-[11px] font-bold tracking-[0.12em] text-gold-ink">
                           VIP
                         </span>
                       )}
                     </span>
-                    <span className="block truncate text-xs text-on-surface-variant">
+                    <span className="block truncate text-[13px] text-label-2">
                       {detail || "No group"}
                       <span className="sm:hidden">
                         {" · "}
@@ -149,7 +147,7 @@ export function GuestLedger({
                     />
                     {status.label}
                   </span>
-                  <span className="hidden text-xs tabular-nums text-on-surface-variant sm:order-3 sm:block sm:text-sm">
+                  <span className="hidden text-[13px] tabular-nums text-label-2 sm:order-3 sm:block sm:text-sm">
                     {seats} {seats === 1 ? "seat" : "seats"}
                   </span>
                 </button>
@@ -160,7 +158,7 @@ export function GuestLedger({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-11 w-11 rounded-full p-0 text-on-surface-variant hover:text-wine"
+                        className="h-11 w-11 rounded-full p-0 text-label-2 hover:text-burgundy"
                         aria-label={`Actions for ${guest.name}`}
                       >
                         <MoreHorizontal className="h-5 w-5" />
@@ -193,7 +191,7 @@ export function GuestLedger({
         </ul>
       )}
 
-      <div className="flex flex-col items-center justify-between gap-4 border-t border-outline-variant/60 pt-4 text-xs text-on-surface-variant sm:flex-row">
+      <div className="flex flex-col items-center justify-between gap-4 border-t border-hairline pt-4 text-[13px] text-label-2 sm:flex-row">
         <div className="flex flex-wrap items-center justify-center gap-2">
           <span>Rows per page:</span>
           <Select
@@ -202,7 +200,7 @@ export function GuestLedger({
           >
             <SelectTrigger
               aria-label="Rows per page"
-              className="h-8 w-18 text-xs"
+              className="h-8 w-18 text-[13px]"
             >
               <SelectValue />
             </SelectTrigger>
@@ -261,7 +259,7 @@ function EmptyState({
 }) {
   if (hasFilters) {
     return (
-      <p className="py-12 text-center text-on-surface-variant">
+      <p className="py-12 text-center text-label-2">
         No guests found matching your criteria.
       </p>
     );
@@ -270,15 +268,15 @@ function EmptyState({
     <div className="flex flex-col items-center gap-4 py-14 text-center">
       <span
         aria-hidden="true"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-wine/10 font-serif text-2xl font-bold text-wine"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-burgundy/10 font-display text-2xl font-bold text-burgundy"
       >
         À
       </span>
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-2xl font-bold text-on-surface">
+        <h2 className="font-display text-2xl font-bold text-night">
           Your guest list starts here
         </h2>
-        <p className="max-w-sm text-sm text-on-surface-variant">
+        <p className="max-w-sm text-sm text-label-2">
           Add the first guest by hand, or bring in a spreadsheet and send every
           party their own RSVP link.
         </p>

@@ -40,10 +40,10 @@ export function GuestDetailDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-night/50 backdrop-blur-xs transition-opacity animate-in fade-in">
-      <div className="relative flex h-full w-full max-w-md flex-col bg-surface-container-lowest shadow-2xl overflow-y-auto p-6 border-l border-outline-variant/60">
-        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/40">
+      <div className="relative flex h-full w-full max-w-md flex-col bg-ivory shadow-2xl overflow-y-auto p-6 border-l border-hairline">
+        <div className="flex items-center justify-between pb-4 border-b border-hairline">
           <div className="flex items-center gap-2">
-            <h2 className="font-serif text-lg font-bold text-on-surface">
+            <h2 className="font-display text-lg font-bold text-night">
               {isEditing ? "Edit Guest" : "Guest Details"}
             </h2>
             {guest.is_vip && (
@@ -58,7 +58,7 @@ export function GuestDetailDrawer({
           <button
             onClick={onClose}
             aria-label="Close drawer"
-            className="rounded-lg p-1 text-mist hover:text-on-surface hover:bg-surface-container"
+            className="rounded-lg p-1 text-label-2 hover:text-night hover:bg-black/5"
           >
             <X className="h-5 w-5" />
           </button>
@@ -79,30 +79,36 @@ export function GuestDetailDrawer({
         ) : (
           <div className="flex flex-col gap-6 py-4 text-sm">
             <div>
-              <div className="text-xl font-semibold text-on-surface">
+              <div className="text-xl font-semibold text-night">
                 {guest.name}
               </div>
-              <div className="text-xs text-mist mt-0.5">
+              <div className="text-[13px] text-label-2 mt-0.5">
                 {guest.phone || "No phone"} • {guest.email || "No email"}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-surface-container/50 border border-outline-variant/40">
+            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl desk-field border border-hairline">
               <div>
-                <span className="text-xs text-mist block">Side / Group</span>
-                <span className="font-medium capitalize text-on-surface">
+                <span className="text-[13px] text-label-2 block">
+                  Side / Group
+                </span>
+                <span className="font-medium capitalize text-night">
                   {guest.side} {guest.group_name ? `(${guest.group_name})` : ""}
                 </span>
               </div>
               <div>
-                <span className="text-xs text-mist block">Party Size</span>
-                <span className="font-medium text-on-surface">
+                <span className="text-[13px] text-label-2 block">
+                  Party Size
+                </span>
+                <span className="font-medium text-night">
                   {guest.party_size}{" "}
                   {guest.plus_ones_allowed ? "(+1 allowed)" : ""}
                 </span>
               </div>
               <div>
-                <span className="text-xs text-mist block">RSVP Status</span>
+                <span className="text-[13px] text-label-2 block">
+                  RSVP Status
+                </span>
                 <Badge
                   variant={
                     guest.rsvp?.status === "accepted"
@@ -116,15 +122,15 @@ export function GuestDetailDrawer({
                 </Badge>
               </div>
               <div>
-                <span className="text-xs text-mist block">Seating</span>
-                <span className="font-medium text-on-surface">
+                <span className="text-[13px] text-label-2 block">Seating</span>
+                <span className="font-medium text-night">
                   {guest.seat?.table_name || "Unassigned"}
                 </span>
               </div>
             </div>
 
             {ended ? (
-              <p className="rounded-xl border border-hairline bg-white/40 p-3 text-xs text-label-2">
+              <p className="rounded-xl border border-hairline bg-white/40 p-3 text-[13px] text-label-2">
                 This celebration has ended, so this guest&rsquo;s invitation
                 link has expired.
               </p>
@@ -143,15 +149,15 @@ export function GuestDetailDrawer({
             )}
 
             {guest.notes && (
-              <div className="rounded-xl bg-surface-container/30 p-3 text-xs">
-                <span className="font-semibold text-on-surface-variant block mb-1">
+              <div className="rounded-xl desk-field p-3 text-[13px]">
+                <span className="font-semibold text-label-2 block mb-1">
                   Notes & Dietary
                 </span>
-                <p className="text-on-surface">{guest.notes}</p>
+                <p className="text-night">{guest.notes}</p>
               </div>
             )}
 
-            <div className="mt-auto flex items-center justify-between pt-6 border-t border-outline-variant/40">
+            <div className="mt-auto flex items-center justify-between pt-6 border-t border-hairline">
               <Button
                 variant="destructive"
                 size="sm"
