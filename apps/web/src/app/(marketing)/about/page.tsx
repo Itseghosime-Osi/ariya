@@ -13,9 +13,9 @@ import { YesScene } from "./yes-scene";
 export const metadata = pageMetadata({
   title: "About",
   description:
-    "Àríyá by OwambePlan: personal invitations, live RSVPs and seating for Nigerian weddings and owambes.",
+    "Àríyá: personal invitations, live RSVPs and seating for Nigerian weddings and owambes.",
   path: "/about",
-  socialTitle: "Àríyá by OwambePlan",
+  socialTitle: "Àríyá",
   socialDescription:
     "Personal invitations, live RSVPs and seating for Nigerian weddings, introductions and owambes.",
 });

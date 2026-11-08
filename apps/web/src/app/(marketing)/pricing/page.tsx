@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 
 export const metadata = pageMetadata({
   title: "Pricing",
-  description: "Àríyá by OwambePlan pricing: pay per event, no subscription.",
+  description: "Àríyá pricing: pay per event, no subscription.",
   path: "/pricing",
   socialTitle: "Pricing · Àríyá",
   socialDescription:

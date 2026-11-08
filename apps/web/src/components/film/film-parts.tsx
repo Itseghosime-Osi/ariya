@@ -812,7 +812,7 @@ export function FilmClose() {
       <section className="sec close" id="start" aria-labelledby="sTitle">
         <div className="wrap">
           <p className="label mono">
-            <b>Àríyá by OwambePlan</b>
+            <b>Àríyá</b>
             <span>For Nigerian weddings, introductions and owambes</span>
           </p>
           <h2 className="statement" id="sTitle">

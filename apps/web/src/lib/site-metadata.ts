@@ -10,7 +10,7 @@ export const OG_IMAGE = {
   alt: "A red velvet ring box, open in candlelight. The Yes, by Àríyá.",
 } as const;
 
-const SITE = "Àríyá by OwambePlan";
+const SITE = "Àríyá";
 
 export function pageMetadata({
   title,

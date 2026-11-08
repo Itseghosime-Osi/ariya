@@ -11,7 +11,7 @@ export const startPages: DocPage[] = [
     blocks: [
       {
         t: "p",
-        x: "Àríyá (by OwambePlan) runs the logistics of a celebration: who is invited, who replied, where they sit, which vendors still owe you something, and who has walked through the door. Hosts and planners see the same live headcount; guests only ever see their own invitation.",
+        x: "Àríyá runs the logistics of a celebration: who is invited, who replied, where they sit, which vendors still owe you something, and who has walked through the door. Hosts and planners see the same live headcount; guests only ever see their own invitation.",
       },
       { t: "h2", x: "What you can do" },
       {

@@ -8,7 +8,7 @@ import { VendorChecklist } from "./vendor-checklist";
 export const metadata = pageMetadata({
   title: "What we do",
   description:
-    "How Àríyá by OwambePlan runs invitations, RSVPs, seating and vendors for Nigerian weddings and owambes.",
+    "How Àríyá runs invitations, RSVPs, seating and vendors for Nigerian weddings and owambes.",
   path: "/product",
   socialTitle: "What Àríyá does · Àríyá",
   socialDescription:
@@ -56,9 +56,9 @@ export default function ProductPage() {
               The calm behind <em className="foil-text">the party.</em>
             </h1>
             <p>
-              Àríyá is OwambePlan&rsquo;s planner for couples and the planners
-              who run their day. Your guest list, invitations, replies, seats
-              and vendors live in one place instead of fifty group chats.
+              Àríyá is a planner for couples and the planners who run their day.
+              Your guest list, invitations, replies, seats and vendors live in
+              one place instead of fifty group chats.
             </p>
           </div>
         </section>
