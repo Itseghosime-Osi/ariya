@@ -16,9 +16,9 @@ function sceneSeconds(mode: "R" | "M" | "N") {
 }
 
 describe("the film's pacing", () => {
-  it("takes about two minutes forty at 1x", () => {
+  it("takes about two and a half minutes at 1x, and ends before the song does", () => {
     expect(map.totalTime()).toBeCloseTo(FILM_SECONDS, 1);
-    expect(FILM_SECONDS).toBeGreaterThan(150);
+    expect(FILM_SECONDS).toBeGreaterThan(140);
   });
 
   it("gives every caption time to be read", () => {

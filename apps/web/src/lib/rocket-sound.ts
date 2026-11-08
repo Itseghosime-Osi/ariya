@@ -1,8 +1,90 @@
 /**
- * Firework sounds, made with the Web Audio API so no file has to load: the launch of a rocket (a
- * thump, then a hiss and thin whistle that rise as it climbs) and the burst (a deep boom, a sharp
- * crack, and falling sparks). Shared by the film's send-off and the welcome fireworks.
+ * Firework sounds. Real recordings of a rocket leaving and a shell bursting (in /site/sfx) play
+ * when they have loaded; until then, or if they cannot load, the same sounds are made with the Web
+ * Audio API: a thump, then a hiss and thin whistle that rise as it climbs, and a deep boom, a
+ * sharp crack and falling sparks. Shared by the film's send-off and the welcome fireworks.
  */
+
+export type SampleName =
+  | "launch1"
+  | "launch2"
+  | "burst1"
+  | "burst2"
+  | "crackle1"
+  | "conga"
+  | "slap"
+  | "shekere"
+  | "agogo"
+  | "kick";
+
+const decoded = new WeakMap<BaseAudioContext, Map<SampleName, AudioBuffer>>();
+const loading = new WeakMap<BaseAudioContext, Map<SampleName, Promise<void>>>();
+
+/** Fetch and decode recorded sounds once per audio context. A failure just leaves the synth. */
+export function loadSamples(ctx: BaseAudioContext, names: SampleName[]) {
+  let have = decoded.get(ctx);
+  if (!have) decoded.set(ctx, (have = new Map()));
+  let busy = loading.get(ctx);
+  if (!busy) loading.set(ctx, (busy = new Map()));
+  return Promise.all(
+    names.map((name) => {
+      const pending = busy.get(name);
+      if (pending) return pending;
+      const job = (async () => {
+        try {
+          const res = await fetch(`/site/sfx/${name}.mp3`);
+          if (!res.ok) return;
+          const buf = await ctx.decodeAudioData(await res.arrayBuffer());
+          have.set(name, buf);
+        } catch {
+          /* the synthesized sound covers it */
+        }
+      })();
+      busy.set(name, job);
+      return job;
+    })
+  ).then(() => undefined);
+}
+
+export function sampleOf(ctx: BaseAudioContext, name: SampleName) {
+  return decoded.get(ctx)?.get(name) ?? null;
+}
+
+/** Play a recording from `at`, for at most `max` seconds with a short fade at its end. */
+export function playSample(
+  ctx: BaseAudioContext,
+  out: AudioNode,
+  name: SampleName,
+  at: number,
+  gain = 1,
+  max = 0,
+  offset = 0
+): boolean {
+  const buf = sampleOf(ctx, name);
+  if (!buf) return false;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const g = ctx.createGain();
+  src.connect(g);
+  g.connect(out);
+  const len =
+    max > 0 ? Math.min(max, buf.duration - offset) : buf.duration - offset;
+  g.gain.setValueAtTime(gain, at);
+  if (max > 0 && len < buf.duration - offset) {
+    g.gain.setValueAtTime(gain, at + Math.max(0, len - 0.25));
+    g.gain.linearRampToValueAtTime(0.0001, at + len);
+  }
+  src.start(at, offset, len);
+  return true;
+}
+
+export const FIREWORK_SAMPLES: SampleName[] = [
+  "launch1",
+  "launch2",
+  "burst1",
+  "burst2",
+  "crackle1",
+];
 
 const noiseBuffers = new WeakMap<BaseAudioContext, AudioBuffer>();
 
@@ -46,6 +128,18 @@ export function launchSound(
   at: number,
   rise: number
 ) {
+  if (
+    playSample(
+      ctx,
+      out,
+      Math.random() < 0.5 ? "launch1" : "launch2",
+      at,
+      0.9,
+      rise + 0.1
+    )
+  ) {
+    return;
+  }
   const thump = ctx.createGain();
   thump.connect(out);
   shape(thump, at, 0.004, 0.2, 0.16);
@@ -92,6 +186,20 @@ export function burstSound(
   at: number,
   power = 1
 ) {
+  const big = power > 1.1 || Math.random() < 0.35;
+  if (
+    playSample(
+      ctx,
+      out,
+      big ? "burst2" : "burst1",
+      at,
+      0.5 + 0.4 * Math.min(power, 1.3),
+      big ? 3.2 : 0
+    )
+  ) {
+    playSample(ctx, out, "crackle1", at + 0.25 + Math.random() * 0.2, 0.9);
+    return;
+  }
   const boom = ctx.createGain();
   boom.connect(out);
   shape(boom, at, 0.006, 0.55 * power, 0.9);

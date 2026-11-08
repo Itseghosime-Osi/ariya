@@ -59,6 +59,7 @@ export function Film() {
       onSuspend: score.suspend,
       onLoop: score.loop,
       onRestart: score.restart,
+      onFinale: score.finale,
       onSfx: score.sfx,
       onAmbience: score.ambience,
       onRate: score.setRate,
@@ -75,9 +76,11 @@ export function Film() {
     root.classList.add("locked");
     engine.collectBeats();
     engine.mount();
+    score.groove(true);
 
     return () => {
       engine.destroy();
+      score.groove(false);
       score.stop();
     };
   }, []);

@@ -69,12 +69,13 @@ const SEGS: ReadonlyArray<ReadonlyArray<string | number>> = [
   ["D", 0.19],
 ];
 
-// The film takes 2:41 at 1x. The dialogue scenes (the room, the memory, the question) get the time
+// The film takes 2:29 at 1x and ends while the song (2:41) still has its last bars, which play
+// out and fade. The dance falls where the song is full. The dialogue scenes (the room, the memory, the question) get the time
 // their captions need to be read; the chapters between them share the rest. The song is not what
 // sets the length. Pinned to crates/render-core/src/story.rs.
-export const FILM_SECONDS = 161.2;
+export const FILM_SECONDS = 149;
 const SEG_SECONDS = [
-  16, 8.5, 44, 8, 5.5, 5.5, 6.5, 9, 5.5, 5.5, 3.5, 5, 9, 6.5, 5, 5, 6.5, 6.5,
+  16, 8.5, 44, 5.5, 5, 5, 6, 5, 4.5, 4.5, 3.5, 5, 5, 4.5, 5, 5, 8, 9,
 ];
 const SCROLL_SECONDS = [
   6, 5, 15, 7, 5, 5, 6, 7, 5, 5, 3.5, 4.5, 7, 6, 4.5, 4.5, 6, 7,

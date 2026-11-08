@@ -1,4 +1,12 @@
-import { burstSound, launchSound } from "../rocket-sound";
+import {
+  burstSound,
+  FIREWORK_SAMPLES,
+  launchSound,
+  loadSamples,
+  playSample,
+  sampleOf,
+  type SampleName,
+} from "../rocket-sound";
 
 // Àríyá's home page music. It loops /site/assets/music.ogg — Ogg Opus, named
 // so the server sends audio/ogg (a .opus extension is served as
@@ -87,6 +95,7 @@ function build() {
     window.AudioContext ??
     (window as unknown as { webkitAudioContext: Ctor }).webkitAudioContext;
   ctx = new AudioCtor();
+  void loadSamples(ctx, [...FIREWORK_SAMPLES, ...GROOVE_SAMPLES]);
   master = ctx.createGain();
   master.gain.value = 0;
   comp = ctx.createDynamicsCompressor();
@@ -450,6 +459,9 @@ export function installScoreHandlers() {
    the archive's Score: clock, seek, level, ambience, sfx. */
 
 let lastSeek = 0;
+// 1 normally; falls to 0 over the last seconds of the song once the film has finished.
+let fadeK = 1;
+let tailRaf = 0;
 // The song starts under the picture, never over it; the dance brings it up.
 let levelNow = 0.2;
 let amb: {
@@ -503,6 +515,8 @@ export function loop(v: boolean) {
 }
 
 export function restart() {
+  fadeK = 1;
+  cancelAnimationFrame(tailRaf);
   if (audioEl) {
     try {
       audioEl.currentTime = 0;
@@ -513,10 +527,32 @@ export function restart() {
   step = 0;
 }
 
+/**
+ * The film is over but the song has a little left: let it play out once and fade away over its last
+ * few seconds, then stay silent until Watch again.
+ */
+export function finale() {
+  if (!audioEl) return;
+  audioEl.loop = false;
+  cancelAnimationFrame(tailRaf);
+  const step = () => {
+    const el = audioEl;
+    if (!el || !on || el.ended) return;
+    const left = (el.duration - el.currentTime) / (el.playbackRate || 1);
+    fadeK = Number.isFinite(left) ? Math.max(0, Math.min(1, left / 3.5)) : 1;
+    if (!el.paused) {
+      const v = Math.max(0, Math.min(1, 0.55 * levelNow * fadeK));
+      if (Math.abs(el.volume - v) > 0.004) el.volume = v;
+    }
+    tailRaf = requestAnimationFrame(step);
+  };
+  tailRaf = requestAnimationFrame(step);
+}
+
 export function suspend(yes: boolean) {
   if (audioEl) {
     if (yes) audioEl.pause();
-    else if (on) void audioEl.play().catch(() => {});
+    else if (on && !audioEl.ended) void audioEl.play().catch(() => {});
   }
   if (ctx) {
     if (yes) void ctx.suspend();
@@ -531,10 +567,129 @@ export function suspend(yes: boolean) {
 export function level(l: number) {
   levelNow += (l - levelNow) * (l > levelNow ? 0.015 : 0.08);
   if (audioEl && on && !audioEl.paused) {
-    const v = Math.max(0, Math.min(1, 0.55 * levelNow));
+    const v = Math.max(0, Math.min(1, 0.55 * levelNow * fadeK));
     if (Math.abs(audioEl.volume - v) > 0.01) audioEl.volume = v;
   } else if (ctx && on && timer) {
     master!.gain.setTargetAtTime(0.8 * levelNow, ctx.currentTime, 0.2);
+  }
+}
+
+/* ---------- The dance groove ----------
+   When the guests dance, real percussion (conga, slap, bell, shekere, bass drum) plays on top of the
+   song, on the song's own beat, so it sits inside the music rather than over it. The beat is found
+   from the recording: 103.6 beats a minute with the first beat 0.29 s in; a bar is four of them in
+   12/8 (twelve triplet steps). Each hit is placed from the song's clock, so a seek or a change of
+   speed does not pull it off the beat. It follows the song's own volume: nothing before the dance,
+   full while the song is full, gone as the song's outro thins. */
+
+export const GROOVE_SAMPLES: SampleName[] = [
+  "kick",
+  "conga",
+  "slap",
+  "shekere",
+  "agogo",
+];
+const GROOVE_BPM = 103.6;
+const GROOVE_FIRST = 0.29;
+const GROOVE_STEP = 60 / GROOVE_BPM / 3;
+const GROOVE_OUTRO = [141, 147]; // the song thins here; the groove goes with it
+// [sample, gain] per triplet step of the bar; null is a rest
+const GROOVE: ReadonlyArray<ReadonlyArray<readonly [SampleName, number]>> = [
+  [
+    ["kick", 0.9],
+    ["shekere", 0.35],
+  ],
+  [["shekere", 0.15]],
+  [
+    ["shekere", 0.2],
+    ["agogo", 0.3],
+  ],
+  [
+    ["conga", 0.6],
+    ["shekere", 0.3],
+  ],
+  [["shekere", 0.15]],
+  [
+    ["slap", 0.5],
+    ["agogo", 0.3],
+    ["shekere", 0.2],
+  ],
+  [
+    ["kick", 0.7],
+    ["shekere", 0.3],
+  ],
+  [
+    ["shekere", 0.15],
+    ["agogo", 0.3],
+  ],
+  [["shekere", 0.2]],
+  [
+    ["conga", 0.75],
+    ["agogo", 0.3],
+    ["shekere", 0.3],
+  ],
+  [["shekere", 0.15]],
+  [
+    ["slap", 0.55],
+    ["agogo", 0.3],
+    ["shekere", 0.2],
+  ],
+];
+let grooveBus: GainNode | null = null;
+let grooveTimer: number | null = null;
+let grooveStep = -1;
+
+function grooveGain(songT: number) {
+  const dance = Math.max(0, Math.min(1, (levelNow - 0.3) / 0.6));
+  const [a, b] = GROOVE_OUTRO;
+  const outro = 1 - Math.max(0, Math.min(1, (songT - a) / (b - a)));
+  return dance * outro * fadeK;
+}
+
+function grooveTick() {
+  const el = audioEl;
+  const c = ctx;
+  if (!el || !c || !on || el.paused || el.ended) return;
+  if (!GROOVE_SAMPLES.every((n) => sampleOf(c, n))) return;
+  const songT = el.currentTime;
+  const rate = el.playbackRate || 1;
+  if (!grooveBus) {
+    grooveBus = c.createGain();
+    grooveBus.connect(c.destination);
+  }
+  const k = grooveGain(songT);
+  grooveBus.gain.setTargetAtTime(0.9 * k, c.currentTime, 0.12);
+  if (k < 0.02) {
+    grooveStep = Math.floor((songT - GROOVE_FIRST) / GROOVE_STEP) + 1;
+    return;
+  }
+  const first = Math.floor((songT - GROOVE_FIRST) / GROOVE_STEP) + 1;
+  // After a seek, start again from the step the song is now on.
+  if (grooveStep < first - 1 || grooveStep > first + 12) grooveStep = first;
+  const horizon = songT + 0.25 * rate;
+  while (GROOVE_FIRST + grooveStep * GROOVE_STEP < horizon) {
+    const at =
+      c.currentTime + (GROOVE_FIRST + grooveStep * GROOVE_STEP - songT) / rate;
+    if (at > c.currentTime - 0.02 && grooveStep >= 0) {
+      const hits = GROOVE[((grooveStep % 12) + 12) % 12];
+      for (const [name, g] of hits) {
+        playSample(c, grooveBus, name, Math.max(at, c.currentTime), g);
+      }
+    }
+    grooveStep += 1;
+  }
+}
+
+/** Run the groove alongside the song; harmless when the recordings have not loaded. */
+export function groove(yes: boolean) {
+  if (!yes) {
+    if (grooveTimer !== null) window.clearInterval(grooveTimer);
+    grooveTimer = null;
+    grooveStep = -1;
+    return;
+  }
+  if (grooveTimer === null) {
+    grooveTimer = window.setInterval(grooveTick, 60);
   }
 }
 
