@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as score from "@/lib/site/score";
 import { FilmEngine, type FilmStatus } from "./engine";
-import { seg } from "./story";
+import { songLevel } from "./story";
 import {
   FilmChrome,
   FilmClose,
@@ -62,9 +62,8 @@ export function Film() {
       onSfx: score.sfx,
       onAmbience: score.ambience,
       onRate: score.setRate,
-      // The song is a soft bed under the picture, and swells into the dance on the stage.
-      onScene: (p, pro) =>
-        score.level(pro >= 1 ? 0.2 + 0.8 * seg(p, 0.84, 0.92) : 0.2),
+      // A soft bed under the picture; it swells for the dancing, not before.
+      onScene: (p, pro, mode) => score.level(songLevel(mode, p, pro)),
     });
 
     engine.onSoundChange = (on) => {

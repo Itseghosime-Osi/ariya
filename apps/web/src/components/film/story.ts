@@ -364,3 +364,17 @@ export function seeded(seed: number) {
     return (s - 1) / 2147483646;
   };
 }
+
+/**
+ * How loud the song is, as a share of its full volume. It is a soft bed under the picture all
+ * the way through, and it swells only when the guests are dancing on the stage: the late part of
+ * "The dance", then the send-off. (During the chapters from "Getting ready" to "The place kept" the
+ * story's own progress holds at the same value, so progress alone cannot tell them apart.)
+ */
+export function songLevel(mode: ModeName, p: number, pro: number): number {
+  const bed = 0.2;
+  if (pro < 1) return bed;
+  if (mode === "D") return 1;
+  if (mode === "old") return bed + (1 - bed) * seg(p, 0.95, 0.985);
+  return bed;
+}

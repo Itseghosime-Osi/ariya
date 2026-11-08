@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { FILM_SECONDS, OPEN_LINES, OPEN_SFX, createJsMap } from "./story";
+import {
+  FILM_SECONDS,
+  OPEN_LINES,
+  OPEN_SFX,
+  createJsMap,
+  songLevel,
+} from "./story";
 
 const map = createJsMap();
 
@@ -46,5 +52,29 @@ describe("the film's pacing", () => {
     expect(hinge?.[0]).toBe("N");
     // The blackout lifts by 0.6 of the question scene.
     expect(hinge?.[1]).toBeGreaterThanOrEqual(0.6);
+  });
+
+  it("keeps the song soft until the guests are dancing", () => {
+    // Getting ready, the morning and the place kept all sit at the same story progress (0.885).
+    for (const mode of [
+      "R",
+      "M",
+      "N",
+      "C",
+      "G",
+      "E",
+      "F",
+      "W",
+      "J",
+      "H",
+      "T",
+    ] as const) {
+      expect(songLevel(mode, 0.885, 1)).toBeCloseTo(0.2, 5);
+    }
+    expect(songLevel("old", 0.5, 1)).toBeCloseTo(0.2, 5);
+    expect(songLevel("old", 0.93, 1)).toBeCloseTo(0.2, 5);
+    expect(songLevel("old", 0.99, 1)).toBeCloseTo(1, 5);
+    expect(songLevel("D", 1, 1)).toBe(1);
+    expect(songLevel("old", 0.99, 0.5)).toBeCloseTo(0.2, 5);
   });
 });

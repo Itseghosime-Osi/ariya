@@ -61,7 +61,8 @@ export interface FilmEngineOptions {
   onRate?: (rate: number) => void;
   onSfx?: (name: string) => void;
   onAmbience?: (kind: string) => void;
-  onScene?: (p: number, pro: number) => void;
+  /** Each frame: story progress, prologue progress, the scene's mode and how far through it. */
+  onScene?: (p: number, pro: number, mode: ModeName, local: number) => void;
 }
 
 type El = HTMLElement;
@@ -91,6 +92,8 @@ export class FilmEngine {
   private playing = false;
   private playLast = 0;
   private wt = 0;
+  /** Watch played to the end: the song stays quiet until the visitor watches again. */
+  private finished = false;
   /** Watch speed, 1x to 2x. */
   private rate = 1;
   private startTimer = 0;
@@ -323,7 +326,8 @@ export class FilmEngine {
     }
     this.playLast = performance.now();
     const heldByVisitor =
-      this.how === "watch" && !this.playing && this.status.entered;
+      this.finished ||
+      (this.how === "watch" && !this.playing && this.status.entered);
     if (!heldByVisitor) this.opts.onSuspend?.(false);
   }
 
@@ -772,6 +776,7 @@ export class FilmEngine {
 
   private setHow(m: "scroll" | "watch", startIn?: number) {
     const was = this.how;
+    if (m === "watch") this.finished = false;
     if (m === "watch" && was !== "watch") {
       // From the page's position, once; from here the clock leads.
       this.wt = this.map.tFromS(this.sFromY(window.scrollY));
@@ -783,7 +788,7 @@ export class FilmEngine {
     window.clearTimeout(this.startTimer);
     this.startTimer = 0;
     document.documentElement.classList.toggle("watching", m === "watch");
-    this.opts.onLoop?.(m !== "watch");
+    this.opts.onLoop?.(m !== "watch" && !this.finished);
 
     const obPlay = this.q<HTMLButtonElement>("obPlay");
     const obMode = this.q("obMode");
@@ -833,6 +838,7 @@ export class FilmEngine {
   }
 
   private songHeld() {
+    if (this.finished) return true;
     return (
       this.how === "watch" &&
       !this.playing &&
@@ -862,9 +868,13 @@ export class FilmEngine {
     this.wt = clamp(this.wt, 0, TT);
     this.target = this.map.rawFromS(this.map.sFromT(this.wt));
     if (this.wt >= TT) {
+      // The story is told. The song stops with it and does not come round again.
+      this.finished = true;
       this.playing = false;
       this.setStatus({ playing: false });
       this.setHow("scroll");
+      this.opts.onLoop?.(false);
+      this.opts.onSuspend?.(true);
       return;
     }
     requestAnimationFrame(this.playStep);
@@ -896,11 +906,15 @@ export class FilmEngine {
   }
 
   private replayFilm() {
+    // Watch again after the end: the story plays from the start, with its song.
+    const again = this.finished;
+    this.finished = false;
     this.jumpTo(0);
     this.wt = 0;
     this.target = this.prog = 0;
     this.opts.onRestart?.();
-    this.setPlaying(this.how === "watch");
+    if (again && this.how !== "watch") this.setHow("watch", 400);
+    else this.setPlaying(this.how === "watch");
   }
 
   private lockHint() {
@@ -1094,7 +1108,7 @@ export class FilmEngine {
     this.op.covered = this.covered;
     this.op.blackout = this.blackout;
 
-    if (this.status.entered) this.opts.onScene?.(p, pro);
+    if (this.status.entered) this.opts.onScene?.(p, pro, sc.mode, sc.local);
     this.sceneRender?.(
       p,
       this.host?.now() ?? (performance.now() - this.t0) / 1000
