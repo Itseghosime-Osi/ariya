@@ -10,9 +10,9 @@ test.describe("Documentation", () => {
     ).toBeVisible();
     for (const name of [
       "Start here",
-      "Host guide",
-      "Engineering",
-      "Reference",
+      "For hosts & planners",
+      "For guests",
+      "At the door",
     ]) {
       await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
     }
@@ -21,27 +21,26 @@ test.describe("Documentation", () => {
   test("a page shows its contents and moves to the next page", async ({
     page,
   }) => {
-    await page.goto("/documentation/billing");
+    await page.goto("/documentation/quick-start");
     await expect(
-      page.getByRole("heading", { level: 1, name: /Billing/ })
+      page.getByRole("heading", { level: 1, name: /Start your celebration/ })
     ).toBeVisible();
-    await expect(page.getByText("₦50,000").first()).toBeVisible();
     await page
       .getByRole("navigation", { name: "Previous and next" })
       .getByRole("link", { name: /Next/ })
       .click();
-    await expect(page).toHaveURL(/\/documentation\/security$/);
+    await expect(page).toHaveURL(/\/documentation\/events$/);
   });
 
   test("search finds a page", async ({ page }) => {
     await page.goto("/documentation");
     await page
       .getByRole("searchbox", { name: "Search the manual" })
-      .fill("webhook");
+      .fill("reply");
     await expect(
       page
         .getByRole("search")
-        .getByRole("link", { name: /Billing and the Celebration Pass/ })
+        .getByRole("link", { name: /Reply to your invitation/ })
     ).toBeVisible();
   });
 
@@ -61,6 +60,13 @@ test.describe("Documentation", () => {
       .getByRole("link", { name: "Docs" })
       .click();
     await expect(page).toHaveURL(/\/documentation$/);
+  });
+
+  test("engineering pages are not published", async ({ page }) => {
+    for (const slug of ["setup", "security", "billing", "environment"]) {
+      const res = await page.goto(`/documentation/${slug}`);
+      expect(res?.status()).toBe(404);
+    }
   });
 
   test("an unknown page is a 404", async ({ page }) => {
