@@ -77,10 +77,10 @@ const nextConfig: NextConfig = {
       ...[
         "/assets/ariya-render.6d6d4c8adbfd.js",
         "/assets/the-yes-controls.819e8d5cbcae.js",
-        "/assets/the-yes-scene.83edb5453053.js",
+        "/assets/the-yes-scene.5d2cde94cd5e.js",
         "/site/assets/ariya-render.6d6d4c8adbfd.js",
         "/site/assets/the-yes-controls.819e8d5cbcae.js",
-        "/site/assets/the-yes-scene.83edb5453053.js",
+        "/site/assets/the-yes-scene.5d2cde94cd5e.js",
       ].map((source) => ({
         source,
         headers: [
@@ -143,13 +143,17 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      ...["about", "product", "pricing", "docs", "story", "film"].map(
-        (page) => ({
-          source: `/${page}.html`,
-          destination: page === "film" || page === "story" ? "/" : `/${page}`,
-          permanent: true,
-        })
-      ),
+      ...["about", "product", "pricing", "story", "film"].map((page) => ({
+        source: `/${page}.html`,
+        destination: page === "film" || page === "story" ? "/" : `/${page}`,
+        permanent: true,
+      })),
+      // The short guide is gone: the full manual replaces it.
+      ...["/docs", "/docs.html"].map((source) => ({
+        source,
+        destination: "/documentation",
+        permanent: true,
+      })),
       {
         source: "/login",
         destination: "/sign-in",

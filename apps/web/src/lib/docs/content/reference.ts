@@ -15,7 +15,6 @@ export const referencePages: DocPage[] = [
         rows: [
           ["`/`, `/film`, `/story`", "The wedding film and story"],
           ["`/about`, `/product`, `/pricing`", "Marketing pages"],
-          ["`/docs`", "The short guide"],
           ["`/documentation`", "This manual"],
           ["`/privacy`, `/terms`", "Legal pages"],
           ["`/e/[slug]`", "A celebration's public page and pass lookup"],

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CELEBRATION_PASS_AMOUNT_KOBO } from "./paystack";
@@ -8,7 +8,7 @@ const filmLayout = join(process.cwd(), "src/app/(film)/layout.tsx");
 const filmParts = join(process.cwd(), "src/components/film/film-parts.tsx");
 
 describe("public marketing integrity", () => {
-  it.each(["about", "product", "pricing", "docs"])(
+  it.each(["about", "product", "pricing"])(
     "%s route carries canonical metadata",
     (page) => {
       // pageMetadata builds the canonical URL from the route path; the
@@ -21,17 +21,17 @@ describe("public marketing integrity", () => {
       expect(metadata.alternates).toEqual({ canonical: `/${page}` });
     }
   );
-  it.each(["about", "product", "pricing", "docs"])(
+  it.each(["about", "product", "pricing"])(
     "%s source declares its canonical path and no stale domain",
     (page) => {
-      const source = readFileSync(
-        join(routes, page, page === "docs" ? "page.mdx" : "page.tsx"),
-        "utf8"
-      );
+      const source = readFileSync(join(routes, page, "page.tsx"), "utf8");
       expect(source).toContain(`path: "/${page}"`);
       expect(source).not.toContain("owambeplan.vercel.app");
     }
   );
+  it("has no old /docs page left behind: the manual replaces it", () => {
+    expect(existsSync(join(routes, "docs"))).toBe(false);
+  });
   it("advertises the actual checkout amount without unsupported SMS reminders", () => {
     const source = readFileSync(join(routes, "pricing/page.tsx"), "utf8");
     const amount = (CELEBRATION_PASS_AMOUNT_KOBO / 100).toLocaleString("en-NG");

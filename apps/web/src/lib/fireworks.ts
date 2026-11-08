@@ -8,7 +8,12 @@
  *
  * Browser only: import it lazily from an effect so it stays out of the main bundle.
  */
-import { playFireworkSound } from "./firework-audio";
+import {
+  fireworkAudioReady,
+  onFireworkAudioReady,
+  playFireworkSound,
+  unlockFireworkAudio,
+} from "./firework-audio";
 
 export type FireworksScale = "finale" | "eventDay";
 
@@ -185,6 +190,24 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   skip.style.cssText =
     "position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));pointer-events:auto;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid rgba(233,201,138,.5);background:rgba(18,4,10,.6);color:#f6e7c1;font:600 11px/1 var(--font-sans),system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer";
   root.append(skip);
+
+  // If the browser has not allowed sound yet (a page opened fresh after sign-up has had no tap),
+  // offer one tap for it; every rocket after that is heard.
+  const sound = document.createElement("button");
+  sound.type = "button";
+  sound.textContent = "Tap for sound";
+  sound.style.cssText = skip.style.cssText.replace(
+    "right:max(16px,env(safe-area-inset-right))",
+    "right:calc(max(16px,env(safe-area-inset-right)) + 96px)"
+  );
+  root.append(sound);
+  const hideSound = () => sound.remove();
+  const stopListening = onFireworkAudioReady(hideSound);
+  sound.addEventListener("click", () => void unlockFireworkAudio());
+  void unlockFireworkAudio().then((ok) => {
+    if (ok) hideSound();
+  });
+  if (fireworkAudioReady()) hideSound();
   document.body.append(root);
   requestAnimationFrame(() => (veil.style.opacity = String(cfg.veil)));
 
@@ -219,12 +242,15 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   const MAX_SPARKS = 4200;
 
   const launch = (power = 1, atX?: number) => {
-    playFireworkSound("launch");
     const u = unit();
     const kind: Kind = pick(["peony", "peony", "willow", "ring", "crackle"]);
     const x = atX ?? rand(w * 0.12, w * 0.88);
     const targetY = rand(h * 0.14, h * 0.46);
     const frames = rand(44, 62);
+    playFireworkSound("launch", {
+      rise: frames / 60,
+      pan: (x / w) * 2 - 1,
+    });
     rockets.push({
       x,
       y: h + 8,
@@ -255,7 +281,10 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   };
 
   const burst = (r: Rocket) => {
-    playFireworkSound("burst");
+    playFireworkSound("burst", {
+      pan: (r.x / w) * 2 - 1,
+      power: Math.min(1.3, 0.6 + r.power * 0.45),
+    });
     const u = unit();
     const big = cfg.size * r.power;
     const base =
@@ -476,6 +505,8 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
     canvas.style.transition = "opacity 700ms ease";
     canvas.style.opacity = "0";
     skip.remove();
+    sound.remove();
+    stopListening();
     window.setTimeout(() => {
       root.remove();
       options.onDone?.();

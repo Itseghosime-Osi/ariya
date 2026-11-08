@@ -6,7 +6,7 @@ export const LEGAL = {
   /** The service the person signs up to. */
   product: "Àríyá",
   /** Who runs it. */
-  operator: "OwambePlan",
+  operator: "Àríyá",
   /** Where a person writes to ask about their data or the terms. The mailbox must exist. */
   contactEmail: "help@ariyaday.com",
   site: "https://ariyaday.com",

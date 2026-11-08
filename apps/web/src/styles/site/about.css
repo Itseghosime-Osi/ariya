@@ -21,7 +21,7 @@
 }
 /* Scoped to the about page: Next injects route CSS globally and keeps it
    loaded after a client navigation, so an unscoped body rule would follow the
-   visitor to /pricing and /docs. */
+   visitor to /pricing and /documentation. */
 body:has(.about-page) {
   background: var(--wine-950);
   color: var(--on-dark);
@@ -140,21 +140,6 @@ body:has(.about-page) .foil-text {
     transform: scaleY(1);
   }
 }
-.head-music {
-  margin-left: 8px;
-}
-@media (max-width: 880px) {
-  .head-music {
-    margin-left: auto;
-  }
-  .head-music + .menu-toggle {
-    margin-left: 8px;
-  }
-  .head-music .lbl {
-    display: none;
-  }
-}
-
 /* ---------- 1. Hero ---------- */
 .c-hero {
   position: relative;
@@ -1270,5 +1255,305 @@ html.js body:has(.about-page) .reveal.in {
   .scroll-hint i {
     animation: none;
     display: none;
+  }
+}
+
+/* ---------- Chapter VI: the door ---------- */
+.c-door {
+  position: relative;
+  height: 380svh;
+  background:
+    radial-gradient(
+      60% 50% at 70% 55%,
+      rgba(125, 33, 57, 0.55),
+      transparent 70%
+    ),
+    var(--wine-950);
+}
+.door-arch {
+  position: absolute;
+  right: max(4vw, 24px);
+  bottom: -12%;
+  width: min(46vw, 560px);
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px 0 0;
+  border: 1px solid rgba(233, 201, 138, 0.28);
+  box-shadow:
+    inset 0 0 90px rgba(233, 201, 138, 0.1),
+    0 0 120px rgba(125, 33, 57, 0.4);
+  background: linear-gradient(180deg, rgba(58, 12, 26, 0.5), transparent);
+}
+.door-grid {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 80px);
+}
+.door-copy {
+  display: grid;
+  gap: 18px;
+  color: var(--on-dark);
+}
+.door-copy h2 {
+  font: 400 clamp(2.4rem, 6vw, 5rem) / 0.98 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.door-copy h2 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+}
+.door-copy p {
+  max-width: 34ch;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--on-dark-soft);
+}
+.door-count {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+  margin-top: 6px;
+}
+.door-count > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.door-count b {
+  font: 400 3rem / 1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+.door-count span {
+  font: 600 0.75rem var(--font-ui);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-dark-soft);
+}
+.door-count .bar {
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(244, 239, 230, 0.14);
+  overflow: hidden;
+}
+.door-count .bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b8864b, #f6e2ad);
+  transition: width 0.6s var(--ease);
+}
+.door-stage {
+  position: relative;
+  height: min(64svh, 560px);
+  display: grid;
+  place-items: center;
+}
+.scanner {
+  position: absolute;
+  inset: 4% 8%;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(233, 201, 138, 0.22);
+  background: rgba(22, 4, 10, 0.35);
+}
+.scanner .corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--gold);
+  opacity: 0.85;
+}
+.scanner .tl {
+  top: 10px;
+  left: 10px;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 8px 0 0 0;
+}
+.scanner .tr {
+  top: 10px;
+  right: 10px;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 8px 0 0;
+}
+.scanner .bl {
+  bottom: 10px;
+  left: 10px;
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0 0 0 8px;
+}
+.scanner .br {
+  bottom: 10px;
+  right: 10px;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 8px 0;
+}
+.scanner .beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0 46%,
+    rgba(246, 226, 173, 0) 46%,
+    rgba(246, 226, 173, 0.55) 50%,
+    rgba(246, 226, 173, 0) 54%,
+    transparent 54%
+  );
+  will-change: transform;
+}
+.pass {
+  position: relative;
+  width: min(250px, 52vw);
+  aspect-ratio: 5 / 7;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  padding: 18px 16px 14px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #fffaf0, #efe3cc);
+  color: #6e1426;
+  text-align: center;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(184, 134, 75, 0.45),
+    inset 0 0 0 6px #fffaf0,
+    inset 0 0 0 7px rgba(184, 134, 75, 0.5);
+  will-change: transform, opacity;
+}
+.pass small {
+  display: block;
+  font: 600 0.5625rem var(--font-caps);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7a5612;
+}
+.pass-top b {
+  display: block;
+  margin-top: 4px;
+  font: 400 1.35rem / 1.05 var(--font-display);
+  font-style: italic;
+}
+.pass-seal {
+  width: 62%;
+  aspect-ratio: 1;
+  align-self: center;
+  justify-self: center;
+  transition:
+    filter 0.4s,
+    transform 0.4s var(--ease);
+}
+.pass[data-scanned="1"] .pass-seal {
+  filter: drop-shadow(0 0 10px rgba(184, 134, 75, 0.9));
+  transform: scale(1.04);
+}
+.pass-foot {
+  font-size: 0.625rem;
+}
+.desk-chip {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 18px);
+  min-width: min(300px, 80%);
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(252, 250, 245, 0.97);
+  color: var(--ink);
+  opacity: 0;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  transition:
+    opacity 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+.desk-chip.verify,
+.desk-chip.admitted {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.desk-chip .who {
+  font: 400 1.25rem var(--font-display);
+}
+.desk-chip .meta {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+.desk-chip .btn-admit {
+  margin-top: 8px;
+  display: inline-flex;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--wine);
+  color: var(--on-dark);
+  font: 600 0.8125rem var(--font-ui);
+  letter-spacing: 0.04em;
+  transition: background 0.3s;
+}
+.desk-chip.admitted .btn-admit {
+  background: #1f6b4a;
+}
+@media (max-width: 860px) {
+  .door-stage {
+    place-items: start center;
+  }
+  .pass {
+    margin-top: 14px;
+  }
+  .door-grid {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 8px;
+  }
+  .door-copy {
+    gap: 10px;
+  }
+  .door-copy p {
+    font-size: 0.9375rem;
+  }
+  .door-count b {
+    font-size: 2.2rem;
+  }
+  .door-stage {
+    height: 42svh;
+  }
+  .pass {
+    width: min(170px, 44vw);
+    padding: 12px 10px 10px;
+  }
+  .pass-top b {
+    font-size: 1.05rem;
+  }
+  .door-arch {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .c-door {
+    height: auto;
+    min-height: 100svh;
+  }
+  .c-door .sticky {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+    padding: 80px 0;
+  }
+  .js .chapter-mark.reveal .cm-line {
+    transform: none;
+    transition: none;
+  }
+  .js .chapter-mark.reveal .cm-line:last-child {
+    transform: scaleX(-1);
   }
 }

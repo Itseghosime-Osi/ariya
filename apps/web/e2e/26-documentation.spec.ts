@@ -45,6 +45,24 @@ test.describe("Documentation", () => {
     ).toBeVisible();
   });
 
+  test("the old /docs address lands on the manual", async ({ page }) => {
+    await page.goto("/docs");
+    await expect(page).toHaveURL(/\/documentation$/);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "The Àríyá manual" })
+    ).toBeVisible();
+  });
+
+  test("the site header's Docs link opens the manual", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/pricing");
+    await page
+      .getByRole("navigation", { name: "Main" })
+      .getByRole("link", { name: "Docs" })
+      .click();
+    await expect(page).toHaveURL(/\/documentation$/);
+  });
+
   test("an unknown page is a 404", async ({ page }) => {
     const res = await page.goto("/documentation/does-not-exist");
     expect(res?.status()).toBe(404);

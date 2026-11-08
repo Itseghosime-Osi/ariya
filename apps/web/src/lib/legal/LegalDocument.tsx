@@ -21,7 +21,7 @@ export function LegalDocument({
   return (
     <article>
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
-        {LEGAL.product} by {LEGAL.operator}
+        {LEGAL.product}
       </p>
       <h1 className="mt-2 font-display text-4xl font-bold leading-tight text-night sm:text-5xl">
         {title}

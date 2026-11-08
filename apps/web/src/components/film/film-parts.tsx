@@ -34,15 +34,9 @@ export function Gate({ status }: { status: FilmStatus }) {
         <h1 id="gateTitle">
           The <em>Yes</em>
         </h1>
-        <p className="value">
-          One personal invitation for every guest, and a guest list that keeps
-          itself.
-        </p>
-        <p className="story mono">
-          A Lagos wedding in seventeen chapters · best with sound
-        </p>
+        <p className="value">One invitation for every guest.</p>
         <fieldset className="hue" id="hue">
-          <legend className="mono">Choose the colour of the day</legend>
+          <legend className="sr-only">Choose the colour of the day</legend>
           <label>
             <input type="radio" name="hue" value="burgundy" defaultChecked />
             <span
@@ -52,7 +46,7 @@ export function Gate({ status }: { status: FilmStatus }) {
               }
               aria-hidden="true"
             />
-            Burgundy
+            <span className="nm">Burgundy</span>
           </label>
           <label>
             <input type="radio" name="hue" value="blue" />
@@ -63,7 +57,7 @@ export function Gate({ status }: { status: FilmStatus }) {
               }
               aria-hidden="true"
             />
-            Sapphire blue
+            <span className="nm">Sapphire blue</span>
           </label>
           <label>
             <input type="radio" name="hue" value="green" />
@@ -74,7 +68,7 @@ export function Gate({ status }: { status: FilmStatus }) {
               }
               aria-hidden="true"
             />
-            Champagne green
+            <span className="nm">Champagne green</span>
           </label>
         </fieldset>
         <div className="load mono" aria-live="polite">
@@ -103,34 +97,24 @@ export function Gate({ status }: { status: FilmStatus }) {
           </p>
           <div className="how-opts" role="group" aria-labelledby="howQ">
             <button className="btn gold" id="howScroll" type="button">
-              Scroll at your own pace
+              Scroll
             </button>
             <button className="btn" id="howWatch" type="button">
               <span className="play-ico" aria-hidden="true" />
-              Watch the proposal
+              Watch
             </button>
           </div>
           <p className="how-note">
-            Scroll gently and every detail has its moment; scroll faster to
-            skim. Watch plays all seventeen chapters by itself{" "}
-            <span id="howMins" />, and you can pause or replay it at any time.
+            Watch plays itself in <span id="howMins" />. Scroll lets you set the
+            pace.
           </p>
         </div>
-        <p className="gate-links">
-          <Link className="quiet" href="/events">
-            Start planning
-          </Link>
-          <span aria-hidden="true">·</span>
-          <Link className="quiet" href="/about">
-            About Àríyá
-          </Link>
-        </p>
       </div>
     </div>
   );
 }
 
-export function FilmNav({ status }: { status: FilmStatus }) {
+export function FilmNav() {
   return (
     <header className="nav" id="nav">
       <a
@@ -150,21 +134,6 @@ export function FilmNav({ status }: { status: FilmStatus }) {
         <Link className="btn gold small" href="/events">
           Start planning
         </Link>
-        <button
-          className="icon-btn"
-          id="soundBtn"
-          type="button"
-          aria-label="Sound"
-          aria-pressed={status.soundOn ? "true" : "false"}
-        >
-          <span className="bars" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="lbl" />
-        </button>
         <button
           className="icon-btn"
           id="menuBtn"
@@ -211,6 +180,54 @@ export function Opening({ status }: { status: FilmStatus }) {
           <span className="ico" aria-hidden="true" />
           <span className="lbl" />
         </button>
+        <span className="speed-wrap" id="obSpeedWrap" hidden>
+          <button
+            type="button"
+            id="obSpeed"
+            aria-expanded="false"
+            aria-controls="obSpeedPanel"
+            aria-label="Playback speed"
+          >
+            <span className="val">1×</span>
+          </button>
+          <div className="speed-panel" id="obSpeedPanel" hidden>
+            <label htmlFor="obRate" className="speed-l">
+              Speed
+            </label>
+            <input
+              id="obRate"
+              type="range"
+              min="1"
+              max="2"
+              step="0.05"
+              defaultValue="1"
+              aria-valuetext="1 times"
+            />
+            <div className="speed-stops">
+              {[1, 1.25, 1.5, 1.75, 2].map((r) => (
+                <button key={r} type="button" data-rate={r}>
+                  {r}×
+                </button>
+              ))}
+            </div>
+          </div>
+        </span>
+        <button
+          type="button"
+          id="soundBtn"
+          aria-label="Sound"
+          aria-pressed={status.soundOn ? "true" : "false"}
+        >
+          <svg className="i i-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
+            <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+          </svg>
+          <svg className="i i-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
+            <path d="M16 9.5l4.5 5M20.5 9.5l-4.5 5" />
+          </svg>
+          <span className="lbl" />
+        </button>
         <button
           type="button"
           id="obCC"
@@ -219,13 +236,31 @@ export function Opening({ status }: { status: FilmStatus }) {
         >
           CC
         </button>
-        <button type="button" id="obReplay">
-          Replay
+        <button type="button" id="obReplay" aria-label="Replay">
+          <svg className="i" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5a7 7 0 1 1-6.6 4.7" />
+            <path d="M5 3.5v5h5" />
+          </svg>
+          <span className="t">Replay</span>
         </button>
-        <button type="button" id="obSkip">
-          Skip<span className="long"> the opening</span>
+        <button type="button" id="obSkip" aria-label="Skip the opening">
+          <svg className="i" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 5l9 7-9 7z" />
+            <path d="M18 5v14" />
+          </svg>
+          <span className="t">
+            Skip<span className="long"> the opening</span>
+          </span>
         </button>
         <button type="button" id="obMode">
+          <svg className="i i-scroll" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="7" y="3" width="10" height="18" rx="5" />
+            <path d="M12 8v3" />
+          </svg>
+          <svg className="i i-watch" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <path d="M10 9.5v5l4.5-2.5z" />
+          </svg>
           <span className="lbl" />
         </button>
       </div>
@@ -812,7 +847,7 @@ export function FilmClose() {
       <section className="sec close" id="start" aria-labelledby="sTitle">
         <div className="wrap">
           <p className="label mono">
-            <b>Àríyá by OwambePlan</b>
+            <b>Àríyá</b>
             <span>For Nigerian weddings, introductions and owambes</span>
           </p>
           <h2 className="statement" id="sTitle">
@@ -884,7 +919,7 @@ export function FilmClose() {
             <Link href="/about">About</Link>
             <Link href="/product">What we do</Link>
             <Link href="/pricing">Pricing</Link>
-            <Link href="/docs">Docs</Link>
+            <Link href="/documentation">Docs</Link>
             <Link href="/events">Demo planner</Link>
           </nav>
           <span>

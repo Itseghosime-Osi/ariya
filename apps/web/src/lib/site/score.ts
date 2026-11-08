@@ -1,3 +1,5 @@
+import { burstSound, launchSound } from "../rocket-sound";
+
 // Àríyá's home page music. It loops /site/assets/music.ogg — Ogg Opus, named
 // so the server sends audio/ogg (a .opus extension is served as
 // application/octet-stream, which some browsers refuse to play). Copyrighted
@@ -348,7 +350,7 @@ export function start(at = 0): boolean {
     (function fade() {
       if (!audioEl || !on) return;
       const k = Math.min(1, (performance.now() - v0) / 1600);
-      audioEl.volume = 0.55 * k;
+      audioEl.volume = 0.55 * levelNow * k;
       if (k < 1) requestAnimationFrame(fade);
     })();
     // A browser that blocks sound without a tap leaves the music off rather
@@ -448,7 +450,8 @@ export function installScoreHandlers() {
    the archive's Score: clock, seek, level, ambience, sfx. */
 
 let lastSeek = 0;
-let levelNow = 1;
+// The song starts under the picture, never over it; the dance brings it up.
+let levelNow = 0.2;
 let amb: {
   src: AudioBufferSourceNode;
   f: BiquadFilterNode;
@@ -484,6 +487,14 @@ export function seek(t: number) {
   } catch {
     /* not loaded yet */
   }
+}
+
+/** Watch speed: the song plays faster or slower with the film, at the same pitch. */
+export function setRate(r: number) {
+  if (!audioEl) return;
+  audioEl.playbackRate = r;
+  (audioEl as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch =
+    true;
 }
 
 /** In Watch the song plays once and ends with the film; scrolling, it loops. */
@@ -679,6 +690,29 @@ const SFX: Record<string, (t: number) => void> = {
 };
 
 /** Plays one described sound, if the visitor has turned sound on. */
+/**
+ * A firework rocket: the thump of the launch, a rising hiss and whistle for the climb, then at the
+ * top a deep boom, a sharp crack and the crackle of falling sparks. `rise` is the climb in seconds
+ * and `pan` places it left (-1) to right (1) like the burst on screen. Silent unless sound is on.
+ */
+export function rocket(rise = 0.95, pan = 0) {
+  if (!on || !ctx) return;
+  const c = ctx;
+  const t = c.currentTime + 0.01;
+  const out = c.createGain();
+  out.gain.value = 0.85;
+  const panner = c.createStereoPanner?.();
+  if (panner) {
+    panner.pan.value = Math.max(-1, Math.min(1, pan)) * 0.7;
+    out.connect(panner);
+    panner.connect(c.destination);
+  } else {
+    out.connect(c.destination);
+  }
+  launchSound(c, out, t, rise);
+  burstSound(c, out, t + rise, 1);
+}
+
 export function sfx(name: string) {
   if (!on || !ctx) return;
   const play = SFX[name];

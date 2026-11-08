@@ -69,8 +69,13 @@ const SEGS: ReadonlyArray<ReadonlyArray<string | number>> = [
   ["D", 0.19],
 ];
 
-const FILM_SECONDS = 120;
-const SEG_SECONDS = [9, 7, 34, 10, 7, 7, 8, 11, 7, 7, 4, 6, 11, 8, 6, 6, 8, 8];
+// The film takes 2:41 at 1x. The dialogue scenes (the room, the memory, the question) get the time
+// their captions need to be read; the chapters between them share the rest. The song is not what
+// sets the length. Pinned to crates/render-core/src/story.rs.
+export const FILM_SECONDS = 161.2;
+const SEG_SECONDS = [
+  16, 8.5, 44, 8, 5.5, 5.5, 6.5, 9, 5.5, 5.5, 3.5, 5, 9, 6.5, 5, 5, 6.5, 6.5,
+];
 const SCROLL_SECONDS = [
   6, 5, 15, 7, 5, 5, 6, 7, 5, 5, 3.5, 4.5, 7, 6, 4.5, 4.5, 6, 7,
 ];
@@ -267,28 +272,28 @@ export const HUES: Record<string, [string, string]> = {
 export const OPEN_LINES: ReadonlyArray<
   readonly [ModeName, number, number, string, string, string?]
 > = [
-  ["R", 0.06, 0.29, "Tunde, quietly", "Chidinma… these past five years…"],
-  ["R", 0.31, 0.43, "", "[paper rustles]", "sfx"],
-  ["R", 0.45, 0.64, "Tunde", "Why does that sound like a graduation speech?"],
-  ["R", 0.65, 0.74, "", "[a small, nervous laugh]", "sfx"],
-  ["R", 0.76, 0.99, "Tunde", "Since that night at table fourteen…"],
-  ["M", 0.1, 0.46, "Chidinma", "That's enough rice for three people."],
+  ["R", 0.05, 0.25, "Tunde, quietly", "Chidinma… these past five years…"],
+  ["R", 0.27, 0.37, "", "[paper rustles]", "sfx"],
+  ["R", 0.385, 0.61, "Tunde", "Why does that sound like a graduation speech?"],
+  ["R", 0.625, 0.72, "", "[a small, nervous laugh]", "sfx"],
+  ["R", 0.74, 0.95, "Tunde", "Since that night at table fourteen…"],
+  ["M", 0.08, 0.46, "Chidinma", "That's enough rice for three people."],
   ["M", 0.48, 0.76, "Tunde", "I'm planning ahead."],
   ["M", 0.77, 0.97, "", "[her laugh]", "sfx"],
   ["N", 0.1, 0.165, "Chidinma", "You kept this?"],
   ["N", 0.17, 0.24, "Tunde", "Of course."],
-  ["N", 0.27, 0.315, "Tunde", "Close your eyes."],
-  ["N", 0.32, 0.37, "Chidinma, amused", "Tunde… what are you doing?"],
-  ["N", 0.375, 0.41, "Tunde, gently", "Please."],
+  ["N", 0.265, 0.315, "Tunde", "Close your eyes."],
+  ["N", 0.32, 0.38, "Chidinma, amused", "Tunde… what are you doing?"],
+  ["N", 0.385, 0.425, "Tunde, gently", "Please."],
   ["N", 0.445, 0.475, "", "[a chair moves]", "sfx"],
-  ["N", 0.478, 0.505, "", "[fabric, a quiet breath]", "sfx"],
-  ["N", 0.508, 0.53, "", "[something small set down on the table]", "sfx"],
-  ["N", 0.535, 0.575, "Tunde", "Okay. Open."],
-  ["N", 0.69, 0.705, "", "[a soft hinge]", "sfx"],
-  ["N", 0.71, 0.75, "Tunde", "I had a whole speech."],
-  ["N", 0.755, 0.785, "Chidinma", "I know."],
-  ["N", 0.8, 0.84, "Tunde", "Will you marry me?"],
-  ["N", 0.86, 0.9, "Chidinma, with a small laugh", "Yes."],
+  ["N", 0.478, 0.508, "", "[fabric, a breath]", "sfx"],
+  ["N", 0.51, 0.54, "", "[something set down]", "sfx"],
+  ["N", 0.545, 0.6, "Tunde", "Okay. Open."],
+  ["N", 0.62, 0.66, "", "[a soft hinge]", "sfx"],
+  ["N", 0.705, 0.76, "Tunde", "I had a whole speech."],
+  ["N", 0.765, 0.8, "Chidinma", "I know."],
+  ["N", 0.81, 0.86, "Tunde", "Will you marry me?"],
+  ["N", 0.875, 0.915, "Chidinma, with a small laugh", "Yes."],
 ];
 
 export const OPEN_SLATES: ReadonlyArray<
@@ -309,15 +314,15 @@ export const OPEN_WORDS: ReadonlyArray<
 
 /** Sounds, by the same clock. They only play once the visitor has turned sound on. */
 export const OPEN_SFX: ReadonlyArray<readonly [ModeName, number, string]> = [
-  ["R", 0.31, "paper"],
-  ["R", 0.66, "breath"],
+  ["R", 0.27, "paper"],
+  ["R", 0.63, "breath"],
   ["R", 0.74, "paper"],
   ["M", 0.52, "clink"],
   ["N", 0.445, "chair"],
   ["N", 0.478, "fabric"],
   ["N", 0.49, "breath"],
   ["N", 0.508, "set"],
-  ["N", 0.69, "hinge"],
+  ["N", 0.62, "hinge"],
   ["N", 0.79, "breath"],
 ];
 
@@ -358,4 +363,19 @@ export function seeded(seed: number) {
     s = (s * 16807) % 2147483647;
     return (s - 1) / 2147483646;
   };
+}
+
+/**
+ * How loud the song is, as a share of its full volume. It is a soft bed under the picture all
+ * the way through, and it swells only when the guests are dancing on the stage: the late part of
+ * "The dance", then the send-off. (During the chapters from "Getting ready" to "The place kept" the
+ * story's own progress holds at the same value, so progress alone cannot tell them apart.)
+ */
+export function songLevel(mode: ModeName, p: number, pro: number): number {
+  const bed = 0.2;
+  if (pro < 1) return bed;
+  if (mode === "D") return 1;
+  // "The dance" begins at 0.97 of the story: the song starts to rise as it does and is full by the send-off.
+  if (mode === "old") return bed + (1 - bed) * seg(p, 0.965, 0.99);
+  return bed;
 }

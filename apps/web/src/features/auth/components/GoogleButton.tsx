@@ -62,7 +62,7 @@ export function GoogleButton({
         type="button"
         onClick={start}
         disabled={busy}
-        className="flex min-h-12 w-full items-center justify-center gap-3 rounded-full border border-hairline bg-white px-6 text-sm font-semibold text-night shadow-sm transition-colors hover:bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-60"
+        className="desk-chip flex min-h-12 w-full items-center justify-center gap-3 rounded-full px-6 text-sm font-semibold text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy disabled:opacity-60"
       >
         <GoogleMark />
         {busy ? "Opening Google…" : label}

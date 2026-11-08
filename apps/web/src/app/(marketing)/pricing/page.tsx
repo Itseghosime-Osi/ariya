@@ -1,10 +1,13 @@
 import Link from "next/link";
 import "@/styles/site/pricing.css";
+import "@/styles/site/story.css";
 import { pageMetadata } from "@/lib/site-metadata";
+import { ProductEngines } from "../product/product-engines";
+import { PriceScene } from "./price-scene";
 
 export const metadata = pageMetadata({
   title: "Pricing",
-  description: "Àríyá by OwambePlan pricing: pay per event, no subscription.",
+  description: "Àríyá pricing: pay per event, no subscription.",
   path: "/pricing",
   socialTitle: "Pricing · Àríyá",
   socialDescription:
@@ -23,6 +26,18 @@ const FAQ = [
   {
     q: "What happens when a table is full?",
     a: "Àríyá won't seat more people than a table has chairs, and shows how many seats are left before you assign anyone.",
+  },
+  {
+    q: "Is there a subscription?",
+    a: "No. You pay once for each event. A free event stays free up to 20 guest invitations.",
+  },
+  {
+    q: "What happens when I pass 20 guests?",
+    a: "Àríyá asks for the Celebration Pass before it lets you invite more. Nothing already on your list is lost.",
+  },
+  {
+    q: "Do you send WhatsApp messages or texts for me?",
+    a: "Not yet. Email invitations are sent for you, ten guests at a time. For WhatsApp or text, copy each guest's personal link into the chat.",
   },
   {
     q: "Is it ready to use today?",
@@ -47,7 +62,8 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }}
       />
-      <main id="main">
+      <ProductEngines />
+      <main id="main" className="story-page">
         <section className="wineband page-hero" aria-labelledby="pTitle">
           <div className="wrap">
             <span className="caps">Pricing</span>
@@ -60,6 +76,8 @@ export default function PricingPage() {
             </p>
           </div>
         </section>
+
+        <PriceScene />
 
         <section className="sec" aria-label="Plans">
           <div className="wrap">
@@ -114,7 +132,53 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="sec linen" aria-labelledby="fTitle">
+        <section className="sec linen" aria-labelledby="iTitle">
+          <div className="wrap pr-split">
+            <div>
+              <div className="sec-head">
+                <span className="caps">The Celebration Pass</span>
+                <h2 id="iTitle">
+                  What the pass <em>unlocks.</em>
+                </h2>
+              </div>
+              <ul className="pr-checks">
+                <li>Unlimited guest invitations for the event</li>
+                <li>
+                  Email invitations in batches, with each guest&rsquo;s own link
+                </li>
+                <li>Automated reminders</li>
+                <li>Seating plans with the 3D hall</li>
+                <li>Guest-list import from a spreadsheet or your contacts</li>
+                <li>Vendor checklists</li>
+                <li>Team access for planners and ushers</li>
+              </ul>
+            </div>
+            <div>
+              <div className="sec-head">
+                <span className="caps">Paying</span>
+                <h2>
+                  How it <em>works.</em>
+                </h2>
+              </div>
+              <ol className="pr-steps">
+                <li>
+                  <b>Open the event&rsquo;s billing page</b>
+                  <span>and choose to pay the Celebration Pass.</span>
+                </li>
+                <li>
+                  <b>Pay in naira through Paystack</b>
+                  <span>Your card details go to Paystack, never to us.</span>
+                </li>
+                <li>
+                  <b>The event unlocks</b>
+                  <span>as soon as Paystack confirms the payment.</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <section className="sec" aria-labelledby="fTitle">
           <div className="wrap">
             <div className="sec-head">
               <span className="caps">Questions</span>

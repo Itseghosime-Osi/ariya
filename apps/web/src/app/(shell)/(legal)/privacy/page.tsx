@@ -19,11 +19,11 @@ const sections: LegalSection[] = [
       <>
         <p>
           {LEGAL.product} is a planning suite for weddings and other
-          celebrations, run by {LEGAL.operator}. We decide how the personal
-          information described here is used to run the service, which makes us
-          the “data controller” for hosts’ accounts. For guest details that a
-          host adds, the host decides why and how they are used, and we process
-          them on the host’s behalf (see section 4).
+          celebrations. We decide how the personal information described here is
+          used to run the service, which makes us the “data controller” for
+          hosts’ accounts. For guest details that a host adds, the host decides
+          why and how they are used, and we process them on the host’s behalf
+          (see section 4).
         </p>
         <p>Questions about this policy: {mail}.</p>
       </>

@@ -18,11 +18,10 @@ const sections: LegalSection[] = [
     title: "Our agreement",
     body: (
       <p>
-        These terms are between you and {LEGAL.operator}, who run{" "}
-        {LEGAL.product}. By creating an account, signing in, or using the
-        service, you agree to them and to our{" "}
-        <Link href="/privacy">Privacy Policy</Link>. If you do not agree, please
-        do not use the service.
+        These terms are between you and the team behind {LEGAL.product}. By
+        creating an account, signing in, or using the service, you agree to them
+        and to our <Link href="/privacy">Privacy Policy</Link>. If you do not
+        agree, please do not use the service.
       </p>
     ),
   },

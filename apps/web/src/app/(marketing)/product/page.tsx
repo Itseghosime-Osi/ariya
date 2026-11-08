@@ -1,14 +1,25 @@
 import Link from "next/link";
 import "@/styles/site/product.css";
 import { pageMetadata } from "@/lib/site-metadata";
-import { InvitationCard } from "@/components/site/fine-card";
+import "@/styles/site/story.css";
+import { ChapterMark } from "@/components/site/chapter-mark";
+import { StorySpine } from "@/components/site/story-spine";
+import { PRODUCT_CHAPTERS } from "./chapters";
+import {
+  CardScene,
+  HelperScene,
+  RepliesScene,
+  SeatsScene,
+  SendScene,
+} from "./scenes";
+import { ProductEngines } from "./product-engines";
 import { GuestBoard } from "./guest-board";
 import { VendorChecklist } from "./vendor-checklist";
 
 export const metadata = pageMetadata({
   title: "What we do",
   description:
-    "How Àríyá by OwambePlan runs invitations, RSVPs, seating and vendors for Nigerian weddings and owambes.",
+    "How Àríyá runs invitations, RSVPs, seating and vendors for Nigerian weddings and owambes.",
   path: "/product",
   socialTitle: "What Àríyá does · Àríyá",
   socialDescription:
@@ -33,7 +44,7 @@ const STEPS = [
   },
   {
     title: "Send personal links",
-    body: "Each guest gets their own link by WhatsApp, SMS or email, and a confirmation email when they reply.",
+    body: "Email goes out in bulk with each guest's own link; for WhatsApp or text, copy the link into the chat. Guests get a confirmation email when they reply.",
   },
   {
     title: "Seat and check in",
@@ -48,7 +59,9 @@ export default function ProductPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_LD) }}
       />
-      <main id="main">
+      <ProductEngines />
+      <main id="main" className="story-page">
+        <StorySpine chapters={PRODUCT_CHAPTERS} mode="steps" />
         <section className="wineband page-hero" aria-labelledby="pTitle">
           <div className="wrap">
             <span className="caps">What Àríyá does</span>
@@ -56,82 +69,72 @@ export default function ProductPage() {
               The calm behind <em className="foil-text">the party.</em>
             </h1>
             <p>
-              Àríyá is OwambePlan&rsquo;s planner for couples and the planners
-              who run their day. Your guest list, invitations, replies, seats
-              and vendors live in one place instead of fifty group chats.
+              Àríyá is a planner for couples and the planners who run their day.
+              Your guest list, invitations, replies, seats and vendors live in
+              one place instead of fifty group chats. Scroll to follow one
+              wedding through it.
             </p>
           </div>
         </section>
 
-        <section className="sec" id="invitations" aria-labelledby="iTitle">
-          <div className="wrap invite-feature">
-            <InvitationCard
-              variant="wine"
-              guest="Adaeze Okonkwo"
-              noCotd
-              label="Sample personal invitation for Adaeze Okonkwo"
-            />
-            <div>
+        <div id={PRODUCT_CHAPTERS[0].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[0]} />
+          <section className="sec linen" id="tools" aria-labelledby="tTitle">
+            <div className="wrap">
               <div className="sec-head">
-                <span className="caps">Invitations and RSVP</span>
-                <h2 id="iTitle">
-                  Every guest gets their <em>own link.</em>
+                <span className="caps">Guests</span>
+                <h2 id="tTitle">
+                  Know who&rsquo;s coming. <em>Start with the list.</em>
                 </h2>
+                <p className="muted">
+                  Type guests in, import a spreadsheet, or pick people from your
+                  phone&rsquo;s contacts. Missing numbers and duplicates are
+                  flagged before anything is saved. Try the sample below.
+                </p>
               </div>
-              <ul className="points">
-                <li>
-                  <b>A personal invitation</b>
-                  <span>
-                    Their name, your colours of the day, the date and venue.
-                    Shared by WhatsApp, SMS or email.
-                  </span>
-                </li>
-                <li>
-                  <b>One-tap replies</b>
-                  <span>
-                    Accept or decline, with a plus-one only when you allow it.
-                    No app to install.
-                  </span>
-                </li>
-                <li>
-                  <b>A confirmation email</b>
-                  <span>
-                    Guests get their reply, date, venue and table in writing.
-                  </span>
-                </li>
-              </ul>
-              <div className="next">
-                <Link className="btn btn-wine" href="/about#invitation">
-                  See a guest&rsquo;s invitation
-                </Link>
-                <Link className="btn btn-ghost" href="/#invitation">
-                  Open one on the home page
-                </Link>
-              </div>
+              <GuestBoard />
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        <section className="sec linen" id="tools" aria-labelledby="tTitle">
-          <div className="wrap">
-            <div className="sec-head">
-              <span className="caps">Guests and seating</span>
-              <h2 id="tTitle">
-                Know who&rsquo;s coming. <em>And where they sit.</em>
-              </h2>
-              <p className="muted">
-                Import your list, watch replies arrive, and seat confirmed
-                guests on a plan of your hall. A table never takes more people
-                than it has chairs.
-              </p>
-            </div>
-            <GuestBoard />
-          </div>
-        </section>
+        <div id={PRODUCT_CHAPTERS[1].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[1]} />
+          <CardScene />
+        </div>
 
-        <section className="sec" id="vendors" aria-labelledby="vTitle">
-          <VendorChecklist />
-        </section>
+        <div id={PRODUCT_CHAPTERS[2].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[2]} />
+          <SendScene />
+        </div>
+
+        <div id={PRODUCT_CHAPTERS[3].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[3]} />
+          <RepliesScene />
+        </div>
+
+        <div id={PRODUCT_CHAPTERS[4].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[4]} />
+          <SeatsScene />
+        </div>
+
+        <div id={PRODUCT_CHAPTERS[5].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[5]} />
+          <section className="sec" id="vendors" aria-labelledby="vTitle">
+            <VendorChecklist />
+          </section>
+          <div className="wrap ps-door-link">
+            <p>
+              On the day, a reception desk scans each guest&rsquo;s seal, shows
+              who it is and where they sit, and admits them with one tap.{" "}
+              <Link href="/about#chapter-door">Watch the door scene</Link>.
+            </p>
+          </div>
+        </div>
+
+        <div id={PRODUCT_CHAPTERS[6].id}>
+          <ChapterMark chapter={PRODUCT_CHAPTERS[6]} />
+          <HelperScene />
+        </div>
 
         <section className="sec wineband" id="how" aria-labelledby="hTitle">
           <div className="wrap">

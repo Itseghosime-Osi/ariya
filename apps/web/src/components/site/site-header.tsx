@@ -16,12 +16,12 @@ const PAGES: ReadonlyArray<readonly [string, string, string]> = [
     "What we do",
     "Guest lists, personal links, seating and vendors.",
   ],
+  ["/pricing", "Pricing", "Free up to 20 guests, then ₦50,000 per event."],
   [
-    "/pricing",
-    "Pricing",
-    "Pay per event. Placeholder prices for the prototype.",
+    "/documentation",
+    "Docs",
+    "The full manual: hosts, teams, setup and reference.",
   ],
-  ["/docs", "Docs", "Guides to guest lists, invitations, seating and vendors."],
   [
     "/events",
     "The demo planner",
@@ -197,13 +197,8 @@ export function SiteHeader() {
     <>
       <header className="site-head on-dark" id="top">
         <div className="wrap">
-          <Link
-            className="lockup"
-            href="/"
-            aria-label="Àríyá by OwambePlan, the film"
-          >
+          <Link className="lockup" href="/" aria-label="Àríyá, the film">
             <b>Àríyá</b>
-            <span>by OwambePlan</span>
           </Link>
 
           <nav className="site-nav" aria-label="Main">
@@ -229,8 +224,8 @@ export function SiteHeader() {
               Pricing
             </Link>
             <Link
-              href="/docs"
-              aria-current={current("/docs") ? "page" : undefined}
+              href="/documentation"
+              aria-current={current("/documentation") ? "page" : undefined}
             >
               Docs
             </Link>
