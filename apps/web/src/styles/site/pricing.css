@@ -214,3 +214,144 @@ section {
     grid-row: 2;
   }
 }
+
+/* ---------- The price scene and the pass ---------- */
+.pr-meter {
+  display: grid;
+  gap: 18px;
+  width: min(440px, 86vw);
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 22px;
+  border: 1px solid rgba(233, 201, 138, 0.28);
+  background: rgba(22, 4, 10, 0.5);
+}
+.pr-guests,
+.pr-price {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+.pr-guests b {
+  font: 400 clamp(3.4rem, 8vw, 5.6rem) / 0.95 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.pr-guests span,
+.pr-price span {
+  font: 600 0.75rem var(--font-ui);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-dark-soft);
+}
+.pr-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(244, 239, 230, 0.14);
+  margin-bottom: 14px;
+}
+.pr-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #b8864b, #f6e2ad);
+}
+.pr-tick {
+  position: absolute;
+  top: 12px;
+  transform: translateX(-50%);
+  font: 600 0.6875rem var(--font-caps);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+.pr-tick::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 1px;
+  height: 12px;
+  background: var(--gold);
+}
+.pr-price b {
+  font: 400 clamp(2.4rem, 6vw, 3.6rem) / 1 var(--font-display);
+  color: var(--on-dark);
+  transition: color 0.4s;
+}
+.pr-price.paid b {
+  color: var(--gold);
+}
+.pr-flat {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--on-dark-soft);
+}
+.pr-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 6vw, 80px);
+}
+.pr-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.pr-checks li {
+  position: relative;
+  padding-left: 30px;
+  line-height: 1.45;
+}
+.pr-checks li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--wine);
+  color: var(--on-dark);
+  font-size: 0.75rem;
+}
+.pr-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  counter-reset: s;
+}
+.pr-steps li {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding-left: 46px;
+  counter-increment: s;
+}
+.pr-steps li::before {
+  content: counter(s);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-ink);
+  font: 400 1rem var(--font-display);
+  color: var(--gold-ink);
+}
+.pr-steps span {
+  color: var(--ink-soft);
+}
+@media (max-width: 860px) {
+  .pr-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

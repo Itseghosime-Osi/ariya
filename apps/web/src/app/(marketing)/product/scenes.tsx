@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EntrySeal } from "@/features/invitations/components/EntrySeal";
 import { THEME_PALETTES } from "@/features/invitations/design";
-import { seg, useScene } from "./use-scene";
+import { seg, useScene } from "@/components/site/use-scene";
 
 const PALETTE = THEME_PALETTES.royal_gold;
 const at = (a: number, d = 0.12) =>

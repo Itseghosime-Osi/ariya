@@ -202,3 +202,97 @@
     display: none;
   }
 }
+
+/* ---------- Scroll-driven scenes: a tall section, a sticky stage, and --p ---------- */
+.ps-scene {
+  position: relative;
+  height: 320svh;
+  background:
+    radial-gradient(
+      60% 50% at 75% 55%,
+      rgba(125, 33, 57, 0.5),
+      transparent 70%
+    ),
+    var(--wine-950);
+  color: var(--on-dark);
+}
+.ps-scene-short {
+  height: 260svh;
+}
+.ps-sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+}
+.ps-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 80px);
+}
+.ps-copy {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+.ps-copy h2 {
+  font: 400 clamp(2.1rem, 4.8vw, 4rem) / 1 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.ps-copy h2 em {
+  font-family: var(--font-hand);
+  font-style: normal;
+}
+.ps-copy p {
+  max-width: 38ch;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--on-dark-soft);
+}
+/* Anything that arrives with the scroll: --a is when it starts, --d how long it takes. */
+.ps-in {
+  --t: clamp(0, calc((var(--p, 0) - var(--a, 0)) / var(--d, 0.12)), 1);
+  opacity: var(--t);
+  transform: translateY(calc((1 - var(--t)) * 22px));
+}
+.ps-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: min(62svh, 540px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-scene,
+  .ps-scene-short {
+    height: auto;
+  }
+  .ps-sticky {
+    position: relative;
+    height: auto;
+    padding: 72px 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .ps-grid {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 10px;
+  }
+  .ps-copy {
+    gap: 10px;
+  }
+  .ps-copy p {
+    font-size: 0.9375rem;
+  }
+  .ps-copy h2 {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+  .ps-stage {
+    min-height: 0;
+  }
+}
