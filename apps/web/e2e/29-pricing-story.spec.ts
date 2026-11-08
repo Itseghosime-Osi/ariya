@@ -8,7 +8,9 @@ test.describe("Pricing", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: /Pay per event/ })
     ).toBeVisible();
-    await expect(page.getByText("₦50,000").first()).toBeVisible();
+    await expect(
+      page.locator("main").getByText("₦50,000").first()
+    ).toBeVisible();
     await expect(page.getByText(/Up to 20 guest invitations/)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /What the pass/ })

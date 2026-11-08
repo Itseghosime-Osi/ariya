@@ -30,6 +30,6 @@ test.describe("What we do tour", () => {
     await send.scrollIntoViewIfNeeded();
     await send.click();
     await expect(page.getByText("Sent", { exact: true })).toHaveCount(3);
-    await expect(page.getByText(/nothing is sent/i)).toBeVisible();
+    await expect(page.locator(".ps-note")).toContainText(/nothing is sent/i);
   });
 });
