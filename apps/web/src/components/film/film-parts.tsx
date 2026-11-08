@@ -6,6 +6,7 @@
 // React re-render can never overwrite a frame that is already on screen.
 
 import Link from "next/link";
+import type { SiteMenuTrigger } from "@/components/site/site-header";
 import type { FilmStatus } from "./engine";
 
 export function FilmStage() {
@@ -114,7 +115,7 @@ export function Gate({ status }: { status: FilmStatus }) {
   );
 }
 
-export function FilmNav() {
+export function FilmNav({ open, onMenuClick }: SiteMenuTrigger) {
   return (
     <header className="nav" id="nav">
       <a
@@ -138,10 +139,12 @@ export function FilmNav() {
           className="icon-btn"
           id="menuBtn"
           type="button"
-          data-cm-open
-          data-cm-label
+          aria-haspopup="dialog"
+          aria-controls="cm"
+          aria-expanded={open}
+          onClick={onMenuClick}
         >
-          Menu
+          {open ? "Close" : "Menu"}
         </button>
       </div>
     </header>

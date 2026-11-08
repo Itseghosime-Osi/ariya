@@ -1,10 +1,5 @@
 import type { Block, DocGroup, DocPage } from "./types";
-import { startPages } from "./content/start";
-import { hostPages } from "./content/hosts";
-import { hostPages2 } from "./content/hosts2";
-import { adminPages } from "./content/admin";
-import { engineeringPages } from "./content/engineering";
-import { referencePages } from "./content/reference";
+import { publicPages } from "./content/public";
 
 export type { Block, DocGroup, DocPage } from "./types";
 
@@ -12,39 +7,26 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     id: "start",
     title: "Start here",
-    blurb: "What Àríyá is, a ten-minute tour and the words we use.",
+    blurb: "A calm beginning, from your first event to your first reply.",
   },
   {
     id: "hosts",
-    title: "Host guide",
-    blurb:
-      "Everything a couple or planner does, from the guest list to the door.",
+    title: "For hosts & planners",
+    blurb: "The guest list, the invitation and every place at the table.",
   },
   {
-    id: "admin",
-    title: "Team, safety and data",
-    blurb: "Roles, security, privacy, email and billing.",
+    id: "guests",
+    title: "For guests",
+    blurb: "Your invitation, your reply and what to bring on the day.",
   },
   {
-    id: "engineering",
-    title: "Engineering",
-    blurb: "Set up, deploy, test and extend the product.",
-  },
-  {
-    id: "reference",
-    title: "Reference",
-    blurb: "Routes, variables, limits, fixes and what is not built yet.",
+    id: "staff",
+    title: "At the door",
+    blurb: "A warm welcome, with the right guest and the right pass.",
   },
 ];
 
-export const DOC_PAGES: DocPage[] = [
-  ...startPages,
-  ...hostPages,
-  ...hostPages2,
-  ...adminPages,
-  ...engineeringPages,
-  ...referencePages,
-];
+export const DOC_PAGES: DocPage[] = publicPages;
 
 export function getDocPage(slug: string): DocPage | undefined {
   return DOC_PAGES.find((p) => p.slug === slug);

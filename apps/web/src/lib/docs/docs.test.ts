@@ -98,42 +98,21 @@ describe("the manual", () => {
     }
   });
 
-  it("covers the whole product", () => {
+  it("covers customer tasks", () => {
     const needed = [
       "overview",
       "quick-start",
-      "concepts",
+      "events",
       "guests",
       "invitations",
       "designer",
+      "film",
       "rsvp",
       "seating",
-      "venue-studio",
       "check-in",
-      "checklist",
-      "vendors",
-      "public-page",
-      "connect-ai",
       "team",
-      "billing",
-      "security",
-      "privacy-and-data",
-      "email",
-      "mcp",
-      "setup",
-      "deployment",
-      "architecture",
-      "data-model",
-      "design-engine",
-      "testing",
-      "conventions",
-      "design-system",
-      "decisions",
-      "routes",
-      "environment",
-      "troubleshooting",
-      "roadmap",
       "faq",
+      "public-page",
     ];
     for (const slug of needed) expect(getDocPage(slug), slug).toBeDefined();
   });
@@ -147,25 +126,58 @@ describe("the manual", () => {
   it("builds a search index and plain text without markup", () => {
     const idx = searchIndex();
     expect(idx).toHaveLength(DOC_PAGES.length);
-    const text = pageText(getDocPage("billing")!);
-    expect(text).toContain("celebration pass");
+    const text = pageText(getDocPage("rsvp")!);
+    expect(text).toContain("personal link");
     expect(text).not.toContain("**");
     expect(slugify("The `entry` **seal**!")).toBe("the-entry-seal");
   });
 
-  it("documents the facts that matter", () => {
-    const all = DOC_PAGES.map(pageText).join(" ");
-    for (const fact of [
-      "50,000",
-      "invitations@ariyaday.com",
-      "help@ariyaday.com",
+  it("keeps retired pages and implementation details out of public search", () => {
+    const retired = [
+      "setup",
+      "deployment",
+      "architecture",
+      "data-model",
+      "design-engine",
+      "testing",
+      "conventions",
+      "design-system",
+      "decisions",
+      "routes",
+      "environment",
+      "troubleshooting",
+      "roadmap",
+      "billing",
+      "security",
+      "email",
+      "mcp",
+      "connect-ai",
+      "privacy-and-data",
+    ];
+    const index = searchIndex();
+    for (const slug of retired) {
+      expect(getDocPage(slug), slug).toBeUndefined();
+      expect(
+        index.some((page) => page.slug === slug),
+        slug
+      ).toBe(false);
+    }
+    const all = JSON.stringify(index).toLowerCase();
+    for (const detail of [
+      "supabase",
+      "paystack_secret",
       "hit_rate_limit",
       "timingsafeequal",
-      "check_in_code",
-      "continue with google",
-      "with you i say yes",
+      "service_role",
+      "pnpm",
+      "public/hall3d",
+      "cron",
+      "rsvp_answers",
+      "competitor",
+      "rust",
+      "rls",
     ]) {
-      expect(all, fact).toContain(fact);
+      expect(all, detail).not.toContain(detail);
     }
   });
 });

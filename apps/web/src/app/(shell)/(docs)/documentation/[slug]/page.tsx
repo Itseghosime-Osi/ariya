@@ -30,6 +30,7 @@ export async function generateMetadata({
   return {
     title: `${page.title} • Àríyá manual`,
     description: page.summary,
+    alternates: { canonical: `/documentation/${page.slug}` },
   };
 }
 

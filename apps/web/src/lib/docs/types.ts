@@ -12,8 +12,7 @@ export type Block =
   | { t: "note"; tone?: "info" | "tip" | "warn"; title?: string; x: string }
   | { t: "code"; x: string; lang?: string };
 
-export type DocGroupId =
-  "start" | "hosts" | "admin" | "engineering" | "reference";
+export type DocGroupId = "start" | "hosts" | "guests" | "staff";
 
 export interface DocPage {
   slug: string;

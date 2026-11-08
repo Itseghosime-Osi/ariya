@@ -1,0 +1,5 @@
+/* The manual keeps its original flat ivory canvas when the site curtain is idle. */
+html:has(.docs-navigation):not(.cur-in):not(.cur-out)::before,
+html:has(.docs-navigation):not(.cur-in):not(.cur-out)::after {
+  box-shadow: none;
+}

@@ -20,7 +20,7 @@ const PAGES: ReadonlyArray<readonly [string, string, string]> = [
   [
     "/documentation",
     "Docs",
-    "The full manual: hosts, teams, setup and reference.",
+    "Practical guides for hosts, guests and the welcome team.",
   ],
   [
     "/events",
@@ -57,7 +57,16 @@ function openCurtain(reduce: boolean) {
   );
 }
 
-export function SiteHeader() {
+export interface SiteMenuTrigger {
+  open: boolean;
+  onMenuClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+export function SiteHeader({
+  renderHeader,
+}: {
+  renderHeader?: (trigger: SiteMenuTrigger) => React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -188,6 +197,14 @@ export function SiteHeader() {
     }
   }
 
+  function onMenuClick(event: React.MouseEvent<HTMLButtonElement>) {
+    if (open) close();
+    else {
+      openerRef.current = event.currentTarget;
+      setOpen(true);
+    }
+  }
+
   const current = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -195,63 +212,60 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="site-head on-dark" id="top">
-        <div className="wrap">
-          <Link className="lockup" href="/" aria-label="Àríyá, the film">
-            <b>Àríyá</b>
-          </Link>
+      {renderHeader ? (
+        renderHeader({ open, onMenuClick })
+      ) : (
+        <header className="site-head on-dark" id="top">
+          <div className="wrap">
+            <Link className="lockup" href="/" aria-label="Àríyá, the film">
+              <b>Àríyá</b>
+            </Link>
 
-          <nav className="site-nav" aria-label="Main">
-            <Link href="/" aria-current={current("/") ? "page" : undefined}>
-              The film
-            </Link>
-            <Link
-              href="/about"
-              aria-current={current("/about") ? "page" : undefined}
+            <nav className="site-nav" aria-label="Main">
+              <Link href="/" aria-current={current("/") ? "page" : undefined}>
+                The film
+              </Link>
+              <Link
+                href="/about"
+                aria-current={current("/about") ? "page" : undefined}
+              >
+                About
+              </Link>
+              <Link
+                href="/product"
+                aria-current={current("/product") ? "page" : undefined}
+              >
+                What we do
+              </Link>
+              <Link
+                href="/pricing"
+                aria-current={current("/pricing") ? "page" : undefined}
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/documentation"
+                aria-current={current("/documentation") ? "page" : undefined}
+              >
+                Docs
+              </Link>
+              <Link className="btn btn-primary btn-small" href="/events">
+                Start planning
+              </Link>
+            </nav>
+            <button
+              className="btn btn-ghost btn-small cm-btn"
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="cm"
+              aria-expanded={open}
+              onClick={onMenuClick}
             >
-              About
-            </Link>
-            <Link
-              href="/product"
-              aria-current={current("/product") ? "page" : undefined}
-            >
-              What we do
-            </Link>
-            <Link
-              href="/pricing"
-              aria-current={current("/pricing") ? "page" : undefined}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/documentation"
-              aria-current={current("/documentation") ? "page" : undefined}
-            >
-              Docs
-            </Link>
-            <Link className="btn btn-primary btn-small" href="/events">
-              Start planning
-            </Link>
-          </nav>
-          <button
-            className="btn btn-ghost btn-small cm-btn"
-            type="button"
-            aria-haspopup="dialog"
-            aria-controls="cm"
-            aria-expanded={open}
-            onClick={(e) => {
-              if (open) {
-                close();
-              } else {
-                openerRef.current = e.currentTarget;
-                setOpen(true);
-              }
-            }}
-          >
-            {open ? "Close" : "Menu"}
-          </button>
-        </div>
-      </header>
+              {open ? "Close" : "Menu"}
+            </button>
+          </div>
+        </header>
+      )}
 
       <div
         className={`cm${open ? " open" : ""}`}

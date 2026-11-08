@@ -5,8 +5,9 @@ import { DOC_GROUPS, DOC_PAGES, pagesInGroup } from "@/lib/docs";
 
 export const metadata: Metadata = {
   title: "Documentation • Àríyá",
+  alternates: { canonical: "/documentation" },
   description:
-    "The complete Àríyá manual: guests, invitations, the designer, seating, check-in, billing, security, setup and reference.",
+    "Practical Àríyá guides for hosts, guests and door staff: events, invitations, replies, seating and check-in.",
 };
 
 export default function DocumentationHome() {
@@ -19,17 +20,16 @@ export default function DocumentationHome() {
         The Àríyá manual
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed">
-        Everything about the product from A to Z: how a host plans a
-        celebration, how guests reply, how the team works on the day, and how
-        the system is built, secured, deployed and tested. {DOC_PAGES.length}{" "}
-        pages in {DOC_GROUPS.length} sections.
+        How a host plans a celebration, how guests reply, and how the team
+        welcomes everyone on the day. {DOC_PAGES.length} pages in{" "}
+        {DOC_GROUPS.length} sections.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href="/documentation/quick-start"
           className="inline-flex min-h-11 items-center rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
-          Ten-minute tour
+          Start your celebration
         </Link>
         <Link
           href="/documentation/overview"

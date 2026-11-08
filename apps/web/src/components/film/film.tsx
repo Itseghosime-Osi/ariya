@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SiteHeader } from "@/components/site/site-header";
 import * as score from "@/lib/site/score";
 import { FilmEngine, type FilmStatus } from "./engine";
 import { songLevel } from "./story";
@@ -89,7 +90,7 @@ export function Film() {
     <div ref={rootRef} className="film">
       <FilmStage />
       <Gate status={status} />
-      <FilmNav />
+      <SiteHeader renderHeader={(trigger) => <FilmNav {...trigger} />} />
       <div className="overlay" id="overlay">
         <Opening status={status} />
         <OldLayer />
