@@ -3,6 +3,28 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Icon } from "@/components/ui/icon";
 
+interface PassDetector {
+  detect(video: HTMLVideoElement): Promise<{ rawValue?: string }[]>;
+}
+interface PassDetectorConstructor {
+  new (options: { formats: string[] }): PassDetector;
+  getSupportedFormats?: () => Promise<string[]>;
+}
+
+function cameraErrorMessage(error: unknown): string {
+  const name =
+    error && typeof error === "object" && "name" in error ? error.name : "";
+  if (name === "NotAllowedError" || name === "SecurityError")
+    return "Camera permission was blocked. Allow camera access in your browser’s site settings and try again.";
+  if (name === "NotFoundError" || name === "DevicesNotFoundError")
+    return "No camera was found. Connect a camera or try another device.";
+  if (name === "NotReadableError" || name === "TrackStartError")
+    return "The camera could not start. Close other apps using it and try again.";
+  return error instanceof Error
+    ? error.message
+    : "Unable to access the camera. Please try again.";
+}
+
 interface CheckInCameraScannerProps {
   onScan: (code: string) => void;
   disabled?: boolean;
@@ -15,101 +37,131 @@ export function CheckInCameraScanner({
   const [isActive, setIsActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isScanningRef = useRef<boolean>(false);
+  const onScanRef = useRef(onScan);
+  onScanRef.current = onScan;
 
-  const stopCamera = useCallback(() => {
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-      scanIntervalRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    isScanningRef.current = false;
-    setIsActive(false);
-  }, []);
-
-  const handleDetected = useCallback(
-    (code: string) => {
-      const clean = code.trim();
-      if (!clean) return;
-      // Stop scanner loop momentarily to avoid duplicate bursts
-      isScanningRef.current = false;
-      onScan(clean);
-      setTimeout(() => {
-        isScanningRef.current = true;
-      }, 2000);
-    },
-    [onScan]
-  );
-
-  const startCamera = async () => {
+  const stopCamera = useCallback(() => setIsActive(false), []);
+  const startCamera = () => {
     setCameraError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
-      setIsActive(true);
-      isScanningRef.current = true;
-
-      // Check if native BarcodeDetector is available
-      if (typeof window !== "undefined" && "BarcodeDetector" in window) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const BarcodeDetectorClass = (window as any).BarcodeDetector;
-        const detector = new BarcodeDetectorClass({
-          formats: ["qr_code", "code_128"],
-        });
-
-        scanIntervalRef.current = setInterval(async () => {
-          if (!isScanningRef.current || !videoRef.current) return;
-          try {
-            const barcodes = await detector.detect(videoRef.current);
-            if (barcodes.length > 0 && barcodes[0].rawValue) {
-              handleDetected(barcodes[0].rawValue);
-            }
-          } catch {
-            // Frame processing catch
-          }
-        }, 400);
-      } else {
-        // Fallback to @zxing/browser
-        const { BrowserMultiFormatReader } = await import("@zxing/browser");
-        const reader = new BrowserMultiFormatReader();
-        if (videoRef.current) {
-          reader.decodeFromVideoElement(videoRef.current, (result) => {
-            if (result && isScanningRef.current) {
-              handleDetected(result.getText());
-            }
-          });
-        }
-      }
-    } catch (err) {
-      setCameraError(
-        err instanceof Error ? err.message : "Unable to access camera device."
-      );
-      stopCamera();
-    }
+    setIsActive(true);
   };
 
+  // Start after React commits the video element. Each activation owns its own
+  // stream and decoder, including requests that resolve after closing/unmounting.
   useEffect(() => {
-    return () => {
-      stopCamera();
+    if (!isActive) return;
+    if (disabled) {
+      setIsActive(false);
+      return;
+    }
+    const video = videoRef.current;
+    if (!video) return;
+    let cancelled = false;
+    let detected = false;
+    let stream: MediaStream | null = null;
+    let controls: { stop: () => void } | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const release = () => {
+      if (timer) clearTimeout(timer);
+      controls?.stop();
+      stream?.getTracks().forEach((track) => track.stop());
+      video.pause();
+      video.srcObject = null;
     };
-  }, [stopCamera]);
+    const report = (value: string) => {
+      const code = value.trim();
+      if (cancelled || detected || !code) return;
+      detected = true;
+      release();
+      setIsActive(false);
+      onScanRef.current(code);
+    };
+    const fail = (error: unknown) => {
+      if (cancelled || detected) return;
+      release();
+      setCameraError(cameraErrorMessage(error));
+      setIsActive(false);
+    };
+
+    async function start() {
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error(
+            window.isSecureContext
+              ? "This browser cannot access a camera. Try a supported browser."
+              : "Camera access requires a secure HTTPS connection."
+          );
+        }
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        video!.srcObject = stream;
+        await video!.play();
+        if (cancelled || detected) return;
+
+        // Some browsers expose BarcodeDetector without supporting QR codes or
+        // Code 128. Use only supported formats and otherwise fall back to ZXing.
+        let detector: PassDetector | undefined;
+        const NativeDetector = (
+          window as Window & { BarcodeDetector?: PassDetectorConstructor }
+        ).BarcodeDetector;
+        if (NativeDetector) {
+          try {
+            const supported = NativeDetector.getSupportedFormats
+              ? await NativeDetector.getSupportedFormats()
+              : ["qr_code", "code_128"];
+            const formats = ["qr_code", "code_128"].filter((format) =>
+              supported.includes(format)
+            );
+            if (formats.includes("qr_code"))
+              detector = new NativeDetector({ formats });
+          } catch {
+            /* A partial native implementation uses the fallback below. */
+          }
+        }
+        if (cancelled || detected) return;
+        if (detector) {
+          const scanFrame = async () => {
+            if (cancelled || detected) return;
+            // Avoid empty frames, and never run two native decodes at once.
+            if (video!.readyState >= 2 && video!.videoWidth > 0) {
+              try {
+                const values = await detector!.detect(video!);
+                const value = values.find((value) => value.rawValue?.trim());
+                if (value?.rawValue) report(value.rawValue);
+              } catch {
+                /* A moving or unreadable frame can be tried again. */
+              }
+            }
+            if (!cancelled && !detected)
+              timer = setTimeout(() => void scanFrame(), 250);
+          };
+          void scanFrame();
+        } else {
+          const { BrowserMultiFormatReader } = await import("@zxing/browser");
+          if (cancelled || detected) return;
+          const reader = new BrowserMultiFormatReader();
+          controls = await reader.decodeFromVideoElement(video!, (result) => {
+            if (result) report(result.getText());
+          });
+          if (cancelled || detected) controls.stop();
+        }
+      } catch (error) {
+        fail(error);
+      }
+    }
+    void start();
+    return () => {
+      cancelled = true;
+      release();
+    };
+  }, [isActive, disabled]);
 
   return (
     <section className="bento-card space-y-4 p-5 sm:p-6">
@@ -131,7 +183,7 @@ export function CheckInCameraScanner({
           }`}
         >
           <Icon name={isActive ? "close" : "camera"} className="text-sm" />
-          <span>{isActive ? "Turn Off Camera" : "Launch Camera Scanner"}</span>
+          <span>{isActive ? "Turn Off Camera" : "Scan a pass"}</span>
         </button>
       </div>
 
@@ -153,6 +205,7 @@ export function CheckInCameraScanner({
           <video
             ref={videoRef}
             playsInline
+            autoPlay
             muted
             className="w-full h-full object-cover"
           />

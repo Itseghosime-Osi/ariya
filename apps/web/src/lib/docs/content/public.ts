@@ -175,11 +175,11 @@ export const publicPages: DocPage[] = [
       },
       {
         t: "h2",
-        x: "WhatsApp and text messages",
+        x: "Share through WhatsApp",
       },
       {
         t: "p",
-        x: "Share copied links or messages in your own WhatsApp or SMS conversation. Copying a link does not send it automatically.",
+        x: "Share copied links or messages in your own WhatsApp conversation. Copying a link does not send it automatically.",
       },
       {
         t: "h2",

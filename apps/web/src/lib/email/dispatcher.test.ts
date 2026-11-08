@@ -113,4 +113,28 @@ describe("dispatchRsvpEmail", () => {
       })
     );
   });
+  it("returns a safe cause while keeping the provider's raw message private", async () => {
+    (serverEnv as { EMAIL_TRANSPORT: string }).EMAIL_TRANSPORT = "resend";
+    mockResendSend.mockResolvedValueOnce({
+      data: null,
+      error: {
+        name: "validation_error",
+        message:
+          "You can only send testing emails to your own email address (owner-only@example.com). Please verify a domain.",
+      },
+    });
+    const result = await dispatchRsvpEmail({
+      eventId: "e-1",
+      recipientEmail: "test@example.com",
+      subject: "Invitation",
+      templateType: "reminder",
+      html: "<p>Invitation</p>",
+    });
+    expect(result.success).toBe(false);
+    expect(result.reason).toBe("test_recipients_only");
+    expect(JSON.stringify(result)).not.toContain("owner-only@example.com");
+    expect(JSON.stringify(mockInsert.mock.calls)).not.toContain(
+      "owner-only@example.com"
+    );
+  });
 });
