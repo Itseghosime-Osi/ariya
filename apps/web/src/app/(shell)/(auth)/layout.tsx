@@ -14,8 +14,8 @@ export default function AuthLayout({
       className="relative isolate h-dvh overflow-hidden bg-ivory text-night"
     >
       <div className="grid h-full min-h-0 lg:grid-cols-2">
-        <section className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto overscroll-contain px-5 pb-5 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-8 sm:pb-7 sm:pt-[calc(1.75rem+env(safe-area-inset-top))] lg:px-12 xl:px-16">
-          <header className="sticky top-0 z-10 -mx-5 flex items-center justify-between gap-4 bg-ivory/95 px-5 pb-3 pt-1 backdrop-blur-sm sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 xl:-mx-16 xl:px-16">
+        <section className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto overscroll-contain px-5 pb-5 sm:px-8 sm:pb-7 lg:px-12 xl:px-16">
+          <header className="sticky top-0 z-10 -mx-5 flex items-center justify-between gap-4 bg-ivory px-5 pb-3 pt-[calc(1rem+env(safe-area-inset-top))] sm:-mx-8 sm:px-8 sm:pt-[calc(1.75rem+env(safe-area-inset-top))] lg:-mx-12 lg:px-12 xl:-mx-16 xl:px-16">
             <Link
               href="/product"
               className="flex min-h-11 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-burgundy"
