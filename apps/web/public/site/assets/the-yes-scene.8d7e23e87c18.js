@@ -1360,13 +1360,9 @@ async function start() {
   const FW_COLS = [[3.2, 2.2, 0.9], [3.4, 0.5, 0.45], [3, 2.8, 2.6], [3.4, 1.3, 0.5]];
   const bursts = Array.from({ length: FB }, () => ({ t0: -99, c: new THREE.Vector3(), col: FW_COLS[0], size: 14 }));
   let nextBurst = 0, burstI = 0;
-  // A rocket climbs for RISE seconds before it bursts, and tells the page so the launch and the
-  // burst can be heard when they are seen.
-  const RISE = 0.95;
-  function fire(t, quiet) {
+  function fire(t) {
     const b = bursts[burstI++ % FB];
-    b.t0 = t + RISE; b.c.set((rand() - 0.5) * 150, 45 + rand() * 40, -150 - rand() * 60); b.col = FW_COLS[Math.floor(rand() * FW_COLS.length)]; b.size = 16 + rand() * 12;
-    if (!quiet && typeof OP.onRocket === "function") OP.onRocket(RISE, Math.max(-1, Math.min(1, b.c.x / 90)));
+    b.t0 = t; b.c.set((rand() - 0.5) * 150, 45 + rand() * 40, -150 - rand() * 60); b.col = FW_COLS[Math.floor(rand() * FW_COLS.length)]; b.size = 16 + rand() * 12;
   }
   // The stars, which gather into the couple's names.
   const NSx = mobile ? 1100 : 2000;
@@ -1437,23 +1433,15 @@ async function start() {
     lanternMat.emissiveIntensity = 2.6 * flick;
     // Fireworks: a volley while the lanterns rise.
     if (motion && v > 0.24 && v < 0.94 && t > nextBurst) { fire(t); nextBurst = t + 0.55 + rand() * 0.9; }
-    if (!motion && bursts[0].t0 < 0 && v > 0.3) { for (let i = 0; i < 4; i++) { fire(t, true); bursts[i].t0 = t - 0.6 - i * 0.2; } }
+    if (!motion && bursts[0].t0 < 0 && v > 0.3) { for (let i = 0; i < 4; i++) { fire(t); bursts[i].t0 = t - 0.6 - i * 0.2; } }
     let flashI = 0;
     for (let b = 0; b < FB; b++) {
       const B = bursts[b], age = motion ? t - B.t0 : 0.9;
       const live = age >= 0 && age < 3.2;
-      const rising = motion && age < 0 && age > -RISE;
       const out = 1 - Math.exp(-2.4 * age), fade = live ? Math.pow(Math.max(0, 1 - age / 3.0), 1.6) : 0;
       if (live && age < 0.25) flashI = Math.max(flashI, 1 - age / 0.25);
       for (let j = 0; j < FP; j++) {
         const i = (b * FP + j) * 3;
-        if (rising && j < 8) {
-          // The climb: a bright head with a short gold tail, slowing as it nears the top.
-          const k = 1 + age / RISE, head = B.c.y - 60 * (1 - k) * (1 - k), fadeUp = Math.min(1, k * 4) * (1 - j / 9);
-          fwPos[i] = B.c.x; fwPos[i + 1] = head - j * (0.9 + 1.6 * (1 - k)); fwPos[i + 2] = B.c.z;
-          fwCol[i] = 2.8 * fadeUp; fwCol[i + 1] = 1.9 * fadeUp; fwCol[i + 2] = 0.8 * fadeUp;
-          continue;
-        }
         if (!live) { fwPos[i + 1] = -999; continue; }
         fwPos[i] = B.c.x + fwDir[i] * B.size * out; fwPos[i + 1] = B.c.y + fwDir[i + 1] * B.size * out - 3.2 * age * age; fwPos[i + 2] = B.c.z + fwDir[i + 2] * B.size * out;
         const tw = j % 3 === 0 && age > 1.2 ? (Math.sin(t * 40 + j) > 0 ? 1 : 0.2) : 1;
