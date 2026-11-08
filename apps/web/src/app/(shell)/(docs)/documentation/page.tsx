@@ -13,7 +13,7 @@ export default function DocumentationHome() {
   return (
     <article>
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-ink">
-        Àríyá by OwambePlan
+        Àríyá
       </p>
       <h1 className="mt-2 font-display text-4xl font-bold leading-tight sm:text-5xl">
         The Àríyá manual

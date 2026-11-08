@@ -16,7 +16,6 @@ export function SiteFooter() {
           >
             Àríyá
           </b>{" "}
-          by OwambePlan
         </span>
         <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
         <span>

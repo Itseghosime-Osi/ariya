@@ -193,13 +193,8 @@ export function SiteHeader() {
     <>
       <header className="site-head on-dark" id="top">
         <div className="wrap">
-          <Link
-            className="lockup"
-            href="/"
-            aria-label="Àríyá by OwambePlan, the film"
-          >
+          <Link className="lockup" href="/" aria-label="Àríyá, the film">
             <b>Àríyá</b>
-            <span>by OwambePlan</span>
           </Link>
 
           <nav className="site-nav" aria-label="Main">

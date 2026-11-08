@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: "Àríyá by OwambePlan",
+    siteName: "Àríyá",
     locale: "en_NG",
     title: "The Yes · Àríyá",
     description:
-      "One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in seventeen chapters, from Àríyá by OwambePlan.",
+      "One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in seventeen chapters, from Àríyá.",
     url: "/",
     images: [
       {

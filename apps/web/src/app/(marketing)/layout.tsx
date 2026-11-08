@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://ariya-two.vercel.app"),
   title: {
     default: "Àríyá · The Yes",
-    template: "%s · Àríyá by OwambePlan",
+    template: "%s · Àríyá",
   },
   applicationName: "Àríyá",
   icons: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
-    siteName: "Àríyá by OwambePlan",
+    siteName: "Àríyá",
     locale: "en_NG",
     images: [
       {
