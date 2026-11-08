@@ -16,11 +16,7 @@ const PAGES: ReadonlyArray<readonly [string, string, string]> = [
     "What we do",
     "Guest lists, personal links, seating and vendors.",
   ],
-  [
-    "/pricing",
-    "Pricing",
-    "Pay per event. Placeholder prices for the prototype.",
-  ],
+  ["/pricing", "Pricing", "Free up to 20 guests, then ₦50,000 per event."],
   ["/docs", "Docs", "Guides to guest lists, invitations, seating and vendors."],
   [
     "/events",

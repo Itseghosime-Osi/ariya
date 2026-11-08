@@ -140,21 +140,6 @@ body:has(.about-page) .foil-text {
     transform: scaleY(1);
   }
 }
-.head-music {
-  margin-left: 8px;
-}
-@media (max-width: 880px) {
-  .head-music {
-    margin-left: auto;
-  }
-  .head-music + .menu-toggle {
-    margin-left: 8px;
-  }
-  .head-music .lbl {
-    display: none;
-  }
-}
-
 /* ---------- 1. Hero ---------- */
 .c-hero {
   position: relative;

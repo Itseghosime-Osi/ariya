@@ -319,7 +319,7 @@ textarea.input {
 .site-head .wrap {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
   min-height: 68px;
 }
 .lockup {
@@ -346,17 +346,24 @@ textarea.input {
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-left: auto;
 }
 .site-nav a:not(.btn) {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 13px;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
   border-radius: 8px;
+}
+.site-nav .btn {
+  margin-left: 12px;
+  white-space: nowrap;
 }
 .site-nav a:not(.btn):hover {
   background: rgba(127, 127, 127, 0.12);
@@ -372,6 +379,10 @@ textarea.input {
 .menu-toggle {
   display: none;
   margin-left: auto;
+}
+/* The menu button only exists where the links above do not fit. */
+.site-head .cm-btn {
+  display: none;
 }
 .cm-btn {
   margin-left: 6px;
@@ -389,9 +400,17 @@ textarea.input {
   border-color: var(--gold);
   color: var(--gold);
 }
+@media (max-width: 1080px) {
+  .lockup span {
+    display: none;
+  }
+}
 @media (max-width: 880px) {
   .site-nav {
     display: none;
+  }
+  .site-head .cm-btn {
+    display: inline-flex;
   }
   .site-nav + .cm-btn {
     margin-left: auto;

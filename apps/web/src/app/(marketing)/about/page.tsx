@@ -6,7 +6,6 @@ import { Fan } from "./fan";
 import { Finale } from "./finale";
 import { Hall } from "./hall";
 import { Hero } from "./hero";
-import { MusicToggle } from "./music-toggle";
 import { Noise } from "./noise";
 import { YesScene } from "./yes-scene";
 
@@ -24,7 +23,6 @@ export default function AboutPage() {
   return (
     <>
       <AboutEngines />
-      <MusicToggle />
       <main id="main" className="about-page">
         <Hero />
         <Noise />
