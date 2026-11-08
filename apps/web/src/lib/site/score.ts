@@ -688,6 +688,134 @@ const SFX: Record<string, (t: number) => void> = {
 };
 
 /** Plays one described sound, if the visitor has turned sound on. */
+/**
+ * A firework rocket: the thump of the launch, a rising hiss and whistle for the climb, then at the
+ * top a deep boom, a sharp crack and the crackle of falling sparks. `rise` is the climb in seconds
+ * and `pan` places it left (-1) to right (1) like the burst on screen. Silent unless sound is on.
+ */
+export function rocket(rise = 0.95, pan = 0) {
+  if (!on || !ctx) return;
+  const c = ctx;
+  const t = c.currentTime + 0.01;
+  const tb = t + rise;
+  const out = c.createGain();
+  out.gain.value = 0.85;
+  const panner = c.createStereoPanner?.();
+  if (panner) {
+    panner.pan.value = Math.max(-1, Math.min(1, pan)) * 0.7;
+    out.connect(panner);
+    panner.connect(c.destination);
+  } else {
+    out.connect(c.destination);
+  }
+
+  const noiseSrc = (at: number, dur: number) => {
+    const s = c.createBufferSource();
+    s.buffer = noiseBuf;
+    s.loop = true;
+    s.start(at, Math.random() * 0.3);
+    s.stop(at + dur + 0.05);
+    return s;
+  };
+  const shaped = (
+    g: GainNode,
+    at: number,
+    a: number,
+    peak: number,
+    d: number
+  ) => env(g, at, a, peak, d);
+
+  // Launch: a soft thump and the first rush of the motor.
+  const thump = c.createGain();
+  thump.connect(out);
+  shaped(thump, t, 0.004, 0.2, 0.16);
+  const to = c.createOscillator();
+  to.frequency.setValueAtTime(140, t);
+  to.frequency.exponentialRampToValueAtTime(55, t + 0.14);
+  to.connect(thump);
+  to.start(t);
+  to.stop(t + 0.22);
+
+  // Climb: a hiss that brightens as it rises, and a thin whistle on top.
+  const hiss = noiseSrc(t, rise);
+  const hissF = c.createBiquadFilter();
+  hissF.type = "bandpass";
+  hissF.Q.value = 2.2;
+  hissF.frequency.setValueAtTime(420, t);
+  hissF.frequency.exponentialRampToValueAtTime(3000, t + rise);
+  const hissG = c.createGain();
+  hiss.connect(hissF);
+  hissF.connect(hissG);
+  hissG.connect(out);
+  hissG.gain.setValueAtTime(0.0001, t);
+  hissG.gain.exponentialRampToValueAtTime(0.16, t + 0.12);
+  hissG.gain.exponentialRampToValueAtTime(0.05, t + rise * 0.95);
+  hissG.gain.exponentialRampToValueAtTime(0.0001, t + rise);
+  const whistle = c.createOscillator();
+  whistle.type = "sine";
+  whistle.frequency.setValueAtTime(760, t);
+  whistle.frequency.exponentialRampToValueAtTime(2300, t + rise);
+  const whG = c.createGain();
+  whistle.connect(whG);
+  whG.connect(out);
+  whG.gain.setValueAtTime(0.0001, t);
+  whG.gain.exponentialRampToValueAtTime(0.03, t + 0.2);
+  whG.gain.exponentialRampToValueAtTime(0.0001, t + rise);
+  whistle.start(t);
+  whistle.stop(t + rise + 0.05);
+
+  // Burst: boom (a falling sine under low noise), then a crack.
+  const boom = c.createGain();
+  boom.connect(out);
+  shaped(boom, tb, 0.006, 0.55, 0.9);
+  const bo = c.createOscillator();
+  bo.frequency.setValueAtTime(110, tb);
+  bo.frequency.exponentialRampToValueAtTime(26, tb + 0.7);
+  bo.connect(boom);
+  bo.start(tb);
+  bo.stop(tb + 1);
+  const rumble = noiseSrc(tb, 0.9);
+  const rumF = c.createBiquadFilter();
+  rumF.type = "lowpass";
+  rumF.frequency.setValueAtTime(700, tb);
+  rumF.frequency.exponentialRampToValueAtTime(120, tb + 0.8);
+  const rumG = c.createGain();
+  rumble.connect(rumF);
+  rumF.connect(rumG);
+  rumG.connect(out);
+  shaped(rumG, tb, 0.004, 0.4, 0.8);
+  const crack = noiseSrc(tb, 0.12);
+  const crF = c.createBiquadFilter();
+  crF.type = "highpass";
+  crF.frequency.value = 2800;
+  const crG = c.createGain();
+  crack.connect(crF);
+  crF.connect(crG);
+  crG.connect(out);
+  shaped(crG, tb, 0.002, 0.28, 0.09);
+
+  // Crackle: sparks falling away, thick at first and thinning out.
+  for (let i = 0; i < 22; i += 1) {
+    const at = tb + 0.12 + Math.pow(Math.random(), 1.7) * 1.7;
+    const spark = noiseSrc(at, 0.05);
+    const sf = c.createBiquadFilter();
+    sf.type = "bandpass";
+    sf.frequency.value = 3500 + Math.random() * 3500;
+    sf.Q.value = 3;
+    const sg = c.createGain();
+    spark.connect(sf);
+    sf.connect(sg);
+    sg.connect(out);
+    shaped(
+      sg,
+      at,
+      0.001,
+      0.05 + Math.random() * 0.09,
+      0.03 + Math.random() * 0.03
+    );
+  }
+}
+
 export function sfx(name: string) {
   if (!on || !ctx) return;
   const play = SFX[name];

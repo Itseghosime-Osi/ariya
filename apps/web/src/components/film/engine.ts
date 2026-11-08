@@ -59,6 +59,8 @@ export interface FilmEngineOptions {
   onRestart?: () => void;
   /** Watch speed changed (1 to 2): the song follows it. */
   onRate?: (rate: number) => void;
+  /** A firework rocket was launched in the send-off: climb seconds, and where it is, -1 to 1. */
+  onRocket?: (rise: number, pan: number) => void;
   onSfx?: (name: string) => void;
   onAmbience?: (kind: string) => void;
   /** Each frame: story progress, prologue progress, the scene's mode and how far through it. */
@@ -260,6 +262,9 @@ export class FilmEngine {
     this.gateStart = performance.now();
     this.t0 = performance.now();
     this.op.embed = this.embed;
+    // The send-off tells us when each rocket leaves, so its sound is heard when it is seen.
+    this.op.onRocket = (rise: number, pan: number) =>
+      this.opts.onRocket?.(rise, pan);
     // Hand the document's canvas to this mount's slot; the module keeps its own
     // GL context and its own reference to `op` either way.
     this.host?.adopt(this.q("glHost") ?? this.root);
