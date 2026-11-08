@@ -57,6 +57,8 @@ export interface FilmEngineOptions {
   onSuspend?: (held: boolean) => void;
   onLoop?: (loop: boolean) => void;
   onRestart?: () => void;
+  /** Watch speed changed (1 to 2): the song follows it. */
+  onRate?: (rate: number) => void;
   onSfx?: (name: string) => void;
   onAmbience?: (kind: string) => void;
   onScene?: (p: number, pro: number) => void;
@@ -88,8 +90,9 @@ export class FilmEngine {
   private how: "scroll" | "watch" = "scroll";
   private playing = false;
   private playLast = 0;
-  private playY = -1;
   private wt = 0;
+  /** Watch speed, 1x to 2x. */
+  private rate = 1;
   private startTimer = 0;
   private hintTimer = 0;
   private skipShown = true;
@@ -147,6 +150,7 @@ export class FilmEngine {
   private bitsOn = false;
   private confetti: HTMLCanvasElement | null = null;
 
+  private ac = new AbortController();
   private frame = 0;
   private raf = 0;
   private t0 = 0;
@@ -214,10 +218,27 @@ export class FilmEngine {
   }
 
   private scrollToRaw(r: number) {
+    // Watching, time is the clock, not the scroll bar: moving means moving the film's time.
+    if (this.how === "watch" && this.status.entered) {
+      const sv = clamp((r - PRO) / (1 - PRO), 0, 1);
+      this.wt = this.map.tFromS(sv);
+      this.target = r;
+      this.opts.onSeek?.(this.wt);
+      this.syncScroll(r);
+      return;
+    }
     const total = this.totalScroll();
     window.scrollTo({
       top: r * total,
       behavior: this.reduceMotion ? "auto" : "smooth",
+    });
+  }
+
+  /** Puts the page where the film is, without animating, for when Scroll takes over from Watch. */
+  private syncScroll(r: number) {
+    window.scrollTo({
+      top: r * this.totalScroll(),
+      behavior: "instant" as ScrollBehavior,
     });
   }
 
@@ -262,6 +283,8 @@ export class FilmEngine {
     this.onResize = this.onResize.bind(this);
     window.addEventListener("scroll", this.onScroll, { passive: true });
     window.addEventListener("resize", this.onResize);
+    this.onVisibility = this.onVisibility.bind(this);
+    document.addEventListener("visibilitychange", this.onVisibility);
 
     this.loadRustMap();
 
@@ -279,6 +302,8 @@ export class FilmEngine {
     cancelAnimationFrame(this.frameGate);
     window.removeEventListener("scroll", this.onScroll);
     window.removeEventListener("resize", this.onResize);
+    document.removeEventListener("visibilitychange", this.onVisibility);
+    this.ac.abort();
     window.clearTimeout(this.envTimer);
     window.clearTimeout(this.hintTimer);
     window.clearTimeout(this.startTimer);
@@ -287,12 +312,34 @@ export class FilmEngine {
     this.els.clear();
   }
 
+  /**
+   * Leave the tab and the song stops with the picture; come back and both carry on from the same
+   * moment. A film the visitor paused themselves stays paused.
+   */
+  private onVisibility() {
+    if (document.hidden) {
+      this.opts.onSuspend?.(true);
+      return;
+    }
+    this.playLast = performance.now();
+    const heldByVisitor =
+      this.how === "watch" && !this.playing && this.status.entered;
+    if (!heldByVisitor) this.opts.onSuspend?.(false);
+  }
+
+  private watching() {
+    return this.how === "watch" && this.status.entered && !this.embed;
+  }
+
   private onScroll() {
+    // Watching, the film follows its own clock; a phone's scroll jitter must not move it.
+    if (this.watching()) return;
     this.target = this.nativeProgress();
   }
 
   private onResize() {
     this.vhCached = 0;
+    if (this.watching()) return;
     this.target = this.nativeProgress();
   }
 
@@ -363,7 +410,7 @@ export class FilmEngine {
     const mins = this.q("howMins");
     if (mins) {
       const TT = this.map.totalTime();
-      mins.textContent = `in ${Math.floor(TT / 60)}:${`0${Math.round(TT % 60)}`.slice(-2)}, to the song`;
+      mins.textContent = `${Math.floor(TT / 60)}:${`0${Math.round(TT % 60)}`.slice(-2)}`;
     }
   }
 
@@ -724,6 +771,14 @@ export class FilmEngine {
   // ------------------------------------------------------ watch / scroll mode
 
   private setHow(m: "scroll" | "watch", startIn?: number) {
+    const was = this.how;
+    if (m === "watch" && was !== "watch") {
+      // From the page's position, once; from here the clock leads.
+      this.wt = this.map.tFromS(this.sFromY(window.scrollY));
+    } else if (m === "scroll" && was === "watch") {
+      this.playing = false;
+      this.syncScroll(this.target);
+    }
     this.how = m;
     window.clearTimeout(this.startTimer);
     this.startTimer = 0;
@@ -733,6 +788,9 @@ export class FilmEngine {
     const obPlay = this.q<HTMLButtonElement>("obPlay");
     const obMode = this.q("obMode");
     if (obPlay) obPlay.hidden = m !== "watch";
+    const speedWrap = this.q("obSpeedWrap");
+    if (speedWrap) speedWrap.hidden = m !== "watch";
+    if (m !== "watch") this.q("obSpeedPanel")?.setAttribute("hidden", "");
     const lbl = obMode?.querySelector(".lbl");
     if (lbl) lbl.textContent = m === "watch" ? "Scroll" : "Watch";
     obMode?.setAttribute(
@@ -756,14 +814,11 @@ export class FilmEngine {
 
   private setPlaying(on: boolean, keepSong?: boolean) {
     this.playing = on;
-    this.playY = window.scrollY;
-    this.wt = this.map.tFromS(this.sFromY(window.scrollY));
     this.playLast = performance.now();
     if (on && this.wt >= this.map.totalTime() - 0.05) {
       this.jumpTo(0);
       this.target = this.prog = 0;
       this.opts.onRestart?.();
-      this.playY = window.scrollY;
       this.wt = 0;
     }
     if (on && this.how === "watch") this.opts.onSeek?.(this.wt);
@@ -786,40 +841,55 @@ export class FilmEngine {
     );
   }
 
+  /**
+   * Watching: the film's time moves by the clock and drives the picture directly, never through the
+   * scroll bar, so a phone's address bar, momentum or re-layout cannot make it skip. The song is the
+   * reference: time follows it by small corrections, and only snaps when they have really come apart
+   * (a seek, a stall). Pausing for the song to buffer holds the picture instead of running ahead.
+   */
   private playStep = (now: number) => {
     if (!this.playing) return;
-    const dt = Math.min(0.25, (now - this.playLast) / 1000);
+    const dt = Math.min(0.1, Math.max(0, (now - this.playLast) / 1000));
     this.playLast = now;
-    if (Math.abs(window.scrollY - this.playY) > 40) {
-      this.playY = window.scrollY;
-      this.wt = this.map.tFromS(this.sFromY(this.playY));
-      this.opts.onSeek?.(this.wt);
-      requestAnimationFrame(this.playStep);
-      return;
-    }
     const TT = this.map.totalTime();
+    if (!this.opts.onWaiting?.()) this.wt += dt * this.rate;
     const ck = this.opts.onClock?.() ?? null;
-    if (ck !== null) {
-      if (this.wt > TT - 1.5 && ck < 1.5) this.wt = TT;
-      else
-        this.wt = Math.min(
-          TT,
-          Math.abs(ck - this.wt) < 1.5 ? Math.max(this.wt, ck) : ck
-        );
-    } else if (!this.opts.onWaiting?.()) {
-      this.wt = Math.min(TT, this.wt + dt);
+    if (ck !== null && !this.opts.onWaiting?.()) {
+      const d = ck - this.wt;
+      if (Math.abs(d) > 0.9) this.wt = ck;
+      else this.wt += d * Math.min(1, dt * 2.5);
     }
-    window.scrollTo({
-      top: this.yFromS(this.map.sFromT(this.wt)),
-      behavior: "instant" as ScrollBehavior,
-    });
-    this.playY = window.scrollY;
+    this.wt = clamp(this.wt, 0, TT);
+    this.target = this.map.rawFromS(this.map.sFromT(this.wt));
     if (this.wt >= TT) {
+      this.playing = false;
+      this.setStatus({ playing: false });
       this.setHow("scroll");
       return;
     }
     requestAnimationFrame(this.playStep);
   };
+
+  /** Watch speed, 1x to 2x in any step; the song follows it. */
+  setRate(r: number) {
+    const rate = clamp(Math.round(r * 20) / 20, 1, 2);
+    this.rate = rate;
+    this.opts.onRate?.(rate);
+    const out = rate.toFixed(2).replace(/\.?0+$/, "");
+    const btn = this.q("obSpeed");
+    if (btn) {
+      const val = btn.querySelector(".val");
+      if (val) val.textContent = `${out}×`;
+    }
+    const slider = this.q<HTMLInputElement>("obRate");
+    if (slider && Number(slider.value) !== rate) slider.value = String(rate);
+    slider?.setAttribute("aria-valuetext", `${out} times`);
+    try {
+      sessionStorage.setItem("ariya-film-rate", String(rate));
+    } catch {
+      /* not remembered */
+    }
+  }
 
   private jumpTo(y: number) {
     window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
@@ -827,6 +897,7 @@ export class FilmEngine {
 
   private replayFilm() {
     this.jumpTo(0);
+    this.wt = 0;
     this.target = this.prog = 0;
     this.opts.onRestart?.();
     this.setPlaying(this.how === "watch");
@@ -844,30 +915,99 @@ export class FilmEngine {
   }
 
   private wireObar() {
-    this.q("obPlay")?.addEventListener("click", () => {
-      if (this.startTimer) {
-        window.clearTimeout(this.startTimer);
-        this.startTimer = 0;
-        this.setPlaying(false);
-        return;
-      }
-      this.setPlaying(!this.playing);
-    });
-    this.q("obReplay")?.addEventListener("click", () => this.replayFilm());
-    this.q("obSkip")?.addEventListener("click", () => {
-      this.scrollToRaw(
-        this.skipToEnd ? 1 : this.map.rawFromS(this.map.sFromScene("C", 0.01))
+    // A destroyed engine (React strict mode mounts twice in development) must not keep answering clicks.
+    const sig = { signal: this.ac.signal };
+    this.q("obPlay")?.addEventListener(
+      "click",
+      () => {
+        if (this.startTimer) {
+          window.clearTimeout(this.startTimer);
+          this.startTimer = 0;
+          this.setPlaying(false);
+          return;
+        }
+        this.setPlaying(!this.playing);
+      },
+      sig
+    );
+    this.q("obReplay")?.addEventListener("click", () => this.replayFilm(), sig);
+
+    // Speed: a slider from 1x to 2x, with the usual stops as shortcuts.
+    const panel = this.q("obSpeedPanel");
+    const speedBtn = this.q<HTMLButtonElement>("obSpeed");
+    speedBtn?.addEventListener(
+      "click",
+      () => {
+        if (!panel) return;
+        const open = panel.hasAttribute("hidden");
+        if (open) panel.removeAttribute("hidden");
+        else panel.setAttribute("hidden", "");
+        speedBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      },
+      sig
+    );
+    this.q<HTMLInputElement>("obRate")?.addEventListener(
+      "input",
+      (e) => {
+        this.setRate(Number((e.target as HTMLInputElement).value));
+      },
+      sig
+    );
+    this.root
+      .querySelectorAll<HTMLButtonElement>("[data-rate]")
+      .forEach((b) =>
+        b.addEventListener(
+          "click",
+          () => this.setRate(Number(b.dataset.rate)),
+          sig
+        )
       );
-    });
-    this.q("obMode")?.addEventListener("click", () => {
-      this.setHow(this.how === "watch" ? "scroll" : "watch");
-    });
-    this.q("obCC")?.addEventListener("click", () => {
-      const captions = !this.status.captions;
-      document.documentElement.classList.toggle("cc-off", !captions);
-      this.q("obCC")?.setAttribute("aria-pressed", captions ? "true" : "false");
-      this.setStatus({ captions });
-    });
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape" && panel && !panel.hasAttribute("hidden")) {
+          panel.setAttribute("hidden", "");
+          speedBtn?.setAttribute("aria-expanded", "false");
+          speedBtn?.focus();
+        }
+      },
+      sig
+    );
+    try {
+      const saved = Number(sessionStorage.getItem("ariya-film-rate"));
+      if (saved >= 1 && saved <= 2) this.setRate(saved);
+    } catch {
+      /* start at 1x */
+    }
+    this.q("obSkip")?.addEventListener(
+      "click",
+      () => {
+        this.scrollToRaw(
+          this.skipToEnd ? 1 : this.map.rawFromS(this.map.sFromScene("C", 0.01))
+        );
+      },
+      sig
+    );
+    this.q("obMode")?.addEventListener(
+      "click",
+      () => {
+        this.setHow(this.how === "watch" ? "scroll" : "watch");
+      },
+      sig
+    );
+    this.q("obCC")?.addEventListener(
+      "click",
+      () => {
+        const captions = !this.status.captions;
+        document.documentElement.classList.toggle("cc-off", !captions);
+        this.q("obCC")?.setAttribute(
+          "aria-pressed",
+          captions ? "true" : "false"
+        );
+        this.setStatus({ captions });
+      },
+      sig
+    );
 
     try {
       this.skimTipped = !!sessionStorage.getItem("ariya-skim-tip");
@@ -1236,9 +1376,16 @@ export class FilmEngine {
     if (toEnd !== this.skipToEnd) {
       this.skipToEnd = toEnd;
       if (obSkip) {
-        obSkip.innerHTML = toEnd
-          ? 'Skip<span class="long"> to the end</span>'
-          : 'Skip<span class="long"> the opening</span>';
+        const t = obSkip.querySelector(".t");
+        if (t) {
+          t.innerHTML = toEnd
+            ? 'Skip<span class="long"> to the end</span>'
+            : 'Skip<span class="long"> the opening</span>';
+        }
+        obSkip.setAttribute(
+          "aria-label",
+          toEnd ? "Skip to the end" : "Skip the opening"
+        );
       }
     }
     if (skip !== this.skipShown) {

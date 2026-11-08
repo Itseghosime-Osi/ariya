@@ -2822,7 +2822,8 @@ async function start() {
       ring.visible = !OPEN || (sm === "N" && u >= 0.5);
       if (sm === "R") { box.position.set(3.6, 0, -1.0); box.rotation.y = 0.55; } else { box.position.set(0, 0, 0); }
       // Box: open from the hinge cut in the opening, and open for the rest of the film.
-      const open = OPEN ? (sm === "N" && u >= 0.7 ? 1 : 0) : 1;
+      // The lid lifts slowly once the room is lit again (the hinge cue is at 0.62), never in one frame.
+      const open = OPEN ? (sm === "N" ? seg(u, 0.62, 0.76) : 0) : 1;
       lidPivot.rotation.x = -(1.86 * open + 0.09 * Math.sin(open * Math.PI));
       if (sm !== "R") box.rotation.y = OPEN ? -0.18 : 0;
       // In the opening the ring stays seated in its slot. After the yes it lifts out of the box in one slow turn and

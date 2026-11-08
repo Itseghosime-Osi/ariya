@@ -5,4 +5,4 @@
  * `scene-import-map.ts`, which is server-only, so no client chunk carries a
  * `three` specifier into a route that has no business reaching the CDN.
  */
-export const SCENE_URL = "/site/assets/the-yes-scene.83edb5453053.js";
+export const SCENE_URL = "/site/assets/the-yes-scene.8d7e23e87c18.js";

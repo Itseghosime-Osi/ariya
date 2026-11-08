@@ -348,7 +348,7 @@ export function start(at = 0): boolean {
     (function fade() {
       if (!audioEl || !on) return;
       const k = Math.min(1, (performance.now() - v0) / 1600);
-      audioEl.volume = 0.55 * k;
+      audioEl.volume = 0.55 * levelNow * k;
       if (k < 1) requestAnimationFrame(fade);
     })();
     // A browser that blocks sound without a tap leaves the music off rather
@@ -448,7 +448,8 @@ export function installScoreHandlers() {
    the archive's Score: clock, seek, level, ambience, sfx. */
 
 let lastSeek = 0;
-let levelNow = 1;
+// The song starts under the picture, never over it; the dance brings it up.
+let levelNow = 0.2;
 let amb: {
   src: AudioBufferSourceNode;
   f: BiquadFilterNode;
@@ -484,6 +485,14 @@ export function seek(t: number) {
   } catch {
     /* not loaded yet */
   }
+}
+
+/** Watch speed: the song plays faster or slower with the film, at the same pitch. */
+export function setRate(r: number) {
+  if (!audioEl) return;
+  audioEl.playbackRate = r;
+  (audioEl as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch =
+    true;
 }
 
 /** In Watch the song plays once and ends with the film; scrolling, it loops. */
