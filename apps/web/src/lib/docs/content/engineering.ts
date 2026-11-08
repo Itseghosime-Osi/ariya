@@ -191,10 +191,7 @@ export const engineeringPages: DocPage[] = [
           ["`(shell)/(legal)`", "`/privacy` and `/terms`"],
           ["`(shell)/(docs)`", "This manual at `/documentation`"],
           ["`(shell)/(print)`", "Print layouts such as the seating chart"],
-          [
-            "`(marketing)`",
-            "Product, pricing, about, story, film and the older `/docs` page",
-          ],
+          ["`(marketing)`", "Product, pricing, about, story and film"],
         ],
       },
       {

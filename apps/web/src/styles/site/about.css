@@ -21,7 +21,7 @@
 }
 /* Scoped to the about page: Next injects route CSS globally and keeps it
    loaded after a client navigation, so an unscoped body rule would follow the
-   visitor to /pricing and /docs. */
+   visitor to /pricing and /documentation. */
 body:has(.about-page) {
   background: var(--wine-950);
   color: var(--on-dark);

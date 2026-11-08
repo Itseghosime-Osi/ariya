@@ -17,7 +17,11 @@ const PAGES: ReadonlyArray<readonly [string, string, string]> = [
     "Guest lists, personal links, seating and vendors.",
   ],
   ["/pricing", "Pricing", "Free up to 20 guests, then ₦50,000 per event."],
-  ["/docs", "Docs", "Guides to guest lists, invitations, seating and vendors."],
+  [
+    "/documentation",
+    "Docs",
+    "The full manual: hosts, teams, setup and reference.",
+  ],
   [
     "/events",
     "The demo planner",
@@ -220,8 +224,8 @@ export function SiteHeader() {
               Pricing
             </Link>
             <Link
-              href="/docs"
-              aria-current={current("/docs") ? "page" : undefined}
+              href="/documentation"
+              aria-current={current("/documentation") ? "page" : undefined}
             >
               Docs
             </Link>

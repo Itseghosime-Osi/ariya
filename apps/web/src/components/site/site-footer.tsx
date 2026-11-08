@@ -21,8 +21,8 @@ export function SiteFooter() {
         <span>
           <Link href="/">The film</Link> · <Link href="/about">About</Link> ·{" "}
           <Link href="/product">What we do</Link> ·{" "}
-          <Link href="/pricing">Pricing</Link> · <Link href="/docs">Docs</Link>{" "}
-          · <Link href="/documentation">Manual</Link> ·{" "}
+          <Link href="/pricing">Pricing</Link> ·{" "}
+          <Link href="/documentation">Docs</Link> ·{" "}
           <Link href="/privacy">Privacy</Link> ·{" "}
           <Link href="/terms">Terms</Link>
         </span>

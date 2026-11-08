@@ -143,13 +143,17 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      ...["about", "product", "pricing", "docs", "story", "film"].map(
-        (page) => ({
-          source: `/${page}.html`,
-          destination: page === "film" || page === "story" ? "/" : `/${page}`,
-          permanent: true,
-        })
-      ),
+      ...["about", "product", "pricing", "story", "film"].map((page) => ({
+        source: `/${page}.html`,
+        destination: page === "film" || page === "story" ? "/" : `/${page}`,
+        permanent: true,
+      })),
+      // The short guide is gone: the full manual replaces it.
+      ...["/docs", "/docs.html"].map((source) => ({
+        source,
+        destination: "/documentation",
+        permanent: true,
+      })),
       {
         source: "/login",
         destination: "/sign-in",

@@ -40,7 +40,6 @@ describe("proxy route protection", () => {
     "/about",
     "/product",
     "/pricing",
-    "/docs",
     "/robots.txt",
     "/sitemap.xml",
   ])("serves %s without a Supabase authentication request", async (path) => {

@@ -884,7 +884,7 @@ export function FilmClose() {
             <Link href="/about">About</Link>
             <Link href="/product">What we do</Link>
             <Link href="/pricing">Pricing</Link>
-            <Link href="/docs">Docs</Link>
+            <Link href="/documentation">Docs</Link>
             <Link href="/events">Demo planner</Link>
           </nav>
           <span>

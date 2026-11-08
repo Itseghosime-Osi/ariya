@@ -7,7 +7,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "about",
     "product",
     "pricing",
-    "docs",
     "privacy",
     "terms",
     "documentation",
