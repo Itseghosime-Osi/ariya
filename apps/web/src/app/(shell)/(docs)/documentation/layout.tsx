@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { DocsSiteNav } from "@/components/docs/DocsSiteNav";
 import { LEGAL } from "@/lib/legal/site";
 import { DOC_GROUPS, pagesInGroup, searchIndex } from "@/lib/docs";
 import { DocsNav } from "@/components/docs/DocsNav";
@@ -17,30 +18,7 @@ export default function DocumentationLayout({
   }));
   return (
     <div className="min-h-screen bg-ivory text-night antialiased selection:bg-gold/30">
-      <header className="mx-auto flex max-w-[88rem] items-center justify-between gap-4 px-5 pb-2 pt-[calc(1.25rem+env(safe-area-inset-top))] sm:px-8">
-        <Link
-          href="/documentation"
-          className="flex min-h-11 items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-burgundy"
-        >
-          <span
-            aria-hidden="true"
-            className="grid h-11 w-11 place-items-center rounded-full border border-gold/50 bg-wine font-display text-2xl font-bold text-gold"
-          >
-            À
-          </span>
-          <span className="font-display text-2xl leading-none text-burgundy">
-            {LEGAL.product} manual
-          </span>
-        </Link>
-        <nav aria-label="Site" className="flex items-center gap-1 text-sm">
-          <Link
-            href="/events"
-            className="inline-flex min-h-11 items-center rounded-full bg-burgundy px-4 font-semibold text-ivory hover:bg-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-          >
-            Open the app
-          </Link>
-        </nav>
-      </header>
+      <DocsSiteNav />
 
       <div className="mx-auto grid max-w-[88rem] gap-8 px-5 pb-16 pt-4 sm:px-8 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto lg:border-r lg:border-hairline lg:pr-5">
