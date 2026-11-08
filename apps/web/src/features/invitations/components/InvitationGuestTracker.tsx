@@ -16,11 +16,10 @@ interface InvitationGuestTrackerProps {
 }
 
 type Filter = "all" | "uninvited" | "invited";
-type Channel = "email" | "sms" | "whatsapp";
+type Channel = "email" | "whatsapp";
 
 const CHANNELS: { key: Channel; label: string; icon: string }[] = [
   { key: "email", label: "Email", icon: "mail" },
-  { key: "sms", label: "Text message", icon: "phone" },
   { key: "whatsapp", label: "WhatsApp", icon: "share" },
 ];
 
@@ -45,12 +44,9 @@ function fillMessage(
     .replaceAll("{link}", `${origin}/i/${guest.rsvpToken}`);
 }
 
-/** The chat or text window for one guest, with the message already written. */
-function chatUrl(channel: Channel, phone: string, text: string) {
-  const body = encodeURIComponent(text);
-  return channel === "whatsapp"
-    ? `https://wa.me/${digits(phone)}?text=${body}`
-    : `sms:${phone.replace(/\s/g, "")}?&body=${body}`;
+/** The guest's WhatsApp chat, with their personal message already written. */
+function whatsappUrl(phone: string, text: string) {
+  return `https://wa.me/${digits(phone)}?text=${encodeURIComponent(text)}`;
 }
 
 export function InvitationGuestTracker({
@@ -92,7 +88,6 @@ export function InvitationGuestTracker({
   const chosen = guests.filter((g) => selected.has(g.id));
   const reach = {
     email: chosen.filter((g) => g.email).length,
-    sms: chosen.filter((g) => g.phone).length,
     whatsapp: chosen.filter((g) => g.phone).length,
   };
 
@@ -165,10 +160,10 @@ export function InvitationGuestTracker({
     });
   };
 
-  const startQueue = (channel: Channel) => {
+  const startQueue = () => {
     const ids = chosen.filter((g) => g.phone).map((g) => g.id);
     setQueue({ ids, at: 0 });
-    setSheet(channel);
+    setSheet("whatsapp");
   };
 
   const current = queue ? byId.get(queue.ids[queue.at]) : undefined;
@@ -390,7 +385,7 @@ export function InvitationGuestTracker({
                 type="button"
                 disabled={reach[c.key] === 0}
                 onClick={() =>
-                  c.key === "email" ? setSheet("email") : startQueue(c.key)
+                  c.key === "email" ? setSheet("email") : startQueue()
                 }
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-4 text-[13px] font-semibold text-night disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3d98f]"
               >
@@ -423,7 +418,7 @@ export function InvitationGuestTracker({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-ink">
                   {sheet === "email" || !queue
                     ? "Send by email"
-                    : `${sheet === "whatsapp" ? "WhatsApp" : "Text message"} · ${queue.at + 1} of ${queue.ids.length}`}
+                    : `WhatsApp · ${queue.at + 1} of ${queue.ids.length}`}
                 </p>
                 <h3 className="font-display text-2xl font-bold text-night">
                   {sheet === "email"
@@ -496,18 +491,16 @@ export function InvitationGuestTracker({
                     {fillMessage(message, current, eventTitle, origin)}
                   </div>
                   <p className="text-[13px] text-label-2">
-                    {sheet === "whatsapp"
-                      ? "WhatsApp opens with this ready to go. Press Send there, then come back for the next guest."
-                      : "Your phone's Messages app opens with this ready to go. Press Send there, then come back for the next guest."}
+                    WhatsApp opens with this ready to go. Press Send there, then
+                    come back for the next guest.
                   </p>
                   <div className="grid grid-cols-[1fr_auto] gap-2">
                     <a
-                      href={chatUrl(
-                        sheet,
+                      href={whatsappUrl(
                         current.phone ?? "",
                         fillMessage(message, current, eventTitle, origin)
                       )}
-                      target={sheet === "whatsapp" ? "_blank" : undefined}
+                      target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => {
                         markInvited([current.id]);
@@ -515,10 +508,7 @@ export function InvitationGuestTracker({
                       }}
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#f6e2ad] to-[#d4a85a] px-5 text-[15px] font-semibold text-night shadow-[0_6px_18px_rgba(212,168,90,0.35)]"
                     >
-                      <Icon
-                        name={sheet === "whatsapp" ? "share" : "phone"}
-                        className="text-lg"
-                      />
+                      <Icon name="share" className="text-lg" />
                       Open for {current.name.split(" ")[0]}
                     </a>
                     <button

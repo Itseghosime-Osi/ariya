@@ -247,7 +247,7 @@ export async function sendGuestInvitationEmailAction(
   });
 
   if (!emailRes.success) {
-    return { error: describeEmailError(emailRes.error) };
+    return { error: describeEmailError(emailRes.error, emailRes.reason) };
   }
 
   // 4. Track guest invited
@@ -293,7 +293,12 @@ export async function sendBulkInvitationEmailsAction(
     if (res.success) sent += 1;
     else failed.push({ guestId, error: res.error ?? "Could not send" });
     // A full quota will not clear halfway through; stop instead of failing every guest.
-    if (res.error && /limit|quota|not fully set up|key/i.test(res.error)) {
+    if (
+      res.error &&
+      /limit|quota|not fully set up|key|sending domain|provider.*logs/i.test(
+        res.error
+      )
+    ) {
       for (const rest of ids.slice(i + 1))
         failed.push({ guestId: rest, error: res.error });
       break;

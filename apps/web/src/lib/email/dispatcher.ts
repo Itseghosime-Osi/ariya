@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { emailFailureReason, type EmailFailureReason } from "./provider-error";
 import { serverEnv } from "@/lib/env/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -18,6 +19,7 @@ export interface EmailDispatchResult {
   success: boolean;
   providerId?: string;
   error?: string;
+  reason?: EmailFailureReason;
 }
 
 export async function dispatchRsvpEmail({
@@ -32,6 +34,7 @@ export async function dispatchRsvpEmail({
   let providerId: string | undefined;
   let status: "sent" | "failed" = "sent";
   let errorClass: string | undefined;
+  let reason: EmailFailureReason | undefined;
 
   try {
     if (serverEnv.EMAIL_TRANSPORT === "resend") {
@@ -47,6 +50,7 @@ export async function dispatchRsvpEmail({
       if (res.error) {
         status = "failed";
         errorClass = res.error.name || "ResendApiError";
+        reason = emailFailureReason(res.error.message);
       } else {
         providerId = res.data?.id;
       }
@@ -103,5 +107,6 @@ export async function dispatchRsvpEmail({
     success: status === "sent",
     providerId: status === "sent" ? providerId : undefined,
     error: status === "failed" ? errorClass : undefined,
+    reason: status === "failed" ? reason : undefined,
   };
 }
