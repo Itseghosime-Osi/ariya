@@ -73,6 +73,8 @@ describe("the film's pacing", () => {
     }
     expect(songLevel("old", 0.5, 1)).toBeCloseTo(0.2, 5);
     expect(songLevel("old", 0.93, 1)).toBeCloseTo(0.2, 5);
+    expect(songLevel("old", 0.96, 1)).toBeCloseTo(0.2, 5);
+    expect(songLevel("old", 0.98, 1)).toBeGreaterThan(0.5);
     expect(songLevel("old", 0.99, 1)).toBeCloseTo(1, 5);
     expect(songLevel("D", 1, 1)).toBe(1);
     expect(songLevel("old", 0.99, 0.5)).toBeCloseTo(0.2, 5);

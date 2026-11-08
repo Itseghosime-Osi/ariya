@@ -375,6 +375,7 @@ export function songLevel(mode: ModeName, p: number, pro: number): number {
   const bed = 0.2;
   if (pro < 1) return bed;
   if (mode === "D") return 1;
-  if (mode === "old") return bed + (1 - bed) * seg(p, 0.95, 0.985);
+  // "The dance" begins at 0.97 of the story: the song starts to rise as it does and is full by the send-off.
+  if (mode === "old") return bed + (1 - bed) * seg(p, 0.965, 0.99);
   return bed;
 }
