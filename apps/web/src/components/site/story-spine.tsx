@@ -1,15 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CHAPTERS, countdownLabel, daysAt } from "./chapters";
+import { measure, type StoryChapter } from "./story";
 
 /**
- * The thread through the page: a gold line that fills as you read, the chapter you are in, and the
- * days left before the wedding. A rail on wide screens, a small pill on phones. It only reads the
- * scroll position, so the scenes keep their own timing.
+ * The thread through a story page: a gold line that fills as you read, the chapter you are in, and
+ * a running figure (days to go, or how far through the tour). A rail on wide screens, a small pill
+ * on phones. It only reads the scroll position, so the scenes keep their own timing.
  */
-export function StorySpine() {
-  const [state, setState] = useState({ index: 0, days: CHAPTERS[0].day });
+export function StorySpine({
+  chapters,
+  mode,
+}: {
+  chapters: readonly StoryChapter[];
+  /** "days" counts down to the wedding; "steps" counts chapters. */
+  mode: "days" | "steps";
+}) {
+  const [state, setState] = useState(() => ({
+    index: 0,
+    ...measure(mode, chapters, 0, 0),
+  }));
   const barRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -19,8 +29,8 @@ export function StorySpine() {
       const mid = window.innerHeight * 0.5;
       let index = 0;
       let within = 0;
-      for (let i = 0; i < CHAPTERS.length; i += 1) {
-        const el = document.getElementById(CHAPTERS[i].id);
+      for (let i = 0; i < chapters.length; i += 1) {
+        const el = document.getElementById(chapters[i].id);
         if (!el) continue;
         const r = el.getBoundingClientRect();
         if (r.top <= mid) {
@@ -31,9 +41,11 @@ export function StorySpine() {
           );
         }
       }
-      const days = daysAt(index, within);
+      const m = measure(mode, chapters, index, within);
       setState((s) =>
-        s.index === index && s.days === days ? s : { index, days }
+        s.index === index && s.big === m.big && s.pill === m.pill
+          ? s
+          : { index, ...m }
       );
       const total = document.documentElement.scrollHeight - window.innerHeight;
       const p =
@@ -51,9 +63,9 @@ export function StorySpine() {
       window.removeEventListener("resize", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [chapters, mode]);
 
-  const current = CHAPTERS[state.index];
+  const current = chapters[state.index];
 
   return (
     <>
@@ -62,7 +74,7 @@ export function StorySpine() {
       </div>
       <nav className="spine" aria-label="Story chapters">
         <ol>
-          {CHAPTERS.map((c, i) => (
+          {chapters.map((c, i) => (
             <li key={c.id}>
               <a
                 href={`#${c.id}`}
@@ -77,8 +89,8 @@ export function StorySpine() {
           ))}
         </ol>
         <p className="count" aria-live="off">
-          <b>{state.days}</b>
-          <span>{state.days <= 0 ? "Today" : "days to go"}</span>
+          <b>{state.big}</b>
+          <span>{state.small}</span>
           <em>
             {current.n} · {current.title}
           </em>
@@ -86,7 +98,7 @@ export function StorySpine() {
       </nav>
       <p className="spine-pill" aria-hidden="true">
         <span>{current.n}</span> {current.title}
-        <i /> {countdownLabel(state.days)}
+        <i /> {state.pill}
       </p>
     </>
   );

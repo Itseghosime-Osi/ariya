@@ -9,8 +9,9 @@ import { Hero } from "./hero";
 import { Noise } from "./noise";
 import { YesScene } from "./yes-scene";
 import { Door } from "./door";
-import { ChapterMark } from "./chapter-mark";
-import { StorySpine } from "./story-spine";
+import { ChapterMark } from "@/components/site/chapter-mark";
+import { StorySpine } from "@/components/site/story-spine";
+import "@/styles/site/story.css";
 import { CHAPTERS } from "./chapters";
 
 export const metadata = pageMetadata({
@@ -28,32 +29,32 @@ export default function AboutPage() {
     <>
       <AboutEngines />
       <main id="main" className="about-page">
-        <StorySpine />
+        <StorySpine chapters={CHAPTERS} mode="days" />
         <div id={CHAPTERS[0].id}>
           <Hero />
         </div>
         <div id={CHAPTERS[1].id}>
-          <ChapterMark index={1} />
+          <ChapterMark chapter={CHAPTERS[1]} />
           <Noise />
         </div>
         <div id={CHAPTERS[2].id}>
-          <ChapterMark index={2} />
+          <ChapterMark chapter={CHAPTERS[2]} />
           <Fan />
         </div>
         <div id={CHAPTERS[3].id}>
-          <ChapterMark index={3} />
+          <ChapterMark chapter={CHAPTERS[3]} />
           <Invitation />
         </div>
         <div id={CHAPTERS[4].id}>
-          <ChapterMark index={4} />
+          <ChapterMark chapter={CHAPTERS[4]} />
           <Hall />
         </div>
         <div id={CHAPTERS[5].id}>
-          <ChapterMark index={5} />
+          <ChapterMark chapter={CHAPTERS[5]} />
           <Door />
         </div>
         <div id={CHAPTERS[6].id}>
-          <ChapterMark index={6} />
+          <ChapterMark chapter={CHAPTERS[6]} />
           <YesScene />
           <Finale />
         </div>

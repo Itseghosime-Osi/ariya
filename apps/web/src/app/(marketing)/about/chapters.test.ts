@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CHAPTERS, countdownLabel, daysAt } from "./chapters";
+import { countdownLabel, daysAt } from "@/components/site/story";
+import { CHAPTERS } from "./chapters";
 
 describe("the About story", () => {
   it("counts down from the first chapter to the day itself", () => {
@@ -15,14 +16,14 @@ describe("the About story", () => {
   });
 
   it("moves smoothly between chapters and never goes below zero", () => {
-    expect(daysAt(0, 0)).toBe(CHAPTERS[0].day);
-    expect(daysAt(0, 1)).toBe(CHAPTERS[1].day);
-    expect(daysAt(1, 0.5)).toBe(
+    expect(daysAt(CHAPTERS, 0, 0)).toBe(CHAPTERS[0].day);
+    expect(daysAt(CHAPTERS, 0, 1)).toBe(CHAPTERS[1].day);
+    expect(daysAt(CHAPTERS, 1, 0.5)).toBe(
       Math.round((CHAPTERS[1].day + CHAPTERS[2].day) / 2)
     );
-    expect(daysAt(CHAPTERS.length - 1, 0.7)).toBe(0);
-    expect(daysAt(0, -3)).toBe(CHAPTERS[0].day);
-    expect(daysAt(0, 9)).toBe(CHAPTERS[1].day);
+    expect(daysAt(CHAPTERS, CHAPTERS.length - 1, 0.7)).toBe(0);
+    expect(daysAt(CHAPTERS, 0, -3)).toBe(CHAPTERS[0].day);
+    expect(daysAt(CHAPTERS, 0, 9)).toBe(CHAPTERS[1].day);
   });
 
   it("words the countdown", () => {
