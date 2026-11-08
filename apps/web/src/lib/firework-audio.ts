@@ -1,79 +1,77 @@
+import { burstSound, launchSound } from "./rocket-sound";
+
 type FireworkSound = "launch" | "burst";
 
+interface SoundOptions {
+  /** How long the rocket climbs, in seconds. */
+  rise?: number;
+  /** Where it is, -1 (left) to 1 (right). */
+  pan?: number;
+  /** About 0.6 to 1.3: a bigger shell sounds bigger. */
+  power?: number;
+}
+
 let context: AudioContext | null = null;
-let audioUnlocked = false;
+let chain: { input: GainNode } | null = null;
+const readyListeners = new Set<() => void>();
 
 function getContext() {
-  if (typeof window === "undefined" || !window.AudioContext) return null;
-  context ??= new window.AudioContext();
+  if (typeof window === "undefined") return null;
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
+  if (!Ctor) return null;
+  context ??= new Ctor();
   return context;
 }
 
-function playLaunch(context: AudioContext) {
-  const now = context.currentTime;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  const pan = context.createStereoPanner();
-  const end = now + 0.48;
-
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(175, now);
-  oscillator.frequency.exponentialRampToValueAtTime(590, end);
-  gain.gain.setValueAtTime(0.001, now);
-  gain.gain.linearRampToValueAtTime(0.045, now + 0.1);
-  gain.gain.exponentialRampToValueAtTime(0.001, end);
-  pan.pan.value = Math.random() * 0.6 - 0.3;
-
-  oscillator.connect(gain);
-  gain.connect(pan);
-  pan.connect(context.destination);
-  oscillator.start(now);
-  oscillator.stop(end);
+/** One output for every shell, with a limiter, so a finale's volley is loud but never clips. */
+function output(audio: AudioContext) {
+  if (!chain) {
+    const input = audio.createGain();
+    input.gain.value = 0.7;
+    const comp = audio.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.ratio.value = 6;
+    input.connect(comp);
+    comp.connect(audio.destination);
+    chain = { input };
+  }
+  return chain.input;
 }
 
-function playBurst(context: AudioContext) {
-  const now = context.currentTime;
-  const duration = 0.38;
-  const length = Math.ceil(context.sampleRate * duration);
-  const buffer = context.createBuffer(1, length, context.sampleRate);
-  const samples = buffer.getChannelData(0);
-  for (let i = 0; i < length; i++) {
-    samples[i] = (Math.random() * 2 - 1) * (1 - i / length);
+/** True when sound can play right now. */
+export function fireworkAudioReady() {
+  return context?.state === "running";
+}
+
+/** Be told when sound becomes available (the visitor tapped, or the browser allowed it). */
+export function onFireworkAudioReady(listener: () => void) {
+  readyListeners.add(listener);
+  return () => {
+    readyListeners.delete(listener);
+  };
+}
+
+function announce() {
+  if (fireworkAudioReady()) for (const fn of readyListeners) fn();
+}
+
+/**
+ * Try to start sound. A browser lets this through after a tap or key press on the page, and
+ * sometimes after earlier interaction with the site; otherwise it stays quiet and returns false.
+ */
+export async function unlockFireworkAudio(): Promise<boolean> {
+  const audio = getContext();
+  if (!audio) return false;
+  try {
+    if (audio.state !== "running") await audio.resume();
+  } catch {
+    return false;
   }
-
-  const noise = context.createBufferSource();
-  const filter = context.createBiquadFilter();
-  const noiseGain = context.createGain();
-  const thump = context.createOscillator();
-  const thumpGain = context.createGain();
-  const pan = context.createStereoPanner();
-  const end = now + duration;
-
-  noise.buffer = buffer;
-  filter.type = "lowpass";
-  filter.frequency.setValueAtTime(2200, now);
-  filter.frequency.exponentialRampToValueAtTime(480, end);
-  noiseGain.gain.setValueAtTime(0.001, now);
-  noiseGain.gain.linearRampToValueAtTime(0.085, now + 0.018);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, end);
-
-  thump.type = "sine";
-  thump.frequency.setValueAtTime(105, now);
-  thump.frequency.exponentialRampToValueAtTime(38, now + 0.22);
-  thumpGain.gain.setValueAtTime(0.07, now);
-  thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
-  pan.pan.value = Math.random() * 0.8 - 0.4;
-
-  noise.connect(filter);
-  filter.connect(noiseGain);
-  noiseGain.connect(pan);
-  thump.connect(thumpGain);
-  thumpGain.connect(pan);
-  pan.connect(context.destination);
-  noise.start(now);
-  noise.stop(end);
-  thump.start(now);
-  thump.stop(now + 0.25);
+  announce();
+  return audio.state === "running";
 }
 
 /** Unlock sound effects on a real user gesture, before a later celebration begins. */
@@ -82,12 +80,7 @@ export function enableFireworkAudioOnInteraction() {
   const unlock = () => {
     document.removeEventListener("pointerdown", unlock, true);
     document.removeEventListener("keydown", unlock, true);
-    const audio = getContext();
-    if (!audio) return;
-    audioUnlocked = true;
-    void audio.resume().catch(() => {
-      audioUnlocked = false;
-    });
+    void unlockFireworkAudio();
   };
   document.addEventListener("pointerdown", unlock, {
     once: true,
@@ -101,27 +94,22 @@ export function enableFireworkAudioOnInteraction() {
   };
 }
 
-/** Original, brief firework sounds; never used by the automatic splash. */
-export function playFireworkSound(sound: FireworkSound) {
-  if (!audioUnlocked || typeof window === "undefined") return;
+/** Rocket sounds: the launch as a rocket leaves, the burst when it opens. Silent if sound is blocked. */
+export function playFireworkSound(
+  sound: FireworkSound,
+  options: SoundOptions = {}
+) {
   const audio = getContext();
-  if (!audio) return;
-
-  const play = () => {
-    if (!audioUnlocked || audio.state !== "running") return;
-    if (sound === "launch") playLaunch(audio);
-    else playBurst(audio);
-  };
-
-  if (audio.state === "running") {
-    play();
-    return;
+  if (!audio || audio.state !== "running") return;
+  const out = output(audio);
+  let dest: AudioNode = out;
+  if (typeof audio.createStereoPanner === "function") {
+    const pan = audio.createStereoPanner();
+    pan.pan.value = Math.max(-1, Math.min(1, options.pan ?? 0)) * 0.75;
+    pan.connect(out);
+    dest = pan;
   }
-
-  void audio
-    .resume()
-    .then(play)
-    .catch(() => {
-      audioUnlocked = false;
-    });
+  const at = audio.currentTime + 0.01;
+  if (sound === "launch") launchSound(audio, dest, at, options.rise ?? 0.9);
+  else burstSound(audio, dest, at, options.power ?? 1);
 }

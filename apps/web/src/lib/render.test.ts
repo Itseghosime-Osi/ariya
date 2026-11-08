@@ -34,7 +34,7 @@ describe("loadRenderEngine", () => {
       expect(cuts[index].a).toBeCloseTo(cuts[index - 1].b, 12);
     }
 
-    expect(render.totalTime()).toBeCloseTo(120, 10);
+    expect(render.totalTime()).toBeCloseTo(161.2, 10);
   });
 
   it("names every cut with a chapter", () => {
@@ -94,7 +94,7 @@ describe("progress helpers", () => {
 
   it("round-trips scroll progress through the film's clock", () => {
     expect(render.tFromS(0)).toBe(0);
-    expect(render.tFromS(1)).toBeCloseTo(120, 10);
+    expect(render.tFromS(1)).toBeCloseTo(161.2, 10);
     expect(render.sFromT(render.tFromS(0.42))).toBeCloseTo(0.42, 12);
   });
 });

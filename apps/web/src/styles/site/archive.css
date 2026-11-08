@@ -2365,3 +2365,178 @@ html.embed body {
 .embed .track {
   height: 100vh;
 }
+
+/* ---------- A quieter gate: title, one line, colour, enter ---------- */
+.gate .hue .nm,
+.gate .load #loadTxt,
+.film .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.gate .hue {
+  gap: 14px 18px;
+  margin-top: 2px;
+}
+.gate .how-note {
+  margin-top: 10px;
+}
+
+/* ---------- Watch speed: a slider from 1x to 2x ---------- */
+.obar .speed-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.obar .speed-wrap[hidden] {
+  display: none;
+}
+.obar #obSpeed {
+  min-width: 52px;
+  font-variant-numeric: tabular-nums;
+}
+.obar .speed-panel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 14px);
+  transform: translateX(-50%);
+  width: min(260px, 78vw);
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-radius: 18px;
+  background: rgba(12, 5, 7, 0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(233, 201, 138, 0.28);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+.obar .speed-panel[hidden] {
+  display: none;
+}
+.obar .speed-l {
+  font: 600 0.65rem/1 var(--font-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.obar .speed-panel input[type="range"] {
+  width: 100%;
+  accent-color: var(--gold);
+  touch-action: pan-x;
+  min-height: 32px;
+}
+.obar .speed-stops {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+.obar .speed-stops button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 8px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Controls: words on a desk, icons on a phone ---------- */
+.obar .i {
+  display: none;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.obar #obSkip .i path:first-child {
+  fill: currentColor;
+}
+.obar #obMode .i-watch {
+  display: none;
+}
+@media (max-width: 640px) {
+  .obar {
+    gap: 2px;
+    padding: 4px;
+    max-width: calc(100vw - 20px);
+  }
+  .obar button {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0 10px;
+    justify-content: center;
+  }
+  .obar .i {
+    display: block;
+  }
+  /* Icon only; the words stay for screen readers. */
+  .obar .t,
+  .obar #obPlay .lbl,
+  .obar #obMode .lbl {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* In Watch the mode button offers Scroll; in Scroll it offers Watch. */
+  html:not(.watching) .obar #obMode .i-scroll {
+    display: none;
+  }
+  html:not(.watching) .obar #obMode .i-watch {
+    display: block;
+  }
+  html.watching .obar #obMode .i-scroll {
+    display: block;
+  }
+  /* The panel centres on the bar, not on its own button. */
+  .obar .speed-wrap {
+    position: static;
+  }
+}
+
+/* Sound lives with the other controls, not in the top bar. */
+.obar #soundBtn .i {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+.obar #soundBtn .i-on {
+  display: none;
+}
+.obar #soundBtn.sound-on .i-on {
+  display: block;
+}
+.obar #soundBtn.sound-on .i-off {
+  display: none;
+}
+.obar #soundBtn[aria-pressed="true"] {
+  color: var(--gold);
+}
+@media (max-width: 640px) {
+  .obar #soundBtn .lbl {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .obar #soundBtn .i {
+    width: 19px;
+    height: 19px;
+  }
+}
+.obar button {
+  white-space: nowrap;
+}

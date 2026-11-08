@@ -77,10 +77,10 @@ const nextConfig: NextConfig = {
       ...[
         "/assets/ariya-render.6d6d4c8adbfd.js",
         "/assets/the-yes-controls.819e8d5cbcae.js",
-        "/assets/the-yes-scene.83edb5453053.js",
+        "/assets/the-yes-scene.5d2cde94cd5e.js",
         "/site/assets/ariya-render.6d6d4c8adbfd.js",
         "/site/assets/the-yes-controls.819e8d5cbcae.js",
-        "/site/assets/the-yes-scene.83edb5453053.js",
+        "/site/assets/the-yes-scene.5d2cde94cd5e.js",
       ].map((source) => ({
         source,
         headers: [

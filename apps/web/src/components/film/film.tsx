@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as score from "@/lib/site/score";
 import { FilmEngine, type FilmStatus } from "./engine";
+import { songLevel } from "./story";
 import {
   FilmChrome,
   FilmClose,
@@ -60,8 +61,10 @@ export function Film() {
       onRestart: score.restart,
       onSfx: score.sfx,
       onAmbience: score.ambience,
-      // The score sits under the dialogue until the yes, then rises.
-      onScene: (p, pro) => score.level(pro >= 1 && p < 0.89 ? 0.28 : 1),
+      onRate: score.setRate,
+      onRocket: score.rocket,
+      // A soft bed under the picture; it swells for the dancing, not before.
+      onScene: (p, pro, mode) => score.level(songLevel(mode, p, pro)),
     });
 
     engine.onSoundChange = (on) => {
@@ -83,7 +86,7 @@ export function Film() {
     <div ref={rootRef} className="film">
       <FilmStage />
       <Gate status={status} />
-      <FilmNav status={status} />
+      <FilmNav />
       <div className="overlay" id="overlay">
         <Opening status={status} />
         <OldLayer />
