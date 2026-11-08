@@ -10,8 +10,8 @@ pub const PRO: f64 = 0.004;
 /// Half-width of the dip that hides a hard cut, in story progress.
 pub const CUT_W: f64 = 0.011;
 /// The length, in seconds, of a self-playing film.
-/// How long the film takes at 1x: 2:41, with each caption given time to be read.
-pub const FILM_SECONDS: f64 = 161.2;
+/// How long the film takes at 1x: 2:29, with each caption given time to be read.
+pub const FILM_SECONDS: f64 = 149.0;
 
 pub const MODE_R: u8 = 0;
 pub const MODE_M: u8 = 1;
@@ -127,7 +127,7 @@ const SEGMENTS: [Segment; 18] = [
 /// The dialogue scenes (the room, the memory, the question) are given the time their captions need
 /// to be read; the chapters between them share the rest.
 const SEG_SECONDS: [f64; 18] = [
-    16.0, 8.5, 44.0, 8.0, 5.5, 5.5, 6.5, 9.0, 5.5, 5.5, 3.5, 5.0, 9.0, 6.5, 5.0, 5.0, 6.5, 6.5,
+    16.0, 8.5, 44.0, 5.5, 5.0, 5.0, 6.0, 5.0, 4.5, 4.5, 3.5, 5.0, 5.0, 4.5, 5.0, 5.0, 8.0, 9.0,
 ];
 
 /// Seconds a cut takes at a gentle scroll.

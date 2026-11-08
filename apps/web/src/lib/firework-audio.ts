@@ -1,4 +1,9 @@
-import { burstSound, launchSound } from "./rocket-sound";
+import {
+  burstSound,
+  FIREWORK_SAMPLES,
+  launchSound,
+  loadSamples,
+} from "./rocket-sound";
 
 type FireworkSound = "launch" | "burst";
 
@@ -22,7 +27,10 @@ function getContext() {
     (window as unknown as { webkitAudioContext?: typeof AudioContext })
       .webkitAudioContext;
   if (!Ctor) return null;
-  context ??= new Ctor();
+  if (!context) {
+    context = new Ctor();
+    void loadSamples(context, FIREWORK_SAMPLES);
+  }
   return context;
 }
 
@@ -70,6 +78,7 @@ export async function unlockFireworkAudio(): Promise<boolean> {
   } catch {
     return false;
   }
+  void loadSamples(audio, FIREWORK_SAMPLES);
   announce();
   return audio.state === "running";
 }

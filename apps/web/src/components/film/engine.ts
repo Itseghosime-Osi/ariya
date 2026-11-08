@@ -57,6 +57,8 @@ export interface FilmEngineOptions {
   onSuspend?: (held: boolean) => void;
   onLoop?: (loop: boolean) => void;
   onRestart?: () => void;
+  /** The picture is over but the song has a little left: let it play out and fade. */
+  onFinale?: () => void;
   /** Watch speed changed (1 to 2): the song follows it. */
   onRate?: (rate: number) => void;
   /** A firework rocket was launched in the send-off: climb seconds, and where it is, -1 to 1. */
@@ -331,8 +333,7 @@ export class FilmEngine {
     }
     this.playLast = performance.now();
     const heldByVisitor =
-      this.finished ||
-      (this.how === "watch" && !this.playing && this.status.entered);
+      this.how === "watch" && !this.playing && this.status.entered;
     if (!heldByVisitor) this.opts.onSuspend?.(false);
   }
 
@@ -843,7 +844,8 @@ export class FilmEngine {
   }
 
   private songHeld() {
-    if (this.finished) return true;
+    // After the end the song plays out its last seconds; it is never held for that.
+    if (this.finished) return false;
     return (
       this.how === "watch" &&
       !this.playing &&
@@ -873,13 +875,13 @@ export class FilmEngine {
     this.wt = clamp(this.wt, 0, TT);
     this.target = this.map.rawFromS(this.map.sFromT(this.wt));
     if (this.wt >= TT) {
-      // The story is told. The song stops with it and does not come round again.
+      // The story is told. The song plays out its last seconds, fades, and does not come round again.
       this.finished = true;
       this.playing = false;
       this.setStatus({ playing: false });
       this.setHow("scroll");
       this.opts.onLoop?.(false);
-      this.opts.onSuspend?.(true);
+      this.opts.onFinale?.();
       return;
     }
     requestAnimationFrame(this.playStep);
