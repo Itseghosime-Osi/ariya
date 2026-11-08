@@ -62,6 +62,7 @@ export function Film() {
       onSfx: score.sfx,
       onAmbience: score.ambience,
       onRate: score.setRate,
+      onRocket: score.rocket,
       // A soft bed under the picture; it swells for the dancing, not before.
       onScene: (p, pro, mode) => score.level(songLevel(mode, p, pro)),
     });
