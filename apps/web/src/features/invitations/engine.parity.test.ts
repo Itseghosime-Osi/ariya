@@ -16,6 +16,16 @@ import {
   stack,
   useDesignEngineBytes,
   withEntrySeal,
+  resizeCanvasPxFast,
+  setPaperEdgeFast,
+  nudgeFast,
+  flipFast,
+  pxToPctFast,
+  pctToPxFast,
+  alignSelection,
+  distributeLayers,
+  groupLayers,
+  ungroupLayers,
 } from "./engine";
 import { createInvitationDesign } from "./design";
 import { normaliseDesign } from "./design";
@@ -190,5 +200,66 @@ describe("the Rust design engine and its TypeScript fallback agree", () => {
     expect(addShape(d, "rect")).toBeNull();
     await useDesignEngineBytes(null);
     expect(addShape(d, "rect")).toBeNull();
+  });
+
+  it("handles canvas px sizing, paper edges, and nudges identically", async () => {
+    const { ts: tsResize, rust: rustResize } = await both(() =>
+      resizeCanvasPxFast(house(), 1080, 1350)
+    );
+    expect(stable(rustResize)).toEqual(stable(tsResize));
+
+    for (const edge of ["sharp", "rounded", "deckled"] as const) {
+      const { ts: tsEdge, rust: rustEdge } = await both(() =>
+        setPaperEdgeFast(tsResize, edge, edge === "rounded" ? 24 : 0)
+      );
+      expect(stable(rustEdge)).toEqual(stable(tsEdge));
+    }
+
+    const { ts: tsNudge, rust: rustNudge } = await both(() =>
+      nudgeFast(tsResize, "names", 10.8, 13.5)
+    );
+    expect(stable(rustNudge)).toEqual(stable(tsNudge));
+
+    const { ts: tsFlip, rust: rustFlip } = await both(() =>
+      flipFast(tsResize, "names", true)
+    );
+    expect(stable(rustFlip)).toEqual(stable(tsFlip));
+
+    const { ts: tsPx, rust: rustPx } = await both(() => pxToPctFast(270, 1080));
+    expect(rustPx).toBe(tsPx);
+
+    const { ts: tsPct, rust: rustPct } = await both(() =>
+      pctToPxFast(25, 1080)
+    );
+    expect(rustPct).toBe(tsPct);
+  });
+
+  it("handles multi-layer align, distribute, group, and ungroup identically", async () => {
+    const base = house();
+    const ids = [base.layers[0].id, base.layers[1].id, base.layers[2].id];
+
+    // Align selection left
+    const { ts: tsAlign, rust: rustAlign } = await both(() =>
+      alignSelection(base, ids, "left")
+    );
+    expect(stable(rustAlign)).toEqual(stable(tsAlign));
+
+    // Distribute vertically
+    const { ts: tsDist, rust: rustDist } = await both(() =>
+      distributeLayers(base, ids, false)
+    );
+    expect(stable(rustDist)).toEqual(stable(tsDist));
+
+    // Group
+    const { ts: tsGroup, rust: rustGroup } = await both(() =>
+      groupLayers(base, ids, "header_group")
+    );
+    expect(stable(rustGroup)).toEqual(stable(tsGroup));
+
+    // Ungroup
+    const { ts: tsUngroup, rust: rustUngroup } = await both(() =>
+      ungroupLayers(tsGroup, ids)
+    );
+    expect(stable(rustUngroup)).toEqual(stable(tsUngroup));
   });
 });

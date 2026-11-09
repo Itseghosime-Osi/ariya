@@ -15,6 +15,7 @@ export type { GeometryRequest } from "./GeometryRequest";
 export type { Layer } from "./Layer";
 export type { LayerKind } from "./LayerKind";
 export type { Palette } from "./Palette";
+export type { PaperEdge } from "./PaperEdge";
 export type { Shape } from "./Shape";
 export type { WireAlign } from "./WireAlign";
 export type { WireHandle } from "./WireHandle";

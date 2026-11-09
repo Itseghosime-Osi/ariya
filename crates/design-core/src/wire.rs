@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 #[cfg(feature = "ts")]
 use ts_rs::TS;
 
-use crate::model::{Design, LayerKind, Shape};
+use crate::model::{Design, LayerKind, PaperEdge, Shape};
 use crate::ops::{self, Alignment, Handle, Rect, StackMove};
 use crate::validate::validate;
 
@@ -120,6 +120,38 @@ pub enum Edit {
     EnsureEntrySeal {
         new_id: String,
     },
+    ResizeCanvasPx {
+        width_px: u32,
+        height_px: u32,
+    },
+    SetPaperEdge {
+        edge_style: PaperEdge,
+        corner_radius_px: Option<f64>,
+    },
+    Nudge {
+        id: String,
+        dx_px: f64,
+        dy_px: f64,
+    },
+    Flip {
+        id: String,
+        horizontal: bool,
+    },
+    AlignSelection {
+        ids: Vec<String>,
+        how: WireAlign,
+    },
+    Distribute {
+        ids: Vec<String>,
+        horizontal: bool,
+    },
+    Group {
+        ids: Vec<String>,
+        group_id: String,
+    },
+    Ungroup {
+        ids: Vec<String>,
+    },
 }
 
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -180,6 +212,14 @@ pub enum GeometryRequest {
     },
     SnapRotation {
         degrees: f64,
+    },
+    PxToPct {
+        px: f64,
+        total_px: f64,
+    },
+    PctToPx {
+        pct: f64,
+        total_px: f64,
     },
 }
 
@@ -279,6 +319,41 @@ fn edit(request: EditRequest) -> Result<EditResponse, String> {
         ),
         Edit::RemoveCard => (ops::remove_imported_card(&design), None),
         Edit::EnsureEntrySeal { new_id } => (ops::ensure_entry_seal(&design, new_id), None),
+        Edit::ResizeCanvasPx {
+            width_px,
+            height_px,
+        } => (ops::resize_canvas_px(&design, width_px, height_px), None),
+        Edit::SetPaperEdge {
+            edge_style,
+            corner_radius_px,
+        } => (
+            ops::set_paper_edge(&design, edge_style, corner_radius_px),
+            None,
+        ),
+        Edit::Nudge { id, dx_px, dy_px } => {
+            let next = ops::nudge(&design, &id, dx_px, dy_px);
+            (next, Some(id))
+        }
+        Edit::Flip { id, horizontal } => {
+            let next = ops::flip_layer(&design, &id, horizontal);
+            (next, Some(id))
+        }
+        Edit::AlignSelection { ids, how } => {
+            let next = ops::align_selection(&design, &ids, alignment(how));
+            (next, None)
+        }
+        Edit::Distribute { ids, horizontal } => {
+            let next = ops::distribute_layers(&design, &ids, horizontal);
+            (next, None)
+        }
+        Edit::Group { ids, group_id } => {
+            let next = ops::group_layers(&design, &ids, group_id);
+            (next, None)
+        }
+        Edit::Ungroup { ids } => {
+            let next = ops::ungroup_layers(&design, &ids);
+            (next, None)
+        }
     };
     validate(&next).map_err(|i| i.message)?;
     Ok(EditResponse {
@@ -312,6 +387,12 @@ fn geometry(request: GeometryRequest) -> Value {
         }
         GeometryRequest::SnapRotation { degrees } => {
             json!({ "degrees": ops::snap_rotation(degrees) })
+        }
+        GeometryRequest::PxToPct { px, total_px } => {
+            json!({ "pct": ops::px_to_pct(px, total_px) })
+        }
+        GeometryRequest::PctToPx { pct, total_px } => {
+            json!({ "px": ops::pct_to_px(pct, total_px) })
         }
     }
 }

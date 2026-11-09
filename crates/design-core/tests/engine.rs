@@ -87,7 +87,7 @@ fn validation_refuses_what_the_server_refuses() {
     assert_eq!(validate(&d).unwrap_err().path, "theme");
 
     let mut d = house();
-    d.canvas = Some(ariya_design_core::model::Canvas { ratio: 9.0 });
+    d.canvas = Some(ariya_design_core::model::Canvas::new(9.0));
     assert_eq!(validate(&d).unwrap_err().path, "canvas.ratio");
 
     let mut d = house();
@@ -149,7 +149,7 @@ fn aligning_uses_the_cards_edges_and_centre() {
 }
 
 #[test]
-fn resizing_never_leaves_the_card_or_gets_narrower_than_a_card_can_save() {
+fn resizing_can_bleed_outside_card_or_gets_narrower_than_a_card_can_save() {
     let start = Rect {
         x: 20.0,
         y: 20.0,
@@ -161,9 +161,9 @@ fn resizing_never_leaves_the_card_or_gets_narrower_than_a_card_can_save() {
         50.0
     );
     let wide = ops::resize_box(start, Handle::E, 500.0, 0.0, false);
-    assert_eq!((wide.x, wide.width), (20.0, 80.0));
+    assert_eq!((wide.x, wide.width), (20.0, 540.0));
     let corner = ops::resize_box(start, Handle::Nw, -30.0, -30.0, false);
-    assert_eq!((corner.x, corner.y), (0.0, 0.0));
+    assert_eq!((corner.x, corner.y), (-10.0, -10.0));
     assert_eq!(corner.x + corner.width, 60.0);
     // Dragged past the other edge, a box stops at the minimum width, which the server accepts.
     let squeezed = ops::resize_box(start, Handle::E, -500.0, 0.0, false);
@@ -313,4 +313,108 @@ fn a_bad_request_is_an_error_envelope_never_a_crash() {
     let v: Value =
         serde_json::from_str(&dispatch(OP_VALIDATE, bad.to_string().as_bytes())).unwrap();
     assert_eq!(v["code"], "invalid");
+}
+
+#[test]
+fn canvas_pixel_sizing_and_paper_edges_operate_cleanly() {
+    let d = house();
+    let resized = ops::resize_canvas_px(&d, 1080, 1350);
+    let c = resized.canvas.unwrap();
+    assert_eq!(c.width_px, Some(1080));
+    assert_eq!(c.height_px, Some(1350));
+    assert!((c.ratio - 0.8).abs() < 1e-4);
+    assert_eq!(resized.canvas_width_px(), 1080);
+    assert_eq!(resized.canvas_height_px(), 1350);
+
+    let sharp = ops::set_paper_edge(&resized, ariya_design_core::model::PaperEdge::Sharp, None);
+    assert_eq!(sharp.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Sharp));
+    assert_eq!(sharp.canvas.unwrap().corner_radius_px, Some(0.0));
+
+    let deckled = ops::set_paper_edge(&sharp, ariya_design_core::model::PaperEdge::Deckled, None);
+    assert_eq!(deckled.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Deckled));
+
+    let rounded = ops::set_paper_edge(&deckled, ariya_design_core::model::PaperEdge::Rounded, Some(24.0));
+    assert_eq!(rounded.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Rounded));
+    assert_eq!(rounded.canvas.unwrap().corner_radius_px, Some(24.0));
+
+    // Nudge layer by 10.8 px (which is exactly 1% on 1080px canvas)
+    let first_id = d.layers[0].id.clone();
+    let orig_x = d.layers[0].x;
+    let nudged = ops::nudge(&resized, &first_id, 10.8, 0.0);
+    let new_x = nudged.layers[0].x;
+    assert!((new_x - (orig_x + 1.0)).abs() < 0.05);
+
+    // Geometry conversions
+    assert_eq!(ops::px_to_pct(540.0, 1080.0), 50.0);
+    assert_eq!(ops::pct_to_px(50.0, 1080.0), 540.0);
+}
+
+#[test]
+fn wire_speaks_px_and_paper_edits() {
+    let design: Value = serde_json::from_str(HOUSE).unwrap();
+
+    let request = json!({
+        "design": design,
+        "edit": { "type": "resizeCanvasPx", "widthPx": 1080, "heightPx": 1350 }
+    });
+    let data = ok(&dispatch(OP_EDIT, request.to_string().as_bytes()));
+    assert_eq!(data["design"]["canvas"]["widthPx"], 1080);
+    assert_eq!(data["design"]["canvas"]["heightPx"], 1350);
+
+    let request = json!({
+        "design": data["design"],
+        "edit": { "type": "setPaperEdge", "edgeStyle": "sharp", "cornerRadiusPx": 0.0 }
+    });
+    let data = ok(&dispatch(OP_EDIT, request.to_string().as_bytes()));
+    assert_eq!(data["design"]["canvas"]["edgeStyle"], "sharp");
+
+    let req_px = json!({ "kind": "pxToPct", "px": 270.0, "totalPx": 1080.0 });
+    let geo = ok(&dispatch(OP_GEOMETRY, req_px.to_string().as_bytes()));
+    assert_eq!(geo["pct"], 25.0);
+
+    let req_pct = json!({ "kind": "pctToPx", "pct": 25.0, "totalPx": 1080.0 });
+    let geo = ok(&dispatch(OP_GEOMETRY, req_pct.to_string().as_bytes()));
+    assert_eq!(geo["px"], 270.0);
+}
+
+#[test]
+fn multi_select_align_distribute_and_groups() {
+    let mut d = house();
+    let id1 = d.layers[0].id.clone();
+    let id2 = d.layers[1].id.clone();
+    let id3 = d.layers[2].id.clone();
+    let ids = vec![id1.clone(), id2.clone(), id3.clone()];
+
+    // Grouping
+    let grouped = ops::group_layers(&d, &ids, "group_header".into());
+    assert_eq!(grouped.layers[0].group_id.as_deref(), Some("group_header"));
+    assert_eq!(grouped.layers[1].group_id.as_deref(), Some("group_header"));
+
+    // Ungrouping
+    let ungrouped = ops::ungroup_layers(&grouped, &ids);
+    assert!(ungrouped.layers[0].group_id.is_none());
+
+    // Align selection to left
+    d.layers[0].x = 10.0;
+    d.layers[1].x = 25.0;
+    d.layers[2].x = 30.0;
+    let aligned = ops::align_selection(&d, &ids, Alignment::Left);
+    assert_eq!(aligned.layers[0].x, 10.0);
+    assert_eq!(aligned.layers[1].x, 10.0);
+    assert_eq!(aligned.layers[2].x, 10.0);
+
+    // Distribute vertically
+    d.layers[0].y = 10.0;
+    d.layers[0].height = Some(10.0);
+    d.layers[1].y = 40.0;
+    d.layers[1].height = Some(10.0);
+    d.layers[2].y = 70.0;
+    d.layers[2].height = Some(10.0);
+
+    let distributed = ops::distribute_layers(&d, &ids, false);
+    // Span = 80 - 10 = 70. Heights = 30. Gap = 40 / 2 = 20.
+    // L0: 10..20, gap 20 -> L1: 40..50, gap 20 -> L2: 70..80.
+    assert_eq!(distributed.layers[0].y, 10.0);
+    assert_eq!(distributed.layers[1].y, 40.0);
+    assert_eq!(distributed.layers[2].y, 70.0);
 }

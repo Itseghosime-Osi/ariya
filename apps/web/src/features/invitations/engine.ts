@@ -16,6 +16,10 @@ import {
 } from "@ariya/design";
 import {
   alignLayer,
+  alignSelectionFast,
+  distributeLayersFast,
+  groupLayersFast,
+  ungroupLayersFast,
   createImageLayer,
   createShapeLayer,
   duplicateLayer,
@@ -24,13 +28,17 @@ import {
   removeImportedCard,
   resizeBox,
   snapRotation,
+  resizeCanvasPx,
+  setPaperEdge,
+  nudgeLayer,
+  flipLayer,
   type Alignment,
   type Box,
   type Handle,
   type StackMove,
 } from "./layer-ops";
 import { createLayerOfKind, ensureEntrySeal } from "./design";
-import type { InvitationDesign, InvitationShape } from "./types";
+import type { InvitationDesign, InvitationShape, PaperEdge } from "./types";
 
 let engine: DesignEngine | null = null;
 let loading: Promise<DesignEngine | null> | null = null;
@@ -167,6 +175,49 @@ export function align(
   );
 }
 
+export function alignSelection(
+  design: InvitationDesign,
+  ids: string[],
+  how: Alignment
+): InvitationDesign {
+  return (
+    run(design, { type: "alignSelection", ids, how })?.design ??
+    alignSelectionFast(design, ids, how)
+  );
+}
+
+export function distributeLayers(
+  design: InvitationDesign,
+  ids: string[],
+  horizontal: boolean
+): InvitationDesign {
+  return (
+    run(design, { type: "distribute", ids, horizontal })?.design ??
+    distributeLayersFast(design, ids, horizontal)
+  );
+}
+
+export function groupLayers(
+  design: InvitationDesign,
+  ids: string[],
+  groupId: string
+): InvitationDesign {
+  return (
+    run(design, { type: "group", ids, groupId })?.design ??
+    groupLayersFast(design, ids, groupId)
+  );
+}
+
+export function ungroupLayers(
+  design: InvitationDesign,
+  ids: string[]
+): InvitationDesign {
+  return (
+    run(design, { type: "ungroup", ids })?.design ??
+    ungroupLayersFast(design, ids)
+  );
+}
+
 export function importCard(
   design: InvitationDesign,
   url: string,
@@ -230,4 +281,74 @@ export function snapRotationFast(degrees: number): number {
     }
   }
   return snapRotation(degrees);
+}
+
+export function resizeCanvasPxFast(
+  design: InvitationDesign,
+  widthPx: number,
+  heightPx: number
+): InvitationDesign {
+  return (
+    run(design, { type: "resizeCanvasPx", widthPx, heightPx })?.design ??
+    resizeCanvasPx(design, widthPx, heightPx)
+  );
+}
+
+export function setPaperEdgeFast(
+  design: InvitationDesign,
+  edgeStyle: PaperEdge,
+  cornerRadiusPx?: number
+): InvitationDesign {
+  return (
+    run(design, {
+      type: "setPaperEdge",
+      edgeStyle,
+      cornerRadiusPx: cornerRadiusPx ?? null,
+    })?.design ?? setPaperEdge(design, edgeStyle, cornerRadiusPx)
+  );
+}
+
+export function nudgeFast(
+  design: InvitationDesign,
+  id: string,
+  dxPx: number,
+  dyPx: number
+): InvitationDesign {
+  return (
+    run(design, { type: "nudge", id, dxPx, dyPx })?.design ??
+    nudgeLayer(design, id, dxPx, dyPx)
+  );
+}
+
+export function flipFast(
+  design: InvitationDesign,
+  id: string,
+  horizontal: boolean
+): InvitationDesign {
+  return (
+    run(design, { type: "flip", id, horizontal })?.design ??
+    flipLayer(design, id, horizontal)
+  );
+}
+
+export function pxToPctFast(px: number, totalPx: number): number {
+  if (engine) {
+    try {
+      return engine.pxToPct(px, totalPx);
+    } catch {
+      /* fall through */
+    }
+  }
+  return totalPx > 0 ? (px / totalPx) * 100 : 0;
+}
+
+export function pctToPxFast(pct: number, totalPx: number): number {
+  if (engine) {
+    try {
+      return engine.pctToPx(pct, totalPx);
+    } catch {
+      /* fall through */
+    }
+  }
+  return (pct / 100) * totalPx;
 }

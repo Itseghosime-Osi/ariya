@@ -2,4 +2,4 @@
 import type { WireHandle } from "./WireHandle";
 import type { WireRect } from "./WireRect";
 
-export type GeometryRequest = { "kind": "resizeBox", start: WireRect, handle: WireHandle, dx: number, dy: number, keepShape: boolean, } | { "kind": "snapRotation", degrees: number, };
+export type GeometryRequest = { "kind": "resizeBox", start: WireRect, handle: WireHandle, dx: number, dy: number, keepShape: boolean, } | { "kind": "snapRotation", degrees: number, } | { "kind": "pxToPct", px: number, totalPx: number, } | { "kind": "pctToPx", pct: number, totalPx: number, };

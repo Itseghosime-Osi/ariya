@@ -79,8 +79,45 @@ export const INVITATION_LAYER_LABELS: Record<InvitationLayerKind, string> = {
   image: "Image",
 };
 
-export const INVITATION_SHAPES = ["rect", "ellipse", "line"] as const;
+export const INVITATION_SHAPES = [
+  "rect",
+  "ellipse",
+  "line",
+  "arch",
+  "star",
+  "diamond",
+  "crest",
+  "triangle",
+] as const;
 export type InvitationShape = (typeof INVITATION_SHAPES)[number];
+
+export const INVITATION_SHAPE_LABELS: Record<InvitationShape, string> = {
+  rect: "Rectangle",
+  ellipse: "Circle",
+  line: "Line",
+  arch: "Cathedral Arch",
+  star: "Star / Sparkle",
+  diamond: "Diamond",
+  crest: "Crest / Shield",
+  triangle: "Triangle",
+};
+
+export const INVITATION_FONTS = [
+  "display",
+  "sans",
+  "script",
+  "serif",
+  "mono",
+] as const;
+export type InvitationFont = (typeof INVITATION_FONTS)[number];
+
+export const INVITATION_FONT_LABELS: Record<InvitationFont, string> = {
+  display: "Bodoni Display (High-contrast Serif)",
+  sans: "Plus Jakarta (Modern Clean Sans)",
+  script: "Great Vibes (Formal Calligraphy)",
+  serif: "Cormorant (Editorial Roman)",
+  mono: "Modernist Mono (Architectural)",
+};
 
 export type InvitationTextAlign = "left" | "center" | "right";
 
@@ -98,7 +135,7 @@ export interface InvitationLayer {
   /** Box width, as a percentage of the card's width. */
   width: number;
   align: InvitationTextAlign;
-  font: "display" | "sans";
+  font: InvitationFont;
   /** Font size in container-query width units, so the card scales as one. */
   size: number;
   weight: 400 | 500 | 600 | 700;
@@ -119,6 +156,44 @@ export interface InvitationLayer {
   rotation?: number;
   /** 0 to 1. */
   opacity?: number;
+  /** Line height / leading multiplier (e.g. 1.0 to 2.5, default: 1.35). */
+  lineHeight?: number;
+  /** Text transformation case. */
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+  /** Optional luxury shadow or foil glow effect. */
+  shadow?: "none" | "soft" | "foil" | "glow";
+  /** CSS mix-blend-mode (e.g. "normal", "multiply", "screen", "overlay") */
+  blendMode?: string;
+  /** Gaussian blur effect in pixels */
+  blur?: number;
+  /** Image adjustment: brightness offset (-100 to 100, default: 0) */
+  brightness?: number;
+  /** Image adjustment: contrast offset (-100 to 100, default: 0) */
+  contrast?: number;
+  /** Image adjustment: saturation offset (-100 to 100, default: 0) */
+  saturate?: number;
+  /** Image adjustment: sepia / warmth percentage (0 to 100, default: 0) */
+  sepia?: number;
+  /** Image adjustment: grayscale percentage (0 to 100, default: 0) */
+  grayscale?: number;
+  /** Custom shadow blur in px (0 to 50) */
+  shadowBlur?: number;
+  /** Custom shadow horizontal offset in px */
+  shadowX?: number;
+  /** Custom shadow vertical offset in px */
+  shadowY?: number;
+  /** Custom shadow color */
+  shadowColor?: string | null;
+  /** Linear or radial gradient background string */
+  gradient?: string;
+  /** Independent top-left corner rounding in container-query width units. */
+  radiusTL?: number;
+  /** Independent top-right corner rounding in container-query width units. */
+  radiusTR?: number;
+  /** Independent bottom-right corner rounding in container-query width units. */
+  radiusBR?: number;
+  /** Independent bottom-left corner rounding in container-query width units. */
+  radiusBL?: number;
   /** Shape fill, or null for none. */
   fill?: string | null;
   /** Shape outline, or null for none. */
@@ -130,13 +205,31 @@ export interface InvitationLayer {
   shape?: InvitationShape;
   imageUrl?: string | null;
   fit?: "cover" | "contain";
+  /** Optional frame / clipping mask for photos (e.g. arch, circle, diamond, crest) */
+  maskShape?: InvitationShape;
+  /** Horizontal focal alignment percentage for cropped photos (0 to 100, default: 50) */
+  focalX?: number;
+  /** Vertical focal alignment percentage for cropped photos (0 to 100, default: 50) */
+  focalY?: number;
+  /** Group ID when multiple layers are grouped together. */
+  groupId?: string;
   /** A locked layer cannot be moved or deleted from the canvas. */
   locked?: boolean;
 }
 
+export type PaperEdge = "sharp" | "rounded" | "deckled";
+
 export interface InvitationCanvas {
   /** Width divided by height. 5:7 portrait stationery is 0.714. */
   ratio: number;
+  /** Width of the design canvas in pixels (default: 1080). */
+  widthPx?: number;
+  /** Height of the design canvas in pixels (default: 1350 or 1512). */
+  heightPx?: number;
+  /** Paper edge styling: sharp cut paper (0px radius), rounded luxury corners, or torn deckled edge. */
+  edgeStyle?: PaperEdge;
+  /** Corner radius in pixels when edgeStyle is "rounded". */
+  cornerRadiusPx?: number;
 }
 
 export interface InvitationDesign {

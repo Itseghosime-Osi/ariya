@@ -3,22 +3,77 @@ import type {
   InvitationDesign,
   InvitationLayer,
   InvitationShape,
+  PaperEdge,
 } from "./types";
 
 /** Pure edits on a design, so the designer's every button can be tested without a browser. */
 
-export const CANVAS_PRESETS: { label: string; ratio: number; note: string }[] =
-  [
-    {
-      label: "Portrait card",
-      ratio: 5 / 7,
-      note: "5 : 7, like printed stationery",
-    },
-    { label: "Square", ratio: 1, note: "1 : 1, for sharing" },
-    { label: "Landscape", ratio: 7 / 5, note: "7 : 5" },
-    { label: "Phone story", ratio: 9 / 16, note: "9 : 16, WhatsApp status" },
-    { label: "Tall banner", ratio: 4 / 5, note: "4 : 5" },
-  ];
+export interface CanvasPreset {
+  label: string;
+  ratio: number;
+  widthPx: number;
+  heightPx: number;
+  note: string;
+}
+
+export const CANVAS_PRESETS: CanvasPreset[] = [
+  {
+    label: "Portrait 5:7",
+    ratio: 5 / 7,
+    widthPx: 1080,
+    heightPx: 1512,
+    note: "1080 × 1512 px, stationery",
+  },
+  {
+    label: "Standard 4:5",
+    ratio: 4 / 5,
+    widthPx: 1080,
+    heightPx: 1350,
+    note: "1080 × 1350 px, prints",
+  },
+  {
+    label: "Square 1:1",
+    ratio: 1,
+    widthPx: 1080,
+    heightPx: 1080,
+    note: "1080 × 1080 px, square",
+  },
+  {
+    label: "Story 9:16",
+    ratio: 9 / 16,
+    widthPx: 1080,
+    heightPx: 1920,
+    note: "1080 × 1920 px, WhatsApp",
+  },
+  {
+    label: "Landscape 7:5",
+    ratio: 7 / 5,
+    widthPx: 1512,
+    heightPx: 1080,
+    note: "1512 × 1080 px, wide",
+  },
+  {
+    label: "A5 Fine Art",
+    ratio: 1200 / 1700,
+    widthPx: 1200,
+    heightPx: 1700,
+    note: "1200 × 1700 px, luxury A5",
+  },
+];
+
+export const DEFAULT_CANVAS_WIDTH_PX = 1080;
+export const DEFAULT_CANVAS_HEIGHT_PX = 1350;
+
+export function designDimensionsPx(design: InvitationDesign): {
+  width: number;
+  height: number;
+} {
+  const width = design.canvas?.widthPx ?? DEFAULT_CANVAS_WIDTH_PX;
+  const ratio = designRatio(design);
+  const height =
+    design.canvas?.heightPx ?? Math.round(width / Math.max(0.1, ratio));
+  return { width, height };
+}
 
 export function designRatio(design: InvitationDesign): number {
   return design.canvas?.ratio ?? INVITATION_ASPECT;
@@ -66,6 +121,25 @@ export function createShapeLayer(
       fill: null,
       stroke: "#b8864b",
       strokeWidth: 0.4,
+      colorRole: "custom",
+    };
+  }
+  if (shape === "arch") {
+    const width = 36;
+    const height = clamp(width * ratio * 1.35, 10, 80);
+    return {
+      ...BASE,
+      id,
+      kind: "shape",
+      shape,
+      x: 32,
+      y: clamp(50 - height / 2, 0, 100 - height),
+      width,
+      height,
+      fill: "#b8864b",
+      stroke: null,
+      strokeWidth: 0.4,
+      radius: 18,
       colorRole: "custom",
     };
   }
@@ -212,6 +286,130 @@ export function alignLayer(
   };
 }
 
+export function alignSelectionFast(
+  design: InvitationDesign,
+  ids: string[],
+  how: Alignment
+): InvitationDesign {
+  if (!ids.length) return design;
+  if (ids.length === 1) return alignLayer(design, ids[0], how);
+
+  const selected = design.layers.filter((l) => ids.includes(l.id));
+  if (!selected.length) return design;
+
+  const minX = Math.min(...selected.map((l) => l.x));
+  const maxRight = Math.max(...selected.map((l) => l.x + l.width));
+  const minY = Math.min(...selected.map((l) => l.y));
+  const maxBottom = Math.max(...selected.map((l) => l.y + (l.height ?? 4)));
+
+  const boxWidth = maxRight - minX;
+  const boxHeight = maxBottom - minY;
+
+  return {
+    ...design,
+    layers: design.layers.map((l) => {
+      if (!ids.includes(l.id)) return l;
+      const h = l.height ?? 4;
+      switch (how) {
+        case "left":
+          return { ...l, x: minX };
+        case "centre":
+          return { ...l, x: minX + (boxWidth - l.width) / 2 };
+        case "right":
+          return { ...l, x: maxRight - l.width };
+        case "top":
+          return { ...l, y: minY };
+        case "middle":
+          return { ...l, y: minY + (boxHeight - h) / 2 };
+        case "bottom":
+          return { ...l, y: maxBottom - h };
+      }
+    }),
+  };
+}
+
+export function distributeLayersFast(
+  design: InvitationDesign,
+  ids: string[],
+  horizontal: boolean
+): InvitationDesign {
+  if (ids.length < 3) return design;
+
+  const indices = design.layers
+    .map((l, i) => ({ i, l }))
+    .filter(({ l }) => ids.includes(l.id));
+
+  if (indices.length < 3) return design;
+
+  const layers = [...design.layers];
+
+  if (horizontal) {
+    indices.sort((a, b) => a.l.x - b.l.x);
+    const first = indices[0].l;
+    const last = indices[indices.length - 1].l;
+    const startX = first.x;
+    const endX = last.x + last.width;
+    const totalWidths = indices.reduce((sum, item) => sum + item.l.width, 0);
+    const span = endX - startX;
+    if (span <= totalWidths) return design;
+
+    const gap = (span - totalWidths) / (indices.length - 1);
+    let currX = startX;
+    for (const { i, l } of indices) {
+      layers[i] = { ...l, x: currX };
+      currX += l.width + gap;
+    }
+  } else {
+    indices.sort((a, b) => a.l.y - b.l.y);
+    const first = indices[0].l;
+    const last = indices[indices.length - 1].l;
+    const startY = first.y;
+    const lastH = last.height ?? 4;
+    const endY = last.y + lastH;
+    const totalHeights = indices.reduce(
+      (sum, item) => sum + (item.l.height ?? 4),
+      0
+    );
+    const span = endY - startY;
+    if (span <= totalHeights) return design;
+
+    const gap = (span - totalHeights) / (indices.length - 1);
+    let currY = startY;
+    for (const { i, l } of indices) {
+      const h = l.height ?? 4;
+      layers[i] = { ...l, y: currY };
+      currY += h + gap;
+    }
+  }
+
+  return { ...design, layers };
+}
+
+export function groupLayersFast(
+  design: InvitationDesign,
+  ids: string[],
+  groupId: string
+): InvitationDesign {
+  return {
+    ...design,
+    layers: design.layers.map((l) =>
+      ids.includes(l.id) ? { ...l, groupId } : l
+    ),
+  };
+}
+
+export function ungroupLayersFast(
+  design: InvitationDesign,
+  ids: string[]
+): InvitationDesign {
+  return {
+    ...design,
+    layers: design.layers.map((l) =>
+      ids.includes(l.id) ? { ...l, groupId: undefined } : l
+    ),
+  };
+}
+
 export type Handle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 
 export interface Box {
@@ -240,24 +438,40 @@ export function resizeBox(
   const right = x + width;
   const bottom = y + height;
   if (handle.includes("w")) {
-    x = clamp(x + dx, 0, right - MIN_W);
+    x += dx;
     width = right - x;
+    if (width < MIN_W) {
+      width = MIN_W;
+      x = right - width;
+    }
+    if (width > 1000) {
+      width = 1000;
+      x = right - width;
+    }
   }
   if (handle.includes("e")) {
-    width = clamp(width + dx, MIN_W, 100 - x);
+    width = clamp(width + dx, MIN_W, 1000);
   }
   if (handle.includes("n")) {
-    y = clamp(y + dy, 0, bottom - MIN_H);
+    y += dy;
     height = bottom - y;
+    if (height < MIN_H) {
+      height = MIN_H;
+      y = bottom - height;
+    }
+    if (height > 1000) {
+      height = 1000;
+      y = bottom - height;
+    }
   }
   if (handle.includes("s")) {
-    height = clamp(height + dy, MIN_H, 100 - y);
+    height = clamp(height + dy, MIN_H, 1000);
   }
   if (keepShape && handle.length === 2 && start.height > 0) {
     const aspect = start.width / start.height;
     const byWidth = width / aspect;
     if (Math.abs(byWidth - height) > 0.01) {
-      height = clamp(byWidth, MIN_H, 100);
+      height = clamp(byWidth, MIN_H, 1000);
       if (handle.includes("n")) y = bottom - height;
     }
   }
@@ -334,4 +548,91 @@ export function hasImportedCard(design: InvitationDesign): boolean {
   return design.layers.some(
     (l) => l.kind === "image" && l.name === "Your card"
   );
+}
+
+export function resizeCanvasPx(
+  design: InvitationDesign,
+  widthPx: number,
+  heightPx: number
+): InvitationDesign {
+  const w = clamp(widthPx, 200, 10000);
+  const h = clamp(heightPx, 200, 10000);
+  const ratio = Math.round((w / h) * 1000) / 1000;
+  return {
+    ...design,
+    canvas: {
+      ...design.canvas,
+      ratio,
+      widthPx: w,
+      heightPx: h,
+    },
+  };
+}
+
+export function setPaperEdge(
+  design: InvitationDesign,
+  edgeStyle: PaperEdge,
+  cornerRadiusPx?: number
+): InvitationDesign {
+  const dims = designDimensionsPx(design);
+  const radius =
+    edgeStyle === "sharp"
+      ? 0
+      : edgeStyle === "rounded"
+        ? Math.min(500, Math.max(0, cornerRadiusPx ?? 16))
+        : 0;
+  return {
+    ...design,
+    canvas: {
+      ...design.canvas,
+      ratio: designRatio(design),
+      widthPx: dims.width,
+      heightPx: dims.height,
+      edgeStyle,
+      cornerRadiusPx: radius,
+    },
+  };
+}
+
+export function nudgeLayer(
+  design: InvitationDesign,
+  id: string,
+  dxPx: number,
+  dyPx: number
+): InvitationDesign {
+  const { width: wPx, height: hPx } = designDimensionsPx(design);
+  const dxPct = wPx > 0 ? (dxPx / wPx) * 100 : 0;
+  const dyPct = hPx > 0 ? (dyPx / hPx) * 100 : 0;
+  return {
+    ...design,
+    layers: design.layers.map((l) => {
+      if (l.id !== id || !isEditable(l)) return l;
+      const maxX = clamp(100 - l.width, 0, 100);
+      const maxY = clamp(100 - (l.height ?? 5), 0, 100);
+      return {
+        ...l,
+        x: clamp(Math.round((l.x + dxPct) * 100) / 100, 0, maxX),
+        y: clamp(Math.round((l.y + dyPct) * 100) / 100, 0, maxY),
+      };
+    }),
+  };
+}
+
+export function flipLayer(
+  design: InvitationDesign,
+  id: string,
+  horizontal: boolean
+): InvitationDesign {
+  return {
+    ...design,
+    layers: design.layers.map((l) => {
+      if (l.id !== id || !isEditable(l)) return l;
+      const current = l.rotation ?? 0;
+      const next = horizontal ? -current : 180 - current;
+      return {
+        ...l,
+        rotation: snapRotation(next),
+      };
+    }),
+  };
 }

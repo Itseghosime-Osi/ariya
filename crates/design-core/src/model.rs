@@ -54,6 +54,9 @@ pub enum Align {
 pub enum Font {
     Display,
     Sans,
+    Script,
+    Serif,
+    Mono,
 }
 
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -83,6 +86,11 @@ pub enum Shape {
     Rect,
     Ellipse,
     Line,
+    Arch,
+    Star,
+    Diamond,
+    Crest,
+    Triangle,
 }
 
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -154,11 +162,32 @@ pub struct Background {
     feature = "ts",
     ts(export, export_to = "../../../packages/design/src/generated/")
 )]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PaperEdge {
+    Sharp,
+    Rounded,
+    Deckled,
+}
+
+#[cfg_attr(feature = "ts", derive(TS))]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/design/src/generated/")
+)]
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Canvas {
     /// Width divided by height.
     pub ratio: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width_px: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height_px: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edge_style: Option<PaperEdge>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub corner_radius_px: Option<f64>,
 }
 
 #[cfg_attr(feature = "ts", derive(TS))]
@@ -204,11 +233,39 @@ pub struct Layer {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub radius: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shape: Option<Shape>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fit: Option<Fit>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mask_shape: Option<Shape>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub focal_x: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub focal_y: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_height: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shadow: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blend_mode: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blur: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gradient: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub radius_tl: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub radius_tr: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub radius_br: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub radius_bl: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locked: Option<bool>,
 }
@@ -236,10 +293,52 @@ pub struct Design {
 /// The house card is a portrait 5:7, like printed stationery.
 pub const HOUSE_RATIO: f64 = 5.0 / 7.0;
 
+/// Standard default canvas width in pixels.
+pub const DEFAULT_CANVAS_WIDTH_PX: u32 = 1080;
+/// Standard default canvas height in pixels (1080 x 1512 for 5:7 stationery).
+pub const DEFAULT_CANVAS_HEIGHT_PX: u32 = 1512;
+
+impl Canvas {
+    pub fn new(ratio: f64) -> Self {
+        Canvas {
+            ratio,
+            width_px: None,
+            height_px: None,
+            edge_style: None,
+            corner_radius_px: None,
+        }
+    }
+
+    pub fn resolved_width_px(&self) -> u32 {
+        self.width_px.unwrap_or(DEFAULT_CANVAS_WIDTH_PX)
+    }
+
+    pub fn resolved_height_px(&self) -> u32 {
+        if let Some(h) = self.height_px {
+            h
+        } else {
+            let w = self.resolved_width_px() as f64;
+            (w / self.ratio.max(0.1)).round().max(100.0) as u32
+        }
+    }
+}
+
 impl Design {
     /// Width divided by height.
     pub fn ratio(&self) -> f64 {
         self.canvas.map_or(HOUSE_RATIO, |c| c.ratio)
+    }
+
+    pub fn canvas_width_px(&self) -> u32 {
+        self.canvas.map_or(DEFAULT_CANVAS_WIDTH_PX, |c| c.resolved_width_px())
+    }
+
+    pub fn canvas_height_px(&self) -> u32 {
+        if let Some(c) = self.canvas {
+            c.resolved_height_px()
+        } else {
+            (DEFAULT_CANVAS_WIDTH_PX as f64 / HOUSE_RATIO).round() as u32
+        }
     }
 }
 
@@ -270,9 +369,23 @@ impl Layer {
             stroke: None,
             stroke_width: None,
             radius: None,
+            group_id: None,
             shape: None,
             image_url: None,
             fit: None,
+            mask_shape: None,
+            focal_x: None,
+            focal_y: None,
+            line_height: None,
+            text_transform: None,
+            shadow: None,
+            blend_mode: None,
+            blur: None,
+            gradient: None,
+            radius_tl: None,
+            radius_tr: None,
+            radius_br: None,
+            radius_bl: None,
             locked: None,
         }
     }
