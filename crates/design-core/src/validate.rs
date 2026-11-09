@@ -58,18 +58,19 @@ fn opt_hex(path: &str, value: &Option<String>) -> Check {
 }
 
 fn web_url(path: &str, value: &str) -> Check {
-    let rest = value
-        .strip_prefix("https://")
-        .or_else(|| value.strip_prefix("http://"));
-    let ok = value.len() <= 2048
-        && rest.is_some_and(|r| !r.is_empty() && !r.starts_with('/'))
+    let ok = value.len() <= 100_000
+        && (value.starts_with("https://")
+            || value.starts_with("http://")
+            || value.starts_with("data:image/")
+            || value.starts_with("blob:"))
+        && !value.contains("javascript:")
         && !value.chars().any(char::is_whitespace);
     if ok {
         Ok(())
     } else {
         Err(Issue::new(
             path,
-            "Image links must start with http or https",
+            "Image links must start with http, https, data:image, or blob",
         ))
     }
 }

@@ -13,10 +13,9 @@ const hexColour = z
 const imageUrl = z
   .string()
   .trim()
-  .max(2048)
-  .url("Use a full image link")
-  .refine((value) => /^https?:\/\//i.test(value), {
-    message: "Image links must start with http or https",
+  .max(100_000)
+  .refine((value) => /^(https?:\/\/|data:image\/|blob:)/i.test(value), {
+    message: "Image links must start with http, https, data:image, or blob",
   });
 
 export const invitationPaletteSchema = z.object({
@@ -37,8 +36,8 @@ export const invitationLayerSchema = z.object({
   id: z.string().min(1).max(48),
   kind: z.enum(INVITATION_LAYER_KINDS),
   text: z.string().max(600),
-  x: z.number().finite().min(-50).max(100),
-  y: z.number().finite().min(-50).max(100),
+  x: z.number().finite().min(-500).max(500),
+  y: z.number().finite().min(-500).max(500),
   width: z.number().finite().min(1).max(1000),
   align: z.enum(["left", "center", "right"]),
   font: z.enum(INVITATION_FONTS),
