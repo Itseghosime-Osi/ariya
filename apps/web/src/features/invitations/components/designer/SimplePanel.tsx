@@ -5,7 +5,12 @@ import { Icon } from "@/components/ui/icon";
 import { Section } from "@/features/seating/hall/studio-ui";
 import { draftInvitationDesign } from "../../assistant";
 import { applyInvitationTheme, THEME_PALETTES } from "../../design";
-import { CANVAS_PRESETS, designRatio, hasImportedCard } from "../../layer-ops";
+import {
+  CANVAS_PRESETS,
+  designRatio,
+  hasImportedCard,
+  resizeCanvasPx,
+} from "../../layer-ops";
 import {
   INVITATION_THEME_LABELS,
   INVITATION_THEMES,
@@ -266,7 +271,7 @@ export function SimplePanel({
               type="button"
               aria-pressed={Math.abs(s.ratio - ratio) < 0.01}
               onClick={() =>
-                onDesign((d) => ({ ...d, canvas: { ratio: s.ratio } }))
+                onDesign((d) => resizeCanvasPx(d, s.widthPx, s.heightPx))
               }
               className="min-h-11 rounded-full border border-hairline bg-white/60 px-4 text-sm font-semibold text-night aria-pressed:border-burgundy aria-pressed:bg-burgundy/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
             >
