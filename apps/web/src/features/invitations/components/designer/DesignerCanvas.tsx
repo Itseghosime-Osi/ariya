@@ -759,7 +759,13 @@ export function DesignerCanvas({
       const layer = props.current.design.layers.find((l) => l.id === g.id);
       if (!layer || !g.handle) return;
       if (hasBox(layer)) {
-        const next = resizeBoxFast(g.origin, g.handle, dx, dy, e.shiftKey);
+        const isRotated = !!layer.rotation && Math.abs(layer.rotation) > 0.1;
+        const keepProportions =
+          e.shiftKey ||
+          isRotated ||
+          layer.kind === "image" ||
+          layer.kind === "seal";
+        const next = resizeBoxFast(g.origin, g.handle, dx, dy, keepProportions);
         update(g.id, next, { commit: false });
       } else {
         // Text, seal, rule and entry seal change width only; height follows.
@@ -1212,11 +1218,11 @@ export function DesignerCanvas({
                   hPercent = 25;
                 }
                 xPercent = Math.max(
-                  -50,
+                  -200,
                   Math.min(90, clickXPct - wPercent / 2)
                 );
                 yPercent = Math.max(
-                  -50,
+                  -200,
                   Math.min(90, clickYPct - hPercent / 2)
                 );
               } else {
@@ -1227,12 +1233,16 @@ export function DesignerCanvas({
 
                 xPercent = Math.round((left / card.width) * 100 * 10) / 10;
                 yPercent = Math.round((top / card.height) * 100 * 10) / 10;
+                const minW =
+                  activeTool === "text" ? 20 : activeTool === "pen" ? 10 : 8;
+                const minH =
+                  activeTool === "text" ? 5 : activeTool === "pen" ? 1 : 5;
                 wPercent = Math.max(
-                  5,
+                  minW,
                   Math.round((width / card.width) * 100 * 10) / 10
                 );
                 hPercent = Math.max(
-                  2,
+                  minH,
                   Math.round((height / card.height) * 100 * 10) / 10
                 );
               }
@@ -1579,9 +1589,9 @@ export function DesignerCanvas({
 
               {/* Inner Corner Radius Drag Handles (PhotoCraft / Figma Style) */}
               {editable &&
-                (selected.kind === "shape" ||
-                  selected.kind === "image" ||
-                  selected.kind === "text") &&
+                ((selected.kind === "shape" &&
+                  (!selected.shape || selected.shape === "rect")) ||
+                  selected.kind === "image") &&
                 box.width >= 40 &&
                 box.height >= 40 &&
                 (() => {

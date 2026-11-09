@@ -22,7 +22,7 @@ describe("Invitation feature schemas", () => {
   it("rejects a layer dragged outside the card", () => {
     const res = invitationDesignSchema.safeParse({
       ...houseDesign,
-      layers: houseDesign.layers.map((layer) => ({ ...layer, x: 140 })),
+      layers: houseDesign.layers.map((layer) => ({ ...layer, x: 600 })),
     });
     expect(res.success).toBe(false);
   });

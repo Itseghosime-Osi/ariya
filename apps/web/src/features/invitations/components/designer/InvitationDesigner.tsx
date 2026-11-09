@@ -175,8 +175,8 @@ export function InvitationDesigner({
                       ...l,
                       x: geom.x,
                       y: geom.y,
-                      width: Math.max(5, geom.width),
-                      height: geom.height ? Math.max(2, geom.height) : l.height,
+                      width: Math.max(8, geom.width),
+                      height: geom.height ? Math.max(5, geom.height) : l.height,
                     }
                   : l
               ),

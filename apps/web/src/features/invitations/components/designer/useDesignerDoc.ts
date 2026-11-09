@@ -123,6 +123,18 @@ export function useDesignerDoc(eventId: string, initial: InvitationDesign) {
     return () => clearTimeout(timer);
   }, [doc.present, eventId]);
 
+  // Warn before closing if there are unsaved changes pending in the save queue
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (latestRef.current !== savedRef.current) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   return {
     design: doc.present,
     commit,

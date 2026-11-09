@@ -82,47 +82,63 @@ export async function exportInvitation({
     const renderWidth = cardElement.offsetWidth;
     const renderHeight = cardElement.offsetHeight;
 
+    // Safe render options to prevent CORS-tainted canvas failures
+    const renderOptions = {
+      pixelRatio,
+      cacheBust: true,
+      width: renderWidth,
+      height: renderHeight,
+      fetchRequestInit: {
+        mode: "cors" as RequestMode,
+      },
+      imagePlaceholder:
+        "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23b8864b'/%3E%3C/svg%3E",
+      style: {
+        margin: "0",
+        transform: "none",
+      },
+    };
+
+    const safeToPng = async (el: HTMLElement, opts = renderOptions) => {
+      try {
+        return await toPng(el, opts);
+      } catch {
+        // Fallback with skipped webfonts if cross-origin fonts blocked canvas
+        return await toPng(el, { ...opts, skipFonts: true });
+      }
+    };
+
     if (format === "png") {
-      const dataUrl = await toPng(cardElement, {
-        pixelRatio,
-        cacheBust: true,
-        width: renderWidth,
-        height: renderHeight,
-        style: {
-          margin: "0",
-          transform: "none",
-        },
-      });
+      const dataUrl = await safeToPng(cardElement);
       triggerDownload(dataUrl, `${baseName}-300dpi.png`);
       return { ok: true };
     }
 
     if (format === "jpeg") {
-      const dataUrl = await toJpeg(cardElement, {
-        pixelRatio: Math.min(pixelRatio, 2),
-        quality,
-        width: renderWidth,
-        height: renderHeight,
-        style: {
-          margin: "0",
-          transform: "none",
-        },
-      });
+      let dataUrl: string;
+      try {
+        dataUrl = await toJpeg(cardElement, {
+          ...renderOptions,
+          pixelRatio: Math.min(pixelRatio, 2),
+          quality,
+        });
+      } catch {
+        dataUrl = await toJpeg(cardElement, {
+          ...renderOptions,
+          skipFonts: true,
+          pixelRatio: Math.min(pixelRatio, 2),
+          quality,
+        });
+      }
       triggerDownload(dataUrl, `${baseName}.jpg`);
       return { ok: true };
     }
 
     if (format === "pdf") {
       // 1. Capture 3x PNG for crystal clear 300 DPI print quality
-      const pngDataUrl = await toPng(cardElement, {
+      const pngDataUrl = await safeToPng(cardElement, {
+        ...renderOptions,
         pixelRatio: 3,
-        cacheBust: true,
-        width: renderWidth,
-        height: renderHeight,
-        style: {
-          margin: "0",
-          transform: "none",
-        },
       });
 
       const pngBytes = dataUrlToUint8Array(pngDataUrl);
