@@ -1,0 +1,827 @@
+"use client";
+
+import React from "react";
+import { cn } from "@/lib/utils";
+import type {
+  InvitationDesign,
+  InvitationLayer,
+  InvitationFont,
+} from "../../types";
+import { GRADIENT_PRESETS } from "./Inspector";
+import { INVITATION_FONTS, INVITATION_FONT_LABELS } from "../../types";
+import { designDimensionsPx } from "../../layer-ops";
+
+export type StudioTool =
+  | "select"
+  | "crop"
+  | "text"
+  | "shape"
+  | "pen"
+  | "image"
+  | "gradient"
+  | "eyedropper"
+  | "hand"
+  | "zoom";
+
+export function ContextualOptionsBar({
+  activeTool,
+  onSelectTool,
+  design,
+  selectedLayer,
+  selectedIds,
+  onPatchLayer,
+  onAlignSelection,
+  onDistribute,
+  onGroupSelection,
+  onUngroupSelection: _onUngroupSelection,
+  activeShapeKind = "rect",
+  onSelectShapeKind,
+  onAddLayer,
+  onResizeCanvasPx,
+  onResetView,
+  zoom,
+  onZoomChange,
+  activeColor: _activeColor,
+  onColorChange: _onColorChange,
+  showRulers,
+  onToggleRulers,
+  showGrid,
+  onToggleGrid,
+  dark = false,
+}: {
+  activeTool: StudioTool;
+  onSelectTool: (tool: StudioTool) => void;
+  design: InvitationDesign;
+  selectedLayer: InvitationLayer | null;
+  selectedIds: string[];
+  onPatchLayer: (id: string, patch: Partial<InvitationLayer>) => void;
+  onAlignSelection?: (
+    ids: string[],
+    how: "left" | "centre" | "right" | "top" | "middle" | "bottom"
+  ) => void;
+  onDistribute?: (ids: string[], horizontal: boolean) => void;
+  onGroupSelection?: () => void;
+  onUngroupSelection?: () => void;
+  activeShapeKind?: "rect" | "ellipse" | "arch" | "line" | "star";
+  onSelectShapeKind?: (
+    kind: "rect" | "ellipse" | "arch" | "line" | "star"
+  ) => void;
+  onAddLayer: (
+    kind: "text" | "rect" | "ellipse" | "arch" | "line" | "star"
+  ) => void;
+  onResizeCanvasPx?: (widthPx: number, heightPx: number) => void;
+  onResetView: () => void;
+  zoom: number;
+  onZoomChange: (z: number) => void;
+  activeColor: string;
+  onColorChange: (hex: string) => void;
+  showRulers: boolean;
+  onToggleRulers: () => void;
+  showGrid: boolean;
+  onToggleGrid: () => void;
+  dark?: boolean;
+}) {
+  const currentLayer = selectedLayer;
+
+  return (
+    <div
+      role="toolbar"
+      aria-label="Contextual Tool Options"
+      className={cn(
+        "flex h-10 w-full items-center gap-2 overflow-x-auto border-b px-3 text-xs select-none shadow-xs transition-colors",
+        dark
+          ? "border-[#382630] bg-[#23181e] text-zinc-200"
+          : "border-[#e8e2d6] bg-[#fcfbfa] text-[#3b2b31]"
+      )}
+    >
+      {/* Tool-Specific Controls */}
+
+      {/* MOVE & ALIGN TOOL OPTIONS */}
+      {activeTool === "select" && (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            className={cn(
+              "text-[11px] max-md:hidden",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            Align:
+          </span>
+          {(
+            [
+              { how: "left", label: "Align left", d: "M4 3v18M8 7h12M8 13h8" },
+              {
+                how: "centre",
+                label: "Center horizontal",
+                d: "M12 3v18M5 7h14M7 13h10",
+              },
+              {
+                how: "right",
+                label: "Align right",
+                d: "M20 3v18M4 7h12M8 13h8",
+              },
+              { how: "top", label: "Align top", d: "M3 4h18M7 8v12M13 8v8" },
+              {
+                how: "middle",
+                label: "Center vertical",
+                d: "M3 12h18M7 5v14M13 7v10",
+              },
+              {
+                how: "bottom",
+                label: "Align bottom",
+                d: "M3 20h18M7 4v12M13 8v8",
+              },
+            ] as const
+          ).map((btn) => (
+            <button
+              key={btn.how}
+              type="button"
+              title={btn.label}
+              aria-label={btn.label}
+              disabled={!currentLayer && selectedIds.length < 2}
+              onClick={() => {
+                const targetIds =
+                  selectedIds.length > 0
+                    ? selectedIds
+                    : currentLayer
+                      ? [currentLayer.id]
+                      : [];
+                if (targetIds.length > 0) {
+                  onAlignSelection?.(targetIds, btn.how);
+                }
+              }}
+              className={cn(
+                "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
+                dark
+                  ? "text-zinc-300 hover:bg-white/10 hover:text-white"
+                  : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+              )}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={btn.d} />
+              </svg>
+            </button>
+          ))}
+
+          <span
+            aria-hidden="true"
+            className={cn(
+              "mx-1 h-4 w-px",
+              dark ? "bg-white/15" : "bg-black/10"
+            )}
+          />
+          <span
+            className={cn(
+              "text-[11px] max-md:hidden",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            Distribute:
+          </span>
+          <button
+            type="button"
+            title="Distribute horizontally"
+            aria-label="Distribute horizontally"
+            disabled={selectedIds.length < 3}
+            onClick={() => onDistribute?.(selectedIds, true)}
+            className={cn(
+              "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
+              dark
+                ? "text-zinc-300 hover:bg-white/10 hover:text-white"
+                : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+            )}
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <rect x="4" y="5" width="4" height="14" rx="1" />
+              <rect x="16" y="5" width="4" height="14" rx="1" />
+              <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="2 2" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            title="Distribute vertically"
+            aria-label="Distribute vertically"
+            disabled={selectedIds.length < 3}
+            onClick={() => onDistribute?.(selectedIds, false)}
+            className={cn(
+              "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
+              dark
+                ? "text-zinc-300 hover:bg-white/10 hover:text-white"
+                : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+            )}
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <rect x="5" y="4" width="14" height="4" rx="1" />
+              <rect x="5" y="16" width="14" height="4" rx="1" />
+              <line x1="2" y1="12" x2="22" y2="12" strokeDasharray="2 2" />
+            </svg>
+          </button>
+
+          {selectedIds.length >= 2 && (
+            <>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "mx-1 h-4 w-px",
+                  dark ? "bg-white/15" : "bg-black/10"
+                )}
+              />
+              <button
+                type="button"
+                title="Group Selected Layers (Cmd+G)"
+                onClick={onGroupSelection}
+                className={cn(
+                  "flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold transition-colors",
+                  dark
+                    ? "bg-white/[0.08] text-[#fff6dc] hover:bg-white/[0.14]"
+                    : "bg-[#4a0e17]/10 text-[#4a0e17] hover:bg-[#4a0e17]/15"
+                )}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>Group</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* CROP & ARTBOARD TOOL OPTIONS */}
+      {activeTool === "crop" && (
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={cn(
+              "text-[11px] font-semibold",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            Ratio:
+          </span>
+          <select
+            aria-label="Crop preset"
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "portrait") onResizeCanvasPx?.(1080, 1512);
+              else if (val === "standard") onResizeCanvasPx?.(1080, 1350);
+              else if (val === "square") onResizeCanvasPx?.(1080, 1080);
+              else if (val === "story") onResizeCanvasPx?.(1080, 1920);
+              else if (val === "landscape") onResizeCanvasPx?.(1512, 1080);
+              else if (val === "a5") onResizeCanvasPx?.(1200, 1700);
+            }}
+            className={cn(
+              "h-7 rounded border px-2 text-xs outline-none transition-colors",
+              dark
+                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
+                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+            )}
+          >
+            <option
+              value="portrait"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              Portrait 5:7 (1080 × 1512)
+            </option>
+            <option
+              value="standard"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              Standard 4:5 (1080 × 1350)
+            </option>
+            <option
+              value="square"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              Square 1:1 (1080 × 1080)
+            </option>
+            <option
+              value="story"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              Story 9:16 (1080 × 1920)
+            </option>
+            <option
+              value="landscape"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              Landscape 7:5 (1512 × 1080)
+            </option>
+            <option
+              value="a5"
+              className={
+                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+              }
+            >
+              A5 Fine Art (1200 × 1700)
+            </option>
+          </select>
+
+          <div className="flex items-center gap-1">
+            <span
+              className={cn(
+                "text-[11px]",
+                dark ? "text-zinc-400" : "text-[#7a5b67]"
+              )}
+            >
+              W:
+            </span>
+            <input
+              type="number"
+              aria-label="Crop Width"
+              value={designDimensionsPx(design).width}
+              onChange={(e) => {
+                const w = Math.max(200, Math.min(6000, Number(e.target.value)));
+                onResizeCanvasPx?.(w, designDimensionsPx(design).height);
+              }}
+              className={cn(
+                "h-7 w-16 rounded border px-1.5 font-mono text-xs outline-none",
+                dark
+                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
+                  : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+              )}
+            />
+            <span
+              className={cn(
+                "text-[11px]",
+                dark ? "text-zinc-400" : "text-[#7a5b67]"
+              )}
+            >
+              H:
+            </span>
+            <input
+              type="number"
+              aria-label="Crop Height"
+              value={designDimensionsPx(design).height}
+              onChange={(e) => {
+                const h = Math.max(200, Math.min(6000, Number(e.target.value)));
+                onResizeCanvasPx?.(designDimensionsPx(design).width, h);
+              }}
+              className={cn(
+                "h-7 w-16 rounded border px-1.5 font-mono text-xs outline-none",
+                dark
+                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
+                  : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+              )}
+            />
+          </div>
+
+          <button
+            type="button"
+            title="Commit Crop (Enter)"
+            onClick={() => onSelectTool("select")}
+            className="flex items-center gap-1 rounded bg-[#dfba73] px-2.5 py-1 text-xs font-bold text-[#20161b] hover:bg-[#edd49d] transition-colors shadow-xs"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>Commit</span>
+          </button>
+
+          <button
+            type="button"
+            title="Cancel Crop (Esc)"
+            onClick={() => onSelectTool("select")}
+            className={cn(
+              "flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium transition-colors",
+              dark
+                ? "border-white/12 bg-white/[0.06] text-zinc-300 hover:text-white"
+                : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec]"
+            )}
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            <span>Cancel</span>
+          </button>
+        </div>
+      )}
+
+      {/* TYPOGRAPHY TOOL OPTIONS */}
+      {activeTool === "text" && (
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Font Family */}
+          <select
+            aria-label="Font family"
+            value={currentLayer?.font ?? "Playfair Display"}
+            onChange={(e) => {
+              if (currentLayer) {
+                onPatchLayer(currentLayer.id, {
+                  font: e.target.value as InvitationFont,
+                });
+              }
+            }}
+            className={cn(
+              "h-7 rounded border px-2 text-xs outline-none transition-colors",
+              dark
+                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
+                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+            )}
+          >
+            {INVITATION_FONTS.map((f) => (
+              <option key={f} value={f}>
+                {INVITATION_FONT_LABELS[f]}
+              </option>
+            ))}
+          </select>
+
+          {/* Font Size */}
+          <select
+            aria-label="Font size"
+            value={currentLayer?.size ?? 24}
+            onChange={(e) => {
+              if (currentLayer) {
+                onPatchLayer(currentLayer.id, { size: Number(e.target.value) });
+              }
+            }}
+            className={cn(
+              "h-7 rounded border px-1.5 text-xs outline-none transition-colors",
+              dark
+                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
+                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+            )}
+          >
+            {[12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72].map(
+              (s) => (
+                <option
+                  key={s}
+                  value={s}
+                  className={
+                    dark
+                      ? "bg-[#23181e] text-[#fff6dc]"
+                      : "bg-white text-[#2d1f24]"
+                  }
+                >
+                  {s} pt
+                </option>
+              )
+            )}
+          </select>
+
+          {/* Alignment */}
+          <div
+            className={cn(
+              "flex items-center rounded border p-0.5",
+              dark
+                ? "border-white/10 bg-white/[0.05]"
+                : "border-[#e8e2d6] bg-white"
+            )}
+          >
+            {(
+              [
+                { align: "left", label: "Left" },
+                { align: "center", label: "Center" },
+                { align: "right", label: "Right" },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.align}
+                type="button"
+                title={`Align ${item.label}`}
+                onClick={() => {
+                  if (currentLayer) {
+                    onPatchLayer(currentLayer.id, { align: item.align });
+                  }
+                }}
+                className={cn(
+                  "grid h-6 w-6 place-items-center rounded text-xs transition-colors",
+                  (currentLayer?.align ?? "center") === item.align
+                    ? dark
+                      ? "bg-[#3d2733] text-[#dfba73]"
+                      : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                    : dark
+                      ? "text-zinc-400 hover:text-white"
+                      : "text-[#7a5b67] hover:text-[#4a0e17]"
+                )}
+              >
+                {item.align === "left" && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="15" y2="12" />
+                    <line x1="3" y1="18" x2="18" y2="18" />
+                  </svg>
+                )}
+                {item.align === "center" && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="6" y1="12" x2="18" y2="12" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                  </svg>
+                )}
+                {item.align === "right" && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="9" y1="12" x2="21" y2="12" />
+                    <line x1="6" y1="18" x2="21" y2="18" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick Add Text */}
+          <button
+            type="button"
+            onClick={() => onAddLayer("text")}
+            className="flex items-center gap-1 rounded bg-[#4a0e17] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#6b1e2e] dark:bg-[#dfba73] dark:text-[#2d1f24] dark:hover:bg-[#edd49d] transition-colors"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Add Text Box</span>
+          </button>
+        </div>
+      )}
+
+      {/* SHAPES TOOL OPTIONS */}
+      {activeTool === "shape" && (
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={cn(
+              "text-[11px] max-sm:hidden",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            Add:
+          </span>
+          {(
+            [
+              { kind: "rect", label: "Rectangle" },
+              { kind: "ellipse", label: "Circle" },
+              { kind: "arch", label: "Cathedral Arch" },
+              { kind: "line", label: "Line" },
+              { kind: "star", label: "Star" },
+            ] as const
+          ).map((s) => {
+            const isSelected = activeShapeKind === s.kind;
+            return (
+              <button
+                key={s.kind}
+                type="button"
+                onClick={() => onSelectShapeKind?.(s.kind)}
+                className={cn(
+                  "rounded border px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1",
+                  isSelected
+                    ? dark
+                      ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73] shadow-xs font-bold ring-1 ring-[#dfba73]/30"
+                      : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] font-bold"
+                    : dark
+                      ? "border-white/10 bg-white/[0.06] text-[#fff6dc] hover:border-[#dfba73]/50 hover:text-[#dfba73]"
+                      : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/50 hover:text-[#4a0e17]"
+                )}
+              >
+                <span>{s.label}</span>
+                <span
+                  title="Click to place immediately on canvas"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddLayer(s.kind);
+                  }}
+                  className="ml-1 opacity-60 hover:opacity-100 hover:text-[#dfba73]"
+                >
+                  +
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* GRADIENT TOOL OPTIONS */}
+      {activeTool === "gradient" && (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            className={cn(
+              "text-[11px] max-sm:hidden",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            Presets:
+          </span>
+          {GRADIENT_PRESETS.slice(0, 5).map((preset) => (
+            <button
+              key={preset.name}
+              type="button"
+              title={preset.name}
+              onClick={() => {
+                if (currentLayer) {
+                  onPatchLayer(currentLayer.id, {
+                    gradient: preset.value,
+                    fill: undefined,
+                  });
+                }
+              }}
+              className={cn(
+                "flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] transition-colors",
+                dark
+                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:border-white/40 hover:text-white"
+                  : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/40 hover:text-[#4a0e17]"
+              )}
+            >
+              <span
+                className="h-3 w-3 rounded-full border border-white/20"
+                style={{ background: preset.value }}
+              />
+              <span className="max-md:hidden">{preset.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* HAND / PAN TOOL OPTIONS */}
+      {activeTool === "hand" && (
+        <div
+          className={cn(
+            "flex items-center gap-2 shrink-0",
+            dark ? "text-zinc-400" : "text-[#7a5b67]"
+          )}
+        >
+          <span>
+            Click and drag on the artboard to pan. Hold Space anywhere to
+            quick-pan.
+          </span>
+          <button
+            type="button"
+            onClick={onResetView}
+            className={cn(
+              "rounded border px-2.5 py-1 text-xs font-medium transition-colors",
+              dark
+                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:bg-white/12"
+                : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:bg-[#4a0e17]/5"
+            )}
+          >
+            Reset View
+          </button>
+        </div>
+      )}
+
+      {/* ZOOM TOOL OPTIONS */}
+      {activeTool === "zoom" && (
+        <div className="flex items-center gap-1.5 shrink-0">
+          {[0.5, 0.75, 1, 1.5, 2].map((z) => (
+            <button
+              key={z}
+              type="button"
+              onClick={() => onZoomChange(z)}
+              className={cn(
+                "rounded px-2 py-1 text-xs font-medium transition-colors",
+                zoom === z
+                  ? dark
+                    ? "bg-[#3d2733] text-[#dfba73] font-semibold"
+                    : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                  : dark
+                    ? "text-zinc-400 hover:text-white"
+                    : "text-[#7a5b67] hover:text-[#4a0e17]"
+              )}
+            >
+              {Math.round(z * 100)}%
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onResetView}
+            className={cn(
+              "rounded border px-2 py-1 text-xs font-medium transition-colors",
+              dark
+                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:bg-white/12"
+                : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:bg-[#4a0e17]/5"
+            )}
+          >
+            Fit Screen
+          </button>
+        </div>
+      )}
+
+      {/* Spacer to push view toggles to the right */}
+      <div className="flex-1" />
+
+      {/* Workspace Display Aids: Rulers & Grid */}
+      <div
+        className={cn(
+          "flex items-center gap-1 border-l pl-2 shrink-0",
+          dark ? "border-white/10" : "border-black/10"
+        )}
+      >
+        <button
+          type="button"
+          onClick={onToggleRulers}
+          aria-pressed={showRulers}
+          title="Toggle Canvas Rulers"
+          className={cn(
+            "rounded px-2 py-1 text-xs font-medium transition-colors",
+            showRulers
+              ? dark
+                ? "bg-[#3d2733] text-[#dfba73]"
+                : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+              : dark
+                ? "text-zinc-400 hover:text-white"
+                : "text-[#7a5b67] hover:text-[#4a0e17]"
+          )}
+        >
+          Rulers
+        </button>
+        <button
+          type="button"
+          onClick={onToggleGrid}
+          aria-pressed={showGrid}
+          title="Toggle Alignment Grid"
+          className={cn(
+            "rounded px-2 py-1 text-xs font-medium transition-colors",
+            showGrid
+              ? dark
+                ? "bg-[#3d2733] text-[#dfba73]"
+                : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+              : dark
+                ? "text-zinc-400 hover:text-white"
+                : "text-[#7a5b67] hover:text-[#4a0e17]"
+          )}
+        >
+          Grid
+        </button>
+      </div>
+    </div>
+  );
+}
