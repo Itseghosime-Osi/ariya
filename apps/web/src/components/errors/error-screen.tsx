@@ -1,5 +1,6 @@
 import React from "react";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
+import { cn } from "@/lib/utils";
 
 export const ERROR_PRIMARY =
   "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-burgundy px-6 text-[14px] font-semibold text-ivory shadow-[0_8px_20px_-8px_rgba(110,20,38,0.6)] transition-colors hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy";
@@ -45,9 +46,12 @@ export function ErrorScreen({
     <div
       role={alert ? "alert" : undefined}
       data-testid={testId}
-      className={`relative isolate flex items-center justify-center px-4 ${
-        page ? "min-h-[100dvh] bg-ivory py-12" : "py-12 sm:py-20"
-      }`}
+      className={cn(
+        "relative isolate flex w-full flex-1 items-center justify-center px-4",
+        page
+          ? "min-h-screen min-h-[100dvh] h-screen bg-ivory py-12"
+          : "min-h-[calc(100vh-8rem)] min-h-[calc(100dvh-8rem)] py-12 sm:py-20"
+      )}
     >
       <div
         aria-hidden="true"
