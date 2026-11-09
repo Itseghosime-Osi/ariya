@@ -24,7 +24,10 @@ export function NavigatorPanel({
   const ratio = designRatio(design);
 
   return (
-    <div className="space-y-4 p-3 text-xs select-none">
+    <div
+      data-testid="navigator-panel"
+      className="space-y-4 p-3 text-xs select-none"
+    >
       {/* Mini-map Card Canvas */}
       <div className="relative mx-auto flex h-52 w-full items-center justify-center rounded-xl border border-hairline bg-black/10 p-3 overflow-hidden">
         {/* Miniature card representation */}

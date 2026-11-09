@@ -57,7 +57,10 @@ export function HistoryPanel({
   };
 
   return (
-    <div className="flex h-full flex-col justify-between p-3 text-xs select-none">
+    <div
+      data-testid="history-panel"
+      className="flex h-full flex-col justify-between p-3 text-xs select-none"
+    >
       <div className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
         <div className="mb-2 flex items-center justify-between">
           <span

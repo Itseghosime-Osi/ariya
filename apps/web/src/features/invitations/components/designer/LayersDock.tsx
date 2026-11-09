@@ -247,7 +247,12 @@ function SortableRow({
   };
 
   return (
-    <li ref={setNodeRef} style={style} className="relative mb-1 list-none">
+    <li
+      ref={setNodeRef}
+      style={style}
+      data-testid={`layer-row-${layer.id}`}
+      className="relative mb-1 list-none"
+    >
       <div
         role="button"
         tabIndex={0}

@@ -324,6 +324,10 @@ export function ColorSwatchesPanel({
             />
             <input
               type="text"
+              id="designer-hex-input"
+              data-testid="hex-color-input"
+              aria-label="Hex color hex"
+              placeholder="#DFBA73"
               value={hexInput}
               onChange={(e) => {
                 const val = e.target.value;

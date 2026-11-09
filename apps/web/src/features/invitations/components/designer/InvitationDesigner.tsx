@@ -179,40 +179,45 @@ export function InvitationDesigner({
         textLayer.width = Math.max(15, geom.width);
         if (geom.height) textLayer.height = geom.height;
         textLayer.text = "Your words";
-        commit((d) => ({
-          ...d,
-          layers: [...d.layers, textLayer],
-        }));
+        commit(
+          (d) => ({
+            ...d,
+            layers: [...d.layers, textLayer],
+          }),
+          true
+        );
         setSelectedId(textLayer.id);
+        setSelectedIds([textLayer.id]);
         setTopTab("properties");
       } else {
-        const shape = addShape(design, kind);
-        if (shape) {
-          commit((d) => {
-            const next = addShape(d, kind);
-            if (!next) return d;
-            return {
-              ...next.design,
-              layers: next.design.layers.map((l) =>
-                l.id === next.id
-                  ? {
-                      ...l,
-                      x: geom.x,
-                      y: geom.y,
-                      width: Math.max(8, geom.width),
-                      height: geom.height ? Math.max(5, geom.height) : l.height,
-                    }
-                  : l
-              ),
-            };
-          });
-          setSelectedId(shape.id);
+        const shapeResult = addShape(design, kind);
+        if (shapeResult) {
+          const newLayers = shapeResult.design.layers.map((l) =>
+            l.id === shapeResult.id
+              ? {
+                  ...l,
+                  x: geom.x,
+                  y: geom.y,
+                  width: Math.max(8, geom.width),
+                  height: geom.height ? Math.max(5, geom.height) : l.height,
+                }
+              : l
+          );
+          commit(
+            (d) => ({
+              ...d,
+              layers: newLayers,
+            }),
+            true
+          );
+          setSelectedId(shapeResult.id);
+          setSelectedIds([shapeResult.id]);
           setTopTab("properties");
         }
       }
       setActiveTool("select");
     },
-    [commit, design, setSelectedId]
+    [commit, design, setSelectedId, setSelectedIds]
   );
 
   const addLayerAt = useCallback(
@@ -1434,6 +1439,8 @@ export function InvitationDesigner({
               dark={dark}
               activeTool={activeTool}
               onSelectTool={setActiveTool}
+              activeShapeKind={activeShapeKind}
+              onSelectShapeKind={setActiveShapeKind}
               onAdd={add}
               onPickImage={() => choose({ purpose: "layer" })}
               onImportCard={() => choose({ purpose: "card" })}

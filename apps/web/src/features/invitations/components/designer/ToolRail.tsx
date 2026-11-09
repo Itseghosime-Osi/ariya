@@ -209,6 +209,8 @@ export function ToolRail({
   onImportCard,
   hasEntrySeal,
   busy,
+  activeShapeKind,
+  onSelectShapeKind,
   activeColor = "#dfba73",
   onColorChange,
   onOpenColorPicker,
@@ -216,6 +218,10 @@ export function ToolRail({
 }: {
   activeTool?: StudioTool;
   onSelectTool?: (tool: StudioTool) => void;
+  activeShapeKind?: "rect" | "ellipse" | "arch" | "line" | "star";
+  onSelectShapeKind?: (
+    kind: "rect" | "ellipse" | "arch" | "line" | "star"
+  ) => void;
   onAdd: (kind: AddKind) => void;
   onPickImage: () => void;
   onImportCard: () => void;
@@ -586,12 +592,25 @@ export function ToolRail({
                 key={shape.kind}
                 type="button"
                 onClick={() => {
+                  if (
+                    shape.kind === "rect" ||
+                    shape.kind === "ellipse" ||
+                    shape.kind === "arch" ||
+                    shape.kind === "line" ||
+                    shape.kind === "star"
+                  ) {
+                    onSelectShapeKind?.(shape.kind);
+                  }
                   onSelectTool?.("shape");
                   onAdd(shape.kind);
                   setShapesMenuOpen(false);
                 }}
                 className={cn(
                   "flex items-center gap-2 rounded-lg border p-2 text-left text-xs font-medium transition",
+                  activeShapeKind === shape.kind &&
+                    (dark
+                      ? "border-[#dfba73] bg-[#dfba73]/10"
+                      : "border-[#4a0e17] bg-[#4a0e17]/5"),
                   dark
                     ? "border-white/5 text-zinc-200 hover:border-[#dfba73]/40 hover:bg-white/10 hover:text-white"
                     : "border-[#e8e2d6] text-[#3b2b31] hover:border-[#4a0e17]/30 hover:bg-[#4a0e17]/5 hover:text-[#4a0e17]"
