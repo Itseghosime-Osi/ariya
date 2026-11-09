@@ -82,6 +82,11 @@ function isCardBackgroundDark(
   return isColorDark(palette.paper);
 }
 
+function clampRadius(val: number | undefined, max = 50): number {
+  if (val == null || !Number.isFinite(val)) return 0;
+  return Math.max(0, Math.min(val, max));
+}
+
 function getShapeStyle(
   shape: InvitationShape | undefined,
   radius = 0,
@@ -90,13 +95,17 @@ function getShapeStyle(
   borderRadius?: string;
   clipPath?: string;
 } {
+  const r = clampRadius(radius, 50);
   switch (shape) {
     case "ellipse":
       return { borderRadius: "50%" };
-    case "arch":
+    case "arch": {
+      const tl = clampRadius(radii?.tl ?? r ?? 18, 50);
+      const tr = clampRadius(radii?.tr ?? r ?? 18, 50);
       return {
-        borderRadius: `${radii?.tl ?? radius ?? 18}cqw ${radii?.tr ?? radius ?? 18}cqw 0 0`,
+        borderRadius: `${tl}cqw ${tr}cqw 0 0`,
       };
+    }
     case "star":
       return {
         clipPath:
@@ -111,7 +120,7 @@ function getShapeStyle(
     case "triangle":
       return { clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" };
     case "rect":
-    default:
+    default: {
       if (
         radii &&
         (radii.tl != null ||
@@ -119,11 +128,16 @@ function getShapeStyle(
           radii.br != null ||
           radii.bl != null)
       ) {
+        const tl = clampRadius(radii.tl ?? r, 50);
+        const tr = clampRadius(radii.tr ?? r, 50);
+        const br = clampRadius(radii.br ?? r, 50);
+        const bl = clampRadius(radii.bl ?? r, 50);
         return {
-          borderRadius: `${radii.tl ?? radius}cqw ${radii.tr ?? radius}cqw ${radii.br ?? radius}cqw ${radii.bl ?? radius}cqw`,
+          borderRadius: `${tl}cqw ${tr}cqw ${br}cqw ${bl}cqw`,
         };
       }
-      return { borderRadius: `${radius}cqw` };
+      return { borderRadius: `${r}cqw` };
+    }
   }
 }
 

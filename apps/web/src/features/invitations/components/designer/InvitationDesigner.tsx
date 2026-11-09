@@ -134,7 +134,31 @@ export function InvitationDesigner({
   const [activeTool, setActiveTool] = useState<StudioTool>("select");
   const [activeColor, setActiveColor] = useState("#dfba73");
   const [sidebarWidth, setSidebarWidth] = useState(360);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const isResizingSidebar = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleWindowResize = () => {
+        if (window.innerWidth < 1200) {
+          setSidebarWidth((w) => Math.min(w, 290));
+        }
+      };
+      handleWindowResize();
+      window.addEventListener("resize", handleWindowResize);
+      return () => window.removeEventListener("resize", handleWindowResize);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready
+        .then(() => setFontsLoaded(true))
+        .catch(() => setFontsLoaded(true));
+    } else {
+      setFontsLoaded(true);
+    }
+  }, []);
 
   const handleResizeCanvasPx = useCallback(
     (widthPx: number, heightPx: number) => {
@@ -206,9 +230,10 @@ export function InvitationDesigner({
 
     const onPointerMove = (ev: PointerEvent) => {
       if (!isResizingSidebar.current) return;
+      const maxW = Math.max(260, Math.min(600, window.innerWidth - 400));
       const newWidth = Math.min(
-        600,
-        Math.max(280, window.innerWidth - ev.clientX)
+        maxW,
+        Math.max(260, window.innerWidth - ev.clientX)
       );
       setSidebarWidth(newWidth);
     };
@@ -1174,6 +1199,11 @@ export function InvitationDesigner({
                 )}
               >
                 · {status}
+              </span>
+            )}
+            {!fontsLoaded && (
+              <span className="text-[10px] text-amber-500 font-medium">
+                · Syncing fonts…
               </span>
             )}
           </div>

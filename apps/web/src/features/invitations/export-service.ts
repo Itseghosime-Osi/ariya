@@ -42,6 +42,36 @@ function dataUrlToUint8Array(dataUrl: string): Uint8Array {
   return bytes;
 }
 
+function proxyExternalImages(cardElement: HTMLElement): () => void {
+  if (typeof window === "undefined") return () => {};
+  const images = cardElement.querySelectorAll<HTMLImageElement>("img");
+  const originalSrcs: Array<{ img: HTMLImageElement; src: string }> = [];
+
+  images.forEach((img) => {
+    const src = img.src;
+    if (src && !src.startsWith("data:") && !src.startsWith("blob:")) {
+      try {
+        const u = new URL(src, window.location.origin);
+        if (
+          u.origin !== window.location.origin &&
+          !src.includes("/api/invitations/image-proxy")
+        ) {
+          originalSrcs.push({ img, src });
+          img.src = `/api/invitations/image-proxy?url=${encodeURIComponent(src)}`;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  });
+
+  return () => {
+    originalSrcs.forEach(({ img, src }) => {
+      img.src = src;
+    });
+  };
+}
+
 export async function exportInvitation({
   cardElement,
   design,
@@ -62,6 +92,10 @@ export async function exportInvitation({
   const baseName = sanitizeFilename(
     coupleName ? `${coupleName}-invitation` : `invitation-${eventId}`
   );
+
+  const restoreImages = cardElement
+    ? proxyExternalImages(cardElement)
+    : () => {};
 
   try {
     if (format === "json") {
@@ -178,5 +212,7 @@ export async function exportInvitation({
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { ok: false, error: message };
+  } finally {
+    restoreImages();
   }
 }
