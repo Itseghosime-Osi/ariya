@@ -24,16 +24,16 @@ export function WorkspaceBar({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex max-w-full items-center gap-1 rounded-full border border-black/[0.06] bg-white/95 p-1 pr-4 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
+    <div className="flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/95 p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
       <BackLink
         href={backHref}
         aria-label="Back"
-        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        className="inline-flex h-10 min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
         <ArrowLeft size={15} aria-hidden="true" />
         Back
       </BackLink>
-      <div className="ml-2 min-w-0">
+      <div className="mx-2 min-w-0 pr-1">
         <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
           {title}
         </h1>
@@ -42,9 +42,13 @@ export function WorkspaceBar({
         </p>
       </div>
       {children && (
-        <div className="ml-3 hidden border-l border-hairline pl-3 min-[1440px]:block">
-          {children}
-        </div>
+        <>
+          <div
+            className="mx-1 hidden h-6 w-px shrink-0 bg-hairline min-[1440px]:block"
+            aria-hidden="true"
+          />
+          <div className="hidden shrink-0 min-[1440px]:block">{children}</div>
+        </>
       )}
     </div>
   );

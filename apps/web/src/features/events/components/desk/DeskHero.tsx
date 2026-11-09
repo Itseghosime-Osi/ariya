@@ -146,7 +146,7 @@ export function DeskHero({
               </p>
               <nav
                 aria-label="Quick actions"
-                className="col-span-2 grid grid-cols-3 gap-2 sm:col-span-1 sm:mt-6 sm:flex sm:flex-wrap sm:justify-center lg:justify-start"
+                className="col-span-2 grid grid-cols-3 gap-2 sm:col-span-1 mt-6 sm:flex sm:flex-wrap sm:justify-center lg:justify-start"
               >
                 {[
                   {
