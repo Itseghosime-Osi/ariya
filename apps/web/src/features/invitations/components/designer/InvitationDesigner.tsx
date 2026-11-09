@@ -58,6 +58,7 @@ type Upload =
   | { purpose: "card" };
 
 const COALESCE_MS = 900;
+const ZOOMS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3];
 
 /**
  * The invitation designer: a full-screen workspace like the seating studio. Simple mode asks
@@ -123,7 +124,7 @@ export function InvitationDesigner({
     "layers" | "properties" | "swatches" | "history" | "navigator"
   >("layers");
 
-  const _setSheetTab = (
+  const setSheetTab = (
     tab: "layers" | "properties" | "swatches" | "history" | "navigator"
   ) => {
     setSheetTabRaw(tab);
@@ -596,7 +597,9 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "c" && selectedIds.length) {
         e.preventDefault();
-        const selLayers = d.layers.filter((l) => selectedIds.includes(l.id));
+        const selLayers = design.layers.filter((l) =>
+          selectedIds.includes(l.id)
+        );
         clipboardRef.current = selLayers;
         setNotice({
           tone: "ok",
@@ -654,7 +657,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "a") {
         e.preventDefault();
-        setSelectedIds(d.layers.map((l) => l.id));
+        setSelectedIds(design.layers.map((l) => l.id));
         return;
       }
       if (mod && e.key.toLowerCase() === "d") {
@@ -664,7 +667,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "j" && selectedIds.length) {
         e.preventDefault();
-        let next = d;
+        let next = design;
         const newIds: string[] = [];
         for (const sid of selectedIds) {
           const out = duplicateViaEngine(next, sid);
