@@ -3,8 +3,7 @@ import { isEventExpired } from "@/lib/event-expiry";
 import React from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getEventById } from "@/features/events/queries";
-import { getInvitationDeskData } from "@/features/invitations/queries";
+import { getInvitationDesignerData } from "@/features/invitations/queries";
 import { InvitationDesigner } from "@/features/invitations/components/designer/InvitationDesigner";
 import type { InvitationEventContent } from "@/features/invitations/types";
 
@@ -21,10 +20,7 @@ export default async function InvitationDesignPage({
   params,
 }: DesignPageProps) {
   const { eventId } = await params;
-  const [data, eventData] = await Promise.all([
-    getInvitationDeskData(eventId),
-    getEventById(eventId),
-  ]);
+  const data = await getInvitationDesignerData(eventId);
   if (!data) notFound();
 
   const content: InvitationEventContent = {
@@ -39,7 +35,7 @@ export default async function InvitationDesignPage({
   };
 
   return (
-    <EndedLock ended={isEventExpired(eventData?.event.date)}>
+    <EndedLock ended={isEventExpired(data.eventDate)}>
       <InvitationDesigner
         eventId={eventId}
         eventTitle={data.eventTitle}
@@ -47,7 +43,7 @@ export default async function InvitationDesignPage({
         initialDesign={data.design}
         coupleName={data.coupleName}
         backHref={`/events/${eventId}/invitations`}
-        requireAccessCard={eventData?.event.require_access_card !== false}
+        requireAccessCard={data.requireAccessCard}
         settingsHref={`/events/${eventId}/page-editor`}
       />
     </EndedLock>

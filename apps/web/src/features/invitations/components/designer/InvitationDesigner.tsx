@@ -793,10 +793,15 @@ export function InvitationDesigner({
           e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
         const dy =
           e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+        const activeTargetIds = selectedIds.length
+          ? selectedIds
+          : selectedId
+            ? [selectedId]
+            : [];
         commit((cur) => ({
           ...cur,
           layers: cur.layers.map((l) => {
-            if (!selectedIds.includes(l.id) || !isEditable(l)) return l;
+            if (!activeTargetIds.includes(l.id) || !isEditable(l)) return l;
             return {
               ...l,
               x:
@@ -1352,6 +1357,7 @@ export function InvitationDesigner({
       {doc.saveState === "error" && (
         <p
           role="alert"
+          data-testid="studio-error-alert"
           className="pointer-events-auto fixed bottom-14 left-4 z-50 max-w-sm rounded-2xl bg-red-500/90 text-white px-4 py-2 text-[12px] font-semibold shadow-lg max-lg:hidden"
         >
           {doc.saveError ?? "Your last change was not saved."}
@@ -1676,6 +1682,7 @@ export function InvitationDesigner({
                     selectedIds={selectedIds}
                     onSelect={(id) => {
                       setSelectedId(id);
+                      setSelectedIds(id ? [id] : []);
                       if (id === "background") {
                         setTopTab("properties");
                       }

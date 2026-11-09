@@ -4,6 +4,50 @@ import { getPartyDisplaySeats } from "@/lib/metrics";
 import { designFromEvent } from "./design";
 import type { InvitationDeskData, InvitationGuest } from "./types";
 
+export async function getInvitationDesignerData(eventId: string): Promise<{
+  eventId: string;
+  eventTitle: string;
+  coupleName: string;
+  eventDate: string;
+  venueName: string;
+  area: string;
+  dressCode: string | null;
+  rsvpBy: string | null;
+  requireAccessCard: boolean;
+  design: ReturnType<typeof designFromEvent>;
+} | null> {
+  const cleanId = eventId?.trim();
+  if (!cleanId || cleanId === "default") {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const { data: event, error: eventErr } = await supabase
+    .from("events")
+    .select(
+      "id, title, couple, date, venue, area, dress_code, rsvp_by, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message, invitation_design"
+    )
+    .eq("id", cleanId)
+    .maybeSingle();
+
+  if (eventErr || !event) {
+    return null;
+  }
+
+  return {
+    eventId: event.id,
+    eventTitle: event.title,
+    coupleName: event.couple,
+    eventDate: event.date,
+    venueName: event.venue,
+    area: event.area ?? "",
+    dressCode: event.dress_code,
+    rsvpBy: event.rsvp_by,
+    requireAccessCard: true,
+    design: designFromEvent(event),
+  };
+}
+
 export async function getInvitationDeskData(
   eventId: string
 ): Promise<InvitationDeskData | null> {
@@ -100,7 +144,7 @@ export async function getInvitationDeskData(
     couple: event.couple,
     date: event.date,
     venue: event.venue,
-    area: event.area,
+    area: event.area ?? "",
     dressCode: event.dress_code,
     rsvpBy: event.rsvp_by,
     theme: event.invitation_theme,
@@ -116,7 +160,7 @@ export async function getInvitationDeskData(
     coupleName: event.couple,
     eventDate: event.date,
     venueName: event.venue,
-    area: event.area,
+    area: event.area ?? "",
     dressCode: event.dress_code,
     rsvpBy: event.rsvp_by,
     isPaid: !!event.paid_at,

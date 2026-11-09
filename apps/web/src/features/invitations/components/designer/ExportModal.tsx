@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { exportInvitation, type ExportFormat } from "../../export-service";
 import type { InvitationDesign } from "../../types";
@@ -75,6 +75,18 @@ export function ExportModal({
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !exporting) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, exporting, onClose]);
+
   if (!open) return null;
 
   const dims = designDimensionsPx(design);
@@ -108,6 +120,7 @@ export function ExportModal({
     <div
       role="dialog"
       aria-modal="true"
+      aria-label="Export invitation artwork"
       aria-labelledby="export-dialog-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity"
       onClick={(e) => {
