@@ -20,6 +20,9 @@ import type { InvitationDesign, InvitationLayer } from "../../types";
 import { calculateSnaps, type GuideLine } from "./snapGuides";
 import type { StudioTool } from "./ContextualOptionsBar";
 
+import { cursorForHandle, resizeInLocalAxes } from "./resize-transform";
+import { radiusDragDelta } from "./corner-radius";
+
 const PAD = 28;
 
 type Patch = Partial<InvitationLayer>;
@@ -92,15 +95,18 @@ function ViewportHorizontalRuler({
   const maxDesignX =
     Math.ceil((stageWidth - cardLeft) / scale / 100) * 100 + 100;
 
-  const step = 100;
-  const minor = 10;
+  const step =
+    [10, 20, 50, 100, 200, 500, 1000, 2000, 5000].find(
+      (n) => n * scale >= 45
+    ) ?? 10000;
+  const minor = step / 10;
   const ticks = [];
 
   for (let x = minDesignX; x <= maxDesignX; x += minor) {
     const screenX = cardLeft + x * scale;
     if (screenX < -20 || screenX > stageWidth + 20) continue;
     const isMajor = x % step === 0;
-    const isHalf = x % 50 === 0 && !isMajor;
+    const isHalf = x % (step / 2) === 0 && !isMajor;
     const isOrigin = x === 0 || x === designWidth;
 
     ticks.push(
@@ -201,15 +207,18 @@ function ViewportVerticalRuler({
   const maxDesignY =
     Math.ceil((stageHeight - cardTop) / scale / 100) * 100 + 100;
 
-  const step = 100;
-  const minor = 10;
+  const step =
+    [10, 20, 50, 100, 200, 500, 1000, 2000, 5000].find(
+      (n) => n * scale >= 45
+    ) ?? 10000;
+  const minor = step / 10;
   const ticks = [];
 
   for (let y = minDesignY; y <= maxDesignY; y += minor) {
     const screenY = cardTop + y * scale;
     if (screenY < -20 || screenY > stageHeight + 20) continue;
     const isMajor = y % step === 0;
-    const isHalf = y % 50 === 0 && !isMajor;
+    const isHalf = y % (step / 2) === 0 && !isMajor;
     const isOrigin = y === 0 || y === designHeight;
 
     ticks.push(
@@ -301,12 +310,18 @@ export function DesignerCanvas({
   selectedId,
   selectedIds,
   zoom,
+  fitRequest = 0,
+  onViewportChange,
+  navigationTarget,
   onZoomChange,
   showHandles,
   activeTool,
   dark = false,
   showRulers = true,
   showGrid = false,
+  snapToGrid = false,
+  guidesLocked = false,
+  clearGuidesRequest = 0,
   onSelect,
   onToggleSelect,
   onSelectBatch,
@@ -325,7 +340,15 @@ export function DesignerCanvas({
   coupleName: string;
   selectedId: string | null;
   selectedIds?: string[];
-  /** 1 fits the card to the stage; larger zooms in. */
+  /** Scale relative to document pixels: 1 is actual size. */
+  fitRequest?: number;
+  onViewportChange?: (view: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
+  navigationTarget?: { x: number; y: number } | null;
   zoom: number;
   onZoomChange?: (zoom: number | ((prev: number) => number)) => void;
   /** Pro mode draws the resize and rotate handles; Simple mode just outlines the layer. */
@@ -334,6 +357,9 @@ export function DesignerCanvas({
   dark?: boolean;
   showRulers?: boolean;
   showGrid?: boolean;
+  snapToGrid?: boolean;
+  guidesLocked?: boolean;
+  clearGuidesRequest?: number;
   onSelect: (id: string | null) => void;
   onToggleSelect?: (id: string) => void;
   onSelectBatch?: (ids: string[]) => void;
@@ -360,6 +386,7 @@ export function DesignerCanvas({
   const gesture = useRef<Gesture | null>(null);
   const props = useRef({
     onUpdate,
+    snapToGrid,
     onBatchUpdate,
     onRecord,
     onRestoreSnapshot,
@@ -371,6 +398,7 @@ export function DesignerCanvas({
   });
   props.current = {
     onUpdate,
+    snapToGrid,
     onBatchUpdate,
     onRecord,
     onRestoreSnapshot,
@@ -395,11 +423,27 @@ export function DesignerCanvas({
     pos: number;
     isNew?: boolean;
   } | null>(null);
+  useEffect(() => {
+    setUserGuides([]);
+  }, [clearGuidesRequest]);
   const draggingGuideRef = useRef<typeof draggingGuide>(null);
   draggingGuideRef.current = draggingGuide;
   const userGuidesRef = useRef(userGuides);
   userGuidesRef.current = userGuides;
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const editingSnapshot = useRef<InvitationDesign | null>(null);
+  const finishText = (cancel = false) => {
+    const snapshot = editingSnapshot.current;
+    editingSnapshot.current = null;
+    if (
+      snapshot &&
+      JSON.stringify(snapshot) !== JSON.stringify(props.current.design)
+    ) {
+      if (cancel) props.current.onRestoreSnapshot?.(snapshot);
+      else props.current.onRecord(snapshot);
+    }
+    setEditingTextId(null);
+  };
   const [cursorPx, setCursorPx] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -433,6 +477,8 @@ export function DesignerCanvas({
         tag === "input" ||
         tag === "textarea" ||
         tag === "select" ||
+        tag === "button" ||
+        document.querySelector('[role="dialog"], [role="menu"]') ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;
@@ -478,15 +524,59 @@ export function DesignerCanvas({
   const dims = designDimensionsPx(design);
   const ratio = designRatio(design);
   const fit = Math.min(
-    Math.max(stage.w - PAD * 2, 120),
-    Math.max(stage.h - PAD * 2, 120) * ratio
+    Math.max(stage.w - PAD * 2, 20),
+    Math.max(stage.h - PAD * 2, 20) * ratio
   );
-  const cardWidth = Math.round(fit * zoom);
+  const lastFit = useRef<number | null>(null);
+  const lastFitRequest = useRef(fitRequest);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  useEffect(() => {
+    if (!stage.w || !stage.h) return;
+    const next = fit / dims.width;
+    const requested = lastFitRequest.current !== fitRequest;
+    if (
+      lastFit.current === null ||
+      requested ||
+      Math.abs(zoomRef.current - lastFit.current) < 0.001
+    ) {
+      onZoomChange?.(next);
+      if (requested) setPan({ x: 0, y: 0 });
+    }
+    lastFit.current = next;
+    lastFitRequest.current = fitRequest;
+  }, [fit, dims.width, fitRequest, stage.w, stage.h, onZoomChange]);
+  const cardWidth = Math.round(dims.width * zoom);
   const cardHeight = Math.round(cardWidth / ratio);
   const cardLeft =
     stage.w > 0 ? Math.round((stage.w - cardWidth) / 2 + pan.x) : 0;
   const cardTop =
     stage.h > 0 ? Math.round((stage.h - cardHeight) / 2 + pan.y) : 0;
+  useEffect(() => {
+    if (!cardWidth || !cardHeight) return;
+    onViewportChange?.({
+      x: -cardLeft / cardWidth,
+      y: -cardTop / cardHeight,
+      width: stage.w / cardWidth,
+      height: stage.h / cardHeight,
+    });
+  }, [
+    cardLeft,
+    cardTop,
+    cardWidth,
+    cardHeight,
+    stage.w,
+    stage.h,
+    onViewportChange,
+  ]);
+  useEffect(() => {
+    if (navigationTarget)
+      setPan({
+        x: (0.5 - navigationTarget.x) * cardWidth,
+        y: (0.5 - navigationTarget.y) * cardHeight,
+      });
+    // A navigator click is a request; changing zoom keeps the user's current pan.
+  }, [navigationTarget]);
 
   useEffect(() => {
     const el = stageRef.current;
@@ -496,7 +586,7 @@ export function DesignerCanvas({
       if (e.ctrlKey || e.metaKey) {
         const factor = Math.exp(-e.deltaY * 0.01);
         onZoomChange?.((z) =>
-          Math.min(4, Math.max(0.25, Math.round(z * factor * 100) / 100))
+          Math.min(4, Math.max(0.05, Math.round(z * factor * 100) / 100))
         );
       } else {
         setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
@@ -514,6 +604,8 @@ export function DesignerCanvas({
         tag === "input" ||
         tag === "textarea" ||
         tag === "select" ||
+        tag === "button" ||
+        document.querySelector('[role="dialog"], [role="menu"]') ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;
@@ -710,6 +802,19 @@ export function DesignerCanvas({
         if (e.altKey) {
           // Alt temporarily suspends magnetic snapping during move
           setActiveGuides([]);
+        } else if (props.current.snapToGrid) {
+          const document = designDimensionsPx(props.current.design);
+          targetX =
+            ((Math.round(((proposedBox.x / 100) * document.width) / 100) *
+              100) /
+              document.width) *
+            100;
+          targetY =
+            ((Math.round(((proposedBox.y / 100) * document.height) / 100) *
+              100) /
+              document.height) *
+            100;
+          setActiveGuides([]);
         } else {
           const otherLayers = props.current.design.layers.filter((l) =>
             g.ids ? !g.ids.includes(l.id) : l.id !== g.id
@@ -809,13 +914,20 @@ export function DesignerCanvas({
       const layer = props.current.design.layers.find((l) => l.id === g.id);
       if (!layer || !g.handle) return;
       if (hasBox(layer)) {
-        const isRotated = !!layer.rotation && Math.abs(layer.rotation) > 0.1;
         const keepProportions =
           e.shiftKey ||
-          isRotated ||
-          layer.kind === "image" ||
-          layer.kind === "seal";
-        const next = resizeBoxFast(g.origin, g.handle, dx, dy, keepProportions);
+          (layer.aspectLocked ??
+            (layer.kind === "image" || layer.kind === "seal"));
+        const next = resizeInLocalAxes(
+          g.origin,
+          g.handle,
+          e.clientX - g.startX,
+          e.clientY - g.startY,
+          g.card,
+          layer.rotation ?? 0,
+          keepProportions,
+          e.altKey
+        );
         update(g.id, next, { commit: false });
       } else {
         // Text, seal, rule and entry seal change width only; height follows.
@@ -889,12 +1001,16 @@ export function DesignerCanvas({
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
+    const onPointerCancel = () =>
+      onCancelKey(new KeyboardEvent("keydown", { key: "Escape" }));
+    window.addEventListener("pointercancel", onPointerCancel);
+    window.addEventListener("blur", onPointerCancel);
     window.addEventListener("keydown", onCancelKey, true);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointercancel", onPointerCancel);
+      window.removeEventListener("blur", onPointerCancel);
       window.removeEventListener("keydown", onCancelKey, true);
     };
   }, []);
@@ -916,7 +1032,17 @@ export function DesignerCanvas({
     e: React.PointerEvent<HTMLDivElement>,
     layer: InvitationLayer
   ) {
-    if (isPanMode) return;
+    if (isPanMode || e.isPrimary === false || e.button !== 0) return;
+    if (["shape", "pen", "zoom", "crop"].includes(activeTool ?? "")) return;
+    if (activeTool === "text") {
+      if (!TEXT_KINDS.has(layer.kind) || !isEditable(layer)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onSelect(layer.id);
+      editingSnapshot.current = props.current.design;
+      setEditingTextId(layer.id);
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     if (e.shiftKey || e.metaKey || e.ctrlKey) {
@@ -1045,18 +1171,22 @@ export function DesignerCanvas({
     };
   }
 
+  const radiusCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => radiusCleanup.current?.(), []);
+
   const startRadiusHandle = (
     e: React.PointerEvent,
     corner: "tl" | "tr" | "br" | "bl",
     startRPx: number,
     maxRPx: number
   ) => {
-    if (!selected || !isEditable(selected)) return;
+    if (!selected || !isEditable(selected) || e.isPrimary === false) return;
     e.stopPropagation();
     e.preventDefault();
     const card = cardRect();
     if (!card) return;
 
+    radiusCleanup.current?.();
     const snapshot = props.current.design;
     const startX = e.clientX;
     const startY = e.clientY;
@@ -1070,19 +1200,21 @@ export function DesignerCanvas({
     let moved = false;
     let cancelled = false;
 
-    setRadiusTooltip({ show: true, rPx: startRPx, x: e.clientX, y: e.clientY });
+    setRadiusTooltip({
+      show: true,
+      rPx: (startRPx / card.width) * dims.width,
+      x: e.clientX,
+      y: e.clientY,
+    });
 
     const onPointerMove = (ev: PointerEvent) => {
       if (cancelled) return;
-      let delta = 0;
-      if (corner === "tl")
-        delta = (ev.clientX - startX + (ev.clientY - startY)) / 1.414;
-      else if (corner === "tr")
-        delta = (-(ev.clientX - startX) + (ev.clientY - startY)) / 1.414;
-      else if (corner === "br")
-        delta = (-(ev.clientX - startX) - (ev.clientY - startY)) / 1.414;
-      else if (corner === "bl")
-        delta = (ev.clientX - startX - (ev.clientY - startY)) / 1.414;
+      const delta = radiusDragDelta(
+        ev.clientX - startX,
+        ev.clientY - startY,
+        selected.rotation ?? 0,
+        corner
+      );
 
       if (!moved && Math.abs(delta) > 0.5) moved = true;
       const newRadiusPx = Math.max(0, Math.min(maxRPx, startRPx + delta));
@@ -1122,7 +1254,7 @@ export function DesignerCanvas({
       }
       setRadiusTooltip({
         show: true,
-        rPx: newRadiusPx,
+        rPx: (newRadiusPx / card.width) * dims.width,
         x: ev.clientX,
         y: ev.clientY,
       });
@@ -1131,9 +1263,16 @@ export function DesignerCanvas({
     const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("pointercancel", onCancel);
+      window.removeEventListener("blur", onCancel);
       window.removeEventListener("keydown", onKeyCancel, true);
       setRadiusTooltip(null);
+    };
+
+    const onCancel = () => {
+      cancelled = true;
+      cleanup();
+      props.current.onRestoreSnapshot?.(snapshot);
     };
 
     const onKeyCancel = (ev: KeyboardEvent) => {
@@ -1152,9 +1291,11 @@ export function DesignerCanvas({
       }
     };
 
+    radiusCleanup.current = cleanup;
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("pointercancel", onCancel);
+    window.addEventListener("blur", onCancel);
     window.addEventListener("keydown", onKeyCancel, true);
   };
 
@@ -1167,6 +1308,7 @@ export function DesignerCanvas({
 
   const startRulerGuide = useCallback(
     (axis: "horizontal" | "vertical", e: React.PointerEvent) => {
+      if (guidesLocked) return;
       e.preventDefault();
       e.stopPropagation();
       const root = cardWrap.current?.querySelector<HTMLElement>(
@@ -1183,7 +1325,7 @@ export function DesignerCanvas({
       );
       setDraggingGuide({ axis, pos, isNew: true });
     },
-    [dims.width]
+    [dims.width, guidesLocked]
   );
 
   const startExistingGuide = useCallback(
@@ -1193,6 +1335,7 @@ export function DesignerCanvas({
     ) => {
       e.preventDefault();
       e.stopPropagation();
+      if (guidesLocked) return;
       setDraggingGuide({
         id: guide.id,
         axis: guide.axis,
@@ -1200,11 +1343,12 @@ export function DesignerCanvas({
         isNew: false,
       });
     },
-    []
+    [guidesLocked]
   );
 
   return (
     <div
+      style={{ touchAction: "none" }}
       ref={stageRef}
       data-testid="designer-stage"
       className={cn(
@@ -1249,6 +1393,7 @@ export function DesignerCanvas({
       }}
       onPointerLeave={() => setCursorPx(null)}
       onPointerDown={(e) => {
+        if (e.isPrimary === false) return;
         if (isPanMode || e.button === 1) {
           gesture.current = {
             type: "pan",
@@ -1280,7 +1425,7 @@ export function DesignerCanvas({
           onZoomChange?.((z) =>
             Math.min(
               4,
-              Math.max(0.25, Math.round((Number(z) + delta) * 100) / 100)
+              Math.max(0.05, Math.round((Number(z) + delta) * 100) / 100)
             )
           );
           return;
@@ -1440,10 +1585,11 @@ export function DesignerCanvas({
           const l = design.layers.find(
             (layer) => layer.id === el.dataset.layerId
           );
-          if (l && TEXT_KINDS.has(l.kind)) {
+          if (l && TEXT_KINDS.has(l.kind) && isEditable(l) && showHandles) {
+            onSelect(l.id);
+            editingSnapshot.current = props.current.design;
             setEditingTextId(l.id);
-          }
-          onEditText?.(el.dataset.layerId);
+          } else if (l && isEditable(l)) onEditText?.(el.dataset.layerId);
         }
       }}
     >
@@ -1508,7 +1654,7 @@ export function DesignerCanvas({
             className="pointer-events-none absolute inset-0 z-10 opacity-20"
             style={{
               backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.5) 1px, transparent 1px)`,
-              backgroundSize: `${Math.max(10, (cardWidth / dims.width) * 100)}px ${Math.max(10, (cardHeight / dims.height) * 100)}px`,
+              backgroundSize: `${(cardWidth / dims.width) * 100}px ${(cardHeight / dims.height) * 100}px`,
             }}
           />
         )}
@@ -1520,11 +1666,13 @@ export function DesignerCanvas({
             return (
               <div
                 key={guide.id}
+                data-guide-id={guide.id}
                 title={`Vertical Guide at ${guide.pos}px (Drag to move, Double-click to delete)`}
                 style={{ left: `${(guide.pos / dims.width) * 100}%` }}
                 onPointerDown={(e) => startExistingGuide(guide, e)}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
+                  if (guidesLocked) return;
                   setUserGuides((prev) =>
                     prev.filter((g) => g.id !== guide.id)
                   );
@@ -1541,11 +1689,13 @@ export function DesignerCanvas({
           return (
             <div
               key={guide.id}
+              data-guide-id={guide.id}
               title={`Horizontal Guide at ${guide.pos}px (Drag to move, Double-click to delete)`}
               style={{ top: `${(guide.pos / dims.height) * 100}%` }}
               onPointerDown={(e) => startExistingGuide(guide, e)}
               onDoubleClick={(e) => {
                 e.stopPropagation();
+                if (guidesLocked) return;
                 setUserGuides((prev) => prev.filter((g) => g.id !== guide.id));
               }}
               className="group absolute inset-x-0 z-30 flex justify-center cursor-row-resize pointer-events-auto"
@@ -1629,9 +1779,7 @@ export function DesignerCanvas({
           onLayerTextChange={(id, text) => {
             onUpdate(id, { text });
           }}
-          onStopEditingText={() => {
-            setEditingTextId(null);
-          }}
+          onStopEditingText={finishText}
         />
 
         {/* Photoshop / Photopea Rule-of-Thirds Crop Overlay */}
@@ -1713,6 +1861,10 @@ export function DesignerCanvas({
                   <span
                     key={h}
                     data-handle={h}
+                    style={{
+                      cursor: cursorForHandle(h, selected.rotation ?? 0),
+                      touchAction: "none",
+                    }}
                     onPointerDown={(e) => startHandle(e, h)}
                     className={`pointer-events-auto absolute grid h-7 w-7 place-items-center ${HANDLES[h]}`}
                   >
@@ -1799,7 +1951,7 @@ export function DesignerCanvas({
                             "pointer-events-auto absolute grid h-6 w-6 place-items-center cursor-crosshair z-30 group",
                             corner.translate
                           )}
-                          title={`Drag inward to adjust ${corner.id.toUpperCase()} corner radius — hold Alt for single corner (${corner.rPx.toFixed(1)}px)`}
+                          title={`Drag inward to adjust ${corner.id.toUpperCase()} corner radius — hold Alt for single corner (${((corner.rPx / cardW) * dims.width).toFixed(1)}px)`}
                         >
                           <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[#dfba73] bg-white shadow-md transition-transform group-hover:scale-125">
                             <span className="block h-1 w-1 rounded-full bg-[#dfba73]" />

@@ -47,7 +47,7 @@ pub fn create_layer(kind: LayerKind, id: String) -> Layer {
         LayerKind::Code => Layer {
             text: String::new(),
             x: 5.0,
-            y: 81.0,
+            y: 83.5,
             width: 19.0,
             size: 3.0,
             color_role: ColorRole::Title,
@@ -496,15 +496,40 @@ pub fn resize_box(start: Rect, handle: Handle, dx: f64, dy: f64, keep_shape: boo
     if handle.south() {
         height = clamp(height + dy, MIN_HEIGHT_DRAG, 1000.0);
     }
-    if keep_shape && handle.corner() && start.height > 0.0 {
+    if keep_shape && start.height > 0.0 && start.width > 0.0 {
         let aspect = start.width / start.height;
-        let by_width = width / aspect;
-        if (by_width - height).abs() > 0.01 {
-            height = clamp(by_width, MIN_HEIGHT_DRAG, 1000.0);
-            if handle.north() {
-                y = bottom - height;
-            }
+        let use_width = handle.east() || handle.west();
+        let width_drives = use_width
+            && (!handle.corner() || (dx / start.width).abs() >= (dy / start.height).abs());
+        if width_drives {
+            width = clamp(
+                width,
+                MIN_WIDTH.max(MIN_HEIGHT_DRAG * aspect),
+                1000.0_f64.min(1000.0 * aspect),
+            );
+            height = width / aspect;
+        } else {
+            height = clamp(
+                height,
+                MIN_HEIGHT_DRAG.max(MIN_WIDTH / aspect),
+                1000.0_f64.min(1000.0 / aspect),
+            );
+            width = height * aspect;
         }
+        x = if handle.west() {
+            right - width
+        } else if !use_width {
+            start.x + (start.width - width) / 2.0
+        } else {
+            start.x
+        };
+        y = if handle.north() {
+            bottom - height
+        } else if !handle.north() && !handle.south() {
+            start.y + (start.height - height) / 2.0
+        } else {
+            start.y
+        };
     }
     Rect {
         x,
@@ -634,7 +659,9 @@ pub fn set_paper_edge(
     let height_px = design.canvas_height_px();
     let corner_radius_px = match edge_style {
         PaperEdge::Sharp => Some(0.0),
-        PaperEdge::Rounded => corner_radius_px.map(|r| clamp(r, 0.0, 500.0)).or(Some(16.0)),
+        PaperEdge::Rounded => corner_radius_px
+            .map(|r| clamp(r, 0.0, 500.0))
+            .or(Some(16.0)),
         PaperEdge::Deckled => Some(0.0),
     };
     next.canvas = Some(Canvas {
@@ -651,10 +678,22 @@ pub fn set_paper_edge(
 pub fn nudge(design: &Design, id: &str, dx_px: f64, dy_px: f64) -> Design {
     let w_px = design.canvas_width_px() as f64;
     let h_px = design.canvas_height_px() as f64;
-    let dx_pct = if w_px > 0.0 { (dx_px / w_px) * 100.0 } else { 0.0 };
-    let dy_pct = if h_px > 0.0 { (dy_px / h_px) * 100.0 } else { 0.0 };
+    let dx_pct = if w_px > 0.0 {
+        (dx_px / w_px) * 100.0
+    } else {
+        0.0
+    };
+    let dy_pct = if h_px > 0.0 {
+        (dy_px / h_px) * 100.0
+    } else {
+        0.0
+    };
     let mut next = design.clone();
-    if let Some(l) = next.layers.iter_mut().find(|l| l.id == id && is_editable(l)) {
+    if let Some(l) = next
+        .layers
+        .iter_mut()
+        .find(|l| l.id == id && is_editable(l))
+    {
         let max_x = clamp(100.0 - l.width, 0.0, 100.0);
         let max_y = clamp(100.0 - l.height.unwrap_or(5.0), 0.0, 100.0);
         l.x = clamp(round_js((l.x + dx_pct) * 100.0) / 100.0, 0.0, max_x);
@@ -666,7 +705,11 @@ pub fn nudge(design: &Design, id: &str, dx_px: f64, dy_px: f64) -> Design {
 /// Flips a layer horizontally or vertically.
 pub fn flip_layer(design: &Design, id: &str, horizontal: bool) -> Design {
     let mut next = design.clone();
-    if let Some(l) = next.layers.iter_mut().find(|l| l.id == id && is_editable(l)) {
+    if let Some(l) = next
+        .layers
+        .iter_mut()
+        .find(|l| l.id == id && is_editable(l))
+    {
         if horizontal {
             let rot = l.rotation.unwrap_or(0.0);
             l.rotation = Some(snap_rotation(-rot));

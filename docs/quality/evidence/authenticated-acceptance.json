@@ -1,0 +1,57 @@
+[
+  {
+    "ids": [214, 215, 250],
+    "name": "Save real design and reload through Next.js",
+    "result": "Pass"
+  },
+  {
+    "ids": [36, 37, 42, 43, 44, 47, 50, 63, 67, 86],
+    "name": "Persist geometry, aspect lock and independent corners",
+    "result": "Pass"
+  },
+  {
+    "ids": [217, 218, 223],
+    "name": "Recover a failed save after reload without losing edits",
+    "result": "Pass"
+  },
+  {
+    "ids": [219],
+    "name": "Reject stale writes from a second tab",
+    "result": "Pass"
+  },
+  {
+    "ids": [110, 112, 113, 114, 116, 125, 128, 129, 130],
+    "name": "Inline text edit, cancellation and document undo",
+    "result": "Pass"
+  },
+  {
+    "ids": [220, 221, 222],
+    "name": "Design backup restores editable structure safely",
+    "result": "Pass"
+  },
+  {
+    "ids": [153, 154, 156, 164],
+    "name": "Colour panel edits house text and synchronizes every RGB channel",
+    "result": "Pass"
+  },
+  {
+    "ids": [189, 190, 191],
+    "name": "Grid snapping and independent guide locking",
+    "result": "Pass"
+  },
+  {
+    "ids": [133, 134, 136, 137, 138, 146, 147, 148, 150],
+    "name": "Upload PNG, JPEG and WebP through local storage and preserve their editable frames",
+    "result": "Pass"
+  },
+  {
+    "ids": [224, 225, 226, 228, 229, 230, 231, 232, 233, 234, 237, 238],
+    "name": "Download live PNG, JPEG and PDF with uploaded images and accented text",
+    "result": "Pass"
+  },
+  {
+    "ids": [9, 10, 253, 254, 256, 266, 267, 268],
+    "name": "Responsive controls and export dialog on phone, tablet and desktop",
+    "result": "Pass"
+  }
+]

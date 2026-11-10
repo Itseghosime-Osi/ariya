@@ -2,12 +2,18 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import styles from "./InvitationDesigner.module.css";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { Segmented } from "@/features/seating/hall/studio-ui";
 import { uploadInvitationImageAction } from "../../actions";
 import { optimizeImageForUpload } from "../../image-compressor";
-import { normaliseDesign, createLayerOfKind } from "../../design";
+import {
+  normaliseDesign,
+  createLayerOfKind,
+  createInvitationDesign,
+} from "../../design";
 import {
   addImage,
   addLayerOfKind,
@@ -57,7 +63,7 @@ type Upload =
   | { purpose: "card" };
 
 const COALESCE_MS = 900;
-const ZOOMS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
+const ZOOMS = [0.05, 0.1, 0.125, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
 
 /**
  * The invitation designer: a full-screen workspace like the seating studio. Simple mode asks
@@ -68,6 +74,7 @@ export function InvitationDesigner({
   eventTitle,
   content,
   initialDesign,
+  initialRevision,
   coupleName,
   backHref,
   requireAccessCard,
@@ -77,6 +84,7 @@ export function InvitationDesigner({
   eventTitle: string;
   content: InvitationEventContent;
   initialDesign: InvitationDesign;
+  initialRevision?: string;
   coupleName: string;
   backHref: string;
   /** The host has switched the access pass on, so every accepted guest's card carries a seal. */
@@ -84,7 +92,7 @@ export function InvitationDesigner({
   /** Where the access pass is switched on and off. */
   settingsHref: string;
 }) {
-  const doc = useDesignerDoc(eventId, initialDesign);
+  const doc = useDesignerDoc(eventId, initialDesign, initialRevision);
   const {
     design,
     commit,
@@ -119,14 +127,24 @@ export function InvitationDesigner({
   const [activeShapeKind, setActiveShapeKind] = useState<
     "rect" | "ellipse" | "arch" | "line" | "star"
   >("rect");
-  const [_sheetTab, setSheetTabRaw] = useState<
+  const [sheetTab, setSheetTabRaw] = useState<
     "layers" | "properties" | "swatches" | "history" | "navigator"
   >("layers");
+
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
+  const [fitRequest, setFitRequest] = useState(0);
+  const [viewport, setViewport] = useState({ x: 0, y: 0, width: 1, height: 1 });
+  const [navigationTarget, setNavigationTarget] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const fitView = useCallback(() => setFitRequest((n) => n + 1), []);
 
   const setSheetTab = (
     tab: "layers" | "properties" | "swatches" | "history" | "navigator"
   ) => {
     setSheetTabRaw(tab);
+    setMobilePanelOpen(true);
     if (tab === "properties" || tab === "swatches") setTopTab(tab);
     else setBottomTab(tab);
   };
@@ -135,6 +153,8 @@ export function InvitationDesigner({
   const [sidebarWidth, setSidebarWidth] = useState(360);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const isResizingSidebar = useRef(false);
+  const sidebarCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => sidebarCleanup.current?.(), []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -228,6 +248,7 @@ export function InvitationDesigner({
 
   const startSidebarResize = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
+    sidebarCleanup.current?.();
     isResizingSidebar.current = true;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
@@ -248,14 +269,22 @@ export function InvitationDesigner({
       document.body.style.userSelect = "";
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("blur", onPointerUp);
     };
 
+    sidebarCleanup.current = onPointerUp;
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("blur", onPointerUp);
   }, []);
 
   const [showRulers, setShowRulers] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(false);
+  const [guidesLocked, setGuidesLocked] = useState(false);
+  const [clearGuidesRequest, setClearGuidesRequest] = useState(0);
   const [busy, setBusy] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [notice, setNotice] = useState<{
@@ -387,7 +416,7 @@ export function InvitationDesigner({
         (d) => ({
           ...d,
           layers: d.layers.map((l) =>
-            patches[l.id] ? { ...l, ...patches[l.id] } : l
+            patches[l.id] && !l.locked ? { ...l, ...patches[l.id] } : l
           ),
         }),
         options?.commit ?? false
@@ -468,6 +497,20 @@ export function InvitationDesigner({
   async function onFile(file: File | undefined) {
     if (!file) return;
     const purpose = uploadRef.current;
+    if (
+      (purpose.purpose === "layer" || purpose.purpose === "card") &&
+      designRef.current.layers.length >= 60 &&
+      !(
+        purpose.purpose === "card" &&
+        designRef.current.layers.some((l) => l.name === "Your card")
+      )
+    ) {
+      setNotice({
+        tone: "bad",
+        text: "An invitation can contain up to 60 layers. Remove one before importing another picture.",
+      });
+      return;
+    }
     if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
       setNotice({
         tone: "bad",
@@ -560,18 +603,72 @@ export function InvitationDesigner({
   }
 
   async function importDesignFile(file: File) {
-    const imported = normaliseDesign(await file.text());
-    if (!imported) {
+    if (file.size > 2 * 1024 * 1024) {
       setNotice({
         tone: "bad",
-        text: "That file is not an Àríyá invitation design.",
+        text: "Design backups must be smaller than 2 MB.",
       });
       return;
     }
-    commit(imported);
-    setSelectedId(null);
-    setNotice({ tone: "ok", text: "Opened the design file." });
+    try {
+      const imported = normaliseDesign(await file.text());
+      if (!imported) {
+        setNotice({
+          tone: "bad",
+          text: "That file is not an Àríyá invitation design.",
+        });
+        return;
+      }
+      if (
+        requireAccessCard &&
+        !imported.layers.some((layer) => layer.kind === "code") &&
+        imported.layers.length >= 60
+      ) {
+        setNotice({
+          tone: "bad",
+          text: "Leave one layer free for this event's required entry seal before importing a 60-layer design.",
+        });
+        return;
+      }
+      commit(imported);
+      setSelectedId(null);
+      setNotice({ tone: "ok", text: "Opened the design file." });
+    } catch {
+      setNotice({
+        tone: "bad",
+        text: "That file could not be read. Your current design has been kept.",
+      });
+    }
   }
+
+  const sampleColor = useCallback(async () => {
+    setActiveTool("eyedropper");
+    if (!("EyeDropper" in window)) {
+      setSheetTab("swatches");
+      setNotice({
+        tone: "ok",
+        text: "Your browser does not support screen sampling. Choose a colour from the colour panel instead.",
+      });
+      return;
+    }
+    try {
+      const EyeDropper = (
+        window as unknown as {
+          EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> };
+        }
+      ).EyeDropper;
+      const result = await new EyeDropper().open();
+      setActiveColor(result.sRGBHex);
+      if (selectedId)
+        patchLayer(selectedId, {
+          fill: result.sRGBHex,
+          color: result.sRGBHex,
+          colorRole: "custom",
+        });
+    } catch {
+      /* Closing the browser sampler leaves the artwork untouched. */
+    }
+  }, [selectedId, patchLayer]);
 
   // -------------------------------------------------------------- keyboard
 
@@ -587,6 +684,11 @@ export function InvitationDesigner({
       ) {
         return;
       }
+      if (
+        e.defaultPrevented ||
+        document.querySelector('[role="dialog"], [role="menu"]')
+      )
+        return;
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
@@ -601,7 +703,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "c" && selectedIds.length) {
         e.preventDefault();
-        const selLayers = design.layers.filter((l) =>
+        const selLayers = designRef.current.layers.filter((l) =>
           selectedIds.includes(l.id)
         );
         clipboardRef.current = selLayers;
@@ -613,7 +715,8 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "v" && clipboardRef.current.length) {
         e.preventDefault();
-        let hasCode = design.layers.some((l) => l.kind === "code");
+        let hasCode = designRef.current.layers.some((l) => l.kind === "code");
+        const groups = new Map<string, string>();
         const copies = clipboardRef.current
           .filter((src) => {
             if (src.kind === "code") {
@@ -623,16 +726,26 @@ export function InvitationDesigner({
             return true;
           })
           .map((src) => {
-            const freshId = "layer_" + Math.random().toString(36).slice(2, 9);
+            const freshId = "layer_" + crypto.randomUUID();
+            if (src.groupId && !groups.has(src.groupId))
+              groups.set(src.groupId, "group_" + crypto.randomUUID());
             return {
               ...src,
               id: freshId,
+              groupId: src.groupId ? groups.get(src.groupId) : undefined,
               locked: undefined,
               name: `${src.name || src.kind} copy`,
               x: Math.min(92, src.x + 2),
               y: Math.min(92, src.y + 2),
             };
           });
+        if (designRef.current.layers.length + copies.length > 60) {
+          setNotice({
+            tone: "bad",
+            text: "An invitation can contain up to 60 layers. Remove a layer before pasting.",
+          });
+          return;
+        }
         if (!copies.length) {
           setNotice({
             tone: "bad",
@@ -678,7 +791,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "a") {
         e.preventDefault();
-        setSelectedIds(design.layers.map((l) => l.id));
+        setSelectedIds(designRef.current.layers.map((l) => l.id));
         return;
       }
       if (mod && e.key.toLowerCase() === "d") {
@@ -688,7 +801,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "j" && selectedIds.length) {
         e.preventDefault();
-        let next = design;
+        let next = designRef.current;
         const newIds: string[] = [];
         for (const sid of selectedIds) {
           const out = duplicateViaEngine(next, sid);
@@ -711,9 +824,39 @@ export function InvitationDesigner({
         stepZoom(-1);
         return;
       }
-      if (mod && e.key === "0") {
+      if (mod && e.key === "1") {
         e.preventDefault();
         setZoom(1);
+        return;
+      }
+      if (mod && e.key === "0") {
+        e.preventDefault();
+        fitView();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "u") {
+        e.preventDefault();
+        choose({ purpose: "layer" });
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "r") {
+        e.preventDefault();
+        setShowRulers((r) => !r);
+        return;
+      }
+      if (mod && e.shiftKey && (e.key === "'" || e.key === '"')) {
+        e.preventDefault();
+        setSnapToGrid((s) => !s);
+        return;
+      }
+      if (mod && e.key === "'") {
+        e.preventDefault();
+        setShowGrid((g) => !g);
+        return;
+      }
+      if (mod && (e.key === "[" || e.key === "]") && selectedId) {
+        e.preventDefault();
+        stack(selectedId, e.key === "]" ? "front" : "back");
         return;
       }
       if (mod) return;
@@ -727,7 +870,7 @@ export function InvitationDesigner({
         }
         if (k === "m") {
           e.preventDefault();
-          setActiveTool("select");
+          choose({ purpose: "card" });
           return;
         }
         if (k === "c") {
@@ -781,7 +924,7 @@ export function InvitationDesigner({
           if (e.shiftKey) {
             return choose({ purpose: "layer" });
           }
-          setActiveTool("eyedropper");
+          void sampleColor();
           return;
         }
       }
@@ -810,9 +953,11 @@ export function InvitationDesigner({
     deleteLayer,
     duplicate,
     patchLayer,
+    sampleColor,
     setActiveTool,
     commit,
     canDelete,
+    fitView,
   ]);
 
   // --------------------------------------------------------------- display
@@ -837,14 +982,15 @@ export function InvitationDesigner({
     }, 60);
   };
 
-  const status =
-    doc.saveState === "saving"
-      ? "saving…"
-      : doc.saveState === "saved"
+  const status = busy
+    ? "Uploading picture…"
+    : doc.isDirty
+      ? doc.saveState === "error"
+        ? "not saved"
+        : "saving…"
+      : initialRevision || doc.saveState === "saved"
         ? "saved"
-        : doc.saveState === "error"
-          ? "not saved"
-          : "";
+        : "";
 
   const menuGroups: MenuGroup[] = [
     {
@@ -880,10 +1026,16 @@ export function InvitationDesigner({
           onClick: () => {
             if (
               window.confirm(
-                "Reset invitation to original template? Unsaved changes will be lost."
+                "Restore the event’s invitation template? You can undo this change."
               )
             ) {
-              commit(() => initialDesign, true);
+              commit(
+                () =>
+                  requireAccessCard
+                    ? withEntrySeal(createInvitationDesign(content))
+                    : createInvitationDesign(content),
+                true
+              );
               setSelectedId(null);
             }
           },
@@ -910,7 +1062,7 @@ export function InvitationDesigner({
         "separator",
         {
           label: "Duplicate Layer",
-          shortcut: "Cmd+D",
+          shortcut: "Cmd+J",
           disabled: !selectedId,
           onClick: () => {
             if (selectedId) duplicate(selectedId);
@@ -1059,8 +1211,13 @@ export function InvitationDesigner({
       title: "View",
       items: [
         {
-          label: "Zoom to 100%",
+          label: "Fit invitation",
           shortcut: "Cmd+0",
+          onClick: fitView,
+        },
+        {
+          label: "Actual size (100%)",
+          shortcut: "Cmd+1",
           onClick: () => setZoom(1),
         },
         {
@@ -1086,6 +1243,20 @@ export function InvitationDesigner({
         },
         "separator",
         {
+          label: snapToGrid ? "Disable grid snapping" : "Snap to grid (100 px)",
+          shortcut: "Cmd+Shift+'",
+          onClick: () => setSnapToGrid((s) => !s),
+        },
+        {
+          label: guidesLocked ? "Unlock guides" : "Lock guides",
+          onClick: () => setGuidesLocked((s) => !s),
+        },
+        {
+          label: "Clear guides",
+          disabled: guidesLocked,
+          onClick: () => setClearGuidesRequest((n) => n + 1),
+        },
+        {
           label: dark ? "Switch to Light Mode" : "Switch to Dark Mode",
           icon: <Icon name="swatch" size={14} />,
           onClick: toggleDark,
@@ -1098,7 +1269,33 @@ export function InvitationDesigner({
     <section
       aria-label="Invitation designer"
       data-testid="invitation-designer"
+      data-mode={mode}
+      data-panel={sheetTab}
+      data-panel-open={mobilePanelOpen}
+      style={
+        { "--studio-sidebar-width": `${sidebarWidth}px` } as React.CSSProperties
+      }
+      onClickCapture={(e) => {
+        const anchor = (e.target as HTMLElement).closest("a[href]");
+        if (
+          !anchor ||
+          !doc.isDirty ||
+          e.metaKey ||
+          e.ctrlKey ||
+          e.shiftKey ||
+          e.altKey
+        )
+          return;
+        const href = anchor.getAttribute("href");
+        if (!href || href.startsWith("#")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        void doc.flushSave().then((ok) => {
+          if (ok) window.location.assign(href);
+        });
+      }}
       className={cn(
+        styles.studio,
         "relative h-dvh overflow-hidden select-none",
         dark ? "dark studio-dark text-[#fff6dc]" : "text-[#2d1f24]"
       )}
@@ -1116,90 +1313,36 @@ export function InvitationDesigner({
         }}
       />
 
-      {/* Studio Top Header Bar: Clean, unboxed, brand aligned, no avatar collision */}
       <header
-        role="banner"
         data-testid="studio-top-header"
-        aria-label="Studio top navigation"
-        className={cn(
-          "fixed inset-x-0 top-0 z-40 flex h-13 items-center justify-between px-3 text-xs border-b backdrop-blur-md transition-colors",
-          dark
-            ? "border-[#382630] bg-[#23181e]/95 text-[#fff6dc]"
-            : "border-[#e8e2d6] bg-[#fcfbfa]/95 text-[#2d1f24]"
-        )}
+        aria-label="Invitation studio navigation"
+        className={styles.header}
       >
-        {/* Left: Back button + Menus (Far Left) */}
-        <div className="flex items-center gap-2 min-w-0 z-10">
+        <div className={styles.identity}>
           <Link
             href={backHref}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",
-              dark
-                ? "bg-white/5 text-[#fff6dc] hover:bg-white/10 hover:text-white"
-                : "bg-black/5 text-[#4a0e17] hover:bg-[#4a0e17]/10"
-            )}
+            aria-label="Back to invitations"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-hairline text-night hover:bg-burgundy/10"
           >
-            <Icon name="arrow_back" size={13} />
-            <span className="font-semibold text-xs">Back</span>
+            <Icon name="arrow_back" size={18} />
           </Link>
-
-          <span
-            aria-hidden="true"
-            className={cn(
-              "h-4 w-px mx-0.5",
-              dark ? "bg-white/15" : "bg-black/10"
-            )}
-          />
-
-          <StudioMenuBar menus={menuGroups} dark={dark} />
-        </div>
-
-        {/* Center: Design Name & Event Title + Live Status Indicator */}
-        <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center">
-          <div className="pointer-events-auto flex items-center gap-2 max-w-[45%] truncate">
-            <span className="font-serif text-sm font-semibold tracking-wide">
-              Invitation Designer
-            </span>
-            <span aria-hidden="true" className="text-xs opacity-40">
-              •
-            </span>
-            <span
-              className={cn(
-                "truncate text-xs font-medium",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
-              )}
-            >
-              {eventTitle}
-            </span>
-            <span
-              className={cn(
-                "h-2 w-2 rounded-full transition-all shrink-0 ml-1",
-                doc.saveState === "saving" && "bg-amber-400 animate-pulse",
-                doc.saveState === "saved" && "bg-emerald-500",
-                doc.saveState === "error" && "bg-red-500"
-              )}
-              aria-hidden="true"
-            />
-            {status && (
-              <span
-                className={cn(
-                  "text-[11px] font-medium transition-opacity",
-                  dark ? "text-zinc-400" : "text-zinc-500"
-                )}
-              >
-                · {status}
-              </span>
-            )}
-            {!fontsLoaded && (
-              <span className="text-[10px] text-amber-500 font-medium">
-                · Syncing fonts…
-              </span>
-            )}
+          <div className={styles.desktopMenus}>
+            <StudioMenuBar menus={menuGroups} dark={dark} />
           </div>
         </div>
-
-        {/* Right: Theme Switch + Mode Toggle + Ariya Luxury Brand Logo (Far Right) */}
-        <div className="flex items-center gap-2.5 z-10">
+        <div className={styles.document}>
+          <h1 className={styles.documentTitle} title={eventTitle}>
+            {eventTitle}
+          </h1>
+          <p role="status" className={styles.documentStatus}>
+            {status ||
+              (doc.recovered
+                ? "Recovered unsaved changes"
+                : "Your invitation template")}
+            {!fontsLoaded ? " · Loading fonts…" : ""}
+          </p>
+        </div>
+        <div className={styles.headerActions}>
           <button
             type="button"
             aria-label={
@@ -1207,20 +1350,13 @@ export function InvitationDesigner({
                 ? "Switch to the light interface"
                 : "Switch to the dark interface"
             }
-            title={dark ? "Switch to light mode" : "Switch to dark mode"}
             aria-pressed={dark}
             onClick={toggleDark}
-            className={cn(
-              "grid h-8 w-8 place-items-center rounded-full transition-colors",
-              dark
-                ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-                : "text-[#4a0e17] hover:bg-[#4a0e17]/10"
-            )}
+            className="grid h-10 w-10 place-items-center rounded-full text-night hover:bg-burgundy/10"
           >
-            <Icon name="swatch" size={16} />
+            <Icon name="swatch" size={18} />
           </button>
-
-          <div className="w-32 shrink-0">
+          <div className="w-28 shrink-0">
             <Segmented
               dark={dark}
               label="Mode"
@@ -1232,42 +1368,22 @@ export function InvitationDesigner({
               onPick={setMode}
             />
           </div>
-
-          <span
-            aria-hidden="true"
-            className={cn(
-              "h-4 w-px mx-0.5",
-              dark ? "bg-white/15" : "bg-black/10"
-            )}
-          />
-
-          <Link
-            href="/"
-            className="flex items-center gap-2 pl-1 pr-0.5 transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73] rounded-full"
-            title="Àríyá Home"
-            aria-label="Àríyá Home"
-          >
-            <span
-              className={cn(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif font-bold text-xs shadow-xs border transition-all",
-                dark
-                  ? "bg-gradient-to-br from-[#dfba73] to-[#9e7534] text-[#1c070d] border-[#dfba73]/40"
-                  : "bg-gradient-to-br from-[#6b1e2e] to-[#4a0e17] text-[#dfba73] border-[#dfba73]/30"
-              )}
-            >
-              À
-            </span>
-            <span
-              className={cn(
-                "font-serif font-bold text-sm tracking-wide hidden sm:inline",
-                dark ? "text-[#dfba73]" : "text-[#4a0e17]"
-              )}
-            >
-              Àríyá
-            </span>
+          <Link href="/" aria-label="Àríyá home" className={styles.wordmark}>
+            <Image
+              src="/icons/icon-maskable-512.png"
+              alt="Àríyá"
+              width={36}
+              height={36}
+              className="rounded-xl"
+            />
           </Link>
         </div>
       </header>
+      {pro && (
+        <div className={styles.mobileMenus}>
+          <StudioMenuBar menus={menuGroups} dark={dark} />
+        </div>
+      )}
 
       {/* The card's stage fills the screen with brand matte studio workspace */}
       <div
@@ -1276,15 +1392,7 @@ export function InvitationDesigner({
           dark ? "bg-[#20161b]" : "bg-[#ede6da]"
         )}
       >
-        <div
-          className={cn(
-            "absolute inset-0 transition-[left,top,bottom] duration-150 motion-reduce:transition-none",
-            pro
-              ? "max-lg:bottom-[calc(44dvh+3.5rem)] lg:left-12 max-lg:top-[132px] lg:top-[92px]"
-              : "max-lg:bottom-[44dvh] lg:left-0 lg:right-96 max-lg:top-[124px] lg:top-[52px]"
-          )}
-          style={pro ? { right: `${sidebarWidth}px` } : undefined}
-        >
+        <div className={cn(styles.stage, !pro && styles.stageSimple)}>
           <DesignerCanvas
             dark={dark}
             design={design}
@@ -1292,11 +1400,17 @@ export function InvitationDesigner({
             selectedId={selectedId}
             selectedIds={selectedIds}
             zoom={zoom}
+            fitRequest={fitRequest}
+            onViewportChange={setViewport}
+            navigationTarget={navigationTarget}
             onZoomChange={setZoom}
             showHandles={pro}
             activeTool={activeTool}
             showRulers={showRulers}
             showGrid={showGrid}
+            snapToGrid={snapToGrid}
+            guidesLocked={guidesLocked}
+            clearGuidesRequest={clearGuidesRequest}
             onSelect={setSelectedId}
             onToggleSelect={toggleSelectedId}
             onSelectBatch={setSelectedIds}
@@ -1364,7 +1478,7 @@ export function InvitationDesigner({
       {pro ? (
         <>
           {/* Photoshop style Contextual Tool Options Bar */}
-          <div className="fixed left-0 right-0 top-[52px] h-10 z-30">
+          <div className={styles.options}>
             <ContextualOptionsBar
               dark={dark}
               activeTool={activeTool}
@@ -1395,7 +1509,7 @@ export function InvitationDesigner({
               onSelectShapeKind={setActiveShapeKind}
               onAddLayer={add}
               onResizeCanvasPx={handleResizeCanvasPx}
-              onResetView={() => setZoom(1)}
+              onResetView={fitView}
               zoom={zoom}
               onZoomChange={setZoom}
               activeColor={activeColor}
@@ -1413,13 +1527,16 @@ export function InvitationDesigner({
               onToggleRulers={() => setShowRulers(!showRulers)}
               showGrid={showGrid}
               onToggleGrid={() => setShowGrid(!showGrid)}
+              snapToGrid={snapToGrid}
+              onToggleSnapToGrid={() => setSnapToGrid((s) => !s)}
             />
           </div>
 
           {/* Left Vertical Tool Rail */}
           <div
             className={cn(
-              "fixed z-30 shadow-xl transition-colors",
+              styles.tools,
+              "transition-colors",
               dark
                 ? "bg-[#23181e] border-r border-[#382630]"
                 : "bg-[#fcfbfa] border-r border-[#e8e2d6]",
@@ -1428,6 +1545,7 @@ export function InvitationDesigner({
             )}
           >
             <ToolRail
+              onSampleColor={() => void sampleColor()}
               dark={dark}
               activeTool={activeTool}
               onSelectTool={setActiveTool}
@@ -1456,9 +1574,9 @@ export function InvitationDesigner({
           {/* Right Studio Sidebar (Layers & Properties) */}
           <aside
             aria-label="Studio Sidebar"
-            style={{ width: `${sidebarWidth}px` }}
             className={cn(
-              "fixed z-20 flex min-h-0 flex-col overflow-hidden transition-colors",
+              styles.sidebar,
+              "flex min-h-0 flex-col overflow-hidden transition-colors",
               dark
                 ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
                 : "bg-[#fcfbfa] text-[#2d1f24] border-l border-[#e8e2d6]",
@@ -1466,8 +1584,54 @@ export function InvitationDesigner({
               "lg:bottom-0 lg:right-0 lg:top-[92px]"
             )}
           >
+            <div className={styles.mobileTabs} aria-label="Studio panels">
+              {(
+                [
+                  ["properties", "Properties"],
+                  ["swatches", "Colours"],
+                  ["layers", "Layers"],
+                  ["history", "History"],
+                  ["navigator", "View"],
+                ] as const
+              ).map(([tab, label]) => (
+                <button
+                  key={tab}
+                  type="button"
+                  aria-expanded={mobilePanelOpen && sheetTab === tab}
+                  onClick={() => {
+                    if (mobilePanelOpen && sheetTab === tab)
+                      setMobilePanelOpen(false);
+                    else setSheetTab(tab);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             {/* Draggable Resizer Edge */}
             <div
+              role="separator"
+              aria-label="Properties panel width"
+              aria-orientation="vertical"
+              aria-valuemin={260}
+              aria-valuemax={600}
+              aria-valuenow={sidebarWidth}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                e.preventDefault();
+                e.stopPropagation();
+                setSidebarWidth((w) =>
+                  Math.max(
+                    260,
+                    Math.min(
+                      600,
+                      window.innerWidth - 400,
+                      w + (e.key === "ArrowLeft" ? 20 : -20)
+                    )
+                  )
+                );
+              }}
               onPointerDown={startSidebarResize}
               className={cn(
                 "hidden lg:block absolute left-0 inset-y-0 w-2.5 -translate-x-1/2 cursor-col-resize z-40 transition-colors group",
@@ -1481,10 +1645,16 @@ export function InvitationDesigner({
             </div>
 
             {/* Top Half of Studio Sidebar: Properties / Color & Swatches */}
-            <div className="flex flex-col h-[52%] min-h-[220px] border-b border-[#dfba73]/20">
+            <div
+              className={cn(
+                styles.panelTop,
+                "flex flex-col h-[52%] min-h-[220px] border-b border-[#dfba73]/20"
+              )}
+            >
               {/* Top Tab Bar */}
               <div
                 className={cn(
+                  styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
@@ -1592,10 +1762,13 @@ export function InvitationDesigner({
             </div>
 
             {/* Bottom Half of Studio Sidebar: Layers / History / Navigator */}
-            <div className="flex flex-col flex-1 min-h-0">
+            <div
+              className={cn(styles.panelBottom, "flex flex-col flex-1 min-h-0")}
+            >
               {/* Bottom Tab Bar */}
               <div
                 className={cn(
+                  styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
@@ -1718,11 +1891,14 @@ export function InvitationDesigner({
                   />
                 ) : (
                   <NavigatorPanel
+                    coupleName={coupleName}
+                    viewport={viewport}
+                    onNavigate={(x, y) => setNavigationTarget({ x, y })}
                     dark={dark}
                     design={design}
                     zoom={zoom}
                     onZoomChange={setZoom}
-                    onResetView={() => setZoom(1)}
+                    onResetView={fitView}
                   />
                 )}
               </div>
@@ -1733,6 +1909,7 @@ export function InvitationDesigner({
         <aside
           aria-label="Invitation questions"
           className={cn(
+            styles.simplePanel,
             "fixed z-20 flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
             dark
               ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
@@ -1771,19 +1948,22 @@ export function InvitationDesigner({
         onRedo={redo}
         zoom={zoom}
         onZoomChange={setZoom}
-        onFit={() => setZoom(1)}
+        onFit={fitView}
         dimensions={designDimensionsPx(design)}
         onExport={() => setExportOpen(true)}
       />
 
       <ExportModal
+        dark={dark}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         design={design}
         eventId={eventId}
         coupleName={coupleName}
         getCardElement={() =>
-          document.querySelector<HTMLElement>("[data-invitation-canvas]")
+          document.querySelector<HTMLElement>(
+            '[data-testid="designer-stage"] [data-invitation-canvas]'
+          )
         }
       />
     </section>

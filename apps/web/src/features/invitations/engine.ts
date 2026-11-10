@@ -69,6 +69,7 @@ export function freshId(kind: string, count = 0): string {
 // The wire carries designs as plain JSON; translate camelCase corner radii
 // (`radiusTL` <-> `radiusTl`) and preserve frontend-only FX fields across WASM round-trips.
 const EXTRA_LAYER_KEYS = [
+  "aspectLocked",
   "flipX",
   "flipY",
   "brightness",
@@ -206,12 +207,30 @@ export function duplicate(
   design: InvitationDesign,
   id: string
 ): { design: InvitationDesign; id: string } | null {
+  if (design.layers.length >= 60) return null;
   const out = run(design, {
     type: "duplicate",
     id,
     newId: freshId("copy", design.layers.length),
   });
-  if (out) return out.id ? { design: out.design, id: out.id } : null;
+  if (out) {
+    if (!out.id) return null;
+    const original = design.layers.find((l) => l.id === id);
+    const extra = Object.fromEntries(
+      EXTRA_LAYER_KEYS.map((key) => [key, original?.[key]])
+    );
+    return {
+      design: {
+        ...out.design,
+        layers: out.design.layers.map((layer) =>
+          layer.id === out.id
+            ? { ...layer, ...extra, groupId: undefined }
+            : layer
+        ),
+      },
+      id: out.id,
+    };
+  }
   return duplicateLayer(design, id);
 }
 

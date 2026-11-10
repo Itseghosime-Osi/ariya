@@ -1,8 +1,7 @@
 "use client";
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { cn } from "@/lib/utils";
-
 export interface MenuAction {
   label: string;
   shortcut?: string;
@@ -11,12 +10,11 @@ export interface MenuAction {
   onClick: () => void;
   icon?: React.ReactNode;
 }
-
 export interface MenuGroup {
   title: string;
   items: Array<MenuAction | "separator">;
 }
-
+/** Menu focus, keyboard traversal, outside clicks and Escape use the shared UI primitives. */
 export function StudioMenuBar({
   menus,
   dark,
@@ -24,122 +22,79 @@ export function StudioMenuBar({
   menus: MenuGroup[];
   dark: boolean;
 }) {
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpenMenu(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
+  const [open, setOpen] = useState<string | null>(null);
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "flex items-center gap-0.5 text-xs select-none",
-        dark ? "text-zinc-200" : "text-[#3b2b31]"
-      )}
+    <nav
+      aria-label="Studio menus"
+      className="flex items-center gap-0.5 text-xs"
     >
-      {menus.map((menu) => {
-        const isOpen = openMenu === menu.title;
-        return (
-          <div key={menu.title} className="relative">
+      {menus.map((menu) => (
+        <DropdownMenu.Root
+          key={menu.title}
+          open={open === menu.title}
+          onOpenChange={(value) => setOpen(value ? menu.title : null)}
+        >
+          <DropdownMenu.Trigger asChild>
             <button
               type="button"
-              aria-haspopup="true"
-              aria-expanded={isOpen}
-              onClick={() => setOpenMenu(isOpen ? null : menu.title)}
               onMouseEnter={() => {
-                if (openMenu !== null && openMenu !== menu.title) {
-                  setOpenMenu(menu.title);
-                }
+                if (open) setOpen(menu.title);
               }}
               className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                isOpen
-                  ? dark
-                    ? "bg-white/15 text-white"
-                    : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
-                  : dark
-                    ? "hover:bg-white/10 hover:text-white"
-                    : "hover:bg-[#4a0e17]/5 hover:text-[#4a0e17]"
+                "min-h-8 rounded-lg px-2.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-gold",
+                dark
+                  ? "text-ivory hover:bg-white/10 data-[state=open]:bg-white/10"
+                  : "text-night hover:bg-burgundy/10 data-[state=open]:bg-burgundy/10"
               )}
             >
               {menu.title}
             </button>
-
-            {isOpen && (
-              <div
-                role="menu"
-                className={cn(
-                  "absolute left-0 top-full mt-1 min-w-[200px] rounded-xl border p-1 shadow-2xl backdrop-blur-md z-50 animate-in fade-in zoom-in-95 duration-100",
-                  dark
-                    ? "border-[#3f2935] bg-[#23181e]/95 text-zinc-200 shadow-black/60"
-                    : "border-[#e6ded2] bg-[#ffffff]/95 text-[#2d1f24] shadow-black/10"
-                )}
-              >
-                {menu.items.map((item, idx) => {
-                  if (item === "separator") {
-                    return (
-                      <div
-                        key={`sep-${idx}`}
-                        className={cn(
-                          "my-1 h-px",
-                          dark ? "bg-white/10" : "bg-black/10"
-                        )}
-                      />
-                    );
-                  }
-
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      role="menuitem"
-                      disabled={item.disabled}
-                      onClick={() => {
-                        item.onClick();
-                        setOpenMenu(null);
-                      }}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors disabled:opacity-35",
-                        item.danger
-                          ? "text-red-500 hover:bg-red-500/10"
-                          : dark
-                            ? "hover:bg-white/10 hover:text-white"
-                            : "hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </span>
-                      {item.shortcut && (
-                        <span
-                          className={cn(
-                            "font-mono text-[10px]",
-                            dark ? "text-zinc-500" : "text-zinc-400"
-                          )}
-                        >
-                          {item.shortcut}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              aria-label={`${menu.title} menu`}
+              align="start"
+              sideOffset={6}
+              collisionPadding={12}
+              className={cn(
+                "z-[100] min-w-56 max-h-[70dvh] overflow-auto rounded-2xl border p-1.5 shadow-xl",
+                dark
+                  ? "border-white/15 bg-[#23181e] text-[#fff6dc]"
+                  : "border-hairline bg-ivory text-night"
+              )}
+            >
+              {menu.items.map((item, index) =>
+                item === "separator" ? (
+                  <DropdownMenu.Separator
+                    key={index}
+                    className="my-1 h-px bg-current opacity-10"
+                  />
+                ) : (
+                  <DropdownMenu.Item
+                    key={item.label}
+                    disabled={item.disabled}
+                    onSelect={item.onClick}
+                    className={cn(
+                      "flex min-h-9 cursor-default select-none items-center justify-between gap-6 rounded-lg px-3 py-2 text-xs outline-none data-[disabled]:opacity-35 data-[highlighted]:bg-burgundy/10",
+                      item.danger && "text-red-600"
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      {item.icon}
+                      {item.label}
+                    </span>
+                    {item.shortcut && (
+                      <kbd className="text-[10px] opacity-65">
+                        {item.shortcut.replaceAll("Cmd", "⌘ / Ctrl")}
+                      </kbd>
+                    )}
+                  </DropdownMenu.Item>
+                )
+              )}
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      ))}
+    </nav>
   );
 }

@@ -47,6 +47,8 @@ export function ContextualOptionsBar({
   onToggleRulers,
   showGrid,
   onToggleGrid,
+  snapToGrid = false,
+  onToggleSnapToGrid,
   dark = false,
 }: {
   activeTool: StudioTool;
@@ -79,6 +81,8 @@ export function ContextualOptionsBar({
   onToggleRulers: () => void;
   showGrid: boolean;
   onToggleGrid: () => void;
+  snapToGrid?: boolean;
+  onToggleSnapToGrid?: () => void;
   dark?: boolean;
 }) {
   const currentLayer = selectedLayer;
@@ -826,6 +830,21 @@ export function ContextualOptionsBar({
           )}
         >
           Grid
+        </button>
+        <button
+          type="button"
+          onClick={onToggleSnapToGrid}
+          aria-label="Snap to grid"
+          aria-pressed={snapToGrid}
+          title="Snap movement to the 100 px grid; hold Alt to suspend"
+          className={cn(
+            "rounded px-2 py-1 text-xs font-medium",
+            snapToGrid
+              ? "bg-burgundy text-white"
+              : "text-label-2 hover:bg-burgundy/10"
+          )}
+        >
+          Snap
         </button>
       </div>
     </div>

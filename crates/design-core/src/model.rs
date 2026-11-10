@@ -330,7 +330,8 @@ impl Design {
     }
 
     pub fn canvas_width_px(&self) -> u32 {
-        self.canvas.map_or(DEFAULT_CANVAS_WIDTH_PX, |c| c.resolved_width_px())
+        self.canvas
+            .map_or(DEFAULT_CANVAS_WIDTH_PX, |c| c.resolved_width_px())
     }
 
     pub fn canvas_height_px(&self) -> u32 {

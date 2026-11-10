@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Icon } from "@/components/ui/icon";
-import { exportInvitation, type ExportFormat } from "../../export-service";
+import {
+  exportInvitation,
+  invitationExportSize,
+  type ExportFormat,
+} from "../../export-service";
 import type { InvitationDesign } from "../../types";
 import { designDimensionsPx } from "../../layer-ops";
 
 interface ExportModalProps {
+  dark?: boolean;
   open: boolean;
   onClose: () => void;
   design: InvitationDesign;
@@ -27,11 +33,11 @@ interface FormatCard {
 const FORMATS: FormatCard[] = [
   {
     id: "pdf",
-    title: "Print-Ready PDF",
+    title: "PDF for printing",
     badge: "Recommended for Print",
     description:
-      "Vector PDF with 300 DPI imagery calibrated for professional printers.",
-    resolution: "Print Standard (300 DPI)",
+      "A flattened PDF, 5 inches wide, with the invitation rendered at 300 DPI.",
+    resolution: "300 DPI · 5 inches wide",
     icon: "document",
   },
   {
@@ -39,7 +45,7 @@ const FORMATS: FormatCard[] = [
     title: "High-Resolution PNG",
     badge: "Lossless (3x)",
     description:
-      "Crystal clear raster with transparent or paper texture. Ideal for screens.",
+      "A high-resolution image of your invitation, suitable for screens and sharing.",
     resolution: "3x Native Canvas Size",
     icon: "sparkles",
   },
@@ -57,35 +63,25 @@ const FORMATS: FormatCard[] = [
     title: "Design Backup (.json)",
     badge: "Editable Source",
     description:
-      "Raw project file containing all layers, dimensions, and typography.",
-    resolution: "Source Code",
+      "An editable backup of your invitation, including its layers and styling.",
+    resolution: "Editable design",
     icon: "download",
   },
 ];
 
 export function ExportModal({
   open,
+  dark = false,
   onClose,
   design,
   eventId,
   coupleName,
   getCardElement,
 }: ExportModalProps) {
+  const returnFocus = useRef<HTMLElement | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !exporting) {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, exporting, onClose]);
 
   if (!open) return null;
 
@@ -117,121 +113,148 @@ export function ExportModal({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Export invitation artwork"
-      aria-labelledby="export-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !exporting) onClose();
+    <Dialog.Root
+      open={open}
+      onOpenChange={(value) => {
+        if (!value && !exporting) onClose();
       }}
     >
-      <div
-        className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-black/10 bg-ivory p-6 shadow-2xl dark:border-white/10 dark:bg-[#1a1118] dark:text-ivory"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-black/10 dark:border-white/10">
-          <div>
-            <h2
-              id="export-dialog-title"
-              className="font-serif text-2xl font-bold tracking-tight text-night dark:text-ivory"
-            >
-              Export Invitation
-            </h2>
-            <p className="mt-1 text-xs text-label-2">
-              Canvas: {dims.width} × {dims.height} px • Edge:{" "}
-              {design.canvas?.edgeStyle ?? "sharp"}
-            </p>
-          </div>
-          <button
-            type="button"
-            aria-label="Close export dialog"
-            onClick={onClose}
-            disabled={exporting}
-            className="rounded-full p-2 text-label-2 transition hover:bg-black/5 hover:text-night dark:hover:bg-white/10 dark:hover:text-ivory"
+      <Dialog.Portal>
+        <Dialog.Content
+          onOpenAutoFocus={() => {
+            returnFocus.current = document.activeElement as HTMLElement;
+            setError(null);
+          }}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            returnFocus.current?.focus();
+          }}
+          onEscapeKeyDown={(e) => {
+            if (exporting) e.preventDefault();
+          }}
+          aria-describedby={undefined}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Export invitation artwork"
+          aria-labelledby="export-dialog-title"
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity ${dark ? "dark" : ""}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !exporting) onClose();
+          }}
+        >
+          <div
+            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-black/10 bg-ivory p-6 max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-2xl dark:border-white/10 dark:bg-[#1a1118] dark:text-ivory"
+            onClick={(e) => e.stopPropagation()}
           >
-            <span className="text-xl leading-none">✕</span>
-          </button>
-        </div>
-
-        {/* Format Selection Grid */}
-        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {FORMATS.map((f) => {
-            const isSelected = selectedFormat === f.id;
-            return (
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-black/10 dark:border-white/10">
+              <div>
+                <Dialog.Title asChild>
+                  <h2
+                    id="export-dialog-title"
+                    className="font-serif text-2xl font-bold tracking-tight text-night dark:text-ivory"
+                  >
+                    Export Invitation
+                  </h2>
+                </Dialog.Title>
+                <p className="mt-1 text-xs text-label-2">
+                  Canvas: {dims.width} × {dims.height} px • Edge:{" "}
+                  {design.canvas?.edgeStyle ?? "sharp"}
+                </p>
+              </div>
               <button
-                key={f.id}
                 type="button"
-                onClick={() => setSelectedFormat(f.id)}
-                className={`relative flex flex-col items-start rounded-2xl border p-3.5 text-left transition-all ${
-                  isSelected
-                    ? "border-burgundy bg-burgundy/5 ring-2 ring-burgundy/20 dark:border-[#e5a93c] dark:bg-[#e5a93c]/10 dark:ring-[#e5a93c]/20"
-                    : "border-hairline bg-white/60 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10"
-                }`}
+                aria-label="Close export dialog"
+                onClick={onClose}
+                disabled={exporting}
+                className="rounded-full p-2 text-label-2 transition hover:bg-black/5 hover:text-night dark:hover:bg-white/10 dark:hover:text-ivory"
               >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-semibold text-sm text-night dark:text-ivory">
-                    {f.title}
-                  </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide ${
+                <span className="text-xl leading-none">✕</span>
+              </button>
+            </div>
+
+            {/* Format Selection Grid */}
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {FORMATS.map((f) => {
+                const isSelected = selectedFormat === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setSelectedFormat(f.id)}
+                    className={`relative flex flex-col items-start rounded-2xl border p-3.5 text-left transition-all ${
                       isSelected
-                        ? "bg-burgundy text-white dark:bg-[#e5a93c] dark:text-black"
-                        : "bg-black/5 text-label-2 dark:bg-white/10"
+                        ? "border-burgundy bg-burgundy/5 ring-2 ring-burgundy/20 dark:border-[#e5a93c] dark:bg-[#e5a93c]/10 dark:ring-[#e5a93c]/20"
+                        : "border-hairline bg-white/60 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10"
                     }`}
                   >
-                    {f.badge}
-                  </span>
-                </div>
-                <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
-                  {f.description}
-                </p>
-                <span className="mt-2.5 text-[11px] font-mono text-black/40 dark:text-white/40">
-                  {f.resolution}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                    <div className="flex w-full items-center justify-between">
+                      <span className="font-semibold text-sm text-night dark:text-ivory">
+                        {f.title}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide ${
+                          isSelected
+                            ? "bg-burgundy text-white dark:bg-[#e5a93c] dark:text-black"
+                            : "bg-black/5 text-label-2 dark:bg-white/10"
+                        }`}
+                      >
+                        {f.badge}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
+                      {f.description}
+                    </p>
+                    <span className="mt-2.5 text-[11px] font-mono text-black/40 dark:text-white/40">
+                      {f.id === "json"
+                        ? "Editable design backup"
+                        : f.id === "pdf"
+                          ? `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in · 300 DPI`
+                          : `${invitationExportSize(design, f.id).width} × ${invitationExportSize(design, f.id).height} px`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-        {error && (
-          <div className="mt-4 rounded-xl bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
-
-        {/* Footer Actions */}
-        <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={exporting}
-            className="rounded-full px-5 py-2.5 text-sm font-semibold text-label-2 transition hover:text-night dark:hover:text-ivory"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={exporting}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-6 py-2.5 text-sm font-semibold text-ivory shadow-md transition hover:bg-burgundy/90 active:scale-98 disabled:opacity-50 dark:bg-[#e5a93c] dark:text-black dark:hover:bg-[#d4982b]"
-          >
-            {exporting ? (
-              <>
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Preparing {selectedFormat.toUpperCase()}…
-              </>
-            ) : (
-              <>
-                <Icon name="download" size={16} />
-                Download {selectedFormat.toUpperCase()}
-              </>
+            {error && (
+              <div className="mt-4 rounded-xl bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400">
+                {error}
+              </div>
             )}
-          </button>
-        </div>
-      </div>
-    </div>
+
+            {/* Footer Actions */}
+            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={exporting}
+                className="rounded-full px-5 py-2.5 text-sm font-semibold text-label-2 transition hover:text-night dark:hover:text-ivory"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={exporting}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-6 py-2.5 text-sm font-semibold text-ivory shadow-md transition hover:bg-burgundy/90 active:scale-98 disabled:opacity-50 dark:bg-[#e5a93c] dark:text-black dark:hover:bg-[#d4982b]"
+              >
+                {exporting ? (
+                  <>
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Preparing {selectedFormat.toUpperCase()}…
+                  </>
+                ) : (
+                  <>
+                    <Icon name="download" size={16} />
+                    Download {selectedFormat.toUpperCase()}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

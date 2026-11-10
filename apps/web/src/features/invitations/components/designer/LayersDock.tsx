@@ -889,7 +889,7 @@ export function LayersDock({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            title="Duplicate Layer (Cmd+D)"
+            title="Duplicate Layer (Cmd+J)"
             disabled={!selectedLayer}
             onClick={() => selectedLayer && onDuplicate(selectedLayer.id)}
             className={cn(

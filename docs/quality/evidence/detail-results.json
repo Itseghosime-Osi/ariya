@@ -1,0 +1,13 @@
+[
+  "Numeric radius",
+  "Unlink independent numeric corners",
+  "Relink uses top-left value",
+  "Outward radius clamps to zero",
+  "100 percent equals document pixels",
+  "Fit view",
+  "Dialog focus trap and return",
+  "Layer copy / paste",
+  "Duplicate shortcut",
+  "Deselect shortcut",
+  "Malformed backup preserves design"
+]

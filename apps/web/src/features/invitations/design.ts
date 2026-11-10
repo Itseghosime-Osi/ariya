@@ -125,9 +125,16 @@ function textLayer(
 export function defaultInvitationLayers(
   event: InvitationEventContent
 ): InvitationLayer[] {
+  const seenVenueParts = new Set<string>();
   const venue = [event.venue, event.area]
-    .map((part) => part?.trim())
-    .filter(Boolean)
+    .flatMap((part) => part?.split(",") ?? [])
+    .map((part) => part.trim())
+    .filter((part) => {
+      const key = part.toLocaleLowerCase("en-NG");
+      if (!part || seenVenueParts.has(key)) return false;
+      seenVenueParts.add(key);
+      return true;
+    })
     .join(", ");
   const names =
     event.headline?.trim() ||
@@ -180,7 +187,10 @@ export function defaultInvitationLayers(
       { x: 8, y: 31.5, width: 84 },
       {
         font: "display",
-        size: 7.4,
+        size: Math.min(
+          7.4,
+          Math.max(2.5, 7.4 * Math.sqrt(34 / Math.max(34, names.length)))
+        ),
         weight: 700,
         colorRole: "title",
       }
@@ -221,21 +231,31 @@ export function defaultInvitationLayers(
         colorRole: "ink",
       }
     ),
-    textLayer("venue", venue || "Venue to be announced", {
-      x: 10,
-      y: 72,
-      width: 80,
-    }),
+    textLayer(
+      "venue",
+      venue || "Venue to be announced",
+      {
+        x: 10,
+        y: 72,
+        width: 80,
+      },
+      { size: venue.length > 45 ? 3.0 : 3.4, lineHeight: 1.2 }
+    ),
     textLayer(
       "dressCode",
       event.dressCode?.trim() ? `Dress code: ${event.dressCode.trim()}` : "",
-      { x: 10, y: 77, width: 80 },
-      { size: 3.2, italic: true, colorRole: "body" }
+      { x: 10, y: 78, width: 80 },
+      {
+        size: (event.dressCode?.length ?? 0) > 45 ? 3.0 : 3.2,
+        lineHeight: 1.2,
+        italic: true,
+        colorRole: "body",
+      }
     ),
     textLayer(
       "footer",
       replyLine,
-      { x: 10, y: 88, width: 80 },
+      { x: 27, y: 88, width: 63 },
       {
         size: 2.9,
         weight: 600,
@@ -370,7 +390,7 @@ export function createLayerOfKind(
       kind,
       text: "",
       x: 5,
-      y: 81,
+      y: 83.5,
       width: 19,
       size: 3,
       colorRole: "title",

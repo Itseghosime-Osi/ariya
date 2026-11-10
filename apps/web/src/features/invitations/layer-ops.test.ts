@@ -156,4 +156,15 @@ describe("layer operations", () => {
     expect(seal).toHaveLength(1);
     expect(seal[0]).toMatchObject({ x: 60, y: 70, visible: true });
   });
+  it("keeps the default RSVP deadline beside the required entry seal", () => {
+    const d = ensureEntrySeal(base());
+    const footer = d.layers.find((l) => l.id === "footer")!;
+    const pass = d.layers.find((l) => l.kind === "code")!;
+    expect(footer.x).toBeGreaterThan(pass.x + pass.width);
+    // Existing custom layouts are not moved by normalisation.
+    footer.x = 12;
+    expect(normaliseDesign(d)?.layers.find((l) => l.id === "footer")?.x).toBe(
+      12
+    );
+  });
 });

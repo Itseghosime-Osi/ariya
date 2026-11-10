@@ -37,10 +37,11 @@ export function StudioBottomDock({
 }) {
   return (
     <div
+      data-testid="studio-statusbar"
       role="region"
       aria-label="Studio controls and export"
       className={cn(
-        "pointer-events-auto fixed bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-full px-4 py-2 shadow-2xl backdrop-blur-md transition-all select-none border",
+        "pointer-events-auto fixed inset-x-0 bottom-0 z-30 flex h-14 items-center justify-center gap-2 px-4 py-2 transition-colors select-none border-t",
         dark
           ? "border-[#3f2935] bg-[#23181e]/92 text-[#fff6dc] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
           : "border-[#e6ded2] bg-[#ffffff]/95 text-[#2d1f24] shadow-[0_10px_35px_rgba(74,14,23,0.12)]"
@@ -91,7 +92,7 @@ export function StudioBottomDock({
           type="button"
           title="Zoom out (-)"
           aria-label="Zoom out"
-          onClick={() => onZoomChange(Math.max(0.25, zoom - 0.25))}
+          onClick={() => onZoomChange(Math.max(0.05, zoom - 0.25))}
           className={cn(
             "grid h-7 w-7 place-items-center rounded-full text-base font-semibold leading-none transition-colors",
             dark
@@ -119,7 +120,7 @@ export function StudioBottomDock({
           type="button"
           title="Zoom in (+)"
           aria-label="Zoom in"
-          onClick={() => onZoomChange(Math.min(3, zoom + 0.25))}
+          onClick={() => onZoomChange(Math.min(4, zoom + 0.25))}
           className={cn(
             "grid h-7 w-7 place-items-center rounded-full text-base font-semibold leading-none transition-colors",
             dark

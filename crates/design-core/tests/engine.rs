@@ -327,14 +327,27 @@ fn canvas_pixel_sizing_and_paper_edges_operate_cleanly() {
     assert_eq!(resized.canvas_height_px(), 1350);
 
     let sharp = ops::set_paper_edge(&resized, ariya_design_core::model::PaperEdge::Sharp, None);
-    assert_eq!(sharp.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Sharp));
+    assert_eq!(
+        sharp.canvas.unwrap().edge_style,
+        Some(ariya_design_core::model::PaperEdge::Sharp)
+    );
     assert_eq!(sharp.canvas.unwrap().corner_radius_px, Some(0.0));
 
     let deckled = ops::set_paper_edge(&sharp, ariya_design_core::model::PaperEdge::Deckled, None);
-    assert_eq!(deckled.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Deckled));
+    assert_eq!(
+        deckled.canvas.unwrap().edge_style,
+        Some(ariya_design_core::model::PaperEdge::Deckled)
+    );
 
-    let rounded = ops::set_paper_edge(&deckled, ariya_design_core::model::PaperEdge::Rounded, Some(24.0));
-    assert_eq!(rounded.canvas.unwrap().edge_style, Some(ariya_design_core::model::PaperEdge::Rounded));
+    let rounded = ops::set_paper_edge(
+        &deckled,
+        ariya_design_core::model::PaperEdge::Rounded,
+        Some(24.0),
+    );
+    assert_eq!(
+        rounded.canvas.unwrap().edge_style,
+        Some(ariya_design_core::model::PaperEdge::Rounded)
+    );
     assert_eq!(rounded.canvas.unwrap().corner_radius_px, Some(24.0));
 
     // Nudge layer by 10.8 px (which is exactly 1% on 1080px canvas)
@@ -417,4 +430,26 @@ fn multi_select_align_distribute_and_groups() {
     assert_eq!(distributed.layers[0].y, 10.0);
     assert_eq!(distributed.layers[1].y, 40.0);
     assert_eq!(distributed.layers[2].y, 70.0);
+}
+
+#[test]
+fn aspect_lock_applies_to_side_handles_and_respects_limits() {
+    let start = Rect {
+        x: 20.0,
+        y: 30.0,
+        width: 40.0,
+        height: 20.0,
+    };
+    let east = ops::resize_box(start, Handle::E, 10.0, 0.0, true);
+    assert_eq!(east.width, 50.0);
+    assert_eq!(east.height, 25.0);
+    assert_eq!(east.y, 27.5);
+    let north = ops::resize_box(start, Handle::N, 0.0, -10.0, true);
+    assert_eq!(north.width, 60.0);
+    assert_eq!(north.height, 30.0);
+    assert_eq!(north.x, 10.0);
+    assert_eq!(north.y, 20.0);
+    let huge = ops::resize_box(start, Handle::Se, 50000.0, 50000.0, true);
+    assert!(huge.width <= 1000.0 && huge.height <= 1000.0);
+    assert!((huge.width / huge.height - 2.0).abs() < 0.0001);
 }

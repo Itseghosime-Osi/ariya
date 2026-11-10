@@ -1,13 +1,6 @@
-/**
- * Client-Side Smart Image Optimization Engine
- *
- * Automatically downsamples and compresses ultra-high-resolution uploads
- * (e.g. 10MB–50MB camera photos, iPhone HDR, high-DPI scans) before upload.
- * Guarantees crisp 300 DPI print fidelity while ensuring file sizes stay well
- * under 800 KB for fast, reliable network uploads and instant canvas responsiveness.
- */
+/** Downsample large pictures for responsive editing while retaining alpha-capable formats. */
 
-const MAX_EDGE_PX = 2560; // Ultra-sharp 300 DPI bounds for portrait stationery
+const MAX_EDGE_PX = 2560; // Working-image bound; export resolution is reported separately.
 const TARGET_QUALITY = 0.88;
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // Accept up to 50 MB
 
@@ -23,6 +16,8 @@ export interface OptimizedImageResult {
 export async function optimizeImageForUpload(
   file: File
 ): Promise<OptimizedImageResult> {
+  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
+    throw new Error("Choose a PNG, JPG or WebP picture.");
   if (file.size > MAX_FILE_SIZE_BYTES) {
     throw new Error(
       `File is too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum supported size is 50MB.`
@@ -97,7 +92,7 @@ export async function optimizeImageForUpload(
 
     if (!blob || blob.size === 0) {
       // Fallback for environments lacking webp canvas encoding
-      const isPng = file.type === "image/png";
+      const isPng = file.type !== "image/jpeg";
       finalMime = isPng ? "image/png" : "image/jpeg";
       finalExt = isPng ? "png" : "jpg";
       blob = await new Promise<Blob | null>((resolve) => {
@@ -106,7 +101,7 @@ export async function optimizeImageForUpload(
     }
 
     // If still over 800 KB, perform progressive quality downsampling
-    if (blob && blob.size > 800 * 1024) {
+    if (blob && blob.size > 800 * 1024 && file.type === "image/jpeg") {
       const smallerBlob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob(resolve, "image/jpeg", 0.82);
       });
@@ -121,6 +116,10 @@ export async function optimizeImageForUpload(
       throw new Error("Image compression encoding failed");
     }
 
+    if (blob.size > 5 * 1024 * 1024)
+      throw new Error(
+        "This picture is still over 5 MB after optimisation. Choose a smaller PNG, JPG or WebP."
+      );
     const baseName = file.name.replace(/\.[^.]+$/, "");
     const optimizedFile = new File([blob], `${baseName}.${finalExt}`, {
       type: finalMime,

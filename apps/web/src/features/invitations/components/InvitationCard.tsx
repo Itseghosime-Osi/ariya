@@ -31,7 +31,7 @@ interface InvitationCardProps {
   /** Studio-only: in-place text editing on the canvas */
   editingLayerId?: string | null;
   onLayerTextChange?: (layerId: string, text: string) => void;
-  onStopEditingText?: () => void;
+  onStopEditingText?: (cancel?: boolean) => void;
 }
 
 /** A quoted CSS url(), so a link with brackets or spaces in it cannot break the rule. */
@@ -304,7 +304,6 @@ export function InvitationCard({
           ? {
               outline: `1px dashed ${palette.foil}`,
               outlineOffset: "3px",
-              borderRadius: "2px",
             }
           : {};
         const movable = interactive && !layer.locked;
@@ -572,14 +571,25 @@ export function InvitationCard({
                 }
               }}
               onInput={(e) => {
-                onLayerTextChange?.(layer.id, e.currentTarget.innerText ?? "");
+                const value = (e.currentTarget.innerText ?? "")
+                  .slice(0, 600)
+                  .replace(/[\uD800-\uDBFF]$/, "");
+                onLayerTextChange?.(layer.id, value);
+              }}
+              onPaste={(e) => {
+                e.preventDefault();
+                document.execCommand(
+                  "insertText",
+                  false,
+                  e.clipboardData.getData("text/plain")
+                );
               }}
               onBlur={() => onStopEditingText?.()}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
                   e.preventDefault();
                   e.stopPropagation();
-                  onStopEditingText?.();
+                  onStopEditingText?.(true);
                 }
               }}
               style={{
@@ -589,7 +599,6 @@ export function InvitationCard({
                 userSelect: "text",
                 outline: `1.5px solid ${palette.foil}`,
                 outlineOffset: "2px",
-                borderRadius: "2px",
                 zIndex: 40,
                 caretColor: palette.foil || "#b8864b",
               }}

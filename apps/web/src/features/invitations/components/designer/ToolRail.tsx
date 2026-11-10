@@ -206,6 +206,7 @@ export function ToolRail({
   onSelectTool,
   onAdd,
   onPickImage,
+  onSampleColor,
   onImportCard,
   hasEntrySeal,
   busy,
@@ -224,6 +225,7 @@ export function ToolRail({
   ) => void;
   onAdd: (kind: AddKind) => void;
   onPickImage: () => void;
+  onSampleColor: () => void;
   onImportCard: () => void;
   hasEntrySeal: boolean;
   busy: boolean;
@@ -232,9 +234,55 @@ export function ToolRail({
   onOpenColorPicker?: () => void;
   dark?: boolean;
 }) {
+  const [vertical, setVertical] = useState(true);
+  useEffect(() => {
+    const media = window.matchMedia(
+      "(min-width: 1024px), (min-width: 600px) and (max-height: 550px)"
+    );
+    const update = () => setVertical(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const [shapesMenuOpen, setShapesMenuOpen] = useState(false);
   const [primaryColor, setPrimaryColor] = useState(activeColor);
   const [secondaryColor, setSecondaryColor] = useState("#4a0e17"); // House Burgundy
+  const resetColors = () => {
+    setPrimaryColor("#000000");
+    setSecondaryColor("#ffffff");
+    onColorChange?.("#000000");
+  };
+  const swapColors = () => {
+    setPrimaryColor(secondaryColor);
+    setSecondaryColor(primaryColor);
+    onColorChange?.(secondaryColor);
+  };
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        e.defaultPrevented ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.altKey ||
+        target?.closest(
+          "input,textarea,select,[contenteditable=true],[role=dialog]"
+        ) ||
+        document.querySelector('[role="dialog"], [role="menu"]')
+      )
+        return;
+      if (e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        resetColors();
+      }
+      if (e.key.toLowerCase() === "x") {
+        e.preventDefault();
+        swapColors();
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  });
   const flyoutRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -252,24 +300,6 @@ export function ToolRail({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [shapesMenuOpen]);
 
-  const runEyedropper = async () => {
-    onSelectTool?.("eyedropper");
-    if (typeof window !== "undefined" && "EyeDropper" in window) {
-      try {
-        // @ts-expect-error EyeDropper Web API in Chromium
-        const eyeDropper = new window.EyeDropper();
-        const result = await eyeDropper.open();
-        if (result?.sRGBHex) {
-          const hex = result.sRGBHex.toLowerCase();
-          setPrimaryColor(hex);
-          onColorChange?.(hex);
-        }
-      } catch {
-        // user cancelled
-      }
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -282,7 +312,7 @@ export function ToolRail({
       <div
         role="toolbar"
         aria-label="Design tools"
-        aria-orientation="vertical"
+        aria-orientation={vertical ? "vertical" : "horizontal"}
         className="flex items-center gap-1 overflow-x-auto max-lg:max-w-full lg:flex-col lg:overflow-visible"
       >
         {/* Move & Select Tool (V) */}
@@ -377,7 +407,7 @@ export function ToolRail({
           shortcut="I"
           dark={dark}
           active={activeTool === "eyedropper"}
-          onClick={runEyedropper}
+          onClick={onSampleColor}
         >
           <svg {...svg}>
             <path d="m14 2 6 6-9.5 9.5a3 3 0 0 1-1.5.8L4 20l1.7-5a3 3 0 0 1 .8-1.5L16 4Z" />
@@ -467,6 +497,24 @@ export function ToolRail({
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </ToolButton>
+        <div className="flex gap-1 lg:hidden">
+          <ToolButton
+            label="Default colours"
+            shortcut="D"
+            onClick={resetColors}
+            dark={dark}
+          >
+            <Icon name="swatch" size={18} />
+          </ToolButton>
+          <ToolButton
+            label="Swap colours"
+            shortcut="X"
+            onClick={swapColors}
+            dark={dark}
+          >
+            <span aria-hidden="true">⇄</span>
+          </ToolButton>
+        </div>
       </div>
 
       {/* Dual Color Swatches at bottom of ToolRail */}

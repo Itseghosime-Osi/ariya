@@ -262,4 +262,27 @@ describe("the Rust design engine and its TypeScript fallback agree", () => {
     );
     expect(stable(rustUngroup)).toEqual(stable(tsUngroup));
   });
+  it("duplicates independently while preserving frontend effects on both engines", async () => {
+    const d = house();
+    d.layers[0] = {
+      ...d.layers[0],
+      groupId: "original-group",
+      flipX: true,
+      shadowBlur: 12,
+      shadowColor: "#702039",
+      brightness: 8,
+    };
+    const { ts, rust } = await both(() => duplicate(d, d.layers[0].id));
+    for (const result of [ts, rust]) {
+      const copy = result?.design.layers.find((l) => l.id === result.id);
+      expect(copy).toMatchObject({
+        flipX: true,
+        shadowBlur: 12,
+        shadowColor: "#702039",
+        brightness: 8,
+      });
+      expect(copy?.groupId).toBeUndefined();
+      expect(result?.design.layers[0].groupId).toBe("original-group");
+    }
+  });
 });

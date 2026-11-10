@@ -14,6 +14,7 @@ export async function getInvitationDesignerData(eventId: string): Promise<{
   dressCode: string | null;
   rsvpBy: string | null;
   requireAccessCard: boolean;
+  revision: string;
   design: ReturnType<typeof designFromEvent>;
 } | null> {
   const cleanId = eventId?.trim();
@@ -25,7 +26,7 @@ export async function getInvitationDesignerData(eventId: string): Promise<{
   const { data: event, error: eventErr } = await supabase
     .from("events")
     .select(
-      "id, title, couple, date, venue, area, dress_code, rsvp_by, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message, invitation_design"
+      "id, title, couple, date, venue, area, dress_code, rsvp_by, paid_at, invitation_theme, invitation_headline, invitation_subheadline, invitation_message, invitation_design, updated_at"
     )
     .eq("id", cleanId)
     .maybeSingle();
@@ -44,7 +45,21 @@ export async function getInvitationDesignerData(eventId: string): Promise<{
     dressCode: event.dress_code,
     rsvpBy: event.rsvp_by,
     requireAccessCard: true,
-    design: designFromEvent(event),
+    revision: event.updated_at,
+    design: designFromEvent({
+      title: event.title,
+      couple: event.couple,
+      date: event.date,
+      venue: event.venue,
+      area: event.area,
+      dressCode: event.dress_code,
+      rsvpBy: event.rsvp_by,
+      theme: event.invitation_theme,
+      headline: event.invitation_headline,
+      subheadline: event.invitation_subheadline,
+      message: event.invitation_message,
+      design: event.invitation_design,
+    }),
   };
 }
 

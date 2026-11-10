@@ -1,0 +1,24 @@
+{
+  "touchDrag": true,
+  "undo": true,
+  "panels": true,
+  "tools": [
+    "Move & Select",
+    "Crop & Aspect",
+    "Type text",
+    "Cathedral Arch",
+    "Vector Shapes & Geometry",
+    "Gradient Fill",
+    "Eyedropper sampler",
+    "Place image / photo",
+    "Import external design",
+    "Add monogram seal",
+    "Guest pass seal added",
+    "Hand / Pan",
+    "Zoom Tool",
+    "Default colours",
+    "Swap colours"
+  ],
+  "export": true,
+  "errors": []
+}

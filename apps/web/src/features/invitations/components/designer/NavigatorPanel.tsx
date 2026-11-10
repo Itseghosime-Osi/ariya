@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { InvitationCard } from "../InvitationCard";
 import { cn } from "@/lib/utils";
 import type { InvitationDesign } from "../../types";
 import { designDimensionsPx, designRatio } from "../../layer-ops";
@@ -8,6 +9,9 @@ import { designDimensionsPx, designRatio } from "../../layer-ops";
 interface NavigatorPanelProps {
   dark?: boolean;
   design: InvitationDesign;
+  coupleName: string;
+  viewport: { x: number; y: number; width: number; height: number };
+  onNavigate: (x: number, y: number) => void;
   zoom: number;
   onZoomChange: (z: number) => void;
   onResetView: () => void;
@@ -17,6 +21,9 @@ export function NavigatorPanel({
   dark,
   design,
   zoom,
+  coupleName,
+  viewport,
+  onNavigate,
   onZoomChange,
   onResetView,
 }: NavigatorPanelProps) {
@@ -31,7 +38,44 @@ export function NavigatorPanel({
       {/* Mini-map Card Canvas */}
       <div className="relative mx-auto flex h-52 w-full items-center justify-center rounded-xl border border-hairline bg-black/10 p-3 overflow-hidden">
         {/* Miniature card representation */}
-        <div
+        <button
+          type="button"
+          aria-label="Navigator: click to centre the canvas"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            onNavigate(
+              e.detail === 0
+                ? 0.5
+                : Math.max(
+                    0,
+                    Math.min(1, (e.clientX - rect.left) / rect.width)
+                  ),
+              e.detail === 0
+                ? 0.5
+                : Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
+            );
+          }}
+          onKeyDown={(e) => {
+            const delta = {
+              ArrowLeft: [-0.05, 0],
+              ArrowRight: [0.05, 0],
+              ArrowUp: [0, -0.05],
+              ArrowDown: [0, 0.05],
+            }[e.key];
+            if (!delta) return;
+            e.preventDefault();
+            e.stopPropagation();
+            onNavigate(
+              Math.max(
+                0,
+                Math.min(1, viewport.x + viewport.width / 2 + delta[0])
+              ),
+              Math.max(
+                0,
+                Math.min(1, viewport.y + viewport.height / 2 + delta[1])
+              )
+            );
+          }}
           className="relative rounded border shadow-lg overflow-hidden transition-all"
           style={{
             aspectRatio: String(ratio),
@@ -42,38 +86,19 @@ export function NavigatorPanel({
                 : "#fffaf3",
           }}
         >
-          {/* Card Layers rendered as miniature shapes / lines */}
-          {design.layers.map((l) => (
-            <div
-              key={l.id}
-              className="absolute pointer-events-none rounded-[1px]"
-              style={{
-                left: `${l.x}%`,
-                top: `${l.y}%`,
-                width: `${l.width}%`,
-                height: `${l.height ?? 3}%`,
-                backgroundColor:
-                  l.kind === "seal"
-                    ? "#dfba73"
-                    : l.kind === "shape"
-                      ? l.fill || "#dfba73"
-                      : l.colorRole === "accent" || l.colorRole === "foil"
-                        ? "#dfba73"
-                        : "#4a0e17",
-                opacity: (l.opacity ?? 1) * 0.7,
-              }}
-            />
-          ))}
-
-          {/* Viewport Red Indicator Box */}
-          <div
-            className="pointer-events-none absolute inset-0 border-2 border-red-500 shadow-sm"
+          <InvitationCard design={design} coupleName={coupleName} sampleEntry />
+          <span
+            data-testid="navigator-viewport"
+            aria-hidden="true"
+            className="pointer-events-none absolute border-2 border-gold bg-gold/10"
             style={{
-              transform: `scale(${Math.max(0.3, 1 / zoom)})`,
-              transformOrigin: "center center",
+              left: `${Math.max(0, viewport.x) * 100}%`,
+              top: `${Math.max(0, viewport.y) * 100}%`,
+              width: `${Math.max(0, Math.min(1, viewport.x + viewport.width) - Math.max(0, viewport.x)) * 100}%`,
+              height: `${Math.max(0, Math.min(1, viewport.y + viewport.height) - Math.max(0, viewport.y)) * 100}%`,
             }}
           />
-        </div>
+        </button>
       </div>
 
       {/* Zoom Control Slider & Presets */}
@@ -109,7 +134,7 @@ export function NavigatorPanel({
           <input
             type="range"
             aria-label="Canvas zoom slider"
-            min={0.25}
+            min={0.05}
             max={4}
             step={0.05}
             value={zoom}

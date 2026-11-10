@@ -219,6 +219,8 @@ export interface InvitationLayer {
   groupId?: string;
   /** A locked layer cannot be moved or deleted from the canvas. */
   locked?: boolean;
+  /** Use the same proportional resize rule in numeric fields and canvas handles. */
+  aspectLocked?: boolean;
 }
 
 export type PaperEdge = "sharp" | "rounded" | "deckled";

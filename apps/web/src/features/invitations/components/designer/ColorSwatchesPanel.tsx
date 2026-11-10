@@ -187,11 +187,16 @@ export function ColorSwatchesPanel({
         background: { ...d.background, kind: "color", color: hex },
       }));
     } else if (selectedLayer) {
-      if (selectedLayer.kind === "text") {
+      if (
+        selectedLayer.kind !== "shape" &&
+        selectedLayer.kind !== "image" &&
+        selectedLayer.kind !== "code"
+      ) {
         onPatchLayer(selectedLayer.id, { colorRole: "custom", color: hex });
       } else if (selectedLayer.kind === "shape") {
         onPatchLayer(selectedLayer.id, { fill: hex });
-      }
+      } else if (selectedLayer.kind === "image")
+        onPatchLayer(selectedLayer.id, { stroke: hex });
     }
   };
 
@@ -255,6 +260,45 @@ export function ColorSwatchesPanel({
       <div className="space-y-2">
         <div
           ref={satValRef}
+          role="group"
+          tabIndex={0}
+          aria-label="Saturation and brightness"
+          onKeyDown={(e) => {
+            if (
+              !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
+                e.key
+              )
+            )
+              return;
+            e.preventDefault();
+            e.stopPropagation();
+            updateHsv({
+              ...hsv,
+              s: Math.max(
+                0,
+                Math.min(
+                  100,
+                  hsv.s +
+                    (e.key === "ArrowRight"
+                      ? 1
+                      : e.key === "ArrowLeft"
+                        ? -1
+                        : 0)
+                )
+              ),
+              v: Math.max(
+                0,
+                Math.min(
+                  100,
+                  hsv.v +
+                    (e.key === "ArrowUp" ? 1 : e.key === "ArrowDown" ? -1 : 0)
+                )
+              ),
+            });
+          }}
+          onPointerCancel={() => {
+            isDraggingSatVal.current = false;
+          }}
           onPointerDown={(e) => {
             isDraggingSatVal.current = true;
             satValRef.current?.setPointerCapture(e.pointerId);
@@ -271,6 +315,7 @@ export function ColorSwatchesPanel({
           }}
           className="relative h-40 w-full cursor-crosshair rounded-xl overflow-hidden shadow-inner border border-hairline"
           style={{
+            touchAction: "none",
             backgroundColor: `hsl(${hsv.h}, 100%, 50%)`,
             backgroundImage: `
               linear-gradient(to top, #000, transparent),
@@ -293,6 +338,7 @@ export function ColorSwatchesPanel({
         <div className="relative flex items-center">
           <input
             type="range"
+            aria-label="Colour hue"
             min={0}
             max={360}
             value={hsv.h}
@@ -307,7 +353,7 @@ export function ColorSwatchesPanel({
       </div>
 
       {/* Hex & RGB Readout Fields */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         <div className="col-span-2">
           <span
             className={cn(
@@ -328,6 +374,10 @@ export function ColorSwatchesPanel({
               data-testid="hex-color-input"
               aria-label="Hex color hex"
               placeholder="#DFBA73"
+              aria-invalid={!/^#[0-9a-f]{6}$/i.test(hexInput)}
+              onBlur={() => {
+                if (!/^#[0-9a-f]{6}$/i.test(hexInput)) setHexInput(activeColor);
+              }}
               value={hexInput}
               onChange={(e) => {
                 const val = e.target.value;
@@ -356,6 +406,7 @@ export function ColorSwatchesPanel({
             type="number"
             min={0}
             max={255}
+            aria-label="Red channel"
             value={rgb.r}
             onChange={(e) => {
               const r = Number(e.target.value);
@@ -380,12 +431,32 @@ export function ColorSwatchesPanel({
             type="number"
             min={0}
             max={255}
+            aria-label="Green channel"
             value={rgb.g}
             onChange={(e) => {
               const g = Number(e.target.value);
               const hex = rgbToHex(rgb.r, g, rgb.b);
               applyColor(hex);
               setHsv(rgbToHsv(rgb.r, g, rgb.b));
+            }}
+            className="h-8 w-full rounded-lg border border-hairline bg-white/[0.06] px-2 font-mono text-xs outline-none"
+          />
+        </div>
+        <div>
+          <span className="mb-1 block text-[10px] font-semibold text-label-2">
+            B
+          </span>
+          <input
+            type="number"
+            aria-label="Blue channel"
+            min={0}
+            max={255}
+            value={rgb.b}
+            onChange={(e) => {
+              const b = Math.max(0, Math.min(255, Number(e.target.value)));
+              const hex = rgbToHex(rgb.r, rgb.g, b);
+              applyColor(hex);
+              setHsv(rgbToHsv(rgb.r, rgb.g, b));
             }}
             className="h-8 w-full rounded-lg border border-hairline bg-white/[0.06] px-2 font-mono text-xs outline-none"
           />

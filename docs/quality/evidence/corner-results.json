@@ -1,0 +1,10 @@
+{
+  "fourWidgets": true,
+  "inward": true,
+  "undo": true,
+  "redo": true,
+  "escape": true,
+  "rotated": true,
+  "export": true,
+  "rotatedSideResize": true
+}

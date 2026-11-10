@@ -155,12 +155,18 @@ pub fn validate(d: &Design) -> Check {
         range("canvas.ratio", c.ratio, 0.4, 2.5)?;
         if let Some(w) = c.width_px {
             if !(200..=10000).contains(&w) {
-                return Err(Issue::new("canvas.widthPx", "Canvas width must be 200 to 10000 px"));
+                return Err(Issue::new(
+                    "canvas.widthPx",
+                    "Canvas width must be 200 to 10000 px",
+                ));
             }
         }
         if let Some(h) = c.height_px {
             if !(200..=10000).contains(&h) {
-                return Err(Issue::new("canvas.heightPx", "Canvas height must be 200 to 10000 px"));
+                return Err(Issue::new(
+                    "canvas.heightPx",
+                    "Canvas height must be 200 to 10000 px",
+                ));
             }
         }
         if let Some(r) = c.corner_radius_px {

@@ -427,6 +427,40 @@ export function Inspector({
   onImportFile: (file: File) => void;
   dark?: boolean;
 }) {
+  const [unit, setUnit] = useState<"px" | "%">("px");
+  const aspectLocked = layer?.aspectLocked ?? layer?.kind === "image";
+  const [unlinkCorners, setUnlinkCorners] = useState(
+    Boolean(
+      layer?.radiusTL != null ||
+      layer?.radiusTR != null ||
+      layer?.radiusBR != null ||
+      layer?.radiusBL != null
+    )
+  );
+  const [fillMode, setFillMode] = useState<"solid" | "gradient" | "none">(
+    layer?.gradient ? "gradient" : layer?.fill ? "solid" : "none"
+  );
+
+  useEffect(() => {
+    setUnlinkCorners(
+      Boolean(
+        layer?.radiusTL != null ||
+        layer?.radiusTR != null ||
+        layer?.radiusBR != null ||
+        layer?.radiusBL != null
+      )
+    );
+    setFillMode(layer?.gradient ? "gradient" : layer?.fill ? "solid" : "none");
+  }, [
+    layer?.id,
+    layer?.gradient,
+    layer?.fill,
+    layer?.radiusTL,
+    layer?.radiusTR,
+    layer?.radiusBR,
+    layer?.radiusBL,
+  ]);
+
   if (selectedIds && selectedIds.length >= 2) {
     const selectedLayers = design.layers.filter((l) =>
       selectedIds.includes(l.id)
@@ -590,152 +624,166 @@ export function Inspector({
     const bg = design.background;
     return (
       <div data-testid="inspector-card">
-        <Section dark={dark} title="Card dimensions & shape">
-          <div className="grid grid-cols-2 gap-2">
-            {CANVAS_PRESETS.map((p) => {
-              const on =
-                Math.abs(p.widthPx - dims.width) <= 4 &&
-                Math.abs(p.heightPx - dims.height) <= 4;
-              return (
-                <button
-                  key={p.label}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() =>
-                    onDesign((d) => resizeCanvasPx(d, p.widthPx, p.heightPx))
-                  }
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-left transition-colors",
-                    on
-                      ? dark
-                        ? "border-[#dfba73] bg-[#dfba73]/15 text-[#dfba73] shadow-xs ring-1 ring-[#dfba73]/40"
-                        : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] shadow-xs"
-                      : dark
-                        ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#fff6dc]"
-                        : "border-[#e8e2d6] bg-white hover:bg-[#f6f2ec] text-[#2d1f24]"
-                  )}
-                >
-                  <span
+        <div className="px-4 pt-4 pb-2">
+          <p className="font-serif text-lg text-night">
+            Your invitation is ready to edit
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-label-2">
+            Select text, a shape or a picture on the card to personalise it.
+            Your template already includes its size and paper.
+          </p>
+        </div>
+        <details className="mx-3 my-3 rounded-2xl border border-hairline">
+          <summary className="cursor-pointer px-4 py-3 text-xs font-semibold text-night">
+            Document settings{" "}
+            <span className="font-normal text-label-2">· optional</span>
+          </summary>
+          <Section dark={dark} title="Invitation size">
+            <div className="grid grid-cols-2 gap-2">
+              {CANVAS_PRESETS.map((p) => {
+                const on =
+                  Math.abs(p.widthPx - dims.width) <= 4 &&
+                  Math.abs(p.heightPx - dims.height) <= 4;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() =>
+                      onDesign((d) => resizeCanvasPx(d, p.widthPx, p.heightPx))
+                    }
                     className={cn(
-                      "block text-xs font-semibold",
+                      "rounded-lg border px-3 py-2 text-left transition-colors",
                       on
                         ? dark
-                          ? "text-[#dfba73]"
-                          : "text-[#4a0e17]"
+                          ? "border-[#dfba73] bg-[#dfba73]/15 text-[#dfba73] shadow-xs ring-1 ring-[#dfba73]/40"
+                          : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] shadow-xs"
                         : dark
-                          ? "text-zinc-100"
-                          : "text-[#2d1f24]"
+                          ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#fff6dc]"
+                          : "border-[#e8e2d6] bg-white hover:bg-[#f6f2ec] text-[#2d1f24]"
                     )}
                   >
-                    {p.label}
-                  </span>
-                  <span
-                    className={cn(
-                      "block text-[10px]",
-                      on
-                        ? dark
-                          ? "text-[#dfba73]/80"
-                          : "text-[#4a0e17]/80"
-                        : dark
-                          ? "text-zinc-400"
-                          : "text-[#7a5b67]"
-                    )}
-                  >
-                    {p.note}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div
-            className={cn(
-              "mt-3 rounded-lg border p-2.5 transition-colors",
-              dark
-                ? "border-white/10 bg-white/[0.03]"
-                : "border-[#e8e2d6] bg-[#f8f6f2]"
-            )}
-          >
-            <span
+                    <span
+                      className={cn(
+                        "block text-xs font-semibold",
+                        on
+                          ? dark
+                            ? "text-[#dfba73]"
+                            : "text-[#4a0e17]"
+                          : dark
+                            ? "text-zinc-100"
+                            : "text-[#2d1f24]"
+                      )}
+                    >
+                      {p.label}
+                    </span>
+                    <span
+                      className={cn(
+                        "block text-[10px]",
+                        on
+                          ? dark
+                            ? "text-[#dfba73]/80"
+                            : "text-[#4a0e17]/80"
+                          : dark
+                            ? "text-zinc-400"
+                            : "text-[#7a5b67]"
+                      )}
+                    >
+                      {p.note}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div
               className={cn(
-                "mb-2 block text-[10px] font-semibold uppercase tracking-wider",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
+                "mt-3 rounded-lg border p-2.5 transition-colors",
+                dark
+                  ? "border-white/10 bg-white/[0.03]"
+                  : "border-[#e8e2d6] bg-[#f8f6f2]"
               )}
             >
-              Exact Size (px)
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <Num
-                dark={dark}
-                label="Width"
-                suffix="px"
-                value={dims.width}
-                min={200}
-                max={5000}
-                step={10}
-                onChange={(w) =>
-                  onDesign((d) => resizeCanvasPx(d, w, dims.height))
-                }
-              />
-              <Num
-                dark={dark}
-                label="Height"
-                suffix="px"
-                value={dims.height}
-                min={200}
-                max={5000}
-                step={10}
-                onChange={(h) =>
-                  onDesign((d) => resizeCanvasPx(d, dims.width, h))
-                }
-              />
+              <span
+                className={cn(
+                  "mb-2 block text-[10px] font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                )}
+              >
+                Exact Size (px)
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                <Num
+                  dark={dark}
+                  label="Width"
+                  suffix="px"
+                  value={dims.width}
+                  min={200}
+                  max={5000}
+                  step={10}
+                  onChange={(w) =>
+                    onDesign((d) => resizeCanvasPx(d, w, dims.height))
+                  }
+                />
+                <Num
+                  dark={dark}
+                  label="Height"
+                  suffix="px"
+                  value={dims.height}
+                  min={200}
+                  max={5000}
+                  step={10}
+                  onChange={(h) =>
+                    onDesign((d) => resizeCanvasPx(d, dims.width, h))
+                  }
+                />
+              </div>
             </div>
-          </div>
-        </Section>
+          </Section>
 
-        <Section dark={dark} title="Paper & edges">
-          <Segmented
-            dark={dark}
-            label="Paper edge style"
-            value={edgeStyle}
-            options={[
-              { key: "sharp", label: "Sharp paper" },
-              { key: "rounded", label: "Rounded" },
-              { key: "deckled", label: "Deckled" },
-            ]}
-            onPick={(edge) =>
-              onDesign((d) =>
-                setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
-              )
-            }
-          />
-          {edgeStyle === "rounded" && (
-            <div className="mt-3">
-              <Num
-                dark={dark}
-                label="Corner radius"
-                suffix="px"
-                value={cornerRadiusPx || 16}
-                min={0}
-                max={120}
-                step={2}
-                onChange={(r) => onDesign((d) => setPaperEdge(d, "rounded", r))}
-              />
-            </div>
-          )}
-          <p
-            className={cn(
-              "mt-2 text-[12px] leading-relaxed",
-              dark ? "text-zinc-400" : "text-label-2"
+          <Section dark={dark} title="Paper & edges">
+            <Segmented
+              dark={dark}
+              label="Paper edge style"
+              value={edgeStyle}
+              options={[
+                { key: "sharp", label: "Sharp paper" },
+                { key: "rounded", label: "Rounded" },
+                { key: "deckled", label: "Deckled" },
+              ]}
+              onPick={(edge) =>
+                onDesign((d) =>
+                  setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
+                )
+              }
+            />
+            {edgeStyle === "rounded" && (
+              <div className="mt-3">
+                <Num
+                  dark={dark}
+                  label="Corner radius"
+                  suffix="px"
+                  value={cornerRadiusPx || 16}
+                  min={0}
+                  max={120}
+                  step={2}
+                  onChange={(r) =>
+                    onDesign((d) => setPaperEdge(d, "rounded", r))
+                  }
+                />
+              </div>
             )}
-          >
-            {edgeStyle === "sharp" &&
-              "Authentic cut paper sheet with natural straight edges (0 px radius)."}
-            {edgeStyle === "rounded" &&
-              "Curved luxury card corners with custom pixel radius."}
-            {edgeStyle === "deckled" &&
-              "Artisanal hand-torn deckled edges for fine art invitations."}
-          </p>
-        </Section>
+            <p
+              className={cn(
+                "mt-2 text-[12px] leading-relaxed",
+                dark ? "text-zinc-400" : "text-label-2"
+              )}
+            >
+              {edgeStyle === "sharp" && "Straight invitation edges."}
+              {edgeStyle === "rounded" && "Rounded invitation corners."}
+              {edgeStyle === "deckled" && "A decorative torn-paper edge."}
+            </p>
+          </Section>
+        </details>
 
         <Section dark={dark} title="Background">
           <Segmented
@@ -863,8 +911,8 @@ export function Inspector({
               dark ? "text-zinc-400" : "text-label-2"
             )}
           >
-            Apply a curated luxury Nigerian wedding layout preset to jumpstart
-            your card.
+            Choose a layout for your invitation. Applying a preset replaces the
+            current layout.
           </p>
           <div className="space-y-2">
             {LAYOUT_PRESETS.map((preset) => (
@@ -964,43 +1012,6 @@ export function Inspector({
     );
   }
 
-  const [unit, setUnit] = useState<"px" | "%">("px");
-  const [aspectLocked, setAspectLocked] = useState(layer.kind === "image");
-  const [unlinkCorners, setUnlinkCorners] = useState(
-    Boolean(
-      layer.radiusTL != null ||
-      layer.radiusTR != null ||
-      layer.radiusBR != null ||
-      layer.radiusBL != null
-    )
-  );
-  const [fillMode, setFillMode] = useState<"solid" | "gradient" | "none">(
-    layer.gradient ? "gradient" : layer.fill ? "solid" : "none"
-  );
-
-  useEffect(() => {
-    setAspectLocked(layer.kind === "image");
-  }, [layer.id, layer.kind]);
-
-  useEffect(() => {
-    setUnlinkCorners(
-      Boolean(
-        layer.radiusTL != null ||
-        layer.radiusTR != null ||
-        layer.radiusBR != null ||
-        layer.radiusBL != null
-      )
-    );
-    setFillMode(layer.gradient ? "gradient" : layer.fill ? "solid" : "none");
-  }, [
-    layer.id,
-    layer.gradient,
-    layer.fill,
-    layer.radiusTL,
-    layer.radiusTR,
-    layer.radiusBR,
-    layer.radiusBL,
-  ]);
   const dims = designDimensionsPx(design);
   const patch = (p: Patch) => {
     if (layer.locked) return;
@@ -1059,7 +1070,7 @@ export function Inspector({
                       ? "Aspect ratio locked (click to unlock)"
                       : "Lock width & height proportions"
                   }
-                  onClick={() => setAspectLocked((v) => !v)}
+                  onClick={() => patch({ aspectLocked: !aspectLocked })}
                   className={cn(
                     "rounded-md px-1.5 py-0.5 text-[10px] font-semibold transition-colors",
                     aspectLocked

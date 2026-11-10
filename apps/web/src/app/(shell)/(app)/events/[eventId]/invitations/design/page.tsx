@@ -37,10 +37,12 @@ export default async function InvitationDesignPage({
   return (
     <EndedLock ended={isEventExpired(data.eventDate)}>
       <InvitationDesigner
+        key={eventId}
         eventId={eventId}
         eventTitle={data.eventTitle}
         content={content}
         initialDesign={data.design}
+        initialRevision={data.revision}
         coupleName={data.coupleName}
         backHref={`/events/${eventId}/invitations`}
         requireAccessCard={data.requireAccessCard}

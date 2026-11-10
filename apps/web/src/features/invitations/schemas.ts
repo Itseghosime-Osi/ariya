@@ -90,6 +90,7 @@ export const invitationLayerSchema = z.object({
   shadowColor: hexColour.nullable().optional(),
   groupId: z.string().trim().max(60).optional(),
   locked: z.boolean().optional(),
+  aspectLocked: z.boolean().optional(),
   flipX: z.boolean().optional(),
   flipY: z.boolean().optional(),
 });
@@ -114,7 +115,21 @@ export const invitationDesignSchema = z.object({
     imageUrl: imageUrl.nullable(),
     overlay: z.number().finite().min(0).max(0.9),
   }),
-  layers: z.array(invitationLayerSchema).max(60),
+  layers: z
+    .array(invitationLayerSchema)
+    .max(60)
+    .superRefine((layers, ctx) => {
+      if (new Set(layers.map((layer) => layer.id)).size !== layers.length)
+        ctx.addIssue({
+          code: "custom",
+          message: "Every layer must have a unique identifier.",
+        });
+      if (layers.filter((layer) => layer.kind === "code").length > 1)
+        ctx.addIssue({
+          code: "custom",
+          message: "An invitation can contain only one guest entry seal.",
+        });
+    }),
 });
 
 export type InvitationDesignInput = z.infer<typeof invitationDesignSchema>;

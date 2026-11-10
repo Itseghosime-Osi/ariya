@@ -217,7 +217,7 @@ export function duplicateLayer(
   if (index < 0) return null;
   const source = design.layers[index];
   // The entry seal is the one thing a card carries once; two would draw two codes.
-  if (source.kind === "code") return null;
+  if (source.kind === "code" || design.layers.length >= 60) return null;
   const copy: InvitationLayer = {
     ...source,
     id: newId(source.kind, design.layers.length),
@@ -225,6 +225,7 @@ export function duplicateLayer(
     y: clamp(source.y + 3, 0, 98),
     name: source.name ? `${source.name} copy` : undefined,
     locked: false,
+    groupId: undefined,
   };
   const layers = [...design.layers];
   layers.splice(index + 1, 0, copy);
@@ -467,13 +468,38 @@ export function resizeBox(
   if (handle.includes("s")) {
     height = clamp(height + dy, MIN_H, 1000);
   }
-  if (keepShape && handle.length === 2 && start.height > 0) {
+  if (keepShape && start.height > 0 && start.width > 0) {
     const aspect = start.width / start.height;
-    const byWidth = width / aspect;
-    if (Math.abs(byWidth - height) > 0.01) {
-      height = clamp(byWidth, MIN_H, 1000);
-      if (handle.includes("n")) y = bottom - height;
+    const useWidth = handle.includes("e") || handle.includes("w");
+    const widthDrives =
+      useWidth &&
+      (handle.length !== 2 ||
+        Math.abs(dx / start.width) >= Math.abs(dy / start.height));
+    if (widthDrives) {
+      width = clamp(
+        width,
+        Math.max(MIN_W, MIN_H * aspect),
+        Math.min(1000, 1000 * aspect)
+      );
+      height = width / aspect;
+    } else {
+      height = clamp(
+        height,
+        Math.max(MIN_H, MIN_W / aspect),
+        Math.min(1000, 1000 / aspect)
+      );
+      width = height * aspect;
     }
+    x = handle.includes("w")
+      ? right - width
+      : !useWidth
+        ? start.x + (start.width - width) / 2
+        : start.x;
+    y = handle.includes("n")
+      ? bottom - height
+      : !handle.includes("s")
+        ? start.y + (start.height - height) / 2
+        : start.y;
   }
   return { x, y, width, height };
 }

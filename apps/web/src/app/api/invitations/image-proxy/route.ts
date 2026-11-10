@@ -1,82 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function isPrivateIp(hostname: string): boolean {
-  if (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "::1" ||
-    hostname === "0.0.0.0"
-  ) {
-    return true;
-  }
-  // Disallow common private IP ranges (10.x, 172.16-31.x, 192.168.x)
-  const parts = hostname.split(".").map(Number);
-  if (parts.length === 4 && parts.every((n) => !isNaN(n))) {
-    if (parts[0] === 10) return true;
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-    if (parts[0] === 192 && parts[1] === 168) return true;
-    if (parts[0] === 169 && parts[1] === 254) return true; // Link-local
-  }
-  return false;
-}
+const MAX_BYTES = 15 * 1024 * 1024;
+const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
+/** Only our uploaded public invitation artwork may be proxied; never arbitrary destinations. */
 export async function GET(req: NextRequest) {
-  const urlParam = req.nextUrl.searchParams.get("url");
-  if (!urlParam) {
-    return new NextResponse("Missing url parameter", { status: 400 });
-  }
-
-  let parsed: URL;
+  let target: URL;
   try {
-    parsed = new URL(urlParam);
+    target = new URL(req.nextUrl.searchParams.get("url") ?? "");
+    const storage = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    if (
+      target.origin !== storage.origin ||
+      target.username ||
+      target.password ||
+      !["https:", "http:"].includes(target.protocol) ||
+      !target.pathname.startsWith("/storage/v1/object/public/event-covers/") ||
+      (process.env.NODE_ENV === "production" && target.protocol !== "https:")
+    )
+      return new NextResponse("Unsupported image source", { status: 403 });
   } catch {
-    return new NextResponse("Invalid URL", { status: 400 });
+    return new NextResponse("Invalid image source", { status: 400 });
   }
-
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    return new NextResponse("Unsupported protocol", { status: 400 });
-  }
-
-  if (isPrivateIp(parsed.hostname)) {
-    return new NextResponse("Forbidden target host", { status: 403 });
-  }
-
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const upstream = await fetch(parsed.toString(), {
+    const upstream = await fetch(target.href, {
       signal: controller.signal,
+      redirect: "error",
+      headers: { Accept: "image/png,image/jpeg,image/webp" },
+    });
+    if (!upstream.ok)
+      return new NextResponse("The image could not be loaded", { status: 502 });
+    const type = (upstream.headers.get("content-type") ?? "").split(";")[0];
+    if (!IMAGE_TYPES.has(type))
+      return new NextResponse("Unsupported image format", { status: 415 });
+    if (Number(upstream.headers.get("content-length")) > MAX_BYTES) {
+      await upstream.body?.cancel();
+      return new NextResponse("Image exceeds 15 MB", { status: 413 });
+    }
+    const reader = upstream.body?.getReader();
+    if (!reader) return new NextResponse("Empty image", { status: 502 });
+    const chunks: Uint8Array[] = [];
+    let length = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > MAX_BYTES) {
+        await reader.cancel();
+        return new NextResponse("Image exceeds 15 MB", { status: 413 });
+      }
+      chunks.push(value);
+    }
+    const body = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) {
+      body.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return new NextResponse(body, {
       headers: {
-        "User-Agent": "Ariya-Design-Studio/1.0",
-        Accept: "image/*",
+        "Content-Type": type,
+        "Content-Length": String(length),
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=86400",
       },
     });
-    clearTimeout(timeout);
-
-    if (!upstream.ok) {
-      return new NextResponse(`Upstream error: ${upstream.statusText}`, {
-        status: upstream.status,
-      });
-    }
-
-    const contentType = upstream.headers.get("content-type") || "image/png";
-    if (!contentType.startsWith("image/")) {
-      return new NextResponse("Target is not an image", { status: 400 });
-    }
-
-    const buffer = await upstream.arrayBuffer();
-
-    return new NextResponse(buffer, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
-      },
-    });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Proxy fetch error";
-    return new NextResponse(message, { status: 502 });
+  } catch {
+    return new NextResponse(
+      "The image could not be loaded. Please try again.",
+      { status: 502 }
+    );
+  } finally {
+    clearTimeout(timer);
   }
 }
