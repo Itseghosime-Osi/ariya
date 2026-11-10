@@ -21,7 +21,7 @@
     "id": "DES-069",
     "name": "Change width or height after rounding",
     "ok": true,
-    "detail": "height set to 120; radius now 60px (≤ 60px)"
+    "detail": "height set to 160; radius now 80px (≤ 80px)"
   },
   {
     "id": "DES-088",

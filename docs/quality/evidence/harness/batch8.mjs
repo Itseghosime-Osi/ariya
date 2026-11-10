@@ -130,45 +130,7 @@ check(
 await undo();
 await undo();
 await p.waitForTimeout(150);
-// DES-170 reorder by dragging the handle
-const rows = () =>
-  p
-    .getByTestId("layers-dock")
-    .locator('[role="group"][aria-label^="Layer "]')
-    .evaluateAll((e) => e.map((x) => x.getAttribute("aria-label")));
-const r0 = await rows();
-const hs = p
-  .getByTestId("layers-dock")
-  .locator('[aria-label="Drag to reorder layer"]');
-const h1 = await hs.nth(2).boundingBox();
-const hx = h1.x + h1.width / 2,
-  hy = h1.y + h1.height / 2;
-await p.mouse.move(hx, hy);
-await p.waitForTimeout(100);
-await p.mouse.down();
-await p.waitForTimeout(100);
-for (let i = 1; i <= 20; i++) {
-  await p.mouse.move(hx, hy + i * 5);
-  await p.waitForTimeout(30);
-}
-await p.waitForTimeout(200);
-await p.mouse.up();
-await p.waitForTimeout(500);
-const r1 = await rows();
-check(
-  "DES-170",
-  "Reorder by dragging",
-  JSON.stringify(r0) !== JSON.stringify(r1),
-  `before ${r0.slice(0, 4).map((s) => s.slice(6, 20))} → after ${r1.slice(0, 4).map((s) => s.slice(6, 20))}`
-);
-await undo();
-await p.waitForTimeout(150);
-check(
-  "DES-170b",
-  "Reorder undo",
-  JSON.stringify(await rows()) === JSON.stringify(r0),
-  "undo restores the order"
-);
+// DES-170 reordering is verified in batch9.mjs
 // DES-258 shortcut collisions among tool titles
 const titles = await p.evaluate(() =>
   [...document.querySelectorAll('[data-testid="invitation-designer"] [title]')]

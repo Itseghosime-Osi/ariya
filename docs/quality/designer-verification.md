@@ -119,11 +119,19 @@ Interface changes: History steps say what changed ("Moved Adaeze & Tunde", "Hid 
 
 Evidence: [batch 1](evidence/studio-batch1.json) selection and movement; [2](evidence/studio-batch2.json) align, distribute, snapping; [3](evidence/studio-batch3.json) accessibility names, overlap, history; [4](evidence/studio-batch4.json) panel split; [5](evidence/studio-batch5.json) rotate, resize, zoom; [6](evidence/studio-batch6.json) corner radius; [7](evidence/studio-batch7.json) text; [8](evidence/studio-batch8.json), [9](evidence/studio-batch9.json), [10](evidence/studio-batch10.json), [11](evidence/studio-batch11.json) background, swatches, layers, pan, effects, reduced motion. New unit tests cover the history descriptions and the inline text editor.
 
-Totals now: **175 verified, 32 partial, 29 not tested, 47 not applicable.** Known open result: DES-200 (border/stroke effect) was not confirmed by the harness probe and stays Not tested.
+### Second pass (same day)
+
+Further checks in the same harness: contextual options, corner-radius edge cases, horizontal distribute, single-step bring forward/send backward, border/outline pixels, long couple and venue names, Reset to Template, Simple-mode event details, blur-during-drag and Space-release cleanup, emulated pen and touch input, emulated high-DPI and zoomed viewports, and a PNG export inspected with Pillow (exact fill colour, rounded corner cut, crop overlay absent from the file). Evidence: [12](evidence/studio-batch12.json), [13](evidence/studio-batch13.json), [14](evidence/studio-batch14.json), [15](evidence/studio-batch15.json), [16](evidence/studio-batch16.json).
+
+One more fix: 14 px objects showed four corner-radius widgets on top of the eight resize handles. The widgets now appear only when the selected box is at least 64 px on screen.
+
+Totals now: **191 verified, 33 partial, 11 not tested, 48 not applicable.** DES-252 (save a reusable template) became Not applicable because the designer does not offer it.
+
+Still not tested, because they need uploads, a real backend or other tooling that was not available: DES-006 (open another document with unsaved work), 025 (transparent-area hit testing), 076/077 (rounded image pixels and image border/shadow), 096 (line endpoints), 120 (slow font loading), 131 (exported text glyphs), 135 (drag a file onto the canvas), 146 (large image import), 155 (alpha) and 206 (clipping mask). Browsers other than Chromium, physical devices and a real stylus remain untested.
 
 ## Work remaining
 
-The matrix currently records **175 verified, 32 partial, 29 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **191 verified, 33 partial, 11 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 

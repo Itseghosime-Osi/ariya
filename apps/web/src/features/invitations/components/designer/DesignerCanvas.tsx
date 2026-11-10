@@ -2040,8 +2040,8 @@ export function DesignerCanvas({
                   (!selected.shape || selected.shape === "rect")) ||
                   (selected.kind === "image" &&
                     (!selected.maskShape || selected.maskShape === "rect"))) &&
-                box.width >= 28 &&
-                box.height >= 28 &&
+                box.width >= 64 &&
+                box.height >= 64 &&
                 (() => {
                   const card = cardRect();
                   const cardW = card?.width ?? 600;

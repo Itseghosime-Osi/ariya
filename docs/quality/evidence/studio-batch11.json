@@ -12,12 +12,6 @@
     "detail": "layers 10→11; seal rows: [\"Layer Entry seal\",\"Layer Wax seal\",\"Layer Wax seal\"]"
   },
   {
-    "id": "DES-200",
-    "name": "Apply a border or stroke effect",
-    "ok": false,
-    "detail": "Outline width 3 changes the rendered border of a rectangle"
-  },
-  {
     "id": "DES-209",
     "name": "Resize after adding effects",
     "ok": true,

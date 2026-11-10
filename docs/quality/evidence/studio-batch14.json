@@ -1,0 +1,32 @@
+[
+  {
+    "id": "DES-263",
+    "name": "Switch tabs during a drag",
+    "ok": true,
+    "detail": "window blur mid-drag restored the layer (moved 0.0 px) and the next drag moved 30.0 of 30 px"
+  },
+  {
+    "id": "DES-262",
+    "name": "Release Space or a modifier outside the window",
+    "ok": true,
+    "detail": "after a blur while Space was held, dragging moves the layer (41 px) instead of panning the card (0 px)"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "DES-089a",
+    "name": "Touch drag moves a layer without scrolling the page",
+    "ok": true,
+    "detail": "tap selected (1); touch drag moved 32,24 of 32,24 px; page scroll changed by 0"
+  },
+  {
+    "id": "DES-264",
+    "name": "Test touch scrolling near handles",
+    "ok": true,
+    "detail": "touch drag on the east resize handle changed the box width 281→305 px (Chromium touch emulation; physical devices not tested)"
+  }
+]

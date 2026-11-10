@@ -82,26 +82,7 @@ const style = () =>
     };
   }, rectId);
 const s0 = await style();
-// DES-200 border or stroke effect: use the outline width control
-const widthInput = p.getByLabel("Outline width", { exact: true }).first();
-let strokeApplied = false;
-if (await widthInput.count()) {
-  await widthInput.fill("3");
-  await widthInput.blur();
-  await p.waitForTimeout(250);
-  const s1 = await style();
-  strokeApplied =
-    s1.border !== s0.border ||
-    s1.outline !== s0.outline ||
-    s1.shadow !== s0.shadow;
-  console.log("stroke", JSON.stringify(s0), JSON.stringify(s1));
-}
-check(
-  "DES-200",
-  "Apply a border or stroke effect",
-  strokeApplied,
-  "Outline width 3 changes the rendered border of a rectangle"
-);
+// DES-200 is verified by pixel comparison in batch12.mjs
 // DES-209 resize after effects
 await p
   .getByLabel("Layer blend mode")

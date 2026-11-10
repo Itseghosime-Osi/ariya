@@ -1,0 +1,14 @@
+[
+  {
+    "id": "DES-249",
+    "name": "Edit event details (designer side)",
+    "ok": true,
+    "detail": "Simple-mode venue field updates the card live (\"The Lagos Event Centre, Victoria Island, Lagos\" → \"The Pearl Garden, Lekki Phase 1\"); undo gives \"The Lagos Event Centre, Victoria Island, Lagos\". Whether guest-facing pages follow the change needs the authenticated suite and was not tested here"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

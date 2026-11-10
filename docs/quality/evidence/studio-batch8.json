@@ -24,18 +24,6 @@
     "detail": "selected row has aria-current=true; lock → button becomes \"Unlock\"; hide → \"Show\" and row dims to 0.4"
   },
   {
-    "id": "DES-170",
-    "name": "Reorder by dragging",
-    "ok": false,
-    "detail": "before Entry seal,Kindly reply b,Dress code: As,The Lagos Even → after Entry seal,Kindly reply b,Dress code: As,The Lagos Even"
-  },
-  {
-    "id": "DES-170b",
-    "name": "Reorder undo",
-    "ok": true,
-    "detail": "undo restores the order"
-  },
-  {
     "id": "DES-258",
     "name": "Test tool shortcut collisions",
     "ok": true,

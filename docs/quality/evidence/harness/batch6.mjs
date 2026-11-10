@@ -74,7 +74,7 @@ check(
   `radius ${rmax}px with box ${W}×${H} (limit ${Math.min(W, H) / 2}px)`
 );
 // DES-069 change height after rounding: radius is clamped, not overflowing
-await p.getByLabel("Height", { exact: true }).first().fill("120");
+await p.getByLabel("Height", { exact: true }).first().fill("160");
 await p.getByLabel("Height", { exact: true }).first().blur();
 await p.waitForTimeout(250);
 const r2 = await rpx("tl");
