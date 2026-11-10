@@ -144,16 +144,16 @@ function getShapeStyle(
 function fontStack(font: InvitationFont): string {
   switch (font) {
     case "script":
-      return "var(--font-great-vibes), 'Great Vibes', 'Alex Brush', 'Dancing Script', 'Cormorant Garamond', cursive, serif";
+      return "var(--font-great-vibes, 'Great Vibes'), 'Great Vibes', 'Alex Brush', 'Dancing Script', 'Cormorant Garamond', cursive, serif";
     case "serif":
-      return "var(--font-cormorant), 'Cormorant Garamond', 'Playfair Display', 'EB Garamond', Georgia, serif";
+      return "var(--font-cormorant, Georgia), 'Cormorant Garamond', 'Playfair Display', 'EB Garamond', Georgia, serif";
     case "mono":
       return "'Space Mono', 'Courier New', Courier, monospace";
     case "display":
-      return "var(--font-display), 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif";
+      return "var(--font-display, var(--font-bodoni-moda, Georgia)), 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif";
     case "sans":
     default:
-      return "var(--font-sans), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+      return "var(--font-sans, 'Plus Jakarta Sans'), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
   }
 }
 

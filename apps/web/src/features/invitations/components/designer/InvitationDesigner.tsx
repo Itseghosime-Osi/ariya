@@ -149,6 +149,10 @@ export function InvitationDesigner({
     else setBottomTab(tab);
   };
   const [activeTool, setActiveTool] = useState<StudioTool>("select");
+  const cropSession = useRef<{
+    design: InvitationDesign;
+    changed: boolean;
+  } | null>(null);
   const [activeColor, setActiveColor] = useState("#dfba73");
   const [sidebarWidth, setSidebarWidth] = useState(360);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -181,7 +185,11 @@ export function InvitationDesigner({
 
   const handleResizeCanvasPx = useCallback(
     (widthPx: number, heightPx: number) => {
-      commit((d) => resizeCanvasPxFast(d, widthPx, heightPx));
+      if (cropSession.current) cropSession.current.changed = true;
+      commit(
+        (d) => resizeCanvasPxFast(d, widthPx, heightPx),
+        !cropSession.current
+      );
     },
     [commit]
   );
@@ -293,11 +301,36 @@ export function InvitationDesigner({
   } | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const backupRef = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<Upload>({ purpose: "layer" });
   const clipboardRef = useRef<InvitationLayer[]>([]);
   const lastEdit = useRef({ key: "", at: 0 });
   const designRef = useRef(design);
   designRef.current = design;
+  const applyCanvasResize = useCallback(() => {
+    const session = cropSession.current;
+    cropSession.current = null;
+    if (session?.changed)
+      recordSnapshot({ ...designRef.current, canvas: session.design.canvas });
+    setActiveTool("select");
+  }, [recordSnapshot]);
+  const cancelCanvasResize = useCallback(() => {
+    const session = cropSession.current;
+    cropSession.current = null;
+    if (session?.changed)
+      commit((d) => ({ ...d, canvas: session.design.canvas }), false);
+    setActiveTool("select");
+  }, [commit]);
+  useEffect(() => {
+    if (activeTool === "crop" && !cropSession.current)
+      cropSession.current = { design: designRef.current, changed: false };
+    if (activeTool !== "crop" && cropSession.current) {
+      const session = cropSession.current;
+      cropSession.current = null;
+      if (session.changed)
+        recordSnapshot({ ...designRef.current, canvas: session.design.canvas });
+    }
+  }, [activeTool, recordSnapshot]);
 
   // The Rust design engine loads in the background. Until it is ready, the TypeScript twin of
   // every operation answers, so nothing waits on it.
@@ -644,6 +677,7 @@ export function InvitationDesigner({
   const sampleColor = useCallback(async () => {
     setActiveTool("eyedropper");
     if (!("EyeDropper" in window)) {
+      setActiveTool("select");
       setSheetTab("swatches");
       setNotice({
         tone: "ok",
@@ -665,8 +699,16 @@ export function InvitationDesigner({
           color: result.sRGBHex,
           colorRole: "custom",
         });
-    } catch {
-      /* Closing the browser sampler leaves the artwork untouched. */
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setSheetTab("swatches");
+        setNotice({
+          tone: "bad",
+          text: "Screen sampling could not start. Choose a colour from the colour panel instead.",
+        });
+      }
+    } finally {
+      setActiveTool("select");
     }
   }, [selectedId, patchLayer]);
 
@@ -860,6 +902,16 @@ export function InvitationDesigner({
         return;
       }
       if (mod) return;
+      if (activeTool === "crop" && e.key === "Escape") {
+        e.preventDefault();
+        cancelCanvasResize();
+        return;
+      }
+      if (activeTool === "crop" && e.key === "Enter") {
+        e.preventDefault();
+        applyCanvasResize();
+        return;
+      }
       if (e.key === "Escape") return setSelectedIds([]);
       if (mode === "pro" && !e.altKey) {
         const k = e.key.toLowerCase();
@@ -946,6 +998,9 @@ export function InvitationDesigner({
   }, [
     selectedId,
     selectedIds,
+    activeTool,
+    applyCanvasResize,
+    cancelCanvasResize,
     mode,
     undo,
     redo,
@@ -1008,6 +1063,11 @@ export function InvitationDesigner({
           shortcut: "Cmd+U",
           icon: <Icon name="image" size={14} />,
           onClick: () => choose({ purpose: "layer" }),
+        },
+        {
+          label: "Open Design Backup…",
+          icon: <Icon name="upload" size={14} />,
+          onClick: () => backupRef.current?.click(),
         },
         {
           label: "Import Card Design…",
@@ -1301,6 +1361,19 @@ export function InvitationDesigner({
       )}
     >
       <input
+        ref={backupRef}
+        type="file"
+        accept="application/json,.json"
+        className="sr-only"
+        tabIndex={-1}
+        aria-label="Choose an invitation design backup"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void importDesignFile(file);
+          event.target.value = "";
+        }}
+      />
+      <input
         ref={fileRef}
         type="file"
         accept="image/png,image/jpeg,image/webp"
@@ -1416,7 +1489,9 @@ export function InvitationDesigner({
             onSelectBatch={setSelectedIds}
             onUpdate={dragLayer}
             onBatchUpdate={dragBatch}
-            onRecord={recordSnapshot}
+            onRecord={(snapshot) => {
+              if (activeTool !== "crop") recordSnapshot(snapshot);
+            }}
             onRestoreSnapshot={restoreState}
             onDropImageFile={dropImageFile}
             onEditText={editText}
@@ -1483,6 +1558,8 @@ export function InvitationDesigner({
               dark={dark}
               activeTool={activeTool}
               onSelectTool={setActiveTool}
+              onApplyCrop={applyCanvasResize}
+              onCancelCrop={cancelCanvasResize}
               design={design}
               selectedLayer={selected}
               selectedIds={selectedIds}
@@ -1745,7 +1822,7 @@ export function InvitationDesigner({
                     onPickImage={(id) => choose({ purpose: "replace", id })}
                     onUploadBackground={() => choose({ purpose: "background" })}
                     onExport={exportDesign}
-                    onImportFile={(f) => void importDesignFile(f)}
+                    onOpenImport={() => backupRef.current?.click()}
                   />
                 ) : (
                   <ColorSwatchesPanel
@@ -1777,7 +1854,6 @@ export function InvitationDesigner({
               >
                 <button
                   type="button"
-                  aria-label="Layers"
                   onClick={() => setBottomTab("layers")}
                   className={cn(
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",

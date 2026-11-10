@@ -234,6 +234,29 @@ describe("the Rust design engine and its TypeScript fallback agree", () => {
     expect(rustPct).toBe(tsPct);
   });
 
+  it("keeps extreme canvas dimensions and aspect limits identical", async () => {
+    for (const [width, height] of [
+      [10000, 200],
+      [200, 10000],
+      [1, 1],
+      [20000, 20000],
+      [1080, 10000],
+      [1080, 200],
+    ]) {
+      const { ts, rust } = await both(() =>
+        resizeCanvasPxFast(house(), width, height)
+      );
+      expect(stable(rust)).toEqual(stable(ts));
+      expect(ts.canvas!.widthPx).toBeGreaterThanOrEqual(200);
+      expect(ts.canvas!.widthPx).toBeLessThanOrEqual(10000);
+      expect(ts.canvas!.heightPx).toBeGreaterThanOrEqual(200);
+      expect(ts.canvas!.heightPx).toBeLessThanOrEqual(10000);
+      expect(ts.canvas!.ratio).toBeGreaterThanOrEqual(0.4);
+      expect(ts.canvas!.ratio).toBeLessThanOrEqual(2.5);
+      expect(ts.layers).toEqual(house().layers);
+    }
+  });
+
   it("handles multi-layer align, distribute, group, and ungroup identically", async () => {
     const base = house();
     const ids = [base.layers[0].id, base.layers[1].id, base.layers[2].id];

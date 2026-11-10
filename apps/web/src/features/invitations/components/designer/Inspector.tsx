@@ -159,7 +159,7 @@ function Num({
           <span
             className={cn(
               "pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono",
-              dark ? "text-zinc-500" : "text-[#9e838f]"
+              dark ? "text-zinc-300" : "text-[#7a5b67]"
             )}
           >
             {suffix}
@@ -402,7 +402,7 @@ export function Inspector({
   onPickImage,
   onUploadBackground,
   onExport,
-  onImportFile,
+  onOpenImport,
   dark = false,
 }: {
   design: InvitationDesign;
@@ -424,7 +424,7 @@ export function Inspector({
   onPickImage: (forLayerId: string) => void;
   onUploadBackground: () => void;
   onExport: () => void;
-  onImportFile: (file: File) => void;
+  onOpenImport: () => void;
   dark?: boolean;
 }) {
   const [unit, setUnit] = useState<"px" | "%">("px");
@@ -985,7 +985,9 @@ export function Inspector({
               <Icon name="download" size={16} />
               Save a copy
             </button>
-            <label
+            <button
+              type="button"
+              onClick={onOpenImport}
               className={cn(
                 "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-within:outline-2 focus-within:outline-[#dfba73]",
                 dark
@@ -995,17 +997,7 @@ export function Inspector({
             >
               <Icon name="upload" size={16} />
               Open a copy
-              <input
-                type="file"
-                accept="application/json,.json"
-                className="sr-only"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onImportFile(f);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+            </button>
           </div>
         </Section>
       </div>
@@ -1359,7 +1351,7 @@ export function Inspector({
               >
                 <path d="M12 2v20M5 12l4-4v8zM19 12l-4-4v8z" />
               </svg>
-              Flip H
+              Horizontal
             </button>
             <button
               type="button"
@@ -1390,7 +1382,7 @@ export function Inspector({
               >
                 <path d="M2 12h20M12 5l-4 4h8zM12 19l-4-4h8z" />
               </svg>
-              Flip V
+              Vertical
             </button>
             <button
               type="button"
@@ -1592,6 +1584,7 @@ export function Inspector({
                   Weight
                 </span>
                 <select
+                  aria-label="Font weight"
                   value={layer.weight}
                   onChange={(e) =>
                     patch({
@@ -1778,12 +1771,16 @@ export function Inspector({
                       <button
                         key={m}
                         type="button"
+                        aria-pressed={fillMode === m}
                         onClick={() => {
                           setFillMode(m);
                           if (m === "none")
                             patch({ fill: null, gradient: undefined });
-                          if (m === "solid" && !layer.fill)
-                            patch({ fill: "#b8864b", gradient: undefined });
+                          if (m === "solid")
+                            patch({
+                              fill: layer.fill || "#b8864b",
+                              gradient: undefined,
+                            });
                           if (m === "gradient" && !layer.gradient)
                             patch({
                               gradient: GRADIENT_PRESETS[0].value,
@@ -1879,6 +1876,7 @@ export function Inspector({
                       </span>
                       <input
                         type="text"
+                        aria-label="Custom gradient CSS"
                         value={layer.gradient ?? ""}
                         placeholder="linear-gradient(135deg, #dfba73, #b8864b)"
                         onChange={(e) =>
@@ -2414,6 +2412,7 @@ export function Inspector({
                   <button
                     key={preset.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() =>
                       patch({
                         shadow: preset.id,

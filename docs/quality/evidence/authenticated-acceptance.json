@@ -40,8 +40,38 @@
     "result": "Pass"
   },
   {
+    "ids": [2, 3, 4, 50, 53, 54],
+    "name": "Canvas size preview cancels, applies and undoes without changing layer data",
+    "result": "Pass"
+  },
+  {
+    "ids": [162, 164, 254],
+    "name": "Sampler API outcomes and shape palette keyboard focus",
+    "result": "Pass"
+  },
+  {
+    "ids": [91, 92, 93, 262, 263],
+    "name": "Draw constrained shapes, cancel gestures and recover after window blur",
+    "result": "Pass"
+  },
+  {
+    "ids": [118, 119, 120, 122, 123, 124, 254],
+    "name": "Available font choices and editor accessibility",
+    "result": "Pass"
+  },
+  {
+    "ids": [22, 49, 53, 54, 102, 167, 174, 175, 177],
+    "name": "Select, move, resize and undo a group as a single object",
+    "result": "Pass"
+  },
+  {
     "ids": [133, 134, 136, 137, 138, 146, 147, 148, 150],
     "name": "Upload PNG, JPEG and WebP through local storage and preserve their editable frames",
+    "result": "Pass"
+  },
+  {
+    "ids": [235, 236],
+    "name": "Cancel a pending export and reject a missing picture without a blank download",
     "result": "Pass"
   },
   {

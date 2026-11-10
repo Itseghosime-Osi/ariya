@@ -175,6 +175,7 @@ function RowButton({
     <button
       type="button"
       aria-label={label}
+      title={label}
       aria-pressed={pressed}
       disabled={disabled}
       onClick={(e) => {
@@ -254,8 +255,9 @@ function SortableRow({
       className="relative mb-1 list-none"
     >
       <div
-        role="button"
-        tabIndex={0}
+        role="group"
+        aria-label={`Layer ${layerLabel(layer)}`}
+        tabIndex={-1}
         aria-current={on ? "true" : undefined}
         onClick={(e) => {
           if (e.shiftKey || e.metaKey || e.ctrlKey) {
@@ -266,7 +268,7 @@ function SortableRow({
           }
         }}
         onKeyDown={(e) => {
-          if (e.target !== e.currentTarget) return;
+          if (!(e.target as HTMLElement).closest("[data-layer-select]")) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             if (e.shiftKey || e.metaKey || e.ctrlKey) {
@@ -299,6 +301,7 @@ function SortableRow({
           {...attributes}
           {...listeners}
           aria-label="Drag to reorder layer"
+          title="Drag to reorder layer"
           className={cn(
             "grid h-6 w-4 shrink-0 cursor-grab place-items-center active:cursor-grabbing",
             dark
@@ -348,9 +351,12 @@ function SortableRow({
             )}
           />
         ) : (
-          <span
+          <button
+            type="button"
+            data-layer-select
+            aria-pressed={on}
             className={cn(
-              "min-w-0 flex-1 truncate text-xs font-medium",
+              "min-w-0 flex-1 truncate text-left text-xs font-medium",
               on
                 ? dark
                   ? "text-white"
@@ -366,7 +372,7 @@ function SortableRow({
             }}
           >
             {layerLabel(layer)}
-          </span>
+          </button>
         )}
 
         {/* Visibility Toggle */}
@@ -753,86 +759,89 @@ export function LayersDock({
                 ))}
 
                 {/* Pinned Foundation Background Layer */}
-                <li
-                  role="button"
-                  tabIndex={0}
-                  data-testid="layer-row-background"
-                  onClick={() => onSelect("background")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      onSelect("background");
-                    }
-                  }}
-                  className={cn(
-                    "mt-1.5 flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors cursor-pointer select-none",
-                    selectedId === "background"
-                      ? dark
-                        ? "border-[#dfba73] bg-[#3d2733] text-[#dfba73] shadow-xs font-semibold"
-                        : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] shadow-xs font-semibold"
-                      : dark
-                        ? "border-transparent bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08]"
-                        : "border-transparent bg-black/[0.02] text-[#2d1f24] hover:bg-black/[0.05]"
-                  )}
-                >
-                  {/* Visibility eye icon */}
-                  <span className="grid h-5 w-5 place-items-center opacity-60">
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  </span>
-
-                  {/* Background Thumbnail preview */}
-                  <div
-                    className={cn(
-                      "h-7 w-7 shrink-0 rounded border overflow-hidden flex items-center justify-center shadow-2xs",
-                      dark
-                        ? "border-white/20 bg-black/40"
-                        : "border-black/10 bg-white"
-                    )}
-                    style={{
-                      backgroundColor:
-                        background?.kind === "color" && background.color
-                          ? background.color
-                          : background?.kind === "velvet"
-                            ? "#4a0d18"
-                            : "#ede6da",
+                <li className="list-none">
+                  <button
+                    type="button"
+                    aria-pressed={selectedId === "background"}
+                    tabIndex={0}
+                    data-testid="layer-row-background"
+                    onClick={() => onSelect("background")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSelect("background");
+                      }
                     }}
-                  >
-                    {background?.kind === "image" && background.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={background.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : background?.kind === "velvet" ? (
-                      <span className="h-4 w-4 rounded-sm bg-[#5c1322] border border-[#dfba73]/40" />
-                    ) : (
-                      <span className="h-4 w-4 rounded-sm bg-[#fcfbfa] border border-black/10 shadow-2xs" />
+                    className={cn(
+                      "mt-1.5 w-full text-left flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors cursor-pointer select-none",
+                      selectedId === "background"
+                        ? dark
+                          ? "border-[#dfba73] bg-[#3d2733] text-[#dfba73] shadow-xs font-semibold"
+                          : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] shadow-xs font-semibold"
+                        : dark
+                          ? "border-transparent bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08]"
+                          : "border-transparent bg-black/[0.02] text-[#2d1f24] hover:bg-black/[0.05]"
                     )}
-                  </div>
-
-                  {/* Layer Name */}
-                  <span className="flex-1 truncate font-medium">
-                    Background
-                  </span>
-
-                  {/* Locked icon: background is the foundation layer */}
-                  <span
-                    title="Foundation canvas layer (locked)"
-                    className="opacity-40"
                   >
-                    <Icon name="lock" size={13} />
-                  </span>
+                    {/* Visibility eye icon */}
+                    <span className="grid h-5 w-5 place-items-center opacity-60">
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </span>
+
+                    {/* Background Thumbnail preview */}
+                    <div
+                      className={cn(
+                        "h-7 w-7 shrink-0 rounded border overflow-hidden flex items-center justify-center shadow-2xs",
+                        dark
+                          ? "border-white/20 bg-black/40"
+                          : "border-black/10 bg-white"
+                      )}
+                      style={{
+                        backgroundColor:
+                          background?.kind === "color" && background.color
+                            ? background.color
+                            : background?.kind === "velvet"
+                              ? "#4a0d18"
+                              : "#ede6da",
+                      }}
+                    >
+                      {background?.kind === "image" && background.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={background.imageUrl}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : background?.kind === "velvet" ? (
+                        <span className="h-4 w-4 rounded-sm bg-[#5c1322] border border-[#dfba73]/40" />
+                      ) : (
+                        <span className="h-4 w-4 rounded-sm bg-[#fcfbfa] border border-black/10 shadow-2xs" />
+                      )}
+                    </div>
+
+                    {/* Layer Name */}
+                    <span className="flex-1 truncate font-medium">
+                      Background
+                    </span>
+
+                    {/* Locked icon: background is the foundation layer */}
+                    <span
+                      title="Foundation canvas layer (locked)"
+                      className="opacity-40"
+                    >
+                      <Icon name="lock" size={13} />
+                    </span>
+                  </button>
                 </li>
               </ul>
             </SortableContext>

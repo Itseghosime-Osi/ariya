@@ -1,0 +1,25 @@
+{
+  "scope": "Editor interface only; invitation artwork excluded. WCAG 2 A/AA and WCAG 2.1 AA automated checks; not a manual accessibility certification.",
+  "results": [
+    {
+      "view": "accessibility-1280-dark",
+      "violations": []
+    },
+    {
+      "view": "accessibility-1280-light",
+      "violations": []
+    },
+    {
+      "view": "accessibility-390-dark",
+      "violations": []
+    },
+    {
+      "view": "accessibility-390-light",
+      "violations": []
+    },
+    {
+      "view": "accessibility",
+      "violations": []
+    }
+  ]
+}

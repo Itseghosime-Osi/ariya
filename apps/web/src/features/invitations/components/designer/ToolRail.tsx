@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import type { StudioTool } from "./ContextualOptionsBar";
@@ -39,7 +40,10 @@ function ToolButton({
   hasFlyout,
   dark,
   children,
+  ref,
+  ...buttonProps
 }: {
+  ref?: React.Ref<HTMLButtonElement>;
   label: string;
   shortcut?: string;
   onClick: () => void;
@@ -48,11 +52,17 @@ function ToolButton({
   hasFlyout?: boolean;
   dark?: boolean;
   children: React.ReactNode;
-}) {
+} & Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "children" | "onClick"
+>) {
   return (
     <div className="relative group">
       <button
+        {...buttonProps}
+        ref={ref}
         type="button"
+        aria-pressed={active}
         aria-label={label}
         aria-keyshortcuts={shortcut}
         title={shortcut ? `${label} (${shortcut})` : label}
@@ -283,22 +293,10 @@ export function ToolRail({
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   });
-  const flyoutRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setPrimaryColor(activeColor);
   }, [activeColor]);
-
-  useEffect(() => {
-    if (!shapesMenuOpen) return;
-    function onDocClick(e: MouseEvent) {
-      if (flyoutRef.current && !flyoutRef.current.contains(e.target as Node)) {
-        setShapesMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [shapesMenuOpen]);
 
   return (
     <div
@@ -330,7 +328,7 @@ export function ToolRail({
 
         {/* Crop & Artboard Tool (C) */}
         <ToolButton
-          label="Crop & Aspect"
+          label="Canvas size & ratio"
           shortcut="C"
           dark={dark}
           active={activeTool === "crop"}
@@ -373,22 +371,89 @@ export function ToolRail({
         </ToolButton>
 
         {/* Shapes Flyout Tool (U) */}
-        <ToolButton
-          label="Vector Shapes & Geometry"
-          shortcut="U"
-          hasFlyout
-          dark={dark}
-          active={activeTool === "shape" || shapesMenuOpen}
-          onClick={() => {
-            onSelectTool?.("shape");
-            setShapesMenuOpen((prev) => !prev);
-          }}
+        <DropdownMenu.Root
+          open={shapesMenuOpen}
+          onOpenChange={setShapesMenuOpen}
         >
-          <svg {...svg}>
-            <rect x="3" y="3" width="10" height="10" rx="1.5" />
-            <circle cx="16" cy="16" r="5" />
-          </svg>
-        </ToolButton>
+          <DropdownMenu.Trigger asChild>
+            <ToolButton
+              label="Vector Shapes & Geometry"
+              shortcut="U"
+              hasFlyout
+              dark={dark}
+              active={activeTool === "shape" || shapesMenuOpen}
+              onClick={() => {
+                onSelectTool?.("shape");
+              }}
+            >
+              <svg {...svg}>
+                <rect x="3" y="3" width="10" height="10" rx="1.5" />
+                <circle cx="16" cy="16" r="5" />
+              </svg>
+            </ToolButton>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              side="right"
+              align="start"
+              sideOffset={8}
+              collisionPadding={12}
+              aria-label="Shape presets"
+              aria-labelledby={undefined}
+              className={cn(
+                "z-50 rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
+                dark
+                  ? "border-[#382630] bg-[#20161b] text-white"
+                  : "border-[#e8e2d6] bg-[#ffffff] text-[#2d1f24] shadow-black/15"
+              )}
+            >
+              <div
+                className={cn(
+                  "mb-2 px-1 text-[10px] font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                )}
+              >
+                Vector Shapes & Geometry
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {SHAPES_CATALOG.map((shape) => (
+                  <DropdownMenu.Item
+                    key={shape.kind}
+                    onSelect={() => {
+                      if (
+                        shape.kind === "rect" ||
+                        shape.kind === "ellipse" ||
+                        shape.kind === "arch" ||
+                        shape.kind === "line" ||
+                        shape.kind === "star"
+                      ) {
+                        onSelectShapeKind?.(shape.kind);
+                      }
+                      onSelectTool?.("shape");
+                      onAdd(shape.kind);
+                      setShapesMenuOpen(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border p-2 text-left text-xs font-medium transition",
+                      activeShapeKind === shape.kind &&
+                        (dark
+                          ? "border-[#dfba73] bg-[#dfba73]/10"
+                          : "border-[#4a0e17] bg-[#4a0e17]/5"),
+                      dark
+                        ? "border-white/5 text-zinc-200 hover:border-[#dfba73]/40 hover:bg-white/10 hover:text-white"
+                        : "border-[#e8e2d6] text-[#3b2b31] hover:border-[#4a0e17]/30 hover:bg-[#4a0e17]/5 hover:text-[#4a0e17]"
+                    )}
+                  >
+                    <span className="shrink-0 text-[#b8864b]">
+                      {shape.icon}
+                    </span>
+                    <span className="truncate">{shape.label}</span>
+                  </DropdownMenu.Item>
+                ))}
+              </div>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
 
         {/* Gradient Tool (G) */}
         <ToolButton
@@ -612,65 +677,6 @@ export function ToolRail({
           </svg>
         </button>
       </div>
-
-      {/* Flyout Shapes Sub-Palette */}
-      {shapesMenuOpen && (
-        <div
-          ref={flyoutRef}
-          role="menu"
-          aria-label="Shape presets"
-          className={cn(
-            "absolute z-50 rounded-xl border p-3 shadow-2xl backdrop-blur-md max-lg:bottom-[calc(100%+0.5rem)] max-lg:left-0 lg:left-full lg:top-16 lg:ml-2 w-64 animate-in fade-in zoom-in-95 duration-150",
-            dark
-              ? "border-[#382630] bg-[#20161b] text-white"
-              : "border-[#e8e2d6] bg-[#ffffff] text-[#2d1f24] shadow-black/15"
-          )}
-        >
-          <div
-            className={cn(
-              "mb-2 px-1 text-[10px] font-semibold uppercase tracking-wider",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
-            )}
-          >
-            Vector Shapes & Geometry
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {SHAPES_CATALOG.map((shape) => (
-              <button
-                key={shape.kind}
-                type="button"
-                onClick={() => {
-                  if (
-                    shape.kind === "rect" ||
-                    shape.kind === "ellipse" ||
-                    shape.kind === "arch" ||
-                    shape.kind === "line" ||
-                    shape.kind === "star"
-                  ) {
-                    onSelectShapeKind?.(shape.kind);
-                  }
-                  onSelectTool?.("shape");
-                  onAdd(shape.kind);
-                  setShapesMenuOpen(false);
-                }}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg border p-2 text-left text-xs font-medium transition",
-                  activeShapeKind === shape.kind &&
-                    (dark
-                      ? "border-[#dfba73] bg-[#dfba73]/10"
-                      : "border-[#4a0e17] bg-[#4a0e17]/5"),
-                  dark
-                    ? "border-white/5 text-zinc-200 hover:border-[#dfba73]/40 hover:bg-white/10 hover:text-white"
-                    : "border-[#e8e2d6] text-[#3b2b31] hover:border-[#4a0e17]/30 hover:bg-[#4a0e17]/5 hover:text-[#4a0e17]"
-                )}
-              >
-                <span className="shrink-0 text-[#b8864b]">{shape.icon}</span>
-                <span className="truncate">{shape.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

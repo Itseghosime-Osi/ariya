@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import type {
   InvitationDesign,
@@ -23,9 +23,52 @@ export type StudioTool =
   | "hand"
   | "zoom";
 
+function CanvasDimensionInput({
+  value,
+  onValue,
+  className,
+  "aria-label": label,
+}: {
+  value: number;
+  onValue: (value: number) => void;
+  className: string;
+  "aria-label": string;
+}) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+  const commit = () => {
+    const n = Number(text);
+    if (!Number.isFinite(n) || !text.trim()) {
+      setText(String(value));
+      return;
+    }
+    const next = Math.max(200, Math.min(10000, Math.round(n)));
+    setText(String(next));
+    if (next !== value) onValue(next);
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={label}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") setText(String(value));
+      }}
+      className={className}
+    />
+  );
+}
+
 export function ContextualOptionsBar({
   activeTool,
   onSelectTool,
+  onApplyCrop,
+  onCancelCrop,
   design,
   selectedLayer,
   selectedIds,
@@ -53,6 +96,8 @@ export function ContextualOptionsBar({
 }: {
   activeTool: StudioTool;
   onSelectTool: (tool: StudioTool) => void;
+  onApplyCrop?: () => void;
+  onCancelCrop?: () => void;
   design: InvitationDesign;
   selectedLayer: InvitationLayer | null;
   selectedIds: string[];
@@ -293,7 +338,7 @@ export function ContextualOptionsBar({
             Ratio:
           </span>
           <select
-            aria-label="Crop preset"
+            aria-label="Canvas size preset"
             onChange={(e) => {
               const val = e.target.value;
               if (val === "portrait") onResizeCanvasPx?.(1080, 1512);
@@ -369,12 +414,11 @@ export function ContextualOptionsBar({
             >
               W:
             </span>
-            <input
-              type="number"
-              aria-label="Crop Width"
+            <CanvasDimensionInput
+              aria-label="Canvas width"
               value={designDimensionsPx(design).width}
-              onChange={(e) => {
-                const w = Math.max(200, Math.min(6000, Number(e.target.value)));
+              onValue={(value) => {
+                const w = Math.max(200, Math.min(10000, value));
                 onResizeCanvasPx?.(w, designDimensionsPx(design).height);
               }}
               className={cn(
@@ -392,12 +436,11 @@ export function ContextualOptionsBar({
             >
               H:
             </span>
-            <input
-              type="number"
-              aria-label="Crop Height"
+            <CanvasDimensionInput
+              aria-label="Canvas height"
               value={designDimensionsPx(design).height}
-              onChange={(e) => {
-                const h = Math.max(200, Math.min(6000, Number(e.target.value)));
+              onValue={(value) => {
+                const h = Math.max(200, Math.min(10000, value));
                 onResizeCanvasPx?.(designDimensionsPx(design).width, h);
               }}
               className={cn(
@@ -411,8 +454,10 @@ export function ContextualOptionsBar({
 
           <button
             type="button"
-            title="Commit Crop (Enter)"
-            onClick={() => onSelectTool("select")}
+            title="Apply canvas size (Enter)"
+            onClick={() =>
+              onApplyCrop ? onApplyCrop() : onSelectTool("select")
+            }
             className="flex items-center gap-1 rounded bg-[#dfba73] px-2.5 py-1 text-xs font-bold text-[#20161b] hover:bg-[#edd49d] transition-colors shadow-xs"
           >
             <svg
@@ -425,13 +470,15 @@ export function ContextualOptionsBar({
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Commit</span>
+            <span>Apply</span>
           </button>
 
           <button
             type="button"
-            title="Cancel Crop (Esc)"
-            onClick={() => onSelectTool("select")}
+            title="Cancel canvas resize (Esc)"
+            onClick={() =>
+              onCancelCrop ? onCancelCrop() : onSelectTool("select")
+            }
             className={cn(
               "flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium transition-colors",
               dark
@@ -646,6 +693,7 @@ export function ContextualOptionsBar({
                 <button
                   type="button"
                   aria-pressed={isSelected}
+                  title={`Draw ${s.label}; hold Shift for equal sides, Alt to draw from the centre, Escape to cancel`}
                   onClick={() => onSelectShapeKind?.(s.kind)}
                   className={cn(
                     "rounded-l border-y border-l px-2.5 py-1 text-xs font-medium transition-all",

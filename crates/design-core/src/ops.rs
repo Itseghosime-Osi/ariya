@@ -626,9 +626,22 @@ pub fn is_editable(layer: &Layer) -> bool {
 
 /// Resizes the canvas in pixels and updates its aspect ratio.
 pub fn resize_canvas_px(design: &Design, width_px: u32, height_px: u32) -> Design {
-    let width_px = width_px.clamp(200, 10000);
-    let height_px = height_px.clamp(200, 10000);
-    let ratio = round_js((width_px as f64 / height_px as f64) * 1000.0) / 1000.0;
+    let mut width_px = width_px.clamp(200, 10000);
+    let mut height_px = height_px.clamp(200, 10000);
+    let requested_ratio = width_px as f64 / height_px as f64;
+    let safe_ratio = clamp(requested_ratio, 0.4, 2.5);
+    if safe_ratio != requested_ratio {
+        if height_px != design.canvas_height_px() && width_px == design.canvas_width_px() {
+            width_px = round_js(height_px as f64 * safe_ratio) as u32;
+        } else {
+            height_px = round_js(width_px as f64 / safe_ratio) as u32;
+        }
+    }
+    let ratio = clamp(
+        round_js((width_px as f64 / height_px as f64) * 1000.0) / 1000.0,
+        0.4,
+        2.5,
+    );
     let mut next = design.clone();
     let existing = next.canvas.unwrap_or(Canvas {
         ratio,

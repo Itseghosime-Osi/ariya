@@ -105,7 +105,7 @@ export function StudioBottomDock({
         <button
           type="button"
           title="Reset Zoom to Fit (Cmd+0)"
-          aria-label="Reset zoom to fit"
+          aria-label={`${Math.round(zoom * 100)}% — reset zoom to fit`}
           onClick={onFit}
           className={cn(
             "rounded-md px-2 py-0.5 font-mono text-xs font-semibold tabular-nums transition-colors",

@@ -19,6 +19,13 @@ This is a verification record, not a statement that all 283 comparison checks pa
 - Keep the fresh template's RSVP deadline beside its entry seal, deduplicate repeated venue parts and improve long-field spacing. Existing saved layouts retain their positions.
 - Load saved database documents correctly instead of rebuilding the default invitation on refresh. Use an optimistic revision check to reject stale tab writes, and keep a per-tab recovery draft for failed saves.
 - Preserve alpha-capable formats during image optimization and validate background images before export. Add missing blue-channel editing and keyboard colour-picker access.
+- Resize selected groups as one proportional unit, including typography, corners and effects; retain an opposite anchor and constrain the group before any child exceeds model limits.
+- Give canvas sizing a genuine Apply/Cancel session and one undo entry. Clamp extreme pixel dimensions consistently in Rust and TypeScript; label this as document resizing rather than image cropping.
+- Cancel exports while fonts, pictures or raster work are pending. Remove temporary artwork and prevent a late download; retain the paper's inset border while excluding its outer studio shadow.
+- Draw equal-sided shapes with Shift and draw from the centre with Alt. Discard drawing previews on Escape, pointer cancellation or window blur; clean up listeners on unmount.
+- Replace the shape flyout with Radix keyboard/focus handling. Correct Layers list semantics and nested controls, accessible label mismatches, numeric-unit contrast and segmented radio keyboard operation.
+- Use working fallback font stacks and accurate typeface labels. Reset the sampler after all outcomes and offer manual colour controls if screen sampling is unavailable or denied.
+- Keep a design-backup picker mounted independently of layer selection and expose it in File. Switching an imported mixed fill/gradient layer to solid now clears the gradient.
 
 ## Browser checks
 
@@ -61,21 +68,34 @@ The local Supabase auth/storage API routing issue was isolated to container loop
 - Grid snapping, guide creation, locking, unlocking and clearing.
 - PNG/JPEG/WebP uploads, saved image references, contain/cover, focal positioning and frame-preserving replacement.
 - Damaged-file rejection followed by successful export.
+- Canvas-size Apply/Cancel/undo, group movement/scaling and exact undo/redo.
+- Shift/Alt drawing and preview cancellation on Escape, pointer cancellation and window blur.
+- Sampler API success, cancellation, rejection and unavailable-browser outcomes using API doubles. Native OS screen sampling remains manual.
+- Offered font families, size/weight/italic, all three alignments and four case modes, tracking/line height and persisted typography.
+- Zero axe violations in the exercised desktop and phone editor views, light and dark, and in the open shape menu. User artwork is excluded from the interface scans.
 - PNG/JPEG/PDF downloads with uploaded images and phone/tablet/desktop control reachability.
 
 [Authenticated test evidence](evidence/authenticated-acceptance.json). The exported PNG sample pass also decoded successfully with ZXing. No real guest entry code was used.
+
+`designer-controls.spec.ts` separately verifies all eight shape insertions, shape geometry, linear/radial/no/solid fills, imported mixed-fill recovery, outline colour/width, all twelve blend modes, keyboard filter/opacity sliders, soft/foil/glow effects, rename, hide/show, both flips, exact 90/180-degree rotation, front/back stacking and delete/undo. It also scans the open gradient controls with axe. [Control evidence](evidence/controls-acceptance.json).
+
+[Interface accessibility results](evidence/interface-accessibility.json) retain the tested viewport/theme combinations. Automated results do not establish complete accessibility or native device support.
 
 The older isolated-fixture measurements remain supplementary evidence. Current desktop/phone screenshots below come from the authenticated Next.js test, restored to the clean invitation template after testing.
 
 ## Work remaining
 
-The matrix deliberately retains partial and untested items; this branch does not claim that all 283 comparison checks pass. Remaining work includes the complete transform/handle/gesture matrix, group transforms, crop interaction semantics, every offered text/font/shape/effect combination, export visual comparisons across those combinations, full keyboard/accessibility checks, and broader browser/device testing. Photopea-only raster retouching, RAW, PSD, channels, multi-page and video workflows are comparison items and are not implemented by this change. Their scope classification is still open in the matrix.
+The matrix currently records **121 verified, 23 partial, 92 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
+
+Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, guest-facing personalization and protected-pass styling, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
+
+The 47 not-applicable items remain visible and unchecked. They describe unoffered Photopea features such as raster retouching, path/Bézier editing, RAW/PSD, channel editing, nested groups, multi-page and video workflows. They are not reported as implemented or passing. See the [control inventory](designer-control-inventory.md) for the current boundaries.
 
 ## Regression checks
 
 - Production Next.js build, with build-only environment placeholders: pass.
 - TypeScript and ESLint: pass.
-- Unit tests: 871 passing across 103 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated resizing, export sizing and image-proxy restrictions.
+- Unit tests: 1,068 passing across 107 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated/group resizing, drawing modifiers, export cancellation/sizing and image-proxy restrictions.
 - Rust workspace tests: 246 passing. Rust/WASM artifacts were rebuilt with the pinned Rust 1.99.1 toolchain.
 - No new application dependencies, production debug routes, environment files, deployment changes or database migrations were added.
 

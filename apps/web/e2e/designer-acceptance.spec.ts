@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
-import { writeFileSync, mkdirSync } from "node:fs";
+import AxeBuilder from "@axe-core/playwright";
+import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 test.afterEach(async ({ page }, info) => {
@@ -96,7 +97,7 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
   };
   const select = async (id: string, p: Page = page) => {
     const row = p.getByTestId(`layer-row-${id}`);
-    await row.locator("[title]").first().click();
+    await row.locator("[data-layer-select]").click();
   };
 
   if (process.env.STUDIO_TEST_EMAIL) {
@@ -104,7 +105,7 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
     await page.locator("#signin-email").fill(process.env.STUDIO_TEST_EMAIL);
     await page.locator("#signin-password").fill("Celebration2026!");
     await page.getByRole("button", { name: /sign in/i }).click();
-    await page.waitForURL(/\/events/);
+    await page.waitForURL(/\/events/, { timeout: 45000 });
   } else await createAndLoginUser(page, undefined, "studio_acceptance");
   const { eventId } = await createTestEvent(page, {
     title: "Àríyá studio acceptance",
@@ -389,6 +390,374 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
       await saved();
     }
   );
+
+  await record(
+    [2, 3, 4, 50, 53, 54],
+    "Canvas size preview cancels, applies and undoes without changing layer data",
+    async () => {
+      await page.keyboard.press("Control+d");
+      const before = await json();
+      await page
+        .getByRole("button", { name: "Canvas size & ratio", exact: true })
+        .click();
+      const width = page.getByLabel("Canvas width", { exact: true });
+      await width.fill("1200");
+      await width.blur();
+      await expect(width).toHaveValue("1200");
+      await page.getByRole("button", { name: "Cancel", exact: true }).click();
+      await expect(page.getByTestId("crop-overlay")).toHaveCount(0);
+      expect((await json()).canvas).toEqual(before.canvas);
+      await page
+        .getByRole("button", { name: "Canvas size & ratio", exact: true })
+        .click();
+      await page.getByLabel("Canvas size preset").selectOption("square");
+      await page.getByRole("button", { name: "Apply", exact: true }).click();
+      const applied = await json();
+      expect(applied.canvas.widthPx).toBe(1080);
+      expect(applied.canvas.heightPx).toBe(1080);
+      expect(applied.layers).toEqual(before.layers);
+      await page.keyboard.press("Control+z");
+      expect((await json()).canvas).toEqual(before.canvas);
+      await page
+        .getByRole("button", { name: "Canvas size & ratio", exact: true })
+        .click();
+      await width.fill("10000");
+      await width.blur();
+      expect(
+        Number(
+          await page.getByLabel("Canvas height", { exact: true }).inputValue()
+        )
+      ).toBeGreaterThanOrEqual(4000);
+      await page.getByRole("button", { name: "Cancel", exact: true }).click();
+      await saved();
+    }
+  );
+
+  await record(
+    [162, 164, 254],
+    "Sampler API outcomes and shape palette keyboard focus",
+    async () => {
+      await page.keyboard.press("v");
+      await select("names");
+      for (const outcome of ["success", "cancel", "denied", "unsupported"]) {
+        const before = (await json()).layers.find(
+          (l: { id: string }) => l.id === "names"
+        );
+        await page.evaluate((outcome) => {
+          if (outcome === "unsupported") {
+            Reflect.deleteProperty(window, "EyeDropper");
+            return;
+          }
+          Object.defineProperty(window, "EyeDropper", {
+            configurable: true,
+            value: class {
+              async open() {
+                if (outcome === "cancel")
+                  throw new DOMException("Cancelled", "AbortError");
+                if (outcome === "denied")
+                  throw new DOMException("Denied", "NotAllowedError");
+                return { sRGBHex: "#123456" };
+              }
+            },
+          });
+        }, outcome);
+        await page
+          .getByRole("button", { name: "Eyedropper sampler", exact: true })
+          .click();
+        await expect(
+          page.getByRole("button", { name: "Eyedropper sampler", exact: true })
+        ).toHaveAttribute("aria-pressed", "false");
+        const after = (await json()).layers.find(
+          (l: { id: string }) => l.id === "names"
+        );
+        if (outcome === "success") expect(after.color).toBe("#123456");
+        else expect(after).toEqual(before);
+        if (outcome === "denied")
+          await expect(
+            page.getByText("Screen sampling could not start.", { exact: false })
+          ).toBeVisible();
+        await page
+          .getByRole("button", { name: "Properties", exact: true })
+          .click();
+      }
+      const trigger = page.getByRole("button", {
+        name: "Vector Shapes & Geometry",
+        exact: true,
+      });
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      const menu = page.getByRole("menu", { name: "Shape presets" });
+      await expect(menu).toBeVisible();
+      const items = menu.getByRole("menuitem");
+      await expect(items.first()).toBeFocused();
+      await page.keyboard.press("ArrowDown");
+      await expect(items.nth(1)).toBeFocused();
+      const scan = await new AxeBuilder({ page })
+        .include('[role="menu"]')
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+        .analyze();
+      expect(
+        scan.violations.map((v) => ({
+          id: v.id,
+          nodes: v.nodes.map((n) => n.target),
+        }))
+      ).toEqual([]);
+      await page.keyboard.press("Escape");
+      await expect(menu).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+  );
+  await record(
+    [91, 92, 93, 262, 263],
+    "Draw constrained shapes, cancel gestures and recover after window blur",
+    async () => {
+      const before = await json();
+      await page.keyboard.press("u");
+      await page
+        .getByRole("toolbar", { name: "Contextual Tool Options" })
+        .getByRole("button", { name: "Rectangle", exact: true })
+        .click();
+      const r = (await card().boundingBox())!;
+      const start = { x: r.x + r.width * 0.55, y: r.y + r.height * 0.45 };
+      for (const cancel of ["Escape", "blur", "pointercancel"]) {
+        await page.mouse.move(start.x, start.y);
+        await page.mouse.down();
+        await page.mouse.move(start.x + 50, start.y + 30);
+        await expect(page.getByTestId("drawing-box-preview")).toBeVisible();
+        if (cancel === "Escape") await page.keyboard.press("Escape");
+        else
+          await page.evaluate(
+            (kind) =>
+              window.dispatchEvent(
+                kind === "blur"
+                  ? new Event("blur")
+                  : new PointerEvent("pointercancel")
+              ),
+            cancel
+          );
+        await page.mouse.up();
+        await expect(page.getByTestId("drawing-box-preview")).toHaveCount(0);
+        expect((await json()).layers).toEqual(before.layers);
+      }
+      await page.keyboard.down("Shift");
+      await page.keyboard.down("Alt");
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      await page.mouse.move(start.x + 40, start.y + 25);
+      await page.mouse.up();
+      await page.keyboard.up("Alt");
+      await page.keyboard.up("Shift");
+      const after = await json(),
+        layer = after.layers.at(-1);
+      expect(after.layers).toHaveLength(before.layers.length + 1);
+      expect((layer.width * r.width) / 100).toBeCloseTo(
+        (layer.height * r.height) / 100,
+        0
+      );
+      expect(((layer.x + layer.width / 2) * r.width) / 100 + r.x).toBeCloseTo(
+        start.x,
+        0
+      );
+      expect(((layer.y + layer.height / 2) * r.height) / 100 + r.y).toBeCloseTo(
+        start.y,
+        0
+      );
+      await page.keyboard.press("v");
+      await page.keyboard.press("Control+z");
+      expect((await json()).layers).toEqual(before.layers);
+    }
+  );
+  await record(
+    [118, 119, 120, 122, 123, 124, 254],
+    "Available font choices and editor accessibility",
+    async () => {
+      await page.keyboard.press("v");
+      await select("names");
+      for (const font of ["display", "sans", "script", "serif", "mono"]) {
+        await page.getByLabel("Font typeface").selectOption(font);
+        await page.evaluate(() => document.fonts.ready);
+        const family = await card()
+          .locator('[data-layer-id="names"]')
+          .evaluate((el) => getComputedStyle(el).fontFamily);
+        expect(family).not.toBe("");
+        if (font === "serif") expect(family).toContain("Georgia");
+      }
+      await page.getByLabel("Font typeface").selectOption("display");
+      const textLayer = card().locator('[data-layer-id="names"]');
+      await value("Size (px)", "54");
+      await value("Line height", "1.8");
+      await value("Letter gap", "0.12");
+      await page.getByLabel("Font weight", { exact: true }).selectOption("700");
+      await page.getByRole("button", { name: "Italic", exact: true }).click();
+      await page.getByLabel("Text transform").selectOption("uppercase");
+      await page.getByRole("radio", { name: "Right", exact: true }).click();
+      const alignment = page.getByRole("radiogroup", {
+        name: "Alignment",
+        exact: true,
+      });
+      await alignment
+        .getByRole("radio", { name: "Right", exact: true })
+        .focus();
+      await page.keyboard.press("Home");
+      await expect(
+        alignment.getByRole("radio", { name: "Left", exact: true })
+      ).toBeFocused();
+      await expect(textLayer).toHaveCSS("text-align", "left");
+      await page.keyboard.press("ArrowRight");
+      await expect(textLayer).toHaveCSS("text-align", "center");
+      await page.keyboard.press("End");
+      await expect(textLayer).toHaveCSS("text-align", "right");
+      for (const casing of ["none", "lowercase", "capitalize", "uppercase"]) {
+        await page.getByLabel("Text transform").selectOption(casing);
+        await expect(textLayer).toHaveCSS("text-transform", casing);
+      }
+      const style = await textLayer.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          size: parseFloat(s.fontSize),
+          line: parseFloat(s.lineHeight),
+          gap: parseFloat(s.letterSpacing),
+          weight: s.fontWeight,
+          italic: s.fontStyle,
+          transform: s.textTransform,
+          align: s.textAlign,
+        };
+      });
+      expect(style.line / style.size).toBeCloseTo(1.8, 2);
+      expect(style.gap / style.size).toBeCloseTo(0.12, 2);
+      expect(style).toMatchObject({
+        weight: "700",
+        italic: "italic",
+        transform: "uppercase",
+        align: "right",
+      });
+      const typed = (await json()).layers.find(
+        (l: { id: string }) => l.id === "names"
+      );
+      await saved();
+      await page.reload();
+      await select("names");
+      expect(
+        (await json()).layers.find((l: { id: string }) => l.id === "names")
+      ).toEqual(typed);
+      const scan = await new AxeBuilder({ page })
+        .include('[data-testid="invitation-designer"]')
+        .exclude("[data-invitation-canvas]")
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .analyze();
+      writeFileSync(
+        test.info().outputPath("accessibility.json"),
+        JSON.stringify(
+          scan.violations.map((v) => ({
+            id: v.id,
+            impact: v.impact,
+            help: v.help,
+            nodes: v.nodes.map((n) => n.target),
+          })),
+          null,
+          2
+        )
+      );
+      expect(
+        scan.violations.map((v) => ({
+          id: v.id,
+          nodes: v.nodes.map((n) => n.target),
+        }))
+      ).toEqual([]);
+    }
+  );
+  await record(
+    [22, 49, 53, 54, 102, 167, 174, 175, 177],
+    "Select, move, resize and undo a group as a single object",
+    async () => {
+      await insert("Rectangle");
+      let draft = await json();
+      const left = draft.layers.at(-1).id;
+      await value("Width", "200");
+      await value("Height", "100");
+      await value("X", "100");
+      await value("Y", "700");
+      await insert("Circle / Oval");
+      draft = await json();
+      const right = draft.layers.at(-1).id;
+      await value("Width", "200");
+      await value("Height", "100");
+      await value("X", "500");
+      await value("Y", "700");
+      await select(left);
+      await page
+        .getByTestId(`layer-row-${right}`)
+        .locator("[data-layer-select]")
+        .click({ modifiers: ["Shift"] });
+      await expect(page.getByTestId("inspector-multiselect")).toBeVisible();
+      await page.keyboard.press("Control+g");
+      const grouped = await json();
+      expect(
+        grouped.layers.find((l: { id: string }) => l.id === left).groupId
+      ).toBe(
+        grouped.layers.find((l: { id: string }) => l.id === right).groupId
+      );
+      await page.keyboard.press("Control+d");
+      await card().locator(`[data-layer-id="${left}"]`).click();
+      await expect(page.getByTestId("inspector-multiselect")).toBeVisible();
+      await expect(page.locator("[data-handle]")).toHaveCount(8);
+      const rect = (await card()
+        .locator(`[data-layer-id="${left}"]`)
+        .boundingBox())!;
+      await page.keyboard.down("Alt");
+      await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(
+        rect.x + rect.width / 2 + 20,
+        rect.y + rect.height / 2 + 15,
+        { steps: 5 }
+      );
+      await page.mouse.up();
+      await page.keyboard.up("Alt");
+      const moved = await json();
+      const member = (d: typeof moved, id: string) =>
+        d.layers.find((l: { id: string }) => l.id === id);
+      expect(member(moved, left).x - member(grouped, left).x).toBeCloseTo(
+        member(moved, right).x - member(grouped, right).x,
+        2
+      );
+      expect(member(moved, left).y - member(grouped, left).y).toBeCloseTo(
+        member(moved, right).y - member(grouped, right).y,
+        2
+      );
+      const corner = (await page.locator('[data-handle="se"]').boundingBox())!;
+      await page.mouse.move(
+        corner.x + corner.width / 2,
+        corner.y + corner.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(
+        corner.x + corner.width / 2 + 30,
+        corner.y + corner.height / 2 + 15,
+        { steps: 6 }
+      );
+      await page.mouse.up();
+      const resized = await json();
+      expect(member(resized, left).width).toBeGreaterThan(
+        member(moved, left).width
+      );
+      const scale = member(resized, left).width / member(moved, left).width;
+      expect(
+        member(resized, right).width / member(moved, right).width
+      ).toBeCloseTo(scale, 3);
+      expect(
+        (member(resized, right).x - member(resized, left).x) /
+          (member(moved, right).x - member(moved, left).x)
+      ).toBeCloseTo(scale, 3);
+      await page.keyboard.press("Control+z");
+      expect(member(await json(), left)).toEqual(member(moved, left));
+      await page.keyboard.press("Control+Shift+z");
+      expect(member(await json(), left)).toEqual(member(resized, left));
+      await page.keyboard.press("Control+Shift+g");
+      expect(member(await json(), left).groupId).toBeUndefined();
+      await saved();
+    }
+  );
   await record(
     [133, 134, 136, 137, 138, 146, 147, 148, 150],
     "Upload PNG, JPEG and WebP through local storage and preserve their editable frames",
@@ -428,7 +797,16 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
         );
         const response = await page.request.get(image.imageUrl);
         expect(response.status()).toBe(200);
+        if (image.id === photos[0].id)
+          expect(await response.body()).toEqual(
+            readFileSync(
+              path.resolve(__dirname, "fixtures/designer/transparent.png")
+            )
+          );
       }
+      expect(
+        ((photos.at(-1).width / photos.at(-1).height) * 1080) / 1512
+      ).toBeCloseTo(4 / 3, 1);
       const photo = photos.at(-1);
       await select(photo.id);
       await page.getByRole("radio", { name: "Show all", exact: true }).click();
@@ -466,6 +844,86 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
         page.getByText("Unable to read image data", { exact: true })
       ).toBeVisible();
       expect((await json()).layers.length).toBe(count);
+    }
+  );
+
+  await record(
+    [235, 236],
+    "Cancel a pending export and reject a missing picture without a blank download",
+    async () => {
+      const pendingRoutes: Array<import("@playwright/test").Route> = [];
+      let downloads = 0;
+      const count = () => downloads++;
+      page.on("download", count);
+      await page.route("**/api/invitations/image-proxy?**", (route) => {
+        pendingRoutes.push(route);
+      });
+      await page.getByRole("button", { name: "Export", exact: true }).click();
+      await page
+        .getByRole("button")
+        .filter({ hasText: "High-Resolution PNG" })
+        .click();
+      await page
+        .getByRole("button", { name: "Download PNG", exact: true })
+        .click();
+      await expect.poll(() => pendingRoutes.length).toBeGreaterThan(0);
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      for (const route of pendingRoutes) await route.abort();
+      await page.unroute("**/api/invitations/image-proxy?**");
+      await page.waitForTimeout(150);
+      expect(downloads).toBe(0);
+      expect(await page.locator("[data-export-copy]").count()).toBe(0);
+      page.off("download", count);
+      await page.keyboard.press("Control+d");
+      const original = await json();
+      const missing = structuredClone(original);
+      const address = new URL(
+        original.layers.find((l: { kind: string }) => l.kind === "image")
+          .imageUrl
+      );
+      address.pathname = address.pathname.replace(
+        /[^/]+$/,
+        "missing-regression-picture.png"
+      );
+      missing.background = {
+        kind: "image",
+        imageUrl: address.href,
+        overlay: 0.2,
+      };
+      const picker = page
+        .locator('input[type="file"][accept="application/json,.json"]')
+        .first();
+      await picker.setInputFiles({
+        name: "missing.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(JSON.stringify(missing)),
+      });
+      await page.getByRole("button", { name: "Export", exact: true }).click();
+      await page
+        .getByRole("button")
+        .filter({ hasText: "High-Resolution PNG" })
+        .click();
+      await page
+        .getByRole("button", { name: "Download PNG", exact: true })
+        .click();
+      await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
+        "could not be loaded",
+        { timeout: 15000 }
+      );
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await picker.setInputFiles({
+        name: "original.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(JSON.stringify(original)),
+      });
+      await saved();
     }
   );
   await record(
@@ -525,6 +983,50 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
         await page.screenshot({
           path: test.info().outputPath(`studio-${width}.png`),
         });
+        if (width === 390 || width === 1280) {
+          for (const dark of [false, true]) {
+            if (dark)
+              await page
+                .getByRole("button", {
+                  name: "Switch to the dark interface",
+                  exact: true,
+                })
+                .click();
+            const scan = await new AxeBuilder({ page })
+              .include('[data-testid="invitation-designer"]')
+              .exclude("[data-invitation-canvas]")
+              .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+              .analyze();
+            writeFileSync(
+              test
+                .info()
+                .outputPath(
+                  `accessibility-${width}-${dark ? "dark" : "light"}.json`
+                ),
+              JSON.stringify(
+                scan.violations.map((v) => ({
+                  id: v.id,
+                  nodes: v.nodes.map((n) => n.target),
+                })),
+                null,
+                2
+              )
+            );
+            expect(
+              scan.violations.map((v) => ({
+                id: v.id,
+                nodes: v.nodes.map((n) => n.target),
+              }))
+            ).toEqual([]);
+            if (dark)
+              await page
+                .getByRole("button", {
+                  name: "Switch to the light interface",
+                  exact: true,
+                })
+                .click();
+          }
+        }
       }
     }
   );

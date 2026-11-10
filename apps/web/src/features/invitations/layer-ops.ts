@@ -581,9 +581,16 @@ export function resizeCanvasPx(
   widthPx: number,
   heightPx: number
 ): InvitationDesign {
-  const w = clamp(widthPx, 200, 10000);
-  const h = clamp(heightPx, 200, 10000);
-  const ratio = Math.round((w / h) * 1000) / 1000;
+  let w = Math.round(clamp(widthPx, 200, 10000));
+  let h = Math.round(clamp(heightPx, 200, 10000));
+  const previous = designDimensionsPx(design);
+  const safeRatio = clamp(w / h, 0.4, 2.5);
+  if (safeRatio !== w / h) {
+    if (h !== previous.height && w === previous.width)
+      w = Math.round(h * safeRatio);
+    else h = Math.round(w / safeRatio);
+  }
+  const ratio = clamp(Math.round((w / h) * 1000) / 1000, 0.4, 2.5);
   return {
     ...design,
     canvas: {

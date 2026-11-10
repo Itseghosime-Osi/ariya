@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Icon } from "@/components/ui/icon";
 import {
@@ -78,6 +78,12 @@ export function ExportModal({
   coupleName,
   getCardElement,
 }: ExportModalProps) {
+  const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
+  const close = () => {
+    controller.current?.abort();
+    onClose();
+  };
   const returnFocus = useRef<HTMLElement | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
   const [exporting, setExporting] = useState(false);
@@ -88,6 +94,8 @@ export function ExportModal({
   const dims = designDimensionsPx(design);
 
   const handleExport = async () => {
+    const active = new AbortController();
+    controller.current = active;
     setExporting(true);
     setError(null);
     try {
@@ -98,8 +106,10 @@ export function ExportModal({
         eventId,
         coupleName,
         format: selectedFormat,
+        signal: active.signal,
       });
 
+      if (res.cancelled) return;
       if (!res.ok) {
         setError(res.error || "Export failed");
       } else {
@@ -116,7 +126,7 @@ export function ExportModal({
     <Dialog.Root
       open={open}
       onOpenChange={(value) => {
-        if (!value && !exporting) onClose();
+        if (!value) close();
       }}
     >
       <Dialog.Portal>
@@ -129,9 +139,7 @@ export function ExportModal({
             e.preventDefault();
             returnFocus.current?.focus();
           }}
-          onEscapeKeyDown={(e) => {
-            if (exporting) e.preventDefault();
-          }}
+          onEscapeKeyDown={close}
           aria-describedby={undefined}
           role="dialog"
           aria-modal="true"
@@ -139,7 +147,7 @@ export function ExportModal({
           aria-labelledby="export-dialog-title"
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity ${dark ? "dark" : ""}`}
           onClick={(e) => {
-            if (e.target === e.currentTarget && !exporting) onClose();
+            if (e.target === e.currentTarget) close();
           }}
         >
           <div
@@ -165,8 +173,7 @@ export function ExportModal({
               <button
                 type="button"
                 aria-label="Close export dialog"
-                onClick={onClose}
-                disabled={exporting}
+                onClick={close}
                 className="rounded-full p-2 text-label-2 transition hover:bg-black/5 hover:text-night dark:hover:bg-white/10 dark:hover:text-ivory"
               >
                 <span className="text-xl leading-none">✕</span>
@@ -218,17 +225,31 @@ export function ExportModal({
             </div>
 
             {error && (
-              <div className="mt-4 rounded-xl bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400">
+              <div
+                role="alert"
+                className="mt-4 rounded-xl bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400"
+              >
                 {error}
               </div>
+            )}
+
+            {design.layers.some(
+              (layer) => layer.kind === "code" && layer.visible
+            ) && (
+              <p
+                role="note"
+                className="mt-4 rounded-xl border border-hairline bg-burgundy/5 p-3 text-xs leading-relaxed text-label-2"
+              >
+                This artwork contains a sample entry seal. Guests receive their
+                own pass after accepting their personal invitation.
+              </p>
             )}
 
             {/* Footer Actions */}
             <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
               <button
                 type="button"
-                onClick={onClose}
-                disabled={exporting}
+                onClick={close}
                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-label-2 transition hover:text-night dark:hover:text-ivory"
               >
                 Cancel

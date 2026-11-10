@@ -112,11 +112,11 @@ export const INVITATION_FONTS = [
 export type InvitationFont = (typeof INVITATION_FONTS)[number];
 
 export const INVITATION_FONT_LABELS: Record<InvitationFont, string> = {
-  display: "Bodoni Display (High-contrast Serif)",
-  sans: "Plus Jakarta (Modern Clean Sans)",
-  script: "Great Vibes (Formal Calligraphy)",
-  serif: "Cormorant (Editorial Roman)",
-  mono: "Modernist Mono (Architectural)",
+  display: "Bodoni Moda",
+  sans: "Plus Jakarta Sans",
+  script: "Great Vibes",
+  serif: "Georgia (system serif)",
+  mono: "Monospace (system)",
 };
 
 export type InvitationTextAlign = "left" | "center" | "right";

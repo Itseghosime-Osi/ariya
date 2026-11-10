@@ -22,16 +22,16 @@ test.describe("Ariya Designer Functional Checklist Verification", () => {
     // DES-188 & DES-191: Rulers & Grid actually toggle canvas overlays
     const rulersCorner = page.getByTestId("canvas-rulers-corner");
     await expect(rulersCorner).toBeVisible();
-    await page.getByRole("button", { name: "Rulers" }).click();
+    await page.getByRole("button", { name: "Rulers", exact: true }).click();
     await expect(rulersCorner).toBeHidden();
-    await page.getByRole("button", { name: "Rulers" }).click();
+    await page.getByRole("button", { name: "Rulers", exact: true }).click();
     await expect(rulersCorner).toBeVisible();
 
     const gridOverlay = page.getByTestId("canvas-grid");
     await expect(gridOverlay).toBeHidden();
-    await page.getByRole("button", { name: "Grid" }).click();
+    await page.getByRole("button", { name: "Grid", exact: true }).click();
     await expect(gridOverlay).toBeVisible();
-    await page.getByRole("button", { name: "Grid" }).click();
+    await page.getByRole("button", { name: "Grid", exact: true }).click();
     await expect(gridOverlay).toBeHidden();
 
     // DES-262 / H-key pan toggle recovers back to select cleanly
@@ -48,7 +48,7 @@ test.describe("Ariya Designer Functional Checklist Verification", () => {
       .click();
     await page
       .getByRole("menu", { name: "Shape presets" })
-      .getByRole("button", { name: "Rectangle" })
+      .getByRole("menuitem", { name: "Rectangle" })
       .click();
 
     await expect(page.getByTestId("designer-selection")).toBeVisible();

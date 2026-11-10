@@ -164,6 +164,26 @@ export function Tiles<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.key}
+          tabIndex={value === o.key ? 0 : -1}
+          onKeyDown={(event) => {
+            const index = options.findIndex((option) => option.key === o.key);
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? options.length - 1
+                  : ["ArrowRight", "ArrowDown"].includes(event.key)
+                    ? (index + 1) % options.length
+                    : ["ArrowLeft", "ArrowUp"].includes(event.key)
+                      ? (index - 1 + options.length) % options.length
+                      : null;
+            if (next === null) return;
+            event.preventDefault();
+            onPick(options[next].key);
+            event.currentTarget.parentElement
+              ?.querySelectorAll<HTMLButtonElement>('[role="radio"]')
+              [next]?.focus();
+          }}
           onClick={() => onPick(o.key)}
           className="group flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-hairline bg-white px-1 py-2 text-[11px] font-medium leading-tight text-night transition-all hover:-translate-y-px hover:border-night/30 hover:shadow-sm aria-checked:border-night aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
@@ -208,6 +228,26 @@ export function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.key}
+          tabIndex={value === o.key ? 0 : -1}
+          onKeyDown={(event) => {
+            const index = options.findIndex((option) => option.key === o.key);
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? options.length - 1
+                  : ["ArrowRight", "ArrowDown"].includes(event.key)
+                    ? (index + 1) % options.length
+                    : ["ArrowLeft", "ArrowUp"].includes(event.key)
+                      ? (index - 1 + options.length) % options.length
+                      : null;
+            if (next === null) return;
+            event.preventDefault();
+            onPick(options[next].key);
+            event.currentTarget.parentElement
+              ?.querySelectorAll<HTMLButtonElement>('[role="radio"]')
+              [next]?.focus();
+          }}
           onClick={() => onPick(o.key)}
           className={cn(
             "inline-flex min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-all focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",

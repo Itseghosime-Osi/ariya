@@ -10,6 +10,7 @@ export interface ExportOptions {
   format: ExportFormat;
   pixelRatio?: number;
   quality?: number;
+  signal?: AbortSignal;
 }
 
 /** Export uses document pixels, never the viewport's fitted/zoomed dimensions. */
@@ -57,6 +58,45 @@ function bytes(url: string) {
   return Uint8Array.from(data, (c) => c.charCodeAt(0));
 }
 
+/** Bound asset/render waits and allow the user to cancel before any file is downloaded. */
+function exportWait<T>(
+  task: Promise<T>,
+  signal?: AbortSignal,
+  timeout = 30000
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancel);
+    };
+    const cancel = () => {
+      cleanup();
+      reject(new DOMException("Export cancelled", "AbortError"));
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(
+        new Error("Export took too long. Check your pictures and try again.")
+      );
+    }, timeout);
+    if (signal?.aborted) {
+      cancel();
+      return;
+    }
+    signal?.addEventListener("abort", cancel, { once: true });
+    task.then(
+      (value) => {
+        cleanup();
+        resolve(value);
+      },
+      (error) => {
+        cleanup();
+        reject(error);
+      }
+    );
+  });
+}
+
 export async function exportInvitation({
   cardElement,
   design,
@@ -65,6 +105,7 @@ export async function exportInvitation({
   format,
   pixelRatio = 3,
   quality = 0.95,
+  signal,
 }: {
   cardElement: HTMLElement | null;
   design: InvitationDesign;
@@ -73,13 +114,15 @@ export async function exportInvitation({
   format: ExportFormat;
   pixelRatio?: number;
   quality?: number;
-}): Promise<{ ok: boolean; error?: string }> {
+  signal?: AbortSignal;
+}): Promise<{ ok: boolean; error?: string; cancelled?: boolean }> {
   const name =
     (coupleName ? `${coupleName}-invitation` : `invitation-${eventId}`)
       .replace(/[^\p{L}\p{N}\-_]+/gu, "-")
       .replace(/^-+|-+$/g, "") || "invitation";
   let wrapper: HTMLDivElement | undefined;
   try {
+    signal?.throwIfAborted();
     if (format === "json") {
       downloadBlob(
         new Blob([JSON.stringify(design, null, 2)], {
@@ -95,7 +138,7 @@ export async function exportInvitation({
       );
     if (!["png", "jpeg", "pdf"].includes(format))
       throw new Error("Unsupported export format.");
-    await document.fonts.ready;
+    await exportWait(document.fonts.ready, signal);
     const dims = designDimensionsPx(design);
     const size = invitationExportSize(design, format, pixelRatio);
     if (format === "pdf" && size.width !== 1500)
@@ -103,6 +146,7 @@ export async function exportInvitation({
         "These proportions exceed the print export limit. Choose an image export or adjust the invitation size."
       );
     wrapper = document.createElement("div");
+    wrapper.setAttribute("data-export-copy", "");
     wrapper.style.cssText = `position:fixed;left:-100000px;top:0;width:${dims.width}px;height:${dims.height}px;pointer-events:none;`;
     const clone = cardElement.cloneNode(true) as HTMLElement;
     Object.assign(clone.style, {
@@ -111,7 +155,11 @@ export async function exportInvitation({
       maxWidth: "none",
       margin: "0",
       transform: "none",
-      boxShadow: "none",
+      boxShadow:
+        cardElement.style.boxShadow
+          .split(/,(?![^(]*\))/)
+          .filter((shadow) => shadow.includes("inset"))
+          .join(",") || "none",
     });
     // The live preview contains selection outlines; these are studio chrome, not artwork.
     clone.querySelectorAll<HTMLElement>("[data-layer-id]").forEach((layer) => {
@@ -138,7 +186,7 @@ export async function exportInvitation({
             const image = new Image();
             image.src = resolved;
             try {
-              await image.decode();
+              await exportWait(image.decode(), signal);
             } catch {
               throw new Error(
                 "A picture could not be loaded for export. Replace it or try again; no incomplete file was downloaded."
@@ -193,8 +241,13 @@ export async function exportInvitation({
     };
     const image =
       format === "jpeg"
-        ? await toJpeg(clone, { ...options, quality })
-        : await toPng(clone, options);
+        ? await exportWait(
+            toJpeg(clone, { ...options, quality }),
+            signal,
+            60000
+          )
+        : await exportWait(toPng(clone, options), signal, 60000);
+    signal?.throwIfAborted();
     if (format !== "pdf") {
       download(image, `${name}.${format === "jpeg" ? "jpg" : "png"}`);
       return { ok: true };
@@ -212,12 +265,14 @@ export async function exportInvitation({
     pdf.setAuthor("Àríyá");
     pdf.setCreator("Àríyá Invitation Studio");
     const data = await pdf.save();
+    signal?.throwIfAborted();
     downloadBlob(
       new Blob([data as Uint8Array<ArrayBuffer>], { type: "application/pdf" }),
       `${name}-print.pdf`
     );
     return { ok: true };
   } catch (error) {
+    if (signal?.aborted) return { ok: false, cancelled: true };
     return {
       ok: false,
       error:

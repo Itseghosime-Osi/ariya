@@ -21,6 +21,8 @@ import { calculateSnaps, type GuideLine } from "./snapGuides";
 import type { StudioTool } from "./ContextualOptionsBar";
 
 import { cursorForHandle, resizeInLocalAxes } from "./resize-transform";
+import { drawBox } from "./draw-box";
+import { transformSelection } from "./selection-transform";
 import { radiusDragDelta } from "./corner-radius";
 
 const PAD = 28;
@@ -28,7 +30,7 @@ const PAD = 28;
 type Patch = Partial<InvitationLayer>;
 
 interface Gesture {
-  type: "move" | "resize" | "rotate" | "pan" | "crop";
+  type: "move" | "resize" | "rotate" | "pan" | "crop" | "selection-resize";
   id: string;
   ids?: string[];
   handle?: Handle;
@@ -460,6 +462,8 @@ export function DesignerCanvas({
     width: number;
     height: number;
   } | null>(null);
+  const drawingCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => drawingCleanup.current?.(), []);
   const [radiusTooltip, setRadiusTooltip] = useState<{
     show: boolean;
     rPx: number;
@@ -676,13 +680,33 @@ export function DesignerCanvas({
       `[data-layer-id="${CSS.escape(selectedId)}"]`
     );
     if (!el) return setBox(null);
-    setBox({
-      left: el.offsetLeft,
-      top: el.offsetTop,
-      width: el.offsetWidth,
-      height: el.offsetHeight,
-    });
-  }, [selectedId]);
+    if (selectedIds && selectedIds.length > 1) {
+      const card = wrap
+        .querySelector<HTMLElement>("[data-invitation-canvas]")
+        ?.getBoundingClientRect();
+      const rectangles = selectedIds.flatMap((id) => {
+        const layer = wrap.querySelector<HTMLElement>(
+          `[data-layer-id="${CSS.escape(id)}"]`
+        );
+        return layer ? [layer.getBoundingClientRect()] : [];
+      });
+      if (!card || !rectangles.length) return setBox(null);
+      const left = Math.min(...rectangles.map((r) => r.left));
+      const top = Math.min(...rectangles.map((r) => r.top));
+      setBox({
+        left: left - card.left,
+        top: top - card.top,
+        width: Math.max(...rectangles.map((r) => r.right)) - left,
+        height: Math.max(...rectangles.map((r) => r.bottom)) - top,
+      });
+    } else
+      setBox({
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      });
+  }, [selectedId, selectedIds]);
 
   useLayoutEffect(() => {
     measure();
@@ -911,6 +935,15 @@ export function DesignerCanvas({
         return;
       }
 
+      if (g.type === "selection-resize" && g.handle && g.origins) {
+        const target = resizeBoxFast(g.origin, g.handle, dx, dy, true);
+        props.current.onBatchUpdate?.(
+          transformSelection(g.snapshot.layers, g.origins, g.origin, target),
+          { commit: false }
+        );
+        return;
+      }
+
       const layer = props.current.design.layers.find((l) => l.id === g.id);
       if (!layer || !g.handle) return;
       if (hasBox(layer)) {
@@ -1025,7 +1058,10 @@ export function DesignerCanvas({
 
   function heightPct(layer: InvitationLayer, card: DOMRect): number {
     if (layer.height) return layer.height;
-    return box ? (box.height / card.height) * 100 : 4;
+    const element = cardWrap.current?.querySelector<HTMLElement>(
+      `[data-layer-id="${CSS.escape(layer.id)}"]`
+    );
+    return element ? (element.offsetHeight / card.height) * 100 : 4;
   }
 
   function onLayerPointerDown(
@@ -1049,12 +1085,23 @@ export function DesignerCanvas({
       onToggleSelect?.(layer.id);
       return;
     }
-    const currentSelected =
+    let currentSelected =
       selectedIds && selectedIds.length
         ? selectedIds
         : selectedId
           ? [selectedId]
           : [];
+    if (layer.groupId) {
+      currentSelected = [
+        ...design.layers
+          .filter(
+            (item) => item.groupId === layer.groupId && item.id !== layer.id
+          )
+          .map((item) => item.id),
+        layer.id,
+      ];
+      props.current.onSelectBatch?.(currentSelected);
+    }
     const isMulti =
       currentSelected.length > 1 && currentSelected.includes(layer.id);
 
@@ -1150,6 +1197,40 @@ export function DesignerCanvas({
     const card = cardRect();
     if (!card) return;
     const r = overlayRef.current?.getBoundingClientRect();
+    if (selectedIds && selectedIds.length > 1 && box && handle !== "rotate") {
+      const origins = Object.fromEntries(
+        design.layers
+          .filter((layer) => selectedIds.includes(layer.id))
+          .map((layer) => [
+            layer.id,
+            {
+              x: layer.x,
+              y: layer.y,
+              width: layer.width,
+              height: heightPct(layer, card),
+            },
+          ])
+      );
+      gesture.current = {
+        type: "selection-resize",
+        id: selected.id,
+        ids: selectedIds,
+        origins,
+        handle,
+        startX: e.clientX,
+        startY: e.clientY,
+        card,
+        origin: {
+          x: (box.left / card.width) * 100,
+          y: (box.top / card.height) * 100,
+          width: (box.width / card.width) * 100,
+          height: (box.height / card.height) * 100,
+        },
+        moved: false,
+        snapshot: design,
+      };
+      return;
+    }
     gesture.current = {
       type: handle === "rotate" ? "rotate" : "resize",
       id: selected.id,
@@ -1299,12 +1380,19 @@ export function DesignerCanvas({
     window.addEventListener("keydown", onKeyCancel, true);
   };
 
+  const multiple = (selectedIds?.length ?? 0) > 1;
   const handles: Handle[] = selected
-    ? hasBox(selected)
+    ? multiple || hasBox(selected)
       ? ["nw", "n", "ne", "e", "se", "s", "sw", "w"]
       : ["w", "e"]
     : [];
-  const editable = selected ? isEditable(selected) : false;
+  const editable = selected
+    ? isEditable(selected) &&
+      (!multiple ||
+        !design.layers.some(
+          (layer) => selectedIds?.includes(layer.id) && layer.locked
+        ))
+    : false;
 
   const startRulerGuide = useCallback(
     (axis: "horizontal" | "vertical", e: React.PointerEvent) => {
@@ -1456,29 +1544,43 @@ export function DesignerCanvas({
               height: 0,
             });
 
-            const onDrawMove = (ev: PointerEvent) => {
-              const curCardX = ev.clientX - card.left;
-              const curCardY = ev.clientY - card.top;
-              const left = Math.min(startCardX, curCardX);
-              const top = Math.min(startCardY, curCardY);
-              const width = Math.abs(curCardX - startCardX);
-              const height = Math.abs(curCardY - startCardY);
-
-              setDrawingBox({
-                left,
-                top,
-                width,
-                height,
-              });
-            };
-
-            const onDrawUp = (ev: PointerEvent) => {
+            drawingCleanup.current?.();
+            let cancelled = false;
+            const geometry = (ev: PointerEvent) =>
+              drawBox(
+                { x: startCardX, y: startCardY },
+                { x: ev.clientX - card.left, y: ev.clientY - card.top },
+                ev.shiftKey &&
+                  activeTool === "shape" &&
+                  activeShapeKind !== "line",
+                ev.altKey
+              );
+            const cleanup = () => {
               window.removeEventListener("pointermove", onDrawMove);
               window.removeEventListener("pointerup", onDrawUp);
+              window.removeEventListener("pointercancel", cancelDraw);
+              window.removeEventListener("blur", cancelDraw);
+              window.removeEventListener("keydown", cancelKey);
+              drawingCleanup.current = null;
+            };
+            const cancelDraw = () => {
+              cancelled = true;
+              cleanup();
               setDrawingBox(null);
-
-              const curCardX = ev.clientX - card.left;
-              const curCardY = ev.clientY - card.top;
+            };
+            const cancelKey = (ev: KeyboardEvent) => {
+              if (ev.key === "Escape") {
+                ev.preventDefault();
+                cancelDraw();
+              }
+            };
+            const onDrawMove = (ev: PointerEvent) => {
+              setDrawingBox(geometry(ev));
+            };
+            const onDrawUp = (ev: PointerEvent) => {
+              cleanup();
+              setDrawingBox(null);
+              if (cancelled) return;
               const dist = Math.hypot(
                 ev.clientX - startClientX,
                 ev.clientY - startClientY
@@ -1511,25 +1613,49 @@ export function DesignerCanvas({
                   Math.min(90, clickYPct - hPercent / 2)
                 );
               } else {
-                const left = Math.min(startCardX, curCardX);
-                const top = Math.min(startCardY, curCardY);
-                const width = Math.abs(curCardX - startCardX);
-                const height = Math.abs(curCardY - startCardY);
-
-                xPercent = Math.round((left / card.width) * 100 * 10) / 10;
-                yPercent = Math.round((top / card.height) * 100 * 10) / 10;
+                const box = geometry(ev);
                 const minW =
                   activeTool === "text" ? 20 : activeTool === "pen" ? 10 : 8;
                 const minH =
                   activeTool === "text" ? 5 : activeTool === "pen" ? 1 : 5;
-                wPercent = Math.max(
-                  minW,
-                  Math.round((width / card.width) * 100 * 10) / 10
-                );
-                hPercent = Math.max(
-                  minH,
-                  Math.round((height / card.height) * 100 * 10) / 10
-                );
+                if (
+                  ev.shiftKey &&
+                  activeTool === "shape" &&
+                  activeShapeKind !== "line"
+                ) {
+                  const side = Math.max(
+                    box.width,
+                    (minW / 100) * card.width,
+                    (minH / 100) * card.height
+                  );
+                  if (ev.altKey) {
+                    box.left = startCardX - side / 2;
+                    box.top = startCardY - side / 2;
+                  } else {
+                    if (ev.clientX < startClientX) box.left = startCardX - side;
+                    if (ev.clientY < startClientY) box.top = startCardY - side;
+                  }
+                  box.width = side;
+                  box.height = side;
+                } else {
+                  const width = Math.max(box.width, (minW / 100) * card.width),
+                    height = Math.max(box.height, (minH / 100) * card.height);
+                  if (ev.altKey) {
+                    box.left = startCardX - width / 2;
+                    box.top = startCardY - height / 2;
+                  } else {
+                    if (ev.clientX < startClientX)
+                      box.left = startCardX - width;
+                    if (ev.clientY < startClientY)
+                      box.top = startCardY - height;
+                  }
+                  box.width = width;
+                  box.height = height;
+                }
+                xPercent = (box.left / card.width) * 100;
+                yPercent = (box.top / card.height) * 100;
+                wPercent = (box.width / card.width) * 100;
+                hPercent = (box.height / card.height) * 100;
               }
 
               const kindToCreate =
@@ -1557,6 +1683,10 @@ export function DesignerCanvas({
 
             window.addEventListener("pointermove", onDrawMove);
             window.addEventListener("pointerup", onDrawUp);
+            window.addEventListener("pointercancel", cancelDraw);
+            window.addEventListener("blur", cancelDraw);
+            window.addEventListener("keydown", cancelKey);
+            drawingCleanup.current = cleanup;
             return;
           }
         }
@@ -1600,7 +1730,7 @@ export function DesignerCanvas({
             type="button"
             data-testid="canvas-rulers-corner"
             title="Double-click to reset pan and zoom (Cmd+0)"
-            aria-label="Reset pan and zoom"
+            aria-label="px: reset pan and zoom"
             onDoubleClick={() => {
               setPan({ x: 0, y: 0 });
               onZoomChange?.(1);
@@ -1836,6 +1966,7 @@ export function DesignerCanvas({
           </div>
         )}
         {showHandles &&
+          activeTool !== "crop" &&
           selected &&
           box &&
           selected.visible &&
@@ -1849,9 +1980,10 @@ export function DesignerCanvas({
                 top: box.top,
                 width: box.width,
                 height: box.height,
-                transform: selected.rotation
-                  ? `rotate(${selected.rotation}deg)`
-                  : undefined,
+                transform:
+                  !multiple && selected.rotation
+                    ? `rotate(${selected.rotation}deg)`
+                    : undefined,
                 outline: "1.5px solid #b8864b",
                 outlineOffset: 2,
               }}
@@ -1862,7 +1994,10 @@ export function DesignerCanvas({
                     key={h}
                     data-handle={h}
                     style={{
-                      cursor: cursorForHandle(h, selected.rotation ?? 0),
+                      cursor: cursorForHandle(
+                        h,
+                        multiple ? 0 : (selected.rotation ?? 0)
+                      ),
                       touchAction: "none",
                     }}
                     onPointerDown={(e) => startHandle(e, h)}
@@ -1871,7 +2006,7 @@ export function DesignerCanvas({
                     <span className="block h-2.5 w-2.5 rounded-[3px] border border-[#b8864b] bg-white shadow" />
                   </span>
                 ))}
-              {editable && (
+              {editable && !multiple && (
                 <span
                   data-handle="rotate"
                   onPointerDown={(e) => startHandle(e, "rotate")}
@@ -1883,6 +2018,7 @@ export function DesignerCanvas({
 
               {/* Inner Corner Radius Drag Handles (PhotoCraft / Figma Style) */}
               {editable &&
+                !multiple &&
                 ((selected.kind === "shape" &&
                   (!selected.shape || selected.shape === "rect")) ||
                   (selected.kind === "image" &&
@@ -1977,8 +2113,8 @@ export function DesignerCanvas({
             }}
           >
             <div className="absolute -bottom-7 right-0 rounded-md bg-[#1c070d]/95 backdrop-blur px-2 py-0.5 font-mono text-[10px] font-bold text-[#dfba73] border border-[#dfba73]/40 shadow-md whitespace-nowrap">
-              {Math.round(drawingBox.width)} × {Math.round(drawingBox.height)}{" "}
-              px
+              {Math.round(drawingBox.width / zoom)} ×{" "}
+              {Math.round(drawingBox.height / zoom)} px
             </div>
           </div>
         )}
