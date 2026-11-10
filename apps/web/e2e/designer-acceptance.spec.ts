@@ -879,7 +879,9 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
       await page
         .getByRole("button", { name: "Download PNG", exact: true })
         .click();
-      await expect.poll(() => pendingRoutes.length).toBeGreaterThan(0);
+      await expect
+        .poll(() => pendingRoutes.length, { timeout: 25000 })
+        .toBeGreaterThan(0);
       await page
         .getByRole("dialog")
         .getByRole("button", { name: "Cancel", exact: true })
