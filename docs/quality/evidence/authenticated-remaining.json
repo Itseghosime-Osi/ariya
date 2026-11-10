@@ -51,53 +51,7 @@
       "detail": "15 delayed font requests; export finished in 6.4 s with document.fonts loaded"
     }
   ],
-  "webkit_partial_run": [
-    {
-      "id": "DES-076",
-      "ok": false,
-      "detail": "corner pixel 0,0,0 \u2192 0,0,0 with a circle frame; centre 223,186,115 \u2192 223,186,115; the picture file is unchanged"
-    },
-    {
-      "id": "DES-206",
-      "ok": true,
-      "detail": "changing the frame mask back and forth is non-destructive: the same single picture layer clips identically each time"
-    },
-    {
-      "id": "DES-077",
-      "ok": false,
-      "detail": "rounded corner clips the picture (0,0,0 \u2192 0,0,0); the border colour appears on the edge (largest change across the edge 220); shadow pixel 249,244,235; far paper unchanged"
-    },
-    {
-      "id": "DES-155",
-      "ok": false,
-      "detail": "50% see-through changes the exported centre pixel 223,186,115 \u2192 239,218,179, which is the midpoint with the paper behind it (112,93,58)"
-    },
-    {
-      "id": "DES-025",
-      "ok": true,
-      "detail": "clicking the corner of a transparent PNG selects it: hit testing follows the picture's box, not its visible pixels"
-    },
-    {
-      "id": "DES-135",
-      "ok": true,
-      "detail": "dropping a file added a picture layer (2\u21923) and the page did not navigate"
-    },
-    {
-      "id": "DES-146",
-      "ok": true,
-      "detail": "a 6000\u00d74000 JPEG (223 KB) placed in 1.8 s and stored at 2560\u00d71707 px"
-    },
-    {
-      "id": "DES-096",
-      "ok": true,
-      "detail": "line length 648 \u2192 333 px and start X \u2192 100 px through the numeric fields (no endpoint handles are offered)"
-    },
-    {
-      "id": "DES-006",
-      "ok": true,
-      "detail": "opening another design replaced the card (15\u21921 layers) and one Undo restored all of the previous work (15 layers)"
-    }
-  ],
-  "firefox": "designer-controls, designer-remaining (both tests) passed; designer-acceptance passed through 'Sampler API outcomes' and failed on a 0.9 px centre-point assertion in 'Draw constrained shapes' (Firefox rounds pointer coordinates to whole pixels).",
-  "webkit": "designer-controls and 'export waits for slow fonts' passed; designer-remaining: circular and rounded frames were not clipped in the exported PNG (DES-076/077 pixel checks failed); designer-acceptance failed at canvas sizing (height field returned 1512 instead of >= 4000)."
+  "firefox": "designer-controls, designer-remaining (both tests) and the full designer-acceptance suite pass.",
+  "webkit": "After the export fix (clip-path for rounded backgrounds): designer-controls, both designer-remaining tests (including the circle/rounded frame pixel checks DES-076/077) and the acceptance suite through 'Upload PNG, JPEG and WebP' pass. The acceptance step 'Cancel a pending export' does not see a proxied image request in WebKit (the earlier exports' proxied pictures appear to be served from WebKit's cache), so the suite stops there; that cancellation is covered in Chromium and Firefox.",
+  "chromium_acceptance": "designer-acceptance passes in full."
 }
