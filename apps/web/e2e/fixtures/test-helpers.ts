@@ -93,9 +93,21 @@ export async function createTestEvent(
 
   // Step 1: who. Two names make a wedding, the default occasion.
   const [first, ...rest] = couple.split(" & ");
-  await page.locator("#name-1").fill(first);
-  await page.locator("#name-2").fill(rest.join(" & "));
-  await page.locator("#title").fill(title);
+  // A field filled before the page hydrates is reset by React, which leaves Next disabled. Try
+  // again from a fresh load rather than wait for a button that will never enable.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.locator("#name-1").fill(first);
+    await page.locator("#name-2").fill(rest.join(" & "));
+    await page.locator("#title").fill(title);
+    if (
+      await page
+        .getByTestId("wizard-next")
+        .isEnabled({ timeout: 3000 })
+        .catch(() => false)
+    )
+      break;
+    await page.reload({ waitUntil: "networkidle" });
+  }
   await page.getByTestId("wizard-next").click();
 
   // Step 2: when. A Saturday is already chosen once the page has loaded.
