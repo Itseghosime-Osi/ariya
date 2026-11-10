@@ -638,33 +638,39 @@ export function ContextualOptionsBar({
           ).map((s) => {
             const isSelected = activeShapeKind === s.kind;
             return (
-              <button
-                key={s.kind}
-                type="button"
-                onClick={() => onSelectShapeKind?.(s.kind)}
-                className={cn(
-                  "rounded border px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1",
-                  isSelected
-                    ? dark
-                      ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73] shadow-xs font-bold ring-1 ring-[#dfba73]/30"
-                      : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] font-bold"
-                    : dark
-                      ? "border-white/10 bg-white/[0.06] text-[#fff6dc] hover:border-[#dfba73]/50 hover:text-[#dfba73]"
-                      : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/50 hover:text-[#4a0e17]"
-                )}
-              >
-                <span>{s.label}</span>
-                <span
-                  title="Click to place immediately on canvas"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddLayer(s.kind);
-                  }}
-                  className="ml-1 opacity-60 hover:opacity-100 hover:text-[#dfba73]"
+              <div key={s.kind} className="inline-flex items-center">
+                <button
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onSelectShapeKind?.(s.kind)}
+                  className={cn(
+                    "rounded-l border-y border-l px-2.5 py-1 text-xs font-medium transition-all",
+                    isSelected
+                      ? dark
+                        ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73] shadow-xs font-bold"
+                        : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] font-bold"
+                      : dark
+                        ? "border-white/10 bg-white/[0.06] text-[#fff6dc] hover:border-[#dfba73]/50 hover:text-[#dfba73]"
+                        : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/50 hover:text-[#4a0e17]"
+                  )}
+                >
+                  {s.label}
+                </button>
+                <button
+                  type="button"
+                  title={`Insert ${s.label} immediately`}
+                  aria-label={`Insert ${s.label}`}
+                  onClick={() => onAddLayer(s.kind)}
+                  className={cn(
+                    "rounded-r border px-1.5 py-1 text-xs font-bold transition-colors",
+                    dark
+                      ? "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-[#dfba73]/25 hover:text-[#dfba73]"
+                      : "border-[#e8e2d6] bg-white/80 text-[#7a5b67] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+                  )}
                 >
                   +
-                </span>
-              </button>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -741,7 +747,7 @@ export function ContextualOptionsBar({
       {/* ZOOM TOOL OPTIONS */}
       {activeTool === "zoom" && (
         <div className="flex items-center gap-1.5 shrink-0">
-          {[0.5, 0.75, 1, 1.5, 2].map((z) => (
+          {[0.25, 0.5, 1, 2, 4].map((z) => (
             <button
               key={z}
               type="button"

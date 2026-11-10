@@ -305,12 +305,16 @@ export function DesignerCanvas({
   showHandles,
   activeTool,
   dark = false,
+  showRulers = true,
+  showGrid = false,
   onSelect,
   onToggleSelect,
   onSelectBatch,
   onUpdate,
   onBatchUpdate,
   onRecord,
+  onRestoreSnapshot,
+  onDropImageFile,
   onEditText,
   onResizeCanvasPx,
   onAddLayerAt,
@@ -328,6 +332,8 @@ export function DesignerCanvas({
   showHandles: boolean;
   activeTool?: StudioTool;
   dark?: boolean;
+  showRulers?: boolean;
+  showGrid?: boolean;
   onSelect: (id: string | null) => void;
   onToggleSelect?: (id: string) => void;
   onSelectBatch?: (ids: string[]) => void;
@@ -337,6 +343,8 @@ export function DesignerCanvas({
     options?: { commit?: boolean }
   ) => void;
   onRecord: (snapshot: InvitationDesign) => void;
+  onRestoreSnapshot?: (snapshot: InvitationDesign) => void;
+  onDropImageFile?: (file: File) => void;
   onEditText?: (id: string) => void;
   onResizeCanvasPx?: (widthPx: number, heightPx: number) => void;
   onAddLayerAt?: (kind: "text" | "rect" | "line", x: number, y: number) => void;
@@ -354,6 +362,7 @@ export function DesignerCanvas({
     onUpdate,
     onBatchUpdate,
     onRecord,
+    onRestoreSnapshot,
     design,
     onSelectBatch,
     onResizeCanvasPx,
@@ -364,6 +373,7 @@ export function DesignerCanvas({
     onUpdate,
     onBatchUpdate,
     onRecord,
+    onRestoreSnapshot,
     design,
     onSelectBatch,
     onResizeCanvasPx,
@@ -374,9 +384,6 @@ export function DesignerCanvas({
   const [stage, setStage] = useState({ w: 0, h: 0 });
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [box, setBox] = useState<Measured | null>(null);
-  const [showRulers, _setShowRulers] = useState(true);
-  const [showGrid, _setShowGrid] = useState(false);
-  const [handTool, setHandTool] = useState(false);
   const [isSpaceDown, setIsSpaceDown] = useState(false);
   const [activeGuides, setActiveGuides] = useState<GuideLine[]>([]);
   const [userGuides, setUserGuides] = useState<
@@ -417,7 +424,7 @@ export function DesignerCanvas({
   } | null>(null);
   marqueeRef.current = marquee;
 
-  const isPanMode = handTool || isSpaceDown || activeTool === "hand";
+  const isPanMode = isSpaceDown || activeTool === "hand";
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -425,16 +432,14 @@ export function DesignerCanvas({
       if (
         tag === "input" ||
         tag === "textarea" ||
+        tag === "select" ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;
       }
-      if (e.code === "Space" && !e.repeat) {
+      if (e.code === "Space" && !e.repeat && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         setIsSpaceDown(true);
-      }
-      if (e.key.toLowerCase() === "h") {
-        setHandTool((v) => !v);
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
@@ -442,11 +447,25 @@ export function DesignerCanvas({
         setIsSpaceDown(false);
       }
     };
+    const onWindowBlur = () => {
+      setIsSpaceDown(false);
+      if (gesture.current) {
+        const g = gesture.current;
+        gesture.current = null;
+        setActiveGuides([]);
+        if (g.moved) props.current.onRestoreSnapshot?.(g.snapshot);
+      }
+      marqueeRef.current = null;
+      setMarquee(null);
+      setDraggingGuide(null);
+    };
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onWindowBlur);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onWindowBlur);
     };
   }, []);
 
@@ -477,7 +496,7 @@ export function DesignerCanvas({
       if (e.ctrlKey || e.metaKey) {
         const factor = Math.exp(-e.deltaY * 0.01);
         onZoomChange?.((z) =>
-          Math.min(3, Math.max(0.25, Math.round(z * factor * 100) / 100))
+          Math.min(4, Math.max(0.25, Math.round(z * factor * 100) / 100))
         );
       } else {
         setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
@@ -487,18 +506,26 @@ export function DesignerCanvas({
     return () => el.removeEventListener("wheel", onWheel);
   }, [onZoomChange]);
 
-  // Arrow key nudging in exact canvas pixels
+  // Arrow key nudging in exact canvas pixels (supports multi-selection & bleed bounds)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
       if (
         tag === "input" ||
         tag === "textarea" ||
+        tag === "select" ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;
       }
-      if (!selectedId) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const targets =
+        selectedIds && selectedIds.length
+          ? selectedIds
+          : selectedId
+            ? [selectedId]
+            : [];
+      if (!targets.length) return;
       const stepPx = e.shiftKey ? 10 : 1;
       let dx = 0;
       let dy = 0;
@@ -509,33 +536,33 @@ export function DesignerCanvas({
       else return;
 
       e.preventDefault();
-      const current = props.current.design.layers.find(
-        (l) => l.id === selectedId
-      );
-      if (!current || !isEditable(current)) return;
       const dxPct = (dx / dims.width) * 100;
       const dyPct = (dy / dims.height) * 100;
-      props.current.onUpdate(
-        selectedId,
-        {
-          x: clamp(
-            Math.round((current.x + dxPct) * 100) / 100,
-            0,
-            100 - current.width
-          ),
-          y: clamp(
-            Math.round((current.y + dyPct) * 100) / 100,
-            0,
-            100 - (current.height ?? 5)
-          ),
-        },
-        { commit: true }
-      );
+      const patches: Record<string, Patch> = {};
+      for (const tid of targets) {
+        const current = props.current.design.layers.find((l) => l.id === tid);
+        if (!current || !isEditable(current)) continue;
+        const minX = -Math.max(0, current.width - 5);
+        const minY = -Math.max(0, (current.height ?? 5) - 3);
+        patches[tid] = {
+          x: clamp(Math.round((current.x + dxPct) * 100) / 100, minX, 95),
+          y: clamp(Math.round((current.y + dyPct) * 100) / 100, minY, 97),
+        };
+      }
+      const patchedIds = Object.keys(patches);
+      if (!patchedIds.length) return;
+      if (patchedIds.length === 1) {
+        props.current.onUpdate(patchedIds[0], patches[patchedIds[0]], {
+          commit: true,
+        });
+      } else if (props.current.onBatchUpdate) {
+        props.current.onBatchUpdate(patches, { commit: true });
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId, dims.width, dims.height]);
+  }, [selectedId, selectedIds, dims.width, dims.height]);
 
   useLayoutEffect(() => {
     const el = stageRef.current;
@@ -668,37 +695,49 @@ export function DesignerCanvas({
       }
 
       if (g.type === "move") {
+        const minX = -Math.max(0, g.origin.width - 5);
+        const minY = -Math.max(0, Math.min(g.origin.height, 98) - 3);
         const proposedBox = {
-          x: clamp(g.origin.x + dx, 0, 100 - g.origin.width),
-          y: clamp(g.origin.y + dy, 0, 100 - Math.min(g.origin.height, 98)),
+          x: clamp(g.origin.x + dx, minX, 95),
+          y: clamp(g.origin.y + dy, minY, 97),
           width: g.origin.width,
           height: g.origin.height,
         };
 
-        const otherLayers = props.current.design.layers.filter((l) =>
-          g.ids ? !g.ids.includes(l.id) : l.id !== g.id
-        );
+        let targetX = proposedBox.x;
+        let targetY = proposedBox.y;
 
-        const currentDims = designDimensionsPx(props.current.design);
-        const userSnapGuides = userGuidesRef.current.map((ug) => ({
-          axis: ug.axis,
-          posPct:
-            ug.axis === "horizontal"
-              ? (ug.pos / currentDims.height) * 100
-              : (ug.pos / currentDims.width) * 100,
-          label: `${ug.axis === "horizontal" ? "Y" : "X"}: ${ug.pos}px`,
-        }));
+        if (e.altKey) {
+          // Alt temporarily suspends magnetic snapping during move
+          setActiveGuides([]);
+        } else {
+          const otherLayers = props.current.design.layers.filter((l) =>
+            g.ids ? !g.ids.includes(l.id) : l.id !== g.id
+          );
 
-        const snap = calculateSnaps(
-          proposedBox,
-          otherLayers,
-          1.0,
-          userSnapGuides
-        );
-        setActiveGuides(snap.guides);
+          const currentDims = designDimensionsPx(props.current.design);
+          const userSnapGuides = userGuidesRef.current.map((ug) => ({
+            axis: ug.axis,
+            posPct:
+              ug.axis === "horizontal"
+                ? (ug.pos / currentDims.height) * 100
+                : (ug.pos / currentDims.width) * 100,
+            label: `${ug.axis === "horizontal" ? "Y" : "X"}: ${ug.pos}px`,
+          }));
 
-        const deltaX = snap.x - g.origin.x;
-        const deltaY = snap.y - g.origin.y;
+          const snap = calculateSnaps(
+            proposedBox,
+            otherLayers,
+            1.0,
+            userSnapGuides
+          );
+          setActiveGuides(snap.guides);
+          targetX = snap.x;
+          targetY = snap.y;
+        }
+
+        const deltaX = targetX - g.origin.x;
+        const deltaY = targetY - g.origin.y;
 
         if (g.ids && g.origins && g.ids.length > 1) {
           const batchPatches: Record<string, Partial<InvitationLayer>> = {};
@@ -724,8 +763,8 @@ export function DesignerCanvas({
           update(
             g.id,
             {
-              x: snap.x,
-              y: snap.y,
+              x: targetX,
+              y: targetY,
             },
             { commit: false }
           );
@@ -752,6 +791,17 @@ export function DesignerCanvas({
         if (g.handle.includes("n"))
           nextH = Math.max(300, Math.min(8000, currentDims.height - deltaPxY));
 
+        if (e.shiftKey && currentDims.height > 0) {
+          const origRatio = currentDims.width / currentDims.height;
+          if (g.handle === "e" || g.handle === "w") {
+            nextH = nextW / origRatio;
+          } else if (g.handle === "n" || g.handle === "s") {
+            nextW = nextH * origRatio;
+          } else {
+            nextH = nextW / origRatio;
+          }
+        }
+
         props.current.onResizeCanvasPx?.(Math.round(nextW), Math.round(nextH));
         return;
       }
@@ -772,6 +822,22 @@ export function DesignerCanvas({
         const side: Handle = g.handle.includes("w") ? "w" : "e";
         const next = resizeBoxFast(g.origin, side, dx, 0, false);
         update(g.id, { x: next.x, width: next.width }, { commit: false });
+      }
+    }
+    function onCancelKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (gesture.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        const g = gesture.current;
+        gesture.current = null;
+        setActiveGuides([]);
+        props.current.onRestoreSnapshot?.(g.snapshot);
+      } else if (marqueeRef.current) {
+        marqueeRef.current = null;
+        setMarquee(null);
+      } else if (draggingGuideRef.current) {
+        setDraggingGuide(null);
       }
     }
     function onUp(e: PointerEvent) {
@@ -824,10 +890,12 @@ export function DesignerCanvas({
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
+    window.addEventListener("keydown", onCancelKey, true);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("keydown", onCancelKey, true);
     };
   }, []);
 
@@ -983,18 +1051,29 @@ export function DesignerCanvas({
     startRPx: number,
     maxRPx: number
   ) => {
-    if (!selected) return;
+    if (!selected || !isEditable(selected)) return;
     e.stopPropagation();
     e.preventDefault();
     const card = cardRect();
     if (!card) return;
 
+    const snapshot = props.current.design;
     const startX = e.clientX;
     const startY = e.clientY;
+    const hasPerCorner =
+      selected.radiusTL !== undefined ||
+      selected.radiusTR !== undefined ||
+      selected.radiusBR !== undefined ||
+      selected.radiusBL !== undefined;
+    const independent = hasPerCorner || e.altKey;
+    const baseUniform = selected.radius ?? 0;
+    let moved = false;
+    let cancelled = false;
 
     setRadiusTooltip({ show: true, rPx: startRPx, x: e.clientX, y: e.clientY });
 
     const onPointerMove = (ev: PointerEvent) => {
+      if (cancelled) return;
       let delta = 0;
       if (corner === "tl")
         delta = (ev.clientX - startX + (ev.clientY - startY)) / 1.414;
@@ -1005,15 +1084,42 @@ export function DesignerCanvas({
       else if (corner === "bl")
         delta = (ev.clientX - startX - (ev.clientY - startY)) / 1.414;
 
+      if (!moved && Math.abs(delta) > 0.5) moved = true;
       const newRadiusPx = Math.max(0, Math.min(maxRPx, startRPx + delta));
       const newRadiusCqw =
         Math.round((newRadiusPx / card.width) * 100 * 10) / 10;
 
-      props.current.onUpdate(
-        selected.id,
-        { radius: newRadiusCqw },
-        { commit: false }
-      );
+      if (independent) {
+        const keyMap = {
+          tl: "radiusTL",
+          tr: "radiusTR",
+          br: "radiusBR",
+          bl: "radiusBL",
+        } as const;
+        props.current.onUpdate(
+          selected.id,
+          {
+            radiusTL: selected.radiusTL ?? baseUniform,
+            radiusTR: selected.radiusTR ?? baseUniform,
+            radiusBR: selected.radiusBR ?? baseUniform,
+            radiusBL: selected.radiusBL ?? baseUniform,
+            [keyMap[corner]]: newRadiusCqw,
+          },
+          { commit: false }
+        );
+      } else {
+        props.current.onUpdate(
+          selected.id,
+          {
+            radius: newRadiusCqw,
+            radiusTL: undefined,
+            radiusTR: undefined,
+            radiusBR: undefined,
+            radiusBL: undefined,
+          },
+          { commit: false }
+        );
+      }
       setRadiusTooltip({
         show: true,
         rPx: newRadiusPx,
@@ -1022,15 +1128,34 @@ export function DesignerCanvas({
       });
     };
 
-    const onPointerUp = () => {
+    const cleanup = () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("keydown", onKeyCancel, true);
       setRadiusTooltip(null);
-      props.current.onRecord(props.current.design);
+    };
+
+    const onKeyCancel = (ev: KeyboardEvent) => {
+      if (ev.key !== "Escape") return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      cancelled = true;
+      cleanup();
+      props.current.onRestoreSnapshot?.(snapshot);
+    };
+
+    const onPointerUp = () => {
+      cleanup();
+      if (!cancelled && moved) {
+        props.current.onRecord(snapshot);
+      }
     };
 
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("keydown", onKeyCancel, true);
   };
 
   const handles: Handle[] = selected
@@ -1088,6 +1213,21 @@ export function DesignerCanvas({
         isPanMode &&
           (gesture.current?.type === "pan" ? "cursor-grabbing" : "cursor-grab")
       )}
+      onDragOver={(e) => {
+        if (e.dataTransfer?.types?.includes("Files")) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }
+      }}
+      onDrop={(e) => {
+        if (!e.dataTransfer?.files?.length) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files[0];
+        if (file && onDropImageFile) {
+          onDropImageFile(file);
+        }
+      }}
       onPointerMove={(e) => {
         const card = cardRect();
         if (!card) return setCursorPx(null);
@@ -1139,7 +1279,7 @@ export function DesignerCanvas({
           const delta = e.altKey ? -0.25 : 0.25;
           onZoomChange?.((z) =>
             Math.min(
-              3,
+              4,
               Math.max(0.25, Math.round((Number(z) + delta) * 100) / 100)
             )
           );
@@ -1312,6 +1452,7 @@ export function DesignerCanvas({
         <>
           <button
             type="button"
+            data-testid="canvas-rulers-corner"
             title="Double-click to reset pan and zoom (Cmd+0)"
             aria-label="Reset pan and zoom"
             onDoubleClick={() => {
@@ -1362,11 +1503,12 @@ export function DesignerCanvas({
       >
         {showGrid && (
           <div
+            data-testid="canvas-grid"
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-10 opacity-20"
             style={{
               backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.5) 1px, transparent 1px)`,
-              backgroundSize: `${Math.max(10, (cardWidth / dims.width) * 100)}px ${Math.max(10, (cardWidth / dims.width) * 100)}px`,
+              backgroundSize: `${Math.max(10, (cardWidth / dims.width) * 100)}px ${Math.max(10, (cardHeight / dims.height) * 100)}px`,
             }}
           />
         )}
@@ -1591,46 +1733,75 @@ export function DesignerCanvas({
               {editable &&
                 ((selected.kind === "shape" &&
                   (!selected.shape || selected.shape === "rect")) ||
-                  selected.kind === "image") &&
-                box.width >= 40 &&
-                box.height >= 40 &&
+                  (selected.kind === "image" &&
+                    (!selected.maskShape || selected.maskShape === "rect"))) &&
+                box.width >= 28 &&
+                box.height >= 28 &&
                 (() => {
                   const card = cardRect();
                   const cardW = card?.width ?? 600;
-                  const currentRadiusPx =
-                    ((selected.radius ?? 0) / 100) * cardW;
+                  const baseCqw = selected.radius ?? 0;
                   const maxRPx = Math.min(box.width, box.height) / 2;
-                  const inset = Math.min(
-                    maxRPx - 4,
-                    Math.max(12, currentRadiusPx + 6)
-                  );
+                  const calcCorner = (cqw: number) => {
+                    const rPx = Math.max(
+                      0,
+                      Math.min(maxRPx, (cqw / 100) * cardW)
+                    );
+                    const inset = Math.min(
+                      Math.max(10, maxRPx - 4),
+                      Math.max(10, rPx + 6)
+                    );
+                    return { rPx, inset };
+                  };
+                  const tl = calcCorner(selected.radiusTL ?? baseCqw);
+                  const tr = calcCorner(selected.radiusTR ?? baseCqw);
+                  const br = calcCorner(selected.radiusBR ?? baseCqw);
+                  const bl = calcCorner(selected.radiusBL ?? baseCqw);
+
+                  const corners = [
+                    {
+                      id: "tl" as const,
+                      rPx: tl.rPx,
+                      style: { left: tl.inset, top: tl.inset },
+                      translate: "-translate-x-1/2 -translate-y-1/2",
+                    },
+                    {
+                      id: "tr" as const,
+                      rPx: tr.rPx,
+                      style: { right: tr.inset, top: tr.inset },
+                      translate: "translate-x-1/2 -translate-y-1/2",
+                    },
+                    {
+                      id: "br" as const,
+                      rPx: br.rPx,
+                      style: { right: br.inset, bottom: br.inset },
+                      translate: "translate-x-1/2 translate-y-1/2",
+                    },
+                    {
+                      id: "bl" as const,
+                      rPx: bl.rPx,
+                      style: { left: bl.inset, bottom: bl.inset },
+                      translate: "-translate-x-1/2 translate-y-1/2",
+                    },
+                  ];
 
                   return (
                     <>
-                      {(
-                        [
-                          { id: "tl", style: { left: inset, top: inset } },
-                          { id: "tr", style: { right: inset, top: inset } },
-                          { id: "br", style: { right: inset, bottom: inset } },
-                          { id: "bl", style: { left: inset, bottom: inset } },
-                        ] as const
-                      ).map((corner) => (
+                      {corners.map((corner) => (
                         <span
                           key={corner.id}
                           data-radius-handle={corner.id}
                           onPointerDown={(e) =>
-                            startRadiusHandle(
-                              e,
-                              corner.id,
-                              currentRadiusPx,
-                              maxRPx
-                            )
+                            startRadiusHandle(e, corner.id, corner.rPx, maxRPx)
                           }
-                          style={corner.style}
-                          className="pointer-events-auto absolute grid h-4 w-4 -translate-x-1/2 -translate-y-1/2 place-items-center cursor-crosshair z-30 group"
-                          title={`Drag inward to adjust corner radius (Current: ${currentRadiusPx.toFixed(1)}px)`}
+                          style={{ ...corner.style, touchAction: "none" }}
+                          className={cn(
+                            "pointer-events-auto absolute grid h-6 w-6 place-items-center cursor-crosshair z-30 group",
+                            corner.translate
+                          )}
+                          title={`Drag inward to adjust ${corner.id.toUpperCase()} corner radius — hold Alt for single corner (${corner.rPx.toFixed(1)}px)`}
                         >
-                          <span className="block h-3.5 w-3.5 rounded-full border-2 border-[#dfba73] bg-white shadow-md group-hover:scale-125 transition-transform flex items-center justify-center">
+                          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[#dfba73] bg-white shadow-md transition-transform group-hover:scale-125">
                             <span className="block h-1 w-1 rounded-full bg-[#dfba73]" />
                           </span>
                         </span>

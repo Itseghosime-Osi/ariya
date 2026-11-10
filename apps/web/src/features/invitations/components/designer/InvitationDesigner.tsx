@@ -27,7 +27,6 @@ import {
 } from "../../engine";
 import {
   designDimensionsPx,
-  isEditable,
   type Alignment,
   type StackMove,
 } from "../../layer-ops";
@@ -58,7 +57,7 @@ type Upload =
   | { purpose: "card" };
 
 const COALESCE_MS = 900;
-const ZOOMS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+const ZOOMS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
 
 /**
  * The invitation designer: a full-screen workspace like the seating studio. Simple mode asks
@@ -255,45 +254,6 @@ export function InvitationDesigner({
     window.addEventListener("pointerup", onPointerUp);
   }, []);
 
-  // Global Tool Quick Keys: V, C, T, U/R/O/L, G, I, H, Z
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      if (
-        tag === "input" ||
-        tag === "textarea" ||
-        tag === "select" ||
-        target?.isContentEditable
-      ) {
-        return;
-      }
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-      const key = e.key.toLowerCase();
-      if (key === "v") {
-        setActiveTool("select");
-      } else if (key === "c") {
-        setActiveTool("crop");
-      } else if (key === "t") {
-        setActiveTool("text");
-      } else if (key === "u" || key === "r" || key === "o" || key === "l") {
-        setActiveTool("shape");
-      } else if (key === "g") {
-        setActiveTool("gradient");
-      } else if (key === "i") {
-        setActiveTool("eyedropper");
-      } else if (key === "h") {
-        setActiveTool("hand");
-      } else if (key === "z") {
-        setActiveTool("zoom");
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
   const [showRulers, setShowRulers] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -376,6 +336,13 @@ export function InvitationDesigner({
   /** Typing in a field is one undo step, not one per letter. */
   const patchLayer = useCallback(
     (id: string, patch: Partial<InvitationLayer>) => {
+      const target = designRef.current.layers.find((l) => l.id === id);
+      if (target?.locked) {
+        const safeOnly = Object.keys(patch).every(
+          (k) => k === "locked" || k === "visible" || k === "name"
+        );
+        if (!safeOnly) return;
+      }
       const key = `${id}:${Object.keys(patch).sort().join(",")}`;
       const now = Date.now();
       const same =
@@ -398,6 +365,8 @@ export function InvitationDesigner({
       patch: Partial<InvitationLayer>,
       options?: { commit?: boolean }
     ) => {
+      const target = designRef.current.layers.find((l) => l.id === id);
+      if (target?.locked) return;
       commit(
         (d) => ({
           ...d,
@@ -489,6 +458,11 @@ export function InvitationDesigner({
   const choose = (u: Upload) => {
     uploadRef.current = u;
     fileRef.current?.click();
+  };
+
+  const dropImageFile = (file: File) => {
+    uploadRef.current = { purpose: "layer" };
+    void onFile(file);
   };
 
   async function onFile(file: File | undefined) {
@@ -639,16 +613,33 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "v" && clipboardRef.current.length) {
         e.preventDefault();
-        const copies = clipboardRef.current.map((src) => {
-          const freshId = "layer_" + Math.random().toString(36).slice(2, 9);
-          return {
-            ...src,
-            id: freshId,
-            name: `${src.name || src.kind} copy`,
-            x: Math.min(92, src.x + 2),
-            y: Math.min(92, src.y + 2),
-          };
-        });
+        let hasCode = design.layers.some((l) => l.kind === "code");
+        const copies = clipboardRef.current
+          .filter((src) => {
+            if (src.kind === "code") {
+              if (hasCode) return false;
+              hasCode = true;
+            }
+            return true;
+          })
+          .map((src) => {
+            const freshId = "layer_" + Math.random().toString(36).slice(2, 9);
+            return {
+              ...src,
+              id: freshId,
+              locked: undefined,
+              name: `${src.name || src.kind} copy`,
+              x: Math.min(92, src.x + 2),
+              y: Math.min(92, src.y + 2),
+            };
+          });
+        if (!copies.length) {
+          setNotice({
+            tone: "bad",
+            text: "Each card carries at most one guest entry pass seal.",
+          });
+          return;
+        }
         commit((cur) => ({
           ...cur,
           layers: [...cur.layers, ...copies],
@@ -754,6 +745,22 @@ export function InvitationDesigner({
           setActiveTool("shape");
           return;
         }
+        if (k === "r" || k === "o" || k === "l" || k === "a" || k === "s") {
+          e.preventDefault();
+          const map: Record<
+            string,
+            "rect" | "ellipse" | "line" | "arch" | "star"
+          > = {
+            r: "rect",
+            o: "ellipse",
+            l: "line",
+            a: "arch",
+            s: "star",
+          };
+          setActiveShapeKind(map[k]);
+          setActiveTool("shape");
+          return;
+        }
         if (k === "g") {
           e.preventDefault();
           setActiveTool("gradient");
@@ -761,7 +768,7 @@ export function InvitationDesigner({
         }
         if (k === "h") {
           e.preventDefault();
-          setActiveTool("hand");
+          setActiveTool((cur) => (cur === "hand" ? "select" : "hand"));
           return;
         }
         if (k === "z") {
@@ -788,34 +795,6 @@ export function InvitationDesigner({
           ),
         }));
         setSelectedIds([]);
-        return;
-      }
-      const arrowKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
-      if (arrowKeys.includes(e.key)) {
-        e.preventDefault();
-        const step = e.shiftKey ? 5 : 0.5;
-        const dx =
-          e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
-        const dy =
-          e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
-        const activeTargetIds = selectedIds.length
-          ? selectedIds
-          : selectedId
-            ? [selectedId]
-            : [];
-        commit((cur) => ({
-          ...cur,
-          layers: cur.layers.map((l) => {
-            if (!activeTargetIds.includes(l.id) || !isEditable(l)) return l;
-            return {
-              ...l,
-              x:
-                Math.round(Math.max(-500, Math.min(500, l.x + dx)) * 100) / 100,
-              y:
-                Math.round(Math.max(-500, Math.min(500, l.y + dy)) * 100) / 100,
-            };
-          }),
-        }));
         return;
       }
     }
@@ -1316,12 +1295,16 @@ export function InvitationDesigner({
             onZoomChange={setZoom}
             showHandles={pro}
             activeTool={activeTool}
+            showRulers={showRulers}
+            showGrid={showGrid}
             onSelect={setSelectedId}
             onToggleSelect={toggleSelectedId}
             onSelectBatch={setSelectedIds}
             onUpdate={dragLayer}
             onBatchUpdate={dragBatch}
             onRecord={recordSnapshot}
+            onRestoreSnapshot={restoreState}
+            onDropImageFile={dropImageFile}
             onEditText={editText}
             onResizeCanvasPx={handleResizeCanvasPx}
             onAddLayerAt={addLayerAt}
@@ -1360,13 +1343,22 @@ export function InvitationDesigner({
       )}
 
       {doc.saveState === "error" && (
-        <p
+        <div
           role="alert"
           data-testid="studio-error-alert"
-          className="pointer-events-auto fixed bottom-14 left-4 z-50 max-w-sm rounded-2xl bg-red-500/90 text-white px-4 py-2 text-[12px] font-semibold shadow-lg max-lg:hidden"
+          className="pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl bg-red-600/95 text-white px-4 py-2 text-[12px] font-semibold shadow-lg"
         >
-          {doc.saveError ?? "Your last change was not saved."}
-        </p>
+          <span className="flex-1">
+            {doc.saveError ?? "Your last change was not saved."}
+          </span>
+          <button
+            type="button"
+            onClick={doc.retrySave}
+            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-bold hover:bg-white/30 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       )}
 
       {pro ? (

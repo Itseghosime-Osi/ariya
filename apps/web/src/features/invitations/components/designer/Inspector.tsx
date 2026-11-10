@@ -14,7 +14,6 @@ import {
   CANVAS_PRESETS,
   designDimensionsPx,
   designRatio,
-  flipLayer,
   resizeCanvasPx,
   setPaperEdge,
   type Alignment,
@@ -966,6 +965,7 @@ export function Inspector({
   }
 
   const [unit, setUnit] = useState<"px" | "%">("px");
+  const [aspectLocked, setAspectLocked] = useState(layer.kind === "image");
   const [unlinkCorners, setUnlinkCorners] = useState(
     Boolean(
       layer.radiusTL != null ||
@@ -977,6 +977,10 @@ export function Inspector({
   const [fillMode, setFillMode] = useState<"solid" | "gradient" | "none">(
     layer.gradient ? "gradient" : layer.fill ? "solid" : "none"
   );
+
+  useEffect(() => {
+    setAspectLocked(layer.kind === "image");
+  }, [layer.id, layer.kind]);
 
   useEffect(() => {
     setUnlinkCorners(
@@ -998,7 +1002,10 @@ export function Inspector({
     layer.radiusBL,
   ]);
   const dims = designDimensionsPx(design);
-  const patch = (p: Patch) => onPatch(layer.id, p);
+  const patch = (p: Patch) => {
+    if (layer.locked) return;
+    onPatch(layer.id, p);
+  };
   const isText = TEXT_KINDS.includes(layer.kind);
   const hasBox = layer.kind === "shape" || layer.kind === "image";
   const label =
@@ -1024,288 +1031,422 @@ export function Inspector({
       >
         {layer.locked && (
           <p className="mb-3 rounded-xl bg-gold/15 px-3 py-2 text-[12px] text-gold-ink">
-            This layer is locked. Unlock it in the layers list to move or resize
-            it.
+            This layer is locked. Unlock it in the layers list to move, resize,
+            or edit its style.
           </p>
         )}
-        <div className="mb-2.5 flex items-center justify-between">
-          <span
-            className={cn(
-              "text-[11px] font-semibold uppercase tracking-wider",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
-            )}
-          >
-            Position & Size
-          </span>
-          <div
-            className={cn(
-              "inline-flex rounded-lg border p-0.5 transition-colors",
-              dark
-                ? "border-white/10 bg-white/[0.05]"
-                : "border-[#e8e2d6] bg-white/60"
-            )}
-          >
-            <button
-              type="button"
-              onClick={() => setUnit("px")}
-              className={cn(
-                "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
-                unit === "px"
-                  ? dark
-                    ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
-                    : "bg-[#4a0e17] text-white shadow-xs"
-                  : dark
-                    ? "text-zinc-400 hover:text-white"
-                    : "text-[#7a5b67] hover:text-night"
-              )}
-            >
-              px
-            </button>
-            <button
-              type="button"
-              onClick={() => setUnit("%")}
-              className={cn(
-                "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
-                unit === "%"
-                  ? dark
-                    ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
-                    : "bg-[#4a0e17] text-white shadow-xs"
-                  : dark
-                    ? "text-zinc-400 hover:text-white"
-                    : "text-[#7a5b67] hover:text-night"
-              )}
-            >
-              %
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {unit === "px" ? (
-            <>
-              <Num
-                dark={dark}
-                label="X"
-                suffix="px"
-                value={Math.round((layer.x / 100) * dims.width)}
-                min={-Math.round(dims.width * 2)}
-                max={Math.round(dims.width * 5)}
-                step={1}
-                onChange={(xPx) =>
-                  patch({
-                    x: Math.round((xPx / dims.width) * 100 * 100) / 100,
-                  })
-                }
-              />
-              <Num
-                dark={dark}
-                label="Y"
-                suffix="px"
-                value={Math.round((layer.y / 100) * dims.height)}
-                min={-Math.round(dims.height * 2)}
-                max={Math.round(dims.height * 5)}
-                step={1}
-                onChange={(yPx) =>
-                  patch({
-                    y: Math.round((yPx / dims.height) * 100 * 100) / 100,
-                  })
-                }
-              />
-              <Num
-                dark={dark}
-                label="Width"
-                suffix="px"
-                value={Math.max(
-                  1,
-                  Math.round((layer.width / 100) * dims.width)
+        <div
+          aria-disabled={layer.locked || undefined}
+          className={cn(layer.locked && "pointer-events-none opacity-55")}
+        >
+          <div className="mb-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "text-[11px] font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[#7a5b67]"
                 )}
-                min={5}
-                max={Math.round(dims.width * 10)}
-                step={1}
-                onChange={(wPx) =>
-                  patch({
-                    width: Math.max(
-                      1,
-                      Math.round((wPx / dims.width) * 100 * 100) / 100
-                    ),
-                  })
-                }
-              />
-              {hasBox && layer.shape !== "line" ? (
+              >
+                Position & Size
+              </span>
+              {hasBox && layer.shape !== "line" && (
+                <button
+                  type="button"
+                  aria-pressed={aspectLocked}
+                  aria-label="Lock aspect ratio"
+                  title={
+                    aspectLocked
+                      ? "Aspect ratio locked (click to unlock)"
+                      : "Lock width & height proportions"
+                  }
+                  onClick={() => setAspectLocked((v) => !v)}
+                  className={cn(
+                    "rounded-md px-1.5 py-0.5 text-[10px] font-semibold transition-colors",
+                    aspectLocked
+                      ? dark
+                        ? "bg-[#dfba73]/25 text-[#dfba73]"
+                        : "bg-[#4a0e17]/15 text-[#4a0e17]"
+                      : dark
+                        ? "text-zinc-400 hover:bg-white/10"
+                        : "text-[#7a5b67] hover:bg-black/5"
+                  )}
+                >
+                  {aspectLocked ? "⛓ Locked" : "⛓ Free"}
+                </button>
+              )}
+            </div>
+            <div
+              className={cn(
+                "inline-flex rounded-lg border p-0.5 transition-colors",
+                dark
+                  ? "border-white/10 bg-white/[0.05]"
+                  : "border-[#e8e2d6] bg-white/60"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setUnit("px")}
+                className={cn(
+                  "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
+                  unit === "px"
+                    ? dark
+                      ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
+                      : "bg-[#4a0e17] text-white shadow-xs"
+                    : dark
+                      ? "text-zinc-400 hover:text-white"
+                      : "text-[#7a5b67] hover:text-night"
+                )}
+              >
+                px
+              </button>
+              <button
+                type="button"
+                onClick={() => setUnit("%")}
+                className={cn(
+                  "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
+                  unit === "%"
+                    ? dark
+                      ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
+                      : "bg-[#4a0e17] text-white shadow-xs"
+                    : dark
+                      ? "text-zinc-400 hover:text-white"
+                      : "text-[#7a5b67] hover:text-night"
+                )}
+              >
+                %
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            {unit === "px" ? (
+              <>
                 <Num
                   dark={dark}
-                  label="Height"
+                  label="X"
                   suffix="px"
-                  value={Math.max(
-                    1,
-                    Math.round(((layer.height ?? 20) / 100) * dims.height)
-                  )}
-                  min={5}
-                  max={Math.round(dims.height * 10)}
+                  value={Math.round((layer.x / 100) * dims.width)}
+                  min={-Math.round(dims.width * 2)}
+                  max={Math.round(dims.width * 5)}
                   step={1}
-                  onChange={(hPx) =>
+                  onChange={(xPx) =>
                     patch({
-                      height: Math.max(
-                        0.2,
-                        Math.round((hPx / dims.height) * 100 * 100) / 100
-                      ),
+                      x: Math.round((xPx / dims.width) * 100 * 100) / 100,
                     })
                   }
                 />
-              ) : (
-                <span />
-              )}
-            </>
-          ) : (
-            <>
-              <Num
-                dark={dark}
-                label="Left"
-                suffix="%"
-                value={layer.x}
-                min={-500}
-                max={500}
-                step={0.5}
-                onChange={(v) => patch({ x: v })}
-              />
-              <Num
-                dark={dark}
-                label="Top"
-                suffix="%"
-                value={layer.y}
-                min={-500}
-                max={500}
-                step={0.5}
-                onChange={(v) => patch({ y: v })}
-              />
-              <Num
-                dark={dark}
-                label="Width"
-                suffix="%"
-                value={layer.width}
-                min={1}
-                max={1000}
-                step={0.5}
-                onChange={(v) => patch({ width: v })}
-              />
-              {hasBox && layer.shape !== "line" ? (
                 <Num
                   dark={dark}
-                  label="Height"
+                  label="Y"
+                  suffix="px"
+                  value={Math.round((layer.y / 100) * dims.height)}
+                  min={-Math.round(dims.height * 2)}
+                  max={Math.round(dims.height * 5)}
+                  step={1}
+                  onChange={(yPx) =>
+                    patch({
+                      y: Math.round((yPx / dims.height) * 100 * 100) / 100,
+                    })
+                  }
+                />
+                <Num
+                  dark={dark}
+                  label="Width"
+                  suffix="px"
+                  value={Math.max(
+                    1,
+                    Math.round((layer.width / 100) * dims.width)
+                  )}
+                  min={5}
+                  max={Math.round(dims.width * 10)}
+                  step={1}
+                  onChange={(wPx) => {
+                    const nextW = Math.max(
+                      1,
+                      Math.round((wPx / dims.width) * 100 * 100) / 100
+                    );
+                    if (aspectLocked && hasBox && layer.shape !== "line") {
+                      const curWPx = (layer.width / 100) * dims.width;
+                      const curHPx = ((layer.height ?? 20) / 100) * dims.height;
+                      const ratio =
+                        curWPx > 0 && curHPx > 0 ? curWPx / curHPx : 1;
+                      const nextHPx = wPx / ratio;
+                      const nextH = Math.max(
+                        0.2,
+                        Math.round((nextHPx / dims.height) * 100 * 100) / 100
+                      );
+                      patch({ width: nextW, height: nextH });
+                    } else {
+                      patch({ width: nextW });
+                    }
+                  }}
+                />
+                {hasBox && layer.shape !== "line" ? (
+                  <Num
+                    dark={dark}
+                    label="Height"
+                    suffix="px"
+                    value={Math.max(
+                      1,
+                      Math.round(((layer.height ?? 20) / 100) * dims.height)
+                    )}
+                    min={5}
+                    max={Math.round(dims.height * 10)}
+                    step={1}
+                    onChange={(hPx) => {
+                      const nextH = Math.max(
+                        0.2,
+                        Math.round((hPx / dims.height) * 100 * 100) / 100
+                      );
+                      if (aspectLocked) {
+                        const curWPx = (layer.width / 100) * dims.width;
+                        const curHPx =
+                          ((layer.height ?? 20) / 100) * dims.height;
+                        const ratio =
+                          curWPx > 0 && curHPx > 0 ? curWPx / curHPx : 1;
+                        const nextWPx = hPx * ratio;
+                        const nextW = Math.max(
+                          1,
+                          Math.round((nextWPx / dims.width) * 100 * 100) / 100
+                        );
+                        patch({ width: nextW, height: nextH });
+                      } else {
+                        patch({ height: nextH });
+                      }
+                    }}
+                  />
+                ) : (
+                  <span />
+                )}
+              </>
+            ) : (
+              <>
+                <Num
+                  dark={dark}
+                  label="Left"
                   suffix="%"
-                  value={layer.height ?? 20}
-                  min={0.2}
+                  value={layer.x}
+                  min={-500}
+                  max={500}
+                  step={0.5}
+                  onChange={(v) => patch({ x: v })}
+                />
+                <Num
+                  dark={dark}
+                  label="Top"
+                  suffix="%"
+                  value={layer.y}
+                  min={-500}
+                  max={500}
+                  step={0.5}
+                  onChange={(v) => patch({ y: v })}
+                />
+                <Num
+                  dark={dark}
+                  label="Width"
+                  suffix="%"
+                  value={layer.width}
+                  min={1}
                   max={1000}
                   step={0.5}
-                  onChange={(v) => patch({ height: v })}
+                  onChange={(v) => {
+                    const nextW = Math.max(1, v);
+                    if (aspectLocked && hasBox && layer.shape !== "line") {
+                      const scale = layer.width > 0 ? nextW / layer.width : 1;
+                      patch({
+                        width: nextW,
+                        height: Math.max(
+                          0.2,
+                          Math.round((layer.height ?? 20) * scale * 100) / 100
+                        ),
+                      });
+                    } else {
+                      patch({ width: nextW });
+                    }
+                  }}
                 />
-              ) : (
-                <span />
-              )}
-            </>
-          )}
-          <Num
-            dark={dark}
-            label="Turn"
-            suffix="°"
-            value={layer.rotation ?? 0}
-            min={-180}
-            max={180}
-            step={1}
-            onChange={(v) => patch({ rotation: v })}
-          />
-          <Num
-            dark={dark}
-            label="See-through"
-            suffix="%"
-            value={Math.round((1 - (layer.opacity ?? 1)) * 100)}
-            min={0}
-            max={100}
-            step={5}
-            onChange={(v) => patch({ opacity: 1 - v / 100 })}
-          />
-        </div>
-
-        <div className="mt-3 flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="Flip horizontal"
-            onClick={() => onDesign((d) => flipLayer(d, layer.id, true))}
-            className={cn(
-              "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-2",
-              dark
-                ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
-                : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
+                {hasBox && layer.shape !== "line" ? (
+                  <Num
+                    dark={dark}
+                    label="Height"
+                    suffix="%"
+                    value={layer.height ?? 20}
+                    min={0.2}
+                    max={1000}
+                    step={0.5}
+                    onChange={(v) => {
+                      const nextH = Math.max(0.2, v);
+                      if (aspectLocked) {
+                        const curH = layer.height ?? 20;
+                        const scale = curH > 0 ? nextH / curH : 1;
+                        patch({
+                          width: Math.max(
+                            1,
+                            Math.round(layer.width * scale * 100) / 100
+                          ),
+                          height: nextH,
+                        });
+                      } else {
+                        patch({ height: nextH });
+                      }
+                    }}
+                  />
+                ) : (
+                  <span />
+                )}
+              </>
             )}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 2v20M5 12l4-4v8zM19 12l-4-4v8z" />
-            </svg>
-            Flip H
-          </button>
-          <button
-            type="button"
-            aria-label="Flip vertical"
-            onClick={() => onDesign((d) => flipLayer(d, layer.id, false))}
-            className={cn(
-              "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-2",
-              dark
-                ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
-                : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
-            )}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M2 12h20M12 5l-4 4h8zM12 19l-4-4h8z" />
-            </svg>
-            Flip V
-          </button>
-        </div>
-        <div
-          className="mt-3 flex flex-wrap gap-1.5"
-          role="group"
-          aria-label="Align on the card"
-        >
-          {ALIGN.map((a) => (
-            <IconBtn
-              key={a.key}
-              label={a.label}
+            <Num
               dark={dark}
-              onClick={() => onAlign(layer.id, a.key)}
+              label="Turn"
+              suffix="°"
+              value={layer.rotation ?? 0}
+              min={-180}
+              max={180}
+              step={1}
+              onChange={(v) => patch({ rotation: v })}
+            />
+            <Num
+              dark={dark}
+              label="See-through"
+              suffix="%"
+              value={Math.round((1 - (layer.opacity ?? 1)) * 100)}
+              min={0}
+              max={100}
+              step={5}
+              onChange={(v) => patch({ opacity: 1 - v / 100 })}
+            />
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="Flip horizontal"
+              aria-pressed={Boolean(layer.flipX)}
+              onClick={() => patch({ flipX: !layer.flipX })}
+              className={cn(
+                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
+                layer.flipX
+                  ? dark
+                    ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73]"
+                    : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                  : dark
+                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
+                    : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
+              )}
             >
               <svg
                 viewBox="0 0 24 24"
-                width="18"
-                height="18"
+                width="15"
+                height="15"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.6"
+                strokeWidth="1.8"
                 strokeLinecap="round"
+                strokeLinejoin="round"
                 aria-hidden="true"
               >
-                <path d={a.d} />
+                <path d="M12 2v20M5 12l4-4v8zM19 12l-4-4v8z" />
               </svg>
-            </IconBtn>
-          ))}
+              Flip H
+            </button>
+            <button
+              type="button"
+              aria-label="Flip vertical"
+              aria-pressed={Boolean(layer.flipY)}
+              onClick={() => patch({ flipY: !layer.flipY })}
+              className={cn(
+                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
+                layer.flipY
+                  ? dark
+                    ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73]"
+                    : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                  : dark
+                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
+                    : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
+              )}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 12h20M12 5l-4 4h8zM12 19l-4-4h8z" />
+              </svg>
+              Flip V
+            </button>
+            <button
+              type="button"
+              aria-label="Rotate 90 degrees counter-clockwise"
+              title="Rotate -90°"
+              onClick={() => {
+                const next =
+                  (((((layer.rotation ?? 0) - 90 + 180) % 360) + 360) % 360) -
+                  180;
+                patch({ rotation: next === -180 ? 180 : next });
+              }}
+              className={cn(
+                "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
+                dark
+                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+              )}
+            >
+              -90°
+            </button>
+            <button
+              type="button"
+              aria-label="Rotate 90 degrees clockwise"
+              title="Rotate +90°"
+              onClick={() => {
+                const next =
+                  (((((layer.rotation ?? 0) + 90 + 180) % 360) + 360) % 360) -
+                  180;
+                patch({ rotation: next === -180 ? 180 : next });
+              }}
+              className={cn(
+                "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
+                dark
+                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+              )}
+            >
+              +90°
+            </button>
+          </div>
+          <div
+            className="mt-3 flex flex-wrap gap-1.5"
+            role="group"
+            aria-label="Align on the card"
+          >
+            {ALIGN.map((a) => (
+              <IconBtn
+                key={a.key}
+                label={a.label}
+                dark={dark}
+                onClick={() => !layer.locked && onAlign(layer.id, a.key)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d={a.d} />
+                </svg>
+              </IconBtn>
+            ))}
+          </div>
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           <IconBtn
@@ -1941,20 +2082,140 @@ export function Inspector({
               ]}
               onPick={(fit) => patch({ fit })}
             />
-            {(!layer.maskShape ||
-              layer.maskShape === "rect" ||
-              layer.maskShape === "arch") && (
+            {(!layer.maskShape || layer.maskShape === "rect") && (
+              <div
+                className={cn(
+                  "space-y-2.5 rounded-xl border p-2.5",
+                  dark
+                    ? "border-white/10 bg-white/[0.03]"
+                    : "border-[#e8e2d6] bg-white/40"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "text-[11px] font-semibold",
+                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    )}
+                  >
+                    Corner Radii
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !unlinkCorners;
+                      setUnlinkCorners(next);
+                      if (!next) {
+                        const r = layer.radiusTL ?? layer.radius ?? 0;
+                        patch({
+                          radius: r,
+                          radiusTL: undefined,
+                          radiusTR: undefined,
+                          radiusBR: undefined,
+                          radiusBL: undefined,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                      unlinkCorners
+                        ? dark
+                          ? "bg-[#dfba73] text-[#20161b] shadow-xs"
+                          : "bg-[#4a0e17] text-white shadow-xs"
+                        : dark
+                          ? "bg-white/10 text-zinc-300 hover:text-white"
+                          : "bg-black/5 text-[#7a5b67] hover:text-[#4a0e17]"
+                    )}
+                  >
+                    {unlinkCorners
+                      ? "4 Corners (Independent)"
+                      : "Linked (Uniform)"}
+                  </button>
+                </div>
+                {!unlinkCorners ? (
+                  <Num
+                    dark={dark}
+                    label="Corner radius"
+                    value={layer.radius ?? 0}
+                    min={0}
+                    max={50}
+                    step={0.5}
+                    suffix="cqw"
+                    onChange={(v) => patch({ radius: v })}
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Num
+                      dark={dark}
+                      label="Top Left"
+                      value={layer.radiusTL ?? layer.radius ?? 0}
+                      min={0}
+                      max={50}
+                      step={0.5}
+                      suffix="cqw"
+                      onChange={(v) => patch({ radiusTL: v })}
+                    />
+                    <Num
+                      dark={dark}
+                      label="Top Right"
+                      value={layer.radiusTR ?? layer.radius ?? 0}
+                      min={0}
+                      max={50}
+                      step={0.5}
+                      suffix="cqw"
+                      onChange={(v) => patch({ radiusTR: v })}
+                    />
+                    <Num
+                      dark={dark}
+                      label="Bottom Left"
+                      value={layer.radiusBL ?? layer.radius ?? 0}
+                      min={0}
+                      max={50}
+                      step={0.5}
+                      suffix="cqw"
+                      onChange={(v) => patch({ radiusBL: v })}
+                    />
+                    <Num
+                      dark={dark}
+                      label="Bottom Right"
+                      value={layer.radiusBR ?? layer.radius ?? 0}
+                      min={0}
+                      max={50}
+                      step={0.5}
+                      suffix="cqw"
+                      onChange={(v) => patch({ radiusBR: v })}
+                    />
+                  </div>
+                )}
+                <HexColorInput
+                  dark={dark}
+                  label="Frame border"
+                  allowNone
+                  value={layer.stroke ?? null}
+                  onChange={(c) => patch({ stroke: c })}
+                />
+                {layer.stroke && (
+                  <Num
+                    dark={dark}
+                    label="Border weight"
+                    value={layer.strokeWidth ?? 0.4}
+                    min={0.1}
+                    max={6}
+                    step={0.1}
+                    onChange={(v) => patch({ strokeWidth: v })}
+                  />
+                )}
+              </div>
+            )}
+            {layer.maskShape === "arch" && (
               <Num
                 dark={dark}
-                label={
-                  layer.maskShape === "arch"
-                    ? "Arch curve"
-                    : "Round the corners"
-                }
-                value={layer.radius ?? (layer.maskShape === "arch" ? 18 : 0)}
+                label="Arch curve"
+                value={layer.radius ?? 18}
                 min={0}
                 max={50}
                 step={0.5}
+                suffix="cqw"
                 onChange={(v) => patch({ radius: v })}
               />
             )}

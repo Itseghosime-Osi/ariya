@@ -108,8 +108,9 @@ export function NavigatorPanel({
           </svg>
           <input
             type="range"
+            aria-label="Canvas zoom slider"
             min={0.25}
-            max={3}
+            max={4}
             step={0.05}
             value={zoom}
             onChange={(e) => onZoomChange(Number(e.target.value))}
@@ -133,7 +134,7 @@ export function NavigatorPanel({
 
         {/* Quick Zoom Buttons */}
         <div className="grid grid-cols-4 gap-1.5 pt-1">
-          {[0.5, 0.75, 1, 1.5].map((z) => (
+          {[0.25, 1, 2, 4].map((z) => (
             <button
               key={z}
               type="button"

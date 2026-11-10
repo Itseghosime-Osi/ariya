@@ -387,10 +387,10 @@ export function ToolRail({
 
         <Divider dark={dark} />
 
-        {/* Picture / Image Upload Tool (I) */}
+        {/* Picture / Image Upload Tool (Shift+I) */}
         <ToolButton
           label="Place image / photo"
-          shortcut="I"
+          shortcut="⇧I"
           dark={dark}
           onClick={onPickImage}
           disabled={busy}
