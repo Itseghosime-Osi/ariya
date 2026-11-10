@@ -56,7 +56,8 @@ export async function createAndLoginUser(
     fullName: `User ${timestamp.toString().slice(-4)}`,
   };
 
-  await page.goto("/sign-up");
+  // Wait for the page to finish hydrating, or WebKit can press Continue before it is wired up.
+  await page.goto("/sign-up", { waitUntil: "networkidle" });
   await page.locator("#fullName").fill(testUser.fullName);
   await page.getByTestId("signup-continue").click();
   await page.locator("#emailInput").fill(testUser.email);
