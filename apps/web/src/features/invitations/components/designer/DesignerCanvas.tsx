@@ -482,7 +482,9 @@ export function DesignerCanvas({
         tag === "textarea" ||
         tag === "select" ||
         tag === "button" ||
-        document.querySelector('[role="dialog"], [role="menu"]') ||
+        document.querySelector(
+          '[role="dialog"]:not([hidden]), [role="menu"]:not([hidden])'
+        ) ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;
@@ -609,7 +611,9 @@ export function DesignerCanvas({
         tag === "textarea" ||
         tag === "select" ||
         tag === "button" ||
-        document.querySelector('[role="dialog"], [role="menu"]') ||
+        document.querySelector(
+          '[role="dialog"]:not([hidden]), [role="menu"]:not([hidden])'
+        ) ||
         (e.target as HTMLElement)?.isContentEditable
       ) {
         return;

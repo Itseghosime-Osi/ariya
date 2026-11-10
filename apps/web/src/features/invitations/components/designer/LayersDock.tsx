@@ -920,6 +920,7 @@ export function LayersDock({
           <button
             type="button"
             title="Duplicate Layer (Cmd+J)"
+            aria-label="Duplicate Layer"
             disabled={!selectedLayer || selectedLayer.kind === "code"}
             onClick={() => selectedLayer && onDuplicate(selectedLayer.id)}
             className={cn(
@@ -934,6 +935,7 @@ export function LayersDock({
           <button
             type="button"
             title="New Text Layer"
+            aria-label="New Text Layer"
             onClick={() => onAddLayer?.("text")}
             className={cn(
               "grid h-6 w-6 place-items-center rounded",
@@ -957,6 +959,7 @@ export function LayersDock({
           <button
             type="button"
             title="Delete Layer"
+            aria-label="Delete Layer"
             disabled={!selectedLayer || !canDelete(selectedLayer)}
             onClick={() => selectedLayer && onDelete(selectedLayer.id)}
             className={cn(

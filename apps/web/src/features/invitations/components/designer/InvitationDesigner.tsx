@@ -66,6 +66,47 @@ type Upload =
 const COALESCE_MS = 900;
 const ZOOMS = [0.05, 0.1, 0.125, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
 
+/**
+ * Text and some other layers have no stored height: the browser lays them out. Vertical alignment
+ * and distribution must use how tall they actually are, so measure the rendered boxes, run the
+ * operation, then remove the heights again so those layers stay automatically sized.
+ */
+function withRenderedHeights(
+  design: InvitationDesign,
+  operate: (measured: InvitationDesign) => InvitationDesign
+): InvitationDesign {
+  const canvas = document.querySelector<HTMLElement>(
+    "[data-invitation-canvas]"
+  );
+  const total = canvas?.offsetHeight ?? 0;
+  const autoSized = new Set<string>();
+  const measured: InvitationDesign = {
+    ...design,
+    layers: design.layers.map((layer) => {
+      if (layer.height != null || !canvas || total <= 0) return layer;
+      const element = canvas.querySelector<HTMLElement>(
+        `[data-layer-id="${CSS.escape(layer.id)}"]`
+      );
+      if (!element) return layer;
+      autoSized.add(layer.id);
+      return {
+        ...layer,
+        height: Math.round((element.offsetHeight / total) * 10000) / 100,
+      };
+    }),
+  };
+  const result = operate(measured);
+  return {
+    ...result,
+    layers: result.layers.map((layer) => {
+      if (!autoSized.has(layer.id)) return layer;
+      const { height, ...rest } = layer;
+      void height;
+      return rest;
+    }),
+  };
+}
+
 /** Cancel/undo also restores pass geometry adjusted by the temporary paper dimensions. */
 function beforeCanvasResize(
   current: InvitationDesign,
@@ -552,7 +593,8 @@ export function InvitationDesigner({
     [commit]
   );
   const align = useCallback(
-    (id: string, how: Alignment) => commit((d) => alignViaEngine(d, id, how)),
+    (id: string, how: Alignment) =>
+      commit((d) => withRenderedHeights(d, (m) => alignViaEngine(m, id, how))),
     [commit]
   );
 
@@ -769,7 +811,9 @@ export function InvitationDesigner({
       }
       if (
         e.defaultPrevented ||
-        document.querySelector('[role="dialog"], [role="menu"]')
+        document.querySelector(
+          '[role="dialog"]:not([hidden]), [role="menu"]:not([hidden])'
+        )
       )
         return;
       const mod = e.metaKey || e.ctrlKey;
@@ -1464,6 +1508,7 @@ export function InvitationDesigner({
                 ? "Switch to the light interface"
                 : "Switch to the dark interface"
             }
+            title={dark ? "Light interface" : "Dark interface"}
             aria-pressed={dark}
             onClick={toggleDark}
             className="grid h-10 w-10 place-items-center rounded-full text-night hover:bg-burgundy/10"
@@ -1606,10 +1651,18 @@ export function InvitationDesigner({
               selectedIds={selectedIds}
               onPatchLayer={patchLayer}
               onAlignSelection={(ids, how) =>
-                commit((d) => alignSelectionViaEngine(d, ids, how))
+                commit((d) =>
+                  withRenderedHeights(d, (m) =>
+                    alignSelectionViaEngine(m, ids, how)
+                  )
+                )
               }
               onDistribute={(ids, h) =>
-                commit((d) => distributeLayersViaEngine(d, ids, h))
+                commit((d) =>
+                  withRenderedHeights(d, (m) =>
+                    distributeLayersViaEngine(m, ids, h)
+                  )
+                )
               }
               onGroupSelection={() => {
                 if (selectedIds.length >= 2) {
@@ -1827,11 +1880,17 @@ export function InvitationDesigner({
                     onDesign={(fn) => commit(fn)}
                     onAlign={align}
                     onAlignSelection={(ids, how) =>
-                      commit((d) => alignSelectionViaEngine(d, ids, how))
+                      commit((d) =>
+                        withRenderedHeights(d, (m) =>
+                          alignSelectionViaEngine(m, ids, how)
+                        )
+                      )
                     }
                     onDistribute={(ids, horizontal) =>
                       commit((d) =>
-                        distributeLayersViaEngine(d, ids, horizontal)
+                        withRenderedHeights(d, (m) =>
+                          distributeLayersViaEngine(m, ids, horizontal)
+                        )
                       )
                     }
                     onGroup={(ids) => {

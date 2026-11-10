@@ -1,0 +1,50 @@
+[
+  {
+    "id": "DES-013",
+    "name": "Use disabled actions",
+    "ok": true,
+    "detail": "align disabled with no selection=true; distribute disabled with one layer=true; align enabled with one layer"
+  },
+  {
+    "id": "DES-182",
+    "name": "Align left, centre, right, top, middle and bottom",
+    "ok": true,
+    "detail": "{\"Align left\":0,\"Center horizontal\":-0.02,\"Align right\":-0.02,\"Align top\":0,\"Center vertical\":-0.15,\"Align bottom\":-0.3} (px offset from card edge/centre; undo restores each)"
+  },
+  {
+    "id": "DES-184",
+    "name": "Distribute horizontally or vertically (vertical)",
+    "ok": true,
+    "detail": "gaps 150.5 / 150.6"
+  },
+  {
+    "id": "DES-184b",
+    "name": "Distribute undo restores",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "DES-185",
+    "name": "Snap to canvas centres and edges",
+    "ok": true,
+    "detail": "centre offset after drag to +3px: -0.01px"
+  },
+  {
+    "id": "DES-187",
+    "name": "Temporarily disable snapping",
+    "ok": true,
+    "detail": "with Alt: centre offset 2.99px (free movement)"
+  },
+  {
+    "id": "DES-186",
+    "name": "Snap to other objects",
+    "ok": true,
+    "detail": "left edge offset to neighbour after dragging within 2.5px: 0.00px"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

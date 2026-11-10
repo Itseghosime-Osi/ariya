@@ -4,6 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
 import type { InvitationDesign } from "../../types";
+import { describeStep } from "./history-labels";
 
 interface HistoryPanelProps {
   dark?: boolean;
@@ -45,16 +46,6 @@ export function HistoryPanel({
       index: past.length + 1 + i,
     });
   });
-
-  const getStepLabel = (
-    d: InvitationDesign,
-    idx: number,
-    isInitial: boolean
-  ) => {
-    if (isInitial) return "Original Invitation";
-    const layers = d.layers.length;
-    return `State ${idx + 1} (${layers} layers)`;
-  };
 
   return (
     <div
@@ -125,7 +116,10 @@ export function HistoryPanel({
               </span>
 
               <span className="truncate flex-1">
-                {getStepLabel(entry.design, idx, idx === 0)}
+                {describeStep(
+                  idx > 0 ? allEntries[idx - 1].design : null,
+                  entry.design
+                )}
               </span>
 
               {isCurrent && (

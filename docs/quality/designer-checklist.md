@@ -2,7 +2,7 @@
 
 Live verification checklist for `feat/studio-pro-designer`, started 10 November 2026. Checked boxes mean verified acceptance checks; partial checks remain unchecked. See [the test matrix](designer-test-matrix.csv) for evidence and limitations.
 
-**Progress:** 126 verified, 25 partial, 85 not tested, 47 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
+**Progress:** 145 verified, 28 partial, 63 not tested, 47 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
 
 **Continuing with another agent?** Read the [Claude handoff](CLAUDE-HANDOFF.md) for scope, code locations, remaining priorities and verification requirements.
 
@@ -46,33 +46,33 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 - [x] **DES-010 · Core** — Resize the browser. Expected: Controls remain reachable; canvas does not jump. **Pass** — 375, 390, 768, 1024, 1440, 1920 and 844×390 layouts checked; panels collapse and no horizontal page overflow. Evidence: `Chromium responsive fixture`.
 - [ ] **DES-011 · Core** — View contextual options. Expected: Options match the active tool and selected object.
 - [x] **DES-012 · Core** — Inspect empty selection. Expected: Properties do not misleadingly edit the previous selection. **Pass** — Layer-list selection and deselection switch the inspector between the selected layer and document properties. Evidence: `Chromium detailed controls fixture`.
-- [ ] **DES-013 · Core** — Use disabled actions. Expected: Disabled state and reason are understandable.
-- [ ] **DES-014 · Core** — Inspect tooltips. Expected: Tool name, shortcut and purpose are discoverable.
+- [x] **DES-013 · Core** — Use disabled actions. Expected: Disabled state and reason are understandable. **Pass** — Align buttons are disabled with no selection and Distribute is disabled until three layers are selected; Align enables with one layer. Chromium desktop, local fixture. Evidence: `evidence/studio-batch2.json`.
+- [x] **DES-014 · Core** — Inspect tooltips. Expected: Tool name, shortcut and purpose are discoverable. **Pass** — All 61 icon-only buttons carry a title tooltip (with the shortcut where one exists). The theme switch and three Layers footer buttons were fixed in this batch. Hover rendering on touch devices is not claimed. Evidence: `evidence/studio-batch3.json`.
 
 ## Selection and movement
 
 - [x] **DES-015 · Core** — Select an object on canvas. Expected: Correct visible object and layer highlight together. **Pass** — Canvas selection updates the inspector; arrow nudge saves the changed coordinate. Evidence: `Chromium functional fixture`.
 - [x] **DES-016 · Core** — Select from Layers. Expected: Canvas selection and inspector update together. **Pass** — Layer-list selection and deselection switch the inspector between the selected layer and document properties. Evidence: `Chromium detailed controls fixture`.
-- [ ] **DES-017 · Core** — Click empty canvas. Expected: Selection clears predictably.
-- [ ] **DES-018 · Core** — Select overlapping objects. Expected: Defined frontmost/deeper-selection behaviour works.
-- [ ] **DES-019 · Core** — Shift-select objects. Expected: Adds or removes items without losing other selections.
-- [ ] **DES-020 · Core** — Drag a selection marquee. Expected: Defined containment/intersection rule is consistent.
-- [ ] **DES-021 · Core** — Move a selected object. Expected: Visual position and numeric coordinates agree.
+- [x] **DES-017 · Core** — Click empty canvas. Expected: Selection clears predictably. **Pass** — Clicking an empty part of the card clears the selection and the inspector. Chromium desktop, local fixture. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-018 · Core** — Select overlapping objects. Expected: Defined frontmost/deeper-selection behaviour works. **Pass** — With a rectangle drawn over the footer, clicking the overlap selects the top layer and the Layers row selects the one underneath. Evidence: `evidence/studio-batch3.json`.
+- [x] **DES-019 · Core** — Shift-select objects. Expected: Adds or removes items without losing other selections. **Pass** — Shift-click adds a second layer and shows the multi-selection inspector. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-020 · Core** — Drag a selection marquee. Expected: Defined containment/intersection rule is consistent. **Pass** — Dragging on the card draws a marquee and selects the layers it touches, showing the multi-selection inspector. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-021 · Core** — Move a selected object. Expected: Visual position and numeric coordinates agree. **Pass** — Dragging a selected layer moved it by the dragged distance (41.3, 30.0 screen px for a 40, 30 drag at 45% zoom). Evidence: `evidence/studio-batch1.json`.
 - [x] **DES-022 · Core** — Move multiple objects. Expected: Relative spacing is preserved. **Pass** — Authenticated browser check selects grouped members together, moves both by the same delta, resizes proportionally and verifies exact undo/redo. Evidence: `designer-acceptance.spec.ts group step; selection-transform.test.ts`.
 - [x] **DES-023 · Core** — Select a locked object. Expected: It cannot accidentally move or edit. **Pass** — Locked rectangle ignores keyboard nudges, hides corner handles, and becomes editable after unlocking. Evidence: `guard-results.json`.
-- [ ] **DES-024 · Core** — Select a hidden object in Layers. Expected: Visibility and selection rules are clear.
+- [x] **DES-024 · Core** — Select a hidden object in Layers. Expected: Visibility and selection rules are clear. **Pass** — A hidden layer disappears from the card, can still be selected from its Layers row, opens its properties and can be shown again. Evidence: `evidence/studio-batch3.json`.
 - [ ] **DES-025 · Core** — Drag over a transparent area. Expected: Hit testing follows the documented bounds or visible pixels.
 - [x] **DES-026 · Core** — Nudge with arrow keys. Expected: Predictable documented movement increment. **Pass** — Canvas selection updates the inspector; arrow nudge saves the changed coordinate. Evidence: `Chromium functional fixture`.
-- [ ] **DES-027 · Core** — Shift-nudge. Expected: Larger documented increment.
+- [x] **DES-027 · Core** — Shift-nudge. Expected: Larger documented increment. **Pass** — Arrow keys move 1 document pixel and Shift+Arrow 10. A hidden, closed menu dialog in the page was blocking these shortcuts; that check now ignores hidden dialogs. Evidence: `evidence/studio-batch1.json`.
 - [ ] **DES-028 · Core** — Alt/Option-drag duplicate. Expected: Original stays; copy has independent identity, if offered. **Not applicable** — Alt suspends snapping while moving; Alt-drag duplication is not offered. Copy/paste and Cmd/Ctrl+J provide duplication. Evidence: `Studio controls/model/export source review`.
-- [ ] **DES-029 · Core** — Move partly outside canvas. Expected: Selection remains recoverable.
-- [ ] **DES-030 · Core** — Release pointer outside canvas. Expected: Drag ends; editor does not stay stuck.
-- [ ] **DES-031 · Core** — Cancel a move. Expected: Original position is restored.
-- [ ] **DES-032 · Core** — Undo a move. Expected: One deliberate drag is one undoable operation.
+- [x] **DES-029 · Core** — Move partly outside canvas. Expected: Selection remains recoverable. **Pass** — A layer can be dragged past the card edge (214 px beyond the right edge at 45% zoom) and Undo returns it. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-030 · Core** — Release pointer outside canvas. Expected: Drag ends; editor does not stay stuck. **Pass** — Releasing the pointer far outside the card ends the gesture and the next drag works normally. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-031 · Core** — Cancel a move. Expected: Original position is restored. **Pass** — Pressing Escape during a drag restores the layer's original position. Evidence: `evidence/studio-batch1.json`.
+- [x] **DES-032 · Core** — Undo a move. Expected: One deliberate drag is one undoable operation. **Pass** — Undo returns a moved layer exactly and Redo reapplies the move. Evidence: `evidence/studio-batch1.json`.
 
 ## Transform box and edge handles
 
-- [ ] **DES-033 · Core** — Select an editable object. Expected: Four corner and four edge resize handles appear where applicable.
+- [x] **DES-033 · Core** — Select an editable object. Expected: Four corner and four edge resize handles appear where applicable. **Pass** — Clicking a text layer shows its selection frame and properties. Evidence: `evidence/studio-batch1.json`.
 - [ ] **DES-034 · Core** — Drag each corner handle. Expected: Object resizes around the expected opposite anchor. **Partial** — 176 geometry assertions cover all eight handles, five rotations, locked/free proportions, opposite/centre anchors, crossed-edge bounds and rotated cursor mapping. The full combination matrix has not been dragged in a browser. Evidence: `transform-invariants.test.ts; resize-transform.test.ts`.
 - [ ] **DES-035 · Core** — Drag each side handle. Expected: Width or height changes independently as intended. **Partial** — 176 geometry assertions cover all eight handles, five rotations, locked/free proportions, opposite/centre anchors, crossed-edge bounds and rotated cursor mapping. The full combination matrix has not been dragged in a browser. Evidence: `transform-invariants.test.ts; resize-transform.test.ts`.
 - [ ] **DES-036 · Core** — Lock aspect ratio. Expected: Proportions remain stable. **Partial** — Numeric aspect locking persists on reload. All eight resize handles have locked/free rotated geometry coverage; exhaustive browser gestures and modifier combinations remain open. Evidence: `designer-acceptance.spec.ts; authenticated-acceptance.json; transform-invariants.test.ts`.
@@ -242,12 +242,12 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 
 ## Alignment, guides and navigation
 
-- [ ] **DES-182 · Core** — Align left, centre, right, top, middle and bottom. Expected: Correct relative-to-canvas or relative-to-selection target.
+- [x] **DES-182 · Core** — Align left, centre, right, top, middle and bottom. Expected: Correct relative-to-canvas or relative-to-selection target. **Pass** — For a single layer, left/centre/right and top/middle/bottom land within 0.3 px of the card edge or centre, and Undo restores each. Text layers have no stored height, so vertical alignment used the wrong box before this fix; it now uses the rendered height. Multi-layer alignment to the selection bounds shares the same code but was not separately browser-tested. Evidence: `evidence/studio-batch2.json`.
 - [ ] **DES-183 · Core** — Switch alignment reference. Expected: Behaviour and label are unambiguous. **Not applicable** — No corresponding control is offered: background removal, saved custom palettes, editable gradient stops/handles, nested groups, switchable alignment-reference mode, pointer-anchored zoom, style clipboard, raster/vector masks, smart objects or selectable export multiplier. Existing alternatives are documented in the control inventory. Evidence: `Studio controls/model/export source review`.
-- [ ] **DES-184 · Core** — Distribute horizontally or vertically. Expected: Defined spacing or centre distribution is consistent.
-- [ ] **DES-185 · Core** — Snap to canvas centres and edges. Expected: Guide appears and object lands accurately.
-- [ ] **DES-186 · Core** — Snap to other objects. Expected: Guides represent genuine alignments.
-- [ ] **DES-187 · Core** — Temporarily disable snapping. Expected: Modifier or toggle works during a drag.
+- [ ] **DES-184 · Core** — Distribute horizontally or vertically. Expected: Defined spacing or centre distribution is consistent. **Partial** — Vertical distribution of three text layers gives equal gaps (150.5 / 150.6 px) and Undo restores them; it used wrong heights for text before this fix. Horizontal distribution was not browser-tested. Evidence: `evidence/studio-batch2.json`.
+- [x] **DES-185 · Core** — Snap to canvas centres and edges. Expected: Guide appears and object lands accurately. **Pass** — Dragging a layer to within 3 px of the card centre snaps its centre to within 0.01 px. Evidence: `evidence/studio-batch2.json`.
+- [x] **DES-186 · Core** — Snap to other objects. Expected: Guides represent genuine alignments. **Pass** — Dragging a layer's edge to within 2.5 px of another layer's edge snaps to 0.00 px. Evidence: `evidence/studio-batch2.json`.
+- [x] **DES-187 · Core** — Temporarily disable snapping. Expected: Modifier or toggle works during a drag. **Pass** — Holding Alt while dragging suspends snapping and the layer stays where it was dropped (2.99 px off centre). Evidence: `evidence/studio-batch2.json`.
 - [x] **DES-188 · Core** — Toggle rulers. Expected: Units and zero points match document coordinates. **Pass** — Rulers toggle through the button and Cmd/Ctrl+R. Evidence: `guard-results.json`.
 - [x] **DES-189 · Core** — Drag guides from rulers. Expected: Correct horizontal or vertical guide is created. **Pass** — Guide creation, locking, unlocking and clearing passed. Independent grid snapping moves layers to 100 px coordinates. Evidence: `Authenticated designer-acceptance.spec.ts`.
 - [x] **DES-190 · Core** — Move, delete and lock guides. Expected: Guides remain separate from artwork. **Pass** — Guide creation, locking, unlocking and clearing passed. Independent grid snapping moves layers to 100 px coordinates. Evidence: `Authenticated designer-acceptance.spec.ts`.
@@ -276,9 +276,9 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 
 ## History, saving and recovery
 
-- [ ] **DES-210 · Core** — Undo and redo each editing operation. Expected: Exact preceding/following state returns.
+- [ ] **DES-210 · Core** — Undo and redo each editing operation. Expected: Exact preceding/following state returns. **Partial** — A nudge, align, duplicate and delete sequence undoes to the exact original layout and redoes to the exact final layout. The other edit types are covered by their own checks; a full per-operation sweep is not complete. Evidence: `evidence/studio-batch3.json`.
 - [x] **DES-211 · Core** — Undo and then make a new edit. Expected: Redo branch is handled predictably. **Pass** — Undo followed by a new edit clears redo. Evidence: `useDesignerDoc.test.tsx`.
-- [ ] **DES-212 · Core** — Restore a history entry. Expected: Layers, selection and properties recover coherently.
+- [x] **DES-212 · Core** — Restore a history entry. Expected: Layers, selection and properties recover coherently. **Pass** — Clicking the first History entry restores the original layout. History steps now say what changed (Moved, Hid, Edited, Added, Deleted) instead of 'State N'. Evidence: `evidence/studio-batch3.json`.
 - [x] **DES-213 · Core** — Reach the history limit. Expected: Defined limit; current work remains stable. **Pass** — 80 edits retain a 50-operation history; undo returns to the oldest retained state without losing the current design. Evidence: `useDesignerDoc.test.tsx`.
 - [x] **DES-214 · Core** — Autosave a design. Expected: Saving, saved and failed states are honest. **Pass** — Real Next.js/local Supabase save, reload, geometry, independent corners, offline recovery, tab conflict and backup checks passed. See authenticated acceptance evidence for the specific operations. Evidence: `Authenticated designer-acceptance.spec.ts`.
 - [x] **DES-215 · Core** — Refresh after saving. Expected: Content, geometry, fonts and assets return. **Pass** — Real Next.js/local Supabase save, reload, geometry, independent corners, offline recovery, tab conflict and backup checks passed. See authenticated acceptance evidence for the specific operations. Evidence: `Authenticated designer-acceptance.spec.ts`.
@@ -328,7 +328,7 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 
 ## Small controls, accessibility and input safety
 
-- [ ] **DES-253 · Core** — Use every icon-only button. Expected: Accessible name and visible tooltip describe the action.
+- [ ] **DES-253 · Core** — Use every icon-only button. Expected: Accessible name and visible tooltip describe the action. **Partial** — Every icon-only button has an accessible name (three Layers buttons were fixed). Each button's function was not exercised. Evidence: `evidence/studio-batch3.json`.
 - [ ] **DES-254 · Core** — Tab through toolbars and panels. Expected: Logical order and visible focus. **Partial** — Shape palette arrows/Escape/focus return, segmented radio Home/End/arrows and export-dialog keyboard containment pass. Automated editor scans pass at desktop/phone widths in both themes, excluding artwork. A complete manual tab/screen-reader audit remains. Evidence: `designer-acceptance.spec.ts; authenticated-acceptance.json`.
 - [ ] **DES-255 · Core** — Use menus and flyouts by keyboard. Expected: Arrow/Enter/Escape behaviour is predictable. **Partial** — Shape palette arrows/Escape/focus return, segmented radio Home/End/arrows and export-dialog keyboard containment pass. Automated editor scans pass at desktop/phone widths in both themes, excluding artwork. A complete manual tab/screen-reader audit remains. Evidence: `designer-acceptance.spec.ts; authenticated-acceptance.json`.
 - [x] **DES-256 · Core** — Open and close a modal. Expected: Focus is contained and returns to its trigger. **Pass** — Tab remains inside export dialog; Escape closes it; focus returns to Export. Mobile PDF download also restores focus. Evidence: `Chromium detailed controls and mobile fixtures`.

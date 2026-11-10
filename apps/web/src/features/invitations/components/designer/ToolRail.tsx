@@ -278,7 +278,9 @@ export function ToolRail({
         target?.closest(
           "input,textarea,select,[contenteditable=true],[role=dialog]"
         ) ||
-        document.querySelector('[role="dialog"], [role="menu"]')
+        document.querySelector(
+          '[role="dialog"]:not([hidden]), [role="menu"]:not([hidden])'
+        )
       )
         return;
       if (e.key.toLowerCase() === "d") {
