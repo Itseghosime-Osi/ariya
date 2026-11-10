@@ -566,14 +566,15 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
         (layer.height * r.height) / 100,
         0
       );
-      expect(((layer.x + layer.width / 2) * r.width) / 100 + r.x).toBeCloseTo(
-        start.x,
-        0
-      );
-      expect(((layer.y + layer.height / 2) * r.height) / 100 + r.y).toBeCloseTo(
-        start.y,
-        0
-      );
+      // Firefox and WebKit deliver whole-pixel pointer coordinates, so allow a pixel of rounding.
+      expect(
+        Math.abs(((layer.x + layer.width / 2) * r.width) / 100 + r.x - start.x)
+      ).toBeLessThan(1.5);
+      expect(
+        Math.abs(
+          ((layer.y + layer.height / 2) * r.height) / 100 + r.y - start.y
+        )
+      ).toBeLessThan(1.5);
       await page.keyboard.press("v");
       await page.keyboard.press("Control+z");
       expect((await json()).layers).toEqual(before.layers);
