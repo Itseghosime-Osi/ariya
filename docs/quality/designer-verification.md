@@ -129,9 +129,20 @@ Totals now: **191 verified, 33 partial, 11 not tested, 48 not applicable.** DES-
 
 Still not tested, because they need uploads, a real backend or other tooling that was not available: DES-006 (open another document with unsaved work), 025 (transparent-area hit testing), 076/077 (rounded image pixels and image border/shadow), 096 (line endpoints), 120 (slow font loading), 131 (exported text glyphs), 135 (drag a file onto the canvas), 146 (large image import), 155 (alpha) and 206 (clipping mask). Browsers other than Chromium, physical devices and a real stylus remain untested.
 
+## Local stack, other browsers and the remaining items (10 November 2026)
+
+Docker and a local Supabase stack were started in this session, so the authenticated suites ran again against the final code (local, fictional data only; credentials stayed in the process environment).
+
+- **Chromium:** `designer-acceptance` (save/reload, recovery, stale tab, uploads, exports, responsive), `designer-controls` and the documentation suite pass. The new `designer-remaining.spec.ts` passes: frame masks and clipping, border and shadow on a rounded frame, see-through blending, transparent-picture hit testing, dropped files, a 6000 × 4000 photo, line length, opening another design and Undo, and export waiting for slow fonts. Exported PNG pixels were read back to check masks, borders, shadow and alpha. [Evidence](evidence/authenticated-remaining.json).
+- **Firefox:** `designer-controls` and both `designer-remaining` tests pass. `designer-acceptance` passes through the sampler step and then stops on a 0.9 px assertion in the Alt-draw test (Firefox rounds pointer coordinates to whole pixels). Later steps were not run in Firefox.
+- **WebKit (Playwright's Safari engine on Linux):** `designer-controls` and the slow-font export pass. **Failures found:** exported PNGs do not clip circular or rounded picture frames (the corner pixel stays the picture's colour), and in `designer-acceptance` the canvas height field returned 1512 where 4000 or more was entered. Safari export of masked pictures needs a fix or a documented limitation; this was not fixed here. Real Safari on a Mac or iPhone was not available.
+- **Test-suite fixes:** sign-up and new-event pages are now awaited until hydrated before the helper fills them in (WebKit pressed Continue too early). `studio-pro-designer.spec.ts` (stale header role/label), `designer-guest.spec.ts` and `designer-pass-layout.spec.ts` were re-run on commit `4d8ac3f`, before this session's changes, and fail there too in this container. `interactive-designer-session.spec.ts` (a flaw-logging script that timed out) was not re-run on that commit. For the guest and pass-layout specs: the guest download is named `download` instead of the expected file name, and the pass-layout spec reads the seal before it re-renders after a reload. They were not changed.
+
+Items closed here: DES-006, 025, 076, 077, 120, 135, 146, 155 and 206 pass (Chromium and, where noted, Firefox); DES-096 stays Partial because the designer offers no endpoint handles. DES-131 (exported text glyphs) remains **Not tested**: reading glyph shapes from a PNG was not attempted.
+
 ## Work remaining
 
-The matrix currently records **191 verified, 33 partial, 11 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **200 verified, 34 partial, 1 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
