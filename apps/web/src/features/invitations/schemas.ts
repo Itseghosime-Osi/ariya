@@ -90,6 +90,8 @@ export const invitationLayerSchema = z.object({
   shadowColor: hexColour.nullable().optional(),
   groupId: z.string().trim().max(60).optional(),
   locked: z.boolean().optional(),
+  flipX: z.boolean().optional(),
+  flipY: z.boolean().optional(),
 });
 
 export const invitationDesignSchema = z.object({

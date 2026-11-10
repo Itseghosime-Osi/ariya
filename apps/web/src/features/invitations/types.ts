@@ -154,6 +154,10 @@ export interface InvitationLayer {
   height?: number;
   /** Degrees, clockwise, about the layer's centre. */
   rotation?: number;
+  /** Mirror horizontally. */
+  flipX?: boolean;
+  /** Mirror vertically. */
+  flipY?: boolean;
   /** 0 to 1. */
   opacity?: number;
   /** Line height / leading multiplier (e.g. 1.0 to 2.5, default: 1.35). */

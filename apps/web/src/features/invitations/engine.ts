@@ -66,10 +66,72 @@ export function freshId(kind: string, count = 0): string {
   return `${kind}-${Date.now().toString(36)}-${count}-${Math.floor(Math.random() * 1e4).toString(36)}`;
 }
 
-// The wire carries designs as plain JSON; the app's own types are the same shape.
-const asWire = (d: InvitationDesign) =>
-  d as unknown as Parameters<DesignEngine["edit"]>[0];
-const fromWire = (d: unknown) => d as InvitationDesign;
+// The wire carries designs as plain JSON; translate camelCase corner radii
+// (`radiusTL` <-> `radiusTl`) and preserve frontend-only FX fields across WASM round-trips.
+const EXTRA_LAYER_KEYS = [
+  "flipX",
+  "flipY",
+  "brightness",
+  "contrast",
+  "saturate",
+  "sepia",
+  "grayscale",
+  "shadowBlur",
+  "shadowX",
+  "shadowY",
+  "shadowColor",
+] as const;
+
+const asWire = (d: InvitationDesign) => {
+  const mapped = {
+    ...d,
+    layers: d.layers.map((l) => {
+      const rec = { ...l } as Record<string, unknown>;
+      if (l.radiusTL !== undefined) rec.radiusTl = l.radiusTL;
+      if (l.radiusTR !== undefined) rec.radiusTr = l.radiusTR;
+      if (l.radiusBR !== undefined) rec.radiusBr = l.radiusBR;
+      if (l.radiusBL !== undefined) rec.radiusBl = l.radiusBL;
+      return rec;
+    }),
+  };
+  return mapped as unknown as Parameters<DesignEngine["edit"]>[0];
+};
+
+const fromWire = (d: unknown, source?: InvitationDesign): InvitationDesign => {
+  const out = d as InvitationDesign;
+  const byId = new Map(source?.layers.map((l) => [l.id, l]) ?? []);
+  return {
+    ...out,
+    layers: out.layers.map((layer) => {
+      const rec = layer as unknown as Record<string, unknown>;
+      const next: Record<string, unknown> = { ...rec };
+      if (rec.radiusTl !== undefined && rec.radiusTl !== null) {
+        next.radiusTL = rec.radiusTl;
+      }
+      if (rec.radiusTr !== undefined && rec.radiusTr !== null) {
+        next.radiusTR = rec.radiusTr;
+      }
+      if (rec.radiusBr !== undefined && rec.radiusBr !== null) {
+        next.radiusBR = rec.radiusBr;
+      }
+      if (rec.radiusBl !== undefined && rec.radiusBl !== null) {
+        next.radiusBL = rec.radiusBl;
+      }
+      delete next.radiusTl;
+      delete next.radiusTr;
+      delete next.radiusBr;
+      delete next.radiusBl;
+
+      const orig = byId.get(layer.id);
+      if (orig) {
+        for (const k of EXTRA_LAYER_KEYS) {
+          if (orig[k] !== undefined) next[k] = orig[k];
+        }
+      }
+      return next as unknown as InvitationDesign["layers"][number];
+    }),
+  };
+};
 
 function run(
   design: InvitationDesign,
@@ -78,7 +140,7 @@ function run(
   if (!engine) return null;
   try {
     const out = engine.edit(asWire(design), edit);
-    return { design: fromWire(out.design), id: out.selectedId };
+    return { design: fromWire(out.design, design), id: out.selectedId };
   } catch {
     // The engine refused (a full card, say). Say so by returning nothing, like the fallback does.
     return { design, id: null };

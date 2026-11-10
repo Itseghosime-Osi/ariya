@@ -103,25 +103,41 @@ export function useDesignerDoc(eventId: string, initial: InvitationDesign) {
     });
   }, []);
 
+  const [saveAttempt, setSaveAttempt] = useState(0);
+
   useEffect(() => {
     const serialised = JSON.stringify(doc.present);
     latestRef.current = serialised;
     if (serialised === savedRef.current) return;
     setSaveState("saving");
     const timer = setTimeout(async () => {
-      const result = await saveInvitationDesignAction(eventId, doc.present);
-      if (latestRef.current !== serialised) return;
-      if (result.ok) {
-        savedRef.current = serialised;
-        setSaveState("saved");
-        setSaveError(null);
-      } else {
+      try {
+        const result = await saveInvitationDesignAction(eventId, doc.present);
+        if (latestRef.current !== serialised) return;
+        if (result.ok) {
+          savedRef.current = serialised;
+          setSaveState("saved");
+          setSaveError(null);
+        } else {
+          setSaveState("error");
+          setSaveError(result.error);
+        }
+      } catch (err: unknown) {
+        if (latestRef.current !== serialised) return;
         setSaveState("error");
-        setSaveError(result.error);
+        setSaveError(
+          err instanceof Error
+            ? err.message
+            : "Connection lost while saving. Please retry."
+        );
       }
     }, SAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [doc.present, eventId]);
+  }, [doc.present, eventId, saveAttempt]);
+
+  const retrySave = useCallback(() => {
+    setSaveAttempt((c) => c + 1);
+  }, []);
 
   // Warn before closing if there are unsaved changes pending in the save queue
   useEffect(() => {
@@ -145,6 +161,7 @@ export function useDesignerDoc(eventId: string, initial: InvitationDesign) {
     canRedo: doc.future.length > 0,
     saveState,
     saveError,
+    retrySave,
     past: doc.past,
     future: doc.future,
     restoreState,

@@ -343,9 +343,14 @@ export function InvitationCard({
           filterParts.push(`drop-shadow(${sx}px ${sy}px ${sb}px ${sc})`);
         }
 
+        const transformParts: string[] = [];
+        if (layer.rotation) transformParts.push(`rotate(${layer.rotation}deg)`);
+        if (layer.flipX) transformParts.push("scaleX(-1)");
+        if (layer.flipY) transformParts.push("scaleY(-1)");
+
         const common: React.CSSProperties = {
-          ...(layer.rotation
-            ? { transform: `rotate(${layer.rotation}deg)` }
+          ...(transformParts.length > 0
+            ? { transform: transformParts.join(" ") }
             : {}),
           ...(layer.opacity != null && layer.opacity < 1
             ? { opacity: layer.opacity }
@@ -532,6 +537,10 @@ export function InvitationCard({
                 backgroundSize: layer.fit === "contain" ? "contain" : "cover",
                 backgroundPosition: `${focalX}% ${focalY}%`,
                 backgroundRepeat: "no-repeat",
+                border:
+                  layer.stroke && !maskStyle.clipPath
+                    ? `${layer.strokeWidth ?? 0.4}cqw solid ${layer.stroke}`
+                    : undefined,
                 ...maskStyle,
                 cursor: movable ? "move" : interactive ? "default" : undefined,
                 touchAction: interactive ? "none" : undefined,
