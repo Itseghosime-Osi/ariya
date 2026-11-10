@@ -8,7 +8,7 @@ Updated 10 November 2026. Repository: `Itseghosime-Osi/ariya`. Work branch: `fea
 2. Read the [283-item checklist](designer-checklist.md), [CSV status matrix](designer-test-matrix.csv), [verification record](designer-verification.md) and [control inventory](designer-control-inventory.md).
 3. Inspect the current branch, working tree and recent commits before editing. Preserve other work. Stay on the feature branch; this handoff does not authorize merging or deploying production.
 
-The checklist and matrix are committed repository files, not temporary artifacts. Current totals: **126 Pass, 25 Partial, 85 Not tested, 47 Not applicable**. Only verified passes have checked boxes. Do not report the whole designer as finished.
+The checklist and matrix are committed repository files, not temporary artifacts. Current totals: **175 Pass, 32 Partial, 29 Not tested, 47 Not applicable** (see the 10 November continuation in the verification record; save/reload and exports were not re-run in that session). Only verified passes have checked boxes. Do not report the whole designer as finished.
 
 ## Product and design requirements
 

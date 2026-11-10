@@ -103,9 +103,27 @@ The seal retains its circular crest, colours and data dots. Functional timing/al
 
 The guest integration check also verifies a party of three, companion/dietary persistence and a revision to one attendee that clears the companion while keeping dietary information. No additional production accounts, hosted database changes or delivery settings are involved.
 
+## Checklist continuation (10 November 2026)
+
+This session had no Docker or local Supabase, so the authenticated suites could not be re-run. Instead, the real `InvitationDesigner` was mounted on a temporary no-login test page with fictional event data ([harness](evidence/harness/README.md)) and driven in Chromium 1440×900 (one phone check at 390×844). Server actions are not mocked, so saving fails there. These batches therefore verify editing, selection, undo/redo, history and layout. **Save, reload, uploads and exported files were not re-verified here**; the earlier authenticated results above still stand for the code as it was.
+
+Fixes found by these checks:
+
+- Vertical align/distribute used a guessed height for text layers (they have no stored height), so middle/bottom and equal gaps were wrong. They now measure the rendered boxes and leave the layers auto-sized.
+- Typing into a text layer reversed the characters: the editor re-rendered the words from state on every keystroke and reset the caret. The browser now owns the text while editing.
+- A text edit ended by clicking another layer or the empty card was not recorded, so Undo skipped it. It is now recorded.
+- A hidden, closed menu dialog elsewhere on the page disabled arrow-key nudges, undo and delete. The shortcut guards now ignore hidden dialogs.
+- Three Layers footer buttons and the theme switch lacked a name or tooltip.
+
+Interface changes: History steps say what changed ("Moved Adaeze & Tunde", "Hid …", "Added Rectangle"); the Type tool opens a new text layer ready to type; the Properties / Layers split in the side panel can be dragged, moved with the arrow keys and reset by double-click.
+
+Evidence: [batch 1](evidence/studio-batch1.json) selection and movement; [2](evidence/studio-batch2.json) align, distribute, snapping; [3](evidence/studio-batch3.json) accessibility names, overlap, history; [4](evidence/studio-batch4.json) panel split; [5](evidence/studio-batch5.json) rotate, resize, zoom; [6](evidence/studio-batch6.json) corner radius; [7](evidence/studio-batch7.json) text; [8](evidence/studio-batch8.json), [9](evidence/studio-batch9.json), [10](evidence/studio-batch10.json), [11](evidence/studio-batch11.json) background, swatches, layers, pan, effects, reduced motion. New unit tests cover the history descriptions and the inline text editor.
+
+Totals now: **175 verified, 32 partial, 29 not tested, 47 not applicable.** Known open result: DES-200 (border/stroke effect) was not confirmed by the harness probe and stays Not tested.
+
 ## Work remaining
 
-The matrix currently records **126 verified, 25 partial, 85 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **175 verified, 32 partial, 29 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
