@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { clipRoundedBackgrounds } from "./export-service";
 
 /** jsdom does not model clip-path or background corners, so feed it the computed values. */
-function fakeComputed(values: Map<Element, Record<string, string>>) {
+function fakeComputed(values: Map<Element, Partial<Record<string, string>>>) {
   vi.spyOn(window, "getComputedStyle").mockImplementation(
     (el: Element) =>
       ({
