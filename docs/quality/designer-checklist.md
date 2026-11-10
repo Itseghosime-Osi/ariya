@@ -4,6 +4,8 @@ Live verification checklist for `feat/studio-pro-designer`, started 10 November 
 
 **Progress:** 126 verified, 25 partial, 85 not tested, 47 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
 
+**Continuing with another agent?** Read the [Claude handoff](CLAUDE-HANDOFF.md) for scope, code locations, remaining priorities and verification requirements.
+
 ## How to use this checklist
 
 This is a functional acceptance checklist, not a claim that Àríyá already passes these tests or must become a complete photo editor. Photopea’s live workspace was opened and its official documentation reviewed. Individual checklist items have not all been exercised in Photopea. Detailed behaviours, particularly corner-radius widgets, are acceptance targets; exact current Photopea parity for those widgets is not established here.
