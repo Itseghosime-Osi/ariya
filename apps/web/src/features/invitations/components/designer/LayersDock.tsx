@@ -378,6 +378,7 @@ function SortableRow({
         {/* Visibility Toggle */}
         <RowButton
           label={`${layer.visible ? "Hide" : "Show"} ${layerLabel(layer)}`}
+          disabled={layer.kind === "code" && !canDelete(layer)}
           pressed={!layer.visible}
           dark={dark}
           onClick={() => onPatch(layer.id, { visible: !layer.visible })}
@@ -581,7 +582,12 @@ export function LayersDock({
               </span>
               <select
                 aria-label="Layer blend mode"
-                value={selectedLayer.blendMode ?? "normal"}
+                disabled={selectedLayer.kind === "code"}
+                value={
+                  selectedLayer.kind === "code"
+                    ? "normal"
+                    : (selectedLayer.blendMode ?? "normal")
+                }
                 onChange={(e) =>
                   onPatch(selectedLayer.id, { blendMode: e.target.value })
                 }
@@ -618,7 +624,10 @@ export function LayersDock({
                   Opacity
                 </span>
                 <span className="font-mono text-[10px]">
-                  {Math.round((selectedLayer.opacity ?? 1) * 100)}%
+                  {selectedLayer.kind === "code"
+                    ? 100
+                    : Math.round((selectedLayer.opacity ?? 1) * 100)}
+                  %
                 </span>
               </div>
               <input
@@ -626,7 +635,12 @@ export function LayersDock({
                 min="0"
                 max="100"
                 aria-label="Layer opacity"
-                value={Math.round((selectedLayer.opacity ?? 1) * 100)}
+                disabled={selectedLayer.kind === "code"}
+                value={
+                  selectedLayer.kind === "code"
+                    ? 100
+                    : Math.round((selectedLayer.opacity ?? 1) * 100)
+                }
                 onChange={(e) =>
                   onPatch(selectedLayer.id, {
                     opacity: Number(e.target.value) / 100,

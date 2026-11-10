@@ -19,7 +19,7 @@ interface RsvpSummaryCardProps {
   checkInCode?: string | null;
   qrCodeUrl?: string | null;
   requireAccessCard?: boolean;
-  /** Set when the host's design carries the entry seal: the guest then holds the invitation, not a QR box. */
+  /** The host's saved artwork; access-card settings decide whether it carries a personal seal. */
   design?: InvitationDesign | null;
   questions?: RsvpQuestion[];
   answers?: RsvpAnswers;
@@ -176,18 +176,18 @@ export function RsvpSummaryCard({
       )}
 
       {/* Royal Check-In Pass */}
-      {isAccepted && design && checkInCode && (
+      {isAccepted && design && (!requireAccessCard || checkInCode) && (
         <MyInvitation
           design={design}
           coupleName={event.couple || event.title}
           guestName={guest.display_name}
-          entryCode={checkInCode}
+          entryCode={requireAccessCard ? checkInCode : null}
         />
       )}
 
       {/* The seal is the pass. This line is only for a seal that will not scan: the code stays off
           the card itself, and the desk can find the guest by name as well. */}
-      {isAccepted && design && checkInCode && (
+      {isAccepted && requireAccessCard && design && checkInCode && (
         <p className={`text-center text-[13px] ${theme.subheadline}`}>
           If the seal will not scan, give this code at the desk:{" "}
           <span
@@ -198,44 +198,48 @@ export function RsvpSummaryCard({
         </p>
       )}
 
-      {isAccepted && !design && checkInCode && qrCodeUrl && (
-        <section
-          className={`bg-white rounded-xl p-5 border text-center space-y-3 shadow-xs ${theme.qrBox}`}
-        >
-          <div className="flex items-center justify-center gap-1.5">
-            <Icon name="qr_code_scanner" className="text-sm" />
-            <span className="text-[11px] font-bold uppercase tracking-widest">
-              Reception Entry Pass
-            </span>
-          </div>
-          <div className="inline-block p-2 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-inner">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qrCodeUrl}
-              alt={`QR Pass for ${guest.display_name}`}
-              width={160}
-              height={160}
-              className="rounded-lg mx-auto"
-            />
-          </div>
-          <div className="space-y-1">
-            <span
-              className={`text-[10px] uppercase tracking-wider font-semibold block ${theme.label}`}
-            >
-              Personal Entry Code
-            </span>
-            <span
-              className={`font-mono text-base font-bold tracking-wider px-3 py-1 rounded-md border inline-block ${theme.codeBadge}`}
-            >
-              {checkInCode}
-            </span>
-          </div>
-          <p className={`text-[11px] max-w-xs mx-auto ${theme.subheadline}`}>
-            This card is yours alone. Show the QR or say your code at the
-            entrance; once you are admitted it cannot be used again.
-          </p>
-        </section>
-      )}
+      {isAccepted &&
+        requireAccessCard &&
+        !design &&
+        checkInCode &&
+        qrCodeUrl && (
+          <section
+            className={`bg-white rounded-xl p-5 border text-center space-y-3 shadow-xs ${theme.qrBox}`}
+          >
+            <div className="flex items-center justify-center gap-1.5">
+              <Icon name="qr_code_scanner" className="text-sm" />
+              <span className="text-[11px] font-bold uppercase tracking-widest">
+                Reception Entry Pass
+              </span>
+            </div>
+            <div className="inline-block p-2 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-inner">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrCodeUrl}
+                alt={`QR Pass for ${guest.display_name}`}
+                width={160}
+                height={160}
+                className="rounded-lg mx-auto"
+              />
+            </div>
+            <div className="space-y-1">
+              <span
+                className={`text-[10px] uppercase tracking-wider font-semibold block ${theme.label}`}
+              >
+                Personal Entry Code
+              </span>
+              <span
+                className={`font-mono text-base font-bold tracking-wider px-3 py-1 rounded-md border inline-block ${theme.codeBadge}`}
+              >
+                {checkInCode}
+              </span>
+            </div>
+            <p className={`text-[11px] max-w-xs mx-auto ${theme.subheadline}`}>
+              This card is yours alone. Show the QR or say your code at the
+              entrance; once you are admitted it cannot be used again.
+            </p>
+          </section>
+        )}
 
       {isAccepted && !requireAccessCard && (
         <section className={`rounded-xl p-4 border text-xs ${theme.noteBox}`}>

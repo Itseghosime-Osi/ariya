@@ -102,6 +102,7 @@ export async function exportInvitation({
   design,
   eventId,
   coupleName,
+  fileBaseName,
   format,
   pixelRatio = 3,
   quality = 0.95,
@@ -111,13 +112,18 @@ export async function exportInvitation({
   design: InvitationDesign;
   eventId: string;
   coupleName?: string;
+  /** Optional filename stem; the exporter sanitizes it and chooses the extension. */
+  fileBaseName?: string;
   format: ExportFormat;
   pixelRatio?: number;
   quality?: number;
   signal?: AbortSignal;
 }): Promise<{ ok: boolean; error?: string; cancelled?: boolean }> {
   const name =
-    (coupleName ? `${coupleName}-invitation` : `invitation-${eventId}`)
+    (
+      fileBaseName ||
+      (coupleName ? `${coupleName}-invitation` : `invitation-${eventId}`)
+    )
       .replace(/[^\p{L}\p{N}\-_]+/gu, "-")
       .replace(/^-+|-+$/g, "") || "invitation";
   let wrapper: HTMLDivElement | undefined;

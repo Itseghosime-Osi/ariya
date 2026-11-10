@@ -418,6 +418,13 @@ export function InvitationCard({
                 cursor: movable ? "move" : interactive ? "default" : undefined,
                 touchAction: interactive ? "none" : undefined,
                 ...common,
+                // A pass is functional content: decorative effects must not erase or mirror it.
+                opacity: 1,
+                filter: "none",
+                mixBlendMode: "normal",
+                transform: layer.rotation
+                  ? `rotate(${layer.rotation}deg)`
+                  : undefined,
               }}
               {...pointerProps}
             >

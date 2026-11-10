@@ -83,9 +83,17 @@ The local Supabase auth/storage API routing issue was isolated to container loop
 
 The older isolated-fixture measurements remain supplementary evidence. Current desktop/phone screenshots below come from the authenticated Next.js test, restored to the clean invitation template after testing.
 
+## Guest invitation and pass regression verification
+
+`designer-guest.spec.ts` uses a fictional event, a reused local host account and a separate signed-out browser context. It verifies saved Unicode wording, uploaded image references and geometry, required single-pass guards, acceptance and decline, and access-card off/on transitions. Switching cards off now keeps the saved design rather than substituting generic artwork; entry-code lookup and fallback code text are skipped in that state.
+
+Guest PNG downloads use the same bounded, font/image-aware exporter as the studio. Phone and desktop output is 3240 × 4536 pixels, with independent image-pixel checks and ZXing decoding against the personal code held only in test memory. An imported hidden seal with zero opacity, blur, mirroring, screen blending and unreadable colours is restored and remains scannable. The four standard theme palettes are unchanged. No guest URLs, codes or downloaded personal-pass images are saved in the evidence. [Guest test evidence](evidence/guest-acceptance.json).
+
+Component tests cover duplicate download prevention, failure/retry, cancellation on unmount, card-off artwork, sample/personal pattern separation and destructive-effect isolation. Readability safeguards do not establish every possible pass placement or physical-print scan condition.
+
 ## Work remaining
 
-The matrix currently records **121 verified, 23 partial, 92 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **125 verified, 26 partial, 85 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, guest-facing personalization and protected-pass styling, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
@@ -95,7 +103,7 @@ The 47 not-applicable items remain visible and unchecked. They describe unoffere
 
 - Production Next.js build, with build-only environment placeholders: pass.
 - TypeScript and ESLint: pass.
-- Unit tests: 1,068 passing across 107 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated/group resizing, drawing modifiers, export cancellation/sizing and image-proxy restrictions.
+- Unit tests: 1,082 passing across 110 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated/group resizing, drawing modifiers, export cancellation/sizing and image-proxy restrictions.
 - Rust workspace tests: 246 passing. Rust/WASM artifacts were rebuilt with the pinned Rust 1.99.1 toolchain.
 - No new application dependencies, production debug routes, environment files, deployment changes or database migrations were added.
 

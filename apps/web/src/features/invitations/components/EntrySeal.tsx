@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import QRCode from "qrcode";
+import { entrySealColours } from "./seal-contrast";
 import type { InvitationPalette } from "../types";
 
 /** A code that opens no one's door: what the studio shows while the host is placing the seal. */
@@ -54,7 +55,7 @@ export function EntrySeal({
   const half = (model.size / 2) * Math.SQRT2 + QUIET;
   const total = half * 2;
   const offset = (total - model.size) / 2;
-  const ink = palette.title;
+  const { ink, paper, forcePlate } = entrySealColours(palette);
   const finders: Array<[number, number]> = [
     [0, 0],
     [0, model.size - 7],
@@ -70,8 +71,8 @@ export function EntrySeal({
       style={{ display: "block", width: "100%", height: "100%" }}
       shapeRendering="geometricPrecision"
     >
-      {plate && (
-        <circle cx={half} cy={half} r={half - 0.1} fill={palette.paper} />
+      {(plate || forcePlate) && (
+        <circle cx={half} cy={half} r={half - 0.1} fill={paper} />
       )}
       <circle
         cx={half}

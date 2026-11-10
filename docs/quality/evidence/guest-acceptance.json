@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "saved host wording and uploaded artwork reach the anonymous guest",
+    "image geometry matches the saved designer and image pixels appear in both PNG exports",
+    "required pass cannot be hidden, deleted, duplicated or mirrored",
+    "imported transparency, blur and low-contrast colours cannot erase the seal",
+    "unaccepted guest has no entry seal",
+    "accepted guest has exactly one personal seal",
+    "guest state and artwork survive reload",
+    "a second guest sees their own details and receives no pass after declining",
+    "turning access cards off retains the host artwork while removing only the pass",
+    "turning access cards back on restores the personal seal",
+    "phone and desktop PNG dimensions agree",
+    "both exported seals independently decode to the personal entry code"
+  ],
+  "pngDimensions": [
+    [3240, 4536],
+    [3240, 4536]
+  ],
+  "scope": "Local fictional event only; no personal links or entry codes recorded"
+}

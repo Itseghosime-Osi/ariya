@@ -399,6 +399,12 @@ export function InvitationDesigner({
   const patchLayer = useCallback(
     (id: string, patch: Partial<InvitationLayer>) => {
       const target = designRef.current.layers.find((l) => l.id === id);
+      if (
+        requireAccessCard &&
+        target?.kind === "code" &&
+        patch.visible === false
+      )
+        return;
       if (target?.locked) {
         const safeOnly = Object.keys(patch).every(
           (k) => k === "locked" || k === "visible" || k === "name"
@@ -418,7 +424,7 @@ export function InvitationDesigner({
         !same
       );
     },
-    [commit]
+    [commit, requireAccessCard]
   );
 
   const dragLayer = useCallback(
@@ -663,7 +669,7 @@ export function InvitationDesigner({
         });
         return;
       }
-      commit(imported);
+      commit(requireAccessCard ? withEntrySeal(imported) : imported);
       setSelectedId(null);
       setNotice({ tone: "ok", text: "Opened the design file." });
     } catch {

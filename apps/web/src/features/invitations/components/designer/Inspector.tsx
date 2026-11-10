@@ -101,6 +101,7 @@ function Num({
   max,
   step = 1,
   suffix,
+  disabled,
   onChange,
   dark,
 }: {
@@ -110,6 +111,7 @@ function Num({
   max: number;
   step?: number;
   suffix?: string;
+  disabled?: boolean;
   onChange: (v: number) => void;
   dark?: boolean;
 }) {
@@ -137,6 +139,7 @@ function Num({
         <input
           type="text"
           inputMode="decimal"
+          disabled={disabled}
           value={text}
           aria-label={label}
           data-step={step}
@@ -1313,7 +1316,12 @@ export function Inspector({
               dark={dark}
               label="See-through"
               suffix="%"
-              value={Math.round((1 - (layer.opacity ?? 1)) * 100)}
+              disabled={layer.kind === "code"}
+              value={
+                layer.kind === "code"
+                  ? 0
+                  : Math.round((1 - (layer.opacity ?? 1)) * 100)
+              }
               min={0}
               max={100}
               step={5}
@@ -1325,7 +1333,13 @@ export function Inspector({
             <button
               type="button"
               aria-label="Flip horizontal"
-              aria-pressed={Boolean(layer.flipX)}
+              disabled={layer.kind === "code"}
+              title={
+                layer.kind === "code"
+                  ? "Entry seals cannot be mirrored"
+                  : undefined
+              }
+              aria-pressed={layer.kind !== "code" && Boolean(layer.flipX)}
               onClick={() => patch({ flipX: !layer.flipX })}
               className={cn(
                 "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
@@ -1356,7 +1370,13 @@ export function Inspector({
             <button
               type="button"
               aria-label="Flip vertical"
-              aria-pressed={Boolean(layer.flipY)}
+              disabled={layer.kind === "code"}
+              title={
+                layer.kind === "code"
+                  ? "Entry seals cannot be mirrored"
+                  : undefined
+              }
+              aria-pressed={layer.kind !== "code" && Boolean(layer.flipY)}
               onClick={() => patch({ flipY: !layer.flipY })}
               className={cn(
                 "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
@@ -2295,320 +2315,328 @@ export function Inspector({
           >
             Each guest&apos;s own entry code is woven into this seal. Guests
             only see a decorative seal; the door scanner reads it. It appears
-            only for guests who have accepted.
+            only for guests who have accepted. Its pattern stays opaque and
+            unmirrored so it can be read at the door. Style the surrounding
+            artwork instead.
           </p>
         </Section>
       )}
 
       {/* Universal Studio Visual FX & Blending Section */}
-      <Section dark={dark} title="Visual FX & Blending">
-        <div className="space-y-3">
-          <div>
-            <span
-              className={cn(
-                "mb-1 block text-[11px] font-semibold",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
-              )}
-            >
-              Blend Mode
-            </span>
-            <select
-              aria-label="Layer blend mode"
-              value={layer.blendMode ?? "normal"}
-              onChange={(e) => patch({ blendMode: e.target.value })}
-              className={fieldClass(dark)}
-            >
-              {BLEND_MODES.map((m) => (
-                <option
-                  key={m.value}
-                  value={m.value}
-                  className={
-                    dark
-                      ? "bg-[#23181e] text-[#fff6dc]"
-                      : "bg-white text-[#2d1f24]"
-                  }
-                >
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5">
+      {layer.kind !== "code" && (
+        <Section dark={dark} title="Visual FX & Blending">
+          <div className="space-y-3">
             <div>
-              <div className="mb-1 flex items-center justify-between">
-                <span
-                  className={cn(
-                    "text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
-                  )}
-                >
-                  Blur
-                </span>
-                <span className="font-mono text-[10px] text-label-2">
-                  {layer.blur ?? 0}px
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="30"
-                step="0.5"
-                aria-label="Gaussian blur"
-                value={layer.blur ?? 0}
-                onChange={(e) => patch({ blur: Number(e.target.value) })}
-                className="h-8 w-full accent-burgundy"
-              />
-            </div>
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <span
-                  className={cn(
-                    "text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
-                  )}
-                >
-                  Opacity
-                </span>
-                <span className="font-mono text-[10px] text-label-2">
-                  {Math.round((layer.opacity ?? 1) * 100)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                aria-label="Opacity percentage"
-                value={Math.round((layer.opacity ?? 1) * 100)}
-                onChange={(e) =>
-                  patch({ opacity: Number(e.target.value) / 100 })
-                }
-                className="h-8 w-full accent-burgundy"
-              />
-            </div>
-          </div>
-
-          {/* Shadow & Glow Presets */}
-          <div>
-            <span
-              className={cn(
-                "mb-1 block text-[11px] font-semibold",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
-              )}
-            >
-              Shadow & Glow
-            </span>
-            <div className="grid grid-cols-4 gap-1.5">
-              {(
-                [
-                  { id: "none", label: "None" },
-                  { id: "soft", label: "Soft" },
-                  { id: "foil", label: "Foil" },
-                  { id: "glow", label: "Glow" },
-                ] as const
-              ).map((preset) => {
-                const active = (layer.shadow ?? "none") === preset.id;
-                return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() =>
-                      patch({
-                        shadow: preset.id,
-                        shadowBlur: undefined,
-                        shadowX: undefined,
-                        shadowY: undefined,
-                      })
-                    }
-                    className={cn(
-                      "rounded-lg border py-1.5 text-center text-xs font-semibold transition-colors",
-                      active
-                        ? dark
-                          ? "border-[#dfba73] bg-[#dfba73]/20 text-[#fff6dc]"
-                          : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
-                        : dark
-                          ? "border-white/10 bg-white/[0.04] text-zinc-400 hover:text-white"
-                          : "border-[#e8e2d6] bg-white text-[#7a5b67] hover:text-night"
-                    )}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Custom Shadow sliders */}
-          <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2">
-            <div className="flex items-center justify-between">
               <span
                 className={cn(
-                  "text-[10px] font-semibold uppercase tracking-wider",
+                  "mb-1 block text-[11px] font-semibold",
                   dark ? "text-zinc-400" : "text-[#7a5b67]"
                 )}
               >
-                Custom Drop Shadow
+                Blend Mode
               </span>
-              <span className="font-mono text-[10px] text-label-2">
-                {layer.shadowBlur ?? 0}px
-              </span>
+              <select
+                aria-label="Layer blend mode"
+                value={layer.blendMode ?? "normal"}
+                onChange={(e) => patch({ blendMode: e.target.value })}
+                className={fieldClass(dark)}
+              >
+                {BLEND_MODES.map((m) => (
+                  <option
+                    key={m.value}
+                    value={m.value}
+                    className={
+                      dark
+                        ? "bg-[#23181e] text-[#fff6dc]"
+                        : "bg-white text-[#2d1f24]"
+                    }
+                  >
+                    {m.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <span className="text-[10px] text-label-2 block mb-0.5">
-                  Blur
-                </span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "text-[11px] font-semibold",
+                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    )}
+                  >
+                    Blur
+                  </span>
+                  <span className="font-mono text-[10px] text-label-2">
+                    {layer.blur ?? 0}px
+                  </span>
+                </div>
                 <input
                   type="range"
                   min="0"
-                  max="40"
-                  step="1"
-                  aria-label="Shadow blur"
-                  value={layer.shadowBlur ?? 0}
-                  onChange={(e) =>
-                    patch({
-                      shadowBlur: Number(e.target.value),
-                      shadow: undefined,
-                    })
-                  }
-                  className="h-6 w-full accent-burgundy"
+                  max="30"
+                  step="0.5"
+                  aria-label="Gaussian blur"
+                  value={layer.blur ?? 0}
+                  onChange={(e) => patch({ blur: Number(e.target.value) })}
+                  className="h-8 w-full accent-burgundy"
                 />
               </div>
               <div>
-                <span className="text-[10px] text-label-2 block mb-0.5">
-                  X Offset
-                </span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "text-[11px] font-semibold",
+                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    )}
+                  >
+                    Opacity
+                  </span>
+                  <span className="font-mono text-[10px] text-label-2">
+                    {Math.round((layer.opacity ?? 1) * 100)}%
+                  </span>
+                </div>
                 <input
                   type="range"
-                  min="-30"
-                  max="30"
+                  min="0"
+                  max="100"
                   step="1"
-                  aria-label="Shadow X offset"
-                  value={layer.shadowX ?? 0}
+                  aria-label="Opacity percentage"
+                  value={Math.round((layer.opacity ?? 1) * 100)}
                   onChange={(e) =>
-                    patch({
-                      shadowX: Number(e.target.value),
-                      shadow: undefined,
-                    })
+                    patch({ opacity: Number(e.target.value) / 100 })
                   }
-                  className="h-6 w-full accent-burgundy"
-                />
-              </div>
-              <div>
-                <span className="text-[10px] text-label-2 block mb-0.5">
-                  Y Offset
-                </span>
-                <input
-                  type="range"
-                  min="-30"
-                  max="30"
-                  step="1"
-                  aria-label="Shadow Y offset"
-                  value={layer.shadowY ?? 4}
-                  onChange={(e) =>
-                    patch({
-                      shadowY: Number(e.target.value),
-                      shadow: undefined,
-                    })
-                  }
-                  className="h-6 w-full accent-burgundy"
+                  className="h-8 w-full accent-burgundy"
                 />
               </div>
             </div>
-          </div>
 
-          {/* Photo & Color Adjustments (Brightness, Contrast, Saturation, Warmth) */}
-          <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2.5">
-            <span
-              className={cn(
-                "text-[10px] font-semibold uppercase tracking-wider block",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
-              )}
-            >
-              Image & Color Adjustments
-            </span>
-            <div className="space-y-2 text-xs">
-              <div>
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-[11px] text-label-2">Brightness</span>
-                  <span className="font-mono text-[10px]">
-                    {layer.brightness ?? 0}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  step="1"
-                  aria-label="Brightness"
-                  value={layer.brightness ?? 0}
-                  onChange={(e) =>
-                    patch({ brightness: Number(e.target.value) })
-                  }
-                  className="h-6 w-full accent-burgundy"
-                />
+            {/* Shadow & Glow Presets */}
+            <div>
+              <span
+                className={cn(
+                  "mb-1 block text-[11px] font-semibold",
+                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                )}
+              >
+                Shadow & Glow
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {(
+                  [
+                    { id: "none", label: "None" },
+                    { id: "soft", label: "Soft" },
+                    { id: "foil", label: "Foil" },
+                    { id: "glow", label: "Glow" },
+                  ] as const
+                ).map((preset) => {
+                  const active = (layer.shadow ?? "none") === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() =>
+                        patch({
+                          shadow: preset.id,
+                          shadowBlur: undefined,
+                          shadowX: undefined,
+                          shadowY: undefined,
+                        })
+                      }
+                      className={cn(
+                        "rounded-lg border py-1.5 text-center text-xs font-semibold transition-colors",
+                        active
+                          ? dark
+                            ? "border-[#dfba73] bg-[#dfba73]/20 text-[#fff6dc]"
+                            : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                          : dark
+                            ? "border-white/10 bg-white/[0.04] text-zinc-400 hover:text-white"
+                            : "border-[#e8e2d6] bg-white text-[#7a5b67] hover:text-night"
+                      )}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-[11px] text-label-2">Contrast</span>
-                  <span className="font-mono text-[10px]">
-                    {layer.contrast ?? 0}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  step="1"
-                  aria-label="Contrast"
-                  value={layer.contrast ?? 0}
-                  onChange={(e) => patch({ contrast: Number(e.target.value) })}
-                  className="h-6 w-full accent-burgundy"
-                />
+            </div>
+
+            {/* Custom Shadow sliders */}
+            <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold uppercase tracking-wider",
+                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  )}
+                >
+                  Custom Drop Shadow
+                </span>
+                <span className="font-mono text-[10px] text-label-2">
+                  {layer.shadowBlur ?? 0}px
+                </span>
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-[11px] text-label-2">Saturation</span>
-                  <span className="font-mono text-[10px]">
-                    {layer.saturate ?? 0}%
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <span className="text-[10px] text-label-2 block mb-0.5">
+                    Blur
                   </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="40"
+                    step="1"
+                    aria-label="Shadow blur"
+                    value={layer.shadowBlur ?? 0}
+                    onChange={(e) =>
+                      patch({
+                        shadowBlur: Number(e.target.value),
+                        shadow: undefined,
+                      })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  step="1"
-                  aria-label="Saturation"
-                  value={layer.saturate ?? 0}
-                  onChange={(e) => patch({ saturate: Number(e.target.value) })}
-                  className="h-6 w-full accent-burgundy"
-                />
+                <div>
+                  <span className="text-[10px] text-label-2 block mb-0.5">
+                    X Offset
+                  </span>
+                  <input
+                    type="range"
+                    min="-30"
+                    max="30"
+                    step="1"
+                    aria-label="Shadow X offset"
+                    value={layer.shadowX ?? 0}
+                    onChange={(e) =>
+                      patch({
+                        shadowX: Number(e.target.value),
+                        shadow: undefined,
+                      })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
+                </div>
+                <div>
+                  <span className="text-[10px] text-label-2 block mb-0.5">
+                    Y Offset
+                  </span>
+                  <input
+                    type="range"
+                    min="-30"
+                    max="30"
+                    step="1"
+                    aria-label="Shadow Y offset"
+                    value={layer.shadowY ?? 4}
+                    onChange={(e) =>
+                      patch({
+                        shadowY: Number(e.target.value),
+                        shadow: undefined,
+                      })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
+                </div>
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-[11px] text-label-2">
-                    Warmth / Sepia
-                  </span>
-                  <span className="font-mono text-[10px]">
-                    {layer.sepia ?? 0}%
-                  </span>
+            </div>
+
+            {/* Photo & Color Adjustments (Brightness, Contrast, Saturation, Warmth) */}
+            <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2.5">
+              <span
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-wider block",
+                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                )}
+              >
+                Image & Color Adjustments
+              </span>
+              <div className="space-y-2 text-xs">
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[11px] text-label-2">Brightness</span>
+                    <span className="font-mono text-[10px]">
+                      {layer.brightness ?? 0}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    step="1"
+                    aria-label="Brightness"
+                    value={layer.brightness ?? 0}
+                    onChange={(e) =>
+                      patch({ brightness: Number(e.target.value) })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  aria-label="Warmth"
-                  value={layer.sepia ?? 0}
-                  onChange={(e) => patch({ sepia: Number(e.target.value) })}
-                  className="h-6 w-full accent-burgundy"
-                />
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[11px] text-label-2">Contrast</span>
+                    <span className="font-mono text-[10px]">
+                      {layer.contrast ?? 0}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    step="1"
+                    aria-label="Contrast"
+                    value={layer.contrast ?? 0}
+                    onChange={(e) =>
+                      patch({ contrast: Number(e.target.value) })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[11px] text-label-2">Saturation</span>
+                    <span className="font-mono text-[10px]">
+                      {layer.saturate ?? 0}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-100"
+                    max="100"
+                    step="1"
+                    aria-label="Saturation"
+                    value={layer.saturate ?? 0}
+                    onChange={(e) =>
+                      patch({ saturate: Number(e.target.value) })
+                    }
+                    className="h-6 w-full accent-burgundy"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[11px] text-label-2">
+                      Warmth / Sepia
+                    </span>
+                    <span className="font-mono text-[10px]">
+                      {layer.sepia ?? 0}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    aria-label="Warmth"
+                    value={layer.sepia ?? 0}
+                    onChange={(e) => patch({ sepia: Number(e.target.value) })}
+                    className="h-6 w-full accent-burgundy"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Section>
+        </Section>
+      )}
     </div>
   );
 }

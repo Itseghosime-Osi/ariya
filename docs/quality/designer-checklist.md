@@ -2,7 +2,7 @@
 
 Live verification checklist for `feat/studio-pro-designer`, started 10 November 2026. Checked boxes mean verified acceptance checks; partial checks remain unchecked. See [the test matrix](designer-test-matrix.csv) for evidence and limitations.
 
-**Progress:** 121 verified, 23 partial, 92 not tested, 47 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
+**Progress:** 125 verified, 26 partial, 85 not tested, 47 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
 
 ## How to use this checklist
 
@@ -306,19 +306,19 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 - [x] **DES-236 · Core** — Cancel or fail export. Expected: No blank download presented as successful. **Pass** — A held image request can be cancelled with no download or leftover export copy. Missing background artwork produces an error instead of a blank file. Asset waits and render failures also have unit coverage. Evidence: `designer-acceptance.spec.ts export-cancellation step; export-cancellation.test.ts`.
 - [x] **DES-237 · Core** — Inspect download name and format. Expected: Correct extension, MIME type and descriptive filename. **Pass** — Actual Next.js PNG/JPEG/PDF downloads contain local uploaded artwork. PNG/JPEG dimensions and PDF page size were inspected independently. Evidence: `Authenticated designer-acceptance.spec.ts`.
 - [x] **DES-238 · Core** — Reopen exported output. Expected: Independent viewer reproduces the design. **Pass** — Actual Next.js PNG/JPEG/PDF downloads contain local uploaded artwork. PNG/JPEG dimensions and PDF page size were inspected independently. Evidence: `Authenticated designer-acceptance.spec.ts`.
-- [ ] **DES-239 · Core** — Compare guest invitation with saved designer. Expected: Wording, layout and images remain consistent.
+- [x] **DES-239 · Core** — Compare guest invitation with saved designer. Expected: Wording, layout and images remain consistent. **Pass** — The anonymous accepted guest receives the saved wording, image URL and frame geometry. Both phone and desktop exports contain the uploaded image pixels. Turning cards off preserves that artwork. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
 
 ## Àríyá-specific invitation and pass rules
 
 - [ ] **DES-240 · Core** — Insert the monogram seal. Expected: Correct initials and styling; movable under intended rules.
-- [ ] **DES-241 · Core** — Insert the guest-entry seal. Expected: Enforces the permitted number of pass elements.
-- [ ] **DES-242 · Core** — Duplicate or paste a pass element. Expected: Does not bypass the single-pass rule.
-- [ ] **DES-243 · Core** — Remove and re-add the pass. Expected: Model and layer state remain consistent.
-- [ ] **DES-244 · Core** — Preview guest personalization. Expected: Correct names and party-specific details appear.
+- [x] **DES-241 · Core** — Insert the guest-entry seal. Expected: Enforces the permitted number of pass elements. **Pass** — A required seal is present once, is restored when importing a hidden seal and cannot be hidden or deleted through the editor. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
+- [x] **DES-242 · Core** — Duplicate or paste a pass element. Expected: Does not bypass the single-pass rule. **Pass** — Cmd/Ctrl+J and copy/paste of the selected required seal keep exactly one pass element. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
+- [ ] **DES-243 · Core** — Remove and re-add the pass. Expected: Model and layer state remain consistent. **Partial** — Required deletion is blocked; switching access cards off removes the guest seal while keeping artwork, and switching them on restores it. Removing/re-adding an optional seal layer still needs verification. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
+- [ ] **DES-244 · Core** — Preview guest personalization. Expected: Correct names and party-specific details appear. **Partial** — An anonymous accepted guest sees their own name and a decodable personal pass. A second guest sees their own details and receives no pass after declining. Plus-one and party-specific variations remain. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
 - [ ] **DES-245 · Core** — Test very long guest and couple names. Expected: Safe wrapping with no hidden text.
-- [ ] **DES-246 · Core** — Preview sample and real pass data. Expected: Demo tokens cannot be mistaken for production passes.
-- [x] **DES-247 · Core** — Export and scan the QR code. Expected: Readable contrast, quiet zone and sufficient effective size. **Pass** — The actual exported PNG sample entry seal decoded successfully using the same ZXing decoder family used by check-in. Sample content only. Evidence: `ZXing independent PNG decode`.
-- [ ] **DES-248 · Core** — Style the pass area. Expected: Required code information cannot be accidentally destroyed.
+- [x] **DES-246 · Core** — Preview sample and real pass data. Expected: Demo tokens cannot be mistaken for production passes. **Pass** — Renderer tests distinguish the host sample from two synthetic personal patterns. Actual local guest exports decode to the guest-specific entry code; no personal codes are retained in evidence. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
+- [x] **DES-247 · Core** — Export and scan the QR code. Expected: Readable contrast, quiet zone and sufficient effective size. **Pass** — Independent ZXing decoding succeeds on actual accepted-guest PNGs at phone and desktop widths, including an imported low-contrast seal with destructive styling. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
+- [ ] **DES-248 · Core** — Style the pass area. Expected: Required code information cannot be accidentally destroyed. **Partial** — Seals ignore imported blur, opacity, blending and mirroring; unreadable palette combinations get a readable plate and ink without changing the four standard themes. Pass controls disable destructive styling. Off-canvas, occlusion and exhaustive small-size cases remain. Evidence: `designer-guest.spec.ts; guest-acceptance.json`.
 - [ ] **DES-249 · Core** — Edit event details. Expected: Designer and guest-facing output follow the intended update policy.
 - [x] **DES-250 · Core** — Use Simple to Pro and back. Expected: Personalized fields and protected elements stay valid. **Pass** — Real Next.js/local Supabase save, reload, geometry, independent corners, offline recovery, tab conflict and backup checks passed. See authenticated acceptance evidence for the specific operations. Evidence: `Authenticated designer-acceptance.spec.ts`.
 - [ ] **DES-251 · Core** — Apply a template. Expected: Clearly defines which content and styles will be replaced.
