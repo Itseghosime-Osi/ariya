@@ -1,0 +1,14 @@
+[
+  {
+    "id": "UI-SPLIT",
+    "name": "Properties/Layers split is draggable, keyboard-operable and resets",
+    "ok": true,
+    "detail": "heights 383 → drag 223 → arrows 282 → double-click 383"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

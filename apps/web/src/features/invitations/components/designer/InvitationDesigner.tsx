@@ -219,6 +219,29 @@ export function InvitationDesigner({
   } | null>(null);
   const [activeColor, setActiveColor] = useState("#dfba73");
   const [sidebarWidth, setSidebarWidth] = useState(360);
+  // How much of the side panel the Properties half takes; the rest is Layers/History/Navigator.
+  const [panelSplit, setPanelSplit] = useState(52);
+  const startPanelSplit = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    const column = e.currentTarget.parentElement;
+    if (!column) return;
+    e.preventDefault();
+    const box = column.getBoundingClientRect();
+    const move = (ev: PointerEvent) =>
+      setPanelSplit(
+        Math.min(75, Math.max(25, ((ev.clientY - box.top) / box.height) * 100))
+      );
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+      window.removeEventListener("blur", stop);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    window.addEventListener("blur", stop);
+  }, []);
+
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const isResizingSidebar = useRef(false);
   const sidebarCleanup = useRef<(() => void) | null>(null);
@@ -1817,9 +1840,12 @@ export function InvitationDesigner({
 
             {/* Top Half of Studio Sidebar: Properties / Color & Swatches */}
             <div
+              style={
+                { "--studio-split": `${panelSplit}%` } as React.CSSProperties
+              }
               className={cn(
                 styles.panelTop,
-                "flex flex-col h-[52%] min-h-[220px] border-b border-[#dfba73]/20"
+                "flex flex-col h-[52%] lg:h-[var(--studio-split)] min-h-[160px] border-b border-[#dfba73]/20"
               )}
             >
               {/* Top Tab Bar */}
@@ -1936,6 +1962,32 @@ export function InvitationDesigner({
                   />
                 )}
               </div>
+            </div>
+
+            <div
+              role="separator"
+              aria-label="Resize Properties and Layers"
+              aria-orientation="horizontal"
+              aria-valuemin={25}
+              aria-valuemax={75}
+              aria-valuenow={Math.round(panelSplit)}
+              tabIndex={0}
+              title="Drag to give Properties or Layers more room"
+              onPointerDown={startPanelSplit}
+              onDoubleClick={() => setPanelSplit(52)}
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                e.preventDefault();
+                setPanelSplit((v) =>
+                  Math.min(75, Math.max(25, v + (e.key === "ArrowUp" ? -4 : 4)))
+                );
+              }}
+              className={cn(
+                "relative z-10 hidden h-2 shrink-0 cursor-row-resize lg:block",
+                dark ? "hover:bg-[#dfba73]/30" : "hover:bg-[#4a0e17]/20"
+              )}
+            >
+              <div className="mx-auto mt-[3px] h-0.5 w-10 rounded-full bg-[#dfba73]/60" />
             </div>
 
             {/* Bottom Half of Studio Sidebar: Layers / History / Navigator */}

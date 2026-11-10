@@ -1,0 +1,74 @@
+[
+  {
+    "id": "DES-129",
+    "name": "Use shortcuts while typing",
+    "ok": true,
+    "detail": "typed tool/shortcut letters; text kept \"rtvhxdmgu 123\"; tool shortcuts did not fire (editing stayed open)"
+  },
+  {
+    "id": "DES-260",
+    "name": "Press shortcuts while editing an input",
+    "ok": true,
+    "detail": "same typing check in a text box; field inputs are also excluded by the shortcut handler (guard on INPUT/TEXTAREA/SELECT/contentEditable)"
+  },
+  {
+    "id": "DES-261a",
+    "name": "Document undo after committing text edit",
+    "ok": true,
+    "detail": "Ctrl+Z after commit restores \"Adaeze & Tunde\""
+  },
+  {
+    "id": "DES-261",
+    "name": "Use Cmd/Ctrl+Z in text and document modes",
+    "ok": true,
+    "detail": "while typing, Ctrl+Z acts on the text (\"Temporary word\") not the document; Escape restores the original"
+  },
+  {
+    "id": "DES-126",
+    "name": "Test long Nigerian names",
+    "ok": true,
+    "detail": "long couple names wrap inside the card: box 408×388 px within 486×680; no horizontal overflow"
+  },
+  {
+    "id": "DES-127",
+    "name": "Use emoji and mixed scripts",
+    "ok": true,
+    "detail": "typed text round-trips intact: \"Ọlájídé 🎉 欢迎 مرحبا\""
+  },
+  {
+    "id": "DES-128",
+    "name": "Delete text while editing",
+    "ok": true,
+    "detail": "empty text → layer kept (empty); layer count 10; no error"
+  },
+  {
+    "id": "DES-115",
+    "name": "Paste plain and formatted text",
+    "ok": true,
+    "detail": "pasted formatted clipboard becomes plain text: Plain pasted"
+  },
+  {
+    "id": "DES-117",
+    "name": "Resize a paragraph box",
+    "ok": true,
+    "detail": "narrowing the box 369→279 px rewraps the text taller 46→69 px"
+  },
+  {
+    "id": "DES-108",
+    "name": "Click with Type tool",
+    "ok": true,
+    "detail": "layers 10→11; typed text landed: true; editing opened immediately=true"
+  },
+  {
+    "id": "DES-109",
+    "name": "Drag with Type tool",
+    "ok": true,
+    "detail": "layers 11→12; dragged-box layer width 200 px"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

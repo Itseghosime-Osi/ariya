@@ -1,0 +1,32 @@
+[
+  {
+    "id": "DES-039",
+    "name": "Rotate with the rotation control",
+    "ok": true,
+    "detail": "handle dragged to the right of the centre: 0° → 90°"
+  },
+  {
+    "id": "DES-041",
+    "name": "Snap rotation",
+    "ok": true,
+    "detail": "dragging to ~47° gives 45° (snapped to a 15° step)"
+  },
+  {
+    "id": "DES-052",
+    "name": "Resize at minimum dimensions",
+    "ok": true,
+    "detail": "after dragging se handle past nw: width 54, height 15 (document px; never zero/negative)"
+  },
+  {
+    "id": "DES-056",
+    "name": "Compare zoom levels",
+    "ok": true,
+    "detail": "[{\"zoom\":\"45% — reset zoom to fit\",\"grewDocPx\":45,\"expected\":44.4},{\"zoom\":\"70% — reset zoom to fit\",\"grewDocPx\":29,\"expected\":28.6},{\"zoom\":\"95% — reset zoom to fit\",\"grewDocPx\":21,\"expected\":21.1}]"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

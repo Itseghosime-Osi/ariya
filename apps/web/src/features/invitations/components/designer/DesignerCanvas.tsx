@@ -434,6 +434,8 @@ export function DesignerCanvas({
   userGuidesRef.current = userGuides;
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const editingSnapshot = useRef<InvitationDesign | null>(null);
+  // A text layer just made with the Type tool opens ready to type, its placeholder selected.
+  const pendingTextEdit = useRef(false);
   const finishText = (cancel = false) => {
     const snapshot = editingSnapshot.current;
     editingSnapshot.current = null;
@@ -522,8 +524,18 @@ export function DesignerCanvas({
   }, []);
 
   useEffect(() => {
-    if (selectedId !== editingTextId) {
-      setEditingTextId(null);
+    if (!pendingTextEdit.current || !selectedId) return;
+    const created = design.layers.find((l) => l.id === selectedId);
+    if (!created || !TEXT_KINDS.has(created.kind)) return;
+    pendingTextEdit.current = false;
+    editingSnapshot.current = props.current.design;
+    setEditingTextId(created.id);
+  }, [selectedId, design.layers]);
+
+  useEffect(() => {
+    if (editingTextId && selectedId !== editingTextId) {
+      // Leaving the text by selecting something else still ends the edit: record it so Undo works.
+      finishText();
     }
   }, [selectedId, editingTextId]);
 
@@ -1669,6 +1681,7 @@ export function DesignerCanvas({
                     ? "line"
                     : (activeShapeKind ?? "rect");
 
+              if (kindToCreate === "text") pendingTextEdit.current = true;
               if (props.current.onAddLayerWithGeometry) {
                 props.current.onAddLayerWithGeometry(kindToCreate, {
                   x: xPercent,

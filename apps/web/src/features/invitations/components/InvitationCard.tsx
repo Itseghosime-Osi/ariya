@@ -208,6 +208,70 @@ function textStyle(
  * The one invitation under an event. The overview, the studio and the guest pass all render this
  * component from the same saved design, so a host never sees two different cards for one wedding.
  */
+/**
+ * The text box while a layer's words are being typed. The browser owns the text and the caret
+ * while it is open, so the words are rendered once from where editing began: re-rendering them
+ * from state on every keystroke would reset the caret to the start and reverse what is typed.
+ */
+function InlineTextEditor({
+  layer,
+  onChange,
+  onStop,
+  style,
+}: {
+  layer: InvitationLayer;
+  onChange?: (id: string, value: string) => void;
+  onStop?: (cancel?: boolean) => void;
+  style: React.CSSProperties;
+}) {
+  const [initial] = React.useState(layer.text);
+  return (
+    <div
+      data-layer-id={layer.id}
+      data-editing-text
+      contentEditable
+      suppressContentEditableWarning
+      role="textbox"
+      aria-label={`Edit ${layer.name || "text"}`}
+      ref={(el) => {
+        if (el && document.activeElement !== el) {
+          el.focus();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }}
+      onInput={(e) => {
+        const value = (e.currentTarget.innerText ?? "")
+          .slice(0, 600)
+          .replace(/[\uD800-\uDBFF]$/, "");
+        onChange?.(layer.id, value);
+      }}
+      onPaste={(e) => {
+        e.preventDefault();
+        document.execCommand(
+          "insertText",
+          false,
+          e.clipboardData.getData("text/plain")
+        );
+      }}
+      onBlur={() => onStop?.()}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+          onStop?.(true);
+        }
+      }}
+      style={style}
+    >
+      {initial}
+    </div>
+  );
+}
+
 export function InvitationCard({
   design: savedDesign,
   coupleName,
@@ -600,46 +664,11 @@ export function InvitationCard({
 
         if (editingLayerId === layer.id) {
           return (
-            <div
+            <InlineTextEditor
               key={layer.id}
-              data-layer-id={layer.id}
-              data-editing-text
-              contentEditable
-              suppressContentEditableWarning
-              role="textbox"
-              aria-label={`Edit ${layer.name || "text"}`}
-              ref={(el) => {
-                if (el && document.activeElement !== el) {
-                  el.focus();
-                  const range = document.createRange();
-                  range.selectNodeContents(el);
-                  const sel = window.getSelection();
-                  sel?.removeAllRanges();
-                  sel?.addRange(range);
-                }
-              }}
-              onInput={(e) => {
-                const value = (e.currentTarget.innerText ?? "")
-                  .slice(0, 600)
-                  .replace(/[\uD800-\uDBFF]$/, "");
-                onLayerTextChange?.(layer.id, value);
-              }}
-              onPaste={(e) => {
-                e.preventDefault();
-                document.execCommand(
-                  "insertText",
-                  false,
-                  e.clipboardData.getData("text/plain")
-                );
-              }}
-              onBlur={() => onStopEditingText?.()}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onStopEditingText?.(true);
-                }
-              }}
+              layer={layer}
+              onChange={onLayerTextChange}
+              onStop={onStopEditingText}
               style={{
                 ...textStyle(layer, design, false),
                 ...common,
@@ -650,9 +679,7 @@ export function InvitationCard({
                 zIndex: 40,
                 caretColor: palette.foil || "#b8864b",
               }}
-            >
-              {layer.text}
-            </div>
+            />
           );
         }
 

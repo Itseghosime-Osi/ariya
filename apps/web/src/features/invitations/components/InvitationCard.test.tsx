@@ -95,3 +95,35 @@ describe("functional entry seals", () => {
     }
   });
 });
+
+describe("inline text editing", () => {
+  it("leaves the typed words to the browser so the caret is not reset on every keystroke", () => {
+    const d = design();
+    const id = d.layers.find((l) => l.id === "names")!.id;
+    const at = (text: string) => ({
+      ...d,
+      layers: d.layers.map((l) => (l.id === id ? { ...l, text } : l)),
+    });
+    const { container, rerender } = render(
+      <InvitationCard
+        design={at("Ada")}
+        coupleName="Ada & Kunle"
+        editingLayerId={id}
+      />
+    );
+    const box = container.querySelector<HTMLElement>("[data-editing-text]")!;
+    const textNode = box.firstChild;
+    expect(box.textContent).toBe("Ada");
+    // Each keystroke updates the document; the editor's own text node must not be rewritten.
+    rerender(
+      <InvitationCard
+        design={at("Ada & Kunle")}
+        coupleName="Ada & Kunle"
+        editingLayerId={id}
+      />
+    );
+    expect(container.querySelector("[data-editing-text]")).toBe(box);
+    expect(box.firstChild).toBe(textNode);
+    expect(box.textContent).toBe("Ada");
+  });
+});
