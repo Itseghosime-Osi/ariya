@@ -14,6 +14,32 @@ export interface ExportOptions {
   signal?: AbortSignal;
 }
 
+/**
+ * WebKit draws an element's background image square inside an SVG foreignObject and ignores its
+ * border-radius, so rounded pictures, gradients and papers lose their corners in the exported file.
+ * Clipping to the same rounded box with clip-path is honoured everywhere, so say it explicitly.
+ */
+export function clipRoundedBackgrounds(root: HTMLElement) {
+  const corners = [
+    "borderTopLeftRadius",
+    "borderTopRightRadius",
+    "borderBottomRightRadius",
+    "borderBottomLeftRadius",
+  ] as const;
+  for (const el of [
+    root,
+    ...Array.from(root.querySelectorAll<HTMLElement>("*")),
+  ]) {
+    const computed = getComputedStyle(el);
+    if (computed.backgroundImage === "none" || computed.clipPath !== "none")
+      continue;
+    const radii = corners.map((corner) => computed[corner]);
+    if (radii.every((radius) => /^0(px|%)?(\s+0(px|%)?)?$/.test(radius)))
+      continue;
+    el.style.clipPath = `inset(0 round ${radii.join(" ")})`;
+  }
+}
+
 /** Export uses document pixels, never the viewport's fitted/zoomed dimensions. */
 export function invitationExportSize(
   design: InvitationDesign,
@@ -177,6 +203,7 @@ export async function exportInvitation({
     });
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
+    clipRoundedBackgrounds(clone);
     // Images are also painted as CSS backgrounds on cards and framed layers.
     const images = new Map<string, Promise<string>>();
     const loadImage = (src: string) => {

@@ -433,11 +433,13 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
         .click();
       await width.fill("10000");
       await width.blur();
-      expect(
-        Number(
-          await page.getByLabel("Canvas height", { exact: true }).inputValue()
+      await expect
+        .poll(async () =>
+          Number(
+            await page.getByLabel("Canvas height", { exact: true }).inputValue()
+          )
         )
-      ).toBeGreaterThanOrEqual(4000);
+        .toBeGreaterThanOrEqual(4000);
       await page.getByRole("button", { name: "Cancel", exact: true }).click();
       await saved();
     }
