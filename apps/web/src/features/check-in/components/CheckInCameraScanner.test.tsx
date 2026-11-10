@@ -10,13 +10,15 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckInCameraScanner } from "./CheckInCameraScanner";
 
-const { decode, decoderStop } = vi.hoisted(() => ({
+const { decode, decoderStop, decodeCanvas } = vi.hoisted(() => ({
   decode: vi.fn(),
+  decodeCanvas: vi.fn(),
   decoderStop: vi.fn(),
 }));
 vi.mock("@zxing/browser", () => ({
-  BrowserMultiFormatReader: class {
+  BrowserQRCodeReader: class {
     decodeFromVideoElement = decode;
+    decodeFromCanvas = decodeCanvas;
   },
 }));
 let media: ReturnType<typeof vi.fn>;
@@ -164,5 +166,27 @@ describe("check-in camera", () => {
     rerender(<CheckInCameraScanner onScan={onScan} disabled />);
     expect(trackStop).toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Scan a pass" })).toBeDisabled();
+  });
+  it("reports a scaled retry after the original ZXing frame is unreadable", async () => {
+    vi.stubGlobal("BarcodeDetector", undefined);
+    vi.spyOn(HTMLVideoElement.prototype, "videoWidth", "get").mockReturnValue(
+      2400
+    );
+    vi.spyOn(HTMLVideoElement.prototype, "videoHeight", "get").mockReturnValue(
+      1800
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+    decodeCanvas.mockReturnValue({ getText: () => "ARY-SCALED-TEST" });
+    render(<CheckInCameraScanner onScan={onScan} />);
+    await start();
+    await waitFor(() => expect(decode).toHaveBeenCalled());
+    await act(async () =>
+      decode.mock.calls[0][1](undefined, new Error("Unreadable native frame"))
+    );
+    expect(decodeCanvas).toHaveBeenCalledOnce();
+    expect(onScan).toHaveBeenCalledExactlyOnceWith("ARY-SCALED-TEST");
+    expect(trackStop).toHaveBeenCalled();
   });
 });

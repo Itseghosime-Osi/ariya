@@ -16,6 +16,7 @@ import {
   stack,
   useDesignEngineBytes,
   withEntrySeal,
+  constrainEntrySealsFast,
   resizeCanvasPxFast,
   setPaperEdgeFast,
   nudgeFast,
@@ -200,6 +201,24 @@ describe("the Rust design engine and its TypeScript fallback agree", () => {
     expect(addShape(d, "rect")).toBeNull();
     await useDesignEngineBytes(null);
     expect(addShape(d, "rect")).toBeNull();
+  });
+
+  it("constrains rotated pass boundaries identically in Rust and TypeScript", async () => {
+    for (const ratio of [0.4, 5 / 7, 1, 2.5])
+      for (const rotation of [0, 45, 90, 135]) {
+        const base = withEntrySeal(house());
+        base.canvas = {
+          ratio,
+          widthPx: 1080,
+          heightPx: Math.round(1080 / ratio),
+          edgeStyle: "rounded",
+          cornerRadiusPx: 500,
+        };
+        const seal = base.layers.find((l) => l.kind === "code")!;
+        Object.assign(seal, { x: -400, y: 400, width: 1000, rotation });
+        const { ts, rust } = await both(() => constrainEntrySealsFast(base));
+        expect(stable(rust)).toEqual(stable(ts));
+      }
   });
 
   it("handles canvas px sizing, paper edges, and nudges identically", async () => {

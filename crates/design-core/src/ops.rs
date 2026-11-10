@@ -1,7 +1,7 @@
 //! Every edit the designer offers, as a pure function from one design to the next.
 //!
 //! Percentages are shares of the card: x and width of its width, y and height of its height.
-//! Later layers draw on top.
+//! Later decorative layers draw on top; the renderer protects the functional pass foreground.
 
 use crate::model::{Canvas, ColorRole, Design, Fit, Font, Layer, LayerKind, PaperEdge, Shape};
 use crate::validate::{MAX_LAYERS, MIN_WIDTH};
@@ -615,6 +615,70 @@ pub fn ensure_entry_seal(design: &Design, id: String) -> Design {
         seal.visible = true;
     } else {
         next.layers.push(create_layer(LayerKind::Code, id));
+    }
+    next
+}
+
+/// Keep the functional pass inside the visible paper, including its rotated bounds and rounded corners.
+pub fn constrain_entry_seals(design: &Design) -> Design {
+    let ratio = design.ratio();
+    let width_px = design.canvas_width_px() as f64;
+    let height_px = width_px / ratio;
+    let corner = design
+        .canvas
+        .as_ref()
+        .filter(|c| c.edge_style == Some(PaperEdge::Rounded))
+        .map(|c| {
+            c.corner_radius_px
+                .unwrap_or(16.0)
+                .min(width_px / 2.0)
+                .min(height_px / 2.0)
+        })
+        .unwrap_or(0.0);
+    let pad_x = 2.0_f64
+        .max(800.0 / width_px)
+        .max(corner * (1.0 - std::f64::consts::FRAC_1_SQRT_2) / width_px * 100.0);
+    let pad_y = 2.0_f64
+        .max(800.0 / height_px)
+        .max(corner * (1.0 - std::f64::consts::FRAC_1_SQRT_2) / height_px * 100.0);
+    let mut next = design.clone();
+    for layer in &mut next.layers {
+        if layer.kind != LayerKind::Code {
+            continue;
+        }
+        let angle = layer.rotation.unwrap_or(0.0).to_radians();
+        let extent = angle.cos().abs() + angle.sin().abs();
+        let width = clamp(
+            layer.width,
+            16.0,
+            ((100.0 - 2.0 * pad_x) / extent).min((100.0 - 2.0 * pad_y) / ratio / extent),
+        );
+        let height = width * ratio;
+        let x = round_js(
+            (clamp(
+                layer.x + layer.width / 2.0,
+                pad_x + width * extent / 2.0,
+                100.0 - pad_x - width * extent / 2.0,
+            ) - width / 2.0)
+                * 1e8,
+        ) / 1e8;
+        let y = round_js(
+            (clamp(
+                layer.y + layer.width * ratio / 2.0,
+                pad_y + height * extent / 2.0,
+                100.0 - pad_y - height * extent / 2.0,
+            ) - height / 2.0)
+                * 1e8,
+        ) / 1e8;
+        let safe_width = round_js(width * 1e8) / 1e8;
+        if (x - layer.x).abs() >= 1e-7
+            || (y - layer.y).abs() >= 1e-7
+            || (safe_width - layer.width).abs() >= 1e-7
+        {
+            layer.x = x;
+            layer.y = y;
+            layer.width = safe_width;
+        }
     }
     next
 }

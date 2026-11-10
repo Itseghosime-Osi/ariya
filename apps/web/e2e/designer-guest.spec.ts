@@ -1,19 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
 import { writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
-const loadDecoder = createRequire(
-  path.resolve(__dirname, "../node_modules/@zxing/browser/package.json")
-);
-const {
-  MultiFormatReader,
-  RGBLuminanceSource,
-  HybridBinarizer,
-  BinaryBitmap,
-  DecodeHintType,
-  BarcodeFormat,
-} = loadDecoder("@zxing/library");
+import { inspectInvitationImage } from "./fixtures/invitation-image";
 
 test("saved invitation reaches an accepted guest and downloads at document resolution", async ({
   page,
@@ -183,6 +172,12 @@ test("saved invitation reaches an accepted guest and downloads at document resol
     await page
       .getByPlaceholder("Chief Olawale Adeyemi", { exact: true })
       .fill(name);
+    if (name === "Nnenna Ọlá-Adeṣọlá") {
+      await page.getByLabel("Party size", { exact: true }).fill("2");
+      await page
+        .getByRole("switch", { name: "Allow a +1 companion", exact: true })
+        .click();
+    }
     await page.getByRole("button", { name: /add to guestbook/i }).click();
     await page.getByText(name, { exact: true }).first().click();
     await page
@@ -210,10 +205,20 @@ test("saved invitation reaches an accepted guest and downloads at document resol
     ).toBeVisible();
     await expect(guest.locator("[data-entry-seal]")).toHaveCount(0);
     await guest.getByLabel(/Joyfully Accept/i).check();
+    await guest.getByLabel(/Number of Attending Guests/).selectOption("3");
+    await guest
+      .getByLabel("Plus One Full Name", { exact: true })
+      .fill("Adaora Okeke");
+    await guest.getByLabel(/Dietary Requirements/).fill("No peanuts");
     await guest.getByRole("button", { name: /submit rsvp response/i }).click();
     await expect(
       guest.getByRole("button", { name: "Save my invitation", exact: true })
     ).toBeVisible();
+    await expect(guest.getByText("3 attendees", { exact: true })).toBeVisible();
+    await expect(
+      guest.getByText("Adaora Okeke", { exact: true })
+    ).toBeVisible();
+    await expect(guest.getByText("No peanuts", { exact: true })).toBeVisible();
     const card = guest
       .getByRole("region", { name: "Your invitation", exact: true })
       .locator("[data-invitation-canvas]");
@@ -250,97 +255,15 @@ test("saved invitation reaches an accepted guest and downloads at document resol
       const png = Buffer.concat(chunks);
       expect(png.subarray(1, 4).toString()).toBe("PNG");
       dimensions.push([png.readUInt32BE(16), png.readUInt32BE(20)]);
-      const paper = (await card.boundingBox())!,
-        seal = (await card.locator("[data-entry-seal]").boundingBox())!,
-        photo = (await guestPicture.boundingBox())!;
-      const pixels = await guest.evaluate(
-        async ({ url, frame }) => {
-          const image = new Image();
-          image.src = url;
-          await image.decode();
-          const scale = image.naturalWidth / frame.paper.width;
-          const left = Math.max(
-              0,
-              Math.floor((frame.seal.x - frame.paper.x) * scale) - 8
-            ),
-            top = Math.max(
-              0,
-              Math.floor((frame.seal.y - frame.paper.y) * scale) - 8
-            );
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.ceil(frame.seal.width * scale) + 16;
-          canvas.height = Math.ceil(frame.seal.height * scale) + 16;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(
-            image,
-            left,
-            top,
-            canvas.width,
-            canvas.height,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-          const rgba = ctx.getImageData(0, 0, canvas.width, canvas.height).data,
-            grey = [];
-          for (let i = 0; i < rgba.length; i += 4)
-            grey.push(
-              Math.round(
-                0.299 * rgba[i] + 0.587 * rgba[i + 1] + 0.114 * rgba[i + 2]
-              )
-            );
-          const pixel = document.createElement("canvas");
-          pixel.width = 1;
-          pixel.height = 1;
-          const p = pixel.getContext("2d")!;
-          p.drawImage(
-            image,
-            (frame.photo.x - frame.paper.x + frame.photo.width / 2) * scale,
-            (frame.photo.y - frame.paper.y + frame.photo.height / 2) * scale,
-            1,
-            1,
-            0,
-            0,
-            1,
-            1
-          );
-          return {
-            width: canvas.width,
-            height: canvas.height,
-            grey,
-            photoPixel: Array.from(p.getImageData(0, 0, 1, 1).data),
-          };
-        },
-        {
-          url: `data:image/png;base64,${png.toString("base64")}`,
-          frame: { paper, seal, photo },
-        }
+      const { decoded, photoPixel } = await inspectInvitationImage(
+        guest,
+        card,
+        png,
+        guestPicture
       );
-      // The uploaded fixture has a gold centre; blank ivory artwork would fail this pixel check.
-      expect(pixels.photoPixel[0]).toBeGreaterThan(160);
-      expect(pixels.photoPixel[1]).toBeGreaterThan(100);
-      expect(pixels.photoPixel[2]).toBeLessThan(180);
-      const reader = new MultiFormatReader();
-      const hints = new Map<unknown, unknown>([
-        [DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]],
-        [DecodeHintType.TRY_HARDER, true],
-      ]);
-      reader.setHints(hints);
-      const decoded = reader
-        .decode(
-          new BinaryBitmap(
-            new HybridBinarizer(
-              new RGBLuminanceSource(
-                Uint8ClampedArray.from(pixels.grey),
-                pixels.width,
-                pixels.height
-              )
-            )
-          ),
-          hints
-        )
-        .getText();
+      expect(photoPixel[0]).toBeGreaterThan(160);
+      expect(photoPixel[1]).toBeGreaterThan(100);
+      expect(photoPixel[2]).toBeLessThan(180);
       const expected = (await guest.locator("span.font-mono").allTextContents())
         .map((text) => text.trim())
         .find((text) => text.startsWith("ARY-"));
@@ -356,6 +279,30 @@ test("saved invitation reaches an accepted guest and downloads at document resol
     await guest.reload();
     await expect(card.locator('[data-layer-id="names"]')).toHaveText(headline);
     await expect(card.locator("[data-entry-seal]")).toHaveCount(1);
+    await guest
+      .getByRole("link", { name: /Update RSVP or dietary preferences/i })
+      .click();
+    await expect(guest.getByLabel(/Number of Attending Guests/)).toHaveValue(
+      "3"
+    );
+    await expect(
+      guest.getByLabel("Plus One Full Name", { exact: true })
+    ).toHaveValue("Adaora Okeke");
+    await expect(guest.getByLabel(/Dietary Requirements/)).toHaveValue(
+      "No peanuts"
+    );
+    await guest.getByLabel(/Number of Attending Guests/).selectOption("1");
+    await expect(
+      guest.getByLabel("Plus One Full Name", { exact: true })
+    ).toHaveCount(0);
+    await guest
+      .getByRole("button", { name: /update.*rsvp|submit rsvp response/i })
+      .click();
+    await expect(guest.getByText("1 attendee", { exact: true })).toBeVisible();
+    await expect(guest.getByText("Adaora Okeke", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(guest.getByText("No peanuts", { exact: true })).toBeVisible();
     const declining = await guestContext.newPage();
     await declining.goto(new URL(new URL(links[1]).pathname, origin).href);
     await expect(
@@ -416,6 +363,8 @@ test("saved invitation reaches an accepted guest and downloads at document resol
             "unaccepted guest has no entry seal",
             "accepted guest has exactly one personal seal",
             "guest state and artwork survive reload",
+            "party count, companion name and dietary requirements persist on reload and revision",
+            "reducing a party from three to one clears the companion without losing dietary notes",
             "a second guest sees their own details and receives no pass after declining",
             "turning access cards off retains the host artwork while removing only the pass",
             "turning access cards back on restores the personal seal",

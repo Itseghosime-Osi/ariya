@@ -1474,6 +1474,7 @@ export function Inspector({
         <div className="mt-2 flex flex-wrap gap-1.5">
           <IconBtn
             label="Bring to front"
+            disabled={layer.kind === "code"}
             dark={dark}
             onClick={() => onStack(layer.id, "front")}
           >
@@ -1481,6 +1482,7 @@ export function Inspector({
           </IconBtn>
           <IconBtn
             label="Send to back"
+            disabled={layer.kind === "code"}
             dark={dark}
             onClick={() => onStack(layer.id, "back")}
           >
@@ -2317,7 +2319,8 @@ export function Inspector({
             only see a decorative seal; the door scanner reads it. It appears
             only for guests who have accepted. Its pattern stays opaque and
             unmirrored so it can be read at the door. Style the surrounding
-            artwork instead.
+            artwork instead. The seal stays inside the paper and above other
+            layers. Leave space around it so it does not cover your wording.
           </p>
         </Section>
       )}

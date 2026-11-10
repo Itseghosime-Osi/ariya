@@ -117,6 +117,7 @@ pub enum Edit {
         new_id: String,
     },
     RemoveCard,
+    ConstrainEntrySeals,
     EnsureEntrySeal {
         new_id: String,
     },
@@ -317,6 +318,7 @@ fn edit(request: EditRequest) -> Result<EditResponse, String> {
             ops::apply_imported_card(&design, url, image_ratio, new_id),
             None,
         ),
+        Edit::ConstrainEntrySeals => (ops::constrain_entry_seals(&design), None),
         Edit::RemoveCard => (ops::remove_imported_card(&design), None),
         Edit::EnsureEntrySeal { new_id } => (ops::ensure_entry_seal(&design, new_id), None),
         Edit::ResizeCanvasPx {

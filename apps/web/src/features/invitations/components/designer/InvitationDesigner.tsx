@@ -11,6 +11,7 @@ import { uploadInvitationImageAction } from "../../actions";
 import { optimizeImageForUpload } from "../../image-compressor";
 import {
   normaliseDesign,
+  constrainEntrySeals,
   createLayerOfKind,
   createInvitationDesign,
 } from "../../design";
@@ -64,6 +65,28 @@ type Upload =
 
 const COALESCE_MS = 900;
 const ZOOMS = [0.05, 0.1, 0.125, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
+
+/** Cancel/undo also restores pass geometry adjusted by the temporary paper dimensions. */
+function beforeCanvasResize(
+  current: InvitationDesign,
+  before: InvitationDesign
+): InvitationDesign {
+  const passes = new Map(
+    before.layers
+      .filter((layer) => layer.kind === "code")
+      .map((layer) => [layer.id, layer])
+  );
+  return constrainEntrySeals({
+    ...current,
+    canvas: before.canvas,
+    layers: current.layers.map((layer) => {
+      const previous = passes.get(layer.id);
+      return layer.kind === "code" && previous
+        ? { ...layer, x: previous.x, y: previous.y, width: previous.width }
+        : layer;
+    }),
+  });
+}
 
 /**
  * The invitation designer: a full-screen workspace like the seating studio. Simple mode asks
@@ -311,14 +334,14 @@ export function InvitationDesigner({
     const session = cropSession.current;
     cropSession.current = null;
     if (session?.changed)
-      recordSnapshot({ ...designRef.current, canvas: session.design.canvas });
+      recordSnapshot(beforeCanvasResize(designRef.current, session.design));
     setActiveTool("select");
   }, [recordSnapshot]);
   const cancelCanvasResize = useCallback(() => {
     const session = cropSession.current;
     cropSession.current = null;
     if (session?.changed)
-      commit((d) => ({ ...d, canvas: session.design.canvas }), false);
+      commit((d) => beforeCanvasResize(d, session.design), false);
     setActiveTool("select");
   }, [commit]);
   useEffect(() => {
@@ -328,7 +351,7 @@ export function InvitationDesigner({
       const session = cropSession.current;
       cropSession.current = null;
       if (session.changed)
-        recordSnapshot({ ...designRef.current, canvas: session.design.canvas });
+        recordSnapshot(beforeCanvasResize(designRef.current, session.design));
     }
   }, [activeTool, recordSnapshot]);
 
@@ -513,7 +536,19 @@ export function InvitationDesigner({
   );
 
   const stack = useCallback(
-    (id: string, move: StackMove) => commit((d) => stackViaEngine(d, id, move)),
+    (id: string, move: StackMove) => {
+      if (
+        designRef.current.layers.find((layer) => layer.id === id)?.kind ===
+        "code"
+      ) {
+        setNotice({
+          tone: "ok",
+          text: "The entry seal stays in front so it can be scanned. You can still move or resize it.",
+        });
+        return;
+      }
+      commit((d) => stackViaEngine(d, id, move));
+    },
     [commit]
   );
   const align = useCallback(
@@ -1129,7 +1164,7 @@ export function InvitationDesigner({
         {
           label: "Duplicate Layer",
           shortcut: "Cmd+J",
-          disabled: !selectedId,
+          disabled: !selectedId || selected?.kind === "code",
           onClick: () => {
             if (selectedId) duplicate(selectedId);
           },
@@ -1221,23 +1256,23 @@ export function InvitationDesigner({
         {
           label: "Bring to Front",
           shortcut: "Cmd+]",
-          disabled: !selectedId,
+          disabled: !selectedId || selected?.kind === "code",
           onClick: () => selectedId && stack(selectedId, "front"),
         },
         {
           label: "Bring Forward",
-          disabled: !selectedId,
+          disabled: !selectedId || selected?.kind === "code",
           onClick: () => selectedId && stack(selectedId, "up"),
         },
         {
           label: "Send Backward",
-          disabled: !selectedId,
+          disabled: !selectedId || selected?.kind === "code",
           onClick: () => selectedId && stack(selectedId, "down"),
         },
         {
           label: "Send to Back",
           shortcut: "Cmd+[",
-          disabled: !selectedId,
+          disabled: !selectedId || selected?.kind === "code",
           onClick: () => selectedId && stack(selectedId, "back"),
         },
         "separator",

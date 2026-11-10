@@ -1,3 +1,4 @@
+import { constrainEntrySeals } from "./pass-layout";
 /**
  * The design engine, as the designer uses it.
  *
@@ -318,6 +319,41 @@ export function removeCard(design: InvitationDesign): InvitationDesign {
   return (
     run(design, { type: "removeCard" })?.design ?? removeImportedCard(design)
   );
+}
+
+/** Position constraints use Rust when loaded, with a safe fallback for older cached engines. */
+export function constrainEntrySealsFast(
+  design: InvitationDesign
+): InvitationDesign {
+  const safe = constrainEntrySeals(design);
+  if (safe === design) return design;
+  const result = run(design, { type: "constrainEntrySeals" })?.design;
+  if (
+    result &&
+    result.layers.length === design.layers.length &&
+    result.layers.every(
+      (layer, index) =>
+        layer.id === design.layers[index].id &&
+        (layer.kind !== "code" ||
+          (["x", "y", "width"] as const).every(
+            (key) => Math.abs(layer[key] - safe.layers[index][key]) < 1e-7
+          ))
+    )
+  )
+    return {
+      ...design,
+      layers: design.layers.map((layer, index) =>
+        layer.kind === "code"
+          ? {
+              ...layer,
+              x: result.layers[index].x,
+              y: result.layers[index].y,
+              width: result.layers[index].width,
+            }
+          : layer
+      ),
+    };
+  return safe;
 }
 
 export function withEntrySeal(design: InvitationDesign): InvitationDesign {

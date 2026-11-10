@@ -41,7 +41,7 @@
   },
   {
     "ids": [2, 3, 4, 50, 53, 54],
-    "name": "Canvas size preview cancels, applies and undoes without changing layer data",
+    "name": "Canvas sizing preserves decorative layers and restores pass positions on cancel/undo",
     "result": "Pass"
   },
   {

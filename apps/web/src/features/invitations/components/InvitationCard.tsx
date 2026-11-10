@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
+import { constrainEntrySeals } from "../pass-layout";
+import { updateEntrySealPlates } from "./seal-plate";
 import { resolveLayerColour } from "../design";
 import { designRatio } from "../layer-ops";
 import { EntrySeal, SAMPLE_ENTRY_CODE } from "./EntrySeal";
@@ -207,7 +209,7 @@ function textStyle(
  * component from the same saved design, so a host never sees two different cards for one wedding.
  */
 export function InvitationCard({
-  design,
+  design: savedDesign,
   coupleName,
   className = "",
   entryCode = null,
@@ -219,6 +221,38 @@ export function InvitationCard({
   onLayerTextChange,
   onStopEditingText,
 }: InvitationCardProps) {
+  const design = constrainEntrySeals(savedDesign);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const hasRenderedPass =
+    Boolean(entryCode || sampleEntry) &&
+    design.layers.some((layer) => layer.kind === "code" && layer.visible);
+  const layerKeys = design.layers.map((layer) => layer.id).join("|");
+  useLayoutEffect(() => {
+    if (hasRenderedPass && canvasRef.current)
+      updateEntrySealPlates(canvasRef.current);
+  });
+  useLayoutEffect(() => {
+    const root = canvasRef.current;
+    if (!root || !hasRenderedPass) return;
+    let active = true;
+    const update = () => {
+      if (active) updateEntrySealPlates(root);
+    };
+    update();
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(root);
+    root
+      .querySelectorAll<HTMLElement>("[data-layer-id]")
+      .forEach((layer) => observer?.observe(layer));
+    document.fonts?.ready.then(update).catch(() => {});
+    document.fonts?.addEventListener?.("loadingdone", update);
+    return () => {
+      active = false;
+      observer?.disconnect();
+      document.fonts?.removeEventListener?.("loadingdone", update);
+    };
+  }, [layerKeys, hasRenderedPass]);
   const { palette, background } = design;
   const interactive = Boolean(onLayerPointerDown);
   const paper = `radial-gradient(120% 90% at 20% 0%, ${palette.paper} 0%, ${palette.paper} 55%, ${palette.paperEdge} 100%)`;
@@ -233,8 +267,13 @@ export function InvitationCard({
   const chrome = design.chrome !== false;
   const edgeStyle = design.canvas?.edgeStyle ?? "sharp";
   const cornerRadiusPx = design.canvas?.cornerRadiusPx;
+  const nativeWidth = design.canvas?.widthPx ?? 1080;
+  const radius = cornerRadiusPx ?? 16;
+  // Root percentages scale with the paper itself; cqw on the root would refer to its ancestor.
   const borderRadius =
-    edgeStyle === "rounded" ? `${cornerRadiusPx ?? 16}px` : "0px";
+    edgeStyle === "rounded"
+      ? `${(radius / nativeWidth) * 100}% / ${(radius / (nativeWidth / designRatio(design))) * 100}%`
+      : "0px";
 
   const paperShadow = !chrome
     ? "0 1px 3px rgba(0,0,0,0.08), 0 18px 45px -12px rgba(0,0,0,0.45)"
@@ -245,6 +284,7 @@ export function InvitationCard({
   return (
     <div
       data-testid="invitation-card"
+      ref={canvasRef}
       data-invitation-canvas
       role="group"
       aria-label="Invitation design"
@@ -420,6 +460,7 @@ export function InvitationCard({
                 ...common,
                 // A pass is functional content: decorative effects must not erase or mirror it.
                 opacity: 1,
+                zIndex: 1,
                 filter: "none",
                 mixBlendMode: "normal",
                 transform: layer.rotation

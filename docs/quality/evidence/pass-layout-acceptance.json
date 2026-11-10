@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "ratio": 0.7142857142857143,
+      "angle": 45,
+      "edge": "sharp",
+      "clamped": true
+    },
+    {
+      "ratio": 2.5,
+      "angle": 135,
+      "edge": "rounded",
+      "clamped": true
+    },
+    {
+      "ratio": 0.4,
+      "angle": 30,
+      "edge": "rounded",
+      "clamped": true
+    },
+    {
+      "ratio": 1,
+      "angle": 90,
+      "edge": "deckled",
+      "clamped": true
+    }
+  ],
+  "scanResults": [
+    {
+      "ratio": 2.5,
+      "angle": 135,
+      "samplingMax": 0
+    },
+    {
+      "ratio": 0.4,
+      "angle": 30,
+      "samplingMax": 600
+    }
+  ],
+  "decoderSampling": "Native-first scanning with 600px/400px retries, matching the check-in fallback. Oversized raw ZXing decoding alone is not claimed.",
+  "checks": [
+    "rotated passes remain within sharp, rounded and deckled paper",
+    "numeric edits clamp with working undo/redo and reload",
+    "later artwork cannot obscure the pass",
+    "a backing plate appears only where needed and disappears when overlap ends",
+    "native PNG independently decodes the sample over dark artwork"
+  ]
+}

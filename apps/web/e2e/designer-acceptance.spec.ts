@@ -393,7 +393,7 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
 
   await record(
     [2, 3, 4, 50, 53, 54],
-    "Canvas size preview cancels, applies and undoes without changing layer data",
+    "Canvas sizing preserves decorative layers and restores pass positions on cancel/undo",
     async () => {
       await page.keyboard.press("Control+d");
       const before = await json();
@@ -406,7 +406,9 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
       await expect(width).toHaveValue("1200");
       await page.getByRole("button", { name: "Cancel", exact: true }).click();
       await expect(page.getByTestId("crop-overlay")).toHaveCount(0);
-      expect((await json()).canvas).toEqual(before.canvas);
+      const cancelled = await json();
+      expect(cancelled.canvas).toEqual(before.canvas);
+      expect(cancelled.layers).toEqual(before.layers);
       await page
         .getByRole("button", { name: "Canvas size & ratio", exact: true })
         .click();
@@ -415,9 +417,17 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
       const applied = await json();
       expect(applied.canvas.widthPx).toBe(1080);
       expect(applied.canvas.heightPx).toBe(1080);
-      expect(applied.layers).toEqual(before.layers);
+      expect(
+        applied.layers.filter(
+          (layer: { kind: string }) => layer.kind !== "code"
+        )
+      ).toEqual(
+        before.layers.filter((layer: { kind: string }) => layer.kind !== "code")
+      );
       await page.keyboard.press("Control+z");
-      expect((await json()).canvas).toEqual(before.canvas);
+      const undone = await json();
+      expect(undone.canvas).toEqual(before.canvas);
+      expect(undone.layers).toEqual(before.layers);
       await page
         .getByRole("button", { name: "Canvas size & ratio", exact: true })
         .click();

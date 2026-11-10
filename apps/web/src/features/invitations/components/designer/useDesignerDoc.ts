@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { saveInvitationDesignAction } from "../../actions";
+import { constrainEntrySealsFast } from "../../engine";
+import { constrainEntrySeals } from "../../pass-layout";
 import { normaliseDesign } from "../../design";
 import type { InvitationDesign } from "../../types";
 
@@ -44,7 +46,7 @@ export function useDesignerDoc(
   });
   const [doc, setDoc] = useState<Doc>({
     past: [],
-    present: recovered ?? initial,
+    present: constrainEntrySeals(recovered ?? initial),
     future: [],
   });
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -62,8 +64,9 @@ export function useDesignerDoc(
       record = true
     ) => {
       setDoc((s) => {
-        const updated = typeof next === "function" ? next(s.present) : next;
-        if (updated === s.present) return s;
+        const candidate = typeof next === "function" ? next(s.present) : next;
+        if (candidate === s.present) return s;
+        const updated = constrainEntrySealsFast(candidate);
         return record
           ? {
               past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],

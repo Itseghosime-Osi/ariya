@@ -1,3 +1,6 @@
+/** Default stationery aspect ratio, shared by the app model and Rust model. */
+export const INVITATION_ASPECT = 5 / 7;
+
 export const INVITATION_THEMES = [
   "royal_gold",
   "emerald_regal",

@@ -238,7 +238,7 @@ function SortableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: layer.id });
+  } = useSortable({ id: layer.id, disabled: layer.kind === "code" });
 
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
@@ -301,7 +301,12 @@ function SortableRow({
           {...attributes}
           {...listeners}
           aria-label="Drag to reorder layer"
-          title="Drag to reorder layer"
+          title={
+            layer.kind === "code"
+              ? "The entry seal stays in front"
+              : "Drag to reorder layer"
+          }
+          disabled={layer.kind === "code"}
           className={cn(
             "grid h-6 w-4 shrink-0 cursor-grab place-items-center active:cursor-grabbing",
             dark
@@ -528,7 +533,9 @@ export function LayersDock({
     setRenaming(null);
   };
 
-  const rows = [...layers].reverse();
+  const rows = [...layers]
+    .reverse()
+    .sort((a, b) => Number(b.kind === "code") - Number(a.kind === "code"));
 
   const filteredRows = rows.filter((l) => {
     if (filter === "text") return TEXT_KINDS.has(l.kind);
@@ -876,7 +883,7 @@ export function LayersDock({
           <button
             type="button"
             title="Layer Effects & Adjustments (fx)"
-            disabled={!selectedLayer}
+            disabled={!selectedLayer || selectedLayer.kind === "code"}
             onClick={onOpenFx}
             className={cn(
               "flex items-center gap-1 font-mono text-xs font-bold disabled:opacity-30",
@@ -913,7 +920,7 @@ export function LayersDock({
           <button
             type="button"
             title="Duplicate Layer (Cmd+J)"
-            disabled={!selectedLayer}
+            disabled={!selectedLayer || selectedLayer.kind === "code"}
             onClick={() => selectedLayer && onDuplicate(selectedLayer.id)}
             className={cn(
               "grid h-6 w-6 place-items-center rounded disabled:opacity-30",

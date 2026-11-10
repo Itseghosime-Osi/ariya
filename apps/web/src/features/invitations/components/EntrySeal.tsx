@@ -17,7 +17,7 @@ interface EntrySealProps {
   className?: string;
 }
 
-const QUIET = 2;
+const QUIET = 4;
 
 function isFinder(row: number, col: number, size: number): boolean {
   const inBox = (r: number, c: number) => r >= 0 && r < 7 && c >= 0 && c < 7;
@@ -43,16 +43,19 @@ export function EntrySeal({
     const qr = QRCode.create(value, { errorCorrectionLevel: "H" });
     const size = qr.modules.size;
     const dots: Array<[number, number]> = [];
+    const marks: Array<[number, number]> = [];
     for (let r = 0; r < size; r += 1) {
       for (let c = 0; c < size; c += 1) {
-        if (qr.modules.get(r, c) && !isFinder(r, c, size)) dots.push([r, c]);
+        if (qr.modules.get(r, c) && !isFinder(r, c, size)) {
+          (qr.modules.isReserved(r, c) ? marks : dots).push([r, c]);
+        }
       }
     }
-    return { size, dots };
+    return { size, dots, marks };
   }, [value]);
 
-  // The ring sits just outside the pattern's corners.
-  const half = (model.size / 2) * Math.SQRT2 + QUIET;
+  // A complete four-module quiet zone must fit at every corner; foil sits outside it.
+  const half = (model.size / 2 + QUIET) * Math.SQRT2 + 2;
   const total = half * 2;
   const offset = (total - model.size) / 2;
   const { ink, paper, forcePlate } = entrySealColours(palette);
@@ -71,9 +74,15 @@ export function EntrySeal({
       style={{ display: "block", width: "100%", height: "100%" }}
       shapeRendering="geometricPrecision"
     >
-      {(plate || forcePlate) && (
-        <circle cx={half} cy={half} r={half - 0.1} fill={paper} />
-      )}
+      <circle
+        data-seal-plate=""
+        data-seal-plate-required={String(plate || forcePlate)}
+        cx={half}
+        cy={half}
+        r={half - 0.1}
+        fill={paper}
+        style={{ display: plate || forcePlate ? undefined : "none" }}
+      />
       <circle
         cx={half}
         cy={half}
@@ -93,6 +102,17 @@ export function EntrySeal({
         strokeDasharray="0.02 0.7"
       />
       <g transform={`translate(${offset} ${offset})`}>
+        {/* Keep alignment, timing and format modules exact; decorate only data modules. */}
+        {model.marks.map(([r, c]) => (
+          <rect
+            key={`m-${r}-${c}`}
+            x={c}
+            y={r}
+            width={1}
+            height={1}
+            fill={ink}
+          />
+        ))}
         {model.dots.map(([r, c]) => (
           <circle
             key={`${r}-${c}`}

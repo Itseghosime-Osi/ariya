@@ -91,11 +91,23 @@ Guest PNG downloads use the same bounded, font/image-aware exporter as the studi
 
 Component tests cover duplicate download prevention, failure/retry, cancellation on unmount, card-off artwork, sample/personal pattern separation and destructive-effect isolation. Readability safeguards do not establish every possible pass placement or physical-print scan condition.
 
+## Pass placement and scanning safeguards
+
+The Rust engine now exposes a generated `constrainEntrySeals` edit. The TypeScript fallback agrees with it; a cached older WASM engine safely falls back if it does not recognize the edit. Only pass positions/sizes are constrained. Decorative bleed, colours and other layer data are retained. Constraints account for rotated bounds, rounded paper corners, minimum seal width and border clearance. A 960-case geometry matrix verifies rotated corners and idempotence; native Rust and WASM parity tests also exercise the operation.
+
+Canvas resize Apply/Cancel/Undo restores any automatic pass adjustment along with the paper. Rounded paper radii now use document-relative units at fitted and native sizes. Passes occupy a protected foreground layer, reflected in the Layers panel. Actual rendered bounds determine when an opaque backing plate is needed; resize/font changes and native export dimensions are rechecked. Clear layouts retain their backing appearance.
+
+The seal retains its circular crest, colours and data dots. Functional timing/alignment/format modules use exact square cells, and the foil sits beyond a complete four-module quiet zone. ZXing still misses some oversized rotated crops at native resolution. The actual QR-only camera fallback now retries unreadable frames at 600px and 400px maximum dimensions, retaining the original attempt for small-code detail. These frames stay in memory; no media is uploaded or retained. Unit tests cover retries, canvas reuse, readiness, missing context and camera cleanup/reporting.
+
+`designer-pass-layout.spec.ts` checks imported extreme placements on sharp, rounded and deckled paper, numeric clamping, undo/redo/reload, foreground pinning, overlap plate activation/removal and exported sample decoding through the same retry policy. [Placement evidence](evidence/pass-layout-acceptance.json). It does not claim that every oversized raw ZXing input decodes or that physical cameras/prints have been tested.
+
+The guest integration check also verifies a party of three, companion/dietary persistence and a revision to one attendee that clears the companion while keeping dietary information. No additional production accounts, hosted database changes or delivery settings are involved.
+
 ## Work remaining
 
-The matrix currently records **125 verified, 26 partial, 85 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **126 verified, 25 partial, 85 not tested and 47 not applicable**. This is still an incomplete acceptance audit.
 
-Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, guest-facing personalization and protected-pass styling, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
+Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
 The 47 not-applicable items remain visible and unchecked. They describe unoffered Photopea features such as raster retouching, path/Bézier editing, RAW/PSD, channel editing, nested groups, multi-page and video workflows. They are not reported as implemented or passing. See the [control inventory](designer-control-inventory.md) for the current boundaries.
 
@@ -103,8 +115,8 @@ The 47 not-applicable items remain visible and unchecked. They describe unoffere
 
 - Production Next.js build, with build-only environment placeholders: pass.
 - TypeScript and ESLint: pass.
-- Unit tests: 1,082 passing across 110 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated/group resizing, drawing modifiers, export cancellation/sizing and image-proxy restrictions.
-- Rust workspace tests: 246 passing. Rust/WASM artifacts were rebuilt with the pinned Rust 1.99.1 toolchain.
+- Unit tests: 1,101 passing across 115 files, including Rust/TypeScript parity, save queue failures/races/history limits, corner projection, rotated/group resizing, drawing modifiers, export cancellation/sizing and image-proxy restrictions.
+- Rust workspace tests: 247 passing. Rust/WASM artifacts were rebuilt with the pinned Rust 1.99.1 toolchain.
 - No new application dependencies, production debug routes, environment files, deployment changes or database migrations were added.
 
 ## Screenshots

@@ -453,3 +453,54 @@ fn aspect_lock_applies_to_side_handles_and_respects_limits() {
     assert!(huge.width <= 1000.0 && huge.height <= 1000.0);
     assert!((huge.width / huge.height - 2.0).abs() < 0.0001);
 }
+
+#[test]
+fn the_pass_boundary_edit_preserves_artwork_and_rotated_corners() {
+    use ariya_design_core::model::{Canvas, PaperEdge};
+    for ratio in [0.4_f64, 5.0 / 7.0, 1.0, 2.5] {
+        for angle in [0.0_f64, 15.0, 45.0, 90.0, 135.0] {
+            let mut design = ops::ensure_entry_seal(&house(), "pass-boundary".into());
+            design.canvas = Some(Canvas {
+                ratio,
+                width_px: Some(1080),
+                height_px: Some((1080.0 / ratio).round() as u32),
+                edge_style: Some(PaperEdge::Rounded),
+                corner_radius_px: Some(500.0),
+            });
+            let pass = design.layers.last_mut().unwrap();
+            pass.x = -400.0;
+            pass.y = 400.0;
+            pass.width = 1000.0;
+            pass.rotation = Some(angle);
+            let response = ok(&dispatch(
+                OP_EDIT,
+                json!({"design": design, "edit": {"type": "constrainEntrySeals"}})
+                    .to_string()
+                    .as_bytes(),
+            ));
+            let next: Design = serde_json::from_value(response["design"].clone()).unwrap();
+            validate(&next).unwrap();
+            assert!(same(
+                &serde_json::to_value(&design.layers[0]).unwrap(),
+                &serde_json::to_value(&next.layers[0]).unwrap()
+            ));
+            assert!(same(
+                &serde_json::to_value(&next).unwrap(),
+                &serde_json::to_value(ops::constrain_entry_seals(&next)).unwrap()
+            ));
+            let pass = next.layers.last().unwrap();
+            let height = 1080.0 / ratio;
+            let cx = (pass.x + pass.width / 2.0) / 100.0 * 1080.0;
+            let cy = (pass.y + pass.width * ratio / 2.0) / 100.0 * height;
+            let half = pass.width / 100.0 * 1080.0 / 2.0;
+            for x in [-half, half] {
+                for y in [-half, half] {
+                    let px = cx + x * angle.to_radians().cos() - y * angle.to_radians().sin();
+                    let py = cy + x * angle.to_radians().sin() + y * angle.to_radians().cos();
+                    assert!((-1e-5..=1080.0 + 1e-5).contains(&px));
+                    assert!((-1e-5..=height + 1e-5).contains(&py));
+                }
+            }
+        }
+    }
+}

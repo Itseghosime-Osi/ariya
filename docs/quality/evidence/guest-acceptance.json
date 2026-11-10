@@ -7,6 +7,8 @@
     "unaccepted guest has no entry seal",
     "accepted guest has exactly one personal seal",
     "guest state and artwork survive reload",
+    "party count, companion name and dietary requirements persist on reload and revision",
+    "reducing a party from three to one clears the companion without losing dietary notes",
     "a second guest sees their own details and receives no pass after declining",
     "turning access cards off retains the host artwork while removing only the pass",
     "turning access cards back on restores the personal seal",

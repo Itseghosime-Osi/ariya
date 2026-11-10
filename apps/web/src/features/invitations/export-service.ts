@@ -1,5 +1,6 @@
 "use client";
 
+import { updateEntrySealPlates } from "./components/seal-plate";
 import { toPng, toJpeg } from "html-to-image";
 import { PDFDocument } from "pdf-lib";
 import type { InvitationDesign } from "./types";
@@ -230,6 +231,8 @@ export async function exportInvitation({
           el.style.backgroundImage = background;
         }),
     ]);
+    // Recheck collisions at document resolution after font/image loading; fitted-screen metrics differ.
+    updateEntrySealPlates(clone);
     const options = {
       width: dims.width,
       height: dims.height,

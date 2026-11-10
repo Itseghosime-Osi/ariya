@@ -1,3 +1,6 @@
+import { constrainEntrySeals } from "./pass-layout";
+export { INVITATION_ASPECT } from "./types";
+export { constrainEntrySeals } from "./pass-layout";
 import { formatEventDate } from "@/lib/format";
 import { invitationDesignSchema } from "./schemas";
 import {
@@ -9,9 +12,6 @@ import {
   type InvitationPalette,
   type InvitationTheme,
 } from "./types";
-
-/** The card is a portrait 5:7, like printed stationery. */
-export const INVITATION_ASPECT = 5 / 7;
 
 export const THEME_PALETTES: Record<InvitationTheme, InvitationPalette> = {
   royal_gold: {
@@ -318,7 +318,7 @@ export function normaliseDesign(input: unknown): InvitationDesign | null {
     }
   }
   const parsed = invitationDesignSchema.safeParse(candidate);
-  return parsed.success ? parsed.data : null;
+  return parsed.success ? constrainEntrySeals(parsed.data) : null;
 }
 
 /** The one design under an event: what the host saved, or the house card if nothing is saved. */

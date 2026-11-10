@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { createScaledPassRetry } from "../scaled-pass-retry";
 import { Icon } from "@/components/ui/icon";
 
 interface PassDetector {
@@ -144,11 +145,17 @@ export function CheckInCameraScanner({
           };
           void scanFrame();
         } else {
-          const { BrowserMultiFormatReader } = await import("@zxing/browser");
+          const { BrowserQRCodeReader } = await import("@zxing/browser");
           if (cancelled || detected) return;
-          const reader = new BrowserMultiFormatReader();
+          const reader = new BrowserQRCodeReader();
+          const retryScaled = createScaledPassRetry(reader);
           controls = await reader.decodeFromVideoElement(video!, (result) => {
+            if (cancelled || detected) return;
             if (result) report(result.getText());
+            else {
+              const code = retryScaled(video!);
+              if (code) report(code);
+            }
           });
           if (cancelled || detected) controls.stop();
         }

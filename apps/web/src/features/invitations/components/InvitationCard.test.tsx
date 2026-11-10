@@ -71,4 +71,27 @@ describe("functional entry seals", () => {
     ).toBe(false);
     expect(container.textContent).not.toContain("ARY-LOCAL");
   });
+  it("keeps rounded paper corners in document units at fitted and native widths", () => {
+    const d = {
+      ...design(),
+      canvas: {
+        ratio: 5 / 7,
+        widthPx: 1080,
+        heightPx: 1512,
+        edgeStyle: "rounded" as const,
+        cornerRadiusPx: 16,
+      },
+    };
+    const { container } = render(
+      <InvitationCard design={d} coupleName="Ada & Kunle" />
+    );
+    const paper = container.querySelector<HTMLElement>(
+      "[data-invitation-canvas]"
+    )!;
+    const [rx, ry] = paper.style.borderRadius.split("/").map(parseFloat);
+    for (const width of [390, 1080]) {
+      expect((rx / 100) * width).toBeCloseTo((ry / 100) * (width / (5 / 7)), 6);
+      expect((rx / 100) * width).toBeCloseTo((16 * width) / 1080, 6);
+    }
+  });
 });
