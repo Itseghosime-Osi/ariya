@@ -88,7 +88,7 @@ export async function createTestEvent(
   const title = options?.title || `The Nuptials of ${couple}`;
   const venue = options?.venue || "Grand Ballroom, Victoria Island";
 
-  await page.goto("/events/new");
+  await page.goto("/events/new", { waitUntil: "networkidle" });
   await expect(page.locator("h1")).toContainText(/plan your celebration/i);
 
   // Step 1: who. Two names make a wedding, the default occasion.
