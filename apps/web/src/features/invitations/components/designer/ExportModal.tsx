@@ -90,6 +90,7 @@ export function ExportModal({
   const returnFocus = useRef<HTMLElement | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
   const [exporting, setExporting] = useState(false);
+  const [printMarks, setPrintMarks] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
@@ -109,6 +110,7 @@ export function ExportModal({
         eventId,
         coupleName,
         format: selectedFormat,
+        printMarks: selectedFormat === "pdf" && printMarks,
         signal: active.signal,
       });
 
@@ -241,10 +243,34 @@ export function ExportModal({
               {selectedFormat === "json"
                 ? "an editable backup you can open again in the studio"
                 : selectedFormat === "pdf"
-                  ? `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
+                  ? printMarks
+                    ? `${(5 + 0.75).toFixed(2)} × ${((dims.height / dims.width) * 5 + 0.75).toFixed(2)} in page with bleed and crop marks, card trims to 5 × ${((dims.height / dims.width) * 5).toFixed(2)} in`
+                    : `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
                   : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
               .
             </p>
+
+            {selectedFormat === "pdf" && (
+              <label className="mt-3 flex min-h-11 cursor-pointer items-start gap-2 rounded-xl border border-hairline bg-white/60 p-3 text-xs dark:bg-white/5">
+                <input
+                  type="checkbox"
+                  data-testid="export-print-marks"
+                  checked={printMarks}
+                  onChange={(e) => setPrintMarks(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span className="leading-relaxed text-label-2">
+                  <strong className="text-night dark:text-ivory">
+                    Add bleed and crop marks for a print shop
+                  </strong>
+                  <br />
+                  Adds 0.125 in of bleed by stretching the card&rsquo;s edges
+                  outwards, and crop marks outside it. Backgrounds and borders
+                  carry on; pictures are not extended. Keep important words
+                  inside the green safe-area guide.
+                </span>
+              </label>
+            )}
 
             {error && (
               <div

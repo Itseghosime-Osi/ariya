@@ -41,9 +41,10 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 - [ ] **B4 (P1) Editable source, not only flattened files.** Canva users cannot get layered files. Offer "Download my design" (.ariya JSON) that re-opens with all layers, plus SVG export for vector layers.
       Done when: downloading then re-importing gives an identical layer tree.
       Decision: keep the JSON backup, and add import of other formats including PSD and AI. Planned as its own build: PSD via a parser (layers become picture layers), AI and PDF by rendering the first page, SVG and images directly. Imports become flattened picture layers, not editable text, and that limit must be shown to the user.
-- [ ] **B5 (P1) Print-ready option.** CMYK note, 300 dpi, bleed, safe margin guides on canvas.
+- [x] **B5 (P1) Print-ready option.** CMYK note, 300 dpi, bleed, safe margin guides on canvas.
       Done when: guides toggle on and the export honours them.
       Decision: bleed and safe-area guides on the canvas plus bleed and crop marks in the PDF.
+      Evidence: View menu > Show print guides (or ⌘/Ctrl K) draws a dashed green safe area (0.25 in) and red bleed line (0.125 in) that are not part of exports; the PDF export has an option for bleed and crop marks. Measured: guides at 5% and 2.5% of the width (RD-B5a–c); the PDF is 414 × 558 pt (5.75 × 7.75 in) for a 5 × 7 in card, with crop marks outside the bleed (`screenshots/upgrade-print-pdf.png`, `evidence/redesign-batch24.json`). Limits: the bleed is made by stretching the card's outer pixels, so backgrounds and borders continue but pictures are not extended; CMYK is not produced (RGB PDF); not checked with a real print shop.
 - [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
       Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).

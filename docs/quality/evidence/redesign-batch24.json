@@ -1,0 +1,44 @@
+[
+  {
+    "id": "RD-B5a",
+    "name": "Safe-area and bleed guides appear",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-B5b",
+    "name": "Safe area is 5% (0.25 in of 5 in) inside, bleed 2.5% (0.125 in) outside",
+    "ok": true,
+    "detail": "safe=0.050 bleed=0.025"
+  },
+  {
+    "id": "RD-B5c",
+    "name": "Guides are not inside the exported card element",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-B5d",
+    "name": "Print-marks option shown for PDF",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-B5e",
+    "name": "Summary describes the larger page",
+    "ok": true,
+    "detail": "You will get: PDF for printing · 5.75 × 7.75 in page with bleed and crop marks, card trims to 5 × 7.00 in."
+  },
+  {
+    "id": "RD-B5f",
+    "name": "PDF downloads",
+    "ok": true,
+    "detail": "Adaeze-Tunde-invitation-print.pdf"
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

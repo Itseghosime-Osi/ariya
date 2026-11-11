@@ -321,6 +321,7 @@ export function DesignerCanvas({
   dark = false,
   showRulers = true,
   showGrid = false,
+  showPrintGuides = false,
   snapToGrid = false,
   guidesLocked = false,
   clearGuidesRequest = 0,
@@ -359,6 +360,8 @@ export function DesignerCanvas({
   dark?: boolean;
   showRulers?: boolean;
   showGrid?: boolean;
+  /** Dashed safe-area (0.25 in) and bleed (0.125 in) guides for a 5-inch-wide card. */
+  showPrintGuides?: boolean;
   snapToGrid?: boolean;
   guidesLocked?: boolean;
   clearGuidesRequest?: number;
@@ -1794,6 +1797,22 @@ export function DesignerCanvas({
           height: cardHeight || undefined,
         }}
       >
+        {showPrintGuides && (
+          <>
+            <div
+              data-testid="print-guide-safe"
+              aria-hidden="true"
+              className="pointer-events-none absolute z-10 border border-dashed border-emerald-600"
+              style={{ inset: "5%" }}
+            />
+            <div
+              data-testid="print-guide-bleed"
+              aria-hidden="true"
+              className="pointer-events-none absolute z-10 border border-dashed border-red-500"
+              style={{ inset: "-2.5%" }}
+            />
+          </>
+        )}
         {showGrid && (
           <div
             data-testid="canvas-grid"

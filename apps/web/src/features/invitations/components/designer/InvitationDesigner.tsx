@@ -382,6 +382,7 @@ export function InvitationDesigner({
 
   const [showRulers, setShowRulers] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
+  const [showPrintGuides, setShowPrintGuides] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(false);
   const [guidesLocked, setGuidesLocked] = useState(false);
   const [clearGuidesRequest, setClearGuidesRequest] = useState(0);
@@ -1501,6 +1502,12 @@ export function InvitationDesigner({
           onClick: () => setShowRulers((r) => !r),
         },
         {
+          label: showPrintGuides
+            ? "Hide print guides"
+            : "Show print guides (safe area and bleed)",
+          onClick: () => setShowPrintGuides((g) => !g),
+        },
+        {
           label: showGrid ? "Hide Grid" : "Show Grid",
           shortcut: "Cmd+'",
           onClick: () => setShowGrid((g) => !g),
@@ -1715,6 +1722,7 @@ export function InvitationDesigner({
             activeTool={activeTool}
             showRulers={showRulers}
             showGrid={showGrid}
+            showPrintGuides={showPrintGuides}
             snapToGrid={snapToGrid}
             guidesLocked={guidesLocked}
             clearGuidesRequest={clearGuidesRequest}
