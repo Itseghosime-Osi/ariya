@@ -68,7 +68,7 @@ export function TableListView({
           <button
             type="button"
             onClick={onAddTable}
-            className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-5 text-xs font-semibold uppercase tracking-[0.12em] text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <Plus size={15} /> Create first table
           </button>
