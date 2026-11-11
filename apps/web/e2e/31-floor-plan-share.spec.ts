@@ -86,7 +86,8 @@ test("share a view-only floor plan, keep editing, then stop sharing", async ({
   ).toBeVisible({
     timeout: 20_000,
   });
-  await v.goto(url);
+  const gone = await v.goto(url);
+  expect(gone?.status()).toBe(404);
   await expect(v.getByText("This floor plan is not shared")).toBeVisible();
   await expect(v.getByText(/Floor plan · view only/i)).toHaveCount(0);
   await visitor.close();
