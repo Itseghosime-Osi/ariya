@@ -10,7 +10,6 @@ import React, {
 import {
   Armchair,
   Box,
-  Camera,
   PanelRightClose,
   PanelRightOpen,
   ChevronDown,
@@ -25,7 +24,6 @@ import {
   MousePointer2,
   Palette,
   Plus,
-  Printer,
   Redo2,
   SunMoon,
   RotateCcw,
@@ -69,7 +67,6 @@ import {
   setLayersLocked,
 } from "./layers";
 import {
-  MAIN_AISLE,
   areaPerDiner,
   nextStageSpot,
   stageItemPlacement,
@@ -2308,6 +2305,8 @@ export function HallStudio({
                   currentRev={hall.currentRev}
                   adoptRev={hall.adoptRev}
                   whenIdle={hall.whenIdle}
+                  onSnapshot={() => view3d.current?.command("snapshot")}
+                  printHref={`/events/${eventId}/seating/print`}
                   className={chip}
                   onSay={say}
                 />
@@ -2315,25 +2314,6 @@ export function HallStudio({
                   className="mx-0.5 h-5 w-px bg-hairline"
                   aria-hidden="true"
                 />
-                <button
-                  type="button"
-                  className={chip}
-                  onClick={() => view3d.current?.command("snapshot")}
-                  aria-label="Save a picture of the hall"
-                  title="Save a picture"
-                >
-                  <Camera size={17} />
-                </button>
-                <Link
-                  href={`/events/${eventId}/seating/print`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={chip}
-                  aria-label="Print cards and chart"
-                  title="Print cards and chart"
-                >
-                  <Printer size={17} />
-                </Link>
                 <button
                   type="button"
                   className={chip}
@@ -3182,14 +3162,14 @@ export function HallStudio({
                           data-testid="table-clearance"
                           className={cn(
                             "mx-4 mt-3 rounded-xl p-3 text-xs",
-                            c.tooNarrow
+                            c.tightest < SPACING_GAP[layout.spacing] - 0.05
                               ? "bg-[#fbeeee] text-[#7a1f20]"
                               : "bg-[#f6f1e8] text-night"
                           )}
                         >
                           <p className="font-semibold">
-                            {c.tooNarrow
-                              ? `Tight: ${gapText(c.tightest)} where an aisle needs ${MAIN_AISLE} m`
+                            {c.tightest < SPACING_GAP[layout.spacing] - 0.05
+                              ? `Tight: ${gapText(c.tightest)}, less than the ${SPACING_GAP[layout.spacing]} m this plan keeps between tables`
                               : "Space around this table"}
                           </p>
                           <ul className="mt-1 space-y-0.5">

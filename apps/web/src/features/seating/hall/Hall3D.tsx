@@ -23,7 +23,8 @@ export interface SceneTable {
   name: string;
   shape: string;
   capacity: number;
-  occupied: number;
+  /** People seated, or null when the plan carries no seating (a shared plan, a proposal). */
+  occupied: number | null;
   x: number;
   y: number;
   rot: number;

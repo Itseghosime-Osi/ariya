@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Download, Link2, Share2 } from "lucide-react";
+import {
+  Camera,
+  Check,
+  Copy,
+  Download,
+  Link2,
+  Printer,
+  Share2,
+} from "lucide-react";
 import { createHallShareAction, revokeHallShareAction } from "../actions";
 import { buildFloorPlanPdf, type PlanTable } from "./floorplan-pdf";
 import type { HallLayout } from "./model";
@@ -20,6 +28,8 @@ export function ShareMenu({
   currentRev,
   adoptRev,
   whenIdle,
+  onSnapshot,
+  printHref,
   className,
   onSay,
 }: {
@@ -32,6 +42,10 @@ export function ShareMenu({
   adoptRev: (n: number) => void;
   /** Resolves once the studio has no save waiting or in flight. */
   whenIdle: () => Promise<void>;
+  /** Save a picture of the hall as it is drawn now. */
+  onSnapshot?: () => void;
+  /** The printable seating chart and place cards. */
+  printHref?: string;
   className?: string;
   onSay: (msg: string) => void;
 }) {
@@ -202,6 +216,33 @@ export function ShareMenu({
               ? "Preparing…"
               : "Download the measured floor plan (PDF)"}
           </button>
+
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {onSnapshot && (
+              <button
+                type="button"
+                onClick={() => {
+                  onSnapshot();
+                  setOpen(false);
+                }}
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-hairline px-3 text-xs font-semibold text-night hover:bg-ivory focus-visible:outline-2 focus-visible:outline-burgundy"
+              >
+                <Camera size={14} aria-hidden="true" />
+                Save a picture
+              </button>
+            )}
+            {printHref && (
+              <a
+                href={printHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-hairline px-3 text-xs font-semibold text-night hover:bg-ivory focus-visible:outline-2 focus-visible:outline-burgundy"
+              >
+                <Printer size={14} aria-hidden="true" />
+                Print chart and cards
+              </a>
+            )}
+          </div>
 
           {error && (
             <p role="alert" className="mt-2 text-xs text-[#9e2a2b]">

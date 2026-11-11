@@ -2235,7 +2235,16 @@ function syncTables() {
     item.obj.position.set(t.x, 0, t.y);
     item.obj.rotation.y = -t.rot * DEG;
     const tall = t.style.centrepiece === "tall" ? 2.0 : 1.35;
-    setLabel(item.obj, k, t.name, `${t.occupied}/${t.capacity}`, tall);
+    // A plan with no seating (a shared floor plan, a proposal) says how big the table is, not "0/10".
+    setLabel(
+      item.obj,
+      k,
+      t.name,
+      t.occupied == null
+        ? `${t.capacity} seats`
+        : `${t.occupied}/${t.capacity}`,
+      tall
+    );
   }
   for (const c of state.chairs) {
     const k = "chair:" + c.id;
