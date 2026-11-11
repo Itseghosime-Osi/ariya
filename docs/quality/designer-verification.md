@@ -140,9 +140,26 @@ Docker and a local Supabase stack were started in this session, so the authentic
 
 Items closed here: DES-006, 025, 076, 077, 120, 135, 146, 155 and 206 pass (Chromium and, where noted, Firefox); DES-096 stays Partial because the designer offers no endpoint handles. DES-131 (exported text) now passes: accented Yoruba names export with the right typeface, every dot and accent, and nothing clipped ([evidence](evidence/studio-batch17.json)). Nothing remains Not tested.
 
+### Third pass (11 November 2026)
+
+Closed from the earlier "could still be tested" list, with a local Supabase stack and Chromium (plus the Firefox/WebKit notes above):
+
+- **Keyboard reordering of layers** was impossible (only a pointer sensor); it now works (Space lifts, arrows move, Space drops, Undo restores). DES-170 passes.
+- **Corner-radius widgets at other zoom levels and shapes** (DES-072, 078): radius × zoom stays constant from 20% to 345%; only rectangles show widgets. The zoom buttons step coarsely, so exactly 25% and 400% are unreachable.
+- **Per-operation undo/redo** (DES-210): 18 operations each restore the exact rendered state on undo and redo.
+- **Navigating away during a save** (DES-216) and **blocked fonts** (DES-119): the edit saves; the card falls back to its serif stack and still exports.
+- **Export matrix** (DES-087, 232, 233; 231 and 229 stay Partial): a rotated, rounded, multiplied, shadowed picture over a transparent PNG matches across PNG, JPEG and PDF; the PDF's flattened picture was read back without a PDF renderer.
+- **Long names on the guest side** (DES-126, 245): couple and guest names of about 70–80 characters fit the guest card and the exported pass still scans.
+- **Event edits after saving** (DES-249, Partial): editing the event's venue does not change the saved card in the designer or for guests. The saved words are authoritative. This needs a product decision.
+- DES-124: text offers solid colours only; no text gradient exists.
+
+Open problems resolved: `designer-guest` fails in Chromium only when the browser runs in a POSIX locale, where Chromium names any download with a non-ASCII file name "download"; with `LANG=C.UTF-8` it passes (Firefox and WebKit were unaffected). `designer-pass-layout` read the seal before it re-rendered after a reload; it now waits, and passes in Chromium, Firefox and WebKit. Still failing: `studio-pro-designer.spec.ts` (an old exploratory script that expects removed labels and writes screenshots to absolute paths on a developer's Mac) and `interactive-designer-session.spec.ts` (an exploratory flaw logger that times out); neither tests current behaviour and both are candidates for deletion. WebKit's acceptance suite still stops at "Cancel a pending export".
+
+Totals now: **211 verified, 24 partial, 0 not tested, 48 not applicable.**
+
 ## Work remaining
 
-The matrix currently records **201 verified, 34 partial, 0 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **211 verified, 24 partial, 0 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
