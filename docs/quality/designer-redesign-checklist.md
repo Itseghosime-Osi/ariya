@@ -20,10 +20,11 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **A1 (P0) Ease of use for non-designers.** Canva's top praise. Keep Simple mode and templates as the default way in; Pro tools stay one step away.
       Done when: a new user can open a template, change the names, date and venue, and export in under 2 minutes with no help text (timed run on desktop and phone).
-- [ ] **A2 (P0) Real-time feel and stability.** Figma is praised for collaboration. Autosave status always visible ("Saved", "Saving", "Offline").
+- [x] **A2 (P0) Real-time feel and stability.** Figma is praised for collaboration. Autosave status always visible ("Saved", "Saving", "Offline").
       Done when: status is visible at all times; a forced network drop shows "Offline" and recovers without losing edits.
       Progress (not closed): the status now reads "offline · will save when you reconnect" and recovers (RD-A2, RD-A2b). Not yet tested: edits made offline surviving a reload.
       Decision: queue and sync saves with conflict handling (bigger build than the current device-side recovery).
+      Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 - [ ] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
       Done when: changing one named style updates every layer using it, and undo reverses it in one step.
 - [ ] **A4 (P1) Developer-style handoff, our version: print handoff.** Figma wins on handoff. Ours is the printer. One "Send to printer" export with bleed, crop marks and size notes.
@@ -107,11 +108,13 @@ Decision: closed as not applicable: the designer is fully included for every hos
       Done when: a 12MP photo edits smoothly and exports at full quality.
 - [ ] **E4 (P1) Fast open.** Studio ready quickly on a cold load; show a skeleton, not a blank screen.
       Done when: time to interactive is recorded for desktop and a throttled phone.
-- [ ] **E5 (P2) Offline-tolerant editing.** Queue saves when the connection drops.
+- [x] **E5 (P2) Offline-tolerant editing.** Queue saves when the connection drops.
 
 ## F. Support and trust (Canva complaint: hard to reach support)
 
 Decision: same as A2: queue saves while offline and sync when back online.
+
+Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 
 - [x] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
       Done when: Help opens in one tap on phone and desktop.
