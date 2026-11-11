@@ -57,6 +57,8 @@ export function useHallLayout({
   const retryTimer = useRef<number | null>(null);
   // The document waiting to reach the server, kept until a save succeeds so a retry can resend it.
   const unsaved = useRef<HallLayout | null>(null);
+  const inFlight = useRef(false);
+  const queued = useRef<{ next: HallLayout; force: boolean } | null>(null);
   const past = useRef<Snapshot[]>([]);
   const future = useRef<Snapshot[]>([]);
   const [, bump] = useState(0);
@@ -81,6 +83,18 @@ export function useHallLayout({
     (next: HallLayout, force = false) => {
       if (retryTimer.current) window.clearTimeout(retryTimer.current);
       retryTimer.current = null;
+      // One save at a time. A second save sent while the first is in flight would still carry the
+      // old revision and be refused as a "conflict" with this studio's own earlier save, so the
+      // newest document waits and goes out as soon as the first one answers.
+      if (inFlight.current) {
+        queued.current = {
+          next,
+          force: force || queued.current?.force === true,
+        };
+        setSaveState("saving");
+        return;
+      }
+      inFlight.current = true;
       setSaving(true);
       setSaveState("saving");
       saveHallLayoutAction(eventId, next, force ? undefined : rev.current)
@@ -119,7 +133,13 @@ export function useHallLayout({
             );
           }
         })
-        .finally(() => setSaving(false));
+        .finally(() => {
+          inFlight.current = false;
+          setSaving(false);
+          const waiting = queued.current;
+          queued.current = null;
+          if (waiting) send(waiting.next, waiting.force);
+        });
     },
     [eventId]
   );
@@ -149,7 +169,13 @@ export function useHallLayout({
         void fetch(`/api/events/${eventId}/hall-layout`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ layout: next, baseRev: rev.current }),
+          // While a save from this studio is still on its way, its revision is not known yet, so
+          // the last edit of the visit goes without one rather than be refused by our own save.
+          body: JSON.stringify(
+            inFlight.current
+              ? { layout: next }
+              : { layout: next, baseRev: rev.current }
+          ),
           keepalive: true,
         }).catch(() => {
           /* the local copy is the fallback */

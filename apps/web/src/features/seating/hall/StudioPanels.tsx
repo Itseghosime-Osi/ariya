@@ -307,30 +307,22 @@ export function GuestsPanel({
                       {g.attending_count === 1 ? "seat" : "seats"}
                       {" · "}
                       {g.group_name || g.side}
-                      {g.status !== "accepted" && ` · ${g.status}`}
+                      {g.status === "pending" && " · awaits reply"}
                     </p>
                   </div>
-                  {g.status !== "accepted" ? (
-                    <span className="shrink-0 rounded-full bg-[#f6f1e8] px-3 py-1.5 text-[11px] font-semibold text-label-2">
-                      Awaits reply
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={tables.length === 0}
-                      title={
-                        tables.length === 0 ? "Add tables first" : undefined
-                      }
-                      onClick={() =>
-                        onStartAssign(assigning === g.id ? null : g.id)
-                      }
-                      aria-pressed={assigning === g.id}
-                      aria-label={`Seat ${g.name}`}
-                      className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy aria-pressed:bg-burgundy disabled:bg-[#eadfd9] disabled:text-label-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-                    >
-                      {assigning === g.id ? "Choosing…" : "Seat"}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    disabled={tables.length === 0}
+                    title={tables.length === 0 ? "Add tables first" : undefined}
+                    onClick={() =>
+                      onStartAssign(assigning === g.id ? null : g.id)
+                    }
+                    aria-pressed={assigning === g.id}
+                    aria-label={`Seat ${g.name}`}
+                    className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy aria-pressed:bg-burgundy disabled:bg-[#eadfd9] disabled:text-label-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                  >
+                    {assigning === g.id ? "Choosing…" : "Seat"}
+                  </button>
                 </div>
                 {/* The table list appears only for the guest being seated: one picker, not one
                     per card, and never when there is no table to pick. */}

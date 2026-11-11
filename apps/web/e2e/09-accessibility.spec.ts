@@ -158,6 +158,9 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
     page,
     context,
   }) => {
+    // Sign-up, an event, a guest, a table and the studio in one journey: the default 30 s left
+    // no room on a slow runner, which made this spec flaky. Every check still runs.
+    test.setTimeout(90_000);
     await createAndLoginUser(page, context, "a11y_keyboard_user");
     const { eventId } = await createTestEvent(page);
 
