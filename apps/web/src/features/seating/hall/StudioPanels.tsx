@@ -146,6 +146,11 @@ export function GuestsPanel({
 }) {
   const [q, setQ] = useState("");
   const [group, setGroup] = useState<string>("all");
+  // A long list is drawn 50 at a time: a 600-guest wedding no longer builds 600 cards at once.
+  // Search and the group filter still look through everyone.
+  const PAGE = 50;
+  const [limit, setLimit] = useState(PAGE);
+  useEffect(() => setLimit(PAGE), [q, group]);
   const groups = useMemo(
     () =>
       Array.from(
@@ -308,7 +313,7 @@ export function GuestsPanel({
           </p>
         ) : (
           <ul className="mt-3 space-y-1.5">
-            {list.map((g) => (
+            {list.slice(0, limit).map((g) => (
               <li
                 key={g.id}
                 className={cn(
@@ -406,6 +411,16 @@ export function GuestsPanel({
               </li>
             ))}
           </ul>
+        )}
+        {list.length > limit && (
+          <button
+            type="button"
+            onClick={() => setLimit((n) => n + PAGE)}
+            className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-hairline bg-white px-4 text-xs font-semibold text-night hover:bg-ivory focus-visible:outline-2 focus-visible:outline-burgundy"
+          >
+            Show {Math.min(PAGE, list.length - limit)} more of{" "}
+            {list.length - limit}
+          </button>
         )}
       </Section>
     </div>
