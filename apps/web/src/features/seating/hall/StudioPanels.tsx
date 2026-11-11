@@ -100,6 +100,32 @@ const initials = (name: string) =>
 
 // ---------------------------------------------------------------- guests
 
+/** Whose guest this is, with a colour dot that is never the only signal. */
+const SIDES: Record<string, { label: string; dot: string }> = {
+  bride: { label: "Bride's side", dot: "#6b1e2e" },
+  groom: { label: "Groom's side", dot: "#3b5b8a" },
+  family: { label: "Family", dot: "#2e6a4f" },
+  vip: { label: "VIP list", dot: "#b8864b" },
+  mutual: { label: "Both sides", dot: "#8a6620" },
+  planner: { label: "Planner", dot: "#5a474e" },
+  imported: { label: "Imported", dot: "#5a474e" },
+};
+
+export function SideChip({ side }: { side: string | null | undefined }) {
+  const s = SIDES[(side || "").toLowerCase()];
+  if (!s) return null;
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-[#f6f1e8] px-1.5 py-0.5 text-[10px] font-semibold text-night">
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: s.dot }}
+        aria-hidden="true"
+      />
+      {s.label}
+    </span>
+  );
+}
+
 export function GuestsPanel({
   guests,
   tables,
@@ -132,7 +158,14 @@ export function GuestsPanel({
       (group === "all" || (g.group_name || g.side || "Guests") === group) &&
       g.name.toLowerCase().includes(q.trim().toLowerCase())
   );
-  const waiting = guests.reduce((a, g) => a + g.attending_count, 0);
+  // The same split as the rest of the studio: accepted people can be seated now; replies still
+  // awaited can be placed early but are not counted as waiting.
+  const toSeat = guests
+    .filter((g) => g.status === "accepted")
+    .reduce((a, g) => a + g.attending_count, 0);
+  const awaiting = guests
+    .filter((g) => g.status === "pending")
+    .reduce((a, g) => a + g.attending_count, 0);
 
   return (
     <div>
@@ -207,10 +240,15 @@ export function GuestsPanel({
       </Section>
 
       <Section
-        title="Waiting for a seat"
+        title="Not at a table yet"
         aside={
-          <span className="rounded-full bg-burgundy px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white">
-            {waiting}
+          <span className="text-[11px] font-semibold tabular-nums text-label-2">
+            {toSeat > 0 && (
+              <span className="mr-1 rounded-full bg-burgundy px-2 py-0.5 text-white">
+                {toSeat} to seat
+              </span>
+            )}
+            {awaiting > 0 && `${awaiting} awaiting reply`}
           </span>
         }
       >
@@ -305,9 +343,22 @@ export function GuestsPanel({
                     <p className="truncate text-[11px] text-label-2">
                       {g.attending_count}{" "}
                       {g.attending_count === 1 ? "seat" : "seats"}
-                      {" · "}
-                      {g.group_name || g.side}
+                      {g.group_name && ` · ${g.group_name}`}
                       {g.status === "pending" && " · awaits reply"}
+                    </p>
+                    {/* What matters when choosing a table, in words as well as colour. */}
+                    <p className="mt-1 flex flex-wrap gap-1">
+                      <SideChip side={g.side} />
+                      {g.is_vip && (
+                        <span className="rounded-full bg-[#e9c98a]/40 px-1.5 py-0.5 text-[10px] font-semibold text-[#5c3d0c]">
+                          VIP
+                        </span>
+                      )}
+                      {g.dietary && (
+                        <span className="max-w-[12rem] truncate rounded-full bg-[#e7f1ea] px-1.5 py-0.5 text-[10px] font-semibold text-[#1f6b4a]">
+                          {g.dietary}
+                        </span>
+                      )}
                     </p>
                   </div>
                   <button

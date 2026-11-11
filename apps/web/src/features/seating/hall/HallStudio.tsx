@@ -391,6 +391,24 @@ export function HallStudio({
   // What the studio just did. Read out to screen readers and shown for a few seconds to everyone:
   // it used to be screen-reader only, so a sighted host never saw "Only 24 more tables fit".
   const [toast, setToast] = useState<{ msg: string; n: number } | null>(null);
+  // A first-visit guide, remembered on this device once dismissed. Storage can be blocked, in
+  // which case the guide simply shows again next time.
+  const [showTips, setShowTips] = useState(false);
+  useEffect(() => {
+    try {
+      setShowTips(localStorage.getItem("ariya:studio-tips") !== "seen");
+    } catch {
+      setShowTips(true);
+    }
+  }, []);
+  const dismissTips = () => {
+    setShowTips(false);
+    try {
+      localStorage.setItem("ariya:studio-tips", "seen");
+    } catch {
+      /* private mode */
+    }
+  };
   const say = (msg: string) => {
     setAnnounce(msg);
     setToast((prev) => ({ msg, n: (prev?.n ?? 0) + 1 }));
@@ -2350,30 +2368,41 @@ export function HallStudio({
                 )}
               </div>
 
-              {toast && !notice && (
+              {(toast || notice) && (
+                // Centred in the space the hall actually has, between the dock and the panel, so
+                // the left dock never covers the start of a message.
                 <div
-                  key={toast.n}
-                  aria-hidden="true"
-                  data-testid="hall-toast"
                   className={cn(
-                    float,
-                    "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold text-night"
+                    "pointer-events-none absolute bottom-20 right-3 flex justify-center",
+                    leftEdge
                   )}
                 >
-                  {toast.msg}
-                </div>
-              )}
-              {notice && (
-                <div
-                  role="status"
-                  className={cn(
-                    float,
-                    // Above both bottom bars, so it is never hidden behind the zoom controls, and
-                    // clickable so its Undo button works.
-                    "pointer-events-auto absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
+                  {toast && !notice && (
+                    <div
+                      key={toast.n}
+                      aria-hidden="true"
+                      data-testid="hall-toast"
+                      className={cn(
+                        float,
+                        "pointer-events-none max-w-full px-4 py-2 text-xs font-semibold text-night"
+                      )}
+                    >
+                      {toast.msg}
+                    </div>
                   )}
-                >
-                  {notice}
+                  {notice && (
+                    <div
+                      role="status"
+                      className={cn(
+                        float,
+                        // Above both bottom bars, so it is never hidden behind the zoom controls, and
+                        // clickable so its Undo button works.
+                        "pointer-events-auto max-w-full px-4 py-2 text-xs font-semibold"
+                      )}
+                    >
+                      {notice}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2968,6 +2997,39 @@ export function HallStudio({
                       The hall changes as you choose
                     </p>
                   </div>
+                </div>
+              )}
+              {mode === "studio" && showTips && (
+                <div
+                  data-testid="studio-tips"
+                  className="border-b border-hairline bg-[#f6f1e8] px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-ink">
+                      Three things to know
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={dismissTips}
+                      className="-mr-2 -mt-2 min-h-11 rounded-full px-3 text-xs font-semibold text-night hover:bg-white focus-visible:outline-2 focus-visible:outline-burgundy"
+                    >
+                      Got it
+                    </button>
+                  </div>
+                  <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs text-night">
+                    <li>
+                      <strong>Fit</strong> fills the hall with tables, or add
+                      one with +.
+                    </li>
+                    <li>
+                      <strong>Seat</strong> seats everyone who accepted in one
+                      go, and you can undo it.
+                    </li>
+                    <li>
+                      Your work saves by itself. The bar at the top says when it
+                      is saved.
+                    </li>
+                  </ol>
                 </div>
               )}
               {/* Eight tools in three groups, so every label and number has room: Design (the room
