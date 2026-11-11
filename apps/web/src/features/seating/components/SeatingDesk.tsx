@@ -41,6 +41,8 @@ interface SeatingDeskProps {
   eventId: string;
   /** The event's name, shown beside the Back button. */
   eventTitle?: string;
+  /** Hall and seating suggestions from connected apps waiting on the approvals desk. */
+  pendingProposals?: number;
   initialData: SeatingDeskData;
   hallLayout?: unknown;
   hallLayoutAvailable?: boolean;
@@ -53,6 +55,7 @@ interface SeatingDeskProps {
 export function SeatingDesk({
   eventId,
   eventTitle,
+  pendingProposals = 0,
   initialData,
   hallLayout = null,
   hallLayoutAvailable = false,
@@ -243,6 +246,7 @@ export function SeatingDesk({
             onUndoSeatEveryone={undoBulkAssign}
             canUndoSeatEveryone={canUndoBulk}
             eventTitle={eventTitle}
+            pendingProposals={pendingProposals}
             backHref={`/events/${eventId}`}
             onNewTable={openNewTable}
           />

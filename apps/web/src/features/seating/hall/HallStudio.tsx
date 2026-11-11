@@ -311,6 +311,8 @@ interface HallStudioProps {
   canUndoSeatEveryone?: boolean;
   /** The event's name, shown beside the Back button. */
   eventTitle?: string;
+  /** Hall and seating suggestions from connected apps waiting on the approvals desk. */
+  pendingProposals?: number;
   /** Where Back goes. */
   backHref?: string;
   /** Opens the new-table form. */
@@ -364,6 +366,7 @@ export function HallStudio({
   deleteTables,
   notice,
   eventTitle,
+  pendingProposals = 0,
   backHref,
   onNewTable,
   onUndoSeatEveryone,
@@ -2265,6 +2268,24 @@ export function HallStudio({
                 <div className="pointer-events-auto sm:hidden">
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </div>
+                {pendingProposals > 0 && (
+                  // A connected app has suggested a room or a seating plan. It is reviewed, with
+                  // a preview and an undo, on the approvals desk: the studio only points there.
+                  <Link
+                    href="/approvals"
+                    data-testid="hall-proposals"
+                    className="pointer-events-auto inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-4 text-xs font-semibold text-white shadow-lg hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                  >
+                    <Sparkles
+                      size={14}
+                      aria-hidden="true"
+                      className="text-[#e9c98a]"
+                    />
+                    {pendingProposals === 1
+                      ? "A connected app suggested a change. Review it"
+                      : `Connected apps suggested ${pendingProposals} changes. Review them`}
+                  </Link>
+                )}
                 {hall.conflict && (
                   <ConflictBanner
                     onTakeTheirs={hall.takeTheirs}
