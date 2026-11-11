@@ -41,4 +41,9 @@ describe("export dimensions", () => {
     expect(size.width * size.height).toBeLessThanOrEqual(24_000_000);
     expect(size.width).toBeLessThanOrEqual(8192);
   });
+  it("keeps the WhatsApp picture within 1600 px on its longest edge", () => {
+    const size = invitationExportSize(d(), "whatsapp");
+    expect(Math.max(size.width, size.height)).toBeLessThanOrEqual(1600);
+    expect(size.width).toBeGreaterThan(400);
+  });
 });

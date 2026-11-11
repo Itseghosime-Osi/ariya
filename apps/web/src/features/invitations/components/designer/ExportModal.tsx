@@ -61,6 +61,15 @@ const FORMATS: FormatCard[] = [
     icon: "swatch",
   },
   {
+    id: "whatsapp",
+    title: "Small for WhatsApp",
+    badge: "Under 400 KB",
+    description:
+      "A smaller JPEG that sends quickly over a slow connection and still reads clearly on a phone.",
+    resolution: "Up to 1600 px, compressed",
+    icon: "swatch",
+  },
+  {
     id: "json",
     title: "Design Backup (.json)",
     badge: "Editable Source",
@@ -218,7 +227,7 @@ export function ExportModal({
                     <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
                       {f.description}
                     </p>
-                    <span className="mt-2.5 text-xs font-mono text-black/40 dark:text-white/40">
+                    <span className="mt-2.5 text-xs font-mono text-label-2">
                       {f.id === "json"
                         ? "Editable design backup"
                         : f.id === "pdf"
@@ -242,11 +251,13 @@ export function ExportModal({
               {" · "}
               {selectedFormat === "json"
                 ? "an editable backup you can open again in the studio"
-                : selectedFormat === "pdf"
-                  ? printMarks
-                    ? `${(5 + 0.75).toFixed(2)} × ${((dims.height / dims.width) * 5 + 0.75).toFixed(2)} in page with bleed and crop marks, card trims to 5 × ${((dims.height / dims.width) * 5).toFixed(2)} in`
-                    : `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
-                  : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
+                : selectedFormat === "whatsapp"
+                  ? `${invitationExportSize(design, "whatsapp").width} × ${invitationExportSize(design, "whatsapp").height} px, compressed to about 400 KB or less`
+                  : selectedFormat === "pdf"
+                    ? printMarks
+                      ? `${(5 + 0.75).toFixed(2)} × ${((dims.height / dims.width) * 5 + 0.75).toFixed(2)} in page with bleed and crop marks, card trims to 5 × ${((dims.height / dims.width) * 5).toFixed(2)} in`
+                      : `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
+                    : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
               .
             </p>
 

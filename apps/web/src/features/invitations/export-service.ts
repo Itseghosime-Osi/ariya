@@ -6,7 +6,7 @@ import { PDFDocument, rgb } from "pdf-lib";
 import type { InvitationDesign } from "./types";
 import { designDimensionsPx } from "./layer-ops";
 
-export type ExportFormat = "png" | "jpeg" | "pdf" | "json";
+export type ExportFormat = "png" | "jpeg" | "pdf" | "json" | "whatsapp";
 export interface ExportOptions {
   format: ExportFormat;
   pixelRatio?: number;
@@ -40,6 +40,34 @@ export function clipRoundedBackgrounds(root: HTMLElement) {
   }
 }
 
+/** WhatsApp shows pictures at most about this wide, so a bigger file only slows the send. */
+export const WHATSAPP_MAX_EDGE = 1600;
+/** The picture is re-compressed until it is no larger than this many bytes (about 400 KB). */
+export const WHATSAPP_MAX_BYTES = 400 * 1024;
+
+/** Re-encode a JPEG data URL, lowering quality in steps until it fits, never below 0.5. */
+export async function compressJpeg(
+  dataUrl: string,
+  maxBytes = WHATSAPP_MAX_BYTES
+): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0);
+  let best = dataUrl;
+  for (const quality of [0.85, 0.78, 0.7, 0.62, 0.55, 0.5]) {
+    best = canvas.toDataURL("image/jpeg", quality);
+    // A base64 data URL is about 4/3 the size of the bytes it holds.
+    if (((best.length - best.indexOf(",") - 1) * 3) / 4 <= maxBytes) break;
+  }
+  return best;
+}
+
 /** Export uses document pixels, never the viewport's fitted/zoomed dimensions. */
 export function invitationExportSize(
   design: InvitationDesign,
@@ -52,7 +80,9 @@ export function invitationExportSize(
       ? 1500 / dims.width
       : format === "jpeg"
         ? Math.min(2, pixelRatio)
-        : pixelRatio;
+        : format === "whatsapp"
+          ? Math.min(2, WHATSAPP_MAX_EDGE / Math.max(dims.width, dims.height))
+          : pixelRatio;
   const scale = Math.min(
     requested,
     8192 / dims.width,
@@ -208,7 +238,7 @@ export async function exportInvitation({
       throw new Error(
         "The invitation is not ready to export. Please try again."
       );
-    if (!["png", "jpeg", "pdf"].includes(format))
+    if (!["png", "jpeg", "pdf", "whatsapp"].includes(format))
       throw new Error("Unsupported export format.");
     await exportWait(document.fonts.ready, signal);
     const dims = designDimensionsPx(design);
@@ -312,10 +342,13 @@ export async function exportInvitation({
         transform: "none",
         margin: "0",
       },
-      backgroundColor: format === "jpeg" ? design.palette.paper : undefined,
+      backgroundColor:
+        format === "jpeg" || format === "whatsapp"
+          ? design.palette.paper
+          : undefined,
     };
     const image =
-      format === "jpeg"
+      format === "jpeg" || format === "whatsapp"
         ? await exportWait(
             toJpeg(clone, { ...options, quality }),
             signal,
@@ -323,6 +356,12 @@ export async function exportInvitation({
           )
         : await exportWait(toPng(clone, options), signal, 60000);
     signal?.throwIfAborted();
+    if (format === "whatsapp") {
+      const small = await exportWait(compressJpeg(image), signal, 30000);
+      signal?.throwIfAborted();
+      download(small, `${name}-whatsapp.jpg`);
+      return { ok: true };
+    }
     if (format !== "pdf") {
       download(image, `${name}.${format === "jpeg" ? "jpg" : "png"}`);
       return { ok: true };

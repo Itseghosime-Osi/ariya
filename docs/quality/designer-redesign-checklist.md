@@ -50,10 +50,12 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 - [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
       Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).
-- [ ] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
+- [x] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
 
 ## C. Pricing and paywalls (both tools)
+
+Evidence: new export 'Small for WhatsApp': a JPEG of at most 1600 px on its longest edge, re-compressed until it is 400 KB or less. Browser-checked: the file downloads as `…-whatsapp.jpg`, is 1142 × 1600 px and 120 KB (`evidence/redesign-batch30.json`); unit test for the size cap. Not checked: a transparent-PNG option (the card has an opaque paper background) or sending it through real WhatsApp.
 
 - [x] **C1 (P0) No surprise locks.** Show what is included before the user designs, not at export.
       Done when: every locked feature shows a lock icon and plan name before use; no feature is found locked only at the last step.
@@ -196,6 +198,7 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
       Progress (not closed): every UI text size below 12px in the designer (102 Tailwind uses plus two CSS rules) is now 12px; checked on desktop and phone, light and dark (`screenshots/upgrade-tokens-*.png`). Fixed two knock-on layout problems (the layers 'Blend Mode' label now reads 'Blend'; the phone Simple/Pro switch is narrower). A single type scale for headings, labels and values is not defined.
 - [ ] **K10 (P1) Dark and light themes polished.** Contrast of 4.5:1 for text and 3:1 for icons/borders in both.
       Done when: axe contrast passes in both themes on all studio states.
+      Progress (not closed): axe (serious and critical issues, WCAG 2 A/AA) passes in light and dark for: idle, a selected layer, the Help dialog, the Export dialog and the command palette, plus Simple mode in light (`evidence/redesign-batch29.json`, 11 checks). It found and fixed low-contrast size text in the Export dialog. Not yet scanned: the Color & Swatches, History and Navigator panels, the quick tour, the empty-card state, and Simple mode in dark.
 - [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
 - [ ] **K12 (P2) Motion.** Short (120–200ms) transitions for panels, tool changes and toasts; respect `prefers-reduced-motion`.
       Done when: reduced-motion removes all non-essential animation.
