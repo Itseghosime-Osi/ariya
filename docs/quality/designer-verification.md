@@ -155,11 +155,20 @@ Closed from the earlier "could still be tested" list, with a local Supabase stac
 
 Open problems resolved: `designer-guest` fails in Chromium only when the browser runs in a POSIX locale, where Chromium names any download with a non-ASCII file name "download"; with `LANG=C.UTF-8` it passes (Firefox and WebKit were unaffected). `designer-pass-layout` read the seal before it re-rendered after a reload; it now waits, and passes in Chromium, Firefox and WebKit. Still failing: `studio-pro-designer.spec.ts` (an old exploratory script that expects removed labels and writes screenshots to absolute paths on a developer's Mac) and `interactive-designer-session.spec.ts` (an exploratory flaw logger that times out); neither tests current behaviour and both are candidates for deletion. WebKit's acceptance suite still stops at "Cancel a pending export".
 
-Totals now: **211 verified, 24 partial, 0 not tested, 48 not applicable.**
+Totals after the third pass: 211 verified, 24 partial.
+
+### Fourth pass: decisions and the open problems
+
+- **Event edits after a card is saved (DES-249, decided and built).** The saved card stays authoritative, so the host's own wording is never overwritten silently. When the designer opens it compares the card's factual lines (date, venue, dress code, reply date) with the event and, if they differ, shows "The event's details have changed since this card was saved" listing each line, with **Update the card** (one Undo restores it) and **Keep my wording** (remembered per browser for those exact changes). Names, headline and message are never touched. Judged once on opening, so edits made during a visit are not second-guessed. Verified end to end: the banner, the update, Undo/Redo, the guest card after saving, and Keep surviving a reload. Unit tests: `design-event-facts.test.ts`.
+- **All blend modes and typefaces across formats (DES-229, 231).** All twelve blend modes agree across PNG, JPEG and PDF within 7 of 441 and give eleven distinct colours; all five typefaces export like the screen. [Evidence](evidence/export-matrix.json).
+- **WebKit acceptance now passes in full.** Three causes, none a product defect: Playwright cannot hold a picture request back in WebKit (the export does request the proxy, but `page.route` is never given it), so the held-export cancellation check runs in Chromium and Firefox only; the dark-theme contrast scan ran while colours were still transitioning; the earlier whole-pixel pointer and hydration issues. The suite passes in Chromium, Firefox and WebKit.
+- **Retired specs.** `studio-pro-designer.spec.ts` and `interactive-designer-session.spec.ts` were old exploratory scripts (removed labels, screenshots to a developer's Mac paths, a flaw logger that timed out). They tested nothing about current behaviour and are deleted.
+
+Totals now: **214 verified, 21 partial, 0 not tested, 48 not applicable.** The remaining partials need real devices, real Safari, a real stylus, printed scans or a screen reader.
 
 ## Work remaining
 
-The matrix currently records **211 verified, 24 partial, 0 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
+The matrix currently records **214 verified, 21 partial, 0 not tested and 48 not applicable**. This is still an incomplete acceptance audit.
 
 Remaining work includes exhaustive browser handle/modifier/zoom combinations, overlapping-object and marquee selection, background/template combinations, all image masks and edge effects, complete align/distribute/snap/history workflows, further long-name/party variations, mixed-group pass boundaries and tiny-document/physical-print scanning, visual export comparisons across effects, every shortcut and a complete manual keyboard/screen-reader audit. Safari, Firefox, physical iOS/Android and stylus input remain untested. The native operating-system eyedropper needs a manual check.
 
