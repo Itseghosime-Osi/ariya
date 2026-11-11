@@ -118,9 +118,9 @@ test.describe("RSVP & Email Dispatch", () => {
     await page.locator("#simple-message").fill(customMessage);
 
     // The designer saves itself once the typing settles.
-    await expect(page.getByText(/· saved$/i)).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(
+      page.getByTestId("studio-top-header").getByRole("status")
+    ).toHaveText(/^saved/, { timeout: 15000 });
 
     // Reload page to verify persistence
     await page.reload();
