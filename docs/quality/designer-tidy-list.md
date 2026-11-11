@@ -119,3 +119,7 @@ What changed (`ExportModal.tsx`, new `dialog-theme.ts`):
 ### Theme sweep: no `dark:` styles left in the designer
 
 The last `dark:` styles (empty-card prompt, "Add text" button in the options bar, notice buttons) now follow the studio's own theme. Checked with axe on the idle studio, a selected layer, the undo toast and the empty card, with the computer in dark mode and the studio in light and in dark (`evidence/tidy-batch35.json`, 8 checks, all clear).
+
+### D1: alignment shown once
+
+The alignment icons no longer appear twice: the inspector's "Align on the card" row is gone and the options bar's Align row is the single place (still works on a selected layer; checked in a browser: one "Align left" button, and it moves the layer). The unused inspector prop and list were removed.

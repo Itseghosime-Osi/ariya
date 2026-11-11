@@ -2184,7 +2184,6 @@ export function InvitationDesigner({
                     selectedIds={selectedIds}
                     onPatch={patchLayer}
                     onDesign={(fn) => commit(fn)}
-                    onAlign={align}
                     onAlignSelection={(ids, how) =>
                       commit((d) =>
                         withRenderedHeights(d, (m) =>
