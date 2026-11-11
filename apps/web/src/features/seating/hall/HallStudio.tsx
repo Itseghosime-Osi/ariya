@@ -3114,7 +3114,7 @@ export function HallStudio({
                 {TOOL_GROUPS.map((g) => (
                   <div key={g.label} role="presentation">
                     <p
-                      className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink"
+                      className="px-1 pb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a5b67]"
                       aria-hidden="true"
                     >
                       {g.label}
