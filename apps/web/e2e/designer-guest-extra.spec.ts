@@ -154,18 +154,51 @@ test("long names fit the guest card and pass; event edits follow the saved desig
       .update({ venue: newVenue })
       .eq("id", eventId);
     expect(error).toBeNull();
-    await guest.reload();
-    const venueNow = await card
-      .locator('[data-layer-id="venue"]')
-      .textContent()
-      .catch(() => null);
-    results.guestCardVenueAfterEventEdit = venueNow;
+    // The saved card keeps the host's words until the host chooses to update it.
     await page.goto(`/events/${eventId}/invitations/design?mode=pro`);
-    const designVenue = await page
+    const venueLayer = page
       .getByTestId("designer-stage")
-      .locator('[data-invitation-canvas] [data-layer-id="venue"]')
+      .locator('[data-invitation-canvas] [data-layer-id="venue"]');
+    await expect(venueLayer).toBeVisible();
+    results.venueBeforeUpdate = await venueLayer.textContent();
+    expect(results.venueBeforeUpdate).not.toContain("Eko Hotels");
+    const banner = page.getByTestId("event-facts-banner");
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText("Venue");
+    await expect(banner).not.toContainText("Date");
+    await banner.getByRole("button", { name: "Update the card" }).click();
+    await expect(venueLayer).toContainText("Eko Hotels");
+    await expect(banner).toHaveCount(0);
+    // One Undo puts the old wording back.
+    await page.keyboard.press("Control+z");
+    await expect(venueLayer).not.toContainText("Eko Hotels");
+    await page.keyboard.press("Control+Shift+z");
+    await expect(venueLayer).toContainText("Eko Hotels");
+    await expect(
+      page.getByTestId("studio-top-header").getByRole("status")
+    ).toHaveText(/^saved/, { timeout: 20000 });
+    await guest.reload();
+    await expect(card.locator('[data-layer-id="venue"]')).toContainText(
+      "Eko Hotels"
+    );
+    results.guestCardVenueAfterUpdate = await card
+      .locator('[data-layer-id="venue"]')
       .textContent();
-    results.designerVenueAfterEventEdit = designVenue;
+    // "Keep my wording" hides the offer for those exact changes, and survives a reload.
+    const { error: dressError } = await admin
+      .from("events")
+      .update({ dress_code: "Aso-ebi, gold and ivory" })
+      .eq("id", eventId);
+    expect(dressError).toBeNull();
+    await page.goto(`/events/${eventId}/invitations/design?mode=pro`);
+    await expect(page.getByTestId("event-facts-banner")).toBeVisible();
+    await page.getByRole("button", { name: "Keep my wording" }).click();
+    await expect(page.getByTestId("event-facts-banner")).toHaveCount(0);
+    await page.reload();
+    await expect(
+      page.getByTestId("designer-stage").locator("[data-invitation-canvas]")
+    ).toBeVisible();
+    await expect(page.getByTestId("event-facts-banner")).toHaveCount(0);
     console.log("GUESTEXTRA", JSON.stringify(results));
   } finally {
     writeFileSync(
