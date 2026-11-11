@@ -10,4 +10,4 @@ export type Layer = { id: string, kind: LayerKind, text: string, x: number, y: n
 /**
  * Always written, as `null` when the colour comes from the palette.
  */
-color: string | null, visible: boolean, name: string | null, height: number | null, rotation: number | null, opacity: number | null, fill: string | null, stroke: string | null, strokeWidth: number | null, radius: number | null, shape: Shape | null, imageUrl: string | null, fit: Fit | null, locked: boolean | null, };
+color: string | null, visible: boolean, name: string | null, height: number | null, rotation: number | null, opacity: number | null, fill: string | null, stroke: string | null, strokeWidth: number | null, radius: number | null, groupId: string | null, shape: Shape | null, imageUrl: string | null, fit: Fit | null, maskShape: Shape | null, focalX: number | null, focalY: number | null, lineHeight: number | null, textTransform: string | null, shadow: string | null, blendMode: string | null, blur: number | null, gradient: string | null, radiusTl: number | null, radiusTr: number | null, radiusBr: number | null, radiusBl: number | null, locked: boolean | null, };

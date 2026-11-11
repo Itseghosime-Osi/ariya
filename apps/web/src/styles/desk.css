@@ -216,6 +216,16 @@
   opacity: 0.9;
 }
 
+/* Deckled handmade paper edge simulation */
+.deckled-paper {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 20px 45px -12px rgba(28, 7, 13, 0.35);
+  outline: 1px dashed rgba(184, 134, 75, 0.25);
+  outline-offset: -2px;
+}
+
 /* Gold stars bloom where you tap. */
 @keyframes desk-sparkle {
   0% {

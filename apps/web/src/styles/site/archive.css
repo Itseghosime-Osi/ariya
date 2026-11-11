@@ -521,6 +521,26 @@ html.watching .scrollcue {
   justify-content: center;
   margin-top: 6px;
 }
+.gate .actions .gate-dashboard-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(235, 206, 149, 0.45);
+  color: var(--ivory);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.gate .actions .gate-dashboard-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.gate .actions .gate-dashboard-btn .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.gate .actions .gate-dashboard-btn:hover .arrow {
+  transform: translateX(3px);
+}
 .gate .quiet {
   background: none;
   border: 0;
@@ -532,6 +552,10 @@ html.watching .scrollcue {
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 5px;
+}
+.gate .actions .quiet {
+  width: 100%;
+  margin-top: 2px;
 }
 .gate .load {
   display: flex;
@@ -2539,4 +2563,40 @@ html.embed body {
 }
 .obar button {
   white-space: nowrap;
+}
+
+/* ---------- Legal footer navigation (Google consent & compliance) ---------- */
+.legal-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(0.6rem, env(safe-area-inset-bottom, 0.6rem));
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+.legal-nav a {
+  pointer-events: auto;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.legal-nav a:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.legal-nav a:focus-visible {
+  outline: 2px solid var(--gold, #e9c98a);
+  outline-offset: 2px;
 }

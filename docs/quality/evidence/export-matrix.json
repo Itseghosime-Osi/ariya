@@ -1,0 +1,128 @@
+{
+  "blend": [
+    {
+      "mode": "normal",
+      "centre": [223, 186, 115],
+      "jpegVsPng": 0,
+      "pdfVsPng": 0,
+      "overlapJpegVsPng": 0,
+      "overlapPdfVsPng": 0
+    },
+    {
+      "mode": "multiply",
+      "centre": [213, 171, 98],
+      "jpegVsPng": 1,
+      "pdfVsPng": 1,
+      "overlapJpegVsPng": 0,
+      "overlapPdfVsPng": 0
+    },
+    {
+      "mode": "screen",
+      "centre": [254, 250, 234],
+      "jpegVsPng": 1,
+      "pdfVsPng": 0,
+      "overlapJpegVsPng": 1,
+      "overlapPdfVsPng": 1
+    },
+    {
+      "mode": "overlay",
+      "centre": [252, 244, 212],
+      "jpegVsPng": 1,
+      "pdfVsPng": 1,
+      "overlapJpegVsPng": 3,
+      "overlapPdfVsPng": 2
+    },
+    {
+      "mode": "darken",
+      "centre": [223, 186, 115],
+      "jpegVsPng": 0,
+      "pdfVsPng": 0,
+      "overlapJpegVsPng": 0,
+      "overlapPdfVsPng": 0
+    },
+    {
+      "mode": "lighten",
+      "centre": [244, 235, 216],
+      "jpegVsPng": 1,
+      "pdfVsPng": 2,
+      "overlapJpegVsPng": 1,
+      "overlapPdfVsPng": 1
+    },
+    {
+      "mode": "color-dodge",
+      "centre": [255, 255, 255],
+      "jpegVsPng": 0,
+      "pdfVsPng": 0,
+      "overlapJpegVsPng": 0,
+      "overlapPdfVsPng": 0
+    },
+    {
+      "mode": "color-burn",
+      "centre": [242, 228, 169],
+      "jpegVsPng": 1,
+      "pdfVsPng": 3,
+      "overlapJpegVsPng": 3,
+      "overlapPdfVsPng": 7
+    },
+    {
+      "mode": "hard-light",
+      "centre": [252, 244, 195],
+      "jpegVsPng": 0,
+      "pdfVsPng": 0,
+      "overlapJpegVsPng": 0,
+      "overlapPdfVsPng": 1
+    },
+    {
+      "mode": "soft-light",
+      "centre": [248, 239, 213],
+      "jpegVsPng": 2,
+      "pdfVsPng": 2,
+      "overlapJpegVsPng": 1,
+      "overlapPdfVsPng": 2
+    },
+    {
+      "mode": "difference",
+      "centre": [21, 49, 101],
+      "jpegVsPng": 1,
+      "pdfVsPng": 2,
+      "overlapJpegVsPng": 1,
+      "overlapPdfVsPng": 1
+    },
+    {
+      "mode": "exclusion",
+      "centre": [41, 79, 135],
+      "jpegVsPng": 1,
+      "pdfVsPng": 2,
+      "overlapJpegVsPng": 2,
+      "overlapPdfVsPng": 1
+    }
+  ],
+  "fontResults": [
+    {
+      "font": "display",
+      "diff": 12.01,
+      "darkPixels": 1849
+    },
+    {
+      "font": "sans",
+      "diff": 11.99,
+      "darkPixels": 2615
+    },
+    {
+      "font": "script",
+      "diff": 8.42,
+      "darkPixels": 1386
+    },
+    {
+      "font": "serif",
+      "diff": 10.17,
+      "darkPixels": 1854
+    },
+    {
+      "font": "mono",
+      "diff": 13.02,
+      "darkPixels": 2262
+    }
+  ],
+  "distinctBlendCentres": 11
+}

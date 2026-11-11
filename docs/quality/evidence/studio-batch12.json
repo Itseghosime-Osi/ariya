@@ -1,0 +1,56 @@
+[
+  {
+    "id": "DES-011",
+    "name": "View contextual options",
+    "ok": true,
+    "detail": "Type tool shows font/size/alignment; Canvas tool shows size/preset/apply/cancel; they differ"
+  },
+  {
+    "id": "DES-075",
+    "name": "Round a large object",
+    "ok": true,
+    "detail": "900×600 px rectangle: 25 drag steps give a monotonic live value (222.7→300 px) in 1766 ms, no jumps"
+  },
+  {
+    "id": "DES-070",
+    "name": "Resize with proportions unlocked",
+    "ok": true,
+    "detail": "height 600→160 with a large radius: radius clamps to 80px (≤ half the new height)"
+  },
+  {
+    "id": "DES-082",
+    "name": "Release pointer outside canvas (radius)",
+    "ok": true,
+    "detail": "tooltip removed after release outside the card; radius settled at 79.9px"
+  },
+  {
+    "id": "DES-074",
+    "name": "Round a very small object",
+    "ok": true,
+    "detail": "14×14 px rectangle: 0 radius widgets shown; widgets overlap resize handles=false"
+  },
+  {
+    "id": "DES-078b",
+    "name": "Ellipse and line show no corner-radius widgets",
+    "ok": true,
+    "detail": "ellipse widgets=0, line widgets=0"
+  },
+  {
+    "id": "DES-200",
+    "name": "Apply a border or stroke effect",
+    "ok": true,
+    "detail": "Outline width changed → the rendered shape pixels differ (true)"
+  },
+  {
+    "id": "DES-245",
+    "name": "Test very long guest and couple names",
+    "ok": true,
+    "detail": "very long couple names and venue stay inside the card (out of bounds: ); couple names overlap the message below=false"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

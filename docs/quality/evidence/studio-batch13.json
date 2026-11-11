@@ -1,0 +1,44 @@
+[
+  {
+    "id": "DES-171",
+    "name": "Bring forward, send backward, front and back (single step)",
+    "ok": true,
+    "detail": "Arrange ▸ Bring Forward moves the layer up one place (7→8); Send Backward returns it exactly"
+  },
+  {
+    "id": "DES-184c",
+    "name": "Distribute horizontally",
+    "ok": true,
+    "detail": "gaps 115.0 / 115.0 px between three rectangles of different widths"
+  },
+  {
+    "id": "DES-251",
+    "name": "Apply a template (Reset to Template)",
+    "ok": true,
+    "detail": "confirmation asked (1): Restore the event’s invitation template?; reset restores the house words (\"Adaeze & Tunde\"); Undo brings back the edit (\"Changed names\")"
+  },
+  {
+    "id": "DES-145",
+    "name": "Distinguish image crop from canvas resize",
+    "ok": true,
+    "detail": "the tool is labelled Canvas size & ratio; entering width 900 then Cancel (Esc) leaves the card at its original size; the overlay disappears with the tool (1→0)"
+  },
+  {
+    "id": "DES-265",
+    "name": "Test stylus input (pen pointer events, emulated)",
+    "ok": true,
+    "detail": "Chromium-emulated pen drag moved the layer 41,24 px of 40,24. Physical stylus and pressure were not tested"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "DES-266",
+    "name": "Use browser zoom and high-DPI display",
+    "ok": true,
+    "detail": "[{\"name\":\"dpr2\",\"overflowX\":false,\"exportVisible\":true},{\"name\":\"dpr3-phone\",\"overflowX\":false,\"exportVisible\":true},{\"name\":\"zoom200\",\"overflowX\":false,\"exportVisible\":true},{\"name\":\"zoom300\",\"overflowX\":false,\"exportVisible\":true}] - emulated by device scale factor and narrower viewports"
+  }
+]

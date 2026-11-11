@@ -1,0 +1,44 @@
+[
+  {
+    "id": "DES-253",
+    "name": "Use every icon-only button (names)",
+    "ok": true,
+    "detail": "icon-only buttons lacking aria-label: []"
+  },
+  {
+    "id": "DES-014",
+    "name": "Inspect tooltips",
+    "ok": true,
+    "detail": "61/61 icon-only buttons carry a title tooltip (with shortcut where one exists)"
+  },
+  {
+    "id": "DES-018",
+    "name": "Select overlapping objects",
+    "ok": true,
+    "detail": "stack at point=[\"shape-mwb557oo-10-5di\",\"footer\"]; canvas click picks top layer; Layers row selects the one underneath"
+  },
+  {
+    "id": "DES-024",
+    "name": "Select a hidden object in Layers",
+    "ok": true,
+    "detail": "hidden on canvas=true; Layers row still selects it and opens its properties"
+  },
+  {
+    "id": "DES-210",
+    "name": "Undo and redo each editing operation",
+    "ok": true,
+    "detail": "ops nudge+align+duplicate+delete: 5 undos restore the original=true; 3 redos restore the final=true"
+  },
+  {
+    "id": "DES-212",
+    "name": "Restore a history entry",
+    "ok": true,
+    "detail": "history labels: [\"Original invitation\",\"Added Rectangle\",\"Edited the card\",\"Moved 20 Mar 2027, 1:00 AM …\",\"Moved 20 Mar 2027, 1:00 AM …\",\"Moved 20 Mar 2027, 1:00 AM …\",\"Added 20 Mar 2027, 1:00 AM …\",\"Deleted 20 Mar 2027, 1:00 AM …\",\"Undo (⌘Z)\",\"Redo (⇧⌘Z)\"]; clicking the first entry restores the original layout=true"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -243,32 +243,18 @@ export function AppShell({
   };
 
   // The seating studio is a workspace, not a page: no sidebar, top bar or dock, just the studio and
-  // its own Back button. Every hook above has already run, so this branch is only a different frame.
-  if (isWorkspaceRoute(pathname)) {
-    return (
-      <div data-app-shell data-workspace className="min-h-screen bg-ivory">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2.5 focus:rounded-xl focus:bg-burgundy focus:text-white focus:font-semibold focus:shadow-lg"
-        >
-          Skip to main content
-        </a>
-        <main
-          id="main-content"
-          tabIndex={-1}
-          className="fixed inset-0 overflow-y-auto focus:outline-none"
-        >
-          {children}
-        </main>
-      </div>
-    );
-  }
+  // its own Back button. A single unified tree is returned so React component reconciliation stays
+  // stable during concurrent transitions without triggering conditional-use-of-use warnings.
+  const isWorkspace = isWorkspaceRoute(pathname);
 
   return (
     <div
       data-app-shell
+      data-workspace={isWorkspace ? "" : undefined}
       className={cn(
-        "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
+        isWorkspace
+          ? "min-h-screen bg-ivory"
+          : "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
         ready && "sb-ready"
       )}
       style={
@@ -284,7 +270,7 @@ export function AppShell({
         Skip to main content
       </a>
 
-      {narrow && drawerOpen && (
+      {!isWorkspace && narrow && drawerOpen && (
         <div
           aria-hidden="true"
           data-testid="sidebar-scrim"
@@ -293,50 +279,63 @@ export function AppShell({
         />
       )}
 
-      <Sidebar
-        events={availableEvents}
-        activeEvent={activeEvent}
-        onSelectEvent={handleSelectEvent}
-        userEmail={userEmail}
-        collapsed={folded}
-        onToggle={toggleSidebar}
-        ready={ready}
-      />
-
-      <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
-        <TopBar
-          // Account screens bring their own bar with a Back button in the installed app on phones.
-          hideOnPhone={hasOwnPhoneHeader(pathname)}
-          eventId={activeEvent?.id}
+      {!isWorkspace && (
+        <Sidebar
+          events={availableEvents}
+          activeEvent={activeEvent}
+          onSelectEvent={handleSelectEvent}
           userEmail={userEmail}
-          pendingProposals={pendingProposals}
+          collapsed={folded}
+          onToggle={toggleSidebar}
+          ready={ready}
         />
+      )}
 
+      {isWorkspace ? (
         <main
           id="main-content"
           tabIndex={-1}
-          className={cn(
-            "flex-1 px-4 sm:px-6 lg:px-8 pt-6 w-full mx-auto focus:outline-none",
-            // The seating studio is a workspace: it uses the full width between the bars.
-            /\/events\/[^/]+\/seating$/.test(pathname)
-              ? "max-w-none"
-              : "max-w-[1280px]"
-          )}
+          className="fixed inset-0 overflow-y-auto focus:outline-none"
         >
-          {archivedMatch && <EventArchivedBanner />}
-          {eventEnded && <EventEndedBanner />}
           {children}
         </main>
-      </div>
+      ) : (
+        <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
+          <TopBar
+            hideOnPhone={hasOwnPhoneHeader(pathname)}
+            eventId={activeEvent?.id}
+            userEmail={userEmail}
+            pendingProposals={pendingProposals}
+          />
 
-      <EventDayCelebration events={availableEvents} />
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className={cn(
+              "flex-1 px-4 sm:px-6 lg:px-8 pt-6 w-full mx-auto focus:outline-none",
+              /\/events\/[^/]+\/seating$/.test(pathname)
+                ? "max-w-none"
+                : "max-w-[1280px]"
+            )}
+          >
+            {archivedMatch && <EventArchivedBanner />}
+            {eventEnded && <EventEndedBanner />}
+            {children}
+          </main>
+        </div>
+      )}
 
-      <PhoneDock
-        events={availableEvents}
-        activeEvent={activeEvent}
-        onSelectEvent={handleSelectEvent}
-      />
-      <InstallHint />
+      {!isWorkspace && (
+        <>
+          <EventDayCelebration events={availableEvents} />
+          <PhoneDock
+            events={availableEvents}
+            activeEvent={activeEvent}
+            onSelectEvent={handleSelectEvent}
+          />
+          <InstallHint />
+        </>
+      )}
     </div>
   );
 }

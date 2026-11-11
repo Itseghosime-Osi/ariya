@@ -1,0 +1,20 @@
+[
+  {
+    "id": "DES-194",
+    "name": "Pan with hand or Space",
+    "ok": true,
+    "detail": "Space+drag 60,40, Hand tool drag 60,40, mouse wheel 0,-120 (px moved for 60,40 drags / 120 wheel)"
+  },
+  {
+    "id": "DES-267",
+    "name": "Use reduced motion",
+    "ok": true,
+    "detail": "elements with transitions or animations: 130 normally, 0 with prefers-reduced-motion. This counts them; it does not prove each is shortened"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -17,7 +17,7 @@ export default function EventsError({
 
   return (
     <ErrorScreen
-      layout="inline"
+      layout="page"
       alert
       testId="events-error-state"
       eyebrow="Connection interrupted"

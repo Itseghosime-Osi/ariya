@@ -8,6 +8,7 @@
 import Link from "next/link";
 import type { SiteMenuTrigger } from "@/components/site/site-header";
 import type { FilmStatus } from "./engine";
+import { GateDashboardButton } from "./gate-dashboard-button";
 
 export function FilmStage() {
   return (
@@ -88,6 +89,7 @@ export function Gate({ status }: { status: FilmStatus }) {
             <span className="ring" aria-hidden="true" />
             Enter the wedding
           </button>
+          <GateDashboardButton />
           <button className="quiet" id="enterQuiet" type="button">
             Enter in silence
           </button>

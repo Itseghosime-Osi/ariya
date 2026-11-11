@@ -2074,7 +2074,7 @@ export function HallStudio({
               {/* What needs attention, under the bar and clear of the tool rail and dock. */}
               <div
                 className={cn(
-                  "pointer-events-none absolute right-3 top-[68px] flex flex-col items-center gap-1.5",
+                  "pointer-events-none absolute right-3 top-[80px] flex flex-col items-center gap-1.5",
                   leftEdge
                 )}
               >
@@ -2308,7 +2308,7 @@ export function HallStudio({
                     aria-orientation="vertical"
                     className={cn(
                       float,
-                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[68px] max-lg:max-h-[calc(100%-5rem)] max-lg:overflow-y-auto lg:top-1/2 lg:max-h-[calc(100%-9rem)] lg:-translate-y-1/2"
+                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[80px] max-lg:max-h-[calc(100%-6rem)] max-lg:overflow-y-auto lg:top-1/2 lg:max-h-[calc(100%-9rem)] lg:-translate-y-1/2"
                     )}
                   >
                     <button
@@ -2493,7 +2493,7 @@ export function HallStudio({
                   {/* Flyouts */}
                   {flyout && (
                     <div
-                      className="pointer-events-auto absolute left-[4.25rem] top-[68px] z-30 max-h-[calc(100%-5rem)] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+                      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
                       role="dialog"
                       aria-label={
                         flyout === "table"
@@ -2678,7 +2678,7 @@ export function HallStudio({
                   {dockShown && (
                     <div
                       id="left-dock"
-                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[68px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300"
+                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[80px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300"
                     >
                       <LeftDock
                         layout={layout}
@@ -3359,7 +3359,7 @@ function ModeSwitch({
     <div
       role="radiogroup"
       aria-label="How much detail to show"
-      className="inline-flex rounded-full border border-hairline bg-white p-1"
+      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs"
     >
       {(
         [
@@ -3376,8 +3376,8 @@ function ModeSwitch({
           className={cn(
             "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
             mode === key
-              ? "bg-burgundy text-ivory"
-              : "text-label-2 hover:bg-burgundy/10"
+              ? "bg-burgundy text-ivory shadow-xs"
+              : "text-label-2 hover:bg-burgundy/10 hover:text-night"
           )}
         >
           {label}
@@ -3407,7 +3407,7 @@ function ShortcutSheet({ onClose }: { onClose: () => void }) {
     <div
       role="dialog"
       aria-label="Keyboard shortcuts"
-      className="pointer-events-auto absolute left-[4.25rem] top-[68px] z-30 max-h-[calc(100%-5rem)] w-[min(340px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(340px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">

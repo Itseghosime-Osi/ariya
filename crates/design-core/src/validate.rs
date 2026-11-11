@@ -58,18 +58,19 @@ fn opt_hex(path: &str, value: &Option<String>) -> Check {
 }
 
 fn web_url(path: &str, value: &str) -> Check {
-    let rest = value
-        .strip_prefix("https://")
-        .or_else(|| value.strip_prefix("http://"));
-    let ok = value.len() <= 2048
-        && rest.is_some_and(|r| !r.is_empty() && !r.starts_with('/'))
+    let ok = value.len() <= 100_000
+        && (value.starts_with("https://")
+            || value.starts_with("http://")
+            || value.starts_with("data:image/")
+            || value.starts_with("blob:"))
+        && !value.contains("javascript:")
         && !value.chars().any(char::is_whitespace);
     if ok {
         Ok(())
     } else {
         Err(Issue::new(
             path,
-            "Image links must start with http or https",
+            "Image links must start with http, https, data:image, or blob",
         ))
     }
 }
@@ -101,9 +102,9 @@ fn layer(i: usize, l: &Layer) -> Check {
     if l.text.chars().count() > 600 {
         return Err(Issue::new(at("text"), "Text can be at most 600 characters"));
     }
-    range(&at("x"), l.x, 0.0, 100.0)?;
-    range(&at("y"), l.y, 0.0, 100.0)?;
-    range(&at("width"), l.width, MIN_WIDTH, 100.0)?;
+    range(&at("x"), l.x, -500.0, 500.0)?;
+    range(&at("y"), l.y, -500.0, 500.0)?;
+    range(&at("width"), l.width, MIN_WIDTH, 1000.0)?;
     range(&at("size"), l.size, 1.0, 20.0)?;
     if ![400, 500, 600, 700].contains(&l.weight) {
         return Err(Issue::new(at("weight"), "Weight is 400, 500, 600 or 700"));
@@ -119,7 +120,7 @@ fn layer(i: usize, l: &Layer) -> Check {
         }
     }
     if let Some(v) = l.height {
-        range(&at("height"), v, MIN_HEIGHT, 100.0)?;
+        range(&at("height"), v, MIN_HEIGHT, 1000.0)?;
     }
     if let Some(v) = l.rotation {
         range(&at("rotation"), v, -360.0, 360.0)?;
@@ -133,7 +134,7 @@ fn layer(i: usize, l: &Layer) -> Check {
         range(&at("strokeWidth"), v, 0.0, 10.0)?;
     }
     if let Some(v) = l.radius {
-        range(&at("radius"), v, 0.0, 50.0)?;
+        range(&at("radius"), v, 0.0, 2000.0)?;
     }
     if let Some(url) = &l.image_url {
         web_url(&at("imageUrl"), url)?;
@@ -152,6 +153,25 @@ pub fn validate(d: &Design) -> Check {
     }
     if let Some(c) = d.canvas {
         range("canvas.ratio", c.ratio, 0.4, 2.5)?;
+        if let Some(w) = c.width_px {
+            if !(200..=10000).contains(&w) {
+                return Err(Issue::new(
+                    "canvas.widthPx",
+                    "Canvas width must be 200 to 10000 px",
+                ));
+            }
+        }
+        if let Some(h) = c.height_px {
+            if !(200..=10000).contains(&h) {
+                return Err(Issue::new(
+                    "canvas.heightPx",
+                    "Canvas height must be 200 to 10000 px",
+                ));
+            }
+        }
+        if let Some(r) = c.corner_radius_px {
+            range("canvas.cornerRadiusPx", r, 0.0, 500.0)?;
+        }
     }
     palette(&d.palette)?;
     range("background.overlay", d.background.overlay, 0.0, 0.9)?;

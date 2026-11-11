@@ -1,0 +1,80 @@
+[
+  {
+    "id": "DES-033",
+    "name": "Select an editable object",
+    "ok": true,
+    "detail": "selection frame + inspector shown"
+  },
+  {
+    "id": "DES-017",
+    "name": "Click empty canvas",
+    "ok": true,
+    "detail": "selection cleared"
+  },
+  {
+    "id": "DES-021",
+    "name": "Move a selected object",
+    "ok": true,
+    "detail": "moved 41.3,30.0 of 40,30"
+  },
+  {
+    "id": "DES-032",
+    "name": "Undo a move",
+    "ok": true,
+    "detail": "undo restored=true; redo restored=true"
+  },
+  {
+    "id": "DES-031",
+    "name": "Cancel a move",
+    "ok": true,
+    "detail": "Escape mid-drag restored position"
+  },
+  {
+    "id": "DES-027",
+    "name": "Shift-nudge",
+    "ok": true,
+    "detail": "arrow 0.44px, shift+arrow 4.52px (screen)"
+  },
+  {
+    "id": "DES-019",
+    "name": "Shift-select objects",
+    "ok": true,
+    "detail": "multi-select inspector shown"
+  },
+  {
+    "id": "DES-020",
+    "name": "Drag a selection marquee",
+    "ok": true,
+    "detail": "marquee visible=true; multi-select inspector shown"
+  },
+  {
+    "id": "DES-029",
+    "name": "Move partly outside canvas",
+    "ok": true,
+    "detail": "right edge 214.4px beyond card"
+  },
+  {
+    "id": "DES-030",
+    "name": "Release pointer outside canvas",
+    "ok": true,
+    "detail": "gesture ended on release; next drag works normally"
+  },
+  {
+    "id": "DES-018",
+    "name": "Select overlapping objects (info)",
+    "ok": true,
+    "detail": "overlap=false; stack at point=[\"footer\"]"
+  },
+  {
+    "id": "DES-024",
+    "name": "Select a hidden object in Layers",
+    "ok": true,
+    "detail": "hidden layer rendered=false; inspector opened from Layers row"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

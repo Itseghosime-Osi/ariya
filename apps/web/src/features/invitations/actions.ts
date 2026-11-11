@@ -59,9 +59,11 @@ export async function trackGuestInvitationsAction(
  */
 export async function saveInvitationDesignAction(
   eventId: string,
-  design: unknown
+  design: unknown,
+  expectedRevision?: string
 ): Promise<
-  { ok: true; design: InvitationDesign } | { ok: false; error: string }
+  | { ok: true; design: InvitationDesign; revision: string }
+  | { ok: false; error: string }
 > {
   const parsed = invitationDesignSchema.safeParse(design);
   if (!parsed.success) {
@@ -71,16 +73,31 @@ export async function saveInvitationDesignAction(
     };
   }
 
+  if (
+    expectedRevision !== undefined &&
+    (typeof expectedRevision !== "string" ||
+      expectedRevision.length > 64 ||
+      !Number.isFinite(Date.parse(expectedRevision)))
+  )
+    return {
+      ok: false,
+      error: "Invalid invitation revision. Reload the designer.",
+    };
+
   const supabase = await createClient();
   const ended = await eventEndedError(supabase, eventId);
   if (ended) return { ok: false, error: ended };
-  const { error } = await supabase
+  let update = supabase
     .from("events")
     .update({
       invitation_design: parsed.data as unknown as Json,
       ...designColumns(parsed.data),
     })
     .eq("id", eventId);
+  if (expectedRevision) update = update.eq("updated_at", expectedRevision);
+  const { data: saved, error } = await update
+    .select("updated_at")
+    .maybeSingle();
 
   if (error) {
     return {
@@ -89,9 +106,17 @@ export async function saveInvitationDesignAction(
     };
   }
 
+  if (!saved)
+    return {
+      ok: false,
+      error: expectedRevision
+        ? "This event changed in another tab or window. Export your unsaved design as a backup, then reload before continuing."
+        : "The invitation could not be saved. Reload to check your access.",
+    };
+
   revalidatePath(`/events/${eventId}/invitations`);
   revalidatePath(`/events/${eventId}`);
-  return { ok: true, design: parsed.data };
+  return { ok: true, design: parsed.data, revision: saved.updated_at };
 }
 
 /**

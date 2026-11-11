@@ -56,7 +56,8 @@ export async function createAndLoginUser(
     fullName: `User ${timestamp.toString().slice(-4)}`,
   };
 
-  await page.goto("/sign-up");
+  // Wait for the page to finish hydrating, or WebKit can press Continue before it is wired up.
+  await page.goto("/sign-up", { waitUntil: "networkidle" });
   await page.locator("#fullName").fill(testUser.fullName);
   await page.getByTestId("signup-continue").click();
   await page.locator("#emailInput").fill(testUser.email);
@@ -87,14 +88,26 @@ export async function createTestEvent(
   const title = options?.title || `The Nuptials of ${couple}`;
   const venue = options?.venue || "Grand Ballroom, Victoria Island";
 
-  await page.goto("/events/new");
+  await page.goto("/events/new", { waitUntil: "networkidle" });
   await expect(page.locator("h1")).toContainText(/plan your celebration/i);
 
   // Step 1: who. Two names make a wedding, the default occasion.
   const [first, ...rest] = couple.split(" & ");
-  await page.locator("#name-1").fill(first);
-  await page.locator("#name-2").fill(rest.join(" & "));
-  await page.locator("#title").fill(title);
+  // A field filled before the page hydrates is reset by React, which leaves Next disabled. Try
+  // again from a fresh load rather than wait for a button that will never enable.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.locator("#name-1").fill(first);
+    await page.locator("#name-2").fill(rest.join(" & "));
+    await page.locator("#title").fill(title);
+    if (
+      await page
+        .getByTestId("wizard-next")
+        .isEnabled({ timeout: 3000 })
+        .catch(() => false)
+    )
+      break;
+    await page.reload({ waitUntil: "networkidle" });
+  }
   await page.getByTestId("wizard-next").click();
 
   // Step 2: when. A Saturday is already chosen once the page has loaded.

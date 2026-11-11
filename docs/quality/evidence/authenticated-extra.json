@@ -1,0 +1,60 @@
+{
+  "exports": {
+    "pdfSize": [1500, 2100],
+    "detail": [
+      {
+        "point": "centre",
+        "png": [222, 188, 128],
+        "jpeg": [222, 188, 127],
+        "pdf": [222, 188, 128],
+        "jpegVsPng": 1,
+        "pdfVsPng": 0
+      },
+      {
+        "point": "rotated-corner",
+        "png": [250, 242, 227],
+        "jpeg": [249, 242, 226],
+        "pdf": [249, 242, 227],
+        "jpegVsPng": 1,
+        "pdfVsPng": 1
+      },
+      {
+        "point": "over-transparent",
+        "png": [110, 20, 38],
+        "jpeg": [111, 20, 38],
+        "pdf": [110, 20, 38],
+        "jpegVsPng": 1,
+        "pdfVsPng": 0
+      },
+      {
+        "point": "paper",
+        "png": [239, 227, 204],
+        "jpeg": [237, 227, 202],
+        "pdf": [239, 227, 204],
+        "jpegVsPng": 3,
+        "pdfVsPng": 0
+      }
+    ]
+  },
+  "guestLongNames": {
+    "cardOverflow": [],
+    "downloadName": "invitation-Chief-Dr-\u2026-Adaeze-Chukwuebuka-Nwachukwu-\u2026-Jr.png",
+    "passDecodes": true,
+    "guestCardVenueAfterEventEdit": "The Grand Ballroom of the Federal Palace Hotel and Towers, Victoria Island, Lagos",
+    "designerVenueAfterEventEdit": "The Grand Ballroom of the Federal Palace Hotel and Towers, Victoria Island, Lagos"
+  },
+  "navigationAndFonts": {
+    "family": "\"Bodoni Moda\", \"Bodoni Moda Fallback\", Georgia, serif, \"Bodoni Moda\", \"Playfair Display\", Didot, Georgia, serif",
+    "box": {
+      "x": 285.109375,
+      "y": 263.546875,
+      "width": 326.75,
+      "height": 38.84375
+    }
+  },
+  "notes": {
+    "locale": "designer-guest passes in Chromium once the browser runs with a UTF-8 locale (LANG=C.UTF-8); in a POSIX locale Chromium names any download with a non-ASCII filename 'download'. Firefox and WebKit were unaffected.",
+    "passLayout": "designer-pass-layout passes in Chromium, Firefox and WebKit after the test waits for the seal to render after a reload.",
+    "eventEdit": "After a design is saved, editing the event's venue changes neither the designer card nor the guest card: the saved design's words are authoritative."
+  }
+}

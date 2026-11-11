@@ -21,7 +21,7 @@ export default function AppError({
 
   return (
     <ErrorScreen
-      layout="inline"
+      layout="page"
       alert
       eyebrow="Workspace interrupted"
       title="This section hit a snag"

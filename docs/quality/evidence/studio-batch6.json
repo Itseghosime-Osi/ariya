@@ -1,0 +1,62 @@
+[
+  {
+    "id": "DES-059",
+    "name": "Hover a radius widget",
+    "ok": true,
+    "detail": "cursor=crosshair; title=\"Drag inward to adjust TL corner radius — hold Alt for single corner (1…\""
+  },
+  {
+    "id": "DES-062",
+    "name": "Read the live value",
+    "ok": true,
+    "detail": "tooltip during drag \"71.8 px\"; widget value afterwards 71.3px (was 16.2px)"
+  },
+  {
+    "id": "DES-068",
+    "name": "Reach geometric limits",
+    "ok": true,
+    "detail": "radius 155.5px with box 444×311 (limit 155.5px)"
+  },
+  {
+    "id": "DES-069",
+    "name": "Change width or height after rounding",
+    "ok": true,
+    "detail": "height set to 160; radius now 80px (≤ 80px)"
+  },
+  {
+    "id": "DES-088",
+    "name": "Use a keyboard alternative",
+    "ok": true,
+    "detail": "numeric Corner radius field edits the radius via keyboard (now 32.4px)"
+  },
+  {
+    "id": "DES-072",
+    "name": "Change zoom to 25, 100 and 400 percent (three zooms)",
+    "ok": true,
+    "detail": "[{\"zoom\":45,\"radiusPx\":44.3,\"expectedApprox\":62.2},{\"zoom\":70,\"radiusPx\":28.1,\"expectedApprox\":40},{\"zoom\":95,\"radiusPx\":20.5,\"expectedApprox\":29.5},{\"zoom\":120,\"radiusPx\":16.2,\"expectedApprox\":23.3}] - the same 20px screen drag gives a radius that scales inversely with zoom"
+  },
+  {
+    "id": "DES-073",
+    "name": "Pan while an object is selected",
+    "ok": true,
+    "detail": "Space+drag moved the card 60,30px; selection and radius widgets remained"
+  },
+  {
+    "id": "DES-078",
+    "name": "Select an ellipse, line, text or unsupported shape (text)",
+    "ok": true,
+    "detail": "text layer shows 0 radius widgets"
+  },
+  {
+    "id": "DES-079",
+    "name": "Select multiple objects",
+    "ok": true,
+    "detail": "no radius widgets while several layers are selected"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

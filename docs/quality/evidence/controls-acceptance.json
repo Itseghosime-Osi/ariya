@@ -1,0 +1,14 @@
+[
+  {
+    "ids": [90, 94, 166],
+    "name": "Every offered shape creates valid visible artwork"
+  },
+  {
+    "ids": [97, 98, 158, 178, 179, 198, 199, 201, 202, 203, 204],
+    "name": "Fill, outline, effects and compositing update live artwork"
+  },
+  {
+    "ids": [46, 47, 167, 169, 171, 173, 180],
+    "name": "Layer naming, visibility, stacking, flip, rotate and deletion are reversible"
+  }
+]

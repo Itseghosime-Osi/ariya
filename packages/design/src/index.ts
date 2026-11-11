@@ -42,6 +42,7 @@ export type {
   Layer,
   LayerKind,
   Palette,
+  PaperEdge,
   Shape,
   WireAlign,
   WireHandle,
@@ -74,6 +75,10 @@ export interface DesignEngine {
   ): WireRect;
   /** A turn, snapped to 15 degree steps when close. */
   snapRotation(degrees: number): number;
+  /** Converts a pixel distance to percent of canvas dimension. */
+  pxToPct(px: number, totalPx: number): number;
+  /** Converts a canvas percentage to pixels. */
+  pctToPx(pct: number, totalPx: number): number;
 }
 
 export interface LoadDesignEngineOptions {
@@ -192,5 +197,9 @@ export async function loadDesignEngine(
     snapRotation: (degrees) =>
       call<{ degrees: number }>(OP.GEOMETRY, { kind: "snapRotation", degrees })
         .degrees,
+    pxToPct: (px, totalPx) =>
+      call<{ pct: number }>(OP.GEOMETRY, { kind: "pxToPct", px, totalPx }).pct,
+    pctToPx: (pct, totalPx) =>
+      call<{ px: number }>(OP.GEOMETRY, { kind: "pctToPx", pct, totalPx }).px,
   };
 }

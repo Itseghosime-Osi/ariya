@@ -37,15 +37,27 @@ export function Section({
   title,
   children,
   aside,
+  dark,
 }: {
   title: string;
   children: React.ReactNode;
   aside?: React.ReactNode;
+  dark?: boolean;
 }) {
   return (
-    <section className="border-b border-hairline px-4 py-3.5 last:border-b-0">
+    <section
+      className={cn(
+        "border-b px-4 py-3.5 last:border-b-0 transition-colors",
+        dark ? "border-white/10" : "border-[#e8e2d6]"
+      )}
+    >
       <div className="mb-2.5 flex items-center justify-between gap-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
+        <h3
+          className={cn(
+            "text-[11px] font-semibold uppercase tracking-[0.16em]",
+            dark ? "text-zinc-400" : "text-[#7a5b67]"
+          )}
+        >
           {title}
         </h3>
         {aside}
@@ -152,6 +164,26 @@ export function Tiles<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.key}
+          tabIndex={value === o.key ? 0 : -1}
+          onKeyDown={(event) => {
+            const index = options.findIndex((option) => option.key === o.key);
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? options.length - 1
+                  : ["ArrowRight", "ArrowDown"].includes(event.key)
+                    ? (index + 1) % options.length
+                    : ["ArrowLeft", "ArrowUp"].includes(event.key)
+                      ? (index - 1 + options.length) % options.length
+                      : null;
+            if (next === null) return;
+            event.preventDefault();
+            onPick(options[next].key);
+            event.currentTarget.parentElement
+              ?.querySelectorAll<HTMLButtonElement>('[role="radio"]')
+              [next]?.focus();
+          }}
           onClick={() => onPick(o.key)}
           className="group flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-hairline bg-white px-1 py-2 text-[11px] font-medium leading-tight text-night transition-all hover:-translate-y-px hover:border-night/30 hover:shadow-sm aria-checked:border-night aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
@@ -173,17 +205,22 @@ export function Segmented<T extends string>({
   value,
   options,
   onPick,
+  dark = false,
 }: {
   label: string;
   value: T;
   options: { key: T; label: string; icon?: React.ReactNode }[];
   onPick: (v: T) => void;
+  dark?: boolean;
 }) {
   return (
     <div
       role="radiogroup"
       aria-label={label}
-      className="flex rounded-full bg-[#f1ece4] p-1"
+      className={cn(
+        "flex rounded-full p-1 transition-colors",
+        dark ? "bg-white/[0.05] border border-white/10" : "bg-[#f1ece4]"
+      )}
     >
       {options.map((o) => (
         <button
@@ -191,8 +228,37 @@ export function Segmented<T extends string>({
           type="button"
           role="radio"
           aria-checked={value === o.key}
+          tabIndex={value === o.key ? 0 : -1}
+          onKeyDown={(event) => {
+            const index = options.findIndex((option) => option.key === o.key);
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? options.length - 1
+                  : ["ArrowRight", "ArrowDown"].includes(event.key)
+                    ? (index + 1) % options.length
+                    : ["ArrowLeft", "ArrowUp"].includes(event.key)
+                      ? (index - 1 + options.length) % options.length
+                      : null;
+            if (next === null) return;
+            event.preventDefault();
+            onPick(options[next].key);
+            event.currentTarget.parentElement
+              ?.querySelectorAll<HTMLButtonElement>('[role="radio"]')
+              [next]?.focus();
+          }}
           onClick={() => onPick(o.key)}
-          className="inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold text-label-2 transition-colors aria-checked:bg-white aria-checked:text-night aria-checked:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className={cn(
+            "inline-flex min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-all focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",
+            value === o.key
+              ? dark
+                ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
+                : "bg-white text-[#2d1f24] shadow-sm"
+              : dark
+                ? "text-zinc-400 hover:text-white"
+                : "text-label-2 hover:text-[#2d1f24]"
+          )}
         >
           {o.icon}
           {o.label}
@@ -301,17 +367,35 @@ export function Toggle({
   checked,
   onChange,
   hint,
+  dark = false,
 }: {
   label: string;
   checked: boolean;
   onChange: (v: boolean) => void;
   hint?: string;
+  dark?: boolean;
 }) {
   return (
     <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3">
       <span>
-        <span className="block text-sm text-night">{label}</span>
-        {hint && <span className="block text-[11px] text-label-2">{hint}</span>}
+        <span
+          className={cn(
+            "block text-sm font-semibold transition-colors",
+            dark ? "text-[#fff6dc]" : "text-[#2d1f24]"
+          )}
+        >
+          {label}
+        </span>
+        {hint && (
+          <span
+            className={cn(
+              "block text-[11px] transition-colors",
+              dark ? "text-zinc-400" : "text-[#7a5b67]"
+            )}
+          >
+            {hint}
+          </span>
+        )}
       </span>
       <span className="relative inline-flex">
         <input
@@ -321,8 +405,20 @@ export function Toggle({
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />
-        <span className="h-6 w-11 rounded-full bg-[#d9d2c6] transition-colors peer-checked:bg-burgundy peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-burgundy" />
-        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+        <span
+          className={cn(
+            "h-6 w-11 rounded-full transition-colors",
+            dark
+              ? "bg-white/15 border border-white/20 peer-checked:bg-[#dfba73] peer-checked:border-[#dfba73] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#dfba73]"
+              : "bg-[#d9d2c6] peer-checked:bg-[#4a0e17] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#4a0e17]"
+          )}
+        />
+        <span
+          className={cn(
+            "absolute left-0.5 top-0.5 h-5 w-5 rounded-full shadow transition-transform peer-checked:translate-x-5",
+            dark ? "bg-white peer-checked:bg-[#20161b]" : "bg-white"
+          )}
+        />
       </span>
     </label>
   );

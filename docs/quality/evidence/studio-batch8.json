@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DES-005",
+    "name": "Change background",
+    "ok": true,
+    "detail": "3 distinct card paints across Paper/Velvet/Colour; undo ×3 restores the original=true"
+  },
+  {
+    "id": "DES-152",
+    "name": "Swap and reset swatches",
+    "ok": true,
+    "detail": "X swaps (rgb(223, 186, 115) / rgb(74, 14, 23) → rgb(74, 14, 23) / rgb(223, 186, 115)); D resets (rgb(0, 0, 0) / rgb(255, 255, 255))"
+  },
+  {
+    "id": "DES-102",
+    "name": "Duplicate a shape",
+    "ok": true,
+    "detail": "layers 11→12; the copy is offset from the original"
+  },
+  {
+    "id": "DES-180",
+    "name": "Identify selected, locked and hidden states",
+    "ok": true,
+    "detail": "selected row has aria-current=true; lock → button becomes \"Unlock\"; hide → \"Show\" and row dims to 0.4"
+  },
+  {
+    "id": "DES-258",
+    "name": "Test tool shortcut collisions",
+    "ok": true,
+    "detail": "single-key shortcuts: {\"V\":\"Move & Select\",\"C\":\"Canvas size & ratio\",\"T\":\"Type text\",\"A\":\"Cathedral Arch\",\"U\":\"Vector Shapes & Geometry\",\"G\":\"Gradient Fill\",\"I\":\"Eyedropper sampler\",\"⇧I\":\"Place image / photo\",\"M\":\"Import external design\",\"H\":\"Hand / Pan\",\"Z\":\"Zoom Tool\",\"D\":\"Default black and white colours\",\"X\":\"Swap foreground/background colours\"}; keys shared by different tools: [] (D and X appear on two buttons that do the same thing)"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

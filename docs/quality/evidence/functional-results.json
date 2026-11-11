@@ -1,0 +1,45 @@
+{
+  "result": [
+    {
+      "name": "Menu keyboard escape",
+      "status": "Pass"
+    },
+    {
+      "name": "Simple / Pro round trip",
+      "status": "Pass"
+    },
+    {
+      "name": "Interface theme switch",
+      "status": "Pass"
+    },
+    {
+      "name": "Selection, nudge, undo and redo autosave",
+      "status": "Pass"
+    },
+    {
+      "name": "Failed save and retry",
+      "status": "Pass"
+    },
+    {
+      "name": "Actual PNG download",
+      "status": "Pass"
+    },
+    {
+      "name": "Actual JPEG download",
+      "status": "Pass"
+    },
+    {
+      "name": "Actual PDF download",
+      "status": "Pass"
+    },
+    {
+      "name": "Actual JSON download",
+      "status": "Pass"
+    },
+    {
+      "name": "Saved fixture reload",
+      "status": "Pass"
+    }
+  ],
+  "errors": []
+}

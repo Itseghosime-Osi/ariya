@@ -22,7 +22,7 @@ describe("Invitation feature schemas", () => {
   it("rejects a layer dragged outside the card", () => {
     const res = invitationDesignSchema.safeParse({
       ...houseDesign,
-      layers: houseDesign.layers.map((layer) => ({ ...layer, x: 140 })),
+      layers: houseDesign.layers.map((layer) => ({ ...layer, x: 600 })),
     });
     expect(res.success).toBe(false);
   });
@@ -64,5 +64,21 @@ describe("entry seal", () => {
         ),
       })
     ).toBe(false);
+  });
+});
+
+describe("single entry seal and unambiguous layer identities", () => {
+  it("rejects imported duplicate identifiers", () => {
+    const d = createInvitationDesign({ couple: "Ada & Kunle" });
+    d.layers.push({ ...d.layers[0] });
+    expect(invitationDesignSchema.safeParse(d).success).toBe(false);
+  });
+  it("rejects a backup that would bypass the single entry-seal rule", () => {
+    const d = createInvitationDesign({ couple: "Ada & Kunle" });
+    d.layers.push(
+      { ...d.layers[0], id: "pass-a", kind: "code" },
+      { ...d.layers[0], id: "pass-b", kind: "code" }
+    );
+    expect(invitationDesignSchema.safeParse(d).success).toBe(false);
   });
 });

@@ -89,13 +89,13 @@ describe("layer operations", () => {
     expect(r.x + r.width).toBeCloseTo(100);
   });
 
-  it("resizes from a handle and keeps inside the card", () => {
+  it("resizes from a handle and allows bleeding outside the card", () => {
     const start = { x: 20, y: 20, width: 40, height: 20 };
     expect(resizeBox(start, "e", 10, 0).width).toBe(50);
-    expect(resizeBox(start, "e", 500, 0)).toMatchObject({ x: 20, width: 80 });
+    expect(resizeBox(start, "e", 500, 0)).toMatchObject({ x: 20, width: 540 });
     const w = resizeBox(start, "nw", -30, -30);
-    expect(w.x).toBe(0);
-    expect(w.y).toBe(0);
+    expect(w.x).toBe(-10);
+    expect(w.y).toBe(-10);
     expect(w.x + w.width).toBe(60);
     const kept = resizeBox(start, "se", 20, 0, true);
     expect(kept.width / kept.height).toBeCloseTo(2);
@@ -155,5 +155,16 @@ describe("layer operations", () => {
     const seal = again.layers.filter((l) => l.kind === "code");
     expect(seal).toHaveLength(1);
     expect(seal[0]).toMatchObject({ x: 60, y: 70, visible: true });
+  });
+  it("keeps the default RSVP deadline beside the required entry seal", () => {
+    const d = ensureEntrySeal(base());
+    const footer = d.layers.find((l) => l.id === "footer")!;
+    const pass = d.layers.find((l) => l.kind === "code")!;
+    expect(footer.x).toBeGreaterThan(pass.x + pass.width);
+    // Existing custom layouts are not moved by normalisation.
+    footer.x = 12;
+    expect(normaliseDesign(d)?.layers.find((l) => l.id === "footer")?.x).toBe(
+      12
+    );
   });
 });

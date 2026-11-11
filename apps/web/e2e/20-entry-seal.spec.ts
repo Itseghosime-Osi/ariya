@@ -33,9 +33,9 @@ test.describe("The entry seal", () => {
     // The host opens the designer; the seal is placed for them.
     // The access pass is on by default, so the designer puts the seal on the card for the host.
     await page.goto(`/events/${eventId}/invitations/design`);
-    await expect(page.getByText(/· saved$/i)).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(
+      page.getByTestId("studio-top-header").getByRole("status")
+    ).toHaveText(/^saved/, { timeout: 15000 });
 
     // The guest accepts and is given the invitation, not a QR box.
     await page.goto(inviteUrl);

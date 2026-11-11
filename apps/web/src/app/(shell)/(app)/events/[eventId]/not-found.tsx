@@ -5,7 +5,7 @@ import { ERROR_PRIMARY, ErrorScreen } from "@/components/errors/error-screen";
 export default function EventNotFound() {
   return (
     <ErrorScreen
-      layout="inline"
+      layout="page"
       code="404"
       eyebrow="Celebration not found"
       title="We can't find that celebration"

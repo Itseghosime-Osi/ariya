@@ -1,3 +1,4 @@
+import { constrainEntrySeals } from "./pass-layout";
 /**
  * The design engine, as the designer uses it.
  *
@@ -16,6 +17,10 @@ import {
 } from "@ariya/design";
 import {
   alignLayer,
+  alignSelectionFast,
+  distributeLayersFast,
+  groupLayersFast,
+  ungroupLayersFast,
   createImageLayer,
   createShapeLayer,
   duplicateLayer,
@@ -24,13 +29,17 @@ import {
   removeImportedCard,
   resizeBox,
   snapRotation,
+  resizeCanvasPx,
+  setPaperEdge,
+  nudgeLayer,
+  flipLayer,
   type Alignment,
   type Box,
   type Handle,
   type StackMove,
 } from "./layer-ops";
 import { createLayerOfKind, ensureEntrySeal } from "./design";
-import type { InvitationDesign, InvitationShape } from "./types";
+import type { InvitationDesign, InvitationShape, PaperEdge } from "./types";
 
 let engine: DesignEngine | null = null;
 let loading: Promise<DesignEngine | null> | null = null;
@@ -58,10 +67,73 @@ export function freshId(kind: string, count = 0): string {
   return `${kind}-${Date.now().toString(36)}-${count}-${Math.floor(Math.random() * 1e4).toString(36)}`;
 }
 
-// The wire carries designs as plain JSON; the app's own types are the same shape.
-const asWire = (d: InvitationDesign) =>
-  d as unknown as Parameters<DesignEngine["edit"]>[0];
-const fromWire = (d: unknown) => d as InvitationDesign;
+// The wire carries designs as plain JSON; translate camelCase corner radii
+// (`radiusTL` <-> `radiusTl`) and preserve frontend-only FX fields across WASM round-trips.
+const EXTRA_LAYER_KEYS = [
+  "aspectLocked",
+  "flipX",
+  "flipY",
+  "brightness",
+  "contrast",
+  "saturate",
+  "sepia",
+  "grayscale",
+  "shadowBlur",
+  "shadowX",
+  "shadowY",
+  "shadowColor",
+] as const;
+
+const asWire = (d: InvitationDesign) => {
+  const mapped = {
+    ...d,
+    layers: d.layers.map((l) => {
+      const rec = { ...l } as Record<string, unknown>;
+      if (l.radiusTL !== undefined) rec.radiusTl = l.radiusTL;
+      if (l.radiusTR !== undefined) rec.radiusTr = l.radiusTR;
+      if (l.radiusBR !== undefined) rec.radiusBr = l.radiusBR;
+      if (l.radiusBL !== undefined) rec.radiusBl = l.radiusBL;
+      return rec;
+    }),
+  };
+  return mapped as unknown as Parameters<DesignEngine["edit"]>[0];
+};
+
+const fromWire = (d: unknown, source?: InvitationDesign): InvitationDesign => {
+  const out = d as InvitationDesign;
+  const byId = new Map(source?.layers.map((l) => [l.id, l]) ?? []);
+  return {
+    ...out,
+    layers: out.layers.map((layer) => {
+      const rec = layer as unknown as Record<string, unknown>;
+      const next: Record<string, unknown> = { ...rec };
+      if (rec.radiusTl !== undefined && rec.radiusTl !== null) {
+        next.radiusTL = rec.radiusTl;
+      }
+      if (rec.radiusTr !== undefined && rec.radiusTr !== null) {
+        next.radiusTR = rec.radiusTr;
+      }
+      if (rec.radiusBr !== undefined && rec.radiusBr !== null) {
+        next.radiusBR = rec.radiusBr;
+      }
+      if (rec.radiusBl !== undefined && rec.radiusBl !== null) {
+        next.radiusBL = rec.radiusBl;
+      }
+      delete next.radiusTl;
+      delete next.radiusTr;
+      delete next.radiusBr;
+      delete next.radiusBl;
+
+      const orig = byId.get(layer.id);
+      if (orig) {
+        for (const k of EXTRA_LAYER_KEYS) {
+          if (orig[k] !== undefined) next[k] = orig[k];
+        }
+      }
+      return next as unknown as InvitationDesign["layers"][number];
+    }),
+  };
+};
 
 function run(
   design: InvitationDesign,
@@ -70,7 +142,7 @@ function run(
   if (!engine) return null;
   try {
     const out = engine.edit(asWire(design), edit);
-    return { design: fromWire(out.design), id: out.selectedId };
+    return { design: fromWire(out.design, design), id: out.selectedId };
   } catch {
     // The engine refused (a full card, say). Say so by returning nothing, like the fallback does.
     return { design, id: null };
@@ -136,12 +208,30 @@ export function duplicate(
   design: InvitationDesign,
   id: string
 ): { design: InvitationDesign; id: string } | null {
+  if (design.layers.length >= 60) return null;
   const out = run(design, {
     type: "duplicate",
     id,
     newId: freshId("copy", design.layers.length),
   });
-  if (out) return out.id ? { design: out.design, id: out.id } : null;
+  if (out) {
+    if (!out.id) return null;
+    const original = design.layers.find((l) => l.id === id);
+    const extra = Object.fromEntries(
+      EXTRA_LAYER_KEYS.map((key) => [key, original?.[key]])
+    );
+    return {
+      design: {
+        ...out.design,
+        layers: out.design.layers.map((layer) =>
+          layer.id === out.id
+            ? { ...layer, ...extra, groupId: undefined }
+            : layer
+        ),
+      },
+      id: out.id,
+    };
+  }
   return duplicateLayer(design, id);
 }
 
@@ -167,6 +257,49 @@ export function align(
   );
 }
 
+export function alignSelection(
+  design: InvitationDesign,
+  ids: string[],
+  how: Alignment
+): InvitationDesign {
+  return (
+    run(design, { type: "alignSelection", ids, how })?.design ??
+    alignSelectionFast(design, ids, how)
+  );
+}
+
+export function distributeLayers(
+  design: InvitationDesign,
+  ids: string[],
+  horizontal: boolean
+): InvitationDesign {
+  return (
+    run(design, { type: "distribute", ids, horizontal })?.design ??
+    distributeLayersFast(design, ids, horizontal)
+  );
+}
+
+export function groupLayers(
+  design: InvitationDesign,
+  ids: string[],
+  groupId: string
+): InvitationDesign {
+  return (
+    run(design, { type: "group", ids, groupId })?.design ??
+    groupLayersFast(design, ids, groupId)
+  );
+}
+
+export function ungroupLayers(
+  design: InvitationDesign,
+  ids: string[]
+): InvitationDesign {
+  return (
+    run(design, { type: "ungroup", ids })?.design ??
+    ungroupLayersFast(design, ids)
+  );
+}
+
 export function importCard(
   design: InvitationDesign,
   url: string,
@@ -186,6 +319,41 @@ export function removeCard(design: InvitationDesign): InvitationDesign {
   return (
     run(design, { type: "removeCard" })?.design ?? removeImportedCard(design)
   );
+}
+
+/** Position constraints use Rust when loaded, with a safe fallback for older cached engines. */
+export function constrainEntrySealsFast(
+  design: InvitationDesign
+): InvitationDesign {
+  const safe = constrainEntrySeals(design);
+  if (safe === design) return design;
+  const result = run(design, { type: "constrainEntrySeals" })?.design;
+  if (
+    result &&
+    result.layers.length === design.layers.length &&
+    result.layers.every(
+      (layer, index) =>
+        layer.id === design.layers[index].id &&
+        (layer.kind !== "code" ||
+          (["x", "y", "width"] as const).every(
+            (key) => Math.abs(layer[key] - safe.layers[index][key]) < 1e-7
+          ))
+    )
+  )
+    return {
+      ...design,
+      layers: design.layers.map((layer, index) =>
+        layer.kind === "code"
+          ? {
+              ...layer,
+              x: result.layers[index].x,
+              y: result.layers[index].y,
+              width: result.layers[index].width,
+            }
+          : layer
+      ),
+    };
+  return safe;
 }
 
 export function withEntrySeal(design: InvitationDesign): InvitationDesign {
@@ -230,4 +398,74 @@ export function snapRotationFast(degrees: number): number {
     }
   }
   return snapRotation(degrees);
+}
+
+export function resizeCanvasPxFast(
+  design: InvitationDesign,
+  widthPx: number,
+  heightPx: number
+): InvitationDesign {
+  return (
+    run(design, { type: "resizeCanvasPx", widthPx, heightPx })?.design ??
+    resizeCanvasPx(design, widthPx, heightPx)
+  );
+}
+
+export function setPaperEdgeFast(
+  design: InvitationDesign,
+  edgeStyle: PaperEdge,
+  cornerRadiusPx?: number
+): InvitationDesign {
+  return (
+    run(design, {
+      type: "setPaperEdge",
+      edgeStyle,
+      cornerRadiusPx: cornerRadiusPx ?? null,
+    })?.design ?? setPaperEdge(design, edgeStyle, cornerRadiusPx)
+  );
+}
+
+export function nudgeFast(
+  design: InvitationDesign,
+  id: string,
+  dxPx: number,
+  dyPx: number
+): InvitationDesign {
+  return (
+    run(design, { type: "nudge", id, dxPx, dyPx })?.design ??
+    nudgeLayer(design, id, dxPx, dyPx)
+  );
+}
+
+export function flipFast(
+  design: InvitationDesign,
+  id: string,
+  horizontal: boolean
+): InvitationDesign {
+  return (
+    run(design, { type: "flip", id, horizontal })?.design ??
+    flipLayer(design, id, horizontal)
+  );
+}
+
+export function pxToPctFast(px: number, totalPx: number): number {
+  if (engine) {
+    try {
+      return engine.pxToPct(px, totalPx);
+    } catch {
+      /* fall through */
+    }
+  }
+  return totalPx > 0 ? (px / totalPx) * 100 : 0;
+}
+
+export function pctToPxFast(pct: number, totalPx: number): number {
+  if (engine) {
+    try {
+      return engine.pctToPx(pct, totalPx);
+    } catch {
+      /* fall through */
+    }
+  }
+  return (pct / 100) * totalPx;
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "DES-181",
+    "name": "Edit the background row",
+    "ok": true,
+    "detail": "the Layers background row opens the card's background controls; Velvet repaints the card; Undo restores it"
+  },
+  {
+    "id": "DES-240",
+    "name": "Insert the monogram seal",
+    "ok": true,
+    "detail": "layers 10→11; seal rows: [\"Layer Entry seal\",\"Layer Wax seal\",\"Layer Wax seal\"]"
+  },
+  {
+    "id": "DES-209",
+    "name": "Resize after adding effects",
+    "ok": true,
+    "detail": "blur/blend effect kept (blur(29px)) while width changed 160→117 px"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

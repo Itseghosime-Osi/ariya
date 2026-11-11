@@ -52,7 +52,11 @@ export default async function GuestInvitationPage({
   let checkInCode: string | null = null;
   let qrCodeUrl: string | null = null;
 
-  if (state === "already_replied" && data?.rsvp?.status === "accepted") {
+  if (
+    state === "already_replied" &&
+    data?.rsvp?.status === "accepted" &&
+    rsvpForm.requireAccessCard
+  ) {
     checkInCode = await getCheckInCode(token);
     if (checkInCode) {
       qrCodeUrl = await generateQrDataUrl(checkInCode);
@@ -75,12 +79,12 @@ export default async function GuestInvitationPage({
         design: rsvpForm.invitationDesign,
       })
     : null;
-  // With the access pass on, the guest's card carries it: where the host put the entry seal, or in
-  // the house spot if they never placed one. Without a pass the card is just the card.
-  const sealedDesign =
+  // Keep the host's saved artwork whether access cards are enabled or not.
+  // Only accepted guests with access cards receive the personal entry seal.
+  const guestDesign =
     rsvpForm.requireAccessCard && checkInCode && savedDesign
       ? ensureEntrySeal(savedDesign)
-      : null;
+      : savedDesign;
 
   const theme = getGuestTheme(data?.event?.invitation_theme);
 
@@ -125,7 +129,7 @@ export default async function GuestInvitationPage({
           }
           finale={
             <FilmFinale
-              design={sealedDesign ?? rsvpForm.invitationDesign}
+              design={guestDesign ?? rsvpForm.invitationDesign}
               entryCode={rsvpForm.requireAccessCard ? checkInCode : null}
               event={{
                 title: data.event.title,
@@ -194,7 +198,7 @@ export default async function GuestInvitationPage({
             checkInCode={checkInCode}
             qrCodeUrl={qrCodeUrl}
             requireAccessCard={rsvpForm.requireAccessCard}
-            design={sealedDesign}
+            design={guestDesign}
             questions={rsvpForm.questions}
             answers={rsvpForm.answers}
           />

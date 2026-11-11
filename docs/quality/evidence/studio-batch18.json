@@ -1,0 +1,32 @@
+[
+  {
+    "id": "DES-170k",
+    "name": "Reorder layers with the keyboard",
+    "ok": true,
+    "detail": "Space lifts a layer's handle, ArrowDown ×2 moves it, Space drops it: Kindly reply by 1 Ma | Dress code: Aso-ebi, | The Lagos Event Cent → Kindly reply by 1 Ma | The Lagos Event Cent | 20 Mar 2027, 1:00 AM; Undo restores the order"
+  },
+  {
+    "id": "DES-072",
+    "name": "Change zoom to 20 and 345 percent",
+    "ok": true,
+    "detail": "[{\"zoom\":20,\"radiusPx\":79.9,\"radiusTimesZoom\":16},{\"zoom\":345,\"radiusPx\":4.3,\"radiusTimesZoom\":14.8}] (radius × zoom stays about constant for the same screen drag; 45–120% was verified earlier)"
+  },
+  {
+    "id": "DES-078c",
+    "name": "Corner-radius widgets by shape",
+    "ok": true,
+    "detail": "widgets shown per inserted shape: {\"Rectangle\":4,\"Circle / Oval\":0,\"Line / Divider\":0,\"Cathedral Arch\":0,\"Star / Sparkle\":0,\"Diamond\":0}"
+  },
+  {
+    "id": "DES-210",
+    "name": "Undo and redo each editing operation",
+    "ok": true,
+    "detail": "18 operations swept; 18 restore exactly on undo and redo: [\"textEdit:1\",\"move:1\",\"nudge:1\",\"resize:1\",\"rotate:1\",\"colour:1\",\"opacity:1\",\"flip:1\",\"align:1\",\"hide:1\",\"lock:1\",\"rename:1\",\"duplicate:1\",\"delete:1\",\"addShape:1\",\"addText:2\",\"bringForward:1\",\"background:1\"]"
+  },
+  {
+    "id": "PAGE",
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { toPng } from "html-to-image";
+import React, { useEffect, useRef, useState } from "react";
+import { exportInvitation } from "@/features/invitations/export-service";
 import { Icon } from "@/components/ui/icon";
 import { InvitationCard } from "@/features/invitations/components/InvitationCard";
 import type { InvitationDesign } from "@/features/invitations/types";
@@ -10,8 +10,8 @@ interface MyInvitationProps {
   design: InvitationDesign;
   coupleName: string;
   guestName: string;
-  /** The guest's entry code. Woven into the card's entry seal; never shown as text or a QR box. */
-  entryCode: string;
+  /** Absent when access cards are off; otherwise woven into the personal entry seal. */
+  entryCode?: string | null;
 }
 
 /**
@@ -25,34 +25,35 @@ export function MyInvitation({
   entryCode,
 }: MyInvitationProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
   const save = async () => {
-    if (!ref.current) return;
+    if (!ref.current || controller.current) return;
+    const active = new AbortController();
+    controller.current = active;
     setBusy(true);
     setFailed(false);
     try {
       const card = ref.current.querySelector<HTMLElement>(
         "[data-invitation-canvas]"
       );
-      if (!card) throw new Error("no card");
-      const url = await toPng(card, {
-        pixelRatio: 3,
-        cacheBust: true,
-        width: card.offsetWidth,
-        height: card.offsetHeight,
-        style: { margin: "0", borderRadius: "0", transform: "none" },
+      const result = await exportInvitation({
+        cardElement: card,
+        design,
+        eventId: "guest",
+        coupleName,
+        fileBaseName: `invitation-${guestName}`,
+        format: "png",
+        signal: active.signal,
       });
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `invitation-${guestName.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "guest"}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      if (!result.ok && !result.cancelled) setFailed(true);
     } catch {
       setFailed(true);
     } finally {
+      controller.current = null;
       setBusy(false);
     }
   };

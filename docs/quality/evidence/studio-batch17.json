@@ -1,0 +1,20 @@
+{
+  "engines": {
+    "chromium": {
+      "names": 8.8,
+      "venue": 3.43,
+      "whole": 5.72
+    },
+    "webkit": {
+      "names": 18.71,
+      "venue": 2.53,
+      "whole": 6.99
+    },
+    "firefox": {
+      "names": 8.97,
+      "venue": 2.16,
+      "whole": 5.6
+    }
+  },
+  "note": "mean per-channel pixel difference (0-255) between the card as shown on screen and the exported PNG, both scaled to 540 px wide; viewed side by side for Chromium and WebKit"
+}

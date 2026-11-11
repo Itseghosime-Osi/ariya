@@ -1,3 +1,6 @@
+import { constrainEntrySeals } from "./pass-layout";
+export { INVITATION_ASPECT } from "./types";
+export { constrainEntrySeals } from "./pass-layout";
 import { formatEventDate } from "@/lib/format";
 import { invitationDesignSchema } from "./schemas";
 import {
@@ -9,9 +12,6 @@ import {
   type InvitationPalette,
   type InvitationTheme,
 } from "./types";
-
-/** The card is a portrait 5:7, like printed stationery. */
-export const INVITATION_ASPECT = 5 / 7;
 
 export const THEME_PALETTES: Record<InvitationTheme, InvitationPalette> = {
   royal_gold: {
@@ -125,9 +125,16 @@ function textLayer(
 export function defaultInvitationLayers(
   event: InvitationEventContent
 ): InvitationLayer[] {
+  const seenVenueParts = new Set<string>();
   const venue = [event.venue, event.area]
-    .map((part) => part?.trim())
-    .filter(Boolean)
+    .flatMap((part) => part?.split(",") ?? [])
+    .map((part) => part.trim())
+    .filter((part) => {
+      const key = part.toLocaleLowerCase("en-NG");
+      if (!part || seenVenueParts.has(key)) return false;
+      seenVenueParts.add(key);
+      return true;
+    })
     .join(", ");
   const names =
     event.headline?.trim() ||
@@ -180,7 +187,10 @@ export function defaultInvitationLayers(
       { x: 8, y: 31.5, width: 84 },
       {
         font: "display",
-        size: 7.4,
+        size: Math.min(
+          7.4,
+          Math.max(2.5, 7.4 * Math.sqrt(34 / Math.max(34, names.length)))
+        ),
         weight: 700,
         colorRole: "title",
       }
@@ -221,21 +231,31 @@ export function defaultInvitationLayers(
         colorRole: "ink",
       }
     ),
-    textLayer("venue", venue || "Venue to be announced", {
-      x: 10,
-      y: 72,
-      width: 80,
-    }),
+    textLayer(
+      "venue",
+      venue || "Venue to be announced",
+      {
+        x: 10,
+        y: 72,
+        width: 80,
+      },
+      { size: venue.length > 45 ? 3.0 : 3.4, lineHeight: 1.2 }
+    ),
     textLayer(
       "dressCode",
       event.dressCode?.trim() ? `Dress code: ${event.dressCode.trim()}` : "",
-      { x: 10, y: 77, width: 80 },
-      { size: 3.2, italic: true, colorRole: "body" }
+      { x: 10, y: 78, width: 80 },
+      {
+        size: (event.dressCode?.length ?? 0) > 45 ? 3.0 : 3.2,
+        lineHeight: 1.2,
+        italic: true,
+        colorRole: "body",
+      }
     ),
     textLayer(
       "footer",
       replyLine,
-      { x: 10, y: 88, width: 80 },
+      { x: 27, y: 88, width: 63 },
       {
         size: 2.9,
         weight: 600,
@@ -298,7 +318,7 @@ export function normaliseDesign(input: unknown): InvitationDesign | null {
     }
   }
   const parsed = invitationDesignSchema.safeParse(candidate);
-  return parsed.success ? parsed.data : null;
+  return parsed.success ? constrainEntrySeals(parsed.data) : null;
 }
 
 /** The one design under an event: what the host saved, or the house card if nothing is saved. */
@@ -370,7 +390,7 @@ export function createLayerOfKind(
       kind,
       text: "",
       x: 5,
-      y: 81,
+      y: 83.5,
       width: 19,
       size: 3,
       colorRole: "title",
@@ -407,4 +427,58 @@ export function createLayerOfKind(
     };
   }
   return { ...BLANK_TEXT_LAYER, id, kind };
+}
+
+/** The event facts a host can change after the card was saved: where, when, dress and reply date. */
+const EVENT_FACT_LAYERS = [
+  ["date", "Date"],
+  ["venue", "Venue"],
+  ["dressCode", "Dress code"],
+  ["footer", "Reply date"],
+] as const;
+
+export interface StaleEventFact {
+  id: string;
+  label: string;
+  /** What the saved card says now. */
+  current: string;
+  /** What the event's details say. */
+  fresh: string;
+}
+
+/**
+ * A saved card keeps the host's own words, so changing the event later does not rewrite it. These
+ * are the factual lines of the card that no longer match the event, offered to the host to update.
+ * The names, headline and message are the host's wording and are never listed.
+ */
+export function staleEventFacts(
+  design: InvitationDesign,
+  event: InvitationEventContent
+): StaleEventFact[] {
+  const fresh = new Map(
+    defaultInvitationLayers(event).map((layer) => [layer.id, layer.text])
+  );
+  const stale: StaleEventFact[] = [];
+  for (const [id, label] of EVENT_FACT_LAYERS) {
+    const layer = design.layers.find((l) => l.id === id);
+    const next = fresh.get(id);
+    if (!layer || !layer.visible || next === undefined) continue;
+    if (layer.text.trim() !== next.trim())
+      stale.push({ id, label, current: layer.text, fresh: next });
+  }
+  return stale;
+}
+
+/** Writes the event's current facts into the listed lines, keeping their position and styling. */
+export function applyEventFacts(
+  design: InvitationDesign,
+  facts: StaleEventFact[]
+): InvitationDesign {
+  const byId = new Map(facts.map((fact) => [fact.id, fact.fresh]));
+  return {
+    ...design,
+    layers: design.layers.map((layer) =>
+      byId.has(layer.id) ? { ...layer, text: byId.get(layer.id)! } : layer
+    ),
+  };
 }

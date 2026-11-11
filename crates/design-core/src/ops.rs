@@ -1,9 +1,9 @@
 //! Every edit the designer offers, as a pure function from one design to the next.
 //!
 //! Percentages are shares of the card: x and width of its width, y and height of its height.
-//! Later layers draw on top.
+//! Later decorative layers draw on top; the renderer protects the functional pass foreground.
 
-use crate::model::{ColorRole, Design, Fit, Font, Layer, LayerKind, Shape};
+use crate::model::{Canvas, ColorRole, Design, Fit, Font, Layer, LayerKind, PaperEdge, Shape};
 use crate::validate::{MAX_LAYERS, MIN_WIDTH};
 
 /// The smallest height a drag can shrink a box to.
@@ -47,7 +47,7 @@ pub fn create_layer(kind: LayerKind, id: String) -> Layer {
         LayerKind::Code => Layer {
             text: String::new(),
             x: 5.0,
-            y: 81.0,
+            y: 83.5,
             width: 19.0,
             size: 3.0,
             color_role: ColorRole::Title,
@@ -100,6 +100,22 @@ pub fn create_shape(shape: Shape, id: String, ratio: f64) -> Layer {
             height: Some(0.4),
             stroke: Some(FOIL.into()),
             stroke_width: Some(0.4),
+            color_role: ColorRole::Custom,
+            ..base
+        };
+    }
+    if shape == Shape::Arch {
+        let width = 36.0;
+        let height = clamp(width * ratio * 1.35, 10.0, 80.0);
+        return Layer {
+            shape: Some(shape),
+            x: 32.0,
+            y: clamp(50.0 - height / 2.0, 0.0, 100.0 - height),
+            width,
+            height: Some(height),
+            fill: Some(FOIL.into()),
+            stroke_width: Some(0.4),
+            radius: Some(18.0),
             color_role: ColorRole::Custom,
             ..base
         };
@@ -245,6 +261,162 @@ pub fn align(design: &Design, id: &str, how: Alignment) -> Design {
     next
 }
 
+pub fn align_selection(design: &Design, ids: &[String], how: Alignment) -> Design {
+    if ids.is_empty() {
+        return design.clone();
+    }
+    if ids.len() == 1 {
+        return align(design, &ids[0], how);
+    }
+    let mut next = design.clone();
+    let selected_layers: Vec<&crate::model::Layer> = next
+        .layers
+        .iter()
+        .filter(|l| ids.iter().any(|id| id == &l.id))
+        .collect();
+
+    if selected_layers.is_empty() {
+        return design.clone();
+    }
+
+    let min_x = selected_layers
+        .iter()
+        .map(|l| l.x)
+        .fold(f64::INFINITY, f64::min);
+    let max_right = selected_layers
+        .iter()
+        .map(|l| l.x + l.width)
+        .fold(f64::NEG_INFINITY, f64::max);
+    let min_y = selected_layers
+        .iter()
+        .map(|l| l.y)
+        .fold(f64::INFINITY, f64::min);
+    let max_bottom = selected_layers
+        .iter()
+        .map(|l| l.y + l.height.unwrap_or(4.0))
+        .fold(f64::NEG_INFINITY, f64::max);
+
+    let box_width = max_right - min_x;
+    let box_height = max_bottom - min_y;
+
+    for l in next.layers.iter_mut() {
+        if ids.iter().any(|id| id == &l.id) {
+            let h = l.height.unwrap_or(4.0);
+            match how {
+                Alignment::Left => l.x = min_x,
+                Alignment::Centre => l.x = min_x + (box_width - l.width) / 2.0,
+                Alignment::Right => l.x = max_right - l.width,
+                Alignment::Top => l.y = min_y,
+                Alignment::Middle => l.y = min_y + (box_height - h) / 2.0,
+                Alignment::Bottom => l.y = max_bottom - h,
+            }
+        }
+    }
+    next
+}
+
+pub fn distribute_layers(design: &Design, ids: &[String], horizontal: bool) -> Design {
+    if ids.len() < 3 {
+        return design.clone();
+    }
+    let mut next = design.clone();
+
+    if horizontal {
+        let mut indices: Vec<usize> = next
+            .layers
+            .iter()
+            .enumerate()
+            .filter(|(_, l)| ids.iter().any(|id| id == &l.id))
+            .map(|(i, _)| i)
+            .collect();
+
+        indices.sort_by(|&a, &b| {
+            next.layers[a]
+                .x
+                .partial_cmp(&next.layers[b].x)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        let first = &next.layers[indices[0]];
+        let last = &next.layers[indices[indices.len() - 1]];
+        let start_x = first.x;
+        let end_x = last.x + last.width;
+
+        let total_widths: f64 = indices.iter().map(|&i| next.layers[i].width).sum();
+        let span = end_x - start_x;
+        if span <= total_widths {
+            return next;
+        }
+
+        let gap = (span - total_widths) / (indices.len() - 1) as f64;
+        let mut curr_x = start_x;
+        for &idx in &indices {
+            next.layers[idx].x = curr_x;
+            curr_x += next.layers[idx].width + gap;
+        }
+    } else {
+        let mut indices: Vec<usize> = next
+            .layers
+            .iter()
+            .enumerate()
+            .filter(|(_, l)| ids.iter().any(|id| id == &l.id))
+            .map(|(i, _)| i)
+            .collect();
+
+        indices.sort_by(|&a, &b| {
+            next.layers[a]
+                .y
+                .partial_cmp(&next.layers[b].y)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        let first = &next.layers[indices[0]];
+        let last = &next.layers[indices[indices.len() - 1]];
+        let start_y = first.y;
+        let last_h = last.height.unwrap_or(4.0);
+        let end_y = last.y + last_h;
+
+        let total_heights: f64 = indices
+            .iter()
+            .map(|&i| next.layers[i].height.unwrap_or(4.0))
+            .sum();
+        let span = end_y - start_y;
+        if span <= total_heights {
+            return next;
+        }
+
+        let gap = (span - total_heights) / (indices.len() - 1) as f64;
+        let mut curr_y = start_y;
+        for &idx in &indices {
+            let h = next.layers[idx].height.unwrap_or(4.0);
+            next.layers[idx].y = curr_y;
+            curr_y += h + gap;
+        }
+    }
+
+    next
+}
+
+pub fn group_layers(design: &Design, ids: &[String], group_id: String) -> Design {
+    let mut next = design.clone();
+    for l in next.layers.iter_mut() {
+        if ids.iter().any(|id| id == &l.id) {
+            l.group_id = Some(group_id.clone());
+        }
+    }
+    next
+}
+
+pub fn ungroup_layers(design: &Design, ids: &[String]) -> Design {
+    let mut next = design.clone();
+    for l in next.layers.iter_mut() {
+        if ids.iter().any(|id| id == &l.id) {
+            l.group_id = None;
+        }
+    }
+    next
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Handle {
     Nw,
@@ -295,28 +467,69 @@ pub fn resize_box(start: Rect, handle: Handle, dx: f64, dy: f64, keep_shape: boo
     let right = x + width;
     let bottom = y + height;
     if handle.west() {
-        x = clamp(x + dx, 0.0, right - MIN_WIDTH);
+        x += dx;
         width = right - x;
+        if width < MIN_WIDTH {
+            width = MIN_WIDTH;
+            x = right - width;
+        }
+        if width > 1000.0 {
+            width = 1000.0;
+            x = right - width;
+        }
     }
     if handle.east() {
-        width = clamp(width + dx, MIN_WIDTH, 100.0 - x);
+        width = clamp(width + dx, MIN_WIDTH, 1000.0);
     }
     if handle.north() {
-        y = clamp(y + dy, 0.0, bottom - MIN_HEIGHT_DRAG);
+        y += dy;
         height = bottom - y;
+        if height < MIN_HEIGHT_DRAG {
+            height = MIN_HEIGHT_DRAG;
+            y = bottom - height;
+        }
+        if height > 1000.0 {
+            height = 1000.0;
+            y = bottom - height;
+        }
     }
     if handle.south() {
-        height = clamp(height + dy, MIN_HEIGHT_DRAG, 100.0 - y);
+        height = clamp(height + dy, MIN_HEIGHT_DRAG, 1000.0);
     }
-    if keep_shape && handle.corner() && start.height > 0.0 {
+    if keep_shape && start.height > 0.0 && start.width > 0.0 {
         let aspect = start.width / start.height;
-        let by_width = width / aspect;
-        if (by_width - height).abs() > 0.01 {
-            height = clamp(by_width, MIN_HEIGHT_DRAG, 100.0);
-            if handle.north() {
-                y = bottom - height;
-            }
+        let use_width = handle.east() || handle.west();
+        let width_drives = use_width
+            && (!handle.corner() || (dx / start.width).abs() >= (dy / start.height).abs());
+        if width_drives {
+            width = clamp(
+                width,
+                MIN_WIDTH.max(MIN_HEIGHT_DRAG * aspect),
+                1000.0_f64.min(1000.0 * aspect),
+            );
+            height = width / aspect;
+        } else {
+            height = clamp(
+                height,
+                MIN_HEIGHT_DRAG.max(MIN_WIDTH / aspect),
+                1000.0_f64.min(1000.0 / aspect),
+            );
+            width = height * aspect;
         }
+        x = if handle.west() {
+            right - width
+        } else if !use_width {
+            start.x + (start.width - width) / 2.0
+        } else {
+            start.x
+        };
+        y = if handle.north() {
+            bottom - height
+        } else if !handle.north() && !handle.south() {
+            start.y + (start.height - height) / 2.0
+        } else {
+            start.y
+        };
     }
     Rect {
         x,
@@ -362,7 +575,7 @@ pub fn apply_imported_card(design: &Design, url: String, image_ratio: f64, id: S
         })
         .collect();
     let mut next = design.clone();
-    next.canvas = Some(crate::model::Canvas { ratio });
+    next.canvas = Some(crate::model::Canvas::new(ratio));
     next.chrome = Some(false);
     next.layers = std::iter::once(create_image(url, id, ratio, ratio, true, None))
         .chain(kept)
@@ -406,7 +619,195 @@ pub fn ensure_entry_seal(design: &Design, id: String) -> Design {
     next
 }
 
+/// Keep the functional pass inside the visible paper, including its rotated bounds and rounded corners.
+pub fn constrain_entry_seals(design: &Design) -> Design {
+    let ratio = design.ratio();
+    let width_px = design.canvas_width_px() as f64;
+    let height_px = width_px / ratio;
+    let corner = design
+        .canvas
+        .as_ref()
+        .filter(|c| c.edge_style == Some(PaperEdge::Rounded))
+        .map(|c| {
+            c.corner_radius_px
+                .unwrap_or(16.0)
+                .min(width_px / 2.0)
+                .min(height_px / 2.0)
+        })
+        .unwrap_or(0.0);
+    let pad_x = 2.0_f64
+        .max(800.0 / width_px)
+        .max(corner * (1.0 - std::f64::consts::FRAC_1_SQRT_2) / width_px * 100.0);
+    let pad_y = 2.0_f64
+        .max(800.0 / height_px)
+        .max(corner * (1.0 - std::f64::consts::FRAC_1_SQRT_2) / height_px * 100.0);
+    let mut next = design.clone();
+    for layer in &mut next.layers {
+        if layer.kind != LayerKind::Code {
+            continue;
+        }
+        let angle = layer.rotation.unwrap_or(0.0).to_radians();
+        let extent = angle.cos().abs() + angle.sin().abs();
+        let width = clamp(
+            layer.width,
+            16.0,
+            ((100.0 - 2.0 * pad_x) / extent).min((100.0 - 2.0 * pad_y) / ratio / extent),
+        );
+        let height = width * ratio;
+        let x = round_js(
+            (clamp(
+                layer.x + layer.width / 2.0,
+                pad_x + width * extent / 2.0,
+                100.0 - pad_x - width * extent / 2.0,
+            ) - width / 2.0)
+                * 1e8,
+        ) / 1e8;
+        let y = round_js(
+            (clamp(
+                layer.y + layer.width * ratio / 2.0,
+                pad_y + height * extent / 2.0,
+                100.0 - pad_y - height * extent / 2.0,
+            ) - height / 2.0)
+                * 1e8,
+        ) / 1e8;
+        let safe_width = round_js(width * 1e8) / 1e8;
+        if (x - layer.x).abs() >= 1e-7
+            || (y - layer.y).abs() >= 1e-7
+            || (safe_width - layer.width).abs() >= 1e-7
+        {
+            layer.x = x;
+            layer.y = y;
+            layer.width = safe_width;
+        }
+    }
+    next
+}
+
 /// True for a layer the canvas may move: shown, and not locked.
 pub fn is_editable(layer: &Layer) -> bool {
     layer.visible && layer.locked != Some(true)
+}
+
+/// Resizes the canvas in pixels and updates its aspect ratio.
+pub fn resize_canvas_px(design: &Design, width_px: u32, height_px: u32) -> Design {
+    let mut width_px = width_px.clamp(200, 10000);
+    let mut height_px = height_px.clamp(200, 10000);
+    let requested_ratio = width_px as f64 / height_px as f64;
+    let safe_ratio = clamp(requested_ratio, 0.4, 2.5);
+    if safe_ratio != requested_ratio {
+        if height_px != design.canvas_height_px() && width_px == design.canvas_width_px() {
+            width_px = round_js(height_px as f64 * safe_ratio) as u32;
+        } else {
+            height_px = round_js(width_px as f64 / safe_ratio) as u32;
+        }
+    }
+    let ratio = clamp(
+        round_js((width_px as f64 / height_px as f64) * 1000.0) / 1000.0,
+        0.4,
+        2.5,
+    );
+    let mut next = design.clone();
+    let existing = next.canvas.unwrap_or(Canvas {
+        ratio,
+        width_px: Some(width_px),
+        height_px: Some(height_px),
+        edge_style: None,
+        corner_radius_px: None,
+    });
+    next.canvas = Some(Canvas {
+        ratio,
+        width_px: Some(width_px),
+        height_px: Some(height_px),
+        edge_style: existing.edge_style,
+        corner_radius_px: existing.corner_radius_px,
+    });
+    next
+}
+
+/// Sets the paper edge style and corner radius in pixels.
+pub fn set_paper_edge(
+    design: &Design,
+    edge_style: PaperEdge,
+    corner_radius_px: Option<f64>,
+) -> Design {
+    let mut next = design.clone();
+    let ratio = design.ratio();
+    let width_px = design.canvas_width_px();
+    let height_px = design.canvas_height_px();
+    let corner_radius_px = match edge_style {
+        PaperEdge::Sharp => Some(0.0),
+        PaperEdge::Rounded => corner_radius_px
+            .map(|r| clamp(r, 0.0, 500.0))
+            .or(Some(16.0)),
+        PaperEdge::Deckled => Some(0.0),
+    };
+    next.canvas = Some(Canvas {
+        ratio,
+        width_px: Some(width_px),
+        height_px: Some(height_px),
+        edge_style: Some(edge_style),
+        corner_radius_px,
+    });
+    next
+}
+
+/// Nudges a layer by (dx_px, dy_px) in canvas pixels.
+pub fn nudge(design: &Design, id: &str, dx_px: f64, dy_px: f64) -> Design {
+    let w_px = design.canvas_width_px() as f64;
+    let h_px = design.canvas_height_px() as f64;
+    let dx_pct = if w_px > 0.0 {
+        (dx_px / w_px) * 100.0
+    } else {
+        0.0
+    };
+    let dy_pct = if h_px > 0.0 {
+        (dy_px / h_px) * 100.0
+    } else {
+        0.0
+    };
+    let mut next = design.clone();
+    if let Some(l) = next
+        .layers
+        .iter_mut()
+        .find(|l| l.id == id && is_editable(l))
+    {
+        let max_x = clamp(100.0 - l.width, 0.0, 100.0);
+        let max_y = clamp(100.0 - l.height.unwrap_or(5.0), 0.0, 100.0);
+        l.x = clamp(round_js((l.x + dx_pct) * 100.0) / 100.0, 0.0, max_x);
+        l.y = clamp(round_js((l.y + dy_pct) * 100.0) / 100.0, 0.0, max_y);
+    }
+    next
+}
+
+/// Flips a layer horizontally or vertically.
+pub fn flip_layer(design: &Design, id: &str, horizontal: bool) -> Design {
+    let mut next = design.clone();
+    if let Some(l) = next
+        .layers
+        .iter_mut()
+        .find(|l| l.id == id && is_editable(l))
+    {
+        if horizontal {
+            let rot = l.rotation.unwrap_or(0.0);
+            l.rotation = Some(snap_rotation(-rot));
+        } else {
+            let rot = l.rotation.unwrap_or(0.0);
+            l.rotation = Some(snap_rotation(180.0 - rot));
+        }
+    }
+    next
+}
+
+/// Converts a pixel measurement into canvas percentage.
+pub fn px_to_pct(px: f64, total_px: f64) -> f64 {
+    if total_px > 0.0 {
+        round_js((px / total_px) * 10000.0) / 100.0
+    } else {
+        0.0
+    }
+}
+
+/// Converts a canvas percentage into pixels.
+pub fn pct_to_px(pct: f64, total_px: f64) -> f64 {
+    round_js((pct / 100.0) * total_px)
 }
