@@ -2235,7 +2235,16 @@ function syncTables() {
     item.obj.position.set(t.x, 0, t.y);
     item.obj.rotation.y = -t.rot * DEG;
     const tall = t.style.centrepiece === "tall" ? 2.0 : 1.35;
-    setLabel(item.obj, k, t.name, `${t.occupied}/${t.capacity}`, tall);
+    // A plan with no seating (a shared floor plan, a proposal) says how big the table is, not "0/10".
+    setLabel(
+      item.obj,
+      k,
+      t.name,
+      t.occupied == null
+        ? `${t.capacity} seats`
+        : `${t.occupied}/${t.capacity}`,
+      tall
+    );
   }
   for (const c of state.chairs) {
     const k = "chair:" + c.id;
@@ -2785,16 +2794,33 @@ function declutter() {
     list.push({ l, rank: sel ? -1e9 : (k.startsWith("zone:") ? -1e6 : 0) + d });
   }
   list.sort((a, b) => a.rank - b.rank);
+  // The part of the view not under the studio's floating panels: a label there would be cut off
+  // or read through a panel, so it waits until the hall is turned or panned into view.
+  const box = stage.getBoundingClientRect();
+  const i = state.inset || {};
+  const view = {
+    left: box.left + (i.left || 0),
+    right: box.right - (i.right || 0),
+    top: box.top + (i.top || 0),
+    bottom: box.bottom - (i.bottom || 0),
+  };
   const placed = [];
   for (const { l } of list) {
     const r = l.el.getBoundingClientRect();
-    const hit = placed.some(
-      (p) =>
-        r.left < p.right + 2 &&
-        r.right > p.left - 2 &&
-        r.top < p.bottom + 1 &&
-        r.bottom > p.top - 1
-    );
+    const outside =
+      r.left < view.left ||
+      r.right > view.right ||
+      r.top < view.top ||
+      r.bottom > view.bottom;
+    const hit =
+      outside ||
+      placed.some(
+        (p) =>
+          r.left < p.right + 2 &&
+          r.right > p.left - 2 &&
+          r.top < p.bottom + 1 &&
+          r.bottom > p.top - 1
+      );
     l.el.classList.toggle("muted", hit);
     if (!hit) placed.push(r);
   }

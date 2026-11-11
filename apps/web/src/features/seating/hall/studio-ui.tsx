@@ -84,8 +84,9 @@ export function Section({
           collapsible && closed ? "" : "mb-2.5"
         )}
       >
+        {/* h2: the workspace bar holds the page's h1, so a panel section is the next level. */}
         {collapsible ? (
-          <h3 className="m-0">
+          <h2 className="m-0">
             <button
               type="button"
               aria-expanded={!closed}
@@ -106,9 +107,9 @@ export function Section({
               </span>
               {title}
             </button>
-          </h3>
+          </h2>
         ) : (
-          <h3 className={headingClass}>{title}</h3>
+          <h2 className={headingClass}>{title}</h2>
         )}
         {aside}
       </div>

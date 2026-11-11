@@ -22,7 +22,7 @@ export function LayoutSummary({
   onFocus?: (id: string) => void;
 }) {
   const seats = tables.reduce((sum, t) => sum + t.capacity, 0);
-  const taken = tables.reduce((sum, t) => sum + t.occupied, 0);
+  const taken = tables.reduce((sum, t) => sum + (t.occupied ?? 0), 0);
   const venue = VENUE_LABEL[layout.venue.type];
 
   return (

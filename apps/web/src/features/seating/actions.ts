@@ -4,6 +4,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
+import { randomBytes } from "node:crypto";
+import { writeHallLayout, writeHallShare, type HallShare } from "./hall-save";
 import {
   createTableSchema,
   updateTableSchema,
@@ -182,36 +184,48 @@ export async function assignSeatAction(
  */
 export async function saveHallLayoutAction(
   eventId: string,
-  layout: unknown
-): Promise<ActionResult<{ fallback?: boolean }>> {
+  layout: unknown,
+  /**
+   * The revision the studio last loaded. When given, a newer stored hall is not overwritten: the
+   * result says `conflict` and hands back what is stored. Omit it to apply a reviewed change.
+   */
+  baseRev?: number
+): Promise<
+  ActionResult<{
+    fallback?: boolean;
+    rev?: number;
+    conflict?: boolean;
+    layout?: unknown;
+  }>
+> {
   const parsed = hallLayoutSchema.safeParse(layout);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
   const supabase = await memberClient(eventId);
   if (!supabase) return { ok: false, error: NOT_A_MEMBER };
-  const { error } = await supabase
-    .from("events")
-    .update({ hall_layout: parsed.data })
-    .eq("id", eventId);
-  if (error) {
-    const missing =
-      error.code === "42703" ||
-      error.code === "PGRST204" ||
-      /hall_layout/.test(error.message ?? "");
+  const res = await writeHallLayout(supabase, eventId, parsed.data, baseRev);
+  if (!res.ok) {
+    if (res.conflict) {
+      return {
+        ok: false,
+        data: { conflict: true, rev: res.rev, layout: res.layout },
+        error: "Someone else changed this hall since you opened it.",
+      };
+    }
     return {
       ok: false,
-      data: missing ? { fallback: true } : undefined,
-      error: missing
+      data: res.missing ? { fallback: true } : undefined,
+      error: res.missing
         ? "Hall layout saved on this device for now."
-        : mapError(error, "Could not save the hall layout."),
+        : mapError(res.error, "Could not save the hall layout."),
     };
   }
   // The checklist builds its tasks from the room, so it must not keep a render made before this
   // save; the studio's own page caches the panel it was opened with.
   revalidatePath(`/events/${eventId}/checklist`);
   revalidatePath(`/events/${eventId}/seating`);
-  return { ok: true };
+  return { ok: true, data: { rev: res.rev } };
 }
 
 /** Save where tables stand in the hall (centimetres). No revalidation: only the studio reads these live. */
@@ -286,15 +300,97 @@ export async function bulkAssignSeatsAction(
   if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   let seated = 0;
   const failed: string[] = [];
-  for (const p of parsed.data) {
-    const { error } = await supabase.rpc("assign_seat", {
-      p_guest_id: p.guestId,
-      p_table_id: p.tableId || undefined,
+  // Eight at a time: one round trip per guest made "Seat 144 guests" take about seven seconds.
+  // Each call still checks the guest and table on its own, so order between them does not matter.
+  const BATCH = 8;
+  for (let i = 0; i < parsed.data.length; i += BATCH) {
+    const chunk = parsed.data.slice(i, i + BATCH);
+    const results = await Promise.all(
+      chunk.map((p) =>
+        supabase.rpc("assign_seat", {
+          p_guest_id: p.guestId,
+          p_table_id: p.tableId || undefined,
+        })
+      )
+    );
+    results.forEach(({ error }, j) => {
+      if (error) failed.push(chunk[j].guestId);
+      else seated++;
     });
-    if (error) failed.push(p.guestId);
-    else seated++;
   }
   revalidatePath(`/events/${eventId}/seating`);
   revalidatePath(`/events/${eventId}`);
   return { ok: failed.length === 0 || seated > 0, data: { seated, failed } };
+}
+
+/**
+ * Create, or replace, the view-only link to this hall's floor plan. The link shows the room to
+ * scale with its tables and seat counts, and no guest names, so a host can send it to a venue
+ * manager or caterer. Members only; the revision check still applies, so a link is never made on
+ * top of a hall someone else has just changed.
+ */
+export async function createHallShareAction(
+  eventId: string,
+  baseRev: number,
+  /** The hall as the studio shows it, saved with the link when nothing is stored yet. */
+  layout?: unknown
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  return setHallShare(
+    eventId,
+    baseRev,
+    {
+      token: randomBytes(24).toString("base64url"),
+      createdAt: Date.now(),
+    },
+    layout
+  );
+}
+
+/** Stop sharing: the old link stops working at once. */
+export async function revokeHallShareAction(
+  eventId: string,
+  baseRev: number
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  return setHallShare(eventId, baseRev, null);
+}
+
+async function setHallShare(
+  eventId: string,
+  baseRev: number,
+  share: HallShare | null,
+  layout?: unknown
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
+  let res = await writeHallShare(supabase, eventId, baseRev, share);
+  // A hall the studio shows but has not saved yet (a new celebration shared straight away): save
+  // it with the link, through the same checks as any studio save.
+  if (!res.ok && res.reason === "no-hall" && share && layout !== undefined) {
+    const parsed = hallLayoutSchema.safeParse(layout);
+    if (parsed.success) {
+      const saved = await writeHallLayout(
+        supabase,
+        eventId,
+        parsed.data,
+        baseRev,
+        share
+      );
+      res = saved.ok
+        ? { ok: true, rev: saved.rev }
+        : { ok: false, reason: saved.conflict ? "conflict" : "error" };
+    }
+  }
+  if (!res.ok) {
+    return {
+      ok: false,
+      error:
+        res.reason === "no-hall"
+          ? "Lay out the hall first, then share its floor plan."
+          : res.reason === "conflict"
+            ? "Someone else changed this hall since you opened it. Reload, then try again."
+            : "Could not change the share link.",
+    };
+  }
+  revalidatePath(`/events/${eventId}/seating`);
+  return { ok: true, data: { token: share?.token ?? "", rev: res.rev } };
 }

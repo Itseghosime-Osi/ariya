@@ -62,7 +62,8 @@ test.describe("Seating Chart & Capacity Conflict", () => {
       timeout: 5000,
     });
 
-    // Assign Eniola to Table via accessible keyboard navigation on select
+    // Assign Eniola to Table: Seat opens the table picker for that guest only.
+    await page.getByRole("button", { name: "Seat Eniola Adeleke" }).click();
     const eniolaSelect = page.locator(
       'select[aria-label="Assign Eniola Adeleke to a table"]'
     );

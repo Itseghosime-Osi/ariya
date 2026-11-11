@@ -10,7 +10,6 @@ import React, {
 import {
   Armchair,
   Box,
-  Camera,
   PanelRightClose,
   PanelRightOpen,
   ChevronDown,
@@ -25,7 +24,6 @@ import {
   MousePointer2,
   Palette,
   Plus,
-  Printer,
   Redo2,
   SunMoon,
   RotateCcw,
@@ -53,6 +51,14 @@ import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
+import { seatingCounts } from "../counts";
+import { SeatRulesPanel } from "./SeatRulesPanel";
+import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
+import { ShareMenu } from "./ShareMenu";
+import { shareOf } from "./share";
+import { clearanceOf, gapText } from "./clearance";
+import { ruleBreaks, type SeatRule } from "./rules";
+import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
   moveLayer,
   nudgeLayer,
@@ -62,12 +68,12 @@ import {
 } from "./layers";
 import {
   areaPerDiner,
+  nextStageSpot,
+  stageItemPlacement,
   SPACING_GAP,
   ZONE_DEFAULTS,
   chairAfterDrop,
   chairPlacement,
-  nextStageSpot,
-  stageItemPlacement,
   chairPositions,
   chairType,
   clamp,
@@ -84,13 +90,10 @@ import {
   zoneId,
   type FreeChair,
   type HallLayout,
-  type ItemGroup,
   type SeatKind,
   type StageItem,
   type TableStyle,
   type Zone,
-  type ZoneKind,
-  type ZoneShape,
 } from "./model";
 import {
   findFreeSpot,
@@ -160,7 +163,6 @@ import {
   type Align,
 } from "./Inspector";
 import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
-import { Keys, SHORTCUTS } from "./shortcuts";
 import { SimpleMode } from "./SimpleMode";
 import {
   chairRow,
@@ -173,102 +175,21 @@ import {
   tableRowSlots,
   type Picked,
 } from "./grouping";
-
-type Positions = Record<string, { x: number; y: number }>;
-type Deck =
-  | "guests"
-  | "room"
-  | "fit"
-  | "seat"
-  | "decor"
-  | "thermal"
-  | "catering"
-  | "risk";
-type Flyout = "table" | "chair" | "zone" | null;
-type Move = { type: string; id: string; x: number; y: number };
-
-const TABLE_PRESETS: {
-  key: string;
-  label: string;
-  shape: TableShape;
-  capacity: number;
-}[] = [
-  { key: "r10", label: "Round 10", shape: "round", capacity: 10 },
-  { key: "r8", label: "Round 8", shape: "round", capacity: 8 },
-  { key: "r12", label: "Round 12", shape: "round", capacity: 12 },
-  { key: "r6", label: "Round 6", shape: "round", capacity: 6 },
-  { key: "b8", label: "Banquet 8", shape: "rectangular", capacity: 8 },
-  { key: "b10", label: "Banquet 10", shape: "rectangular", capacity: 10 },
-  { key: "o10", label: "Oval 10", shape: "oval", capacity: 10 },
-  { key: "s4", label: "Cocktail 4", shape: "round", capacity: 4 },
-  { key: "h8", label: "High table 8", shape: "head", capacity: 8 },
-];
-
-const ZONE_GALLERY: {
-  kind: ZoneKind;
-  label: string;
-  shape?: ZoneShape;
-  w?: number;
-  h?: number;
-}[] = [
-  { kind: "stage", label: "Stage" },
-  { kind: "dance", label: "Round dance floor", shape: "round", w: 7, h: 7 },
-  { kind: "dance", label: "Square dance floor", shape: "rect", w: 7, h: 7 },
-  { kind: "dance", label: "Heart dance floor", shape: "heart", w: 7, h: 6.4 },
-  { kind: "dance", label: "Hexagon dance floor", shape: "hexagon", w: 7, h: 7 },
-  { kind: "buffet", label: "Buffet" },
-  { kind: "bar", label: "Drinks bar" },
-  { kind: "dj", label: "DJ & MC" },
-  { kind: "cake", label: "Cake table", shape: "round" },
-  { kind: "entrance", label: "Entrance arch" },
-  { kind: "photo", label: "Flower wall" },
-  { kind: "gifts", label: "Gifts table" },
-  { kind: "pillar", label: "Pillar", shape: "round" },
-  { kind: "custom", label: "Custom table", w: 1.8, h: 0.9 },
-  { kind: "custom", label: "Custom item", w: 1.2, h: 1.2 },
-];
-
-const CHAIR_GROUPS: {
-  key: string;
-  label: string;
-  n: number;
-  spacing: number;
-  seat?: SeatKind;
-}[] = [
-  { key: "one", label: "One chair", n: 1, spacing: 0 },
-  { key: "two", label: "Couple’s chairs", n: 2, spacing: 0.7, seat: "couple" },
-  { key: "row", label: "Row of 6", n: 6, spacing: 0.55 },
-  { key: "row12", label: "Row of 12", n: 12, spacing: 0.55 },
-  {
-    key: "celebrant",
-    label: "Celebrant’s chair",
-    n: 1,
-    spacing: 0,
-    seat: "celebrant",
-  },
-  { key: "couch", label: "Couch (two seats)", n: 1, spacing: 0, seat: "couch" },
-];
-
-/** Rows of tables, so a host can lay out a block without placing each one. */
-const TABLE_ROWS: { key: string; label: string; n: number; perRow: number }[] =
-  [
-    { key: "r3", label: "Row of 3", n: 3, perRow: 3 },
-    { key: "r4", label: "Row of 4", n: 4, perRow: 4 },
-    { key: "r6", label: "Row of 6", n: 6, perRow: 6 },
-    { key: "block6", label: "2 rows of 3", n: 6, perRow: 3 },
-    { key: "block12", label: "3 rows of 4", n: 12, perRow: 4 },
-  ];
-
-/** The words a host would use, for the line that confirms what was just added. */
-const STAGE_ITEM_WORD: Record<StageItem["kind"], string> = {
-  podium: "A podium",
-  lectern: "A lectern",
-  arch: "An arch",
-  couch: "A couch",
-  table: "A table",
-  cake: "A cake table",
-  screen: "A screen",
-};
+import {
+  CHAIR_GROUPS,
+  Deck,
+  Flyout,
+  Move,
+  Positions,
+  STAGE_ITEM_WORD,
+  TABLE_PRESETS,
+  TABLE_ROWS,
+  TOOL_GROUPS,
+  ZONE_GALLERY,
+  isTyping,
+  nextTableNames,
+} from "./studio-config";
+import { GroupBar, ModeSwitch, RailTip, ShortcutSheet } from "./studio-chrome";
 
 interface HallStudioProps {
   eventId: string;
@@ -297,38 +218,19 @@ interface HallStudioProps {
   deleteTables: (ids: string[]) => Promise<number>;
   /** A short message to show over the hall (saved, could not save…). */
   notice?: React.ReactNode;
+  /** Take back the last "Seat everyone"; true when it worked. */
+  onUndoSeatEveryone?: () => Promise<boolean>;
+  canUndoSeatEveryone?: boolean;
   /** The event's name, shown beside the Back button. */
   eventTitle?: string;
+  /** Hall and seating suggestions from connected apps waiting on the approvals desk. */
+  pendingProposals?: number;
   /** Where Back goes. */
   backHref?: string;
   /** Opens the new-table form. */
   onNewTable?: () => void;
 }
 
-function nextTableNames(tables: TableWithGuests[], count: number): string[] {
-  let n = 0;
-  for (const t of tables) {
-    const m = /^table\s+(\d+)$/i.exec(t.name.trim());
-    if (m) n = Math.max(n, Number(m[1]));
-  }
-  return Array.from(
-    { length: count },
-    (_, i) => `Table ${String(n + i + 1).padStart(2, "0")}`
-  );
-}
-
-const isTyping = (el: EventTarget | null) =>
-  el instanceof HTMLElement &&
-  (el.tagName === "INPUT" ||
-    el.tagName === "TEXTAREA" ||
-    el.tagName === "SELECT" ||
-    el.isContentEditable);
-
-/**
- * The hall studio: a realistic 3D hall on an endless board, a floating tool rail to add tables,
- * chairs and areas, an inspector to design whatever is selected, and a deck of planning tools
- * (guests, room, fit, seat, décor) on the side.
- */
 export function HallStudio({
   eventId,
   data,
@@ -345,8 +247,11 @@ export function HallStudio({
   deleteTables,
   notice,
   eventTitle,
+  pendingProposals = 0,
   backHref,
   onNewTable,
+  onUndoSeatEveryone,
+  canUndoSeatEveryone = false,
 }: HallStudioProps) {
   const hall = useHallLayout({
     eventId,
@@ -379,7 +284,36 @@ export function HallStudio({
     after: { layout: HallLayout; positions: Positions };
     showing: Compared;
   } | null>(null);
-  const say = (msg: string) => setAnnounce(msg);
+  // What the studio just did. Read out to screen readers and shown for a few seconds to everyone:
+  // it used to be screen-reader only, so a sighted host never saw "Only 24 more tables fit".
+  const [toast, setToast] = useState<{ msg: string; n: number } | null>(null);
+  // A first-visit guide, remembered on this device once dismissed. Storage can be blocked, in
+  // which case the guide simply shows again next time.
+  const [showTips, setShowTips] = useState(false);
+  useEffect(() => {
+    try {
+      setShowTips(localStorage.getItem("ariya:studio-tips") !== "seen");
+    } catch {
+      setShowTips(true);
+    }
+  }, []);
+  const dismissTips = () => {
+    setShowTips(false);
+    try {
+      localStorage.setItem("ariya:studio-tips", "seen");
+    } catch {
+      /* private mode */
+    }
+  };
+  const say = (msg: string) => {
+    setAnnounce(msg);
+    setToast((prev) => ({ msg, n: (prev?.n ?? 0) + 1 }));
+  };
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 5000);
+    return () => window.clearTimeout(id);
+  }, [toast]);
 
   // ---------- cooling ----------
   const [thermal, setThermal] = useState<ThermalReport | null>(null);
@@ -675,7 +609,10 @@ export function HallStudio({
   }, [data.tables, fpOf, layout]);
 
   // ---------- planning numbers ----------
-  const guests = data.stats.seatedAttendees + data.stats.unseatedAttendees;
+  // One set of numbers for every panel (see counts.ts): accepted people can be seated, replies
+  // still awaited are planned for but never counted as waiting for a seat.
+  const counts = useMemo(() => seatingCounts(data), [data]);
+  const guests = counts.expectedPeople;
 
   // The cooling verdict follows the plan: every edit to the room, the crowd or the units re-asks.
   useEffect(() => {
@@ -823,8 +760,53 @@ export function HallStudio({
       x: positions[t.id]?.x ?? 0,
       y: positions[t.id]?.y ?? 0,
     }));
-    return { units, plan: planSeating(units, tables, front) };
-  }, [data.unseatedGuests, data.tables, positions, front]);
+    return {
+      units,
+      plan: planSeating(units, tables, front, {
+        rules: layout.seatRules,
+        occupants: new Map(
+          data.tables.map((t) => [t.id, t.guests.map((g) => g.id)])
+        ),
+      }),
+    };
+  }, [data.unseatedGuests, data.tables, positions, front, layout.seatRules]);
+
+  // ---------- seating rules ----------
+  const ruleGuests = useMemo(
+    () =>
+      [...data.tables.flatMap((t) => t.guests), ...data.unseatedGuests]
+        .map((g) => ({ id: g.id, name: g.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [data.tables, data.unseatedGuests]
+  );
+  const breaks = useMemo(() => {
+    const tableOf = new Map<string, string | null>();
+    for (const t of data.tables)
+      for (const g of t.guests) tableOf.set(g.id, t.id);
+    const names = new Map(ruleGuests.map((g) => [g.id, g.name]));
+    const tableNames = new Map(data.tables.map((t) => [t.id, t.name]));
+    return ruleBreaks(
+      layout.seatRules,
+      tableOf,
+      (id) => names.get(id) ?? "A guest",
+      (id) => tableNames.get(id) ?? "a table"
+    );
+  }, [layout.seatRules, data.tables, ruleGuests]);
+  const addRule = (rule: SeatRule) => {
+    updateLayout((l) => ({ ...l, seatRules: [...l.seatRules, rule] }));
+    say(
+      rule.kind === "together"
+        ? "Keep-together rule saved"
+        : "Keep-apart rule saved"
+    );
+  };
+  const removeRule = (id: string) => {
+    updateLayout((l) => ({
+      ...l,
+      seatRules: l.seatRules.filter((r) => r.id !== id),
+    }));
+    say("Rule removed");
+  };
 
   // ---------- the scene the 3D hall draws ----------
   const scene: Scene = useMemo(
@@ -939,7 +921,23 @@ export function HallStudio({
       .map(([id, p]) => ({ id, x: toCm(p.x), y: toCm(p.y) }));
     void setTablePositions(moves);
   };
+  // When "Seat everyone" is the newest step, Undo (and Ctrl+Z) takes back the seats first.
+  const [bulkAt, setBulkAt] = useState<{ at: number; n: number } | null>(null);
+  const lastEditAt = hall.history.at(-1)?.at ?? 0;
+  const seatUndoFirst =
+    !!bulkAt && canUndoSeatEveryone && bulkAt.at >= lastEditAt;
+  const undoSeats = async () => {
+    if (!onUndoSeatEveryone) return;
+    if (await onUndoSeatEveryone()) {
+      setBulkAt(null);
+      say("Seats taken back");
+    }
+  };
   const undo = () => {
+    if (seatUndoFirst) {
+      void undoSeats();
+      return;
+    }
     const snap = hall.undo(positions);
     if (snap) {
       setCompare(null);
@@ -947,6 +945,40 @@ export function HallStudio({
       say("Undone");
     }
   };
+  /** Undo several steps at once, back to just before a step in the History list. */
+  const undoSteps = (n: number) => {
+    let pos = positions;
+    let last: { positions: Positions } | null = null;
+    for (let i = 0; i < n; i++) {
+      const snap = hall.undo(pos);
+      if (!snap) break;
+      last = snap;
+      pos = snap.positions;
+    }
+    if (last) {
+      setCompare(null);
+      restorePositions(last.positions);
+      say(n === 1 ? "Undone" : `Went back ${n} steps`);
+    }
+  };
+  const historyEntries: HistoryEntry[] = [
+    ...hall.history.map((h, i) => ({
+      key: `h${i}-${h.at}`,
+      label: h.label,
+      at: h.at,
+      onRevert: () => undoSteps(hall.history.length - i),
+    })),
+    ...(bulkAt && canUndoSeatEveryone
+      ? [
+          {
+            key: `seat-${bulkAt.at}`,
+            label: `Seated ${bulkAt.n} guests`,
+            at: bulkAt.at,
+            onRevert: () => void undoSeats(),
+          },
+        ]
+      : []),
+  ];
   const redo = () => {
     const snap = hall.redo(positions);
     if (snap) {
@@ -1535,9 +1567,12 @@ export function HallStudio({
     setBusy(null);
     say(
       count !== undefined && list.length < count
-        ? `Only ${created.length} more tables fit. Try snug spacing or smaller tables.`
+        ? `Only ${created.length} more ${created.length === 1 ? "table fits" : "tables fit"} in a ${layout.width} × ${layout.length} m hall. Make the room bigger, use snug spacing or choose smaller tables.`
         : `${created.length} tables added`
     );
+    // Show the whole hall again: after a bulk change the camera could be left zoomed in, with
+    // half the hall under the side panel.
+    if (created.length > 1) view3d.current?.command("fit");
   };
 
   /** Take away empty tables: the crowded ones first, then those furthest from the stage. */
@@ -1718,8 +1753,10 @@ export function HallStudio({
 
   const seatEveryone = async () => {
     setBusy("seat");
-    await bulkAssign(seatPlan.plan.assignments);
+    const res = await bulkAssign(seatPlan.plan.assignments);
+    if (res.seated > 0) setBulkAt({ at: Date.now(), n: res.seated });
     setBusy(null);
+    view3d.current?.command("fit");
   };
 
   const assignTo = (guestId: string, tableId: string) => {
@@ -1873,10 +1910,7 @@ export function HallStudio({
   ];
 
   const warnCount = Object.values(warnings).filter((w) => w !== "tight").length;
-  const unseatedSeats = data.unseatedGuests.reduce(
-    (a, g) => a + g.attending_count,
-    0
-  );
+  const unseatedSeats = counts.toSeat.people;
   const evening = layout.mood === "evening";
   // Rain only makes sense where there is sky above the tables.
   const openVenue =
@@ -1902,7 +1936,11 @@ export function HallStudio({
       key: "guests",
       label: "Guests",
       icon: Users,
-      stat: unseatedSeats ? `${unseatedSeats} to seat` : "All seated",
+      stat: unseatedSeats
+        ? `${unseatedSeats} to seat`
+        : counts.accepted.people
+          ? "All seated"
+          : "No yes yet",
     },
     {
       key: "room",
@@ -1920,7 +1958,7 @@ export function HallStudio({
       key: "seat",
       label: "Seat",
       icon: Wand2,
-      stat: `${data.stats.readinessPct}% done`,
+      stat: `${counts.seatedPct}% seated`,
     },
     {
       key: "thermal",
@@ -1976,14 +2014,19 @@ export function HallStudio({
     <dl className="grid grid-cols-2 gap-x-4 gap-y-2" data-testid="hall-meter">
       {[
         {
-          k: "Guests",
-          v: guests,
-          note: buffer ? `${target} with buffer` : undefined,
+          k: "Coming",
+          v: counts.accepted.people,
+          note: counts.awaiting.people
+            ? `+${counts.awaiting.people} awaiting reply`
+            : undefined,
         },
         {
           k: "Seats",
           v: seats,
-          note: seats >= target ? "enough" : `${target - seats} short`,
+          note:
+            seats >= target
+              ? "enough"
+              : `${target - seats} short${buffer ? ` with ${buffer}% buffer` : ""}`,
           bad: seats < target,
         },
         { k: "Hall fits", v: fitEmpty.seats, wide: true },
@@ -1996,12 +2039,12 @@ export function HallStudio({
       ].map((m) => (
         <div
           key={m.k}
-          className={cn("items-baseline gap-1 whitespace-nowrap", "flex")}
+          className="flex min-w-0 flex-wrap items-baseline gap-x-1"
         >
           <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
             {m.k}
           </dt>
-          <dd className="flex items-baseline gap-1">
+          <dd className="flex min-w-0 flex-wrap items-baseline gap-x-1">
             <span className="text-sm font-bold tabular-nums">{m.v}</span>
             {m.note && (
               <span
@@ -2032,6 +2075,33 @@ export function HallStudio({
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
+      {/* About 25 Tab presses used to stand between the page top and the panel. These links
+          appear on focus and jump straight there. */}
+      <nav
+        aria-label="Skip links"
+        className="pointer-events-none fixed left-3 top-3 z-50 flex flex-col gap-1"
+      >
+        {[
+          ["#hall-tools", "Skip to planning tools"],
+          ["#hall-panel", "Skip to the open panel"],
+        ].map(([href, label]) => (
+          <a
+            key={href}
+            href={href}
+            onClick={(e) => {
+              const el = document.querySelector<HTMLElement>(href);
+              if (!el) return;
+              e.preventDefault();
+              if (!el.hasAttribute("tabindex"))
+                el.setAttribute("tabindex", "-1");
+              el.focus();
+            }}
+            className="pointer-events-auto sr-only rounded-full bg-night px-4 py-2 text-xs font-semibold text-white focus:not-sr-only focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
 
       {
         <>
@@ -2060,13 +2130,10 @@ export function HallStudio({
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
-                  detail={`${layout.width} × ${layout.length} m${
-                    hall.saving
-                      ? " · saving…"
-                      : hall.storedLocally
-                        ? " · saved on this device"
-                        : ""
-                  }`}
+                  detail={`${layout.width} × ${layout.length} m`}
+                  status={
+                    <SaveStatus state={hall.saveState} onRetry={hall.retry} />
+                  }
                 >
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </WorkspaceBar>
@@ -2078,10 +2145,34 @@ export function HallStudio({
                   leftEdge
                 )}
               >
-                {/* Below a wide screen the bar has no room for the switch, so it sits here. */}
-                <div className="pointer-events-auto min-[1440px]:hidden">
+                {/* On a phone the bar has no room for the switch, so it sits here. */}
+                <div className="pointer-events-auto sm:hidden">
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </div>
+                {pendingProposals > 0 && (
+                  // A connected app has suggested a room or a seating plan. It is reviewed, with
+                  // a preview and an undo, on the approvals desk: the studio only points there.
+                  <Link
+                    href="/approvals"
+                    data-testid="hall-proposals"
+                    className="pointer-events-auto inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-4 text-xs font-semibold text-white shadow-lg hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                  >
+                    <Sparkles
+                      size={14}
+                      aria-hidden="true"
+                      className="text-[#e9c98a]"
+                    />
+                    {pendingProposals === 1
+                      ? "A connected app suggested a change. Review it"
+                      : `Connected apps suggested ${pendingProposals} changes. Review them`}
+                  </Link>
+                )}
+                {hall.conflict && (
+                  <ConflictBanner
+                    onTakeTheirs={hall.takeTheirs}
+                    onKeepMine={hall.keepMine}
+                  />
+                )}
                 {/* Below the hall numbers rather than centred on the top edge: at the widths the
                     studio actually runs at, a centred bar sits underneath this card and cannot be
                     clicked. */}
@@ -2143,7 +2234,7 @@ export function HallStudio({
                           "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
                         )}
                       >
-                        Add tables from the toolbar, or use Fit to fill the hall
+                        Add a table with +, or fill the hall from Fit
                       </span>
                     )}
                 </div>
@@ -2180,7 +2271,7 @@ export function HallStudio({
                   type="button"
                   className={chip}
                   onClick={undo}
-                  disabled={!hall.canUndo}
+                  disabled={!hall.canUndo && !seatUndoFirst}
                   aria-label="Undo"
                   title="Undo (Ctrl + Z)"
                 >
@@ -2196,29 +2287,33 @@ export function HallStudio({
                 >
                   <Redo2 size={17} />
                 </button>
+                <HistoryMenu entries={historyEntries} className={chip} />
+                <ShareMenu
+                  eventId={eventId}
+                  eventTitle={eventTitle}
+                  layout={layout}
+                  tables={data.tables.map((t) => ({
+                    name: t.name,
+                    shape: t.shape,
+                    capacity: t.capacity,
+                    x: positions[t.id]?.x ?? 0,
+                    y: positions[t.id]?.y ?? 0,
+                    rot: rotationOf(t.id),
+                    seated: t.occupiedSeats,
+                  }))}
+                  initialToken={shareOf(initialLayout)?.token ?? null}
+                  currentRev={hall.currentRev}
+                  adoptRev={hall.adoptRev}
+                  whenIdle={hall.whenIdle}
+                  onSnapshot={() => view3d.current?.command("snapshot")}
+                  printHref={`/events/${eventId}/seating/print`}
+                  className={chip}
+                  onSay={say}
+                />
                 <span
                   className="mx-0.5 h-5 w-px bg-hairline"
                   aria-hidden="true"
                 />
-                <button
-                  type="button"
-                  className={chip}
-                  onClick={() => view3d.current?.command("snapshot")}
-                  aria-label="Save a picture of the hall"
-                  title="Save a picture"
-                >
-                  <Camera size={17} />
-                </button>
-                <Link
-                  href={`/events/${eventId}/seating/print`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={chip}
-                  aria-label="Print cards and chart"
-                  title="Print cards and chart"
-                >
-                  <Printer size={17} />
-                </Link>
                 <button
                   type="button"
                   className={chip}
@@ -2287,15 +2382,41 @@ export function HallStudio({
                 )}
               </div>
 
-              {notice && (
+              {(toast || notice) && (
+                // Centred in the space the hall actually has, between the dock and the panel, so
+                // the left dock never covers the start of a message.
                 <div
-                  role="status"
                   className={cn(
-                    float,
-                    "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
+                    "pointer-events-none absolute bottom-20 right-3 flex justify-center",
+                    leftEdge
                   )}
                 >
-                  {notice}
+                  {toast && !notice && (
+                    <div
+                      key={toast.n}
+                      aria-hidden="true"
+                      data-testid="hall-toast"
+                      className={cn(
+                        float,
+                        "pointer-events-none max-w-full px-4 py-2 text-xs font-semibold text-night"
+                      )}
+                    >
+                      {toast.msg}
+                    </div>
+                  )}
+                  {notice && (
+                    <div
+                      role="status"
+                      className={cn(
+                        float,
+                        // Above both bottom bars, so it is never hidden behind the zoom controls, and
+                        // clickable so its Undo button works.
+                        "pointer-events-auto max-w-full px-4 py-2 text-xs font-semibold"
+                      )}
+                    >
+                      {notice}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2733,7 +2854,6 @@ export function HallStudio({
                           setDeck("seat");
                           togglePanel(true);
                         }}
-                        stats={data.stats}
                         meter={meter}
                         onClose={() => setDockOpen(false)}
                       />
@@ -2751,111 +2871,118 @@ export function HallStudio({
                   leftEdge
                 )}
               >
+                {/* One bar for the view: zoom, fit, camera and turning. It used to be two bars that
+                    stacked on a laptop and covered the toasts above them. */}
                 <div
+                  role="toolbar"
+                  aria-label="View"
                   className={cn(
                     float,
-                    "pointer-events-auto flex items-center gap-0.5 p-1"
+                    "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1"
                   )}
                 >
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("zoomOut")}
-                    aria-label="Zoom out"
-                    title="Zoom out (−)"
-                  >
-                    <Minus size={17} />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("zoomOut")}
+                      aria-label="Zoom out"
+                      title="Zoom out (−)"
+                    >
+                      <Minus size={17} />
+                    </button>
+                    <span
+                      className="w-12 text-center text-xs font-semibold tabular-nums text-night"
+                      aria-hidden="true"
+                    >
+                      {cam.pct}%
+                    </span>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("zoomIn")}
+                      aria-label="Zoom in"
+                      title="Zoom in (+)"
+                    >
+                      <Plus size={17} />
+                    </button>
+                    <span
+                      className="mx-0.5 h-5 w-px bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("fit")}
+                      aria-label="Fit the hall in view"
+                      title="Fit (F or 0)"
+                    >
+                      <Maximize size={16} />
+                    </button>
+                  </div>
                   <span
-                    className="w-12 text-center text-xs font-semibold tabular-nums text-night"
-                    aria-hidden="true"
-                  >
-                    {cam.pct}%
-                  </span>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("zoomIn")}
-                    aria-label="Zoom in"
-                    title="Zoom in (+)"
-                  >
-                    <Plus size={17} />
-                  </button>
-                  <span
-                    className="mx-0.5 h-5 w-px bg-hairline"
+                    className="mx-1 h-6 w-px shrink-0 bg-hairline"
                     aria-hidden="true"
                   />
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("fit")}
-                    aria-label="Fit the hall in view"
-                    title="Fit (F or 0)"
+                  <div
+                    className="flex shrink-0 items-center gap-0.5"
+                    role="radiogroup"
+                    aria-label="Camera"
                   >
-                    <Maximize size={16} />
-                  </button>
-                </div>
-                <div
-                  className={cn(
-                    float,
-                    "pointer-events-auto flex items-center gap-0.5 p-1"
-                  )}
-                  role="radiogroup"
-                  aria-label="Camera"
-                >
-                  {(
-                    [
-                      ["top", "Top", Square, "top"],
-                      ["3d", "3D", Box, "perspective"],
-                    ] as const
-                  ).map(([k, l, I, cmd]) => (
+                    {(
+                      [
+                        ["top", "Top", Square, "top"],
+                        ["3d", "3D", Box, "perspective"],
+                      ] as const
+                    ).map(([k, l, I, cmd]) => (
+                      <button
+                        key={k}
+                        type="button"
+                        role="radio"
+                        aria-checked={cam.view === k}
+                        onClick={() => view3d.current?.command(cmd)}
+                        className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      >
+                        <I size={15} /> {l}
+                      </button>
+                    ))}
                     <button
-                      key={k}
                       type="button"
-                      role="radio"
-                      aria-checked={cam.view === k}
-                      onClick={() => view3d.current?.command(cmd)}
-                      className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      className={chip}
+                      onClick={() => view3d.current?.command("rotateLeft")}
+                      aria-label="Turn the view left"
+                      title="Turn the view (or drag empty space)"
                     >
-                      <I size={15} /> {l}
+                      <RotateCcw size={16} />
                     </button>
-                  ))}
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("rotateLeft")}
-                    aria-label="Turn the view left"
-                    title="Turn the view (or drag empty space)"
-                  >
-                    <RotateCcw size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("rotateRight")}
-                    aria-label="Turn the view right"
-                    title="Turn the view (or drag empty space)"
-                  >
-                    <RotateCw size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("tiltUp")}
-                    aria-label="Look down from higher"
-                    title="Look from higher (or drag down on empty space)"
-                  >
-                    <ChevronUp size={17} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("tiltDown")}
-                    aria-label="Look from lower"
-                    title="Look from lower, down to eye level"
-                  >
-                    <ChevronDown size={17} />
-                  </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("rotateRight")}
+                      aria-label="Turn the view right"
+                      title="Turn the view (or drag empty space)"
+                    >
+                      <RotateCw size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("tiltUp")}
+                      aria-label="Look down from higher"
+                      title="Look from higher (or drag down on empty space)"
+                    >
+                      <ChevronUp size={17} />
+                    </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("tiltDown")}
+                      aria-label="Look from lower"
+                      title="Look from lower, down to eye level"
+                    >
+                      <ChevronDown size={17} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2886,57 +3013,110 @@ export function HallStudio({
                   </div>
                 </div>
               )}
+              {mode === "studio" && showTips && (
+                <div
+                  data-testid="studio-tips"
+                  className="border-b border-hairline bg-[#f6f1e8] px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-ink">
+                      Three things to know
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={dismissTips}
+                      className="-mr-2 -mt-2 min-h-11 rounded-full px-3 text-xs font-semibold text-night hover:bg-white focus-visible:outline-2 focus-visible:outline-burgundy"
+                    >
+                      Got it
+                    </button>
+                  </div>
+                  <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs text-night">
+                    <li>
+                      <strong>Fit</strong> fills the hall with tables, or add
+                      one with +.
+                    </li>
+                    <li>
+                      <strong>Seat</strong> seats everyone who accepted in one
+                      go, and you can undo it.
+                    </li>
+                    <li>
+                      Your work saves by itself. The bar at the top says when it
+                      is saved.
+                    </li>
+                  </ol>
+                </div>
+              )}
+              {/* Eight tools in three groups, so every label and number has room: Design (the room
+                  itself), Seat (who sits where) and Plan (what the day needs). All eight stay tabs
+                  of one list, so arrow keys and links to a tool keep working. */}
               <div
+                id="hall-tools"
                 role="tablist"
                 aria-label="Planning tools"
                 hidden={mode === "simple"}
-                className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
+                className="flex flex-col gap-1.5 border-b border-hairline p-2"
               >
-                {tiles.map(({ key, label, icon: I, stat }) => {
-                  const on = deck === key && selection.length === 0;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      role="tab"
-                      id={`hall-tab-${key}`}
-                      aria-selected={on}
-                      aria-controls="hall-panel"
-                      onClick={() => {
-                        setSelection([]);
-                        setDeck(key);
-                      }}
-                      className={cn(
-                        "group relative flex min-h-[76px] flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 text-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-                        on
-                          ? "bg-night text-white shadow-[0_8px_20px_-10px_rgba(28,7,13,0.7)]"
-                          : "text-night hover:bg-white hover:shadow-sm"
-                      )}
+                {TOOL_GROUPS.map((g) => (
+                  <div key={g.label} role="presentation">
+                    <p
+                      className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink"
+                      aria-hidden="true"
                     >
-                      <span
-                        className={cn(
-                          "grid h-8 w-8 place-items-center rounded-full transition-transform group-hover:scale-110 motion-reduce:transition-none",
-                          on
-                            ? "bg-white/10 text-[#e9c98a]"
-                            : "bg-white text-burgundy shadow-sm"
-                        )}
-                      >
-                        <I size={16} />
-                      </span>
-                      <span className="text-[11px] font-semibold leading-none">
-                        {label}
-                      </span>
-                      <span
-                        className={cn(
-                          "max-w-full truncate px-0.5 text-[10px] leading-none",
-                          on ? "text-white/80" : "text-label-2"
-                        )}
-                      >
-                        {stat}
-                      </span>
-                    </button>
-                  );
-                })}
+                      {g.label}
+                    </p>
+                    <div role="presentation" className="grid grid-cols-3 gap-1">
+                      {tiles
+                        .filter((tile) => g.keys.includes(tile.key))
+                        .map(({ key, label, icon: I, stat }) => {
+                          const on = deck === key && selection.length === 0;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              role="tab"
+                              id={`hall-tab-${key}`}
+                              aria-selected={on}
+                              aria-controls="hall-panel"
+                              onClick={() => {
+                                setSelection([]);
+                                setDeck(key);
+                              }}
+                              className={cn(
+                                "group flex min-h-11 items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+                                on
+                                  ? "bg-night text-white"
+                                  : "text-night hover:bg-white hover:shadow-sm"
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "grid h-7 w-7 shrink-0 place-items-center rounded-full",
+                                  on
+                                    ? "bg-white/10 text-[#e9c98a]"
+                                    : "bg-white text-burgundy shadow-sm"
+                                )}
+                              >
+                                <I size={14} aria-hidden="true" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block text-[12px] font-semibold leading-tight">
+                                  {label}
+                                </span>
+                                <span
+                                  className={cn(
+                                    "block text-[10px] leading-tight",
+                                    on ? "text-white/80" : "text-label-2"
+                                  )}
+                                >
+                                  {stat}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div
                 key={single ? `${single.type}:${single.id}` : `deck:${deck}`}
@@ -2965,49 +3145,93 @@ export function HallStudio({
                   />
                 )}
                 {mode === "simple" ? null : selTable ? (
-                  <TableInspector
-                    table={selTable}
-                    layout={layout}
-                    pos={positions[selTable.id] ?? { x: 0, y: 0 }}
-                    rot={rotationOf(selTable.id)}
-                    onClose={() => setSelection([])}
-                    onRotate={rotateBy}
-                    onRot={(d) =>
-                      setRotation({ type: "table", id: selTable.id }, d)
-                    }
-                    onMove={(x, y) =>
-                      moveItems([{ type: "table", id: selTable.id, x, y }])
-                    }
-                    onDuplicate={duplicate}
-                    onDelete={remove}
-                    onUpdate={(patch) => void updateTable(selTable.id, patch)}
-                    onStyle={(patch) => styleTables([selTable.id], patch)}
-                    onStyleAll={() => {
-                      const st = styleOf(layout, selTable.id);
-                      updateLayout((l) => ({
-                        ...l,
-                        tableStyles: {},
-                        decor: {
-                          ...l.decor,
-                          linen: st.cloth,
-                          chair: st.chair,
-                          cover: st.cover,
-                          sash: st.sash,
-                          centrepiece: st.centrepiece,
-                          flower: st.flower,
-                        },
-                      }));
-                      say("Every table now has this look");
-                    }}
-                    onResetStyle={() =>
-                      updateLayout((l) => {
-                        const rest = { ...l.tableStyles };
-                        delete rest[selTable.id];
-                        return { ...l, tableStyles: rest };
-                      })
-                    }
-                    onUnseat={(guestId) => onAssignTable(guestId, null)}
-                  />
+                  <>
+                    {(() => {
+                      // The space around this table, measured from the plan, so a squeezed aisle
+                      // shows up while the table is still being placed.
+                      const c = clearanceOf(
+                        fpOf(selTable),
+                        data.tables
+                          .filter((o) => o.id !== selTable.id)
+                          .map((o) => ({ name: o.name, f: fpOf(o) })),
+                        layout.zones,
+                        layout
+                      );
+                      return (
+                        <div
+                          data-testid="table-clearance"
+                          className={cn(
+                            "mx-4 mt-3 rounded-xl p-3 text-xs",
+                            c.tightest < SPACING_GAP[layout.spacing] - 0.05
+                              ? "bg-[#fbeeee] text-[#7a1f20]"
+                              : "bg-[#f6f1e8] text-night"
+                          )}
+                        >
+                          <p className="font-semibold">
+                            {c.tightest < SPACING_GAP[layout.spacing] - 0.05
+                              ? `Tight: ${gapText(c.tightest)}, less than the ${SPACING_GAP[layout.spacing]} m this plan keeps between tables`
+                              : "Space around this table"}
+                          </p>
+                          <ul className="mt-1 space-y-0.5">
+                            {c.table && (
+                              <li>
+                                {gapText(c.table.gap)} to {c.table.name}
+                              </li>
+                            )}
+                            <li>{gapText(c.wall)} to the nearest wall</li>
+                            {c.zone && (
+                              <li>
+                                {gapText(c.zone.gap)} to {c.zone.label}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+                    <TableInspector
+                      table={selTable}
+                      layout={layout}
+                      pos={positions[selTable.id] ?? { x: 0, y: 0 }}
+                      rot={rotationOf(selTable.id)}
+                      onClose={() => setSelection([])}
+                      onRotate={rotateBy}
+                      onRot={(d) =>
+                        setRotation({ type: "table", id: selTable.id }, d)
+                      }
+                      onMove={(x, y) =>
+                        moveItems([{ type: "table", id: selTable.id, x, y }])
+                      }
+                      onDuplicate={duplicate}
+                      onDelete={remove}
+                      onUpdate={(patch) => void updateTable(selTable.id, patch)}
+                      onStyle={(patch) => styleTables([selTable.id], patch)}
+                      onStyleAll={() => {
+                        const st = styleOf(layout, selTable.id);
+                        updateLayout((l) => ({
+                          ...l,
+                          tableStyles: {},
+                          decor: {
+                            ...l.decor,
+                            linen: st.cloth,
+                            chair: st.chair,
+                            cover: st.cover,
+                            sash: st.sash,
+                            centrepiece: st.centrepiece,
+                            flower: st.flower,
+                          },
+                        }));
+                        say("Every table now has this look");
+                      }}
+                      onResetStyle={() =>
+                        updateLayout((l) => {
+                          const rest = { ...l.tableStyles };
+                          delete rest[selTable.id];
+                          return { ...l, tableStyles: rest };
+                        })
+                      }
+                      onUnseat={(guestId) => onAssignTable(guestId, null)}
+                    />
+                  </>
                 ) : selZone ? (
                   <ZoneInspector
                     zone={selZone}
@@ -3071,6 +3295,7 @@ export function HallStudio({
                       setSelection([{ type: "table", id }]);
                       view3d.current?.focus(`table:${id}`);
                     }}
+                    onOpenFit={() => setDeck("fit")}
                   />
                 ) : deck === "room" ? (
                   <>
@@ -3152,27 +3377,28 @@ export function HallStudio({
                         data.tables.filter((t) => t.occupiedSeats === 0).length
                       }
                       crowded={warnCount}
-                      onAddOne={() =>
-                        void placeNew(
-                          preset.shape,
-                          preset.capacity,
-                          undefined,
-                          false
-                        )
-                      }
                       onRemove={(n) => void removeTables(n)}
                       onFixCrowding={() => void fixCrowding()}
                       onAutoLayout={autoLayout}
                     />
                   </>
                 ) : deck === "seat" ? (
-                  <SeatPanel
-                    plan={seatPlan.plan}
-                    units={seatPlan.units}
-                    readiness={data.stats.readinessPct}
-                    busy={busy}
-                    onSeat={seatEveryone}
-                  />
+                  <>
+                    <SeatPanel
+                      plan={seatPlan.plan}
+                      units={seatPlan.units}
+                      readiness={counts.seatedPct}
+                      busy={busy}
+                      onSeat={seatEveryone}
+                    />
+                    <SeatRulesPanel
+                      rules={layout.seatRules}
+                      guests={ruleGuests}
+                      breaks={breaks}
+                      onAdd={addRule}
+                      onRemove={removeRule}
+                    />
+                  </>
                 ) : deck === "thermal" ? (
                   <ThermalPanel
                     report={thermal}
@@ -3236,208 +3462,5 @@ export function HallStudio({
         </>
       }
     </section>
-  );
-}
-
-/**
- * Grouping, above whatever is selected: name a set of items so it moves as one, rename it, or
- * take it apart. A group is a way of holding things together, not a copy of them.
- */
-function GroupBar({
-  count,
-  group,
-  onGroup,
-  onRename,
-  onUngroup,
-}: {
-  count: number;
-  group: ItemGroup | null;
-  onGroup: (name: string) => void;
-  onRename: (id: string, name: string) => void;
-  onUngroup: (id: string) => void;
-}) {
-  const [name, setName] = React.useState("");
-  const [editing, setEditing] = React.useState(false);
-  React.useEffect(() => {
-    setName(group?.name ?? "");
-    setEditing(false);
-  }, [group?.id, group?.name]);
-
-  return (
-    <div className="border-b border-hairline bg-[#faf7f2] px-4 py-2.5">
-      {group ? (
-        <div className="flex items-center gap-2">
-          {editing ? (
-            <form
-              className="flex min-w-0 flex-1 items-center gap-1.5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onRename(group.id, name);
-                setEditing(false);
-              }}
-            >
-              <input
-                autoFocus
-                value={name}
-                aria-label="Group name"
-                onChange={(e) => setName(e.target.value.slice(0, 60))}
-                className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
-              />
-              <button
-                type="submit"
-                className="min-h-9 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory"
-              >
-                Save
-              </button>
-            </form>
-          ) : (
-            <>
-              <p className="min-w-0 flex-1 truncate text-xs font-semibold text-night">
-                {group.name}
-                <span className="ml-1.5 font-normal text-label-2">
-                  {group.items.length} items
-                </span>
-              </p>
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="min-h-9 rounded-full px-3 text-xs font-semibold text-burgundy hover:bg-burgundy/10"
-              >
-                Rename
-              </button>
-              <button
-                type="button"
-                onClick={() => onUngroup(group.id)}
-                className="min-h-9 rounded-full px-3 text-xs font-semibold text-label-2 hover:bg-black/5"
-              >
-                Ungroup
-              </button>
-            </>
-          )}
-        </div>
-      ) : count > 1 ? (
-        <form
-          className="flex items-center gap-1.5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onGroup(name);
-            setName("");
-          }}
-        >
-          <input
-            value={name}
-            aria-label="Name this group"
-            placeholder="Name this group"
-            onChange={(e) => setName(e.target.value.slice(0, 60))}
-            className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
-          />
-          <button
-            type="submit"
-            className="min-h-9 shrink-0 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory hover:bg-wine"
-          >
-            Group {count}
-          </button>
-        </form>
-      ) : (
-        <p className="text-[11px] text-label-2">
-          Select two or more items to group them, so they move together.
-        </p>
-      )}
-    </div>
-  );
-}
-
-/** Simple mode on one side, the full studio on the other, over the same document (7.2). */
-function ModeSwitch({
-  mode,
-  onChange,
-}: {
-  mode: "simple" | "studio";
-  onChange: (m: "simple" | "studio") => void;
-}) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label="How much detail to show"
-      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs"
-    >
-      {(
-        [
-          ["simple", "Simple"],
-          ["studio", "Full studio"],
-        ] as const
-      ).map(([key, label]) => (
-        <button
-          key={key}
-          type="button"
-          role="radio"
-          aria-checked={mode === key}
-          onClick={() => onChange(key)}
-          className={cn(
-            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-            mode === key
-              ? "bg-burgundy text-ivory shadow-xs"
-              : "text-label-2 hover:bg-burgundy/10 hover:text-night"
-          )}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** The hover label beside a rail button, with its letter keys. */
-function RailTip({ label, keys }: { label: string; keys: string[] }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute left-full top-1/2 z-20 ml-3 flex -translate-y-1/2 -translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
-    >
-      {label}
-      <Keys keys={keys.map((k) => [k])} dark />
-    </span>
-  );
-}
-
-function ShortcutSheet({ onClose }: { onClose: () => void }) {
-  // The sheet only opens after a click or key press, so reading the platform here is safe.
-  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
-  return (
-    <div
-      role="dialog"
-      aria-label="Keyboard shortcuts"
-      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(340px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
-          Keyboard shortcuts
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="grid h-7 w-7 place-items-center rounded-full text-label-2 hover:bg-[#f1ece4]"
-        >
-          <X size={14} />
-        </button>
-      </div>
-      {SHORTCUTS(mac ? "⌘" : "Ctrl").map(({ group, items }) => (
-        <div key={group} className="mb-3 last:mb-0">
-          <p className="mb-1 text-xs font-semibold text-night">{group}</p>
-          <ul className="space-y-1">
-            {items.map(([keys, what]) => (
-              <li
-                key={what}
-                className="flex items-center justify-between gap-3 text-xs text-label-2"
-              >
-                <span>{what}</span>
-                <Keys keys={keys} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
   );
 }
