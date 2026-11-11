@@ -53,6 +53,7 @@ import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
+import { seatingCounts } from "../counts";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
   moveLayer,
@@ -687,7 +688,10 @@ export function HallStudio({
   }, [data.tables, fpOf, layout]);
 
   // ---------- planning numbers ----------
-  const guests = data.stats.seatedAttendees + data.stats.unseatedAttendees;
+  // One set of numbers for every panel (see counts.ts): accepted people can be seated, replies
+  // still awaited are planned for but never counted as waiting for a seat.
+  const counts = useMemo(() => seatingCounts(data), [data]);
+  const guests = counts.expectedPeople;
 
   // The cooling verdict follows the plan: every edit to the room, the crowd or the units re-asks.
   useEffect(() => {
@@ -1885,10 +1889,7 @@ export function HallStudio({
   ];
 
   const warnCount = Object.values(warnings).filter((w) => w !== "tight").length;
-  const unseatedSeats = data.unseatedGuests.reduce(
-    (a, g) => a + g.attending_count,
-    0
-  );
+  const unseatedSeats = counts.toSeat.people;
   const evening = layout.mood === "evening";
   // Rain only makes sense where there is sky above the tables.
   const openVenue =
@@ -1914,7 +1915,11 @@ export function HallStudio({
       key: "guests",
       label: "Guests",
       icon: Users,
-      stat: unseatedSeats ? `${unseatedSeats} to seat` : "All seated",
+      stat: unseatedSeats
+        ? `${unseatedSeats} to seat`
+        : counts.accepted.people
+          ? "All seated"
+          : "No yes yet",
     },
     {
       key: "room",
@@ -1932,7 +1937,7 @@ export function HallStudio({
       key: "seat",
       label: "Seat",
       icon: Wand2,
-      stat: `${data.stats.readinessPct}% done`,
+      stat: `${counts.seatedPct}% seated`,
     },
     {
       key: "thermal",
@@ -1988,14 +1993,19 @@ export function HallStudio({
     <dl className="grid grid-cols-2 gap-x-4 gap-y-2" data-testid="hall-meter">
       {[
         {
-          k: "Guests",
-          v: guests,
-          note: buffer ? `${target} with buffer` : undefined,
+          k: "Coming",
+          v: counts.accepted.people,
+          note: counts.awaiting.people
+            ? `+${counts.awaiting.people} awaiting reply`
+            : undefined,
         },
         {
           k: "Seats",
           v: seats,
-          note: seats >= target ? "enough" : `${target - seats} short`,
+          note:
+            seats >= target
+              ? "enough"
+              : `${target - seats} short${buffer ? ` with ${buffer}% buffer` : ""}`,
           bad: seats < target,
         },
         { k: "Hall fits", v: fitEmpty.seats, wide: true },
@@ -2008,12 +2018,12 @@ export function HallStudio({
       ].map((m) => (
         <div
           key={m.k}
-          className={cn("items-baseline gap-1 whitespace-nowrap", "flex")}
+          className="flex min-w-0 flex-wrap items-baseline gap-x-1"
         >
           <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-label-2">
             {m.k}
           </dt>
-          <dd className="flex items-baseline gap-1">
+          <dd className="flex min-w-0 flex-wrap items-baseline gap-x-1">
             <span className="text-sm font-bold tabular-nums">{m.v}</span>
             {m.note && (
               <span
@@ -2763,7 +2773,6 @@ export function HallStudio({
                           setDeck("seat");
                           togglePanel(true);
                         }}
-                        stats={data.stats}
                         meter={meter}
                         onClose={() => setDockOpen(false)}
                       />
@@ -3191,7 +3200,7 @@ export function HallStudio({
                   <SeatPanel
                     plan={seatPlan.plan}
                     units={seatPlan.units}
-                    readiness={data.stats.readinessPct}
+                    readiness={counts.seatedPct}
                     busy={busy}
                     onSeat={seatEveryone}
                   />

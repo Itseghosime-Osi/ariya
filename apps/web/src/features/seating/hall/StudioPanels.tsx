@@ -143,7 +143,7 @@ export function GuestsPanel({
       >
         {tables.length === 0 ? (
           <p className="text-xs text-label-2">
-            Add tables from the toolbar on the right of the hall.
+            Use + at the top of the hall to add one, or Fit to fill the hall.
           </p>
         ) : (
           <ul className="-mx-1 flex max-h-[148px] flex-wrap gap-1.5 overflow-y-auto px-1 py-0.5">
@@ -827,8 +827,8 @@ export function FitPanel({
       <Section title="Tables in the hall">
         {/* One control for one number: type it, or step it, then Apply. */}
         <div className="flex items-end gap-2">
-          <label className="min-w-0 flex-1 text-[11px] font-semibold text-label-2">
-            Number of tables
+          <div className="min-w-0 flex-1 text-[11px] font-semibold text-label-2">
+            <label htmlFor="hall-table-count">Set the number of tables</label>
             <span className="mt-1 flex items-center gap-1">
               <button
                 type="button"
@@ -840,6 +840,7 @@ export function FitPanel({
                 −
               </button>
               <input
+                id="hall-table-count"
                 type="text"
                 inputMode="numeric"
                 value={want}
@@ -856,7 +857,7 @@ export function FitPanel({
                 +
               </button>
             </span>
-          </label>
+          </div>
           <button
             type="button"
             disabled={busy !== null || wanted === tableCount}
@@ -1072,7 +1073,7 @@ export function SeatPanel({
         <ul className="mt-3 space-y-1.5 rounded-xl bg-[#f6f1e8] p-3 text-sm text-night">
           <li>
             <strong>{plan.assignments.length}</strong> of {units.length}{" "}
-            confirmed guests can be seated
+            accepted invitations without a table can be seated
           </li>
           {plan.split.length > 0 && (
             <li>
@@ -1096,9 +1097,9 @@ export function SeatPanel({
           type="button"
           disabled={busy !== null || plan.assignments.length === 0}
           onClick={onSeat}
-          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-burgundy px-5 text-xs font-semibold uppercase tracking-[0.12em] text-ivory transition-colors hover:bg-wine disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory transition-colors hover:bg-wine disabled:bg-[#eadfd9] disabled:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
-          <Wand2 size={15} />
+          <Wand2 size={15} aria-hidden="true" />
           {busy === "seat"
             ? "Seating guests…"
             : units.length === 0

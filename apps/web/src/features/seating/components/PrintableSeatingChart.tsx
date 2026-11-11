@@ -61,7 +61,7 @@ export function PrintableSeatingChart({
                   : "text-on-surface-variant hover:text-wine"
               }`}
             >
-              Place Cards (V2 23)
+              Place cards
             </button>
           </div>
 

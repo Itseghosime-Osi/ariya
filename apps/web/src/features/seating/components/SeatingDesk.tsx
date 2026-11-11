@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useState } from "react";
+import { seatingCounts } from "../counts";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { BackLink } from "@/components/layout/back-link";
@@ -195,7 +196,7 @@ export function SeatingDesk({
                 Seating &amp; Floor Plan
               </h1>
               <p className="truncate text-[11px] leading-tight text-label-2">
-                {[eventTitle, `${data.stats.readinessPct}% seated`]
+                {[eventTitle, `${seatingCounts(data).seatedPct}% seated`]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
