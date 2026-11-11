@@ -381,7 +381,11 @@ export function InvitationDesigner({
     window.addEventListener("blur", onPointerUp);
   }, []);
 
-  const [showRulers, setShowRulers] = useState(true);
+  // Rulers start on in Pro and off in Simple; once the host picks, their choice stands.
+  const [rulersChoice, setRulersChoice] = useState<boolean | null>(null);
+  const proRef = useRef(false);
+  proRef.current = mode === "pro";
+  const showRulers = rulersChoice ?? mode === "pro";
   const [showGrid, setShowGrid] = useState(false);
   const [showPrintGuides, setShowPrintGuides] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(false);
@@ -1099,7 +1103,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "r") {
         e.preventDefault();
-        setShowRulers((r) => !r);
+        setRulersChoice((c) => !(c ?? proRef.current));
         return;
       }
       if (mod && e.shiftKey && (e.key === "'" || e.key === '"')) {
@@ -1512,7 +1516,7 @@ export function InvitationDesigner({
         {
           label: showRulers ? "Hide Rulers" : "Show Rulers",
           shortcut: "Cmd+R",
-          onClick: () => setShowRulers((r) => !r),
+          onClick: () => setRulersChoice((c) => !(c ?? proRef.current)),
         },
         {
           label: showPrintGuides
@@ -1685,7 +1689,7 @@ export function InvitationDesigner({
           >
             <Icon name="swatch" size={18} />
           </button>
-          <div className="w-24 shrink-0 sm:w-28">
+          <div className="w-[7.5rem] shrink-0">
             <Segmented
               dark={dark}
               label="Mode"
@@ -1969,7 +1973,7 @@ export function InvitationDesigner({
                 }
               }}
               showRulers={showRulers}
-              onToggleRulers={() => setShowRulers(!showRulers)}
+              onToggleRulers={() => setRulersChoice(!showRulers)}
               showGrid={showGrid}
               onToggleGrid={() => setShowGrid(!showGrid)}
               snapToGrid={snapToGrid}

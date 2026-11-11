@@ -107,3 +107,11 @@ What changed (`ExportModal.tsx`, new `dialog-theme.ts`):
 - Same theme fix applied to the Help dialog, command palette and quick tour (`dialog-theme.ts`).
 - Format titles and button names are unchanged, so the existing E2E specs still find them.
 - Evidence: `evidence/tidy-batch32.json` (axe in four theme combinations, footer visible, card heights, backup download), `evidence/tidy-batch33.json` (axe for Help, palette and tour), screenshots `tidy-export-after-*.png`.
+
+### Group A: defects from the audit (A1 to A4), all fixed
+
+- **A1** The Zoom menu is now a compact chevron (▾), no clipped text, still sets 25 to 400% and Fit.
+- **A2** The Simple/Pro switch has the room it needs, so it is fully on screen at 360, 390 and 430 px. The theme button stays in the header (an existing E2E step uses it on a phone).
+- **A3** The options row shows a soft edge on the side where there is more to scroll to (CSS only).
+- **A4** Rulers follow the mode: off by default in Simple, on in Pro; once the host chooses, their choice stands.
+- Evidence: `evidence/tidy-batch34.json` (11 checks) and `screenshots/tidy-after-a*.png`.
