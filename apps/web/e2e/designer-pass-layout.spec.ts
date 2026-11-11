@@ -64,6 +64,8 @@ test("pass placement, rounded paper and foreground readability", async ({
     ).toBeVisible();
   };
   const inside = async () => {
+    // After a reload the card can still be rendering; measure it only once the seal is there.
+    await expect(card.locator("[data-entry-seal]")).toBeVisible();
     const paper = (await card.boundingBox())!,
       seal = (await card.locator("[data-entry-seal]").boundingBox())!;
     expect(seal.x).toBeGreaterThanOrEqual(paper.x - 0.5);

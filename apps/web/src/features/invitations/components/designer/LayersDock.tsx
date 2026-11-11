@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -12,6 +13,7 @@ import {
 import {
   arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -523,6 +525,10 @@ export function LayersDock({
       activationConstraint: {
         distance: 4,
       },
+    }),
+    // Space or Enter on a layer's handle lifts it, the arrow keys move it, Space drops it.
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
