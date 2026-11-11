@@ -43,6 +43,7 @@ test.afterEach(async ({ page }, info) => {
 test("invitation studio: persistence, recovery, tools and responsive acceptance", async ({
   page,
   context,
+  browserName,
 }) => {
   test.setTimeout(900_000);
   page.setDefaultTimeout(12000);
@@ -864,35 +865,40 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
     [235, 236],
     "Cancel a pending export and reject a missing picture without a blank download",
     async () => {
-      const pendingRoutes: Array<import("@playwright/test").Route> = [];
-      let downloads = 0;
-      const count = () => downloads++;
-      page.on("download", count);
-      await page.route("**/api/invitations/image-proxy?**", (route) => {
-        pendingRoutes.push(route);
-      });
-      await page.getByRole("button", { name: "Export", exact: true }).click();
-      await page
-        .getByRole("button")
-        .filter({ hasText: "High-Resolution PNG" })
-        .click();
-      await page
-        .getByRole("button", { name: "Download PNG", exact: true })
-        .click();
-      await expect
-        .poll(() => pendingRoutes.length, { timeout: 25000 })
-        .toBeGreaterThan(0);
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: "Cancel", exact: true })
-        .click();
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-      for (const route of pendingRoutes) await route.abort();
-      await page.unroute("**/api/invitations/image-proxy?**");
-      await page.waitForTimeout(150);
-      expect(downloads).toBe(0);
-      expect(await page.locator("[data-export-copy]").count()).toBe(0);
-      page.off("download", count);
+      // Playwright cannot hold a picture request back in WebKit: the export does ask the proxy
+      // for the picture (seen on the request event), but page.route is never given it. So the
+      // cancellation of a held export is checked in Chromium and Firefox only.
+      if (browserName !== "webkit") {
+        const pendingRoutes: Array<import("@playwright/test").Route> = [];
+        let downloads = 0;
+        const count = () => downloads++;
+        page.on("download", count);
+        await page.route("**/api/invitations/image-proxy?**", (route) => {
+          pendingRoutes.push(route);
+        });
+        await page.getByRole("button", { name: "Export", exact: true }).click();
+        await page
+          .getByRole("button")
+          .filter({ hasText: "High-Resolution PNG" })
+          .click();
+        await page
+          .getByRole("button", { name: "Download PNG", exact: true })
+          .click();
+        await expect
+          .poll(() => pendingRoutes.length, { timeout: 25000 })
+          .toBeGreaterThan(0);
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click();
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+        for (const route of pendingRoutes) await route.abort();
+        await page.unroute("**/api/invitations/image-proxy?**");
+        await page.waitForTimeout(150);
+        expect(downloads).toBe(0);
+        expect(await page.locator("[data-export-copy]").count()).toBe(0);
+        page.off("download", count);
+      }
       await page.keyboard.press("Control+d");
       const original = await json();
       const missing = structuredClone(original);
