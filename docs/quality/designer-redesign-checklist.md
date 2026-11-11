@@ -5,6 +5,17 @@ Each item says what users complained about or praised, what we do about it in À
 Status: `[ ]` open, `[x]` done and verified. Priority: **P0** do first, **P1** next, **P2** later.
 Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.js, 44px touch targets, desktop and mobile, fictional test data only.
 
+## Product decisions (from the owner)
+
+- **Pricing (C1–C5):** the designer stays fully included for every host. No paid tiers, locks or upgrade prompts. C1–C5 are closed as not applicable by decision.
+- **Source files (B4):** keep the JSON backup. Add import of other formats, including PSD and AI, as a separate build (see B4).
+- **Print (B5):** bleed and safe-area guides on the canvas, plus bleed and crop marks in the PDF.
+- **Templates (G1–G3):** check every existing template with long names and diacritics. No template browser and no new designs for now (G2, G3 deferred).
+- **AI (G4):** no AI in the designer for now. Closed as not planned.
+- **Offline (A2, E5):** queue and sync saves, with conflict handling.
+- **Phone versus desktop:** equal priority; do both together, one component at a time.
+- **Support (F1, F4):** keep `help@ariyaday.com`. The mailbox still has to be created by the owner.
+
 ## A. Keep what people praise
 
 - [ ] **A1 (P0) Ease of use for non-designers.** Canva's top praise. Keep Simple mode and templates as the default way in; Pro tools stay one step away.
@@ -12,6 +23,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 - [ ] **A2 (P0) Real-time feel and stability.** Figma is praised for collaboration. Autosave status always visible ("Saved", "Saving", "Offline").
       Done when: status is visible at all times; a forced network drop shows "Offline" and recovers without losing edits.
       Progress (not closed): the status now reads "offline · will save when you reconnect" and recovers (RD-A2, RD-A2b). Not yet tested: edits made offline surviving a reload.
+      Decision: queue and sync saves with conflict handling (bigger build than the current device-side recovery).
 - [ ] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
       Done when: changing one named style updates every layer using it, and undo reverses it in one step.
 - [ ] **A4 (P1) Developer-style handoff, our version: print handoff.** Figma wins on handoff. Ours is the printer. One "Send to printer" export with bleed, crop marks and size notes.
@@ -28,8 +40,10 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: a card using every brand font exports with the same glyph shapes; a blocked font shows a clear message, not a silent fallback.
 - [ ] **B4 (P1) Editable source, not only flattened files.** Canva users cannot get layered files. Offer "Download my design" (.ariya JSON) that re-opens with all layers, plus SVG export for vector layers.
       Done when: downloading then re-importing gives an identical layer tree.
+      Decision: keep the JSON backup, and add import of other formats including PSD and AI. Planned as its own build: PSD via a parser (layers become picture layers), AI and PDF by rendering the first page, SVG and images directly. Imports become flattened picture layers, not editable text, and that limit must be shown to the user.
 - [ ] **B5 (P1) Print-ready option.** CMYK note, 300 dpi, bleed, safe margin guides on canvas.
       Done when: guides toggle on and the export honours them.
+      Decision: bleed and safe-area guides on the canvas plus bleed and crop marks in the PDF.
 - [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
       Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).
@@ -38,24 +52,30 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## C. Pricing and paywalls (both tools)
 
-- [ ] **C1 (P0) No surprise locks.** Show what is included before the user designs, not at export.
+- [x] **C1 (P0) No surprise locks.** Show what is included before the user designs, not at export.
       Done when: every locked feature shows a lock icon and plan name before use; no feature is found locked only at the last step.
       Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
-- [ ] **C2 (P0) Free versus paid is stated in one place.** One plain pricing table in the studio's help.
+      Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
+- [x] **C2 (P0) Free versus paid is stated in one place.** One plain pricing table in the studio's help.
       Done when: the table matches the real entitlements checked in code (unit test comparing the two).
       Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
-- [ ] **C3 (P1) No seat tricks.** Guests and helpers viewing or commenting never need a paid seat; only editing is limited.
+      Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
+- [x] **C3 (P1) No seat tricks.** Guests and helpers viewing or commenting never need a paid seat; only editing is limited.
       Done when: a view-only collaborator can open, comment and download the guest version without a paid seat.
       Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
-- [ ] **C4 (P1) Gentle upgrade prompts.** At most one prompt per session, never blocking a task.
+      Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
+- [x] **C4 (P1) Gentle upgrade prompts.** At most one prompt per session, never blocking a task.
       Done when: no modal upgrade prompt appears mid-edit (E2E check).
       Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
-- [ ] **C5 (P2) Premium filter clarity.** Template and asset lists must clearly separate free from premium (Canva reviewers called this confusing).
+      Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
+- [x] **C5 (P2) Premium filter clarity.** Template and asset lists must clearly separate free from premium (Canva reviewers called this confusing).
       Done when: filter chips "All / Free / Premium" work and counts are right.
 
 ## D. Learning curve and navigation
 
 Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
+
+Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
 
 - [ ] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
       Done when: first-time users see only the essentials; a "More tools" control reveals the rest and remembers the choice.
@@ -90,6 +110,8 @@ Status: the designer has no paid features, plan gates or upgrade prompts today (
 
 ## F. Support and trust (Canva complaint: hard to reach support)
 
+Decision: same as A2: queue saves while offline and sync when back online.
+
 - [x] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
       Done when: Help opens in one tap on phone and desktop.
       Evidence: Help button in header (44px) and Help menu with help@ariyaday.com; RD-F1. Phone width not yet checked.
@@ -106,11 +128,15 @@ Status: the designer has no paid features, plan gates or upgrade prompts today (
       Progress (not closed): Names with Yoruba diacritics stay inside the card width (RD-G1). KNOWN DEFECT (RD-G1b, `screenshots/upgrade-longname-defect.png`): a very long name wraps to four lines and overlaps the message text below. Needs shrink-to-fit (H2) or an overlap warning. Open.
 - [ ] **G2 (P1) Template search and filters.** Culture, mood, colour, size, free or premium.
       Done when: filters combine and results match.
+      Decision: deferred by decision (no template browser for now).
 - [ ] **G3 (P1) One-click colour and font themes** from the template, protecting contrast.
       Done when: axe contrast passes for every theme.
-- [ ] **G4 (P2) AI helper that is predictable (Canva AI "hit or miss").** Only offer AI features that give reviewable, undoable results; label clearly as suggestions.
+      Decision: deferred by decision (no one-click themes for now).
+- [x] **G4 (P2) AI helper that is predictable (Canva AI "hit or miss").** Only offer AI features that give reviewable, undoable results; label clearly as suggestions.
 
 ## H. Docs and text editing (Canva: clunky docs)
+
+Decision: closed as not planned: no AI in the designer for now (owner decision).
 
 - [ ] **H1 (P1) Reliable text editing.** Caret never jumps, paste is plain text, undo steps are sensible, long names wrap or shrink predictably.
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
