@@ -1013,6 +1013,8 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
                   exact: true,
                 })
                 .click();
+            // Colours transition for a moment after the switch; measure contrast once they settle.
+            await page.waitForTimeout(800);
             const scan = await new AxeBuilder({ page })
               .include('[data-testid="invitation-designer"]')
               .exclude("[data-invitation-canvas]")
