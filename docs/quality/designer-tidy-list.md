@@ -92,3 +92,18 @@ Order of work: A to D first (visible defects), then E to H, then I to K. One bra
 4. Update `designer-redesign-checklist.md` (K1, K2, K3, K5, K6, K8, K9, L5, L7) only with evidence.
 
 Not part of this tidy: a new layout, new modes, new brand motifs, version history, templates.
+
+## Done so far
+
+### Export dialog (owner screenshot, dark computer with a light studio)
+
+Problems seen: badges, descriptions and sizes almost invisible; badges wrapping onto two lines; cards of unequal height with an empty slot; the Download button below the fold; focus on the close button. Root cause: the dialogs used Tailwind `dark:` styles, which follow the computer's dark mode, while the studio has its own light/dark setting. A dark computer with a light studio gave a dark panel with light-theme text.
+
+What changed (`ExportModal.tsx`, new `dialog-theme.ts`):
+
+- Colours now come from the studio's own theme (four combinations of computer and studio theme checked).
+- Header and footer stay in view; only the middle scrolls, so Download is always visible (also on a 390 px phone).
+- Format cards: short one-line badges (Print, Lossless, Light, Under 400 KB, Editable), equal heights per row, the backup card full width, `aria-pressed` for the chosen card, focus lands on the chosen card.
+- Same theme fix applied to the Help dialog, command palette and quick tour (`dialog-theme.ts`).
+- Format titles and button names are unchanged, so the existing E2E specs still find them.
+- Evidence: `evidence/tidy-batch32.json` (axe in four theme combinations, footer visible, card heights, backup download), `evidence/tidy-batch33.json` (axe for Help, palette and tour), screenshots `tidy-export-after-*.png`.

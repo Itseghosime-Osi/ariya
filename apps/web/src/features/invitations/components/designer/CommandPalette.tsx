@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { cn } from "@/lib/utils";
+import { dialogTheme } from "./dialog-theme";
 import type { MenuGroup } from "./StudioMenuBar";
 
 interface Command {
@@ -24,6 +26,7 @@ export function CommandPalette({
   menus: MenuGroup[];
   dark?: boolean;
 }) {
+  const t = dialogTheme(dark);
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
@@ -91,12 +94,20 @@ export function CommandPalette({
         <Dialog.Content
           aria-describedby={undefined}
           data-testid="command-palette"
-          className={`fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[12vh] backdrop-blur-sm ${dark ? "dark" : ""}`}
+          className={cn(
+            "fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] backdrop-blur-sm",
+            t.overlay
+          )}
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-black/10 bg-ivory shadow-2xl dark:border-white/10 dark:bg-[#1a1118] dark:text-ivory">
+          <div
+            className={cn(
+              "w-full max-w-md overflow-hidden rounded-2xl border shadow-2xl",
+              t.panel
+            )}
+          >
             <Dialog.Title className="sr-only">Find a command</Dialog.Title>
             <input
               autoFocus
@@ -122,7 +133,10 @@ export function CommandPalette({
                   choose(results[index]);
                 }
               }}
-              className="h-12 w-full border-b border-black/10 bg-transparent px-4 text-sm outline-none dark:border-white/10"
+              className={cn(
+                "h-12 w-full border-b bg-transparent px-4 text-sm outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-[var(--studio-gold)]",
+                t.divider
+              )}
             />
             <ul
               id="command-list"
@@ -131,7 +145,7 @@ export function CommandPalette({
               className="max-h-[50vh] overflow-y-auto py-1"
             >
               {results.length === 0 && (
-                <li className="px-4 py-6 text-center text-xs text-label-2">
+                <li className={cn("px-4 py-6 text-center text-xs", t.muted)}>
                   Nothing matches “{query}”. Try a shorter word.
                 </li>
               )}
@@ -145,17 +159,26 @@ export function CommandPalette({
                   onMouseMove={() => setIndex(i)}
                   onClick={() => choose(c)}
                   className={`flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 text-sm ${
-                    i === index ? "bg-burgundy/10" : ""
+                    i === index
+                      ? dark
+                        ? "bg-white/10"
+                        : "bg-[var(--studio-wine)]/10"
+                      : ""
                   } ${c.disabled ? "opacity-40" : ""}`}
                 >
                   <span>
-                    <span className="mr-2 text-xs uppercase tracking-wide text-label-2">
+                    <span
+                      className={cn(
+                        "mr-2 text-xs uppercase tracking-wide",
+                        t.muted
+                      )}
+                    >
                       {c.group}
                     </span>
                     {c.label}
                   </span>
                   {c.shortcut && (
-                    <span className="font-mono text-xs text-label-2">
+                    <span className={cn("font-mono text-xs", t.muted)}>
                       {c.shortcut.replaceAll("Cmd", "⌘/Ctrl")}
                     </span>
                   )}

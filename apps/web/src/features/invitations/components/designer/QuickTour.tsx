@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { dialogTheme } from "./dialog-theme";
 
 const KEY = "ariya:studio-tour-done";
 const STEPS = [
@@ -34,10 +36,13 @@ function read(): boolean {
 export function QuickTour({
   forceOpen,
   onForceClose,
+  dark = false,
 }: {
   forceOpen: boolean;
   onForceClose: () => void;
+  dark?: boolean;
 }) {
+  const t = dialogTheme(dark);
   const [auto, setAuto] = useState(false);
   const [step, setStep] = useState(0);
 
@@ -68,30 +73,39 @@ export function QuickTour({
       role="region"
       aria-label="Quick tour"
       data-testid="quick-tour"
-      className="fixed bottom-[72px] left-3 z-30 w-[min(20rem,calc(100%-1.5rem))] rounded-2xl border border-hairline bg-ivory p-4 shadow-xl dark:bg-[#1a1118] dark:text-ivory sm:left-16"
+      className={cn(
+        "fixed bottom-[72px] left-3 z-30 w-[min(20rem,calc(100%-1.5rem))] rounded-2xl border p-4 shadow-xl sm:left-16",
+        t.panel
+      )}
     >
-      <p className="font-serif text-base font-bold text-night dark:text-ivory">
+      <p className={cn("font-serif text-base font-bold", t.title)}>
         {STEPS[step].title}
       </p>
-      <p className="mt-1 text-xs leading-relaxed text-label-2">
+      <p className={cn("mt-1 text-xs leading-relaxed", t.muted)}>
         {STEPS[step].body}
       </p>
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-xs text-label-2">
+        <span className={cn("text-xs", t.muted)}>
           {step + 1} of {STEPS.length}
         </span>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={finish}
-            className="min-h-11 rounded-full px-3 text-xs font-semibold text-label-2 hover:text-night"
+            className={cn(
+              "min-h-11 rounded-full px-3 text-xs font-semibold",
+              t.ghost
+            )}
           >
             Skip
           </button>
           <button
             type="button"
             onClick={() => (last ? finish() : setStep(step + 1))}
-            className="min-h-11 rounded-full bg-burgundy px-4 text-xs font-semibold text-ivory hover:bg-burgundy/90"
+            className={cn(
+              "min-h-11 rounded-full px-4 text-xs font-semibold",
+              t.primary
+            )}
           >
             {last ? "Done" : "Next"}
           </button>

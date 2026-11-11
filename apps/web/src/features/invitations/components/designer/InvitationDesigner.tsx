@@ -2440,7 +2440,11 @@ export function InvitationDesigner({
         onClose={() => setPaletteOpen(false)}
         menus={menuGroups}
       />
-      <QuickTour forceOpen={tourOpen} onForceClose={() => setTourOpen(false)} />
+      <QuickTour
+        dark={dark}
+        forceOpen={tourOpen}
+        onForceClose={() => setTourOpen(false)}
+      />
       <HelpDialog
         dark={dark}
         open={helpOpen}
