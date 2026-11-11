@@ -28,7 +28,7 @@ export function WorkspaceBar({
       <BackLink
         href={backHref}
         aria-label="Back"
-        className="inline-flex h-10 min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
         <ArrowLeft size={15} aria-hidden="true" />
         Back

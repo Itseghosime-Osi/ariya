@@ -153,7 +153,8 @@ test.describe("Ariya Designer Functional Checklist Verification", () => {
 
     // DES-023 / DES-080 / DES-169: Lock layer blocks edits
     const layersRows = page.locator("[data-testid^='layer-row-']");
-    const rectRow = layersRows.first();
+    // The entry seal is pinned first, so pick the rectangle's own row.
+    const rectRow = layersRows.filter({ hasText: /Rectangle/ }).first();
     await rectRow.getByRole("button", { name: /^Lock /i }).click();
     await expect(page.getByText(/This layer is locked/i)).toBeVisible();
     await expect(radiusHandles).toHaveCount(0);
