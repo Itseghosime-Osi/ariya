@@ -19,6 +19,8 @@ interface ExportModalProps {
   eventId: string;
   coupleName?: string;
   getCardElement: () => HTMLElement | null;
+  /** Called after a file has been handed to the browser, so the studio can confirm it. */
+  onExported?: (format: ExportFormat) => void;
 }
 
 interface FormatCard {
@@ -77,6 +79,7 @@ export function ExportModal({
   eventId,
   coupleName,
   getCardElement,
+  onExported,
 }: ExportModalProps) {
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
@@ -113,6 +116,7 @@ export function ExportModal({
       if (!res.ok) {
         setError(res.error || "Export failed");
       } else {
+        onExported?.(selectedFormat);
         onClose();
       }
     } catch (err) {

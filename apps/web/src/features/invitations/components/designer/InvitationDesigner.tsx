@@ -2425,6 +2425,12 @@ export function InvitationDesigner({
         dark={dark}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
+        onExported={(format) =>
+          setNotice({
+            tone: "ok",
+            text: `Exported as ${format === "json" ? "a design backup" : format.toUpperCase()}. Check your downloads.`,
+          })
+        }
         design={design}
         eventId={eventId}
         coupleName={coupleName}

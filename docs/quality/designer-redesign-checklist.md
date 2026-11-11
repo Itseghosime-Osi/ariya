@@ -32,6 +32,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: guides toggle on and the export honours them.
 - [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
+      Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).
 - [ ] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
 
@@ -181,11 +182,13 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [ ] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
 - [ ] **L7 (P1) Toasts and status.** One toast pattern: saved, exported, copied, failed; non-blocking, dismissible, announced to screen readers.
       Done when: every async action shows a consistent toast and an `aria-live` announcement.
+      Progress (not closed): export now confirms with a toast ('Exported as …', RD-L7b); saved, undone and failed states already use the same toast. Screen-reader announcement relies on `role=status`; not tested with a real reader.
 - [ ] **L8 (P1) Loading states.** Skeletons for studio, template grid and images; export shows progress and a cancel.
       Done when: no blank or frozen state longer than 300ms without feedback.
 - [ ] **L9 (P1) Error and recovery UX.** Inline errors next to the cause, never only a toast; offline banner; autosave retry (links to F2).
 - [ ] **L10 (P1) Event-facts banner and saved-card policy.** Keep the "Update the card / Keep my wording" banner clear, and show what changed.
       Done when: banner lists the changed fields and either choice is undoable.
+      Progress (not closed): the banner already lists each changed field as old → new and 'Update the card' is undoable; 'Keep my wording' is stored and is not an undo step. Not closed.
 - [ ] **L11 (P1) Share and guest preview.** "See it as a guest" preview, with a clear separation between the host's design and what guests receive. No guest links or codes shown in reports.
 - [ ] **L12 (P2) Keyboard-first UX.** Full keyboard path through tools, inspector and layers; visible focus ring everywhere.
       Done when: tabbing through the studio never traps or hides focus.
