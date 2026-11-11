@@ -172,8 +172,9 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
 - [ ] **K3 (P0) Tool rail redesign.** Group tools (Select, Text, Shapes, Images, Seal/QR, More), consistent icons and labels, active state that is clear without relying on colour alone.
       Done when: every tool has an icon, label or tooltip, shortcut, and a 44px target; icon set is one consistent style.
       Progress (not closed): reviewed: every tool-rail button already has an aria-label and a title with its shortcut. Grouping, active-state redesign and one icon style are not done.
-- [ ] **K4 (P0) Inspector redesign.** Collapsible sections (Position, Text, Fill, Effects) with the most-used controls first; same control pattern everywhere (label above, value right).
+- [x] **K4 (P0) Inspector redesign.** Collapsible sections (Position, Text, Fill, Effects) with the most-used controls first; same control pattern everywhere (label above, value right).
       Done when: no inspector section needs scrolling to reach its primary control on a 768px-tall screen; sections remember open/closed.
+      Evidence: all 18 inspector sections fold from their heading (a 44px button with `aria-expanded`, works with Enter and Space) and the choice is remembered per section across reloads; `evidence/redesign-batch25.json` RD-K4a–g, `screenshots/upgrade-inspector-collapsed.png`. Seating studio sections are unchanged (opt-in). Not done: reordering controls so the primary control of each section needs no scrolling on a 768px-tall screen. Chromium desktop only.
 - [ ] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
       Done when: each layer type shows only its relevant controls, nothing jumps position between selections.
 - [ ] **K6 (P1) Layers panel redesign.** Clear thumbnails or type icons, readable names, lock/hide icons with tooltips, drag handle and keyboard reorder kept.

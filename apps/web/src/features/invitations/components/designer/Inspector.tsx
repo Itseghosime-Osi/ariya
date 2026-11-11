@@ -473,6 +473,7 @@ export function Inspector({
     return (
       <div data-testid="inspector-multiselect">
         <Section
+          collapsible
           dark={dark}
           title={`Selection (${selectedLayers.length} layers)`}
         >
@@ -525,7 +526,7 @@ export function Inspector({
           </div>
         </Section>
 
-        <Section dark={dark} title="Align Selection">
+        <Section collapsible dark={dark} title="Align Selection">
           <div className="grid grid-cols-3 gap-2">
             {[
               { how: "left" as const, label: "Left" },
@@ -553,7 +554,7 @@ export function Inspector({
         </Section>
 
         {selectedLayers.length >= 3 && (
-          <Section dark={dark} title="Distribute Spacing">
+          <Section collapsible dark={dark} title="Distribute Spacing">
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -583,7 +584,7 @@ export function Inspector({
           </Section>
         )}
 
-        <Section dark={dark} title="Layers in Selection">
+        <Section collapsible dark={dark} title="Layers in Selection">
           <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
             {selectedLayers.map((l) => (
               <div
@@ -641,7 +642,7 @@ export function Inspector({
             Document settings{" "}
             <span className="font-normal text-label-2">· optional</span>
           </summary>
-          <Section dark={dark} title="Invitation size">
+          <Section collapsible dark={dark} title="Invitation size">
             <div className="grid grid-cols-2 gap-2">
               {CANVAS_PRESETS.map((p) => {
                 const on =
@@ -743,7 +744,7 @@ export function Inspector({
             </div>
           </Section>
 
-          <Section dark={dark} title="Paper & edges">
+          <Section collapsible dark={dark} title="Paper & edges">
             <Segmented
               dark={dark}
               label="Paper edge style"
@@ -788,7 +789,7 @@ export function Inspector({
           </Section>
         </details>
 
-        <Section dark={dark} title="Background">
+        <Section collapsible dark={dark} title="Background">
           <Segmented
             dark={dark}
             label="Background"
@@ -857,7 +858,7 @@ export function Inspector({
           )}
         </Section>
 
-        <Section dark={dark} title="Colours">
+        <Section collapsible dark={dark} title="Colours">
           <div className="grid grid-cols-2 gap-2">
             {INVITATION_THEMES.map((t) => {
               const p = THEME_PALETTES[t];
@@ -907,7 +908,7 @@ export function Inspector({
           </div>
         </Section>
 
-        <Section dark={dark} title="Stationery Layout Presets">
+        <Section collapsible dark={dark} title="Stationery Layout Presets">
           <p
             className={cn(
               "mb-2.5 text-[11px] leading-relaxed",
@@ -963,7 +964,7 @@ export function Inspector({
           </div>
         </Section>
 
-        <Section dark={dark} title="Decoration">
+        <Section collapsible dark={dark} title="Decoration">
           <Toggle
             dark={dark}
             label="House ribbon and border"
@@ -973,7 +974,7 @@ export function Inspector({
           />
         </Section>
 
-        <Section dark={dark} title="Design file">
+        <Section collapsible dark={dark} title="Design file">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -1022,6 +1023,7 @@ export function Inspector({
   return (
     <div data-testid="inspector-layer">
       <Section
+        collapsible
         dark={dark}
         title={label}
         aside={
@@ -1508,7 +1510,7 @@ export function Inspector({
       </Section>
 
       {isText && (
-        <Section dark={dark} title="Words">
+        <Section collapsible dark={dark} title="Words">
           <label className="block">
             <span className="sr-only">Text</span>
             <textarea
@@ -1695,7 +1697,7 @@ export function Inspector({
       )}
 
       {(isText || layer.kind === "divider" || layer.kind === "seal") && (
-        <Section dark={dark} title="Colour">
+        <Section collapsible dark={dark} title="Colour">
           {layer.kind !== "seal" && (
             <div
               className="mb-3 flex flex-wrap gap-1.5"
@@ -1734,7 +1736,7 @@ export function Inspector({
       )}
 
       {layer.kind === "shape" && (
-        <Section dark={dark} title="Shape Geometry & Style">
+        <Section collapsible dark={dark} title="Shape Geometry & Style">
           <div className="space-y-3">
             <div>
               <p
@@ -2062,7 +2064,7 @@ export function Inspector({
       )}
 
       {layer.kind === "image" && (
-        <Section dark={dark} title="Picture & Framing">
+        <Section collapsible dark={dark} title="Picture & Framing">
           <div className="space-y-3">
             <button
               type="button"
@@ -2308,7 +2310,7 @@ export function Inspector({
       )}
 
       {layer.kind === "code" && (
-        <Section dark={dark} title="Entry seal">
+        <Section collapsible dark={dark} title="Entry seal">
           <p
             className={cn(
               "text-[13px] leading-relaxed",
@@ -2327,7 +2329,7 @@ export function Inspector({
 
       {/* Universal Studio Visual FX & Blending Section */}
       {layer.kind !== "code" && (
-        <Section dark={dark} title="Visual FX & Blending">
+        <Section collapsible dark={dark} title="Visual FX & Blending">
           <div className="space-y-3">
             <div>
               <span

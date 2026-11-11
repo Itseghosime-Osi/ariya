@@ -38,12 +38,39 @@ export function Section({
   children,
   aside,
   dark,
+  collapsible = false,
 }: {
   title: string;
   children: React.ReactNode;
   aside?: React.ReactNode;
   dark?: boolean;
+  /** The heading becomes a button that folds the section; the choice is remembered per title. */
+  collapsible?: boolean;
 }) {
+  const key = `ariya:section-closed:${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const [closed, setClosed] = React.useState(false);
+  React.useEffect(() => {
+    if (!collapsible) return;
+    try {
+      setClosed(localStorage.getItem(key) === "1");
+    } catch {
+      /* storage blocked: sections simply start open */
+    }
+  }, [collapsible, key]);
+  const toggle = () => {
+    const next = !closed;
+    setClosed(next);
+    try {
+      if (next) localStorage.setItem(key, "1");
+      else localStorage.removeItem(key);
+    } catch {
+      /* not remembered */
+    }
+  };
+  const headingClass = cn(
+    "text-[11px] font-semibold uppercase tracking-[0.16em]",
+    dark ? "text-zinc-400" : "text-[#7a5b67]"
+  );
   return (
     <section
       className={cn(
@@ -51,18 +78,41 @@ export function Section({
         dark ? "border-white/10" : "border-[#e8e2d6]"
       )}
     >
-      <div className="mb-2.5 flex items-center justify-between gap-2">
-        <h3
-          className={cn(
-            "text-[11px] font-semibold uppercase tracking-[0.16em]",
-            dark ? "text-zinc-400" : "text-[#7a5b67]"
-          )}
-        >
-          {title}
-        </h3>
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2",
+          collapsible && closed ? "" : "mb-2.5"
+        )}
+      >
+        {collapsible ? (
+          <h3 className="m-0">
+            <button
+              type="button"
+              aria-expanded={!closed}
+              onClick={toggle}
+              className={cn(
+                headingClass,
+                "-mx-1 flex min-h-11 items-center gap-1.5 rounded-md px-1 text-left hover:opacity-80 focus-visible:outline-2 focus-visible:outline-[#dfba73]"
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "inline-block transition-transform motion-reduce:transition-none",
+                  closed ? "-rotate-90" : ""
+                )}
+              >
+                ▾
+              </span>
+              {title}
+            </button>
+          </h3>
+        ) : (
+          <h3 className={headingClass}>{title}</h3>
+        )}
         {aside}
       </div>
-      {children}
+      <div hidden={collapsible && closed}>{children}</div>
     </section>
   );
 }
