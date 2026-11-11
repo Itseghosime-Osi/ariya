@@ -119,3 +119,7 @@ What changed (`ExportModal.tsx`, new `dialog-theme.ts`):
 ### Theme sweep: no `dark:` styles left in the designer
 
 The last `dark:` styles (empty-card prompt, "Add text" button in the options bar, notice buttons) now follow the studio's own theme. Checked with axe on the idle studio, a selected layer, the undo toast and the empty card, with the computer in dark mode and the studio in light and in dark (`evidence/tidy-batch35.json`, 8 checks, all clear).
+
+### D1: alignment shown twice, on purpose (change tried and reverted)
+
+The alignment icons appear in the options bar and again in the inspector. Removing the inspector row looked like a tidy-up and passed local checks, but CI caught a case it broke: the options bar shows each tool's own options, so its Align row exists only while the Select tool is active. After drawing a shape the options bar shows shape options, and the inspector row is then the only way to align the layer (`studio-checklist-audit.spec.ts` clicks "Align left" in that state). So both stay. A better tidy would keep an Align row in the options bar for every tool; that is a larger change and is left open.
