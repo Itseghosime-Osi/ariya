@@ -2,7 +2,7 @@
 
 Live verification checklist for `feat/studio-pro-designer`, started 10 November 2026. Checked boxes mean verified acceptance checks; partial checks remain unchecked. See [the test matrix](designer-test-matrix.csv) for evidence and limitations.
 
-**Progress:** 200 verified, 34 partial, 1 not tested, 48 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
+**Progress:** 201 verified, 34 partial, 0 not tested, 48 not applicable. [Verification scope, checks and screenshots](designer-verification.md).
 
 **Continuing with another agent?** Read the [Claude handoff](CLAUDE-HANDOFF.md) for scope, code locations, remaining priorities and verification requirements.
 
@@ -179,7 +179,7 @@ A rounded-rectangle insertion preset or a single Radius input does not establish
 - [x] **DES-128 · Core** — Delete text while editing. Expected: Deletes characters, not the entire layer. **Pass** — Deleting all the text and leaving the box keeps an empty layer (10 layers) with no error; Undo restores the words. Evidence: `evidence/studio-batch7.json`.
 - [x] **DES-129 · Core** — Use shortcuts while typing. Expected: Tool hotkeys do not replace the active text tool accidentally. **Pass** — Typing the tool shortcut letters (r t v h x d m g u) into a text box inserts them as text and does not switch tools. Evidence: `evidence/studio-batch7.json`.
 - [x] **DES-130 · Core** — Undo text edits. Expected: Useful edit grouping; caret and content recover correctly. **Pass** — Actual inline editing retains focus, commits and cancels, preserves accented/multiline text, and supports document undo/redo. Evidence: `Authenticated designer-acceptance.spec.ts`.
-- [ ] **DES-131 · Core** — Export text. Expected: No clipped descenders, missing accents or substituted fonts.
+- [x] **DES-131 · Core** — Export text. Expected: No clipped descenders, missing accents or substituted fonts. **Pass** — A couple name with Yoruba dot-below and acute marks ('Ọlájídé & Adéṣọlá') and a venue with descenders export at 3240 × 4536 px with the same typeface, every accent and dot present and nothing clipped. Compared by eye with the on-screen card in Chromium and WebKit and by mean pixel difference in Chromium, Firefox and WebKit (names band 8.8, 9.0 and 18.7; the WebKit export sets the name about 1% wider than the screen). Not compared in real Safari. Evidence: `evidence/studio-batch17.json`.
 - [ ] **DES-132 · Core** — Edit text on a path. Expected: Start/end and direction work if deliberately supported. **Not applicable** — Formatting applies to a whole text layer. Rich per-character formatting and text on paths are not offered. Evidence: `Studio controls/model/export source review`.
 
 ## Images, crop and replacement
