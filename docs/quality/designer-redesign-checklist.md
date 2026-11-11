@@ -106,6 +106,7 @@ Decision: closed as not applicable: the designer is fully included for every hos
 - [ ] **E1 (P0) Performance budget.** Interaction stays smooth with 100 layers and 20 images on a mid-range phone.
       Done when: a stress fixture with 100 layers keeps drag/resize under a stated frame time (measured, recorded in evidence).
       Progress (not closed): 60 layers (the studio's maximum): median frame 16.7ms, 95th percentile 66.6ms while dragging, in a headless Chromium dev build with no GPU (RD-E1). No budget agreed yet and no mid-range phone measurement, so not closed.
+      Progress (not closed): a budget is now stated in `designer-release-check.md`: 95th-percentile drag frame under 100 ms at 60 layers. Last measured 66.6 ms (median 16.7 ms) in headless Chromium, so the budget is met there; there is no phone measurement yet, which is why the item stays open.
 - [ ] **E2 (P1) Heavy work off the main thread.** Keep alignment, distribution and export maths in Rust/WASM; move image decoding off the main thread where possible.
       Done when: long tasks over 50ms on the stress fixture are removed or justified.
 - [ ] **E3 (P1) Image size control.** Downscale big uploads for editing, keep the original for export.
@@ -171,6 +172,8 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 ## K. UI redesign (look and layout)
 
 Context: the phone/tablet layout and side-panel proportions were reworked in PR #92. Not yet redesigned: tool rail, inspector forms, header, desktop options bar, phone Simple mode. Both reviews say users want less clutter and clearer hierarchy.
+
+Progress (not closed): the routine is written in `designer-release-check.md` (automated checks, harness batches, budget, which documents to update, a check log). It is a process, so it closes only after it has been run for a release and logged.
 
 - [ ] **K1 (P0) Visual hierarchy audit.** One primary action per screen (Export), secondary actions quieter, destructive actions separated.
       Done when: a screenshot review of every studio state (empty, selected, panel open, export) shows one obvious primary action and no more than 2 competing emphases.
