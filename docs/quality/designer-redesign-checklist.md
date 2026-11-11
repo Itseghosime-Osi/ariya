@@ -209,6 +209,7 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 
 - [ ] **L1 (P0) Core journey map.** Write and test the main flow: Event → Choose template → Edit → Preview → Export/Share. Remove any step that does not help.
       Done when: each step is reachable in at most 2 taps and a user test records where people stall.
+      Progress (not closed): the journey and tap counts are in `designer-journey.md` (studio part: open, change a line, Export, Download = 3 taps plus typing). The 'where people stall' part needs the usability test.
 - [x] **L2 (P0) Empty states that teach.** Empty canvas, no layers, no saved designs, and no images each show one sentence and one button.
       Done when: every empty state has a screenshot and a clear next action.
       Evidence: Empty-canvas card with one sentence and an Add text button; RD-L2a/b/c, `screenshots/upgrade-empty.png`. Other empty states (no saved designs, no images) still open.
@@ -243,8 +244,10 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
       Progress (not closed): after-screenshots at 1440, 768 and 360 (idle and selected, light only) in `screenshots/upgrade-{d,t,p}-{idle,sel}.png`. No dark mode and no before/after pairs yet.
 - [ ] **M2 (P0) Regression suite stays green:** studio accessibility (44px targets), acceptance, export matrix, layer and undo specs.
 - [ ] **M3 (P1) Usability test script:** 5 tasks (change names, move a layer, change colour, export, share), 5 participants, success rate and time per task recorded.
-- [ ] **M4 (P1) Heuristic review** (Nielsen's 10) with findings logged and ranked.
-- [ ] **M5 (P1) Design review against the competitor complaints:** every A–L item mapped to a screen, so nothing from the reviews is left out.
+      Progress (not closed): the script (5 tasks, measures, pass bar, results table) is in `designer-usability-test.md`. It has not been run; the item closes when 5 people have done it.
+- [x] **M4 (P1) Heuristic review** (Nielsen's 10) with findings logged and ranked.
+      Evidence: an expert review against Nielsen's 10 heuristics is in `designer-heuristic-review.md`, with ten findings ranked by severity and five ranked fixes. It was done by one reviewer from code, screenshots and browser checks (Chromium, desktop and phone), not with users.
+- [x] **M5 (P1) Design review against the competitor complaints:** every A–L item mapped to a screen, so nothing from the reviews is left out.
 
 ## Suggested order
 
@@ -261,3 +264,5 @@ Each item is closed only with a test, screenshot or measurement saved under `doc
 
 - Canva: [Capterra](https://www.capterra.com/p/168956/Canva/reviews/), [Capterra 1-star](https://www.capterra.com/p/168956/Canva/reviews/?rating=1), [Software Advice](https://www.softwareadvice.com/graphic-design/canva-profile/reviews/), [GetApp](https://www.getapp.com/design-software/a/canva/)
 - Figma: [Capterra](https://capterra.com/p/175027/Figma/reviews/), [G2](https://www.g2.com/products/Figma/reviews), [Trustpilot](https://www.trustpilot.com/review/figma.com?page=3), [PeerSpot](https://origin.peerspot.com/products/figma-pros-and-cons)
+
+  Evidence: `designer-complaint-map.md` lists every item in sections A to L with its status and where it lives in the studio, plus the Canva and Figma complaints that drove the list. It is generated from this checklist, so it must be regenerated when items close.
