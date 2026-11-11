@@ -86,7 +86,7 @@ export function UnseatedGuestList({
             />
             <p className="font-medium">
               {guests.length === 0
-                ? "All registered guests have been seated!"
+                ? "Nobody is waiting for a seat. Guests appear here once they accept."
                 : "No unseated guests match your search filter."}
             </p>
           </div>

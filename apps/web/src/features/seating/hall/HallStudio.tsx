@@ -331,6 +331,13 @@ const isTyping = (el: EventTarget | null) =>
  * chairs and areas, an inspector to design whatever is selected, and a deck of planning tools
  * (guests, room, fit, seat, décor) on the side.
  */
+/** The planning tools, grouped the way a host thinks about the day. */
+const TOOL_GROUPS: { label: string; keys: Deck[] }[] = [
+  { label: "Design", keys: ["room", "fit", "decor"] },
+  { label: "Seat", keys: ["guests", "seat"] },
+  { label: "Plan", keys: ["catering", "thermal", "risk"] },
+];
+
 export function HallStudio({
   eventId,
   data,
@@ -1554,6 +1561,9 @@ export function HallStudio({
         ? `Only ${created.length} more ${created.length === 1 ? "table fits" : "tables fit"} in a ${layout.width} × ${layout.length} m hall. Make the room bigger, use snug spacing or choose smaller tables.`
         : `${created.length} tables added`
     );
+    // Show the whole hall again: after a bulk change the camera could be left zoomed in, with
+    // half the hall under the side panel.
+    if (created.length > 1) view3d.current?.command("fit");
   };
 
   /** Take away empty tables: the crowded ones first, then those furthest from the stage. */
@@ -1736,6 +1746,7 @@ export function HallStudio({
     setBusy("seat");
     await bulkAssign(seatPlan.plan.assignments);
     setBusy(null);
+    view3d.current?.command("fit");
   };
 
   const assignTo = (guestId: string, tableId: string) => {
@@ -2054,6 +2065,33 @@ export function HallStudio({
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
+      {/* About 25 Tab presses used to stand between the page top and the panel. These links
+          appear on focus and jump straight there. */}
+      <nav
+        aria-label="Skip links"
+        className="pointer-events-none fixed left-3 top-3 z-50 flex flex-col gap-1"
+      >
+        {[
+          ["#hall-tools", "Skip to planning tools"],
+          ["#hall-panel", "Skip to the open panel"],
+        ].map(([href, label]) => (
+          <a
+            key={href}
+            href={href}
+            onClick={(e) => {
+              const el = document.querySelector<HTMLElement>(href);
+              if (!el) return;
+              e.preventDefault();
+              if (!el.hasAttribute("tabindex"))
+                el.setAttribute("tabindex", "-1");
+              el.focus();
+            }}
+            className="pointer-events-auto sr-only rounded-full bg-night px-4 py-2 text-xs font-semibold text-white focus:not-sr-only focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
 
       {
         <>
@@ -2168,7 +2206,7 @@ export function HallStudio({
                           "pointer-events-auto px-3 py-1.5 text-[11px] font-semibold text-night"
                         )}
                       >
-                        Add tables from the toolbar, or use Fit to fill the hall
+                        Add a table with +, or fill the hall from Fit
                       </span>
                     )}
                 </div>
@@ -2319,7 +2357,7 @@ export function HallStudio({
                   data-testid="hall-toast"
                   className={cn(
                     float,
-                    "pointer-events-none absolute bottom-36 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold text-night"
+                    "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold text-night"
                   )}
                 >
                   {toast.msg}
@@ -2332,7 +2370,7 @@ export function HallStudio({
                     float,
                     // Above both bottom bars, so it is never hidden behind the zoom controls, and
                     // clickable so its Undo button works.
-                    "pointer-events-auto absolute bottom-36 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
+                    "pointer-events-auto absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
                   )}
                 >
                   {notice}
@@ -2790,111 +2828,118 @@ export function HallStudio({
                   leftEdge
                 )}
               >
+                {/* One bar for the view: zoom, fit, camera and turning. It used to be two bars that
+                    stacked on a laptop and covered the toasts above them. */}
                 <div
+                  role="toolbar"
+                  aria-label="View"
                   className={cn(
                     float,
-                    "pointer-events-auto flex items-center gap-0.5 p-1"
+                    "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1"
                   )}
                 >
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("zoomOut")}
-                    aria-label="Zoom out"
-                    title="Zoom out (−)"
-                  >
-                    <Minus size={17} />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("zoomOut")}
+                      aria-label="Zoom out"
+                      title="Zoom out (−)"
+                    >
+                      <Minus size={17} />
+                    </button>
+                    <span
+                      className="w-12 text-center text-xs font-semibold tabular-nums text-night"
+                      aria-hidden="true"
+                    >
+                      {cam.pct}%
+                    </span>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("zoomIn")}
+                      aria-label="Zoom in"
+                      title="Zoom in (+)"
+                    >
+                      <Plus size={17} />
+                    </button>
+                    <span
+                      className="mx-0.5 h-5 w-px bg-hairline"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("fit")}
+                      aria-label="Fit the hall in view"
+                      title="Fit (F or 0)"
+                    >
+                      <Maximize size={16} />
+                    </button>
+                  </div>
                   <span
-                    className="w-12 text-center text-xs font-semibold tabular-nums text-night"
-                    aria-hidden="true"
-                  >
-                    {cam.pct}%
-                  </span>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("zoomIn")}
-                    aria-label="Zoom in"
-                    title="Zoom in (+)"
-                  >
-                    <Plus size={17} />
-                  </button>
-                  <span
-                    className="mx-0.5 h-5 w-px bg-hairline"
+                    className="mx-1 h-6 w-px shrink-0 bg-hairline"
                     aria-hidden="true"
                   />
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("fit")}
-                    aria-label="Fit the hall in view"
-                    title="Fit (F or 0)"
+                  <div
+                    className="flex shrink-0 items-center gap-0.5"
+                    role="radiogroup"
+                    aria-label="Camera"
                   >
-                    <Maximize size={16} />
-                  </button>
-                </div>
-                <div
-                  className={cn(
-                    float,
-                    "pointer-events-auto flex items-center gap-0.5 p-1"
-                  )}
-                  role="radiogroup"
-                  aria-label="Camera"
-                >
-                  {(
-                    [
-                      ["top", "Top", Square, "top"],
-                      ["3d", "3D", Box, "perspective"],
-                    ] as const
-                  ).map(([k, l, I, cmd]) => (
+                    {(
+                      [
+                        ["top", "Top", Square, "top"],
+                        ["3d", "3D", Box, "perspective"],
+                      ] as const
+                    ).map(([k, l, I, cmd]) => (
+                      <button
+                        key={k}
+                        type="button"
+                        role="radio"
+                        aria-checked={cam.view === k}
+                        onClick={() => view3d.current?.command(cmd)}
+                        className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      >
+                        <I size={15} /> {l}
+                      </button>
+                    ))}
                     <button
-                      key={k}
                       type="button"
-                      role="radio"
-                      aria-checked={cam.view === k}
-                      onClick={() => view3d.current?.command(cmd)}
-                      className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                      className={chip}
+                      onClick={() => view3d.current?.command("rotateLeft")}
+                      aria-label="Turn the view left"
+                      title="Turn the view (or drag empty space)"
                     >
-                      <I size={15} /> {l}
+                      <RotateCcw size={16} />
                     </button>
-                  ))}
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("rotateLeft")}
-                    aria-label="Turn the view left"
-                    title="Turn the view (or drag empty space)"
-                  >
-                    <RotateCcw size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("rotateRight")}
-                    aria-label="Turn the view right"
-                    title="Turn the view (or drag empty space)"
-                  >
-                    <RotateCw size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("tiltUp")}
-                    aria-label="Look down from higher"
-                    title="Look from higher (or drag down on empty space)"
-                  >
-                    <ChevronUp size={17} />
-                  </button>
-                  <button
-                    type="button"
-                    className={chip}
-                    onClick={() => view3d.current?.command("tiltDown")}
-                    aria-label="Look from lower"
-                    title="Look from lower, down to eye level"
-                  >
-                    <ChevronDown size={17} />
-                  </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("rotateRight")}
+                      aria-label="Turn the view right"
+                      title="Turn the view (or drag empty space)"
+                    >
+                      <RotateCw size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("tiltUp")}
+                      aria-label="Look down from higher"
+                      title="Look from higher (or drag down on empty space)"
+                    >
+                      <ChevronUp size={17} />
+                    </button>
+                    <button
+                      type="button"
+                      className={chip}
+                      onClick={() => view3d.current?.command("tiltDown")}
+                      aria-label="Look from lower"
+                      title="Look from lower, down to eye level"
+                    >
+                      <ChevronDown size={17} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2925,57 +2970,77 @@ export function HallStudio({
                   </div>
                 </div>
               )}
+              {/* Eight tools in three groups, so every label and number has room: Design (the room
+                  itself), Seat (who sits where) and Plan (what the day needs). All eight stay tabs
+                  of one list, so arrow keys and links to a tool keep working. */}
               <div
+                id="hall-tools"
                 role="tablist"
                 aria-label="Planning tools"
                 hidden={mode === "simple"}
-                className="grid grid-cols-6 gap-1 border-b border-hairline p-2"
+                className="flex flex-col gap-1.5 border-b border-hairline p-2"
               >
-                {tiles.map(({ key, label, icon: I, stat }) => {
-                  const on = deck === key && selection.length === 0;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      role="tab"
-                      id={`hall-tab-${key}`}
-                      aria-selected={on}
-                      aria-controls="hall-panel"
-                      onClick={() => {
-                        setSelection([]);
-                        setDeck(key);
-                      }}
-                      className={cn(
-                        "group relative flex min-h-[76px] flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 text-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-                        on
-                          ? "bg-night text-white shadow-[0_8px_20px_-10px_rgba(28,7,13,0.7)]"
-                          : "text-night hover:bg-white hover:shadow-sm"
-                      )}
+                {TOOL_GROUPS.map((g) => (
+                  <div key={g.label} role="presentation">
+                    <p
+                      className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink"
+                      aria-hidden="true"
                     >
-                      <span
-                        className={cn(
-                          "grid h-8 w-8 place-items-center rounded-full transition-transform group-hover:scale-110 motion-reduce:transition-none",
-                          on
-                            ? "bg-white/10 text-[#e9c98a]"
-                            : "bg-white text-burgundy shadow-sm"
-                        )}
-                      >
-                        <I size={16} />
-                      </span>
-                      <span className="text-[11px] font-semibold leading-none">
-                        {label}
-                      </span>
-                      <span
-                        className={cn(
-                          "max-w-full truncate px-0.5 text-[10px] leading-none",
-                          on ? "text-white/80" : "text-label-2"
-                        )}
-                      >
-                        {stat}
-                      </span>
-                    </button>
-                  );
-                })}
+                      {g.label}
+                    </p>
+                    <div role="presentation" className="grid grid-cols-3 gap-1">
+                      {tiles
+                        .filter((tile) => g.keys.includes(tile.key))
+                        .map(({ key, label, icon: I, stat }) => {
+                          const on = deck === key && selection.length === 0;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              role="tab"
+                              id={`hall-tab-${key}`}
+                              aria-selected={on}
+                              aria-controls="hall-panel"
+                              onClick={() => {
+                                setSelection([]);
+                                setDeck(key);
+                              }}
+                              className={cn(
+                                "group flex min-h-11 items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+                                on
+                                  ? "bg-night text-white"
+                                  : "text-night hover:bg-white hover:shadow-sm"
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "grid h-7 w-7 shrink-0 place-items-center rounded-full",
+                                  on
+                                    ? "bg-white/10 text-[#e9c98a]"
+                                    : "bg-white text-burgundy shadow-sm"
+                                )}
+                              >
+                                <I size={14} aria-hidden="true" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block text-[12px] font-semibold leading-tight">
+                                  {label}
+                                </span>
+                                <span
+                                  className={cn(
+                                    "block text-[10px] leading-tight",
+                                    on ? "text-white/80" : "text-label-2"
+                                  )}
+                                >
+                                  {stat}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div
                 key={single ? `${single.type}:${single.id}` : `deck:${deck}`}
@@ -3110,6 +3175,7 @@ export function HallStudio({
                       setSelection([{ type: "table", id }]);
                       view3d.current?.focus(`table:${id}`);
                     }}
+                    onOpenFit={() => setDeck("fit")}
                   />
                 ) : deck === "room" ? (
                   <>

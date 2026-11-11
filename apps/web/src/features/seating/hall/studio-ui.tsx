@@ -52,14 +52,15 @@ export function Section({
       )}
     >
       <div className="mb-2.5 flex items-center justify-between gap-2">
-        <h3
+        {/* h2: the workspace bar holds the page's h1, so a panel section is the next level. */}
+        <h2
           className={cn(
             "text-[11px] font-semibold uppercase tracking-[0.16em]",
             dark ? "text-zinc-400" : "text-[#7a5b67]"
           )}
         >
           {title}
-        </h3>
+        </h2>
         {aside}
       </div>
       {children}

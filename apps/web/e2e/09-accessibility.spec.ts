@@ -193,7 +193,10 @@ test.describe("Accessibility Audits (WCAG 2.1 AA via Axe)", () => {
       timeout: 5000,
     });
 
-    // Keyboard-only navigation: focus select element, select table option, check assignment
+    // Keyboard-only navigation: Seat opens the picker, then choose a table from the select.
+    const seat = page.getByRole("button", { name: "Seat Seyi Makinde" });
+    await seat.focus();
+    await page.keyboard.press("Enter");
     const select = page.locator(
       'select[aria-label="Assign Seyi Makinde to a table"]'
     );

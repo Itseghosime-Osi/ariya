@@ -107,6 +107,7 @@ export function GuestsPanel({
   onStartAssign,
   onAssign,
   onFocusTable,
+  onOpenFit,
 }: {
   guests: SeatingGuest[];
   tables: TableWithGuests[];
@@ -114,6 +115,8 @@ export function GuestsPanel({
   onStartAssign: (guestId: string | null) => void;
   onAssign: (guestId: string, tableId: string) => void;
   onFocusTable: (id: string) => void;
+  /** Opens the Fit tool, where the hall is filled with tables. */
+  onOpenFit?: () => void;
 }) {
   const [q, setQ] = useState("");
   const [group, setGroup] = useState<string>("all");
@@ -142,9 +145,22 @@ export function GuestsPanel({
         }
       >
         {tables.length === 0 ? (
-          <p className="text-xs text-label-2">
-            Use + at the top of the hall to add one, or Fit to fill the hall.
-          </p>
+          <div className="rounded-xl bg-[#f6f1e8] p-3">
+            <p className="text-xs text-night">
+              <strong className="font-semibold">Add tables first.</strong>{" "}
+              Guests can only be seated at a table. Use + at the top of the hall
+              to add one, or fill the hall in one go.
+            </p>
+            {onOpenFit && (
+              <button
+                type="button"
+                onClick={onOpenFit}
+                className="mt-2 inline-flex min-h-11 items-center rounded-full bg-night px-4 text-xs font-semibold text-white hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+              >
+                Fill the hall with tables
+              </button>
+            )}
+          </div>
         ) : (
           <ul className="-mx-1 flex max-h-[148px] flex-wrap gap-1.5 overflow-y-auto px-1 py-0.5">
             {tables.map((t) => {
@@ -294,33 +310,56 @@ export function GuestsPanel({
                       {g.status !== "accepted" && ` · ${g.status}`}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onStartAssign(assigning === g.id ? null : g.id)
-                    }
-                    aria-pressed={assigning === g.id}
-                    className="inline-flex min-h-9 items-center rounded-full bg-night px-3 text-[11px] font-semibold text-white transition-colors hover:bg-burgundy aria-pressed:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-                  >
-                    {assigning === g.id ? "Choosing…" : "Seat"}
-                  </button>
+                  {g.status !== "accepted" ? (
+                    <span className="shrink-0 rounded-full bg-[#f6f1e8] px-3 py-1.5 text-[11px] font-semibold text-label-2">
+                      Awaits reply
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={tables.length === 0}
+                      title={
+                        tables.length === 0 ? "Add tables first" : undefined
+                      }
+                      onClick={() =>
+                        onStartAssign(assigning === g.id ? null : g.id)
+                      }
+                      aria-pressed={assigning === g.id}
+                      aria-label={`Seat ${g.name}`}
+                      className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy aria-pressed:bg-burgundy disabled:bg-[#eadfd9] disabled:text-label-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+                    >
+                      {assigning === g.id ? "Choosing…" : "Seat"}
+                    </button>
+                  )}
                 </div>
-                <select
-                  aria-label={`Assign ${g.name} to a table`}
-                  value=""
-                  onChange={(e) =>
-                    e.target.value && onAssign(g.id, e.target.value)
-                  }
-                  className="mt-2 h-9 w-full rounded-lg border border-hairline bg-[#fbf8f2] px-2 text-xs text-night focus:border-night focus:outline-none"
-                >
-                  <option value="">Or choose a table…</option>
-                  {tables.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({Math.max(0, t.capacity - t.occupiedSeats)} left
-                      of {t.capacity})
+                {/* The table list appears only for the guest being seated: one picker, not one
+                    per card, and never when there is no table to pick. */}
+                {assigning === g.id && tables.length > 0 && (
+                  <select
+                    aria-label={`Assign ${g.name} to a table`}
+                    value=""
+                    onChange={(e) =>
+                      e.target.value && onAssign(g.id, e.target.value)
+                    }
+                    className="mt-2 h-11 w-full rounded-lg border border-hairline bg-[#fbf8f2] px-2 text-sm text-night focus:border-night focus:outline-none"
+                  >
+                    <option value="">
+                      Click a table in the hall, or pick one…
                     </option>
-                  ))}
-                </select>
+                    {tables.map((t) => {
+                      const left = Math.max(0, t.capacity - t.occupiedSeats);
+                      return (
+                        <option
+                          key={t.id}
+                          value={t.id}
+                          disabled={left < g.attending_count}
+                        >
+                          {t.name} ({left} left of {t.capacity})
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}
               </li>
             ))}
           </ul>
