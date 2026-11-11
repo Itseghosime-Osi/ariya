@@ -6,6 +6,7 @@ import { getAddedRiskIds } from "@/features/checklist/queries";
 import { getEventById } from "@/features/events/queries";
 import { getEventSeatingData, getHallLayout } from "@/features/seating/queries";
 import { SeatingDesk } from "@/features/seating/components/SeatingDesk";
+import { countPendingHallProposals } from "@/features/approvals/queries";
 
 interface SeatingPageProps {
   params: Promise<{ eventId: string }>;
@@ -21,12 +22,14 @@ export async function generateMetadata({ params }: SeatingPageProps) {
 
 export default async function SeatingPageRoute({ params }: SeatingPageProps) {
   const { eventId } = await params;
-  const [eventData, seatingData, hall, addedRiskIds] = await Promise.all([
-    getEventById(eventId),
-    getEventSeatingData(eventId),
-    getHallLayout(eventId),
-    getAddedRiskIds(eventId),
-  ]);
+  const [eventData, seatingData, hall, addedRiskIds, pendingProposals] =
+    await Promise.all([
+      getEventById(eventId),
+      getEventSeatingData(eventId),
+      getHallLayout(eventId),
+      getAddedRiskIds(eventId),
+      countPendingHallProposals(eventId),
+    ]);
 
   if (!eventData) {
     notFound();
@@ -38,6 +41,7 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
         <SeatingDesk
           eventId={eventId}
           eventTitle={eventData.event.title}
+          pendingProposals={pendingProposals}
           initialData={seatingData}
           hallLayout={hall.layout}
           hallLayoutAvailable={hall.available}

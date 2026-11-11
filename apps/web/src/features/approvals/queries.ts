@@ -397,3 +397,23 @@ function eventTitleOf(
   if (!events) return null;
   return Array.isArray(events) ? (events[0]?.title ?? null) : events.title;
 }
+
+/**
+ * Hall and seating suggestions from connected apps still waiting on this celebration, so the
+ * studio can point the host to the approvals desk. Counting only: the desk previews and applies
+ * them with its own checks, so the studio never gains a second way to write a proposal.
+ */
+export async function countPendingHallProposals(
+  eventId: string
+): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("ai_proposals")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", eventId)
+    .eq("status", "pending")
+    .in("kind", ["apply_hall_layout", "apply_seating_plan"])
+    .gt("expires_at", new Date().toISOString());
+  if (error) return 0;
+  return count ?? 0;
+}

@@ -340,10 +340,23 @@ export const hallLayoutSchema = z.object({
       order: z.array(z.string().min(1).max(60)).max(600).default([]),
     })
     .default({ hidden: [], locked: [], order: [] }),
+  /** Keep-together and keep-apart rules for seating, kept with the plan (no migration). */
+  seatRules: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(40),
+        kind: z.enum(["together", "apart"]),
+        guestIds: z.array(z.guid()).min(2).max(20),
+        note: z.string().max(80).optional(),
+      })
+    )
+    .max(50)
+    .default([]),
   mood: z.enum(["day", "evening"]),
   chandeliers: z.boolean(),
   ceiling: z.number().min(HALL_CEILING_MIN).max(HALL_CEILING_MAX),
 });
+export type HallLayoutInput = z.infer<typeof hallLayoutSchema>;
 
 export const tablePositionsSchema = z
   .array(

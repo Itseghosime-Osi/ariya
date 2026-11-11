@@ -127,7 +127,8 @@ function sceneOf(layout: HallLayout, tables: PreviewTable[]): Scene {
       name: table.name,
       shape: table.shape,
       capacity: table.capacity,
-      occupied: 0,
+      // No seating comes with a room on its own: label each table with its size instead.
+      occupied: null,
       x: table.x / 100,
       y: table.y / 100,
       rot: layout.rotations[table.id] ?? 0,

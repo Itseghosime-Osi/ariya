@@ -1,5 +1,6 @@
 "use client";
 
+import { seatingCounts } from "../counts";
 import {
   useEffect,
   useMemo,
@@ -69,11 +70,6 @@ export interface LeftDockProps {
   onNewTable: () => void;
   /** Opens the Seat deck, where the engine seats everyone in one go. */
   onAutoSeat: () => void;
-  stats: {
-    seatedAttendees: number;
-    unseatedAttendees: number;
-    readinessPct: number;
-  };
   /** The hall's live numbers (guests, seats, what fits), shown above the tabs. */
   meter?: ReactNode;
   /** The layer under the pointer or keyboard focus, as a hall key like `table:id`, or null. */
@@ -100,7 +96,6 @@ export function LeftDock({
   onAssign,
   onNewTable,
   onAutoSeat,
-  stats,
   meter,
   onHover,
   onToggleHidden,
@@ -225,7 +220,6 @@ export function LeftDock({
             onAssign={onAssign}
             onNewTable={onNewTable}
             onAutoSeat={onAutoSeat}
-            stats={stats}
             onHover={onHover}
           />
         )}
@@ -749,7 +743,6 @@ function TablesTab({
   onAssign,
   onNewTable,
   onAutoSeat,
-  stats,
   onHover,
 }: Pick<
   LeftDockProps,
@@ -761,7 +754,6 @@ function TablesTab({
   | "onAssign"
   | "onNewTable"
   | "onAutoSeat"
-  | "stats"
   | "onHover"
 >) {
   const [open, setOpen] = useState<string | null>(null);
@@ -780,17 +772,24 @@ function TablesTab({
   const waiting = unseated.filter(
     (g) => !q || g.name.toLowerCase().includes(q)
   );
-  const total = stats.seatedAttendees + stats.unseatedAttendees;
+  // The same numbers as the rest of the studio (counts.ts): accepted people only.
+  const counts = seatingCounts({ tables, unseatedGuests: unseated });
 
   return (
     <div className="p-2">
       <div className="rounded-2xl border border-hairline bg-white p-3">
         <div className="flex items-baseline justify-between gap-2">
           <p className="text-xs font-semibold text-night">
-            {stats.seatedAttendees} of {total} guests seated
+            {counts.seated.people} of {counts.accepted.people} people seated
+            {counts.awaiting.people > 0 && (
+              <span className="font-normal text-label-2">
+                {" "}
+                · {counts.awaiting.people} awaiting reply
+              </span>
+            )}
           </p>
           <p className="text-xs font-bold tabular-nums text-burgundy">
-            {stats.readinessPct}%
+            {counts.seatedPct}%
           </p>
         </div>
         <div
@@ -798,12 +797,12 @@ function TablesTab({
           aria-label="Guests seated"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={stats.readinessPct}
+          aria-valuenow={counts.seatedPct}
           className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#f1ece4]"
         >
           <div
             className="h-full rounded-full bg-gradient-to-r from-[#d4a85a] to-burgundy transition-[width] duration-500"
-            style={{ width: `${stats.readinessPct}%` }}
+            style={{ width: `${counts.seatedPct}%` }}
           />
         </div>
         <div className="mt-3 flex gap-2">
@@ -817,7 +816,7 @@ function TablesTab({
           <button
             type="button"
             onClick={onAutoSeat}
-            disabled={stats.unseatedAttendees === 0}
+            disabled={counts.toSeat.people === 0}
             className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-hairline bg-white px-3 text-xs font-semibold text-night hover:border-night/40 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
             <Users size={14} aria-hidden="true" /> Auto-seat
