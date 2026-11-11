@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Segmented } from "@/features/seating/hall/studio-ui";
 import { uploadInvitationImageAction } from "../../actions";
 import { optimizeImageForUpload } from "../../image-compressor";
+import { IMPORT_ACCEPT, toRasterPicture } from "../../import-formats";
 import {
   normaliseDesign,
   constrainEntrySeals,
@@ -724,18 +725,14 @@ export function InvitationDesigner({
       });
       return;
     }
-    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
-      setNotice({
-        tone: "bad",
-        text: "Please choose a PNG, JPG or WebP picture.",
-      });
-      return;
-    }
     setBusy(true);
     setNotice(null);
     let optimized;
+    let importNote: string | undefined;
     try {
-      optimized = await optimizeImageForUpload(file);
+      const raster = await toRasterPicture(file);
+      importNote = raster.note;
+      optimized = await optimizeImageForUpload(raster.file);
     } catch (err: unknown) {
       setBusy(false);
       setNotice({
@@ -809,6 +806,7 @@ export function InvitationDesigner({
       setSelectedId(out.id);
       setSheetTab("properties");
     }
+    if (importNote) setNotice({ tone: "ok", text: importNote });
   }
 
   function exportDesign() {
@@ -1609,7 +1607,7 @@ export function InvitationDesigner({
       <input
         ref={fileRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept={IMPORT_ACCEPT}
         className="sr-only"
         aria-label="Choose a picture"
         tabIndex={-1}
