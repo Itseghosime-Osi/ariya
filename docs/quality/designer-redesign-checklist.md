@@ -11,6 +11,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: a new user can open a template, change the names, date and venue, and export in under 2 minutes with no help text (timed run on desktop and phone).
 - [ ] **A2 (P0) Real-time feel and stability.** Figma is praised for collaboration. Autosave status always visible ("Saved", "Saving", "Offline").
       Done when: status is visible at all times; a forced network drop shows "Offline" and recovers without losing edits.
+      Progress (not closed): the status now reads "offline · will save when you reconnect" and recovers (RD-A2, RD-A2b). Not yet tested: edits made offline surviving a reload.
 - [ ] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
       Done when: changing one named style updates every layer using it, and undo reverses it in one step.
 - [ ] **A4 (P1) Developer-style handoff, our version: print handoff.** Figma wins on handoff. Ours is the printer. One "Send to printer" export with bleed, crop marks and size notes.
@@ -20,8 +21,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **B1 (P0) Consistent export.** Same card must look identical on screen, PNG, JPG, PDF and the guest download, in Chromium, Firefox and WebKit.
       Done when: export-matrix spec compares all formats and browsers with no visible differences (extend `designer-export-matrix.spec.ts`).
-- [ ] **B2 (P0) Show what you will get before you export.** Preview step with format, size in pixels and file size.
+- [x] **B2 (P0) Show what you will get before you export.** Preview step with format, size in pixels and file size.
       Done when: preview matches the downloaded file dimensions exactly.
+      Evidence: Export dialog shows 'You will get' with format and pixel/inch size that follows the chosen format; RD-B2, `screenshots/upgrade-export.png`. File size not shown yet.
 - [ ] **B3 (P0) Fonts never change on export.** Embed fonts; fail loudly if one cannot load.
       Done when: a card using every brand font exports with the same glyph shapes; a blocked font shows a clear message, not a silent fallback.
 - [ ] **B4 (P1) Editable source, not only flattened files.** Canva users cannot get layered files. Offer "Download my design" (.ariya JSON) that re-opens with all layers, plus SVG export for vector layers.
@@ -58,8 +60,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: typing "export" or "align" jumps to the right control.
 - [ ] **D5 (P1) Clear folders and navigation (Canva and Figma both criticised).** Designs grouped by event; breadcrumbs; a visible Back to event.
       Done when: from any studio screen the user can reach their event in one click, and the saved design list is grouped by event.
-- [ ] **D6 (P1) Shortcut help.** Press `?` for a shortcut sheet.
+- [x] **D6 (P1) Shortcut help.** Press `?` for a shortcut sheet.
       Done when: the sheet lists real, tested shortcuts only.
+      Evidence: Help and shortcuts dialog (button, Help menu, `?` key); `evidence/redesign-batch19.json` RD-D6/b/c, screenshot `screenshots/upgrade-help.png`. Shortcut list matches the menus; Chromium desktop only.
 - [ ] **D7 (P2) Short video or GIF help per tool in Help.**
 
 ## E. Performance (Figma complaint: large files)
@@ -76,8 +79,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## F. Support and trust (Canva complaint: hard to reach support)
 
-- [ ] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
+- [x] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
       Done when: Help opens in one tap on phone and desktop.
+      Evidence: Help button in header (44px) and Help menu with help@ariyaday.com; RD-F1. Phone width not yet checked.
 - [ ] **F2 (P1) Clear error messages.** Every failure says what happened and what to do next.
       Done when: forced failures (export, save, image upload) each show a readable message and a retry.
 - [ ] **F3 (P1) Version history users can find.** Name versions, restore one.
@@ -145,8 +149,9 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
 
 - [ ] **L1 (P0) Core journey map.** Write and test the main flow: Event → Choose template → Edit → Preview → Export/Share. Remove any step that does not help.
       Done when: each step is reachable in at most 2 taps and a user test records where people stall.
-- [ ] **L2 (P0) Empty states that teach.** Empty canvas, no layers, no saved designs, and no images each show one sentence and one button.
+- [x] **L2 (P0) Empty states that teach.** Empty canvas, no layers, no saved designs, and no images each show one sentence and one button.
       Done when: every empty state has a screenshot and a clear next action.
+      Evidence: Empty-canvas card with one sentence and an Add text button; RD-L2a/b/c, `screenshots/upgrade-empty.png`. Other empty states (no saved designs, no images) still open.
 - [ ] **L3 (P0) Selection feedback.** Handles, size/position readout while dragging, snapping guides with labels, clear multi-select state.
       Done when: dragging shows live values and guides; handles are at least 44px touch targets on phone.
 - [ ] **L4 (P0) Undo safety net.** Visible undo/redo, a "Reverted" toast with Redo, and confirmation only for truly destructive actions (delete design).

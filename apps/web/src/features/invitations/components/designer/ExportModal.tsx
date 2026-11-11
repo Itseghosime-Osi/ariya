@@ -224,6 +224,24 @@ export function ExportModal({
               })}
             </div>
 
+            <p
+              data-testid="export-summary"
+              className="mt-3 text-xs text-label-2"
+              aria-live="polite"
+            >
+              You will get:{" "}
+              <strong className="text-night dark:text-ivory">
+                {FORMATS.find((f) => f.id === selectedFormat)?.title}
+              </strong>
+              {" · "}
+              {selectedFormat === "json"
+                ? "an editable backup you can open again in the studio"
+                : selectedFormat === "pdf"
+                  ? `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
+                  : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
+              .
+            </p>
+
             {error && (
               <div
                 role="alert"

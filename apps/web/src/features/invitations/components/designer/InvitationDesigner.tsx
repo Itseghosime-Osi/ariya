@@ -54,6 +54,7 @@ import { StudioMenuBar, type MenuGroup } from "./StudioMenuBar";
 import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
+import { HelpDialog } from "./HelpDialog";
 import { ColorSwatchesPanel } from "./ColorSwatchesPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { NavigatorPanel } from "./NavigatorPanel";
@@ -384,6 +385,8 @@ export function InvitationDesigner({
   const [clearGuidesRequest, setClearGuidesRequest] = useState(0);
   const [busy, setBusy] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [online, setOnline] = useState(true);
   const [notice, setNotice] = useState<{
     tone: "ok" | "bad";
     text: string;
@@ -838,6 +841,17 @@ export function InvitationDesigner({
     }
   }, [selectedId, patchLayer]);
 
+  useEffect(() => {
+    const sync = () => setOnline(navigator.onLine);
+    sync();
+    window.addEventListener("online", sync);
+    window.addEventListener("offline", sync);
+    return () => {
+      window.removeEventListener("online", sync);
+      window.removeEventListener("offline", sync);
+    };
+  }, []);
+
   // -------------------------------------------------------------- keyboard
 
   useEffect(() => {
@@ -860,6 +874,11 @@ export function InvitationDesigner({
       )
         return;
       const mod = e.metaKey || e.ctrlKey;
+      if (!mod && e.key === "?") {
+        e.preventDefault();
+        setHelpOpen(true);
+        return;
+      }
       if (mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
         if (e.shiftKey) redo();
@@ -1167,13 +1186,15 @@ export function InvitationDesigner({
 
   const status = busy
     ? "Uploading picture…"
-    : doc.isDirty
-      ? doc.saveState === "error"
-        ? "not saved"
-        : "saving…"
-      : initialRevision || doc.saveState === "saved"
-        ? "saved"
-        : "";
+    : !online
+      ? "offline · will save when you reconnect"
+      : doc.isDirty
+        ? doc.saveState === "error"
+          ? "not saved"
+          : "saving…"
+        : initialRevision || doc.saveState === "saved"
+          ? "saved"
+          : "";
 
   const menuGroups: MenuGroup[] = [
     {
@@ -1451,6 +1472,16 @@ export function InvitationDesigner({
         },
       ],
     },
+    {
+      title: "Help",
+      items: [
+        {
+          label: "Help and shortcuts…",
+          shortcut: "?",
+          onClick: () => setHelpOpen(true),
+        },
+      ],
+    },
   ];
 
   return (
@@ -1547,6 +1578,15 @@ export function InvitationDesigner({
         <div className={styles.headerActions}>
           <button
             type="button"
+            aria-label="Help and shortcuts"
+            title="Help and shortcuts (?)"
+            onClick={() => setHelpOpen(true)}
+            className="grid h-11 w-11 place-items-center rounded-full text-sm font-bold text-night hover:bg-burgundy/10"
+          >
+            ?
+          </button>
+          <button
+            type="button"
             aria-label={
               dark
                 ? "Switch to the light interface"
@@ -1630,6 +1670,30 @@ export function InvitationDesigner({
             onAddLayerWithGeometry={addLayerWithGeometry}
             activeShapeKind={activeShapeKind}
           />
+          {!design.layers.some(
+            (layer) => layer.visible && layer.kind !== "code"
+          ) && (
+            <div
+              data-testid="studio-empty-state"
+              className="pointer-events-none absolute inset-0 z-10 grid place-items-center p-6"
+            >
+              <div className="pointer-events-auto max-w-xs rounded-2xl border border-hairline bg-ivory/95 p-5 text-center shadow-lg dark:bg-[#1a1118]/95 dark:text-ivory">
+                <p className="font-serif text-lg font-bold text-night dark:text-ivory">
+                  Your card is empty
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-label-2">
+                  Add some text to begin, or upload a picture.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => add("text")}
+                  className="mt-3 inline-flex min-h-11 items-center rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-burgundy/90"
+                >
+                  Add text
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -2256,6 +2320,12 @@ export function InvitationDesigner({
         onFit={fitView}
         dimensions={designDimensionsPx(design)}
         onExport={() => setExportOpen(true)}
+      />
+
+      <HelpDialog
+        dark={dark}
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
       />
 
       <ExportModal
