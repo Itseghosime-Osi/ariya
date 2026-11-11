@@ -125,8 +125,10 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
       Done when: a screenshot review of every studio state (empty, selected, panel open, export) shows one obvious primary action and no more than 2 competing emphases.
 - [ ] **K2 (P0) Header redesign.** Event name, save status, undo/redo, Share and Export in a fixed order; secondary items moved into a menu.
       Done when: header fits at 360px, 768px and 1440px with no wrapping or clipped labels.
+      Progress (not closed): reviewed at 360/768/1440; fixed a regression where the new Help button squeezed the phone title (hidden under 640px; Help menu still reachable). Fixed order and menu grouping not yet redesigned.
 - [ ] **K3 (P0) Tool rail redesign.** Group tools (Select, Text, Shapes, Images, Seal/QR, More), consistent icons and labels, active state that is clear without relying on colour alone.
       Done when: every tool has an icon, label or tooltip, shortcut, and a 44px target; icon set is one consistent style.
+      Progress (not closed): reviewed: every tool-rail button already has an aria-label and a title with its shortcut. Grouping, active-state redesign and one icon style are not done.
 - [ ] **K4 (P0) Inspector redesign.** Collapsible sections (Position, Text, Fill, Effects) with the most-used controls first; same control pattern everywhere (label above, value right).
       Done when: no inspector section needs scrolling to reach its primary control on a 768px-tall screen; sections remember open/closed.
 - [ ] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
@@ -152,10 +154,12 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
 - [x] **L2 (P0) Empty states that teach.** Empty canvas, no layers, no saved designs, and no images each show one sentence and one button.
       Done when: every empty state has a screenshot and a clear next action.
       Evidence: Empty-canvas card with one sentence and an Add text button; RD-L2a/b/c, `screenshots/upgrade-empty.png`. Other empty states (no saved designs, no images) still open.
-- [ ] **L3 (P0) Selection feedback.** Handles, size/position readout while dragging, snapping guides with labels, clear multi-select state.
+- [x] **L3 (P0) Selection feedback.** Handles, size/position readout while dragging, snapping guides with labels, clear multi-select state.
       Done when: dragging shows live values and guides; handles are at least 44px touch targets on phone.
-- [ ] **L4 (P0) Undo safety net.** Visible undo/redo, a "Reverted" toast with Redo, and confirmation only for truly destructive actions (delete design).
+      Evidence: live X · Y · W (· H) pixel readout while dragging, gone 0.9s after; `evidence/redesign-batch20.json` RD-L3a/b, `screenshots/upgrade-drag-readout.png`. Snap guides already existed. Touch handles not re-measured.
+- [x] **L4 (P0) Undo safety net.** Visible undo/redo, a "Reverted" toast with Redo, and confirmation only for truly destructive actions (delete design).
       Done when: no destructive action is lost without an undo or confirm.
+      Evidence: Undo and Redo show an 'Undone/Redone' toast with a one-tap reverse button that dismisses after 6s; RD-L4a–e, `screenshots/upgrade-undo-toast.png`. Delete design still confirms (existing behaviour).
 - [ ] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
       Done when: on a 360×640 emulated phone the edited field stays visible with the keyboard open (real-device check in I3).
 - [ ] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
@@ -175,6 +179,7 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
 ## M. UI/UX validation
 
 - [ ] **M1 (P0) Before/after screenshots** for each redesigned area at 360px, 768px, 1440px, light and dark, saved under `docs/quality/screenshots/`.
+      Progress (not closed): after-screenshots at 1440, 768 and 360 (idle and selected, light only) in `screenshots/upgrade-{d,t,p}-{idle,sel}.png`. No dark mode and no before/after pairs yet.
 - [ ] **M2 (P0) Regression suite stays green:** studio accessibility (44px targets), acceptance, export matrix, layer and undo specs.
 - [ ] **M3 (P1) Usability test script:** 5 tasks (change names, move a layer, change colour, export, share), 5 participants, success rate and time per task recorded.
 - [ ] **M4 (P1) Heuristic review** (Nielsen's 10) with findings logged and ranked.
