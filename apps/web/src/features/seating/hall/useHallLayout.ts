@@ -4,6 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { saveHallLayoutAction } from "../actions";
 import { defaultLayout, normaliseLayout, type HallLayout } from "./model";
 
+export type SaveState = "saved" | "saving" | "failed" | "conflict" | "local";
+
+function revOf(doc: unknown): number {
+  if (!doc || typeof doc !== "object") return 0;
+  const r = (doc as { rev?: unknown }).rev;
+  return typeof r === "number" && Number.isFinite(r) && r >= 0
+    ? Math.floor(r)
+    : 0;
+}
+
 type Positions = Record<string, { x: number; y: number }>;
 
 interface Snapshot {
@@ -32,6 +42,21 @@ export function useHallLayout({
   );
   const [storedLocally, setStoredLocally] = useState(!available);
   const [saving, setSaving] = useState(false);
+  /**
+   * What the host is told about their work: saved, saving, not saved (with a retry), or that
+   * someone else saved a newer hall. `failed` and `conflict` stay until a save goes through.
+   */
+  const [saveState, setSaveState] = useState<SaveState>("saved");
+  const [conflict, setConflict] = useState<{
+    rev: number;
+    layout: unknown;
+  } | null>(null);
+  // The revision this studio last loaded or saved; a save based on an older one is refused.
+  const rev = useRef(revOf(initialLayout));
+  const attempts = useRef(0);
+  const retryTimer = useRef<number | null>(null);
+  // The document waiting to reach the server, kept until a save succeeds so a retry can resend it.
+  const unsaved = useRef<HallLayout | null>(null);
   const past = useRef<Snapshot[]>([]);
   const future = useRef<Snapshot[]>([]);
   const [, bump] = useState(0);
@@ -52,6 +77,58 @@ export function useHallLayout({
    * timeout, so without this the last edit of a visit is lost — which is how a host lays out a
    * hall and then finds the checklist saying there is no plan.
    */
+  const send = useCallback(
+    (next: HallLayout, force = false) => {
+      if (retryTimer.current) window.clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+      setSaving(true);
+      setSaveState("saving");
+      saveHallLayoutAction(eventId, next, force ? undefined : rev.current)
+        .then((res) => {
+          if (res.ok) {
+            if (typeof res.data?.rev === "number") rev.current = res.data.rev;
+            if (unsaved.current === next) unsaved.current = null;
+            attempts.current = 0;
+            setStoredLocally(false);
+            setConflict(null);
+            setSaveState(unsaved.current ? "saving" : "saved");
+            return;
+          }
+          if (res.data?.fallback) {
+            setStoredLocally(true);
+            setSaveState("local");
+            return;
+          }
+          if (res.data?.conflict) {
+            setConflict({ rev: res.data.rev ?? 0, layout: res.data.layout });
+            setSaveState("conflict");
+            return;
+          }
+          throw new Error(res.error || "save failed");
+        })
+        .catch(() => {
+          // The local copy is already written. Try again a few times, then wait for the host.
+          setSaveState("failed");
+          attempts.current += 1;
+          if (attempts.current <= 3) {
+            retryTimer.current = window.setTimeout(
+              () => {
+                if (unsaved.current) send(unsaved.current);
+              },
+              1000 * 2 ** attempts.current
+            );
+          }
+        })
+        .finally(() => setSaving(false));
+    },
+    [eventId]
+  );
+
+  /**
+   * Send whatever the pause was waiting on. Leaving the studio for another page cancels the
+   * timeout, so without this the last edit of a visit is lost — which is how a host lays out a
+   * hall and then finds the checklist saying there is no plan.
+   */
   const flush = useCallback(
     (leaving = false) => {
       if (timer.current) window.clearTimeout(timer.current);
@@ -59,6 +136,7 @@ export function useHallLayout({
       const next = latest.current;
       latest.current = null;
       if (!next) return;
+      unsaved.current = next;
       try {
         localStorage.setItem(LOCAL_KEY(eventId), JSON.stringify(next));
       } catch {
@@ -71,21 +149,64 @@ export function useHallLayout({
         void fetch(`/api/events/${eventId}/hall-layout`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(next),
+          body: JSON.stringify({ layout: next, baseRev: rev.current }),
           keepalive: true,
         }).catch(() => {
           /* the local copy is the fallback */
         });
         return;
       }
-      setSaving(true);
-      void saveHallLayoutAction(eventId, next).then((res) => {
-        setSaving(false);
-        if (!res.ok && res.data?.fallback) setStoredLocally(true);
-        else if (res.ok) setStoredLocally(false);
-      });
+      send(next);
     },
-    [eventId, storedLocally, available]
+    [eventId, storedLocally, available, send]
+  );
+
+  /** Send the unsaved document again now. */
+  const retry = useCallback(() => {
+    attempts.current = 0;
+    const next = unsaved.current ?? current.current;
+    send(next);
+  }, [send]);
+
+  /** Someone else saved a newer hall: keep this one anyway, replacing theirs. */
+  const keepMine = useCallback(() => {
+    const next = unsaved.current ?? current.current;
+    send(next, true);
+  }, [send]);
+
+  /** Someone else saved a newer hall: take theirs and drop the unsaved edits. */
+  const takeTheirs = useCallback(() => {
+    if (!conflict) return;
+    const theirs = normaliseLayout(conflict.layout);
+    rev.current = conflict.rev;
+    unsaved.current = null;
+    latest.current = null;
+    if (theirs) {
+      current.current = theirs;
+      setLayout(theirs);
+    }
+    past.current = [];
+    future.current = [];
+    setConflict(null);
+    setSaveState("saved");
+    bump((n) => n + 1);
+  }, [conflict]);
+
+  // Warn before leaving while work has not reached the server.
+  useEffect(() => {
+    if (saveState !== "failed" && saveState !== "conflict") return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [saveState]);
+
+  useEffect(
+    () => () => {
+      if (retryTimer.current) window.clearTimeout(retryTimer.current);
+    },
+    []
   );
 
   // A layout kept on this device wins over the empty default when the database has none.
@@ -105,10 +226,11 @@ export function useHallLayout({
   const persist = useCallback(
     (next: HallLayout) => {
       latest.current = next;
+      if (saveState !== "conflict") setSaveState("saving");
       if (timer.current) window.clearTimeout(timer.current);
       timer.current = window.setTimeout(flush, 600);
     },
-    [flush]
+    [flush, saveState]
   );
 
   /** Record the current state so it can be undone, before making a change. */
@@ -200,5 +322,10 @@ export function useHallLayout({
     canRedo: future.current.length > 0,
     storedLocally,
     saving,
+    saveState,
+    conflict: conflict !== null,
+    retry,
+    keepMine,
+    takeTheirs,
   };
 }

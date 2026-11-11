@@ -75,7 +75,6 @@ import {
   MetreField,
   Section,
   Segmented,
-  Stepper,
   Swatches,
   TableGlyph,
   Tiles,
@@ -794,7 +793,6 @@ export function FitPanel({
   tableCount,
   emptyCount,
   crowded,
-  onAddOne,
   onRemove,
   onFixCrowding,
   onAutoLayout,
@@ -817,7 +815,6 @@ export function FitPanel({
   tableCount: number;
   emptyCount: number;
   crowded: number;
-  onAddOne: () => void;
   onRemove: (n: number) => void;
   onFixCrowding: () => void;
   onAutoLayout: () => void;
@@ -828,32 +825,37 @@ export function FitPanel({
   return (
     <div>
       <Section title="Tables in the hall">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <Stepper
-              label="Tables"
-              value={tableCount}
-              min={0}
-              max={400}
-              onChange={(v) => (v > tableCount ? onAddOne() : onRemove(1))}
-            />
-          </div>
-          <p className="text-[11px] leading-tight text-label-2">
-            {emptyCount} empty
-            <br />
-            {tableCount - emptyCount} with guests
-          </p>
-        </div>
-        <div className="mt-2 flex items-end gap-2">
-          <label className="flex-1 text-[11px] font-semibold text-label-2">
-            Set the number of tables
-            <input
-              type="text"
-              inputMode="numeric"
-              value={want}
-              onChange={(e) => setWant(e.target.value.replace(/[^0-9]/g, ""))}
-              className="mt-1 h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base tabular-nums text-night outline-none focus:border-night sm:text-sm"
-            />
+        {/* One control for one number: type it, or step it, then Apply. */}
+        <div className="flex items-end gap-2">
+          <label className="min-w-0 flex-1 text-[11px] font-semibold text-label-2">
+            Number of tables
+            <span className="mt-1 flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="One fewer table"
+                disabled={busy !== null || wanted === 0}
+                onClick={() => setWant(String(Math.max(0, wanted - 1)))}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-hairline bg-white text-night hover:bg-ivory disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-burgundy"
+              >
+                −
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={want}
+                onChange={(e) => setWant(e.target.value.replace(/[^0-9]/g, ""))}
+                className="h-11 w-full min-w-0 rounded-lg border border-hairline bg-white px-2.5 text-center text-base tabular-nums text-night outline-none focus:border-night sm:text-sm"
+              />
+              <button
+                type="button"
+                aria-label="One more table"
+                disabled={busy !== null}
+                onClick={() => setWant(String(wanted + 1))}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-hairline bg-white text-night hover:bg-ivory disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-burgundy"
+              >
+                +
+              </button>
+            </span>
           </label>
           <button
             type="button"
@@ -868,6 +870,10 @@ export function FitPanel({
             Apply
           </button>
         </div>
+        <p className="mt-1.5 text-[11px] text-label-2">
+          {tableCount} now · {emptyCount} empty · {tableCount - emptyCount} with
+          guests · about {fitEmpty.placements.length} fit in this hall
+        </p>
         <p className="mt-2 text-[11px] text-label-2">
           Fewer tables take away empty ones first, starting with the most
           crowded and those furthest from the stage. Guests are never unseated

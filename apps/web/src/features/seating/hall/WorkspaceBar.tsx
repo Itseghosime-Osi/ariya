@@ -11,6 +11,7 @@ export function WorkspaceBar({
   backHref,
   eventTitle,
   detail,
+  status,
   title = "Seating & Floor Plan",
   children,
 }: {
@@ -20,6 +21,8 @@ export function WorkspaceBar({
   eventTitle?: string;
   /** A short line after the event name: the hall's size and whether it has saved. */
   detail?: string;
+  /** Whether the hall is saved, shown under the title on every screen size. */
+  status?: ReactNode;
   /** Sits at the end of the bar: the mode switch. */
   children?: ReactNode;
 }) {
@@ -40,14 +43,16 @@ export function WorkspaceBar({
         <p className="truncate text-[11px] leading-tight text-label-2">
           {[eventTitle, detail].filter(Boolean).join(" · ")}
         </p>
+        {status && <div className="mt-0.5 leading-tight">{status}</div>}
       </div>
       {children && (
         <>
           <div
-            className="mx-1 hidden h-6 w-px shrink-0 bg-hairline min-[1440px]:block"
+            className="mx-1 hidden h-6 w-px shrink-0 bg-hairline sm:block"
             aria-hidden="true"
           />
-          <div className="hidden shrink-0 min-[1440px]:block">{children}</div>
+          {/* The mode switch lives here at every width; on a phone it drops below the bar. */}
+          <div className="hidden shrink-0 sm:block">{children}</div>
         </>
       )}
     </div>

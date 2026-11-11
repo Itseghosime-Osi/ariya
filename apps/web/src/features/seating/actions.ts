@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
+import { writeHallLayout } from "./hall-save";
 import {
   createTableSchema,
   updateTableSchema,
@@ -182,36 +183,48 @@ export async function assignSeatAction(
  */
 export async function saveHallLayoutAction(
   eventId: string,
-  layout: unknown
-): Promise<ActionResult<{ fallback?: boolean }>> {
+  layout: unknown,
+  /**
+   * The revision the studio last loaded. When given, a newer stored hall is not overwritten: the
+   * result says `conflict` and hands back what is stored. Omit it to apply a reviewed change.
+   */
+  baseRev?: number
+): Promise<
+  ActionResult<{
+    fallback?: boolean;
+    rev?: number;
+    conflict?: boolean;
+    layout?: unknown;
+  }>
+> {
   const parsed = hallLayoutSchema.safeParse(layout);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
   const supabase = await memberClient(eventId);
   if (!supabase) return { ok: false, error: NOT_A_MEMBER };
-  const { error } = await supabase
-    .from("events")
-    .update({ hall_layout: parsed.data })
-    .eq("id", eventId);
-  if (error) {
-    const missing =
-      error.code === "42703" ||
-      error.code === "PGRST204" ||
-      /hall_layout/.test(error.message ?? "");
+  const res = await writeHallLayout(supabase, eventId, parsed.data, baseRev);
+  if (!res.ok) {
+    if (res.conflict) {
+      return {
+        ok: false,
+        data: { conflict: true, rev: res.rev, layout: res.layout },
+        error: "Someone else changed this hall since you opened it.",
+      };
+    }
     return {
       ok: false,
-      data: missing ? { fallback: true } : undefined,
-      error: missing
+      data: res.missing ? { fallback: true } : undefined,
+      error: res.missing
         ? "Hall layout saved on this device for now."
-        : mapError(error, "Could not save the hall layout."),
+        : mapError(res.error, "Could not save the hall layout."),
     };
   }
   // The checklist builds its tasks from the room, so it must not keep a render made before this
   // save; the studio's own page caches the panel it was opened with.
   revalidatePath(`/events/${eventId}/checklist`);
   revalidatePath(`/events/${eventId}/seating`);
-  return { ok: true };
+  return { ok: true, data: { rev: res.rev } };
 }
 
 /** Save where tables stand in the hall (centimetres). No revalidation: only the studio reads these live. */
@@ -286,13 +299,23 @@ export async function bulkAssignSeatsAction(
   if (!supabase) return { ok: false, error: NOT_A_MEMBER };
   let seated = 0;
   const failed: string[] = [];
-  for (const p of parsed.data) {
-    const { error } = await supabase.rpc("assign_seat", {
-      p_guest_id: p.guestId,
-      p_table_id: p.tableId || undefined,
+  // Eight at a time: one round trip per guest made "Seat 144 guests" take about seven seconds.
+  // Each call still checks the guest and table on its own, so order between them does not matter.
+  const BATCH = 8;
+  for (let i = 0; i < parsed.data.length; i += BATCH) {
+    const chunk = parsed.data.slice(i, i + BATCH);
+    const results = await Promise.all(
+      chunk.map((p) =>
+        supabase.rpc("assign_seat", {
+          p_guest_id: p.guestId,
+          p_table_id: p.tableId || undefined,
+        })
+      )
+    );
+    results.forEach(({ error }, j) => {
+      if (error) failed.push(chunk[j].guestId);
+      else seated++;
     });
-    if (error) failed.push(p.guestId);
-    else seated++;
   }
   revalidatePath(`/events/${eventId}/seating`);
   revalidatePath(`/events/${eventId}`);

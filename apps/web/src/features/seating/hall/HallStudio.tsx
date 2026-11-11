@@ -53,6 +53,7 @@ import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
+import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
   moveLayer,
   nudgeLayer,
@@ -379,7 +380,18 @@ export function HallStudio({
     after: { layout: HallLayout; positions: Positions };
     showing: Compared;
   } | null>(null);
-  const say = (msg: string) => setAnnounce(msg);
+  // What the studio just did. Read out to screen readers and shown for a few seconds to everyone:
+  // it used to be screen-reader only, so a sighted host never saw "Only 24 more tables fit".
+  const [toast, setToast] = useState<{ msg: string; n: number } | null>(null);
+  const say = (msg: string) => {
+    setAnnounce(msg);
+    setToast((prev) => ({ msg, n: (prev?.n ?? 0) + 1 }));
+  };
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 5000);
+    return () => window.clearTimeout(id);
+  }, [toast]);
 
   // ---------- cooling ----------
   const [thermal, setThermal] = useState<ThermalReport | null>(null);
@@ -1535,7 +1547,7 @@ export function HallStudio({
     setBusy(null);
     say(
       count !== undefined && list.length < count
-        ? `Only ${created.length} more tables fit. Try snug spacing or smaller tables.`
+        ? `Only ${created.length} more ${created.length === 1 ? "table fits" : "tables fit"} in a ${layout.width} × ${layout.length} m hall. Make the room bigger, use snug spacing or choose smaller tables.`
         : `${created.length} tables added`
     );
   };
@@ -2060,13 +2072,10 @@ export function HallStudio({
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
-                  detail={`${layout.width} × ${layout.length} m${
-                    hall.saving
-                      ? " · saving…"
-                      : hall.storedLocally
-                        ? " · saved on this device"
-                        : ""
-                  }`}
+                  detail={`${layout.width} × ${layout.length} m`}
+                  status={
+                    <SaveStatus state={hall.saveState} onRetry={hall.retry} />
+                  }
                 >
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </WorkspaceBar>
@@ -2078,10 +2087,16 @@ export function HallStudio({
                   leftEdge
                 )}
               >
-                {/* Below a wide screen the bar has no room for the switch, so it sits here. */}
-                <div className="pointer-events-auto min-[1440px]:hidden">
+                {/* On a phone the bar has no room for the switch, so it sits here. */}
+                <div className="pointer-events-auto sm:hidden">
                   <ModeSwitch mode={mode} onChange={chooseMode} />
                 </div>
+                {hall.conflict && (
+                  <ConflictBanner
+                    onTakeTheirs={hall.takeTheirs}
+                    onKeepMine={hall.keepMine}
+                  />
+                )}
                 {/* Below the hall numbers rather than centred on the top edge: at the widths the
                     studio actually runs at, a centred bar sits underneath this card and cannot be
                     clicked. */}
@@ -2287,12 +2302,27 @@ export function HallStudio({
                 )}
               </div>
 
+              {toast && !notice && (
+                <div
+                  key={toast.n}
+                  aria-hidden="true"
+                  data-testid="hall-toast"
+                  className={cn(
+                    float,
+                    "pointer-events-none absolute bottom-36 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold text-night"
+                  )}
+                >
+                  {toast.msg}
+                </div>
+              )}
               {notice && (
                 <div
                   role="status"
                   className={cn(
                     float,
-                    "pointer-events-none absolute bottom-20 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
+                    // Above both bottom bars, so it is never hidden behind the zoom controls, and
+                    // clickable so its Undo button works.
+                    "pointer-events-auto absolute bottom-36 left-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-2 text-xs font-semibold"
                   )}
                 >
                   {notice}
@@ -3152,14 +3182,6 @@ export function HallStudio({
                         data.tables.filter((t) => t.occupiedSeats === 0).length
                       }
                       crowded={warnCount}
-                      onAddOne={() =>
-                        void placeNew(
-                          preset.shape,
-                          preset.capacity,
-                          undefined,
-                          false
-                        )
-                      }
                       onRemove={(n) => void removeTables(n)}
                       onFixCrowding={() => void fixCrowding()}
                       onAutoLayout={autoLayout}

@@ -344,6 +344,7 @@ export const hallLayoutSchema = z.object({
   chandeliers: z.boolean(),
   ceiling: z.number().min(HALL_CEILING_MIN).max(HALL_CEILING_MAX),
 });
+export type HallLayoutInput = z.infer<typeof hallLayoutSchema>;
 
 export const tablePositionsSchema = z
   .array(

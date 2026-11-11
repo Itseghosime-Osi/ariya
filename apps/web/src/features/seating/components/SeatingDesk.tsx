@@ -75,6 +75,8 @@ export function SeatingDesk({
     updateTable,
     setTablePositions,
     bulkAssign,
+    undoBulkAssign,
+    canUndoBulk,
     data,
     errorMsg,
     successMsg,
@@ -143,7 +145,17 @@ export function SeatingDesk({
     </span>
   ) : successMsg ? (
     <span className="inline-flex items-center gap-2 text-[#1f6b4a]">
-      <CircleCheck size={15} /> {successMsg}
+      <CircleCheck size={15} aria-hidden="true" /> {successMsg}
+      {canUndoBulk && (
+        <button
+          type="button"
+          onClick={() => void undoBulkAssign()}
+          data-testid="undo-seat-everyone"
+          className="ml-1 inline-flex min-h-8 items-center rounded-full bg-night px-3 text-[11px] font-semibold text-white hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          Undo
+        </button>
+      )}
     </span>
   ) : null;
 
