@@ -4,7 +4,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
-import { writeHallLayout } from "./hall-save";
+import { randomBytes } from "node:crypto";
+import { writeHallLayout, writeHallShare, type HallShare } from "./hall-save";
 import {
   createTableSchema,
   updateTableSchema,
@@ -320,4 +321,76 @@ export async function bulkAssignSeatsAction(
   revalidatePath(`/events/${eventId}/seating`);
   revalidatePath(`/events/${eventId}`);
   return { ok: failed.length === 0 || seated > 0, data: { seated, failed } };
+}
+
+/**
+ * Create, or replace, the view-only link to this hall's floor plan. The link shows the room to
+ * scale with its tables and seat counts, and no guest names, so a host can send it to a venue
+ * manager or caterer. Members only; the revision check still applies, so a link is never made on
+ * top of a hall someone else has just changed.
+ */
+export async function createHallShareAction(
+  eventId: string,
+  baseRev: number,
+  /** The hall as the studio shows it, saved with the link when nothing is stored yet. */
+  layout?: unknown
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  return setHallShare(
+    eventId,
+    baseRev,
+    {
+      token: randomBytes(24).toString("base64url"),
+      createdAt: Date.now(),
+    },
+    layout
+  );
+}
+
+/** Stop sharing: the old link stops working at once. */
+export async function revokeHallShareAction(
+  eventId: string,
+  baseRev: number
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  return setHallShare(eventId, baseRev, null);
+}
+
+async function setHallShare(
+  eventId: string,
+  baseRev: number,
+  share: HallShare | null,
+  layout?: unknown
+): Promise<ActionResult<{ token: string; rev: number }>> {
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
+  let res = await writeHallShare(supabase, eventId, baseRev, share);
+  // A hall the studio shows but has not saved yet (a new celebration shared straight away): save
+  // it with the link, through the same checks as any studio save.
+  if (!res.ok && res.reason === "no-hall" && share && layout !== undefined) {
+    const parsed = hallLayoutSchema.safeParse(layout);
+    if (parsed.success) {
+      const saved = await writeHallLayout(
+        supabase,
+        eventId,
+        parsed.data,
+        baseRev,
+        share
+      );
+      res = saved.ok
+        ? { ok: true, rev: saved.rev }
+        : { ok: false, reason: saved.conflict ? "conflict" : "error" };
+    }
+  }
+  if (!res.ok) {
+    return {
+      ok: false,
+      error:
+        res.reason === "no-hall"
+          ? "Lay out the hall first, then share its floor plan."
+          : res.reason === "conflict"
+            ? "Someone else changed this hall since you opened it. Reload, then try again."
+            : "Could not change the share link.",
+    };
+  }
+  revalidatePath(`/events/${eventId}/seating`);
+  return { ok: true, data: { token: share?.token ?? "", rev: res.rev } };
 }

@@ -403,6 +403,23 @@ export function useHallLayout({
     undo,
     redo,
     canUndo: past.current.length > 0,
+    /** The revision this studio last saved or loaded. */
+    currentRev: () => rev.current,
+    /**
+     * Send any edit still waiting, and resolve once no save is in flight, so an action that
+     * changes the stored hall (a share link) starts from the revision this studio really holds.
+     */
+    whenIdle: async () => {
+      flush();
+      for (let i = 0; i < 200; i++) {
+        if (!inFlight.current && !queued.current && !timer.current) return;
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    },
+    /** Take the revision a server action just wrote (e.g. a share link), so the next save fits. */
+    adoptRev: (n: number) => {
+      rev.current = n;
+    },
     /** The steps that can be undone, oldest first, with what each did and when. */
     history: past.current.map((s) => ({ label: s.label, at: s.at })),
     canRedo: future.current.length > 0,

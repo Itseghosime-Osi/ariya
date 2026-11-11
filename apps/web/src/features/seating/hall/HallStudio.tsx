@@ -56,6 +56,8 @@ import { WorkspaceBar } from "./WorkspaceBar";
 import { seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
 import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
+import { ShareMenu } from "./ShareMenu";
+import { shareOf } from "./share";
 import { ruleBreaks, type SeatRule } from "./rules";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
@@ -2382,6 +2384,26 @@ export function HallStudio({
                   <Redo2 size={17} />
                 </button>
                 <HistoryMenu entries={historyEntries} className={chip} />
+                <ShareMenu
+                  eventId={eventId}
+                  eventTitle={eventTitle}
+                  layout={layout}
+                  tables={data.tables.map((t) => ({
+                    name: t.name,
+                    shape: t.shape,
+                    capacity: t.capacity,
+                    x: positions[t.id]?.x ?? 0,
+                    y: positions[t.id]?.y ?? 0,
+                    rot: rotationOf(t.id),
+                    seated: t.occupiedSeats,
+                  }))}
+                  initialToken={shareOf(initialLayout)?.token ?? null}
+                  currentRev={hall.currentRev}
+                  adoptRev={hall.adoptRev}
+                  whenIdle={hall.whenIdle}
+                  className={chip}
+                  onSay={say}
+                />
                 <span
                   className="mx-0.5 h-5 w-px bg-hairline"
                   aria-hidden="true"

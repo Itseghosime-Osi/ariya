@@ -1,6 +1,9 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { HallLayoutInput } from "./schemas";
+import { shareOf, type HallShare } from "./hall/share";
+
+export type { HallShare };
 
 /**
  * Write a hall document without silently overwriting someone else's newer one.
@@ -44,7 +47,12 @@ export async function writeHallLayout(
   supabase: SupabaseClient,
   eventId: string,
   layout: HallLayoutInput,
-  baseRev?: number
+  baseRev?: number,
+  /**
+   * Set or clear the view-only link. Left out, the link already stored is kept: the studio and
+   * applied proposals save the hall without knowing about it, and must not drop it.
+   */
+  share?: HallShare | null
 ): Promise<HallWriteResult> {
   const read = await supabase
     .from("events")
@@ -66,9 +74,16 @@ export async function writeHallLayout(
   }
 
   const next = current + 1;
+  const keepShare = share === undefined ? shareOf(stored) : share;
   let write = supabase
     .from("events")
-    .update({ hall_layout: { ...layout, rev: next } })
+    .update({
+      hall_layout: {
+        ...layout,
+        rev: next,
+        ...(keepShare ? { share: keepShare } : {}),
+      },
+    })
     .eq("id", eventId);
   write =
     stored === null
@@ -89,5 +104,50 @@ export async function writeHallLayout(
       (again.data as { hall_layout?: unknown } | null)?.hall_layout ?? null;
     return { ok: false, conflict: true, rev: revOf(now), layout: now };
   }
+  return { ok: true, rev: next };
+}
+
+/**
+ * Set or clear the view-only link on the stored hall without touching the room itself. The hall
+ * was validated when it was saved, so only the `share` key and the revision change, and the write
+ * is still conditional on the revision the studio last saw.
+ */
+export async function writeHallShare(
+  supabase: SupabaseClient,
+  eventId: string,
+  baseRev: number,
+  share: HallShare | null
+): Promise<
+  | { ok: true; rev: number }
+  | { ok: false; reason: "no-hall" | "conflict" | "error" }
+> {
+  const read = await supabase
+    .from("events")
+    .select("hall_layout")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (read.error) return { ok: false, reason: "error" };
+  const stored = (read.data as { hall_layout?: unknown } | null)?.hall_layout;
+  if (!stored || typeof stored !== "object" || Array.isArray(stored))
+    return { ok: false, reason: "no-hall" };
+  const current = revOf(stored);
+  if (current !== baseRev) return { ok: false, reason: "conflict" };
+
+  const { share: _old, ...rest } = stored as Record<string, unknown>;
+  void _old;
+  const next = current + 1;
+  let write = supabase
+    .from("events")
+    .update({
+      hall_layout: { ...rest, rev: next, ...(share ? { share } : {}) },
+    })
+    .eq("id", eventId);
+  write =
+    current === 0
+      ? write.is("hall_layout->rev", null)
+      : write.eq("hall_layout->>rev", String(current));
+  const { data, error } = await write.select("id");
+  if (error) return { ok: false, reason: "error" };
+  if (!data || data.length === 0) return { ok: false, reason: "conflict" };
   return { ok: true, rev: next };
 }
