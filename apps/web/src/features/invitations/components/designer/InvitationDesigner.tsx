@@ -222,7 +222,7 @@ export function InvitationDesigner({
   const [activeColor, setActiveColor] = useState("#dfba73");
   const [sidebarWidth, setSidebarWidth] = useState(360);
   // How much of the side panel the Properties half takes; the rest is Layers/History/Navigator.
-  const [panelSplit, setPanelSplit] = useState(52);
+  const [panelSplit, setPanelSplit] = useState(60);
   const startPanelSplit = useCallback((e: React.PointerEvent<HTMLElement>) => {
     const column = e.currentTarget.parentElement;
     if (!column) return;
@@ -1460,6 +1460,7 @@ export function InvitationDesigner({
       data-mode={mode}
       data-panel={sheetTab}
       data-panel-open={mobilePanelOpen}
+      data-has-selection={selectedIds.length > 0}
       style={
         { "--studio-sidebar-width": `${sidebarWidth}px` } as React.CSSProperties
       }
@@ -2050,7 +2051,7 @@ export function InvitationDesigner({
               tabIndex={0}
               title="Drag to give Properties or Layers more room"
               onPointerDown={startPanelSplit}
-              onDoubleClick={() => setPanelSplit(52)}
+              onDoubleClick={() => setPanelSplit(60)}
               onKeyDown={(e) => {
                 if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
                 e.preventDefault();

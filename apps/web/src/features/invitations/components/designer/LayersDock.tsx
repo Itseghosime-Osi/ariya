@@ -577,17 +577,17 @@ export function LayersDock({
       {selectedLayer && (
         <div
           className={cn(
-            "border-b px-3 py-2 transition-colors",
+            "border-b px-3 py-1.5 transition-colors",
             dark
               ? "border-[#382630] bg-[#1c1217] text-zinc-200"
               : "border-[#e8e2d6] bg-[#f5efe7] text-[#3b2b31]"
           )}
         >
-          <div className="grid grid-cols-2 gap-2">
-            <div>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3">
+            <div className="flex items-center gap-2">
               <span
                 className={cn(
-                  "mb-1 block text-[10px] font-semibold uppercase tracking-wider",
+                  "shrink-0 text-[10px] font-semibold uppercase tracking-wider",
                   dark ? "text-zinc-400" : "text-[#7a5b67]"
                 )}
               >
@@ -605,7 +605,7 @@ export function LayersDock({
                   onPatch(selectedLayer.id, { blendMode: e.target.value })
                 }
                 className={cn(
-                  "h-8 w-full rounded border px-2 text-xs font-medium outline-none",
+                  "h-8 min-w-0 flex-1 rounded border px-2 text-xs font-medium outline-none",
                   dark
                     ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
                     : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
@@ -626,8 +626,8 @@ export function LayersDock({
                 ))}
               </select>
             </div>
-            <div>
-              <div className="mb-1 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5">
                 <span
                   className={cn(
                     "text-[10px] font-semibold uppercase tracking-wider",
@@ -660,7 +660,7 @@ export function LayersDock({
                   })
                 }
                 className={cn(
-                  "h-8 w-full",
+                  "h-8 min-w-0 flex-1",
                   dark ? "accent-[#dfba73]" : "accent-[#4a0e17]"
                 )}
               />
