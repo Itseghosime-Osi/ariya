@@ -59,7 +59,7 @@ export function StudioMenuBar({
               className={cn(
                 "z-[100] min-w-56 max-h-[70dvh] overflow-auto rounded-2xl border p-1.5 shadow-xl",
                 dark
-                  ? "border-white/15 bg-[#23181e] text-[#fff6dc]"
+                  ? "border-white/15 bg-[#23181e] text-[var(--studio-cream)]"
                   : "border-hairline bg-ivory text-night"
               )}
             >
@@ -84,7 +84,7 @@ export function StudioMenuBar({
                       {item.label}
                     </span>
                     {item.shortcut && (
-                      <kbd className="text-[10px] opacity-65">
+                      <kbd className="text-xs opacity-65">
                         {item.shortcut.replaceAll("Cmd", "⌘ / Ctrl")}
                       </kbd>
                     )}

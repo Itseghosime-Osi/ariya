@@ -26,6 +26,7 @@ describe("invitation document save queue", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     sessionStorage.clear();
+    localStorage.clear();
     save.mockReset();
     save.mockResolvedValue({ ok: true });
   });
@@ -187,5 +188,63 @@ describe("invitation document save queue", () => {
     await act(() => vi.advanceTimersByTimeAsync(701));
     expect(save.mock.calls[0][2]).toBe("2026-11-10T10:00:00Z");
     expect(save.mock.calls[1][2]).toBe("2026-11-10T11:00:00Z");
+  });
+  it("retries a dropped connection by itself and then saves", async () => {
+    save
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useDesignerDoc("net", initial()));
+    act(() => result.current.commit((d) => ({ ...d, chrome: false })));
+    await act(() => vi.advanceTimersByTimeAsync(701));
+    expect(result.current.saveState).toBe("error");
+    expect(save).toHaveBeenCalledTimes(1);
+    await act(() => vi.advanceTimersByTimeAsync(2001));
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(result.current.saveState).toBe("saved");
+    expect(result.current.isDirty).toBe(false);
+  });
+  it("saves queued edits as soon as the browser is back online", async () => {
+    save
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useDesignerDoc("online", initial()));
+    act(() => result.current.commit((d) => ({ ...d, chrome: false })));
+    await act(() => vi.advanceTimersByTimeAsync(701));
+    expect(result.current.saveState).toBe("error");
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(result.current.saveState).toBe("saved");
+  });
+  it("does not retry when the server refuses the save", async () => {
+    save.mockResolvedValue({
+      ok: false,
+      error: "This event changed in another tab or window.",
+    });
+    const { result } = renderHook(() => useDesignerDoc("refused", initial()));
+    act(() => result.current.commit((d) => ({ ...d, chrome: false })));
+    await act(() => vi.advanceTimersByTimeAsync(701));
+    await act(() => vi.advanceTimersByTimeAsync(60000));
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(result.current.saveState).toBe("error");
+    expect(result.current.saveError).toMatch(/another tab/);
+  });
+  it("keeps an unsaved draft after the tab is closed and reopened", async () => {
+    save.mockRejectedValue(new TypeError("Failed to fetch"));
+    const original = initial();
+    const first = renderHook(() =>
+      useDesignerDoc("closed-tab", original, "2026-11-10T10:00:00Z")
+    );
+    act(() => first.result.current.commit((d) => ({ ...d, chrome: false })));
+    await act(() => vi.advanceTimersByTimeAsync(701));
+    first.unmount();
+    sessionStorage.clear(); // a closed tab takes its session storage with it
+    const reopened = renderHook(() =>
+      useDesignerDoc("closed-tab", original, "2026-11-10T10:00:00Z")
+    );
+    expect(reopened.result.current.recovered).toBe(true);
+    expect(reopened.result.current.design.chrome).toBe(false);
   });
 });

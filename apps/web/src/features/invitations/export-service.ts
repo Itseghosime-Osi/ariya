@@ -2,11 +2,11 @@
 
 import { updateEntrySealPlates } from "./components/seal-plate";
 import { toPng, toJpeg } from "html-to-image";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import type { InvitationDesign } from "./types";
 import { designDimensionsPx } from "./layer-ops";
 
-export type ExportFormat = "png" | "jpeg" | "pdf" | "json";
+export type ExportFormat = "png" | "jpeg" | "pdf" | "json" | "whatsapp";
 export interface ExportOptions {
   format: ExportFormat;
   pixelRatio?: number;
@@ -40,6 +40,34 @@ export function clipRoundedBackgrounds(root: HTMLElement) {
   }
 }
 
+/** WhatsApp shows pictures at most about this wide, so a bigger file only slows the send. */
+export const WHATSAPP_MAX_EDGE = 1600;
+/** The picture is re-compressed until it is no larger than this many bytes (about 400 KB). */
+export const WHATSAPP_MAX_BYTES = 400 * 1024;
+
+/** Re-encode a JPEG data URL, lowering quality in steps until it fits, never below 0.5. */
+export async function compressJpeg(
+  dataUrl: string,
+  maxBytes = WHATSAPP_MAX_BYTES
+): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0);
+  let best = dataUrl;
+  for (const quality of [0.85, 0.78, 0.7, 0.62, 0.55, 0.5]) {
+    best = canvas.toDataURL("image/jpeg", quality);
+    // A base64 data URL is about 4/3 the size of the bytes it holds.
+    if (((best.length - best.indexOf(",") - 1) * 3) / 4 <= maxBytes) break;
+  }
+  return best;
+}
+
 /** Export uses document pixels, never the viewport's fitted/zoomed dimensions. */
 export function invitationExportSize(
   design: InvitationDesign,
@@ -52,7 +80,9 @@ export function invitationExportSize(
       ? 1500 / dims.width
       : format === "jpeg"
         ? Math.min(2, pixelRatio)
-        : pixelRatio;
+        : format === "whatsapp"
+          ? Math.min(2, WHATSAPP_MAX_EDGE / Math.max(dims.width, dims.height))
+          : pixelRatio;
   const scale = Math.min(
     requested,
     8192 / dims.width,
@@ -124,6 +154,42 @@ function exportWait<T>(
   });
 }
 
+/** Print bleed and the crop-mark margin, in PDF points (72 per inch): 0.125 in of bleed. */
+export const PRINT_BLEED_PT = 9;
+export const PRINT_MARK_PT = 18;
+
+/**
+ * Pad a rendered card with `bleedPx` on every side by stretching its outermost pixel row and
+ * column outwards, so a printer can trim without a white edge. This continues backgrounds and
+ * borders but cannot invent artwork that is not there, which the export dialog says plainly.
+ */
+export async function extendBleed(
+  dataUrl: string,
+  bleedPx: number
+): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+  const w = img.naturalWidth;
+  const h = img.naturalHeight;
+  const b = Math.round(bleedPx);
+  const canvas = document.createElement("canvas");
+  canvas.width = w + 2 * b;
+  canvas.height = h + 2 * b;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("This browser could not prepare the print bleed.");
+  ctx.drawImage(img, b, b);
+  ctx.drawImage(img, 0, 0, 1, h, 0, b, b, h);
+  ctx.drawImage(img, w - 1, 0, 1, h, b + w, b, b, h);
+  ctx.drawImage(img, 0, 0, w, 1, b, 0, w, b);
+  ctx.drawImage(img, 0, h - 1, w, 1, b, b + h, w, b);
+  ctx.drawImage(img, 0, 0, 1, 1, 0, 0, b, b);
+  ctx.drawImage(img, w - 1, 0, 1, 1, b + w, 0, b, b);
+  ctx.drawImage(img, 0, h - 1, 1, 1, 0, b + h, b, b);
+  ctx.drawImage(img, w - 1, h - 1, 1, 1, b + w, b + h, b, b);
+  return canvas.toDataURL("image/png");
+}
+
 export async function exportInvitation({
   cardElement,
   design,
@@ -133,6 +199,7 @@ export async function exportInvitation({
   format,
   pixelRatio = 3,
   quality = 0.95,
+  printMarks = false,
   signal,
 }: {
   cardElement: HTMLElement | null;
@@ -144,6 +211,8 @@ export async function exportInvitation({
   format: ExportFormat;
   pixelRatio?: number;
   quality?: number;
+  /** PDF only: add 0.125 in of bleed around the card and crop marks in the margin. */
+  printMarks?: boolean;
   signal?: AbortSignal;
 }): Promise<{ ok: boolean; error?: string; cancelled?: boolean }> {
   const name =
@@ -169,7 +238,7 @@ export async function exportInvitation({
       throw new Error(
         "The invitation is not ready to export. Please try again."
       );
-    if (!["png", "jpeg", "pdf"].includes(format))
+    if (!["png", "jpeg", "pdf", "whatsapp"].includes(format))
       throw new Error("Unsupported export format.");
     await exportWait(document.fonts.ready, signal);
     const dims = designDimensionsPx(design);
@@ -273,10 +342,13 @@ export async function exportInvitation({
         transform: "none",
         margin: "0",
       },
-      backgroundColor: format === "jpeg" ? design.palette.paper : undefined,
+      backgroundColor:
+        format === "jpeg" || format === "whatsapp"
+          ? design.palette.paper
+          : undefined,
     };
     const image =
-      format === "jpeg"
+      format === "jpeg" || format === "whatsapp"
         ? await exportWait(
             toJpeg(clone, { ...options, quality }),
             signal,
@@ -284,19 +356,67 @@ export async function exportInvitation({
           )
         : await exportWait(toPng(clone, options), signal, 60000);
     signal?.throwIfAborted();
+    if (format === "whatsapp") {
+      const small = await exportWait(compressJpeg(image), signal, 30000);
+      signal?.throwIfAborted();
+      download(small, `${name}-whatsapp.jpg`);
+      return { ok: true };
+    }
     if (format !== "pdf") {
       download(image, `${name}.${format === "jpeg" ? "jpg" : "png"}`);
       return { ok: true };
     }
     const pdf = await PDFDocument.create();
-    const embedded = await pdf.embedPng(bytes(image));
-    const page = pdf.addPage([size.widthPt, size.heightPt]);
-    page.drawImage(embedded, {
-      x: 0,
-      y: 0,
-      width: size.widthPt,
-      height: size.heightPt,
-    });
+    let page;
+    if (printMarks) {
+      const bleed = PRINT_BLEED_PT;
+      const slug = bleed + PRINT_MARK_PT;
+      const pxPerPt = size.width / size.widthPt;
+      const padded = await exportWait(
+        extendBleed(image, bleed * pxPerPt),
+        signal,
+        60000
+      );
+      const embedded = await pdf.embedPng(bytes(padded));
+      page = pdf.addPage([size.widthPt + 2 * slug, size.heightPt + 2 * slug]);
+      page.drawImage(embedded, {
+        x: slug - bleed,
+        y: slug - bleed,
+        width: size.widthPt + 2 * bleed,
+        height: size.heightPt + 2 * bleed,
+      });
+      // Crop marks sit outside the bleed so they are never printed on the card.
+      const left = slug;
+      const right = slug + size.widthPt;
+      const bottom = slug;
+      const top = slug + size.heightPt;
+      const gap = bleed + 2;
+      const len = PRINT_MARK_PT - 4;
+      const mark = (x1: number, y1: number, x2: number, y2: number) =>
+        page!.drawLine({
+          start: { x: x1, y: y1 },
+          end: { x: x2, y: y2 },
+          thickness: 0.4,
+          color: rgb(0, 0, 0),
+        });
+      for (const x of [left, right]) {
+        mark(x, bottom - gap, x, bottom - gap - len);
+        mark(x, top + gap, x, top + gap + len);
+      }
+      for (const y of [bottom, top]) {
+        mark(left - gap, y, left - gap - len, y);
+        mark(right + gap, y, right + gap + len, y);
+      }
+    } else {
+      const embedded = await pdf.embedPng(bytes(image));
+      page = pdf.addPage([size.widthPt, size.heightPt]);
+      page.drawImage(embedded, {
+        x: 0,
+        y: 0,
+        width: size.widthPt,
+        height: size.heightPt,
+      });
+    }
     pdf.setTitle(coupleName ? `${coupleName} — Invitation` : "Invitation");
     pdf.setAuthor("Àríyá");
     pdf.setCreator("Àríyá Invitation Studio");

@@ -152,12 +152,12 @@ function ViewportHorizontalRuler({
         "pointer-events-auto cursor-row-resize absolute left-7 right-0 top-0 h-6 select-none overflow-hidden border-b z-30 transition-colors",
         dark
           ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[#4a0e17]"
+          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
       )}
     >
       {paperEnd > paperStart && (
         <div
-          className="absolute inset-y-0 bg-[#dfba73]/[0.08] border-x border-[#dfba73]/40"
+          className="absolute inset-y-0 bg-[var(--studio-gold)]/[0.08] border-x border-[var(--studio-gold)]/40"
           style={{
             left: cardLeft,
             width: cardWidth,
@@ -261,11 +261,11 @@ function ViewportVerticalRuler({
         "pointer-events-auto cursor-col-resize absolute left-0 top-6 bottom-0 w-7 select-none overflow-hidden border-r z-30 transition-colors",
         dark
           ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[#4a0e17]"
+          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
       )}
     >
       <div
-        className="absolute inset-x-0 bg-[#dfba73]/[0.08] border-y border-[#dfba73]/40"
+        className="absolute inset-x-0 bg-[var(--studio-gold)]/[0.08] border-y border-[var(--studio-gold)]/40"
         style={{
           top: cardTop,
           height: cardHeight,
@@ -321,6 +321,7 @@ export function DesignerCanvas({
   dark = false,
   showRulers = true,
   showGrid = false,
+  showPrintGuides = false,
   snapToGrid = false,
   guidesLocked = false,
   clearGuidesRequest = 0,
@@ -359,6 +360,8 @@ export function DesignerCanvas({
   dark?: boolean;
   showRulers?: boolean;
   showGrid?: boolean;
+  /** Dashed safe-area (0.25 in) and bleed (0.125 in) guides for a 5-inch-wide card. */
+  showPrintGuides?: boolean;
   snapToGrid?: boolean;
   guidesLocked?: boolean;
   clearGuidesRequest?: number;
@@ -1457,7 +1460,7 @@ export function DesignerCanvas({
       data-testid="designer-stage"
       className={cn(
         "absolute inset-0 overflow-hidden select-none",
-        dark ? "bg-[#20161b]" : "bg-[#ede6da]",
+        dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]",
         isPanMode &&
           (gesture.current?.type === "pan" ? "cursor-grabbing" : "cursor-grab")
       )}
@@ -1753,10 +1756,10 @@ export function DesignerCanvas({
               onZoomChange?.(1);
             }}
             className={cn(
-              "pointer-events-auto absolute left-0 top-0 z-40 flex h-6 w-7 select-none items-center justify-center border-b border-r font-mono text-[9px] font-bold transition-colors",
+              "pointer-events-auto absolute left-0 top-0 z-40 flex h-6 w-7 select-none items-center justify-center border-b border-r font-mono text-xs font-bold transition-colors",
               dark
                 ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-                : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[#4a0e17]"
+                : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
             )}
           >
             px
@@ -1794,6 +1797,22 @@ export function DesignerCanvas({
           height: cardHeight || undefined,
         }}
       >
+        {showPrintGuides && (
+          <>
+            <div
+              data-testid="print-guide-safe"
+              aria-hidden="true"
+              className="pointer-events-none absolute z-10 border border-dashed border-emerald-600"
+              style={{ inset: "5%" }}
+            />
+            <div
+              data-testid="print-guide-bleed"
+              aria-hidden="true"
+              className="pointer-events-none absolute z-10 border border-dashed border-red-500"
+              style={{ inset: "-2.5%" }}
+            />
+          </>
+        )}
         {showGrid && (
           <div
             data-testid="canvas-grid"
@@ -1826,8 +1845,8 @@ export function DesignerCanvas({
                 }}
                 className="group absolute inset-y-0 z-30 flex items-center cursor-col-resize pointer-events-auto"
               >
-                <div className="h-full w-px bg-[#00e5ff] shadow-[0_0_2px_#00e5ff] transition-all group-hover:w-0.5 group-hover:bg-[#dfba73]" />
-                <span className="absolute top-2 -left-6 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-[9px] font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
+                <div className="h-full w-px bg-[#00e5ff] shadow-[0_0_2px_#00e5ff] transition-all group-hover:w-0.5 group-hover:bg-[var(--studio-gold)]" />
+                <span className="absolute top-2 -left-6 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
                   X: {guide.pos}px
                 </span>
               </div>
@@ -1847,8 +1866,8 @@ export function DesignerCanvas({
               }}
               className="group absolute inset-x-0 z-30 flex justify-center cursor-row-resize pointer-events-auto"
             >
-              <div className="h-px w-full bg-[#00e5ff] shadow-[0_0_2px_#00e5ff] transition-all group-hover:h-0.5 group-hover:bg-[#dfba73]" />
-              <span className="absolute right-2 -top-5 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-[9px] font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
+              <div className="h-px w-full bg-[#00e5ff] shadow-[0_0_2px_#00e5ff] transition-all group-hover:h-0.5 group-hover:bg-[var(--studio-gold)]" />
+              <span className="absolute right-2 -top-5 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
                 Y: {guide.pos}px
               </span>
             </div>
@@ -1862,8 +1881,8 @@ export function DesignerCanvas({
               style={{ left: `${(draggingGuide.pos / dims.width) * 100}%` }}
               className="pointer-events-none absolute inset-y-0 z-40 flex items-center"
             >
-              <div className="h-full w-0.5 bg-[#dfba73] shadow-[0_0_6px_#dfba73]" />
-              <span className="absolute top-4 -left-7 rounded bg-[#dfba73] px-2 py-0.5 text-[10px] font-mono font-bold text-[#20161b] shadow-xl whitespace-nowrap">
+              <div className="h-full w-0.5 bg-[var(--studio-gold)] shadow-[0_0_6px_#dfba73]" />
+              <span className="absolute top-4 -left-7 rounded bg-[var(--studio-gold)] px-2 py-0.5 text-xs font-mono font-bold text-[var(--studio-night)] shadow-xl whitespace-nowrap">
                 X: {draggingGuide.pos}px
               </span>
             </div>
@@ -1872,8 +1891,8 @@ export function DesignerCanvas({
               style={{ top: `${(draggingGuide.pos / dims.height) * 100}%` }}
               className="pointer-events-none absolute inset-x-0 z-40 flex justify-center"
             >
-              <div className="h-0.5 w-full bg-[#dfba73] shadow-[0_0_6px_#dfba73]" />
-              <span className="absolute right-4 -top-6 rounded bg-[#dfba73] px-2 py-0.5 text-[10px] font-mono font-bold text-[#20161b] shadow-xl whitespace-nowrap">
+              <div className="h-0.5 w-full bg-[var(--studio-gold)] shadow-[0_0_6px_#dfba73]" />
+              <span className="absolute right-4 -top-6 rounded bg-[var(--studio-gold)] px-2 py-0.5 text-xs font-mono font-bold text-[var(--studio-night)] shadow-xl whitespace-nowrap">
                 Y: {draggingGuide.pos}px
               </span>
             </div>
@@ -1891,7 +1910,7 @@ export function DesignerCanvas({
               >
                 <div className="h-full w-px bg-[#b8864b] shadow-[0_0_3px_#b8864b]" />
                 {guide.label && (
-                  <span className="absolute top-2 -translate-x-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-[9px] font-mono font-bold text-white shadow-xs">
+                  <span className="absolute top-2 -translate-x-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
                     {guide.label}
                   </span>
                 )}
@@ -1907,7 +1926,7 @@ export function DesignerCanvas({
             >
               <div className="h-px w-full bg-[#b8864b] shadow-[0_0_3px_#b8864b]" />
               {guide.label && (
-                <span className="absolute left-2 -translate-y-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-[9px] font-mono font-bold text-white shadow-xs">
+                <span className="absolute left-2 -translate-y-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
                   {guide.label}
                 </span>
               )}
@@ -2106,8 +2125,8 @@ export function DesignerCanvas({
                           )}
                           title={`Drag inward to adjust ${corner.id.toUpperCase()} corner radius — hold Alt for single corner (${((corner.rPx / cardW) * dims.width).toFixed(1)}px)`}
                         >
-                          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[#dfba73] bg-white shadow-md transition-transform group-hover:scale-125">
-                            <span className="block h-1 w-1 rounded-full bg-[#dfba73]" />
+                          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--studio-gold)] bg-white shadow-md transition-transform group-hover:scale-125">
+                            <span className="block h-1 w-1 rounded-full bg-[var(--studio-gold)]" />
                           </span>
                         </span>
                       ))}
@@ -2121,7 +2140,7 @@ export function DesignerCanvas({
         {drawingBox && (
           <div
             data-testid="drawing-box-preview"
-            className="pointer-events-none absolute z-40 border-2 border-dashed border-[#dfba73] bg-[#dfba73]/15 rounded shadow-lg transition-none"
+            className="pointer-events-none absolute z-40 border-2 border-dashed border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 rounded shadow-lg transition-none"
             style={{
               left: drawingBox.left,
               top: drawingBox.top,
@@ -2129,7 +2148,7 @@ export function DesignerCanvas({
               height: drawingBox.height,
             }}
           >
-            <div className="absolute -bottom-7 right-0 rounded-md bg-[#1c070d]/95 backdrop-blur px-2 py-0.5 font-mono text-[10px] font-bold text-[#dfba73] border border-[#dfba73]/40 shadow-md whitespace-nowrap">
+            <div className="absolute -bottom-7 right-0 rounded-md bg-[#1c070d]/95 backdrop-blur px-2 py-0.5 font-mono text-xs font-bold text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-md whitespace-nowrap">
               {Math.round(drawingBox.width / zoom)} ×{" "}
               {Math.round(drawingBox.height / zoom)} px
             </div>
@@ -2140,10 +2159,10 @@ export function DesignerCanvas({
       {/* Floating Radius Tooltip (PhotoCraft Style: R: 93.5 px) */}
       {radiusTooltip?.show && (
         <div
-          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-9 rounded-md bg-[#1c070d]/95 backdrop-blur px-2.5 py-1 font-mono text-[11px] font-bold text-[#dfba73] shadow-lg border border-[#dfba73]/40 flex items-center gap-1.5"
+          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-9 rounded-md bg-[#1c070d]/95 backdrop-blur px-2.5 py-1 font-mono text-xs font-bold text-[var(--studio-gold)] shadow-lg border border-[var(--studio-gold)]/40 flex items-center gap-1.5"
           style={{ left: radiusTooltip.x, top: radiusTooltip.y }}
         >
-          <span className="text-[10px] text-zinc-400">R:</span>
+          <span className="text-xs text-zinc-400">R:</span>
           <span>{radiusTooltip.rPx.toFixed(1)} px</span>
         </div>
       )}
@@ -2152,7 +2171,7 @@ export function DesignerCanvas({
       {marquee && (
         <div
           data-testid="selection-marquee"
-          className="pointer-events-none fixed z-50 border border-[#dfba73] bg-[#dfba73]/15 shadow-sm"
+          className="pointer-events-none fixed z-50 border border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 shadow-sm"
           style={{
             left: Math.min(marquee.startX, marquee.curX),
             top: Math.min(marquee.startY, marquee.curY),

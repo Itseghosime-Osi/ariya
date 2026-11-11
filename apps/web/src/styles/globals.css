@@ -7,6 +7,14 @@
 @import "./film.css";
 
 :root {
+  /* Invitation studio palette: one place to change the studio's colours. */
+  --studio-wine: #4a0e17;
+  --studio-gold: #dfba73;
+  --studio-mauve: #7a5b67;
+  --studio-cream: #fff6dc;
+  --studio-line: #e8e2d6;
+  --studio-ink: #2d1f24;
+  --studio-night: #20161b;
   --ivory: #f7f2ea;
   --chrome: #f7f2ea;
   --surface: #ffffff;

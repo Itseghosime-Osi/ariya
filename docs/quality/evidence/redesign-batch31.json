@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-F2a",
+    "name": "A failed upload shows its reason and a Try again button",
+    "ok": true,
+    "detail": "The picture service is busy.\nTry again"
+  },
+  {
+    "id": "RD-F2b",
+    "name": "Try again uploads the same file and adds the picture",
+    "ok": true,
+    "detail": "attempts=2 layers 10->11"
+  },
+  {
+    "id": "RD-F2c",
+    "name": "The error is gone after success",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

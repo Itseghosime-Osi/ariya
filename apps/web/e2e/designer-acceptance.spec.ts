@@ -201,7 +201,12 @@ test("invitation studio: persistence, recovery, tools and responsive acceptance"
       await expect(page.getByTestId("studio-error-alert")).toBeVisible({
         timeout: 15000,
       });
+      // Back online, the queued edit is saved by itself; nothing is lost and no retry is needed.
       await context.setOffline(false);
+      await expect(
+        page.getByTestId("studio-top-header").getByRole("status")
+      ).toHaveText(/^saved/, { timeout: 30000 });
+      await expect(page.getByTestId("studio-error-alert")).toHaveCount(0);
       await page.reload();
       await select("names");
       await expect(

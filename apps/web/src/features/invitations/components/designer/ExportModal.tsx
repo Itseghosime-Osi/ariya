@@ -19,6 +19,8 @@ interface ExportModalProps {
   eventId: string;
   coupleName?: string;
   getCardElement: () => HTMLElement | null;
+  /** Called after a file has been handed to the browser, so the studio can confirm it. */
+  onExported?: (format: ExportFormat) => void;
 }
 
 interface FormatCard {
@@ -59,6 +61,15 @@ const FORMATS: FormatCard[] = [
     icon: "swatch",
   },
   {
+    id: "whatsapp",
+    title: "Small for WhatsApp",
+    badge: "Under 400 KB",
+    description:
+      "A smaller JPEG that sends quickly over a slow connection and still reads clearly on a phone.",
+    resolution: "Up to 1600 px, compressed",
+    icon: "swatch",
+  },
+  {
     id: "json",
     title: "Design Backup (.json)",
     badge: "Editable Source",
@@ -77,6 +88,7 @@ export function ExportModal({
   eventId,
   coupleName,
   getCardElement,
+  onExported,
 }: ExportModalProps) {
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
@@ -87,6 +99,7 @@ export function ExportModal({
   const returnFocus = useRef<HTMLElement | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
   const [exporting, setExporting] = useState(false);
+  const [printMarks, setPrintMarks] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
@@ -106,6 +119,7 @@ export function ExportModal({
         eventId,
         coupleName,
         format: selectedFormat,
+        printMarks: selectedFormat === "pdf" && printMarks,
         signal: active.signal,
       });
 
@@ -113,6 +127,7 @@ export function ExportModal({
       if (!res.ok) {
         setError(res.error || "Export failed");
       } else {
+        onExported?.(selectedFormat);
         onClose();
       }
     } catch (err) {
@@ -200,7 +215,7 @@ export function ExportModal({
                         {f.title}
                       </span>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide ${
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium tracking-wide ${
                           isSelected
                             ? "bg-burgundy text-white dark:bg-[#e5a93c] dark:text-black"
                             : "bg-black/5 text-label-2 dark:bg-white/10"
@@ -212,7 +227,7 @@ export function ExportModal({
                     <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
                       {f.description}
                     </p>
-                    <span className="mt-2.5 text-[11px] font-mono text-black/40 dark:text-white/40">
+                    <span className="mt-2.5 text-xs font-mono text-label-2">
                       {f.id === "json"
                         ? "Editable design backup"
                         : f.id === "pdf"
@@ -223,6 +238,50 @@ export function ExportModal({
                 );
               })}
             </div>
+
+            <p
+              data-testid="export-summary"
+              className="mt-3 text-xs text-label-2"
+              aria-live="polite"
+            >
+              You will get:{" "}
+              <strong className="text-night dark:text-ivory">
+                {FORMATS.find((f) => f.id === selectedFormat)?.title}
+              </strong>
+              {" · "}
+              {selectedFormat === "json"
+                ? "an editable backup you can open again in the studio"
+                : selectedFormat === "whatsapp"
+                  ? `${invitationExportSize(design, "whatsapp").width} × ${invitationExportSize(design, "whatsapp").height} px, compressed to about 400 KB or less`
+                  : selectedFormat === "pdf"
+                    ? printMarks
+                      ? `${(5 + 0.75).toFixed(2)} × ${((dims.height / dims.width) * 5 + 0.75).toFixed(2)} in page with bleed and crop marks, card trims to 5 × ${((dims.height / dims.width) * 5).toFixed(2)} in`
+                      : `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
+                    : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
+              .
+            </p>
+
+            {selectedFormat === "pdf" && (
+              <label className="mt-3 flex min-h-11 cursor-pointer items-start gap-2 rounded-xl border border-hairline bg-white/60 p-3 text-xs dark:bg-white/5">
+                <input
+                  type="checkbox"
+                  data-testid="export-print-marks"
+                  checked={printMarks}
+                  onChange={(e) => setPrintMarks(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span className="leading-relaxed text-label-2">
+                  <strong className="text-night dark:text-ivory">
+                    Add bleed and crop marks for a print shop
+                  </strong>
+                  <br />
+                  Adds 0.125 in of bleed by stretching the card&rsquo;s edges
+                  outwards, and crop marks outside it. Backgrounds and borders
+                  carry on; pictures are not extended. Keep important words
+                  inside the green safe-area guide.
+                </span>
+              </label>
+            )}
 
             {error && (
               <div

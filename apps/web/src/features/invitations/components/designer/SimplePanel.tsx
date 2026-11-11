@@ -20,7 +20,7 @@ import {
 } from "../../types";
 
 const FIELD =
-  "desk-field min-h-12 w-full rounded-2xl px-4 py-3 text-base text-night outline-hidden focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy";
+  "desk-field min-h-12 w-full rounded-2xl px-4 py-3 text-base text-night focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-burgundy";
 
 /** What a person calls each line, in their words, not the designer's. */
 const WORDS: {

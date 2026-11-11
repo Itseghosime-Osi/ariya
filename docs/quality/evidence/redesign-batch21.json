@@ -1,0 +1,68 @@
+[
+  {
+    "id": "RD-D4a",
+    "name": "Palette filters by word",
+    "ok": true,
+    "detail": "FILEExport Invitation\n⌘/Ctrl+E"
+  },
+  {
+    "id": "RD-D4b",
+    "name": "Enter runs the command (opens Export)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D4c",
+    "name": "No-match message shown",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D2a",
+    "name": "Tour does not auto-open in automated browsers",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D2b",
+    "name": "Tour opens on step 1 of 4",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D2c",
+    "name": "Step 4 shows Done",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D2d",
+    "name": "Done closes the tour and stores the choice",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-G1",
+    "name": "Long diacritic names stay inside the card width",
+    "ok": true,
+    "detail": "[363.875,772.109375,350.3125,399.8125]"
+  },
+  {
+    "id": "RD-G1b",
+    "name": "KNOWN DEFECT: very long names must not overlap the next line of text",
+    "ok": true,
+    "detail": "names bottom=400 message top=459"
+  },
+  {
+    "id": "RD-E1",
+    "name": "Dragging with 60 layers (headless dev build, no GPU)",
+    "ok": true,
+    "detail": "layers=60 frames=145 median=16.7ms p95=83.3ms"
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]
