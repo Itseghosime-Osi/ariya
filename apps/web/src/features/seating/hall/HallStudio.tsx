@@ -2121,7 +2121,7 @@ export function HallStudio({
                 design tool: this strip is that bar's background; the title and actions sit on it. */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 z-[5] hidden h-14 border-b border-hairline bg-[#fbf9f5] lg:block"
+              className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-14 border-b border-hairline bg-[#fbf9f5]"
             />
             <Hall3D
               ref={view3d}
@@ -2141,7 +2141,7 @@ export function HallStudio({
               )}
             >
               {/* Back, the page's name and the mode switch: the only chrome the app leaves. */}
-              <div className="pointer-events-auto absolute left-3 top-3 max-w-[calc(100%-23.5rem)] lg:left-1 lg:top-0 lg:flex lg:h-14 lg:items-center">
+              <div className="pointer-events-auto absolute left-3 top-0 flex h-14 max-w-[calc(100%-30rem)] items-center">
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
@@ -2149,9 +2149,7 @@ export function HallStudio({
                   status={
                     <SaveStatus state={hall.saveState} onRetry={hall.retry} />
                   }
-                >
-                  <ModeSwitch mode={mode} onChange={chooseMode} />
-                </WorkspaceBar>
+                />
               </div>
               {/* What needs attention, under the bar and clear of the tool rail and dock. */}
               <div
@@ -2258,10 +2256,15 @@ export function HallStudio({
               {/* Undo, redo, picture */}
               <div
                 className={cn(
-                  float,
-                  "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1 lg:top-1.5 lg:border-0 lg:bg-transparent lg:shadow-none"
+                  "pointer-events-auto absolute top-0 flex h-14 items-center gap-0.5",
+                  // The canvas controls stop at the side panel on a laptop; the top bar runs to
+                  // the screen's edge, so its actions reach past that by the panel's width.
+                  panelOpen ? "right-3 lg:right-[-348px]" : "right-3"
                 )}
               >
+                <div className="mr-2 hidden sm:block">
+                  <ModeSwitch mode={mode} onChange={chooseMode} />
+                </div>
                 {onNewTable && (
                   <>
                     <button
