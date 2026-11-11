@@ -428,3 +428,57 @@ export function createLayerOfKind(
   }
   return { ...BLANK_TEXT_LAYER, id, kind };
 }
+
+/** The event facts a host can change after the card was saved: where, when, dress and reply date. */
+const EVENT_FACT_LAYERS = [
+  ["date", "Date"],
+  ["venue", "Venue"],
+  ["dressCode", "Dress code"],
+  ["footer", "Reply date"],
+] as const;
+
+export interface StaleEventFact {
+  id: string;
+  label: string;
+  /** What the saved card says now. */
+  current: string;
+  /** What the event's details say. */
+  fresh: string;
+}
+
+/**
+ * A saved card keeps the host's own words, so changing the event later does not rewrite it. These
+ * are the factual lines of the card that no longer match the event, offered to the host to update.
+ * The names, headline and message are the host's wording and are never listed.
+ */
+export function staleEventFacts(
+  design: InvitationDesign,
+  event: InvitationEventContent
+): StaleEventFact[] {
+  const fresh = new Map(
+    defaultInvitationLayers(event).map((layer) => [layer.id, layer.text])
+  );
+  const stale: StaleEventFact[] = [];
+  for (const [id, label] of EVENT_FACT_LAYERS) {
+    const layer = design.layers.find((l) => l.id === id);
+    const next = fresh.get(id);
+    if (!layer || !layer.visible || next === undefined) continue;
+    if (layer.text.trim() !== next.trim())
+      stale.push({ id, label, current: layer.text, fresh: next });
+  }
+  return stale;
+}
+
+/** Writes the event's current facts into the listed lines, keeping their position and styling. */
+export function applyEventFacts(
+  design: InvitationDesign,
+  facts: StaleEventFact[]
+): InvitationDesign {
+  const byId = new Map(facts.map((fact) => [fact.id, fact.fresh]));
+  return {
+    ...design,
+    layers: design.layers.map((layer) =>
+      byId.has(layer.id) ? { ...layer, text: byId.get(layer.id)! } : layer
+    ),
+  };
+}

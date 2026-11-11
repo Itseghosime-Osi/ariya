@@ -14,6 +14,8 @@ import {
   constrainEntrySeals,
   createLayerOfKind,
   createInvitationDesign,
+  staleEventFacts,
+  applyEventFacts,
 } from "../../design";
 import {
   addImage,
@@ -386,6 +388,24 @@ export function InvitationDesigner({
     tone: "ok" | "bad";
     text: string;
   } | null>(null);
+  // Lines of a saved card that no longer match the event, judged once when the designer opens so
+  // the host's own edits during this visit are never second-guessed. The card keeps the host's
+  // words until they choose to update it; "Keep my wording" hides the offer for these exact changes.
+  const [staleFacts, setStaleFacts] = useState(() =>
+    staleEventFacts(initialDesign, content)
+  );
+  const factsKey = `ariya-keep-card:${eventId}:${staleFacts
+    .map((f) => `${f.id}=${f.fresh}`)
+    .join("|")}`;
+  const [keptKey, setKeptKey] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setKeptKey(localStorage.getItem(factsKey) ? factsKey : null);
+    } catch {
+      setKeptKey(null);
+    }
+  }, [factsKey]);
+  const offerFacts = staleFacts.length > 0 && keptKey !== factsKey;
 
   const fileRef = useRef<HTMLInputElement>(null);
   const backupRef = useRef<HTMLInputElement>(null);
@@ -1611,6 +1631,62 @@ export function InvitationDesigner({
           />
         </div>
       </div>
+
+      {offerFacts && (
+        <div
+          role="region"
+          aria-label="Event details changed"
+          data-testid="event-facts-banner"
+          className={cn(
+            "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-[13px] shadow-xl",
+            dark
+              ? "border-[#5e384c] bg-[#2a1b23] text-[#fff6dc]"
+              : "border-[#dfba73] bg-[#fffaf0] text-[#3b2b31]"
+          )}
+        >
+          <p className="font-semibold">
+            The event&rsquo;s details have changed since this card was saved.
+          </p>
+          <ul className="mt-1 space-y-0.5 text-[12px] opacity-80">
+            {staleFacts.map((fact) => (
+              <li key={fact.id}>
+                <b>{fact.label}:</b> {fact.current || "(empty)"} &rarr;{" "}
+                {fact.fresh || "(empty)"}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                commit((d) => applyEventFacts(d, staleFacts));
+                setStaleFacts([]);
+                setNotice({
+                  tone: "ok",
+                  text: "Card updated from the event details. You can undo this.",
+                });
+              }}
+              className="rounded-full bg-[#4a0e17] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
+            >
+              Update the card
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.setItem(factsKey, "1");
+                } catch {
+                  /* the offer comes back next time */
+                }
+                setKeptKey(factsKey);
+              }}
+              className="rounded-full border px-4 py-1.5 text-[12px] font-semibold hover:bg-black/5"
+            >
+              Keep my wording
+            </button>
+          </div>
+        </div>
+      )}
 
       {notice && (
         <div className="pointer-events-auto fixed top-[100px] left-1/2 -translate-x-1/2 z-50 flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2">
