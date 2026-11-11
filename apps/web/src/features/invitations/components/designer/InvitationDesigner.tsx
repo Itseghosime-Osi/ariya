@@ -396,7 +396,7 @@ export function InvitationDesigner({
   const [notice, setNotice] = useState<{
     tone: "ok" | "bad";
     text: string;
-    action?: { label: string; onClick: () => void };
+    action?: { label: string; ariaLabel?: string; onClick: () => void };
   } | null>(null);
   // Live position and size while a layer is dragged or resized (L3). Cleared a moment after the
   // last move so it never lingers over the card.
@@ -408,7 +408,11 @@ export function InvitationDesigner({
     setNotice({
       tone: "ok",
       text: "Undone",
-      action: { label: "Redo", onClick: () => redoRef.current() },
+      action: {
+        label: "Redo",
+        ariaLabel: "Redo this change",
+        onClick: () => redoRef.current(),
+      },
     });
   }, [doc.canUndo, rawUndo]);
   const redo = useCallback(() => {
@@ -417,7 +421,11 @@ export function InvitationDesigner({
     setNotice({
       tone: "ok",
       text: "Redone",
-      action: { label: "Undo", onClick: () => undoRef.current() },
+      action: {
+        label: "Undo",
+        ariaLabel: "Undo this change",
+        onClick: () => undoRef.current(),
+      },
     });
   }, [doc.canRedo, rawRedo]);
   const undoRef = useRef(undo);
@@ -738,6 +746,13 @@ export function InvitationDesigner({
       setNotice({
         tone: "bad",
         text: err instanceof Error ? err.message : "Failed to process image.",
+        action: {
+          label: "Try again",
+          onClick: () => {
+            uploadRef.current = purpose;
+            void onFile(file);
+          },
+        },
       });
       return;
     }
@@ -767,6 +782,13 @@ export function InvitationDesigner({
       setNotice({
         tone: "bad",
         text: result.error || "Failed to upload image.",
+        action: {
+          label: "Try again",
+          onClick: () => {
+            uploadRef.current = purpose;
+            void onFile(file);
+          },
+        },
       });
       return;
     }
@@ -1854,7 +1876,7 @@ export function InvitationDesigner({
             {notice.action && (
               <button
                 type="button"
-                aria-label={`${notice.action.label} this change`}
+                aria-label={notice.action.ariaLabel ?? notice.action.label}
                 onClick={() => {
                   const run = notice.action!.onClick;
                   run();

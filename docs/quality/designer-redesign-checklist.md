@@ -125,6 +125,7 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Evidence: Help button in header (44px) and Help menu with help@ariyaday.com; RD-F1. Phone width not yet checked.
 - [ ] **F2 (P1) Clear error messages.** Every failure says what happened and what to do next.
       Done when: forced failures (export, save, image upload) each show a readable message and a retry.
+      Progress (not closed): a failed picture import or upload now shows the reason and a **Try again** button that repeats the same file (`evidence/redesign-batch31.json`: a forced server error, then retry succeeds and adds the picture). Still open: a next step on export failures, and forced-failure checks for save errors in the browser (the unit tests cover save retry).
 - [ ] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
 - [ ] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).
@@ -228,6 +229,7 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [ ] **L8 (P1) Loading states.** Skeletons for studio, template grid and images; export shows progress and a cancel.
       Done when: no blank or frozen state longer than 300ms without feedback.
 - [ ] **L9 (P1) Error and recovery UX.** Inline errors next to the cause, never only a toast; offline banner; autosave retry (links to F2).
+      Progress (not closed): same as F2 for pictures; the offline banner and automatic save retry exist (A2). Save errors still use a separate red box rather than the notice pattern.
 - [ ] **L10 (P1) Event-facts banner and saved-card policy.** Keep the "Update the card / Keep my wording" banner clear, and show what changed.
       Done when: banner lists the changed fields and either choice is undoable.
       Progress (not closed): the banner already lists each changed field as old → new and 'Update the card' is undoable; 'Keep my wording' is stored and is not an undo step. Not closed.
