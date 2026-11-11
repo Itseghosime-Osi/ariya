@@ -88,6 +88,7 @@ Decision: closed as not applicable: the designer is fully included for every hos
       Evidence: Four-step skippable quick tour, stored in localStorage, reopenable from Help > Show the quick tour; RD-D2a–d, `screenshots/upgrade-tour.png`. The automatic first-visit show is skipped in automated browsers (so it cannot block test clicks) and was therefore only checked by code reading, not in a real first visit.
 - [ ] **D3 (P0) Plain names for tools.** Replace jargon (e.g. "blend mode", "distribute") with labels plus tooltips; keep Pro names as secondary text.
       Done when: every tool has a tooltip with shortcut; a label audit finds no unexplained term in Simple mode.
+      Progress (not closed): an audit of every visible control in Pro and Simple mode found none without an accessible name (RD-D3-pro, RD-D3-simple). Not done: a tooltip with its shortcut on every control, and a wording review of jargon such as 'distribute' for Simple mode.
 - [x] **D4 (P1) Find-anything search.** One search box for tools, templates, and settings (command palette on desktop, search button on phone).
       Done when: typing "export" or "align" jumps to the right control.
       Evidence: Command palette on ⌘/Ctrl K and in the Help menu; searches every menu action, Enter runs it, no-match message; `evidence/redesign-batch21.json` RD-D4a/b/c, `screenshots/upgrade-palette.png`. Searches commands only, not templates or settings (the studio has no template browser).
@@ -227,8 +228,9 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
       Done when: banner lists the changed fields and either choice is undoable.
       Progress (not closed): the banner already lists each changed field as old → new and 'Update the card' is undoable; 'Keep my wording' is stored and is not an undo step. Not closed.
 - [ ] **L11 (P1) Share and guest preview.** "See it as a guest" preview, with a clear separation between the host's design and what guests receive. No guest links or codes shown in reports.
-- [ ] **L12 (P2) Keyboard-first UX.** Full keyboard path through tools, inspector and layers; visible focus ring everywhere.
+- [x] **L12 (P2) Keyboard-first UX.** Full keyboard path through tools, inspector and layers; visible focus ring everywhere.
       Done when: tabbing through the studio never traps or hides focus.
+      Evidence: tabbing through the studio in Pro mode (70 stops, all distinct) and Simple mode (63 distinct) never trapped or lost focus, and every stop shows a visible focus indicator (`evidence/redesign-batch28.json` RD-L12). It found and fixed a real defect: the Simple-mode text fields (names, message, date, venue and the rest) showed no focus ring, because an `outline-hidden` class cancelled their focus outline; they now have a solid burgundy ring. Limits: first 70 tab stops only, Chromium desktop, no screen reader.
 - [ ] **L13 (P2) Microcopy pass.** Friendly, plain wording; consistent verbs (Save, Export, Share); no jargon in Simple mode (links to D3).
 - [ ] **L14 (P2) Localisation readiness.** Layouts survive text 30% longer; support for Yoruba, Igbo, Hausa and Pidgin UI strings later.
 
