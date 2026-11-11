@@ -355,6 +355,14 @@
     left: 12px;
     right: 12px;
     max-width: none;
+    /* Above the tool row and the sheet's tabs, never over them. */
+    bottom: calc(
+      var(--studio-status-h) + var(--studio-drawer-height) +
+        var(--studio-tools-h) + 16px
+    );
+  }
+  .studio[data-panel-open="true"] :global([data-testid="studio-error-alert"]) {
+    bottom: calc(var(--studio-status-h) + var(--studio-drawer-height) + 8px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
