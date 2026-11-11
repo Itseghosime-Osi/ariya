@@ -471,7 +471,11 @@ async function applyHallProposal(
 
   const snapshot = hallSnapshot(currentLayout, tables.data);
 
-  const savedLayout = await saveHallLayoutAction(eventId, payload.data.layout);
+  // Seating rules belong to the host, not to the room an app proposed: keep the ones already set.
+  const savedLayout = await saveHallLayoutAction(eventId, {
+    ...payload.data.layout,
+    seatRules: currentLayout?.seatRules ?? [],
+  });
   if (!savedLayout.ok) {
     const reason = savedLayout.data?.fallback
       ? "This celebration's hall cannot be saved yet."

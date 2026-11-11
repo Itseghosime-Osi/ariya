@@ -54,6 +54,8 @@ import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
 import { seatingCounts } from "../counts";
+import { SeatRulesPanel } from "./SeatRulesPanel";
+import { ruleBreaks, type SeatRule } from "./rules";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
   moveLayer,
@@ -864,8 +866,53 @@ export function HallStudio({
       x: positions[t.id]?.x ?? 0,
       y: positions[t.id]?.y ?? 0,
     }));
-    return { units, plan: planSeating(units, tables, front) };
-  }, [data.unseatedGuests, data.tables, positions, front]);
+    return {
+      units,
+      plan: planSeating(units, tables, front, {
+        rules: layout.seatRules,
+        occupants: new Map(
+          data.tables.map((t) => [t.id, t.guests.map((g) => g.id)])
+        ),
+      }),
+    };
+  }, [data.unseatedGuests, data.tables, positions, front, layout.seatRules]);
+
+  // ---------- seating rules ----------
+  const ruleGuests = useMemo(
+    () =>
+      [...data.tables.flatMap((t) => t.guests), ...data.unseatedGuests]
+        .map((g) => ({ id: g.id, name: g.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [data.tables, data.unseatedGuests]
+  );
+  const breaks = useMemo(() => {
+    const tableOf = new Map<string, string | null>();
+    for (const t of data.tables)
+      for (const g of t.guests) tableOf.set(g.id, t.id);
+    const names = new Map(ruleGuests.map((g) => [g.id, g.name]));
+    const tableNames = new Map(data.tables.map((t) => [t.id, t.name]));
+    return ruleBreaks(
+      layout.seatRules,
+      tableOf,
+      (id) => names.get(id) ?? "A guest",
+      (id) => tableNames.get(id) ?? "a table"
+    );
+  }, [layout.seatRules, data.tables, ruleGuests]);
+  const addRule = (rule: SeatRule) => {
+    updateLayout((l) => ({ ...l, seatRules: [...l.seatRules, rule] }));
+    say(
+      rule.kind === "together"
+        ? "Keep-together rule saved"
+        : "Keep-apart rule saved"
+    );
+  };
+  const removeRule = (id: string) => {
+    updateLayout((l) => ({
+      ...l,
+      seatRules: l.seatRules.filter((r) => r.id !== id),
+    }));
+    say("Rule removed");
+  };
 
   // ---------- the scene the 3D hall draws ----------
   const scene: Scene = useMemo(
@@ -3325,13 +3372,22 @@ export function HallStudio({
                     />
                   </>
                 ) : deck === "seat" ? (
-                  <SeatPanel
-                    plan={seatPlan.plan}
-                    units={seatPlan.units}
-                    readiness={counts.seatedPct}
-                    busy={busy}
-                    onSeat={seatEveryone}
-                  />
+                  <>
+                    <SeatPanel
+                      plan={seatPlan.plan}
+                      units={seatPlan.units}
+                      readiness={counts.seatedPct}
+                      busy={busy}
+                      onSeat={seatEveryone}
+                    />
+                    <SeatRulesPanel
+                      rules={layout.seatRules}
+                      guests={ruleGuests}
+                      breaks={breaks}
+                      onAdd={addRule}
+                      onRemove={removeRule}
+                    />
+                  </>
                 ) : deck === "thermal" ? (
                   <ThermalPanel
                     report={thermal}
