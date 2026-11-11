@@ -59,7 +59,6 @@ import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
 import { shareOf } from "./share";
 import { clearanceOf, gapText } from "./clearance";
-import { MAIN_AISLE } from "./model";
 import { ruleBreaks, type SeatRule } from "./rules";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
@@ -70,13 +69,14 @@ import {
   setLayersLocked,
 } from "./layers";
 import {
+  MAIN_AISLE,
   areaPerDiner,
+  nextStageSpot,
+  stageItemPlacement,
   SPACING_GAP,
   ZONE_DEFAULTS,
   chairAfterDrop,
   chairPlacement,
-  nextStageSpot,
-  stageItemPlacement,
   chairPositions,
   chairType,
   clamp,
@@ -93,13 +93,10 @@ import {
   zoneId,
   type FreeChair,
   type HallLayout,
-  type ItemGroup,
   type SeatKind,
   type StageItem,
   type TableStyle,
   type Zone,
-  type ZoneKind,
-  type ZoneShape,
 } from "./model";
 import {
   findFreeSpot,
@@ -169,7 +166,6 @@ import {
   type Align,
 } from "./Inspector";
 import { ChairGlyph, Section, ShapeGlyph, TableGlyph } from "./studio-ui";
-import { Keys, SHORTCUTS } from "./shortcuts";
 import { SimpleMode } from "./SimpleMode";
 import {
   chairRow,
@@ -182,102 +178,21 @@ import {
   tableRowSlots,
   type Picked,
 } from "./grouping";
-
-type Positions = Record<string, { x: number; y: number }>;
-type Deck =
-  | "guests"
-  | "room"
-  | "fit"
-  | "seat"
-  | "decor"
-  | "thermal"
-  | "catering"
-  | "risk";
-type Flyout = "table" | "chair" | "zone" | null;
-type Move = { type: string; id: string; x: number; y: number };
-
-const TABLE_PRESETS: {
-  key: string;
-  label: string;
-  shape: TableShape;
-  capacity: number;
-}[] = [
-  { key: "r10", label: "Round 10", shape: "round", capacity: 10 },
-  { key: "r8", label: "Round 8", shape: "round", capacity: 8 },
-  { key: "r12", label: "Round 12", shape: "round", capacity: 12 },
-  { key: "r6", label: "Round 6", shape: "round", capacity: 6 },
-  { key: "b8", label: "Banquet 8", shape: "rectangular", capacity: 8 },
-  { key: "b10", label: "Banquet 10", shape: "rectangular", capacity: 10 },
-  { key: "o10", label: "Oval 10", shape: "oval", capacity: 10 },
-  { key: "s4", label: "Cocktail 4", shape: "round", capacity: 4 },
-  { key: "h8", label: "High table 8", shape: "head", capacity: 8 },
-];
-
-const ZONE_GALLERY: {
-  kind: ZoneKind;
-  label: string;
-  shape?: ZoneShape;
-  w?: number;
-  h?: number;
-}[] = [
-  { kind: "stage", label: "Stage" },
-  { kind: "dance", label: "Round dance floor", shape: "round", w: 7, h: 7 },
-  { kind: "dance", label: "Square dance floor", shape: "rect", w: 7, h: 7 },
-  { kind: "dance", label: "Heart dance floor", shape: "heart", w: 7, h: 6.4 },
-  { kind: "dance", label: "Hexagon dance floor", shape: "hexagon", w: 7, h: 7 },
-  { kind: "buffet", label: "Buffet" },
-  { kind: "bar", label: "Drinks bar" },
-  { kind: "dj", label: "DJ & MC" },
-  { kind: "cake", label: "Cake table", shape: "round" },
-  { kind: "entrance", label: "Entrance arch" },
-  { kind: "photo", label: "Flower wall" },
-  { kind: "gifts", label: "Gifts table" },
-  { kind: "pillar", label: "Pillar", shape: "round" },
-  { kind: "custom", label: "Custom table", w: 1.8, h: 0.9 },
-  { kind: "custom", label: "Custom item", w: 1.2, h: 1.2 },
-];
-
-const CHAIR_GROUPS: {
-  key: string;
-  label: string;
-  n: number;
-  spacing: number;
-  seat?: SeatKind;
-}[] = [
-  { key: "one", label: "One chair", n: 1, spacing: 0 },
-  { key: "two", label: "Couple’s chairs", n: 2, spacing: 0.7, seat: "couple" },
-  { key: "row", label: "Row of 6", n: 6, spacing: 0.55 },
-  { key: "row12", label: "Row of 12", n: 12, spacing: 0.55 },
-  {
-    key: "celebrant",
-    label: "Celebrant’s chair",
-    n: 1,
-    spacing: 0,
-    seat: "celebrant",
-  },
-  { key: "couch", label: "Couch (two seats)", n: 1, spacing: 0, seat: "couch" },
-];
-
-/** Rows of tables, so a host can lay out a block without placing each one. */
-const TABLE_ROWS: { key: string; label: string; n: number; perRow: number }[] =
-  [
-    { key: "r3", label: "Row of 3", n: 3, perRow: 3 },
-    { key: "r4", label: "Row of 4", n: 4, perRow: 4 },
-    { key: "r6", label: "Row of 6", n: 6, perRow: 6 },
-    { key: "block6", label: "2 rows of 3", n: 6, perRow: 3 },
-    { key: "block12", label: "3 rows of 4", n: 12, perRow: 4 },
-  ];
-
-/** The words a host would use, for the line that confirms what was just added. */
-const STAGE_ITEM_WORD: Record<StageItem["kind"], string> = {
-  podium: "A podium",
-  lectern: "A lectern",
-  arch: "An arch",
-  couch: "A couch",
-  table: "A table",
-  cake: "A cake table",
-  screen: "A screen",
-};
+import {
+  CHAIR_GROUPS,
+  Deck,
+  Flyout,
+  Move,
+  Positions,
+  STAGE_ITEM_WORD,
+  TABLE_PRESETS,
+  TABLE_ROWS,
+  TOOL_GROUPS,
+  ZONE_GALLERY,
+  isTyping,
+  nextTableNames,
+} from "./studio-config";
+import { GroupBar, ModeSwitch, RailTip, ShortcutSheet } from "./studio-chrome";
 
 interface HallStudioProps {
   eventId: string;
@@ -318,37 +233,6 @@ interface HallStudioProps {
   /** Opens the new-table form. */
   onNewTable?: () => void;
 }
-
-function nextTableNames(tables: TableWithGuests[], count: number): string[] {
-  let n = 0;
-  for (const t of tables) {
-    const m = /^table\s+(\d+)$/i.exec(t.name.trim());
-    if (m) n = Math.max(n, Number(m[1]));
-  }
-  return Array.from(
-    { length: count },
-    (_, i) => `Table ${String(n + i + 1).padStart(2, "0")}`
-  );
-}
-
-const isTyping = (el: EventTarget | null) =>
-  el instanceof HTMLElement &&
-  (el.tagName === "INPUT" ||
-    el.tagName === "TEXTAREA" ||
-    el.tagName === "SELECT" ||
-    el.isContentEditable);
-
-/**
- * The hall studio: a realistic 3D hall on an endless board, a floating tool rail to add tables,
- * chairs and areas, an inspector to design whatever is selected, and a deck of planning tools
- * (guests, room, fit, seat, décor) on the side.
- */
-/** The planning tools, grouped the way a host thinks about the day. */
-const TOOL_GROUPS: { label: string; keys: Deck[] }[] = [
-  { label: "Design", keys: ["room", "fit", "decor"] },
-  { label: "Seat", keys: ["guests", "seat"] },
-  { label: "Plan", keys: ["catering", "thermal", "risk"] },
-];
 
 export function HallStudio({
   eventId,
@@ -3598,208 +3482,5 @@ export function HallStudio({
         </>
       }
     </section>
-  );
-}
-
-/**
- * Grouping, above whatever is selected: name a set of items so it moves as one, rename it, or
- * take it apart. A group is a way of holding things together, not a copy of them.
- */
-function GroupBar({
-  count,
-  group,
-  onGroup,
-  onRename,
-  onUngroup,
-}: {
-  count: number;
-  group: ItemGroup | null;
-  onGroup: (name: string) => void;
-  onRename: (id: string, name: string) => void;
-  onUngroup: (id: string) => void;
-}) {
-  const [name, setName] = React.useState("");
-  const [editing, setEditing] = React.useState(false);
-  React.useEffect(() => {
-    setName(group?.name ?? "");
-    setEditing(false);
-  }, [group?.id, group?.name]);
-
-  return (
-    <div className="border-b border-hairline bg-[#faf7f2] px-4 py-2.5">
-      {group ? (
-        <div className="flex items-center gap-2">
-          {editing ? (
-            <form
-              className="flex min-w-0 flex-1 items-center gap-1.5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onRename(group.id, name);
-                setEditing(false);
-              }}
-            >
-              <input
-                autoFocus
-                value={name}
-                aria-label="Group name"
-                onChange={(e) => setName(e.target.value.slice(0, 60))}
-                className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
-              />
-              <button
-                type="submit"
-                className="min-h-9 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory"
-              >
-                Save
-              </button>
-            </form>
-          ) : (
-            <>
-              <p className="min-w-0 flex-1 truncate text-xs font-semibold text-night">
-                {group.name}
-                <span className="ml-1.5 font-normal text-label-2">
-                  {group.items.length} items
-                </span>
-              </p>
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="min-h-9 rounded-full px-3 text-xs font-semibold text-burgundy hover:bg-burgundy/10"
-              >
-                Rename
-              </button>
-              <button
-                type="button"
-                onClick={() => onUngroup(group.id)}
-                className="min-h-9 rounded-full px-3 text-xs font-semibold text-label-2 hover:bg-black/5"
-              >
-                Ungroup
-              </button>
-            </>
-          )}
-        </div>
-      ) : count > 1 ? (
-        <form
-          className="flex items-center gap-1.5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onGroup(name);
-            setName("");
-          }}
-        >
-          <input
-            value={name}
-            aria-label="Name this group"
-            placeholder="Name this group"
-            onChange={(e) => setName(e.target.value.slice(0, 60))}
-            className="h-9 min-w-0 flex-1 rounded-lg border border-hairline bg-white px-2 text-sm text-night outline-none focus:border-night"
-          />
-          <button
-            type="submit"
-            className="min-h-9 shrink-0 rounded-full bg-burgundy px-3 text-xs font-semibold text-ivory hover:bg-wine"
-          >
-            Group {count}
-          </button>
-        </form>
-      ) : (
-        <p className="text-[11px] text-label-2">
-          Select two or more items to group them, so they move together.
-        </p>
-      )}
-    </div>
-  );
-}
-
-/** Simple mode on one side, the full studio on the other, over the same document (7.2). */
-function ModeSwitch({
-  mode,
-  onChange,
-}: {
-  mode: "simple" | "studio";
-  onChange: (m: "simple" | "studio") => void;
-}) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label="How much detail to show"
-      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs"
-    >
-      {(
-        [
-          ["simple", "Simple"],
-          ["studio", "Full studio"],
-        ] as const
-      ).map(([key, label]) => (
-        <button
-          key={key}
-          type="button"
-          role="radio"
-          aria-checked={mode === key}
-          onClick={() => onChange(key)}
-          className={cn(
-            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
-            mode === key
-              ? "bg-burgundy text-ivory shadow-xs"
-              : "text-label-2 hover:bg-burgundy/10 hover:text-night"
-          )}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** The hover label beside a rail button, with its letter keys. */
-function RailTip({ label, keys }: { label: string; keys: string[] }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute left-full top-1/2 z-20 ml-3 flex -translate-y-1/2 -translate-x-1 items-center gap-2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-visible/rail:translate-x-0 group-focus-visible/rail:opacity-100 motion-reduce:transition-none"
-    >
-      {label}
-      <Keys keys={keys.map((k) => [k])} dark />
-    </span>
-  );
-}
-
-function ShortcutSheet({ onClose }: { onClose: () => void }) {
-  // The sheet only opens after a click or key press, so reading the platform here is safe.
-  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
-  return (
-    <div
-      role="dialog"
-      aria-label="Keyboard shortcuts"
-      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(340px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-label-2">
-          Keyboard shortcuts
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="grid h-7 w-7 place-items-center rounded-full text-label-2 hover:bg-[#f1ece4]"
-        >
-          <X size={14} />
-        </button>
-      </div>
-      {SHORTCUTS(mac ? "⌘" : "Ctrl").map(({ group, items }) => (
-        <div key={group} className="mb-3 last:mb-0">
-          <p className="mb-1 text-xs font-semibold text-night">{group}</p>
-          <ul className="space-y-1">
-            {items.map(([keys, what]) => (
-              <li
-                key={what}
-                className="flex items-center justify-between gap-3 text-xs text-label-2"
-              >
-                <span>{what}</span>
-                <Keys keys={keys} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
   );
 }
