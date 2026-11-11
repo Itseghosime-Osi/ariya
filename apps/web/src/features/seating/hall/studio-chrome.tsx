@@ -141,7 +141,7 @@ export function ModeSwitch({
           aria-checked={mode === key}
           onClick={() => onChange(key)}
           className={cn(
-            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy lg:h-8 lg:min-h-0 lg:px-3.5",
             mode === key
               ? "bg-burgundy text-ivory shadow-xs"
               : "text-label-2 hover:bg-burgundy/10 hover:text-night"
