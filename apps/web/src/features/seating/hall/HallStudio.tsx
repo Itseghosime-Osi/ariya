@@ -448,7 +448,7 @@ export function HallStudio({
           outRight + (wide ? (panelOpen ? p.offsetWidth : 0) : 12)
         ),
         bottom: Math.round(
-          outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : 0)
+          outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : wide ? 32 : 0)
         ),
       };
       setInset((cur) =>
@@ -2405,7 +2405,7 @@ export function HallStudio({
                 // the left dock never covers the start of a message.
                 <div
                   className={cn(
-                    "pointer-events-none absolute bottom-20 right-3 flex justify-center",
+                    "pointer-events-none absolute bottom-20 right-3 flex justify-center lg:bottom-[6.5rem]",
                     leftEdge
                   )}
                 >
@@ -2880,12 +2880,49 @@ export function HallStudio({
                 </>
               )}
 
-              {/* Zoom and camera */}
+              {/* Status line on a laptop, like a design tool's: the mouse and keys on the left, the
+                  plan's totals and the zoom on the right. It replaces the hints that used to
+                  crowd the bottom of the side panel. */}
+              <div
+                className={cn(
+                  "pointer-events-auto absolute bottom-0 right-0 hidden h-8 items-center justify-between gap-4 border-t border-hairline bg-[#fbf9f5] px-3 text-[11px] text-label-2 lg:flex",
+                  mode === "simple"
+                    ? "left-0"
+                    : dockShown
+                      ? "left-[356px]"
+                      : "left-14"
+                )}
+                data-testid="hall-status-line"
+              >
+                <p className="min-w-0 truncate">
+                  <kbd className="font-sans font-semibold text-night">Drag</kbd>{" "}
+                  a table to move ·{" "}
+                  <kbd className="font-sans font-semibold text-night">Drag</kbd>{" "}
+                  empty space to turn ·{" "}
+                  <kbd className="font-sans font-semibold text-night">
+                    Space
+                  </kbd>{" "}
+                  to pan ·{" "}
+                  <kbd className="font-sans font-semibold text-night">
+                    Shift
+                  </kbd>
+                  -drag to select many ·{" "}
+                  <kbd className="font-sans font-semibold text-night">?</kbd>{" "}
+                  for shortcuts
+                </p>
+                <p className="shrink-0 tabular-nums">
+                  {data.tables.length}{" "}
+                  {data.tables.length === 1 ? "table" : "tables"} · {seats}{" "}
+                  seats · {counts.seated.people} of {counts.accepted.people}{" "}
+                  seated · {cam.pct}%
+                </p>
+              </div>
+
               <div
                 // Centred in the free space between the rail (or dock) and the panel, and wrapping
                 // rather than running off the edge when that space is narrow.
                 className={cn(
-                  "pointer-events-none absolute bottom-3 right-3 flex flex-wrap items-center justify-center gap-2",
+                  "pointer-events-none absolute bottom-3 right-3 flex flex-wrap items-center justify-center gap-2 lg:bottom-10",
                   leftEdge
                 )}
               >
@@ -3469,14 +3506,6 @@ export function HallStudio({
                   />
                 )}
               </div>
-              <p
-                hidden={mode === "simple"}
-                className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block"
-              >
-                Drag a table to move it · drag empty space to turn the hall ·
-                right-drag or Space to pan · Shift-drag to select many · press ?
-                for shortcuts
-              </p>
             </div>
           </div>
         </>
