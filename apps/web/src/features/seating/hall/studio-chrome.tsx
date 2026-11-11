@@ -126,7 +126,9 @@ export function ModeSwitch({
     <div
       role="radiogroup"
       aria-label="How much detail to show"
-      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs lg:border-0 lg:bg-[#f1ece4] lg:shadow-none"
+      // Each button keeps a 44 px target for a finger; on a laptop only the pill drawn inside it
+      // is button-sized, so the switch reads like ordinary buttons in the top bar.
+      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs lg:items-center lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
     >
       {(
         [
@@ -141,13 +143,23 @@ export function ModeSwitch({
           aria-checked={mode === key}
           onClick={() => onChange(key)}
           className={cn(
-            "min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy lg:h-8 lg:min-h-0 lg:px-3.5",
+            "group min-h-11 rounded-full px-4 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
+            "lg:inline-flex lg:items-center lg:px-0.5",
             mode === key
-              ? "bg-burgundy text-ivory shadow-xs"
-              : "text-label-2 hover:bg-burgundy/10 hover:text-night"
+              ? "bg-burgundy text-ivory shadow-xs lg:bg-transparent lg:shadow-none"
+              : "text-label-2 hover:bg-burgundy/10 hover:text-night lg:hover:bg-transparent"
           )}
         >
-          {label}
+          <span
+            className={cn(
+              "lg:block lg:rounded-full lg:px-3.5 lg:py-1.5",
+              mode === key
+                ? "lg:bg-burgundy lg:text-ivory"
+                : "lg:bg-[#f1ece4] lg:group-hover:bg-burgundy/10"
+            )}
+          >
+            {label}
+          </span>
         </button>
       ))}
     </div>
