@@ -2437,10 +2437,15 @@ export function InvitationDesigner({
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         onExported={(format) =>
-          setNotice({
-            tone: "ok",
-            text: `Exported as ${format === "json" ? "a design backup" : format.toUpperCase()}. Check your downloads.`,
-          })
+          // A success message never replaces an error the host has not dismissed yet.
+          setNotice((current) =>
+            current?.tone === "bad"
+              ? current
+              : {
+                  tone: "ok",
+                  text: `Exported as ${format === "json" ? "a design backup" : format === "whatsapp" ? "a small WhatsApp picture" : format.toUpperCase()}. Check your downloads.`,
+                }
+          )
         }
         design={design}
         eventId={eventId}
