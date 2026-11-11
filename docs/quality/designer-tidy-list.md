@@ -115,3 +115,7 @@ What changed (`ExportModal.tsx`, new `dialog-theme.ts`):
 - **A3** The options row shows a soft edge on the side where there is more to scroll to (CSS only).
 - **A4** Rulers follow the mode: off by default in Simple, on in Pro; once the host chooses, their choice stands.
 - Evidence: `evidence/tidy-batch34.json` (11 checks) and `screenshots/tidy-after-a*.png`.
+
+### Theme sweep: no `dark:` styles left in the designer
+
+The last `dark:` styles (empty-card prompt, "Add text" button in the options bar, notice buttons) now follow the studio's own theme. Checked with axe on the idle studio, a selected layer, the undo toast and the empty card, with the computer in dark mode and the studio in light and in dark (`evidence/tidy-batch35.json`, 8 checks, all clear).

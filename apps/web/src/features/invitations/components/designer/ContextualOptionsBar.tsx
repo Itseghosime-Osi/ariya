@@ -680,7 +680,12 @@ export function ContextualOptionsBar({
           <button
             type="button"
             onClick={() => onAddLayer("text")}
-            className="flex items-center gap-1 rounded bg-[var(--studio-wine)] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#6b1e2e] dark:bg-[var(--studio-gold)] dark:text-[var(--studio-ink)] dark:hover:bg-[#edd49d] transition-colors"
+            className={cn(
+              "flex items-center gap-1 rounded px-2.5 py-1 text-xs font-semibold transition-colors",
+              dark
+                ? "bg-[var(--studio-gold)] text-[var(--studio-ink)] hover:bg-[#edd49d]"
+                : "bg-[var(--studio-wine)] text-white hover:bg-[#6b1e2e]"
+            )}
           >
             <svg
               width="12"

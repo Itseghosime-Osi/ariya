@@ -58,6 +58,7 @@ import { ExportModal } from "./ExportModal";
 import { HelpDialog } from "./HelpDialog";
 import { CommandPalette } from "./CommandPalette";
 import { QuickTour } from "./QuickTour";
+import { dialogTheme } from "./dialog-theme";
 import { ColorSwatchesPanel } from "./ColorSwatchesPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { NavigatorPanel } from "./NavigatorPanel";
@@ -1768,17 +1769,35 @@ export function InvitationDesigner({
               data-testid="studio-empty-state"
               className="pointer-events-none absolute inset-0 z-10 grid place-items-center p-6"
             >
-              <div className="pointer-events-auto max-w-xs rounded-2xl border border-hairline bg-ivory/95 p-5 text-center shadow-lg dark:bg-[#1a1118]/95 dark:text-ivory">
-                <p className="font-serif text-lg font-bold text-night dark:text-ivory">
+              <div
+                className={cn(
+                  "pointer-events-auto max-w-xs rounded-2xl border p-5 text-center shadow-lg",
+                  dialogTheme(dark).panel
+                )}
+              >
+                <p
+                  className={cn(
+                    "font-serif text-lg font-bold",
+                    dialogTheme(dark).title
+                  )}
+                >
                   Your card is empty
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-label-2">
+                <p
+                  className={cn(
+                    "mt-1 text-xs leading-relaxed",
+                    dialogTheme(dark).muted
+                  )}
+                >
                   Add some text to begin, or upload a picture.
                 </p>
                 <button
                   type="button"
                   onClick={() => add("text")}
-                  className="mt-3 inline-flex min-h-11 items-center rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-burgundy/90"
+                  className={cn(
+                    "mt-3 inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold",
+                    dialogTheme(dark).primary
+                  )}
                 >
                   Add text
                 </button>
@@ -1878,7 +1897,10 @@ export function InvitationDesigner({
                   const run = notice.action!.onClick;
                   run();
                 }}
-                className="min-h-8 rounded-full px-3 text-[13px] font-bold underline hover:bg-black/10 dark:hover:bg-white/10"
+                className={cn(
+                  "min-h-8 rounded-full px-3 text-[13px] font-bold underline",
+                  dark ? "hover:bg-white/10" : "hover:bg-black/10"
+                )}
               >
                 {notice.action.label}
               </button>
@@ -1887,7 +1909,10 @@ export function InvitationDesigner({
               type="button"
               aria-label="Dismiss"
               onClick={() => setNotice(null)}
-              className="grid h-6 w-6 place-items-center rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+              className={cn(
+                "grid h-6 w-6 place-items-center rounded-full",
+                dark ? "hover:bg-white/10" : "hover:bg-black/10"
+              )}
             >
               <Icon name="close" size={14} />
             </button>
