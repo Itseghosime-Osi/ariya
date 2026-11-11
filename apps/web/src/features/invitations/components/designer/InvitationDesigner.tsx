@@ -164,8 +164,8 @@ export function InvitationDesigner({
     design,
     commit,
     recordSnapshot,
-    undo,
-    redo,
+    undo: rawUndo,
+    redo: rawRedo,
     past,
     future,
     restoreState,
@@ -390,7 +390,39 @@ export function InvitationDesigner({
   const [notice, setNotice] = useState<{
     tone: "ok" | "bad";
     text: string;
+    action?: { label: string; onClick: () => void };
   } | null>(null);
+  // Live position and size while a layer is dragged or resized (L3). Cleared a moment after the
+  // last move so it never lingers over the card.
+  const [readout, setReadout] = useState<string | null>(null);
+  const readoutTimer = useRef<number | null>(null);
+  const undo = useCallback(() => {
+    if (!doc.canUndo) return;
+    rawUndo();
+    setNotice({
+      tone: "ok",
+      text: "Undone",
+      action: { label: "Redo", onClick: () => redoRef.current() },
+    });
+  }, [doc.canUndo, rawUndo]);
+  const redo = useCallback(() => {
+    if (!doc.canRedo) return;
+    rawRedo();
+    setNotice({
+      tone: "ok",
+      text: "Redone",
+      action: { label: "Undo", onClick: () => undoRef.current() },
+    });
+  }, [doc.canRedo, rawRedo]);
+  const undoRef = useRef(undo);
+  undoRef.current = undo;
+  const redoRef = useRef(redo);
+  redoRef.current = redo;
+  useEffect(() => {
+    if (!notice || notice.tone !== "ok") return;
+    const t = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
   // Lines of a saved card that no longer match the event, judged once when the designer opens so
   // the host's own edits during this visit are never second-guessed. The card keeps the host's
   // words until they choose to update it; "Keep my wording" hides the offer for these exact changes.
@@ -545,6 +577,20 @@ export function InvitationDesigner({
     ) => {
       const target = designRef.current.layers.find((l) => l.id === id);
       if (target?.locked) return;
+      if (target && !options?.commit) {
+        const dims = designDimensionsPx(designRef.current);
+        const next = { ...target, ...patch };
+        const parts = [
+          `X ${Math.round((next.x / 100) * dims.width)}`,
+          `Y ${Math.round((next.y / 100) * dims.height)}`,
+          `W ${Math.round((next.width / 100) * dims.width)}`,
+        ];
+        if (next.height != null)
+          parts.push(`H ${Math.round((next.height / 100) * dims.height)}`);
+        setReadout(`${parts.join(" · ")} px`);
+        if (readoutTimer.current) window.clearTimeout(readoutTimer.current);
+        readoutTimer.current = window.setTimeout(() => setReadout(null), 900);
+      }
       commit(
         (d) => ({
           ...d,
@@ -1581,7 +1627,7 @@ export function InvitationDesigner({
             aria-label="Help and shortcuts"
             title="Help and shortcuts (?)"
             onClick={() => setHelpOpen(true)}
-            className="grid h-11 w-11 place-items-center rounded-full text-sm font-bold text-night hover:bg-burgundy/10"
+            className="hidden h-11 w-11 place-items-center rounded-full text-sm font-bold text-night hover:bg-burgundy/10 sm:grid"
           >
             ?
           </button>
@@ -1753,6 +1799,16 @@ export function InvitationDesigner({
         </div>
       )}
 
+      {readout && (
+        <div
+          data-testid="drag-readout"
+          aria-hidden="true"
+          className="pointer-events-none fixed bottom-[72px] left-1/2 z-40 -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-[12px] font-semibold text-ivory shadow-lg"
+        >
+          {readout}
+        </div>
+      )}
+
       {notice && (
         <div className="pointer-events-auto fixed top-[100px] left-1/2 -translate-x-1/2 z-50 flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2">
           <p
@@ -1769,6 +1825,18 @@ export function InvitationDesigner({
             )}
           >
             {notice.text}
+            {notice.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  const run = notice.action!.onClick;
+                  run();
+                }}
+                className="min-h-8 rounded-full px-3 text-[13px] font-bold underline hover:bg-black/10 dark:hover:bg-white/10"
+              >
+                {notice.action.label}
+              </button>
+            )}
             <button
               type="button"
               aria-label="Dismiss"

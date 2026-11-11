@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RD-L3a",
+    "name": "Readout shows live X/Y/W while dragging",
+    "ok": true,
+    "detail": "X 178 · Y 543 · W 907 px"
+  },
+  {
+    "id": "RD-L3b",
+    "name": "Readout disappears after the drag",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L4a",
+    "name": "Undo shows an Undone toast with Redo",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L4b",
+    "name": "Undo moved the layer back",
+    "ok": true,
+    "detail": "363.875 405.1875 363.875"
+  },
+  {
+    "id": "RD-L4c",
+    "name": "Redo button reapplies the move",
+    "ok": true,
+    "detail": "405.1875 405.1875"
+  },
+  {
+    "id": "RD-L4d",
+    "name": "Toast now says Redone with Undo",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L4e",
+    "name": "Toast dismisses itself",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]
