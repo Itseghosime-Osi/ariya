@@ -55,6 +55,8 @@ import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
 import { HelpDialog } from "./HelpDialog";
+import { CommandPalette } from "./CommandPalette";
+import { QuickTour } from "./QuickTour";
 import { ColorSwatchesPanel } from "./ColorSwatchesPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { NavigatorPanel } from "./NavigatorPanel";
@@ -386,6 +388,8 @@ export function InvitationDesigner({
   const [busy, setBusy] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [online, setOnline] = useState(true);
   const [notice, setNotice] = useState<{
     tone: "ok" | "bad";
@@ -920,6 +924,11 @@ export function InvitationDesigner({
       )
         return;
       const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
       if (!mod && e.key === "?") {
         e.preventDefault();
         setHelpOpen(true);
@@ -1525,6 +1534,15 @@ export function InvitationDesigner({
           label: "Help and shortcuts…",
           shortcut: "?",
           onClick: () => setHelpOpen(true),
+        },
+        {
+          label: "Find a command…",
+          shortcut: "Cmd+K",
+          onClick: () => setPaletteOpen(true),
+        },
+        {
+          label: "Show the quick tour",
+          onClick: () => setTourOpen(true),
         },
       ],
     },
@@ -2390,6 +2408,13 @@ export function InvitationDesigner({
         onExport={() => setExportOpen(true)}
       />
 
+      <CommandPalette
+        dark={dark}
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        menus={menuGroups}
+      />
+      <QuickTour forceOpen={tourOpen} onForceClose={() => setTourOpen(false)} />
       <HelpDialog
         dark={dark}
         open={helpOpen}

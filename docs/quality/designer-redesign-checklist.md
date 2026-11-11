@@ -39,25 +39,34 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **C1 (P0) No surprise locks.** Show what is included before the user designs, not at export.
       Done when: every locked feature shows a lock icon and plan name before use; no feature is found locked only at the last step.
+      Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
 - [ ] **C2 (P0) Free versus paid is stated in one place.** One plain pricing table in the studio's help.
       Done when: the table matches the real entitlements checked in code (unit test comparing the two).
+      Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
 - [ ] **C3 (P1) No seat tricks.** Guests and helpers viewing or commenting never need a paid seat; only editing is limited.
       Done when: a view-only collaborator can open, comment and download the guest version without a paid seat.
+      Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
 - [ ] **C4 (P1) Gentle upgrade prompts.** At most one prompt per session, never blocking a task.
       Done when: no modal upgrade prompt appears mid-edit (E2E check).
+      Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
 - [ ] **C5 (P2) Premium filter clarity.** Template and asset lists must clearly separate free from premium (Canva reviewers called this confusing).
       Done when: filter chips "All / Free / Premium" work and counts are right.
 
 ## D. Learning curve and navigation
 
+Status: the designer has no paid features, plan gates or upgrade prompts today (searched `features/invitations`), so there is nothing to fix in the studio yet. This item applies when pricing tiers are introduced. Left open on purpose.
+
 - [ ] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
       Done when: first-time users see only the essentials; a "More tools" control reveals the rest and remembers the choice.
-- [ ] **D2 (P0) Guided first run.** 4-step coach marks (pick template, edit text, move/resize, export), skippable, shown once.
+      Progress (not closed): Simple mode is already the default and Pro is one switch away; the choice is remembered (`ariya:invite-mode`). Not yet a timed first-use test or a 6–8 control audit of Simple mode.
+- [x] **D2 (P0) Guided first run.** 4-step coach marks (pick template, edit text, move/resize, export), skippable, shown once.
       Done when: completing or skipping stores the choice; re-openable from Help.
+      Evidence: Four-step skippable quick tour, stored in localStorage, reopenable from Help > Show the quick tour; RD-D2a–d, `screenshots/upgrade-tour.png`. The automatic first-visit show is skipped in automated browsers (so it cannot block test clicks) and was therefore only checked by code reading, not in a real first visit.
 - [ ] **D3 (P0) Plain names for tools.** Replace jargon (e.g. "blend mode", "distribute") with labels plus tooltips; keep Pro names as secondary text.
       Done when: every tool has a tooltip with shortcut; a label audit finds no unexplained term in Simple mode.
-- [ ] **D4 (P1) Find-anything search.** One search box for tools, templates, and settings (command palette on desktop, search button on phone).
+- [x] **D4 (P1) Find-anything search.** One search box for tools, templates, and settings (command palette on desktop, search button on phone).
       Done when: typing "export" or "align" jumps to the right control.
+      Evidence: Command palette on ⌘/Ctrl K and in the Help menu; searches every menu action, Enter runs it, no-match message; `evidence/redesign-batch21.json` RD-D4a/b/c, `screenshots/upgrade-palette.png`. Searches commands only, not templates or settings (the studio has no template browser).
 - [ ] **D5 (P1) Clear folders and navigation (Canva and Figma both criticised).** Designs grouped by event; breadcrumbs; a visible Back to event.
       Done when: from any studio screen the user can reach their event in one click, and the saved design list is grouped by event.
 - [x] **D6 (P1) Shortcut help.** Press `?` for a shortcut sheet.
@@ -69,6 +78,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **E1 (P0) Performance budget.** Interaction stays smooth with 100 layers and 20 images on a mid-range phone.
       Done when: a stress fixture with 100 layers keeps drag/resize under a stated frame time (measured, recorded in evidence).
+      Progress (not closed): 60 layers (the studio's maximum): median frame 16.7ms, 95th percentile 66.6ms while dragging, in a headless Chromium dev build with no GPU (RD-E1). No budget agreed yet and no mid-range phone measurement, so not closed.
 - [ ] **E2 (P1) Heavy work off the main thread.** Keep alignment, distribution and export maths in Rust/WASM; move image decoding off the main thread where possible.
       Done when: long tasks over 50ms on the stress fixture are removed or justified.
 - [ ] **E3 (P1) Image size control.** Downscale big uploads for editing, keep the original for export.
@@ -92,6 +102,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **G1 (P0) Fresh Nigerian-wedding-first templates.** Canva reviewers call templates dated. Audit each template on current style, Yoruba/Igbo/Hausa/Pidgin text, and long names.
       Done when: each template renders correctly with long names and diacritics (Àríyá, Ọlá, Ṣeun).
+      Progress (not closed): Names with Yoruba diacritics stay inside the card width (RD-G1). KNOWN DEFECT (RD-G1b, `screenshots/upgrade-longname-defect.png`): a very long name wraps to four lines and overlaps the message text below. Needs shrink-to-fit (H2) or an overlap warning. Open.
 - [ ] **G2 (P1) Template search and filters.** Culture, mood, colour, size, free or premium.
       Done when: filters combine and results match.
 - [ ] **G3 (P1) One-click colour and font themes** from the template, protecting contrast.
@@ -102,6 +113,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 - [ ] **H1 (P1) Reliable text editing.** Caret never jumps, paste is plain text, undo steps are sensible, long names wrap or shrink predictably.
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
+      Progress (not closed): same long-name overlap as G1; typing, paste and undo regression specs from the earlier checklist still pass in CI.
 - [ ] **H2 (P2) Text fit options.** "Shrink to fit" and "Grow box" per text layer.
 
 ## I. Accessibility and phones
@@ -148,6 +160,8 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
       Done when: reduced-motion removes all non-essential animation.
 
 ## L. UX redesign (flows and feedback)
+
+Progress (not closed): `prefers-reduced-motion` rule already exists in `InvitationDesigner.module.css`; not audited against every animation, and the new toasts/tour use no animation.
 
 - [ ] **L1 (P0) Core journey map.** Write and test the main flow: Event → Choose template → Edit → Preview → Export/Share. Remove any step that does not help.
       Done when: each step is reachable in at most 2 taps and a user test records where people stall.

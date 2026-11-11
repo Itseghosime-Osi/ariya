@@ -41,6 +41,7 @@ const SHORTCUTS: { group: string; items: [string, string][] }[] = [
       ["Actual size", "⌘/Ctrl 1"],
       ["Export invitation", "⌘/Ctrl E"],
       ["Upload image", "⌘/Ctrl U"],
+      ["Find a command", "⌘/Ctrl K"],
       ["This help", "?"],
     ],
   },
