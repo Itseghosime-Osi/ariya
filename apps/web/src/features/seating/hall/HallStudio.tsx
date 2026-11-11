@@ -407,8 +407,8 @@ export function HallStudio({
     mode === "simple"
       ? "left-3"
       : dockShown
-        ? "left-[4.25rem] lg:left-[392px]"
-        : "left-[4.25rem] lg:left-[76px]";
+        ? "left-[4.25rem] lg:left-[368px]"
+        : "left-[4.25rem] lg:left-[68px]";
 
   // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
   const body = useRef<HTMLDivElement>(null);
@@ -434,17 +434,17 @@ export function HallStudio({
           r.left +
             (wide
               ? dockShown
-                ? 392
+                ? 356
                 : mode === "studio"
-                  ? 76
-                  : 12
+                  ? 56
+                  : 0
               : mode === "studio"
                 ? 72
                 : 12)
         ),
-        top: Math.round(r.top + 64),
+        top: Math.round(r.top + (wide ? 56 : 64)),
         right: Math.round(
-          outRight + (wide && panelOpen ? p.offsetWidth + 12 : 12)
+          outRight + (wide ? (panelOpen ? p.offsetWidth : 0) : 12)
         ),
         bottom: Math.round(
           outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : 0)
@@ -2108,6 +2108,12 @@ export function HallStudio({
           {/* The hall fills the whole studio; the controls and the side panel float over it, so
               panning never crops it at a box edge. */}
           <div ref={body} className="relative min-h-0 flex-1">
+            {/* On a laptop or desktop the studio is three fixed zones under one top bar, like a
+                design tool: this strip is that bar's background; the title and actions sit on it. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-[5] hidden h-14 border-b border-hairline bg-[#fbf9f5] lg:block"
+            />
             <Hall3D
               ref={view3d}
               scene={scene}
@@ -2122,11 +2128,11 @@ export function HallStudio({
                 // be clicked.
                 "pointer-events-none absolute inset-0 z-10 transition-[right,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
                 panelOpen &&
-                  "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
+                  "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[360px]"
               )}
             >
               {/* Back, the page's name and the mode switch: the only chrome the app leaves. */}
-              <div className="pointer-events-auto absolute left-3 top-3 max-w-[calc(100%-23.5rem)]">
+              <div className="pointer-events-auto absolute left-3 top-3 max-w-[calc(100%-23.5rem)] lg:left-1 lg:top-0 lg:flex lg:h-14 lg:items-center">
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
@@ -2141,7 +2147,7 @@ export function HallStudio({
               {/* What needs attention, under the bar and clear of the tool rail and dock. */}
               <div
                 className={cn(
-                  "pointer-events-none absolute right-3 top-[80px] flex flex-col items-center gap-1.5",
+                  "pointer-events-none absolute right-3 top-[80px] flex flex-col items-center gap-1.5 lg:top-[68px]",
                   leftEdge
                 )}
               >
@@ -2244,7 +2250,7 @@ export function HallStudio({
               <div
                 className={cn(
                   float,
-                  "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
+                  "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1 lg:top-1.5 lg:border-0 lg:bg-transparent lg:shadow-none"
                 )}
               >
                 {onNewTable && (
@@ -2429,7 +2435,7 @@ export function HallStudio({
                     aria-orientation="vertical"
                     className={cn(
                       float,
-                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[80px] max-lg:max-h-[calc(100%-6rem)] max-lg:overflow-y-auto lg:top-1/2 lg:max-h-[calc(100%-9rem)] lg:-translate-y-1/2"
+                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[80px] max-lg:max-h-[calc(100%-6rem)] max-lg:overflow-y-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-14 lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:py-3 lg:shadow-none"
                     )}
                   >
                     <button
@@ -2614,7 +2620,7 @@ export function HallStudio({
                   {/* Flyouts */}
                   {flyout && (
                     <div
-                      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+                      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] lg:left-[4.5rem] lg:top-[68px] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
                       role="dialog"
                       aria-label={
                         flyout === "table"
@@ -2799,7 +2805,7 @@ export function HallStudio({
                   {dockShown && (
                     <div
                       id="left-dock"
-                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[80px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300"
+                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[80px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300 lg:bottom-0 lg:left-14 lg:top-14 lg:w-[300px] lg:border-r lg:border-hairline lg:bg-[#fbf9f5] lg:[&>*]:h-full lg:[&>*]:rounded-none lg:[&>*]:border-0 lg:[&>*]:shadow-none"
                     >
                       <LeftDock
                         layout={layout}
@@ -2993,7 +2999,7 @@ export function HallStudio({
               inert={!panelOpen}
               aria-hidden={!panelOpen || undefined}
               className={cn(
-                "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]",
+                "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-14 lg:h-auto lg:w-[360px] lg:rounded-none lg:border-y-0 lg:border-r-0",
                 !panelOpen &&
                   "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
               )}

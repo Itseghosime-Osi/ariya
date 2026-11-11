@@ -27,7 +27,8 @@ export function WorkspaceBar({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/95 p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
+    // A floating pill on a tablet; on a laptop it sits flat in the studio's one top bar.
+    <div className="flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/95 p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur lg:border-0 lg:bg-transparent lg:shadow-none lg:backdrop-blur-none">
       <BackLink
         href={backHref}
         aria-label="Back"
