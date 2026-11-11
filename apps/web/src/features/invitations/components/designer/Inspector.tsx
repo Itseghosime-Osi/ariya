@@ -358,6 +358,15 @@ function IconBtn({
   );
 }
 
+const ALIGN: { key: Alignment; label: string; d: string }[] = [
+  { key: "left", label: "Align left", d: "M3 3v18M7 7h12M7 13h7" },
+  { key: "centre", label: "Centre across", d: "M12 3v18M5 7h14M8 13h8" },
+  { key: "right", label: "Align right", d: "M21 3v18M5 7h12M10 13h7" },
+  { key: "top", label: "Align top", d: "M3 3h18M7 7v12M13 7v7" },
+  { key: "middle", label: "Centre down", d: "M3 12h18M7 5v14M13 8v8" },
+  { key: "bottom", label: "Align bottom", d: "M3 21h18M7 5v12M13 10v7" },
+];
+
 const ROLES: { value: InvitationColorRole; label: string }[] = [
   { value: "title", label: "Names" },
   { value: "ink", label: "Ink" },
@@ -383,6 +392,7 @@ export function Inspector({
   selectedIds,
   onPatch,
   onDesign,
+  onAlign,
   onAlignSelection,
   onDistribute,
   onGroup,
@@ -403,6 +413,7 @@ export function Inspector({
   selectedIds?: string[];
   onPatch: (id: string, patch: Patch) => void;
   onDesign: (next: (d: InvitationDesign) => InvitationDesign) => void;
+  onAlign: (id: string, how: Alignment) => void;
   onAlignSelection?: (ids: string[], how: Alignment) => void;
   onDistribute?: (ids: string[], horizontal: boolean) => void;
   onGroup?: (ids: string[]) => void;
@@ -1433,6 +1444,33 @@ export function Inspector({
             >
               +90°
             </button>
+          </div>
+          <div
+            className="mt-3 flex flex-wrap gap-1.5"
+            role="group"
+            aria-label="Align on the card"
+          >
+            {ALIGN.map((a) => (
+              <IconBtn
+                key={a.key}
+                label={a.label}
+                dark={dark}
+                onClick={() => !layer.locked && onAlign(layer.id, a.key)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d={a.d} />
+                </svg>
+              </IconBtn>
+            ))}
           </div>
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
