@@ -126,7 +126,7 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Evidence: Help button in header (44px) and Help menu with help@ariyaday.com; RD-F1. Phone width not yet checked.
 - [ ] **F2 (P1) Clear error messages.** Every failure says what happened and what to do next.
       Done when: forced failures (export, save, image upload) each show a readable message and a retry.
-      Progress (not closed): a failed picture import or upload now shows the reason and a **Try again** button that repeats the same file (`evidence/redesign-batch31.json`: a forced server error, then retry succeeds and adds the picture). Still open: a next step on export failures, and forced-failure checks for save errors in the browser (the unit tests cover save retry).
+      Progress (not closed): a failed picture **upload** (server or network error) now shows the reason and a **Try again** button that repeats the same file; an unreadable or damaged file shows its reason without a button, because trying the same file again cannot help (`evidence/redesign-batch31.json`: a forced server error, then retry succeeds and adds the picture). Still open: a next step on export failures, and forced-failure checks for save errors in the browser (the unit tests cover save retry).
 - [ ] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
 - [ ] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).

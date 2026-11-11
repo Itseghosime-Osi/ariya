@@ -746,13 +746,6 @@ export function InvitationDesigner({
       setNotice({
         tone: "bad",
         text: err instanceof Error ? err.message : "Failed to process image.",
-        action: {
-          label: "Try again",
-          onClick: () => {
-            uploadRef.current = purpose;
-            void onFile(file);
-          },
-        },
       });
       return;
     }
