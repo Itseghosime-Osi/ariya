@@ -123,9 +123,10 @@ Decision: same as A2: queue saves while offline and sync when back online.
 
 ## G. Templates and content quality
 
-- [ ] **G1 (P0) Fresh Nigerian-wedding-first templates.** Canva reviewers call templates dated. Audit each template on current style, Yoruba/Igbo/Hausa/Pidgin text, and long names.
+- [x] **G1 (P0) Fresh Nigerian-wedding-first templates.** Canva reviewers call templates dated. Audit each template on current style, Yoruba/Igbo/Hausa/Pidgin text, and long names.
       Done when: each template renders correctly with long names and diacritics (Àríyá, Ọlá, Ṣeun).
       Progress (not closed): Names with Yoruba diacritics stay inside the card width (RD-G1). KNOWN DEFECT (RD-G1b, `screenshots/upgrade-longname-defect.png`): a very long name wraps to four lines and overlaps the message text below. Needs shrink-to-fit (H2) or an overlap warning. Open.
+      Evidence: all four layout presets (Cathedral Arch, Royal Monogram, Modern Minimalist, Owambe Opulence) plus the default card, each with a 74-character Yoruba/Igbo name, a long venue and a long message, stay inside the card with no overlapping text (`evidence/redesign-batch23.json`, `screenshots/upgrade-tpl-*.png`). Fix made on the way: every text line kind now shrinks (to 45% at most) when it would exceed 2–3 lines; built-in default sizes are unchanged (checked). Chromium desktop only; export of each preset not re-run.
 - [ ] **G2 (P1) Template search and filters.** Culture, mood, colour, size, free or premium.
       Done when: filters combine and results match.
       Decision: deferred by decision (no template browser for now).

@@ -205,6 +205,20 @@ function textStyle(
 }
 
 /**
+ * The most lines each kind of text may take before it shrinks. Chosen above what the built-in
+ * templates use, so a normal card is never touched and only very long words are fitted.
+ */
+const MAX_LINES: Partial<Record<InvitationLayer["kind"], number>> = {
+  kicker: 2,
+  names: 2,
+  message: 3,
+  date: 2,
+  venue: 3,
+  dressCode: 2,
+  footer: 2,
+};
+
+/**
  * A text layer that keeps the headline to a fixed number of lines. A very long pair of names
  * shrinks (down to 45%) instead of wrapping into the lines below it. Sizes are container-query
  * units, so the line count does not change as the card scales: it is measured once per change.
@@ -745,7 +759,7 @@ export function InvitationCard({
           <FittedText
             key={layer.id}
             layer={layer}
-            maxLines={layer.kind === "names" ? 2 : undefined}
+            maxLines={MAX_LINES[layer.kind]}
             style={{ ...textStyle(layer, design, interactive), ...common }}
             pointerProps={pointerProps}
           />
