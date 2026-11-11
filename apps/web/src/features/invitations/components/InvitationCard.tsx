@@ -205,6 +205,64 @@ function textStyle(
 }
 
 /**
+ * A text layer that keeps the headline to a fixed number of lines. A very long pair of names
+ * shrinks (down to 45%) instead of wrapping into the lines below it. Sizes are container-query
+ * units, so the line count does not change as the card scales: it is measured once per change.
+ */
+function FittedText({
+  layer,
+  maxLines,
+  style,
+  pointerProps,
+}: {
+  layer: InvitationLayer;
+  maxLines?: number;
+  style: React.CSSProperties;
+  pointerProps: React.HTMLAttributes<HTMLDivElement>;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !maxLines) return;
+    const fit = () => {
+      let scale = 1;
+      el.style.fontSize = `${layer.size}cqw`;
+      for (let i = 0; i < 10 && scale > 0.45; i++) {
+        const cs = getComputedStyle(el);
+        const lineHeight =
+          parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.35;
+        if (!lineHeight || el.scrollHeight / lineHeight <= maxLines + 0.15)
+          break;
+        scale = Math.max(0.45, scale - 0.07);
+        el.style.fontSize = `${layer.size * scale}cqw`;
+      }
+    };
+    fit();
+    let cancelled = false;
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) fit();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    layer.text,
+    layer.size,
+    layer.width,
+    layer.font,
+    layer.weight,
+    maxLines,
+    layer.tracking,
+    layer.lineHeight,
+  ]);
+  return (
+    <div ref={ref} data-layer-id={layer.id} style={style} {...pointerProps}>
+      {layer.text}
+    </div>
+  );
+}
+
+/**
  * The one invitation under an event. The overview, the studio and the guest pass all render this
  * component from the same saved design, so a host never sees two different cards for one wedding.
  */
@@ -684,14 +742,13 @@ export function InvitationCard({
         }
 
         return (
-          <div
+          <FittedText
             key={layer.id}
-            data-layer-id={layer.id}
+            layer={layer}
+            maxLines={layer.kind === "names" ? 2 : undefined}
             style={{ ...textStyle(layer, design, interactive), ...common }}
-            {...pointerProps}
-          >
-            {layer.text}
-          </div>
+            pointerProps={pointerProps}
+          />
         );
       })}
     </div>

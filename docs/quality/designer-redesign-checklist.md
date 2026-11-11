@@ -118,6 +118,8 @@ Status: the designer has no paid features, plan gates or upgrade prompts today (
 
 ## I. Accessibility and phones
 
+Progress (not closed): the Names line now shrinks automatically to keep to two lines. A per-layer 'Shrink to fit / Grow box' option is not built (it needs a model change in the Rust engine and schema).
+
 - [ ] **I1 (P0) 44px targets and keyboard access everywhere.** Already enforced by `20-studio-accessibility.spec.ts`; keep it green.
 - [ ] **I2 (P1) Screen reader pass** on the main flow (open, edit, export) with a real reader; record results.
 - [ ] **I3 (P1) Phone-first checks on real devices** (iOS Safari, Android Chrome): layout, keyboard, export download.

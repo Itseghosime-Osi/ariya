@@ -45,19 +45,19 @@
     "id": "RD-G1",
     "name": "Long diacritic names stay inside the card width",
     "ok": true,
-    "detail": "[363.875,772.109375,350.3125,593.046875]"
+    "detail": "[363.875,772.109375,350.3125,399.8125]"
   },
   {
     "id": "RD-G1b",
     "name": "KNOWN DEFECT: very long names must not overlap the next line of text",
-    "ok": false,
-    "detail": "names bottom=593 message top=459"
+    "ok": true,
+    "detail": "names bottom=400 message top=459"
   },
   {
     "id": "RD-E1",
     "name": "Dragging with 60 layers (headless dev build, no GPU)",
     "ok": true,
-    "detail": "layers=60 frames=150 median=16.7ms p95=83.4ms"
+    "detail": "layers=60 frames=145 median=16.7ms p95=83.3ms"
   },
   {
     "id": "RD-ERR",
