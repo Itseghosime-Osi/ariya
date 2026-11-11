@@ -58,6 +58,8 @@ import { SeatRulesPanel } from "./SeatRulesPanel";
 import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
 import { shareOf } from "./share";
+import { clearanceOf, gapText } from "./clearance";
+import { MAIN_AISLE } from "./model";
 import { ruleBreaks, type SeatRule } from "./rules";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
@@ -3258,49 +3260,93 @@ export function HallStudio({
                   />
                 )}
                 {mode === "simple" ? null : selTable ? (
-                  <TableInspector
-                    table={selTable}
-                    layout={layout}
-                    pos={positions[selTable.id] ?? { x: 0, y: 0 }}
-                    rot={rotationOf(selTable.id)}
-                    onClose={() => setSelection([])}
-                    onRotate={rotateBy}
-                    onRot={(d) =>
-                      setRotation({ type: "table", id: selTable.id }, d)
-                    }
-                    onMove={(x, y) =>
-                      moveItems([{ type: "table", id: selTable.id, x, y }])
-                    }
-                    onDuplicate={duplicate}
-                    onDelete={remove}
-                    onUpdate={(patch) => void updateTable(selTable.id, patch)}
-                    onStyle={(patch) => styleTables([selTable.id], patch)}
-                    onStyleAll={() => {
-                      const st = styleOf(layout, selTable.id);
-                      updateLayout((l) => ({
-                        ...l,
-                        tableStyles: {},
-                        decor: {
-                          ...l.decor,
-                          linen: st.cloth,
-                          chair: st.chair,
-                          cover: st.cover,
-                          sash: st.sash,
-                          centrepiece: st.centrepiece,
-                          flower: st.flower,
-                        },
-                      }));
-                      say("Every table now has this look");
-                    }}
-                    onResetStyle={() =>
-                      updateLayout((l) => {
-                        const rest = { ...l.tableStyles };
-                        delete rest[selTable.id];
-                        return { ...l, tableStyles: rest };
-                      })
-                    }
-                    onUnseat={(guestId) => onAssignTable(guestId, null)}
-                  />
+                  <>
+                    {(() => {
+                      // The space around this table, measured from the plan, so a squeezed aisle
+                      // shows up while the table is still being placed.
+                      const c = clearanceOf(
+                        fpOf(selTable),
+                        data.tables
+                          .filter((o) => o.id !== selTable.id)
+                          .map((o) => ({ name: o.name, f: fpOf(o) })),
+                        layout.zones,
+                        layout
+                      );
+                      return (
+                        <div
+                          data-testid="table-clearance"
+                          className={cn(
+                            "mx-4 mt-3 rounded-xl p-3 text-xs",
+                            c.tooNarrow
+                              ? "bg-[#fbeeee] text-[#7a1f20]"
+                              : "bg-[#f6f1e8] text-night"
+                          )}
+                        >
+                          <p className="font-semibold">
+                            {c.tooNarrow
+                              ? `Tight: ${gapText(c.tightest)} where an aisle needs ${MAIN_AISLE} m`
+                              : "Space around this table"}
+                          </p>
+                          <ul className="mt-1 space-y-0.5">
+                            {c.table && (
+                              <li>
+                                {gapText(c.table.gap)} to {c.table.name}
+                              </li>
+                            )}
+                            <li>{gapText(c.wall)} to the nearest wall</li>
+                            {c.zone && (
+                              <li>
+                                {gapText(c.zone.gap)} to {c.zone.label}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+                    <TableInspector
+                      table={selTable}
+                      layout={layout}
+                      pos={positions[selTable.id] ?? { x: 0, y: 0 }}
+                      rot={rotationOf(selTable.id)}
+                      onClose={() => setSelection([])}
+                      onRotate={rotateBy}
+                      onRot={(d) =>
+                        setRotation({ type: "table", id: selTable.id }, d)
+                      }
+                      onMove={(x, y) =>
+                        moveItems([{ type: "table", id: selTable.id, x, y }])
+                      }
+                      onDuplicate={duplicate}
+                      onDelete={remove}
+                      onUpdate={(patch) => void updateTable(selTable.id, patch)}
+                      onStyle={(patch) => styleTables([selTable.id], patch)}
+                      onStyleAll={() => {
+                        const st = styleOf(layout, selTable.id);
+                        updateLayout((l) => ({
+                          ...l,
+                          tableStyles: {},
+                          decor: {
+                            ...l.decor,
+                            linen: st.cloth,
+                            chair: st.chair,
+                            cover: st.cover,
+                            sash: st.sash,
+                            centrepiece: st.centrepiece,
+                            flower: st.flower,
+                          },
+                        }));
+                        say("Every table now has this look");
+                      }}
+                      onResetStyle={() =>
+                        updateLayout((l) => {
+                          const rest = { ...l.tableStyles };
+                          delete rest[selTable.id];
+                          return { ...l, tableStyles: rest };
+                        })
+                      }
+                      onUnseat={(guestId) => onAssignTable(guestId, null)}
+                    />
+                  </>
                 ) : selZone ? (
                   <ZoneInspector
                     zone={selZone}
