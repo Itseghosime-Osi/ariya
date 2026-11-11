@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   assignSeatAction,
   bulkAssignSeatsAction,
@@ -21,6 +21,11 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
   const [data, setData] = useState<SeatingDeskData>(initialData);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const lastBulk = useRef<{
+    guestIds: string[];
+    before: SeatingDeskData;
+  } | null>(null);
+  const [canUndoBulk, setCanUndoBulk] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
 
@@ -346,7 +351,39 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
         ? `Seated ${res.data.seated}; ${failed.size} could not be seated.`
         : `Seating chart updated: ${res.data.seated} guests seated.`
     );
+    // Remember who this run seated, so it can be taken back in one step.
+    lastBulk.current = {
+      guestIds: pairs.map((p) => p.guestId).filter((id) => !failed.has(id)),
+      before: previous,
+    };
+    setCanUndoBulk(true);
     return { seated: res.data.seated, failed: failed.size };
+  };
+
+  /**
+   * Take back the last "Seat everyone": the guests it seated go back to waiting. Auto-seat only
+   * ever fills empty seats, so unseating exactly those guests restores the plan as it was.
+   */
+  const undoBulkAssign = async () => {
+    const last = lastBulk.current;
+    if (!last || last.guestIds.length === 0) return false;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    const res = await bulkAssignSeatsAction(
+      eventId,
+      last.guestIds.map((guestId) => ({ guestId, tableId: null }))
+    );
+    if (!res.ok || !res.data || res.data.failed.length > 0) {
+      setErrorMsg(
+        "Could not take back every seat. Reload to see where guests are now."
+      );
+      return false;
+    }
+    lastBulk.current = null;
+    setCanUndoBulk(false);
+    setData(last.before);
+    setSuccessMsg(`Took back ${res.data.seated} seats.`);
+    return true;
   };
 
   return {
@@ -354,6 +391,8 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     updateTable,
     setTablePositions,
     bulkAssign,
+    undoBulkAssign,
+    canUndoBulk,
     data,
     errorMsg,
     successMsg,

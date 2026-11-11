@@ -7,6 +7,7 @@
  * `hall_layout` JSON document per event.
  */
 import type { Environment, VenueProfile, VenueType } from "@ariya/studio";
+import { normaliseRules, type SeatRule } from "./rules";
 
 export type ZoneKind =
   | "stage"
@@ -175,6 +176,8 @@ export interface HallLayout {
   stageItems: StageItem[];
   /** What the host hid, locked and the order they put the layers in: view state kept with the plan. */
   layers: LayerState;
+  /** Keep-together and keep-apart rules for seating (see rules.ts). */
+  seatRules: SeatRule[];
   mood: "day" | "evening";
   chandeliers: boolean;
   /** Ceiling height in metres. */
@@ -455,6 +458,7 @@ export function defaultLayout(width = 30, length = 20): HallLayout {
     groups: [],
     stageItems: [],
     layers: { hidden: [], locked: [], order: [] },
+    seatRules: [],
     mood: "day",
     chandeliers: false,
     ceiling: 5,
@@ -568,6 +572,7 @@ export function normaliseLayout(raw: unknown): HallLayout | null {
         )
       : [],
     layers: normaliseLayers(r.layers),
+    seatRules: normaliseRules(r.seatRules),
     mood: r.mood === "evening" ? "evening" : "day",
     chandeliers: r.chandeliers === true,
     ceiling: clamp(Number(r.ceiling) || 5, 3, 15),

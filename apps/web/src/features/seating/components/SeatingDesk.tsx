@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useState } from "react";
+import { seatingCounts } from "../counts";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { BackLink } from "@/components/layout/back-link";
@@ -40,6 +41,8 @@ interface SeatingDeskProps {
   eventId: string;
   /** The event's name, shown beside the Back button. */
   eventTitle?: string;
+  /** Hall and seating suggestions from connected apps waiting on the approvals desk. */
+  pendingProposals?: number;
   initialData: SeatingDeskData;
   hallLayout?: unknown;
   hallLayoutAvailable?: boolean;
@@ -52,6 +55,7 @@ interface SeatingDeskProps {
 export function SeatingDesk({
   eventId,
   eventTitle,
+  pendingProposals = 0,
   initialData,
   hallLayout = null,
   hallLayoutAvailable = false,
@@ -75,6 +79,8 @@ export function SeatingDesk({
     updateTable,
     setTablePositions,
     bulkAssign,
+    undoBulkAssign,
+    canUndoBulk,
     data,
     errorMsg,
     successMsg,
@@ -143,7 +149,17 @@ export function SeatingDesk({
     </span>
   ) : successMsg ? (
     <span className="inline-flex items-center gap-2 text-[#1f6b4a]">
-      <CircleCheck size={15} /> {successMsg}
+      <CircleCheck size={15} aria-hidden="true" /> {successMsg}
+      {canUndoBulk && (
+        <button
+          type="button"
+          onClick={() => void undoBulkAssign()}
+          data-testid="undo-seat-everyone"
+          className="ml-1 inline-flex min-h-8 items-center rounded-full bg-night px-3 text-[11px] font-semibold text-white hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        >
+          Undo
+        </button>
+      )}
     </span>
   ) : null;
 
@@ -183,7 +199,7 @@ export function SeatingDesk({
                 Seating &amp; Floor Plan
               </h1>
               <p className="truncate text-[11px] leading-tight text-label-2">
-                {[eventTitle, `${data.stats.readinessPct}% seated`]
+                {[eventTitle, `${seatingCounts(data).seatedPct}% seated`]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
@@ -227,7 +243,10 @@ export function SeatingDesk({
             onDeleteTable={handleDeleteTable}
             deleteTables={deleteTables}
             notice={notice}
+            onUndoSeatEveryone={undoBulkAssign}
+            canUndoSeatEveryone={canUndoBulk}
             eventTitle={eventTitle}
+            pendingProposals={pendingProposals}
             backHref={`/events/${eventId}`}
             onNewTable={openNewTable}
           />

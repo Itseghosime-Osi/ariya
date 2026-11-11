@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hallLayoutSchema } from "@/features/seating/schemas";
+import { writeHallLayout } from "@/features/seating/hall-save";
 
 /**
  * The last write of a studio visit (build checklist 7.5).
@@ -36,26 +37,31 @@ export async function PUT(
   }
 
   const body: unknown = await request.json().catch(() => null);
-  const parsed = hallLayoutSchema.safeParse(body);
+  // The studio sends `{ layout, baseRev }`; an older page sends the bare layout.
+  const wrapped =
+    body && typeof body === "object" && "layout" in (body as object)
+      ? (body as { layout: unknown; baseRev?: unknown })
+      : { layout: body, baseRev: undefined };
+  const parsed = hallLayoutSchema.safeParse(wrapped.layout);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid layout" }, { status: 400 });
   }
+  const baseRev =
+    typeof wrapped.baseRev === "number" ? wrapped.baseRev : undefined;
 
-  const { error } = await supabase
-    .from("events")
-    .update({ hall_layout: parsed.data })
-    .eq("id", eventId);
-
-  if (error) {
-    if (
-      error.code === "42703" ||
-      error.code === "PGRST204" ||
-      /hall_layout/.test(error.message ?? "")
-    ) {
+  const res = await writeHallLayout(supabase, eventId, parsed.data, baseRev);
+  if (!res.ok) {
+    if (res.conflict) {
+      return NextResponse.json(
+        { conflict: true, rev: res.rev },
+        { status: 409 }
+      );
+    }
+    if (res.missing) {
       return NextResponse.json({ fallback: true }, { status: 200 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Could not save" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, rev: res.rev });
 }
