@@ -43,6 +43,7 @@ import {
   Users,
   Wand2,
   X,
+  History as HistoryIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -53,7 +54,7 @@ import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
 import { seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
-import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
+import { HistoryMenu, HistoryPanel, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
 import { shareOf } from "./share";
 import { clearanceOf, gapText } from "./clearance";
@@ -1981,6 +1982,14 @@ export function HallStudio({
       stat: catering ? `${catering.portions} portions` : "—",
     },
     {
+      key: "history",
+      label: "History",
+      icon: HistoryIcon,
+      stat: hall.history.length
+        ? `${hall.history.length} ${hall.history.length === 1 ? "step" : "steps"}`
+        : "No steps yet",
+    },
+    {
       key: "risk",
       label: "Risks",
       icon: ShieldAlert,
@@ -3433,6 +3442,8 @@ export function HallStudio({
                     onExport={exportCatering}
                     exporting={exporting}
                   />
+                ) : deck === "history" ? (
+                  <HistoryPanel entries={historyEntries} />
                 ) : deck === "risk" ? (
                   <RiskPanel
                     report={risk}

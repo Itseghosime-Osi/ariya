@@ -126,7 +126,7 @@ export function ModeSwitch({
     <div
       role="radiogroup"
       aria-label="How much detail to show"
-      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs"
+      className="inline-flex rounded-full border border-hairline bg-white p-0.5 shadow-2xs lg:border-0 lg:bg-[#f1ece4] lg:shadow-none"
     >
       {(
         [

@@ -107,3 +107,53 @@ export function HistoryMenu({
     </div>
   );
 }
+
+/**
+ * The same steps as the History menu, as a panel that stays open beside the hall, so a host can
+ * watch what changed while they work and go back to any point.
+ */
+export function HistoryPanel({ entries }: { entries: HistoryEntry[] }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const list = [...entries].sort((a, b) => b.at - a.at).slice(0, 30);
+  return (
+    <div className="px-4 py-3.5" data-testid="history-panel">
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a5b67]">
+        History
+      </h2>
+      {list.length === 0 ? (
+        <p className="mt-3 rounded-xl bg-[#f6f1e8] px-3 py-4 text-center text-sm text-night">
+          Nothing changed yet in this visit.
+        </p>
+      ) : (
+        <ol className="mt-2 divide-y divide-hairline">
+          {list.map((e) => (
+            <li key={e.key} className="flex items-center gap-2 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-night">
+                  {e.label}
+                </p>
+                <p className="text-[11px] text-label-2">{ago(e.at, now)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={e.onRevert}
+                aria-label={`Go back to before: ${e.label}`}
+                className="min-h-11 shrink-0 rounded-full border border-hairline px-3 text-xs font-semibold text-night hover:bg-ivory focus-visible:outline-2 focus-visible:outline-burgundy"
+              >
+                Go back
+              </button>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="mt-2 text-[11px] text-label-2">
+        Going back undoes every step after the one you choose. Redo brings them
+        back.
+      </p>
+    </div>
+  );
+}

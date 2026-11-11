@@ -15,7 +15,8 @@ export type Deck =
   | "decor"
   | "thermal"
   | "catering"
-  | "risk";
+  | "risk"
+  | "history";
 export type Flyout = "table" | "chair" | "zone" | null;
 export type Move = { type: string; id: string; x: number; y: number };
 
@@ -136,6 +137,6 @@ export const isTyping = (el: EventTarget | null) =>
 /** The planning tools, grouped the way a host thinks about the day. */
 export const TOOL_GROUPS: { label: string; keys: Deck[] }[] = [
   { label: "Design", keys: ["room", "fit", "decor"] },
-  { label: "Seat", keys: ["guests", "seat"] },
+  { label: "Seat and history", keys: ["guests", "seat", "history"] },
   { label: "Plan", keys: ["catering", "thermal", "risk"] },
 ];
