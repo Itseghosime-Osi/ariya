@@ -19,6 +19,43 @@ type Positions = Record<string, { x: number; y: number }>;
 interface Snapshot {
   layout: HallLayout;
   positions: Positions;
+  /** What the step after this snapshot did, in the host's words, and when. */
+  label: string;
+  at: number;
+}
+
+/** A plain description of what changed between two halls, for the History list. */
+export function describeChange(prev: HallLayout, next: HallLayout): string {
+  if (prev.width !== next.width || prev.length !== next.length)
+    return `Resized the room to ${next.width} × ${next.length} m`;
+  if (prev.zones.length < next.zones.length) return "Added an area";
+  if (prev.zones.length > next.zones.length) return "Removed an area";
+  if (JSON.stringify(prev.zones) !== JSON.stringify(next.zones))
+    return "Moved or resized an area";
+  if (prev.seatRules.length !== next.seatRules.length)
+    return prev.seatRules.length < next.seatRules.length
+      ? "Added a seating rule"
+      : "Removed a seating rule";
+  if (JSON.stringify(prev.rotations) !== JSON.stringify(next.rotations))
+    return "Turned tables";
+  if (
+    JSON.stringify(prev.decor) !== JSON.stringify(next.decor) ||
+    JSON.stringify(prev.tableStyles) !== JSON.stringify(next.tableStyles)
+  )
+    return "Changed the décor";
+  if (prev.chairs.length !== next.chairs.length)
+    return prev.chairs.length < next.chairs.length
+      ? "Added chairs"
+      : "Removed chairs";
+  if (JSON.stringify(prev.chairs) !== JSON.stringify(next.chairs))
+    return "Moved chairs";
+  if (prev.spacing !== next.spacing) return "Changed table spacing";
+  if (prev.mood !== next.mood) return "Changed the light";
+  if (JSON.stringify(prev.groups) !== JSON.stringify(next.groups))
+    return "Grouped items";
+  if (JSON.stringify(prev.layers) !== JSON.stringify(next.layers))
+    return "Changed layers";
+  return "Edited the hall";
 }
 
 const LOCAL_KEY = (eventId: string) => `ariya:hall:${eventId}`;
@@ -260,14 +297,17 @@ export function useHallLayout({
   );
 
   /** Record the current state so it can be undone, before making a change. */
-  const remember = useCallback((positions: Positions) => {
-    past.current = [
-      ...past.current.slice(-49),
-      { layout: current.current, positions },
-    ];
-    future.current = [];
-    bump((n) => n + 1);
-  }, []);
+  const remember = useCallback(
+    (positions: Positions, label = "Moved tables") => {
+      past.current = [
+        ...past.current.slice(-49),
+        { layout: current.current, positions, label, at: Date.now() },
+      ];
+      future.current = [];
+      bump((n) => n + 1);
+    },
+    []
+  );
 
   const update = useCallback(
     (
@@ -276,7 +316,15 @@ export function useHallLayout({
     ) => {
       const prev = current.current;
       const value = typeof next === "function" ? next(prev) : next;
-      past.current = [...past.current.slice(-49), { layout: prev, positions }];
+      past.current = [
+        ...past.current.slice(-49),
+        {
+          layout: prev,
+          positions,
+          label: describeChange(prev, value),
+          at: Date.now(),
+        },
+      ];
       future.current = [];
       commit(value);
       persist(value);
@@ -289,7 +337,12 @@ export function useHallLayout({
     (positions: Positions): Snapshot | null => {
       const prev = past.current.pop();
       if (!prev) return null;
-      future.current.push({ layout: current.current, positions });
+      future.current.push({
+        layout: current.current,
+        positions,
+        label: prev.label,
+        at: prev.at,
+      });
       commit(prev.layout);
       persist(prev.layout);
       bump((n) => n + 1);
@@ -315,7 +368,12 @@ export function useHallLayout({
     (positions: Positions): Snapshot | null => {
       const next = future.current.pop();
       if (!next) return null;
-      past.current.push({ layout: current.current, positions });
+      past.current.push({
+        layout: current.current,
+        positions,
+        label: next.label,
+        at: next.at,
+      });
       commit(next.layout);
       persist(next.layout);
       bump((n) => n + 1);
@@ -345,6 +403,8 @@ export function useHallLayout({
     undo,
     redo,
     canUndo: past.current.length > 0,
+    /** The steps that can be undone, oldest first, with what each did and when. */
+    history: past.current.map((s) => ({ label: s.label, at: s.at })),
     canRedo: future.current.length > 0,
     storedLocally,
     saving,

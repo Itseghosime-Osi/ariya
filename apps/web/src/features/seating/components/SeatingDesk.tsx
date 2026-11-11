@@ -240,6 +240,8 @@ export function SeatingDesk({
             onDeleteTable={handleDeleteTable}
             deleteTables={deleteTables}
             notice={notice}
+            onUndoSeatEveryone={undoBulkAssign}
+            canUndoSeatEveryone={canUndoBulk}
             eventTitle={eventTitle}
             backHref={`/events/${eventId}`}
             onNewTable={openNewTable}

@@ -55,6 +55,7 @@ import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
 import { seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
+import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
 import { ruleBreaks, type SeatRule } from "./rules";
 import { ConflictBanner, SaveStatus } from "./SaveStatus";
 import {
@@ -301,6 +302,9 @@ interface HallStudioProps {
   deleteTables: (ids: string[]) => Promise<number>;
   /** A short message to show over the hall (saved, could not save…). */
   notice?: React.ReactNode;
+  /** Take back the last "Seat everyone"; true when it worked. */
+  onUndoSeatEveryone?: () => Promise<boolean>;
+  canUndoSeatEveryone?: boolean;
   /** The event's name, shown beside the Back button. */
   eventTitle?: string;
   /** Where Back goes. */
@@ -358,6 +362,8 @@ export function HallStudio({
   eventTitle,
   backHref,
   onNewTable,
+  onUndoSeatEveryone,
+  canUndoSeatEveryone = false,
 }: HallStudioProps) {
   const hall = useHallLayout({
     eventId,
@@ -1027,7 +1033,23 @@ export function HallStudio({
       .map(([id, p]) => ({ id, x: toCm(p.x), y: toCm(p.y) }));
     void setTablePositions(moves);
   };
+  // When "Seat everyone" is the newest step, Undo (and Ctrl+Z) takes back the seats first.
+  const [bulkAt, setBulkAt] = useState<{ at: number; n: number } | null>(null);
+  const lastEditAt = hall.history.at(-1)?.at ?? 0;
+  const seatUndoFirst =
+    !!bulkAt && canUndoSeatEveryone && bulkAt.at >= lastEditAt;
+  const undoSeats = async () => {
+    if (!onUndoSeatEveryone) return;
+    if (await onUndoSeatEveryone()) {
+      setBulkAt(null);
+      say("Seats taken back");
+    }
+  };
   const undo = () => {
+    if (seatUndoFirst) {
+      void undoSeats();
+      return;
+    }
     const snap = hall.undo(positions);
     if (snap) {
       setCompare(null);
@@ -1035,6 +1057,40 @@ export function HallStudio({
       say("Undone");
     }
   };
+  /** Undo several steps at once, back to just before a step in the History list. */
+  const undoSteps = (n: number) => {
+    let pos = positions;
+    let last: { positions: Positions } | null = null;
+    for (let i = 0; i < n; i++) {
+      const snap = hall.undo(pos);
+      if (!snap) break;
+      last = snap;
+      pos = snap.positions;
+    }
+    if (last) {
+      setCompare(null);
+      restorePositions(last.positions);
+      say(n === 1 ? "Undone" : `Went back ${n} steps`);
+    }
+  };
+  const historyEntries: HistoryEntry[] = [
+    ...hall.history.map((h, i) => ({
+      key: `h${i}-${h.at}`,
+      label: h.label,
+      at: h.at,
+      onRevert: () => undoSteps(hall.history.length - i),
+    })),
+    ...(bulkAt && canUndoSeatEveryone
+      ? [
+          {
+            key: `seat-${bulkAt.at}`,
+            label: `Seated ${bulkAt.n} guests`,
+            at: bulkAt.at,
+            onRevert: () => void undoSeats(),
+          },
+        ]
+      : []),
+  ];
   const redo = () => {
     const snap = hall.redo(positions);
     if (snap) {
@@ -1809,7 +1865,8 @@ export function HallStudio({
 
   const seatEveryone = async () => {
     setBusy("seat");
-    await bulkAssign(seatPlan.plan.assignments);
+    const res = await bulkAssign(seatPlan.plan.assignments);
+    if (res.seated > 0) setBulkAt({ at: Date.now(), n: res.seated });
     setBusy(null);
     view3d.current?.command("fit");
   };
@@ -2308,7 +2365,7 @@ export function HallStudio({
                   type="button"
                   className={chip}
                   onClick={undo}
-                  disabled={!hall.canUndo}
+                  disabled={!hall.canUndo && !seatUndoFirst}
                   aria-label="Undo"
                   title="Undo (Ctrl + Z)"
                 >
@@ -2324,6 +2381,7 @@ export function HallStudio({
                 >
                   <Redo2 size={17} />
                 </button>
+                <HistoryMenu entries={historyEntries} className={chip} />
                 <span
                   className="mx-0.5 h-5 w-px bg-hairline"
                   aria-hidden="true"
