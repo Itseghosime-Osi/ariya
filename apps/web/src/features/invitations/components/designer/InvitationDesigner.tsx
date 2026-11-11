@@ -1854,6 +1854,7 @@ export function InvitationDesigner({
             {notice.action && (
               <button
                 type="button"
+                aria-label={`${notice.action.label} this change`}
                 onClick={() => {
                   const run = notice.action!.onClick;
                   run();
