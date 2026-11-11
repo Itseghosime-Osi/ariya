@@ -184,8 +184,9 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
       Done when: each layer type shows only its relevant controls, nothing jumps position between selections.
 - [ ] **K6 (P1) Layers panel redesign.** Clear thumbnails or type icons, readable names, lock/hide icons with tooltips, drag handle and keyboard reorder kept.
       Done when: 50 layers stay scannable; rename inline works; existing reorder tests stay green.
-- [ ] **K7 (P1) Canvas surround.** Calm neutral background, soft page shadow, rulers/guides optional, zoom control with presets (Fit, 50, 100, 200).
+- [x] **K7 (P1) Canvas surround.** Calm neutral background, soft page shadow, rulers/guides optional, zoom control with presets (Fit, 50, 100, 200).
       Done when: the card is visually the focus; zoom controls are reachable on phone and desktop.
+      Evidence: the bottom bar has a Zoom menu (Fit, 25%, 50%, 100%, 200%, 400%) next to −, the percentage and +, on desktop and at 360px; all presets set the stated zoom and Fit returns to the fitted size, and the bar still fits the screen (`evidence/redesign-batch27.json`, `screenshots/upgrade-zoom-*.png`). The calm neutral surround and soft page shadow already existed; rulers stay optional under View. The small − and + buttons are 28px, below the 44px target on phones, and are not changed here.
 - [ ] **K8 (P1) Design tokens.** One source for colours, spacing (4/8 scale), radius, shadow, type sizes, z-index; remove one-off values in `InvitationDesigner.module.css`.
       Done when: a grep finds no hard-coded colour or spacing outside the tokens file; light and dark both read from tokens.
       Progress (not closed): the seven core studio colours (wine, gold, mauve, cream, line, ink, night) are now CSS variables in `styles/globals.css`, replacing 539 hard-coded values across the designer; before/after screenshots at 1440 and 360, light and dark, differ only in the Next dev-mode 'Rendering' badge (pixel comparison). About 240 other hex values and all spacing, radius and shadow values are still literal, so the item stays open.

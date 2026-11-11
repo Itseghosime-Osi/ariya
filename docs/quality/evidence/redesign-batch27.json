@@ -1,0 +1,86 @@
+[
+  {
+    "id": "RD-K7-desktop-a",
+    "name": "Zoom presets are on screen (desktop)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K7-desktop-b",
+    "name": "100% preset sets 100%",
+    "ok": true,
+    "detail": "100%"
+  },
+  {
+    "id": "RD-K7-desktop-c",
+    "name": "50% preset sets 50%",
+    "ok": true,
+    "detail": "50%"
+  },
+  {
+    "id": "RD-K7-desktop-d",
+    "name": "400% preset sets 400%",
+    "ok": true,
+    "detail": "400%"
+  },
+  {
+    "id": "RD-K7-desktop-e",
+    "name": "Fit returns to the fitted zoom",
+    "ok": true,
+    "detail": "45%"
+  },
+  {
+    "id": "RD-K7-desktop-f",
+    "name": "Dock still fits on screen",
+    "ok": true,
+    "detail": "export right edge=965 of 1440"
+  },
+  {
+    "id": "RD-K7-desktop-err",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K7-phone-a",
+    "name": "Zoom presets are on screen (phone)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K7-phone-b",
+    "name": "100% preset sets 100%",
+    "ok": true,
+    "detail": "100%"
+  },
+  {
+    "id": "RD-K7-phone-c",
+    "name": "50% preset sets 50%",
+    "ok": true,
+    "detail": "50%"
+  },
+  {
+    "id": "RD-K7-phone-d",
+    "name": "400% preset sets 400%",
+    "ok": true,
+    "detail": "400%"
+  },
+  {
+    "id": "RD-K7-phone-e",
+    "name": "Fit returns to the fitted zoom",
+    "ok": true,
+    "detail": "28%"
+  },
+  {
+    "id": "RD-K7-phone-f",
+    "name": "Dock still fits on screen",
+    "ok": true,
+    "detail": "export right edge=353 of 360"
+  },
+  {
+    "id": "RD-K7-phone-err",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

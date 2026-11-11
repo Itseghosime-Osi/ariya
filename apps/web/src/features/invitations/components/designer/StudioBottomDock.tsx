@@ -130,6 +130,34 @@ export function StudioBottomDock({
         >
           +
         </button>
+        <select
+          aria-label="Zoom presets"
+          title="Zoom presets"
+          data-testid="zoom-presets"
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === "fit") onFit();
+            else if (v) onZoomChange(Number(v));
+            e.target.value = "";
+          }}
+          className={cn(
+            "h-7 w-[3.25rem] cursor-pointer rounded-md border bg-transparent px-1 text-xs font-semibold",
+            dark
+              ? "border-white/15 text-[var(--studio-gold)]"
+              : "border-black/10 text-[#6b1e2e]"
+          )}
+        >
+          <option value="" disabled>
+            Zoom
+          </option>
+          <option value="fit">Fit</option>
+          <option value="0.25">25%</option>
+          <option value="0.5">50%</option>
+          <option value="1">100%</option>
+          <option value="2">200%</option>
+          <option value="4">400%</option>
+        </select>
       </div>
 
       <span
