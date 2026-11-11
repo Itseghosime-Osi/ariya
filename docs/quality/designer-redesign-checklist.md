@@ -169,6 +169,7 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
 - [ ] **K2 (P0) Header redesign.** Event name, save status, undo/redo, Share and Export in a fixed order; secondary items moved into a menu.
       Done when: header fits at 360px, 768px and 1440px with no wrapping or clipped labels.
       Progress (not closed): reviewed at 360/768/1440; fixed a regression where the new Help button squeezed the phone title (hidden under 640px; Help menu still reachable). Fixed order and menu grouping not yet redesigned.
+      Progress (not closed): the phone Simple/Pro switch is narrower so it keeps its room at 360px.
 - [ ] **K3 (P0) Tool rail redesign.** Group tools (Select, Text, Shapes, Images, Seal/QR, More), consistent icons and labels, active state that is clear without relying on colour alone.
       Done when: every tool has an icon, label or tooltip, shortcut, and a 44px target; icon set is one consistent style.
       Progress (not closed): reviewed: every tool-rail button already has an aria-label and a title with its shortcut. Grouping, active-state redesign and one icon style are not done.
@@ -183,8 +184,10 @@ Context: the phone/tablet layout and side-panel proportions were reworked in PR 
       Done when: the card is visually the focus; zoom controls are reachable on phone and desktop.
 - [ ] **K8 (P1) Design tokens.** One source for colours, spacing (4/8 scale), radius, shadow, type sizes, z-index; remove one-off values in `InvitationDesigner.module.css`.
       Done when: a grep finds no hard-coded colour or spacing outside the tokens file; light and dark both read from tokens.
+      Progress (not closed): the seven core studio colours (wine, gold, mauve, cream, line, ink, night) are now CSS variables in `styles/globals.css`, replacing 539 hard-coded values across the designer; before/after screenshots at 1440 and 360, light and dark, differ only in the Next dev-mode 'Rendering' badge (pixel comparison). About 240 other hex values and all spacing, radius and shadow values are still literal, so the item stays open.
 - [ ] **K9 (P1) Typography.** Brand fonts for the product chrome, a readable UI size (min 14px body, 12px labels), consistent weights.
       Done when: no UI text under 12px; headings, labels and values follow one scale.
+      Progress (not closed): every UI text size below 12px in the designer (102 Tailwind uses plus two CSS rules) is now 12px; checked on desktop and phone, light and dark (`screenshots/upgrade-tokens-*.png`). Fixed two knock-on layout problems (the layers 'Blend Mode' label now reads 'Blend'; the phone Simple/Pro switch is narrower). A single type scale for headings, labels and values is not defined.
 - [ ] **K10 (P1) Dark and light themes polished.** Contrast of 4.5:1 for text and 3:1 for icons/borders in both.
       Done when: axe contrast passes in both themes on all studio states.
 - [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.

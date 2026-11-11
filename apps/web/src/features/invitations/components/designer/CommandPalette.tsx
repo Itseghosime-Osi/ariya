@@ -149,13 +149,13 @@ export function CommandPalette({
                   } ${c.disabled ? "opacity-40" : ""}`}
                 >
                   <span>
-                    <span className="mr-2 text-[11px] uppercase tracking-wide text-label-2">
+                    <span className="mr-2 text-xs uppercase tracking-wide text-label-2">
                       {c.group}
                     </span>
                     {c.label}
                   </span>
                   {c.shortcut && (
-                    <span className="font-mono text-[11px] text-label-2">
+                    <span className="font-mono text-xs text-label-2">
                       {c.shortcut.replaceAll("Cmd", "⌘/Ctrl")}
                     </span>
                   )}

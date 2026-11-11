@@ -69,14 +69,14 @@ function ToolButton({
         disabled={disabled}
         onClick={onClick}
         className={cn(
-          "relative grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",
+          "relative grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
           active
             ? dark
-              ? "bg-[#3d2733] text-[#dfba73] shadow-inner"
-              : "bg-[#4a0e17]/10 text-[#4a0e17] shadow-inner font-semibold"
+              ? "bg-[#3d2733] text-[var(--studio-gold)] shadow-inner"
+              : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] shadow-inner font-semibold"
             : dark
               ? "text-zinc-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
-              : "text-[#4a363f] hover:bg-[#4a0e17]/5 hover:text-[#4a0e17] disabled:opacity-30"
+              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)] disabled:opacity-30"
         )}
       >
         {children}
@@ -85,7 +85,7 @@ function ToolButton({
             aria-hidden="true"
             className={cn(
               "absolute bottom-1 right-1 h-0 w-0 border-b-[4px] border-l-[4px] border-l-transparent",
-              dark ? "border-b-zinc-400" : "border-b-[#4a0e17]/60"
+              dark ? "border-b-zinc-400" : "border-b-[var(--studio-wine)]/60"
             )}
           />
         )}
@@ -94,10 +94,10 @@ function ToolButton({
       {/* Hover tooltip */}
       <div
         className={cn(
-          "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-50 hidden rounded-md px-2 py-1 text-[11px] font-medium shadow-xl whitespace-nowrap group-hover:block border",
+          "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-50 hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
           dark
-            ? "bg-[#23181e] text-[#fff6dc] border-white/15"
-            : "bg-[#ffffff] text-[#2d1f24] border-[#e6ded2] shadow-black/10"
+            ? "bg-[#23181e] text-[var(--studio-cream)] border-white/15"
+            : "bg-[#ffffff] text-[var(--studio-ink)] border-[#e6ded2] shadow-black/10"
         )}
       >
         <span>{label}</span>
@@ -305,8 +305,8 @@ export function ToolRail({
       className={cn(
         "relative h-full flex flex-col justify-between items-center py-2 select-none border-r transition-colors",
         dark
-          ? "bg-[#20161b] border-[#382630] text-zinc-200"
-          : "bg-[#fcfbfa] border-[#e8e2d6] text-[#3b2b31]"
+          ? "bg-[var(--studio-night)] border-[#382630] text-zinc-200"
+          : "bg-[#fcfbfa] border-[var(--studio-line)] text-[#3b2b31]"
       )}
     >
       <div
@@ -405,14 +405,14 @@ export function ToolRail({
               className={cn(
                 "z-50 rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
                 dark
-                  ? "border-[#382630] bg-[#20161b] text-white"
-                  : "border-[#e8e2d6] bg-[#ffffff] text-[#2d1f24] shadow-black/15"
+                  ? "border-[#382630] bg-[var(--studio-night)] text-white"
+                  : "border-[var(--studio-line)] bg-[#ffffff] text-[var(--studio-ink)] shadow-black/15"
               )}
             >
               <div
                 className={cn(
-                  "mb-2 px-1 text-[10px] font-semibold uppercase tracking-wider",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-2 px-1 text-xs font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Vector Shapes & Geometry
@@ -439,11 +439,11 @@ export function ToolRail({
                       "flex items-center gap-2 rounded-lg border p-2 text-left text-xs font-medium transition",
                       activeShapeKind === shape.kind &&
                         (dark
-                          ? "border-[#dfba73] bg-[#dfba73]/10"
-                          : "border-[#4a0e17] bg-[#4a0e17]/5"),
+                          ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/10"
+                          : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/5"),
                       dark
-                        ? "border-white/5 text-zinc-200 hover:border-[#dfba73]/40 hover:bg-white/10 hover:text-white"
-                        : "border-[#e8e2d6] text-[#3b2b31] hover:border-[#4a0e17]/30 hover:bg-[#4a0e17]/5 hover:text-[#4a0e17]"
+                        ? "border-white/5 text-zinc-200 hover:border-[var(--studio-gold)]/40 hover:bg-white/10 hover:text-white"
+                        : "border-[var(--studio-line)] text-[#3b2b31] hover:border-[var(--studio-wine)]/30 hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
                     )}
                   >
                     <span className="shrink-0 text-[#b8864b]">
@@ -662,7 +662,7 @@ export function ToolRail({
             "transition-colors",
             dark
               ? "text-zinc-400 hover:text-white"
-              : "text-[#4a363f] hover:text-[#4a0e17]"
+              : "text-[#4a363f] hover:text-[var(--studio-wine)]"
           )}
         >
           <svg

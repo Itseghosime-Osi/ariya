@@ -206,7 +206,7 @@ export function ExportModal({
                         {f.title}
                       </span>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide ${
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium tracking-wide ${
                           isSelected
                             ? "bg-burgundy text-white dark:bg-[#e5a93c] dark:text-black"
                             : "bg-black/5 text-label-2 dark:bg-white/10"
@@ -218,7 +218,7 @@ export function ExportModal({
                     <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
                       {f.description}
                     </p>
-                    <span className="mt-2.5 text-[11px] font-mono text-black/40 dark:text-white/40">
+                    <span className="mt-2.5 text-xs font-mono text-black/40 dark:text-white/40">
                       {f.id === "json"
                         ? "Editable design backup"
                         : f.id === "pdf"

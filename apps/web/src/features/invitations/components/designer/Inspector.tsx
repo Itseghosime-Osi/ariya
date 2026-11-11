@@ -89,8 +89,8 @@ const fieldClass = (dark?: boolean) =>
   cn(
     "min-h-10 w-full rounded-lg border px-3 text-xs outline-none transition-colors",
     dark
-      ? "border-white/15 bg-white/[0.06] text-[#fff6dc] placeholder-zinc-400 focus:border-[#dfba73] focus:ring-1 focus:ring-[#dfba73] focus:bg-white/[0.09]"
-      : "border-[#e8e2d6] bg-white text-[#2d1f24] placeholder-[#a6929a] focus:border-[#4a0e17] focus:ring-1 focus:ring-[#4a0e17] shadow-xs"
+      ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] placeholder-zinc-400 focus:border-[var(--studio-gold)] focus:ring-1 focus:ring-[var(--studio-gold)] focus:bg-white/[0.09]"
+      : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] placeholder-[#a6929a] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)] shadow-xs"
   );
 
 /** A number that commits on Enter or when you leave it, so typing "12" never passes through "1". */
@@ -129,8 +129,8 @@ function Num({
     <label className="block">
       <span
         className={cn(
-          "mb-1 block text-[11px] font-semibold",
-          dark ? "text-zinc-400" : "text-[#7a5b67]"
+          "mb-1 block text-xs font-semibold",
+          dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
         )}
       >
         {label}
@@ -162,7 +162,7 @@ function Num({
           <span
             className={cn(
               "pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono",
-              dark ? "text-zinc-300" : "text-[#7a5b67]"
+              dark ? "text-zinc-300" : "text-[var(--studio-mauve)]"
             )}
           >
             {suffix}
@@ -209,8 +209,8 @@ function HexColorInput({
       <div>
         <p
           className={cn(
-            "mb-1 text-[11px] font-semibold",
-            dark ? "text-zinc-400" : "text-[#7a5b67]"
+            "mb-1 text-xs font-semibold",
+            dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
           )}
         >
           Luxury Metallic Foils
@@ -263,8 +263,8 @@ function HexColorInput({
             className={cn(
               "h-9 w-full rounded-lg border px-2.5 font-mono text-xs uppercase outline-none transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73] focus:ring-1 focus:ring-[#dfba73] focus:bg-white/[0.09]"
-                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17] focus:ring-1 focus:ring-[#4a0e17]"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)] focus:ring-1 focus:ring-[var(--studio-gold)] focus:bg-white/[0.09]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)]"
             )}
           />
         </div>
@@ -289,7 +289,7 @@ function HexColorInput({
               "grid h-9 w-9 shrink-0 place-items-center rounded-lg border transition-colors",
               dark
                 ? "border-white/12 bg-white/[0.06] text-zinc-300 hover:bg-white/[0.12] hover:text-white"
-                : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec]"
             )}
           >
             <svg
@@ -312,10 +312,10 @@ function HexColorInput({
             type="button"
             onClick={() => onChange(null)}
             className={cn(
-              "text-[11px] font-medium transition-colors",
+              "text-xs font-medium transition-colors",
               dark
-                ? "text-zinc-400 hover:text-[#dfba73]"
-                : "text-[#7a5b67] hover:text-[#4a0e17]"
+                ? "text-zinc-400 hover:text-[var(--studio-gold)]"
+                : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
             )}
           >
             Clear
@@ -349,8 +349,8 @@ function IconBtn({
       className={cn(
         "grid h-10 w-10 place-items-center rounded-lg border disabled:opacity-25 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1",
         dark
-          ? "border-white/12 bg-white/[0.06] text-zinc-200 hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
-          : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] hover:text-[#2d1f24] focus-visible:outline-[#4a0e17] shadow-xs"
+          ? "border-white/12 bg-white/[0.06] text-zinc-200 hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
+          : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] hover:text-[var(--studio-ink)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
       )}
     >
       {children}
@@ -491,12 +491,12 @@ export function Inspector({
                   className={cn(
                     "inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-xs font-semibold transition",
                     dark
-                      ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                      ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                       : "border-hairline bg-white/60 text-night hover:bg-white"
                   )}
                 >
                   <Icon name="layers" size={14} />
-                  Ungroup (<kbd className="font-mono text-[10px]">⌘⇧G</kbd>)
+                  Ungroup (<kbd className="font-mono text-xs">⌘⇧G</kbd>)
                 </button>
               ) : (
                 <button
@@ -505,12 +505,12 @@ export function Inspector({
                   className={cn(
                     "inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-xs font-semibold transition",
                     dark
-                      ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                      ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                       : "border-hairline bg-white/60 text-night hover:bg-white"
                   )}
                 >
                   <Icon name="layers" size={14} />
-                  Group (<kbd className="font-mono text-[10px]">⌘G</kbd>)
+                  Group (<kbd className="font-mono text-xs">⌘G</kbd>)
                 </button>
               )}
 
@@ -543,7 +543,7 @@ export function Inspector({
                 className={cn(
                   "inline-flex min-h-10 items-center justify-center rounded-xl border px-2 py-1.5 text-xs font-medium transition",
                   dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
                 )}
               >
@@ -562,7 +562,7 @@ export function Inspector({
                 className={cn(
                   "inline-flex min-h-10 items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold transition",
                   dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
                 )}
               >
@@ -574,7 +574,7 @@ export function Inspector({
                 className={cn(
                   "inline-flex min-h-10 items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold transition",
                   dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
                 )}
               >
@@ -592,21 +592,21 @@ export function Inspector({
                 className={cn(
                   "flex items-center justify-between rounded-xl border px-3 py-2 text-xs",
                   dark
-                    ? "border-white/10 bg-white/[0.04] text-[#fff6dc]"
+                    ? "border-white/10 bg-white/[0.04] text-[var(--studio-cream)]"
                     : "border-hairline bg-white/40 text-night"
                 )}
               >
                 <span
                   className={cn(
                     "font-semibold truncate",
-                    dark ? "text-[#fff6dc]" : "text-night"
+                    dark ? "text-[var(--studio-cream)]" : "text-night"
                   )}
                 >
                   {l.name || l.kind}
                 </span>
                 <span
                   className={cn(
-                    "text-[10px] font-mono",
+                    "text-xs font-mono",
                     dark ? "text-zinc-400" : "text-label-2"
                   )}
                 >
@@ -660,11 +660,11 @@ export function Inspector({
                       "rounded-lg border px-3 py-2 text-left transition-colors",
                       on
                         ? dark
-                          ? "border-[#dfba73] bg-[#dfba73]/15 text-[#dfba73] shadow-xs ring-1 ring-[#dfba73]/40"
-                          : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] shadow-xs"
+                          ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 text-[var(--studio-gold)] shadow-xs ring-1 ring-[var(--studio-gold)]/40"
+                          : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] shadow-xs"
                         : dark
-                          ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#fff6dc]"
-                          : "border-[#e8e2d6] bg-white hover:bg-[#f6f2ec] text-[#2d1f24]"
+                          ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[var(--studio-cream)]"
+                          : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec] text-[var(--studio-ink)]"
                     )}
                   >
                     <span
@@ -672,25 +672,25 @@ export function Inspector({
                         "block text-xs font-semibold",
                         on
                           ? dark
-                            ? "text-[#dfba73]"
-                            : "text-[#4a0e17]"
+                            ? "text-[var(--studio-gold)]"
+                            : "text-[var(--studio-wine)]"
                           : dark
                             ? "text-zinc-100"
-                            : "text-[#2d1f24]"
+                            : "text-[var(--studio-ink)]"
                       )}
                     >
                       {p.label}
                     </span>
                     <span
                       className={cn(
-                        "block text-[10px]",
+                        "block text-xs",
                         on
                           ? dark
-                            ? "text-[#dfba73]/80"
-                            : "text-[#4a0e17]/80"
+                            ? "text-[var(--studio-gold)]/80"
+                            : "text-[var(--studio-wine)]/80"
                           : dark
                             ? "text-zinc-400"
-                            : "text-[#7a5b67]"
+                            : "text-[var(--studio-mauve)]"
                       )}
                     >
                       {p.note}
@@ -704,13 +704,13 @@ export function Inspector({
                 "mt-3 rounded-lg border p-2.5 transition-colors",
                 dark
                   ? "border-white/10 bg-white/[0.03]"
-                  : "border-[#e8e2d6] bg-[#f8f6f2]"
+                  : "border-[var(--studio-line)] bg-[#f8f6f2]"
               )}
             >
               <span
                 className={cn(
-                  "mb-2 block text-[10px] font-semibold uppercase tracking-wider",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-2 block text-xs font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Exact Size (px)
@@ -833,8 +833,8 @@ export function Inspector({
                 className={cn(
                   "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                   dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white"
-                    : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
                 )}
               >
                 <Icon name="upload" size={16} />
@@ -869,14 +869,14 @@ export function Inspector({
                   aria-pressed={design.theme === t}
                   onClick={() => onDesign((d) => applyInvitationTheme(d, t))}
                   className={cn(
-                    "rounded-xl border p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",
+                    "rounded-xl border p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
                     design.theme === t
                       ? dark
-                        ? "border-[#dfba73] bg-[#dfba73]/15 shadow-xs ring-1 ring-[#dfba73]/40"
-                        : "border-[#4a0e17] bg-[#4a0e17]/10 shadow-xs"
+                        ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 shadow-xs ring-1 ring-[var(--studio-gold)]/40"
+                        : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 shadow-xs"
                       : dark
                         ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200"
-                        : "border-[#e8e2d6] bg-white hover:bg-[#f6f2ec] text-night"
+                        : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec] text-night"
                   )}
                 >
                   <span className="mb-1.5 flex gap-1">
@@ -893,8 +893,8 @@ export function Inspector({
                       "text-[13px] font-semibold",
                       design.theme === t
                         ? dark
-                          ? "text-[#dfba73]"
-                          : "text-[#4a0e17]"
+                          ? "text-[var(--studio-gold)]"
+                          : "text-[var(--studio-wine)]"
                         : dark
                           ? "text-zinc-100"
                           : "text-night"
@@ -911,7 +911,7 @@ export function Inspector({
         <Section collapsible dark={dark} title="Stationery Layout Presets">
           <p
             className={cn(
-              "mb-2.5 text-[11px] leading-relaxed",
+              "mb-2.5 text-xs leading-relaxed",
               dark ? "text-zinc-400" : "text-label-2"
             )}
           >
@@ -925,10 +925,10 @@ export function Inspector({
                 type="button"
                 onClick={() => onDesign((d) => applyLayoutPreset(d, preset.id))}
                 className={cn(
-                  "w-full rounded-xl border p-2.5 text-left transition focus-visible:outline-2 focus-visible:outline-[#dfba73]",
+                  "w-full rounded-xl border p-2.5 text-left transition focus-visible:outline-2 focus-visible:outline-[var(--studio-gold)]",
                   dark
                     ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20"
-                    : "border-[#e8e2d6] bg-white hover:bg-[#f6f2ec]"
+                    : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec]"
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -942,10 +942,10 @@ export function Inspector({
                   </span>
                   <span
                     className={cn(
-                      "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                      "rounded-full px-2 py-0.5 text-xs font-semibold",
                       dark
-                        ? "bg-[#dfba73]/15 text-[#dfba73]"
-                        : "bg-[#4a0e17]/10 text-[#4a0e17]"
+                        ? "bg-[var(--studio-gold)]/15 text-[var(--studio-gold)]"
+                        : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                     )}
                   >
                     {preset.badge}
@@ -953,7 +953,7 @@ export function Inspector({
                 </div>
                 <span
                   className={cn(
-                    "mt-0.5 block text-[11px]",
+                    "mt-0.5 block text-xs",
                     dark ? "text-zinc-400" : "text-label-2"
                   )}
                 >
@@ -982,8 +982,8 @@ export function Inspector({
               className={cn(
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                 dark
-                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                  ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
               )}
             >
               <Icon name="download" size={16} />
@@ -993,10 +993,10 @@ export function Inspector({
               type="button"
               onClick={onOpenImport}
               className={cn(
-                "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-within:outline-2 focus-within:outline-[#dfba73]",
+                "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-within:outline-2 focus-within:outline-[var(--studio-gold)]",
                 dark
-                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                  ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
               )}
             >
               <Icon name="upload" size={16} />
@@ -1051,8 +1051,8 @@ export function Inspector({
             <div className="flex items-center gap-1.5">
               <span
                 className={cn(
-                  "text-[11px] font-semibold uppercase tracking-wider",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "text-xs font-semibold uppercase tracking-wider",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Position & Size
@@ -1069,14 +1069,14 @@ export function Inspector({
                   }
                   onClick={() => patch({ aspectLocked: !aspectLocked })}
                   className={cn(
-                    "rounded-md px-1.5 py-0.5 text-[10px] font-semibold transition-colors",
+                    "rounded-md px-1.5 py-0.5 text-xs font-semibold transition-colors",
                     aspectLocked
                       ? dark
-                        ? "bg-[#dfba73]/25 text-[#dfba73]"
-                        : "bg-[#4a0e17]/15 text-[#4a0e17]"
+                        ? "bg-[var(--studio-gold)]/25 text-[var(--studio-gold)]"
+                        : "bg-[var(--studio-wine)]/15 text-[var(--studio-wine)]"
                       : dark
                         ? "text-zinc-400 hover:bg-white/10"
-                        : "text-[#7a5b67] hover:bg-black/5"
+                        : "text-[var(--studio-mauve)] hover:bg-black/5"
                   )}
                 >
                   {aspectLocked ? "⛓ Locked" : "⛓ Free"}
@@ -1088,21 +1088,21 @@ export function Inspector({
                 "inline-flex rounded-lg border p-0.5 transition-colors",
                 dark
                   ? "border-white/10 bg-white/[0.05]"
-                  : "border-[#e8e2d6] bg-white/60"
+                  : "border-[var(--studio-line)] bg-white/60"
               )}
             >
               <button
                 type="button"
                 onClick={() => setUnit("px")}
                 className={cn(
-                  "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
+                  "rounded-md px-2 py-0.5 text-xs font-semibold transition-colors",
                   unit === "px"
                     ? dark
-                      ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
-                      : "bg-[#4a0e17] text-white shadow-xs"
+                      ? "bg-[var(--studio-gold)] text-[var(--studio-night)] shadow-xs font-bold"
+                      : "bg-[var(--studio-wine)] text-white shadow-xs"
                     : dark
                       ? "text-zinc-400 hover:text-white"
-                      : "text-[#7a5b67] hover:text-night"
+                      : "text-[var(--studio-mauve)] hover:text-night"
                 )}
               >
                 px
@@ -1111,14 +1111,14 @@ export function Inspector({
                 type="button"
                 onClick={() => setUnit("%")}
                 className={cn(
-                  "rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors",
+                  "rounded-md px-2 py-0.5 text-xs font-semibold transition-colors",
                   unit === "%"
                     ? dark
-                      ? "bg-[#dfba73] text-[#20161b] shadow-xs font-bold"
-                      : "bg-[#4a0e17] text-white shadow-xs"
+                      ? "bg-[var(--studio-gold)] text-[var(--studio-night)] shadow-xs font-bold"
+                      : "bg-[var(--studio-wine)] text-white shadow-xs"
                     : dark
                       ? "text-zinc-400 hover:text-white"
-                      : "text-[#7a5b67] hover:text-night"
+                      : "text-[var(--studio-mauve)] hover:text-night"
                 )}
               >
                 %
@@ -1347,11 +1347,11 @@ export function Inspector({
                 "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
                 layer.flipX
                   ? dark
-                    ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73]"
-                    : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                    ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
+                    : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                   : dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
-                    : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] focus-visible:outline-[var(--studio-wine)] shadow-xs"
               )}
             >
               <svg
@@ -1384,11 +1384,11 @@ export function Inspector({
                 "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
                 layer.flipY
                   ? dark
-                    ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73]"
-                    : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                    ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
+                    : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                   : dark
-                    ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[#dfba73]"
-                    : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] focus-visible:outline-[#4a0e17] shadow-xs"
+                    ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] focus-visible:outline-[var(--studio-wine)] shadow-xs"
               )}
             >
               <svg
@@ -1419,8 +1419,8 @@ export function Inspector({
               className={cn(
                 "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
-                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
-                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                  ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
               )}
             >
               -90°
@@ -1438,8 +1438,8 @@ export function Inspector({
               className={cn(
                 "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
-                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
-                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                  ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
               )}
             >
               +90°
@@ -1525,8 +1525,8 @@ export function Inspector({
             <div>
               <span
                 className={cn(
-                  "mb-1 block text-[11px] font-semibold",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-1 block text-xs font-semibold",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Typeface
@@ -1601,8 +1601,8 @@ export function Inspector({
               <label className="block">
                 <span
                   className={cn(
-                    "mb-1 block text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    "mb-1 block text-xs font-semibold",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
                   Weight
@@ -1630,8 +1630,8 @@ export function Inspector({
               <div>
                 <span
                   className={cn(
-                    "mb-1 block text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    "mb-1 block text-xs font-semibold",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
                   Case
@@ -1656,8 +1656,8 @@ export function Inspector({
               <div>
                 <span
                   className={cn(
-                    "mb-1 block text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    "mb-1 block text-xs font-semibold",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
                   Shadow / Foil
@@ -1680,7 +1680,7 @@ export function Inspector({
               </div>
             </div>
             <div>
-              <span className="mb-1 block text-[11px] font-semibold text-label-2">
+              <span className="mb-1 block text-xs font-semibold text-label-2">
                 Style
               </span>
               <button
@@ -1711,10 +1711,10 @@ export function Inspector({
                   aria-pressed={layer.colorRole === r.value}
                   onClick={() => patch({ colorRole: r.value, color: null })}
                   className={cn(
-                    "min-h-9 rounded-full border px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#dfba73]",
+                    "min-h-9 rounded-full border px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
                     layer.colorRole === r.value
                       ? dark
-                        ? "border-[#dfba73] bg-[#dfba73] text-[#20161b] font-bold"
+                        ? "border-[var(--studio-gold)] bg-[var(--studio-gold)] text-[var(--studio-night)] font-bold"
                         : "border-burgundy bg-burgundy/10 text-burgundy"
                       : dark
                         ? "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]"
@@ -1741,8 +1741,8 @@ export function Inspector({
             <div>
               <p
                 className={cn(
-                  "mb-1 text-[11px] font-semibold",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-1 text-xs font-semibold",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Shape
@@ -1777,8 +1777,8 @@ export function Inspector({
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
-                      "text-[11px] font-semibold",
-                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                      "text-xs font-semibold",
+                      dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                     )}
                   >
                     Fill Type
@@ -1788,7 +1788,7 @@ export function Inspector({
                       "inline-flex rounded-lg border p-0.5",
                       dark
                         ? "border-white/10 bg-white/[0.05]"
-                        : "border-[#e8e2d6] bg-white/60"
+                        : "border-[var(--studio-line)] bg-white/60"
                     )}
                   >
                     {(["solid", "gradient", "none"] as const).map((m) => (
@@ -1812,14 +1812,14 @@ export function Inspector({
                             });
                         }}
                         className={cn(
-                          "rounded-md px-2 py-0.5 text-[10px] font-semibold capitalize transition-colors",
+                          "rounded-md px-2 py-0.5 text-xs font-semibold capitalize transition-colors",
                           fillMode === m
                             ? dark
-                              ? "bg-[#dfba73] text-[#20161b] shadow-xs"
-                              : "bg-[#4a0e17] text-white shadow-xs"
+                              ? "bg-[var(--studio-gold)] text-[var(--studio-night)] shadow-xs"
+                              : "bg-[var(--studio-wine)] text-white shadow-xs"
                             : dark
                               ? "text-zinc-400 hover:text-white"
-                              : "text-[#7a5b67] hover:text-[#4a0e17]"
+                              : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
                         )}
                       >
                         {m}
@@ -1844,13 +1844,13 @@ export function Inspector({
                       "space-y-2 rounded-xl border p-2.5",
                       dark
                         ? "border-white/10 bg-white/[0.03]"
-                        : "border-[#e8e2d6] bg-white/40"
+                        : "border-[var(--studio-line)] bg-white/40"
                     )}
                   >
                     <span
                       className={cn(
-                        "block text-[11px] font-semibold",
-                        dark ? "text-zinc-400" : "text-[#7a5b67]"
+                        "block text-xs font-semibold",
+                        dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                       )}
                     >
                       Luxury Gradient Presets
@@ -1867,8 +1867,8 @@ export function Inspector({
                             "flex items-center gap-2 rounded-lg border p-1 text-left transition-all",
                             layer.gradient === g.value
                               ? dark
-                                ? "border-[#dfba73] ring-1 ring-[#dfba73] bg-[#dfba73]/15 text-[#dfba73]"
-                                : "border-[#4a0e17] ring-1 ring-[#4a0e17] bg-[#4a0e17]/5"
+                                ? "border-[var(--studio-gold)] ring-1 ring-[var(--studio-gold)] bg-[var(--studio-gold)]/15 text-[var(--studio-gold)]"
+                                : "border-[var(--studio-wine)] ring-1 ring-[var(--studio-wine)] bg-[var(--studio-wine)]/5"
                               : dark
                                 ? "border-white/10 hover:border-white/20 bg-white/[0.04]"
                                 : "border-black/10 hover:border-black/25 bg-white"
@@ -1880,8 +1880,10 @@ export function Inspector({
                           />
                           <span
                             className={cn(
-                              "truncate text-[10px] font-medium",
-                              dark ? "text-zinc-200" : "text-[#2d1f24]"
+                              "truncate text-xs font-medium",
+                              dark
+                                ? "text-zinc-200"
+                                : "text-[var(--studio-ink)]"
                             )}
                           >
                             {g.name}
@@ -1892,8 +1894,8 @@ export function Inspector({
                     <div>
                       <span
                         className={cn(
-                          "mb-1 block text-[10px] font-semibold",
-                          dark ? "text-zinc-400" : "text-[#7a5b67]"
+                          "mb-1 block text-xs font-semibold",
+                          dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                         )}
                       >
                         Custom Gradient CSS
@@ -1916,8 +1918,8 @@ export function Inspector({
 
             <p
               className={cn(
-                "text-[11px] font-semibold",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
+                "text-xs font-semibold",
+                dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
               )}
             >
               {layer.shape === "line" ? "Colour" : "Outline"}
@@ -1955,14 +1957,14 @@ export function Inspector({
                   "space-y-2 rounded-xl border p-2.5",
                   dark
                     ? "border-white/10 bg-white/[0.03]"
-                    : "border-[#e8e2d6] bg-white/40"
+                    : "border-[var(--studio-line)] bg-white/40"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
-                      "text-[11px] font-semibold",
-                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                      "text-xs font-semibold",
+                      dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                     )}
                   >
                     Corner Radii
@@ -1984,14 +1986,14 @@ export function Inspector({
                       }
                     }}
                     className={cn(
-                      "rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                      "rounded-md px-2 py-0.5 text-xs font-semibold transition-colors",
                       unlinkCorners
                         ? dark
-                          ? "bg-[#dfba73] text-[#20161b] shadow-xs"
-                          : "bg-[#4a0e17] text-white shadow-xs"
+                          ? "bg-[var(--studio-gold)] text-[var(--studio-night)] shadow-xs"
+                          : "bg-[var(--studio-wine)] text-white shadow-xs"
                         : dark
                           ? "bg-white/10 text-zinc-300 hover:text-white"
-                          : "bg-black/5 text-[#7a5b67] hover:text-[#4a0e17]"
+                          : "bg-black/5 text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
                     )}
                   >
                     {unlinkCorners
@@ -2072,8 +2074,8 @@ export function Inspector({
               className={cn(
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                 dark
-                  ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+                  ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
               )}
             >
               <Icon name="upload" size={16} />
@@ -2082,8 +2084,8 @@ export function Inspector({
             <div>
               <p
                 className={cn(
-                  "mb-1 text-[11px] font-semibold",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-1 text-xs font-semibold",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Frame mask
@@ -2121,14 +2123,14 @@ export function Inspector({
                   "space-y-2.5 rounded-xl border p-2.5",
                   dark
                     ? "border-white/10 bg-white/[0.03]"
-                    : "border-[#e8e2d6] bg-white/40"
+                    : "border-[var(--studio-line)] bg-white/40"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
-                      "text-[11px] font-semibold",
-                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                      "text-xs font-semibold",
+                      dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                     )}
                   >
                     Corner Radii
@@ -2150,14 +2152,14 @@ export function Inspector({
                       }
                     }}
                     className={cn(
-                      "rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                      "rounded-md px-2 py-0.5 text-xs font-semibold transition-colors",
                       unlinkCorners
                         ? dark
-                          ? "bg-[#dfba73] text-[#20161b] shadow-xs"
-                          : "bg-[#4a0e17] text-white shadow-xs"
+                          ? "bg-[var(--studio-gold)] text-[var(--studio-night)] shadow-xs"
+                          : "bg-[var(--studio-wine)] text-white shadow-xs"
                         : dark
                           ? "bg-white/10 text-zinc-300 hover:text-white"
-                          : "bg-black/5 text-[#7a5b67] hover:text-[#4a0e17]"
+                          : "bg-black/5 text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
                     )}
                   >
                     {unlinkCorners
@@ -2257,14 +2259,14 @@ export function Inspector({
                 "space-y-2 rounded-xl border p-2.5",
                 dark
                   ? "border-white/10 bg-white/[0.03]"
-                  : "border-[#e8e2d6] bg-white/40"
+                  : "border-[var(--studio-line)] bg-white/40"
               )}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    "text-[11px] font-semibold",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    "text-xs font-semibold",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
                   In-frame focal position
@@ -2274,8 +2276,10 @@ export function Inspector({
                     type="button"
                     onClick={() => patch({ focalX: 50, focalY: 50 })}
                     className={cn(
-                      "text-[10px] font-medium hover:underline",
-                      dark ? "text-[#dfba73]" : "text-[#4a0e17]"
+                      "text-xs font-medium hover:underline",
+                      dark
+                        ? "text-[var(--studio-gold)]"
+                        : "text-[var(--studio-wine)]"
                     )}
                   >
                     Reset (Center)
@@ -2334,8 +2338,8 @@ export function Inspector({
             <div>
               <span
                 className={cn(
-                  "mb-1 block text-[11px] font-semibold",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-1 block text-xs font-semibold",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Blend Mode
@@ -2352,8 +2356,8 @@ export function Inspector({
                     value={m.value}
                     className={
                       dark
-                        ? "bg-[#23181e] text-[#fff6dc]"
-                        : "bg-white text-[#2d1f24]"
+                        ? "bg-[#23181e] text-[var(--studio-cream)]"
+                        : "bg-white text-[var(--studio-ink)]"
                     }
                   >
                     {m.label}
@@ -2366,13 +2370,13 @@ export function Inspector({
                 <div className="mb-1 flex items-center justify-between">
                   <span
                     className={cn(
-                      "text-[11px] font-semibold",
-                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                      "text-xs font-semibold",
+                      dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                     )}
                   >
                     Blur
                   </span>
-                  <span className="font-mono text-[10px] text-label-2">
+                  <span className="font-mono text-xs text-label-2">
                     {layer.blur ?? 0}px
                   </span>
                 </div>
@@ -2391,13 +2395,13 @@ export function Inspector({
                 <div className="mb-1 flex items-center justify-between">
                   <span
                     className={cn(
-                      "text-[11px] font-semibold",
-                      dark ? "text-zinc-400" : "text-[#7a5b67]"
+                      "text-xs font-semibold",
+                      dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                     )}
                   >
                     Opacity
                   </span>
-                  <span className="font-mono text-[10px] text-label-2">
+                  <span className="font-mono text-xs text-label-2">
                     {Math.round((layer.opacity ?? 1) * 100)}%
                   </span>
                 </div>
@@ -2420,8 +2424,8 @@ export function Inspector({
             <div>
               <span
                 className={cn(
-                  "mb-1 block text-[11px] font-semibold",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "mb-1 block text-xs font-semibold",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Shadow & Glow
@@ -2453,11 +2457,11 @@ export function Inspector({
                         "rounded-lg border py-1.5 text-center text-xs font-semibold transition-colors",
                         active
                           ? dark
-                            ? "border-[#dfba73] bg-[#dfba73]/20 text-[#fff6dc]"
-                            : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17]"
+                            ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-cream)]"
+                            : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                           : dark
                             ? "border-white/10 bg-white/[0.04] text-zinc-400 hover:text-white"
-                            : "border-[#e8e2d6] bg-white text-[#7a5b67] hover:text-night"
+                            : "border-[var(--studio-line)] bg-white text-[var(--studio-mauve)] hover:text-night"
                       )}
                     >
                       {preset.label}
@@ -2472,19 +2476,19 @@ export function Inspector({
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    "text-[10px] font-semibold uppercase tracking-wider",
-                    dark ? "text-zinc-400" : "text-[#7a5b67]"
+                    "text-xs font-semibold uppercase tracking-wider",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
                   Custom Drop Shadow
                 </span>
-                <span className="font-mono text-[10px] text-label-2">
+                <span className="font-mono text-xs text-label-2">
                   {layer.shadowBlur ?? 0}px
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <span className="text-[10px] text-label-2 block mb-0.5">
+                  <span className="text-xs text-label-2 block mb-0.5">
                     Blur
                   </span>
                   <input
@@ -2504,7 +2508,7 @@ export function Inspector({
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-label-2 block mb-0.5">
+                  <span className="text-xs text-label-2 block mb-0.5">
                     X Offset
                   </span>
                   <input
@@ -2524,7 +2528,7 @@ export function Inspector({
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-label-2 block mb-0.5">
+                  <span className="text-xs text-label-2 block mb-0.5">
                     Y Offset
                   </span>
                   <input
@@ -2550,8 +2554,8 @@ export function Inspector({
             <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2.5">
               <span
                 className={cn(
-                  "text-[10px] font-semibold uppercase tracking-wider block",
-                  dark ? "text-zinc-400" : "text-[#7a5b67]"
+                  "text-xs font-semibold uppercase tracking-wider block",
+                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                 )}
               >
                 Image & Color Adjustments
@@ -2559,8 +2563,8 @@ export function Inspector({
               <div className="space-y-2 text-xs">
                 <div>
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[11px] text-label-2">Brightness</span>
-                    <span className="font-mono text-[10px]">
+                    <span className="text-xs text-label-2">Brightness</span>
+                    <span className="font-mono text-xs">
                       {layer.brightness ?? 0}%
                     </span>
                   </div>
@@ -2579,8 +2583,8 @@ export function Inspector({
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[11px] text-label-2">Contrast</span>
-                    <span className="font-mono text-[10px]">
+                    <span className="text-xs text-label-2">Contrast</span>
+                    <span className="font-mono text-xs">
                       {layer.contrast ?? 0}%
                     </span>
                   </div>
@@ -2599,8 +2603,8 @@ export function Inspector({
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[11px] text-label-2">Saturation</span>
-                    <span className="font-mono text-[10px]">
+                    <span className="text-xs text-label-2">Saturation</span>
+                    <span className="font-mono text-xs">
                       {layer.saturate ?? 0}%
                     </span>
                   </div>
@@ -2619,10 +2623,8 @@ export function Inspector({
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[11px] text-label-2">
-                      Warmth / Sepia
-                    </span>
-                    <span className="font-mono text-[10px]">
+                    <span className="text-xs text-label-2">Warmth / Sepia</span>
+                    <span className="font-mono text-xs">
                       {layer.sepia ?? 0}%
                     </span>
                   </div>

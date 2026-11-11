@@ -106,13 +106,13 @@ export function NavigatorPanel({
         <div className="flex items-center justify-between">
           <span
             className={cn(
-              "text-[11px] font-semibold",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs font-semibold",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Artboard Zoom
           </span>
-          <span className="font-mono text-xs font-bold text-[#dfba73]">
+          <span className="font-mono text-xs font-bold text-[var(--studio-gold)]">
             {Math.round(zoom * 100)}%
           </span>
         </div>
@@ -139,7 +139,7 @@ export function NavigatorPanel({
             step={0.05}
             value={zoom}
             onChange={(e) => onZoomChange(Number(e.target.value))}
-            className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-[#dfba73] focus:outline-none"
+            className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--studio-gold)] focus:outline-none"
           />
           <svg
             width="15"
@@ -165,14 +165,14 @@ export function NavigatorPanel({
               type="button"
               onClick={() => onZoomChange(z)}
               className={cn(
-                "rounded-md py-1 text-center font-mono text-[11px] font-medium transition",
+                "rounded-md py-1 text-center font-mono text-xs font-medium transition",
                 Math.abs(zoom - z) < 0.05
                   ? dark
-                    ? "bg-[#dfba73] text-[#20161b] font-bold"
-                    : "bg-[#4a0e17] text-white font-bold"
+                    ? "bg-[var(--studio-gold)] text-[var(--studio-night)] font-bold"
+                    : "bg-[var(--studio-wine)] text-white font-bold"
                   : dark
                     ? "bg-white/[0.06] text-zinc-300 hover:bg-white/[0.12]"
-                    : "bg-black/5 text-[#2d1f24] hover:bg-black/10"
+                    : "bg-black/5 text-[var(--studio-ink)] hover:bg-black/10"
               )}
             >
               {Math.round(z * 100)}%
@@ -186,8 +186,8 @@ export function NavigatorPanel({
           className={cn(
             "w-full flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold transition mt-2",
             dark
-              ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
-              : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+              ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
+              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
           )}
         >
           <svg
@@ -211,14 +211,14 @@ export function NavigatorPanel({
       <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-1.5">
         <span
           className={cn(
-            "text-[10px] uppercase font-semibold tracking-wide block",
-            dark ? "text-zinc-400" : "text-[#7a5b67]"
+            "text-xs uppercase font-semibold tracking-wide block",
+            dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
           )}
         >
           Artboard Dimensions
         </span>
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className={dark ? "text-zinc-300" : "text-[#2d1f24]"}>
+          <span className={dark ? "text-zinc-300" : "text-[var(--studio-ink)]"}>
             {dims.width} × {dims.height} px
           </span>
           <span className="text-label-2">Ratio: {ratio.toFixed(3)}</span>

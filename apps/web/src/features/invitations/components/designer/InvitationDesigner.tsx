@@ -1588,7 +1588,9 @@ export function InvitationDesigner({
       className={cn(
         styles.studio,
         "relative h-dvh overflow-hidden select-none",
-        dark ? "dark studio-dark text-[#fff6dc]" : "text-[#2d1f24]"
+        dark
+          ? "dark studio-dark text-[var(--studio-cream)]"
+          : "text-[var(--studio-ink)]"
       )}
     >
       <input
@@ -1670,7 +1672,7 @@ export function InvitationDesigner({
           >
             <Icon name="swatch" size={18} />
           </button>
-          <div className="w-28 shrink-0">
+          <div className="w-24 shrink-0 sm:w-28">
             <Segmented
               dark={dark}
               label="Mode"
@@ -1703,7 +1705,7 @@ export function InvitationDesigner({
       <div
         className={cn(
           "fixed inset-0 z-0 transition-colors",
-          dark ? "bg-[#20161b]" : "bg-[#ede6da]"
+          dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]"
         )}
       >
         <div className={cn(styles.stage, !pro && styles.stageSimple)}>
@@ -1777,8 +1779,8 @@ export function InvitationDesigner({
           className={cn(
             "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-[13px] shadow-xl",
             dark
-              ? "border-[#5e384c] bg-[#2a1b23] text-[#fff6dc]"
-              : "border-[#dfba73] bg-[#fffaf0] text-[#3b2b31]"
+              ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
+              : "border-[var(--studio-gold)] bg-[#fffaf0] text-[#3b2b31]"
           )}
         >
           <p className="font-semibold">
@@ -1803,7 +1805,7 @@ export function InvitationDesigner({
                   text: "Card updated from the event details. You can undo this.",
                 });
               }}
-              className="rounded-full bg-[#4a0e17] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
+              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
             >
               Update the card
             </button>
@@ -1887,7 +1889,7 @@ export function InvitationDesigner({
           <button
             type="button"
             onClick={doc.retrySave}
-            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-bold hover:bg-white/30 transition-colors"
+            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-bold hover:bg-white/30 transition-colors"
           >
             Retry
           </button>
@@ -1968,7 +1970,7 @@ export function InvitationDesigner({
               "transition-colors",
               dark
                 ? "bg-[#23181e] border-r border-[#382630]"
-                : "bg-[#fcfbfa] border-r border-[#e8e2d6]",
+                : "bg-[#fcfbfa] border-r border-[var(--studio-line)]",
               "max-lg:bottom-[calc(44dvh+0.5rem)] max-lg:left-3 max-lg:right-3 max-lg:h-12 max-lg:rounded-2xl max-lg:border",
               "lg:left-0 lg:top-[92px] lg:bottom-0 lg:w-12"
             )}
@@ -2007,8 +2009,8 @@ export function InvitationDesigner({
               styles.sidebar,
               "flex min-h-0 flex-col overflow-hidden transition-colors",
               dark
-                ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
-                : "bg-[#fcfbfa] text-[#2d1f24] border-l border-[#e8e2d6]",
+                ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
+                : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
               "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-t-2xl max-lg:border-t max-lg:!w-full",
               "lg:bottom-0 lg:right-0 lg:top-[92px]"
             )}
@@ -2065,12 +2067,12 @@ export function InvitationDesigner({
               className={cn(
                 "hidden lg:block absolute left-0 inset-y-0 w-2.5 -translate-x-1/2 cursor-col-resize z-40 transition-colors group",
                 dark
-                  ? "hover:bg-[#dfba73]/40 active:bg-[#dfba73]"
-                  : "hover:bg-[#4a0e17]/30 active:bg-[#4a0e17]"
+                  ? "hover:bg-[var(--studio-gold)]/40 active:bg-[var(--studio-gold)]"
+                  : "hover:bg-[var(--studio-wine)]/30 active:bg-[var(--studio-wine)]"
               )}
               title="Drag to resize studio panel"
             >
-              <div className="h-full w-0.5 mx-auto opacity-0 group-hover:opacity-100 bg-[#dfba73]" />
+              <div className="h-full w-0.5 mx-auto opacity-0 group-hover:opacity-100 bg-[var(--studio-gold)]" />
             </div>
 
             {/* Top Half of Studio Sidebar: Properties / Color & Swatches */}
@@ -2080,7 +2082,7 @@ export function InvitationDesigner({
               }
               className={cn(
                 styles.panelTop,
-                "flex flex-col h-[52%] lg:h-[var(--studio-split)] min-h-[160px] border-b border-[#dfba73]/20"
+                "flex flex-col h-[52%] lg:h-[var(--studio-split)] min-h-[160px] border-b border-[var(--studio-gold)]/20"
               )}
             >
               {/* Top Tab Bar */}
@@ -2090,7 +2092,7 @@ export function InvitationDesigner({
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
-                    : "bg-[#f4efe8] border-[#e8e2d6]"
+                    : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
                 <button
@@ -2100,11 +2102,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     topTab === "properties"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="styler" size={13} />
@@ -2117,11 +2119,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     topTab === "swatches"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="swatch" size={13} />
@@ -2219,10 +2221,12 @@ export function InvitationDesigner({
               }}
               className={cn(
                 "relative z-10 hidden h-2 shrink-0 cursor-row-resize lg:block",
-                dark ? "hover:bg-[#dfba73]/30" : "hover:bg-[#4a0e17]/20"
+                dark
+                  ? "hover:bg-[var(--studio-gold)]/30"
+                  : "hover:bg-[var(--studio-wine)]/20"
               )}
             >
-              <div className="mx-auto mt-[3px] h-0.5 w-10 rounded-full bg-[#dfba73]/60" />
+              <div className="mx-auto mt-[3px] h-0.5 w-10 rounded-full bg-[var(--studio-gold)]/60" />
             </div>
 
             {/* Bottom Half of Studio Sidebar: Layers / History / Navigator */}
@@ -2236,7 +2240,7 @@ export function InvitationDesigner({
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
-                    : "bg-[#f4efe8] border-[#e8e2d6]"
+                    : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
                 <button
@@ -2246,25 +2250,25 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "layers"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="table_chart_view" size={13} />
                   <span>Layers</span>
                   <span
                     className={cn(
-                      "rounded-full px-1.5 py-0.2 text-[10px] font-mono",
+                      "rounded-full px-1.5 py-0.2 text-xs font-mono",
                       bottomTab === "layers"
                         ? dark
-                          ? "bg-black/40 text-[#dfba73]"
+                          ? "bg-black/40 text-[var(--studio-gold)]"
                           : "bg-white/20 text-white"
                         : dark
                           ? "bg-black/30 text-zinc-400"
-                          : "bg-black/5 text-[#7a5b67]"
+                          : "bg-black/5 text-[var(--studio-mauve)]"
                     )}
                   >
                     {design.layers.length}
@@ -2277,11 +2281,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "history"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="schedule" size={13} />
@@ -2294,11 +2298,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "navigator"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="search" size={13} />
@@ -2375,8 +2379,8 @@ export function InvitationDesigner({
             styles.simplePanel,
             "fixed z-20 flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
             dark
-              ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
-              : "bg-[#fcfbfa] text-[#2d1f24] border-l border-[#e8e2d6]",
+              ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
+              : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
             "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-b-none",
             "lg:bottom-0 lg:right-0 lg:top-[52px] lg:w-96"
           )}

@@ -77,7 +77,7 @@ export function QuickTour({
         {STEPS[step].body}
       </p>
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-label-2">
+        <span className="text-xs text-label-2">
           {step + 1} of {STEPS.length}
         </span>
         <div className="flex gap-2">
