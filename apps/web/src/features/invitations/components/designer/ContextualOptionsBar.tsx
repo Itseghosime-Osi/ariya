@@ -253,12 +253,12 @@ export function ContextualOptionsBar({
               dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
-            Distribute:
+            Space evenly:
           </span>
           <button
             type="button"
-            title="Distribute horizontally"
-            aria-label="Distribute horizontally"
+            title="Space evenly, left to right"
+            aria-label="Space evenly, left to right"
             disabled={selectedIds.length < 3}
             onClick={() => onDistribute?.(selectedIds, true)}
             className={cn(
@@ -283,8 +283,8 @@ export function ContextualOptionsBar({
           </button>
           <button
             type="button"
-            title="Distribute vertically"
-            aria-label="Distribute vertically"
+            title="Space evenly, top to bottom"
+            aria-label="Space evenly, top to bottom"
             disabled={selectedIds.length < 3}
             onClick={() => onDistribute?.(selectedIds, false)}
             className={cn(
