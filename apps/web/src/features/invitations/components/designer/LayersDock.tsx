@@ -136,7 +136,7 @@ function LayerThumbnail({
           "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-2xs",
           dark
             ? "border-[var(--studio-gold)]/40 bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
-            : "border-[#b8864b]/40 bg-[#b8864b]/15 text-[#7a5612]"
+            : "border-[var(--studio-bronze)]/40 bg-[var(--studio-bronze)]/15 text-[#7a5612]"
         )}
       >
         <Icon name="celebration" size={13} />
@@ -289,11 +289,11 @@ function SortableRow({
           "group flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-[10px] px-2 py-1 transition-all select-none border",
           on
             ? dark
-              ? "bg-[#3d2733] text-white border-[#5e384c] shadow-xs"
+              ? "bg-[var(--studio-active-dark)] text-white border-[#5e384c] shadow-xs"
               : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] border-[var(--studio-wine)]/25 shadow-xs font-semibold"
             : dark
               ? "text-zinc-200 border-transparent hover:bg-white/5 hover:text-white"
-              : "text-[#3b2b31] border-transparent hover:bg-black/5 hover:text-[var(--studio-wine)]",
+              : "text-[var(--studio-ink-2)] border-transparent hover:bg-black/5 hover:text-[var(--studio-wine)]",
           !layer.visible && "opacity-40"
         )}
       >
@@ -370,7 +370,7 @@ function SortableRow({
                   : "text-[var(--studio-wine)]"
                 : dark
                   ? "text-zinc-200 group-hover:text-white"
-                  : "text-[#3b2b31] group-hover:text-[var(--studio-wine)]"
+                  : "text-[var(--studio-ink-2)] group-hover:text-[var(--studio-wine)]"
             )}
             title={layerLabel(layer)}
             onDoubleClick={() => {
@@ -424,7 +424,7 @@ function SortableRow({
             "mt-1 flex items-center justify-between gap-1 rounded px-2 py-1",
             dark
               ? "bg-white/[0.06] border border-white/10 text-[var(--studio-cream)]"
-              : "bg-white border border-[var(--studio-line)] text-[#4a363f]"
+              : "bg-white border border-[var(--studio-line)] text-[var(--studio-ink-3)]"
           )}
         >
           <div className="flex items-center gap-1">
@@ -571,7 +571,7 @@ export function LayersDock({
       className={cn(
         "flex min-h-0 flex-1 flex-col select-none transition-colors",
         dark
-          ? "bg-[#23181e] text-[var(--studio-cream)]"
+          ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)]"
           : "bg-[#faf8f5] text-[var(--studio-ink)]"
       )}
     >
@@ -581,8 +581,8 @@ export function LayersDock({
           className={cn(
             "border-b px-3 py-2 transition-colors",
             dark
-              ? "border-[#382630] bg-[#1c1217] text-zinc-200"
-              : "border-[var(--studio-line)] bg-[#f5efe7] text-[#3b2b31]"
+              ? "border-[var(--studio-edge-dark)] bg-[#1c1217] text-zinc-200"
+              : "border-[var(--studio-line)] bg-[#f5efe7] text-[var(--studio-ink-2)]"
           )}
         >
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3">
@@ -619,7 +619,7 @@ export function LayersDock({
                     value={m.value}
                     className={
                       dark
-                        ? "bg-[#23181e] text-[var(--studio-cream)]"
+                        ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)]"
                         : "bg-white text-[var(--studio-ink)]"
                     }
                   >
@@ -678,8 +678,8 @@ export function LayersDock({
         className={cn(
           "flex gap-1 border-b px-3 py-2 text-xs font-semibold",
           dark
-            ? "border-[#382630] bg-[var(--studio-night)] text-zinc-400"
-            : "border-[var(--studio-line)] bg-[#fcfbfa] text-[var(--studio-mauve)]"
+            ? "border-[var(--studio-edge-dark)] bg-[var(--studio-night)] text-zinc-400"
+            : "border-[var(--studio-line)] bg-[var(--studio-paper)] text-[var(--studio-mauve)]"
         )}
       >
         {(
@@ -707,7 +707,7 @@ export function LayersDock({
               "flex-1 rounded-[10px] px-1.5 py-1 pointer-coarse:min-h-11 transition-colors text-center truncate",
               filter === tab.id
                 ? dark
-                  ? "bg-[#3d2733] font-bold text-white shadow-2xs"
+                  ? "bg-[var(--studio-active-dark)] font-bold text-white shadow-2xs"
                   : "bg-[var(--studio-wine)] font-bold text-white shadow-2xs"
                 : dark
                   ? "hover:text-white hover:bg-white/5"
@@ -738,7 +738,7 @@ export function LayersDock({
               className={cn(
                 "mb-2 flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium border",
                 dark
-                  ? "bg-[#3d2733] border-[var(--studio-gold)]/40 text-[var(--studio-gold)]"
+                  ? "bg-[var(--studio-active-dark)] border-[var(--studio-gold)]/40 text-[var(--studio-gold)]"
                   : "bg-[var(--studio-wine)]/10 border-[var(--studio-wine)]/20 text-[var(--studio-wine)]"
               )}
             >
@@ -807,7 +807,7 @@ export function LayersDock({
                       "mt-1.5 w-full text-left flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors cursor-pointer select-none",
                       selectedId === "background"
                         ? dark
-                          ? "border-[var(--studio-gold)] bg-[#3d2733] text-[var(--studio-gold)] shadow-xs font-semibold"
+                          ? "border-[var(--studio-gold)] bg-[var(--studio-active-dark)] text-[var(--studio-gold)] shadow-xs font-semibold"
                           : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] shadow-xs font-semibold"
                         : dark
                           ? "border-transparent bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08]"
@@ -856,7 +856,7 @@ export function LayersDock({
                       ) : background?.kind === "velvet" ? (
                         <span className="h-4 w-4 rounded-sm bg-[#5c1322] border border-[var(--studio-gold)]/40" />
                       ) : (
-                        <span className="h-4 w-4 rounded-sm bg-[#fcfbfa] border border-black/10 shadow-2xs" />
+                        <span className="h-4 w-4 rounded-sm bg-[var(--studio-paper)] border border-black/10 shadow-2xs" />
                       )}
                     </div>
 
@@ -885,7 +885,7 @@ export function LayersDock({
         className={cn(
           "flex h-9 items-center justify-between border-t px-3",
           dark
-            ? "border-[#382630] bg-[#1c1217] text-zinc-400"
+            ? "border-[var(--studio-edge-dark)] bg-[#1c1217] text-zinc-400"
             : "border-[var(--studio-line)] bg-[#f5efe7] text-[var(--studio-mauve)]"
         )}
       >

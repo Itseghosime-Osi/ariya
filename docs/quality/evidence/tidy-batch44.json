@@ -1,0 +1,14 @@
+[
+  {
+    "id": "RD-B2",
+    "name": "Status line under the title has one size, weight and colour at every width",
+    "ok": true,
+    "detail": "12px/400/rgb(90, 71, 78)"
+  },
+  {
+    "id": "RD-B3",
+    "name": "Menu row buttons use one text size and padding at every width",
+    "ok": true,
+    "detail": "12px/10px"
+  }
+]

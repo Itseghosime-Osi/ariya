@@ -1820,7 +1820,7 @@ export function InvitationDesigner({
             "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-[13px] shadow-xl",
             dark
               ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
-              : "border-[var(--studio-gold)] bg-[#fffaf0] text-[#3b2b31]"
+              : "border-[var(--studio-gold)] bg-[#fffaf0] text-[var(--studio-ink-2)]"
           )}
         >
           <p className="font-semibold">
@@ -2024,8 +2024,8 @@ export function InvitationDesigner({
               styles.tools,
               "transition-colors",
               dark
-                ? "bg-[#23181e] border-r border-[#382630]"
-                : "bg-[#fcfbfa] border-r border-[var(--studio-line)]",
+                ? "bg-[var(--studio-surface-dark)] border-r border-[var(--studio-edge-dark)]"
+                : "bg-[var(--studio-paper)] border-r border-[var(--studio-line)]",
               "max-lg:bottom-[calc(44dvh+0.5rem)] max-lg:left-3 max-lg:right-3 max-lg:h-12 max-lg:rounded-2xl max-lg:border",
               "lg:left-0 lg:top-[92px] lg:bottom-0 lg:w-12"
             )}
@@ -2064,8 +2064,8 @@ export function InvitationDesigner({
               styles.sidebar,
               "flex min-h-0 flex-col overflow-hidden transition-colors",
               dark
-                ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
-                : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
+                ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-l border-[var(--studio-edge-dark)]"
+                : "bg-[var(--studio-paper)] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
               "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-t-2xl max-lg:border-t max-lg:!w-full",
               "lg:bottom-0 lg:right-0 lg:top-[92px]"
             )}
@@ -2146,7 +2146,7 @@ export function InvitationDesigner({
                   styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
-                    ? "bg-[#1d1419] border-[#382630]"
+                    ? "bg-[#1d1419] border-[var(--studio-edge-dark)]"
                     : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
@@ -2294,7 +2294,7 @@ export function InvitationDesigner({
                   styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
-                    ? "bg-[#1d1419] border-[#382630]"
+                    ? "bg-[#1d1419] border-[var(--studio-edge-dark)]"
                     : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
@@ -2434,8 +2434,8 @@ export function InvitationDesigner({
             styles.simplePanel,
             "fixed z-20 flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
             dark
-              ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
-              : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
+              ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-l border-[var(--studio-edge-dark)]"
+              : "bg-[var(--studio-paper)] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
             "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-b-none",
             "lg:bottom-0 lg:right-0 lg:top-[52px] lg:w-96"
           )}
