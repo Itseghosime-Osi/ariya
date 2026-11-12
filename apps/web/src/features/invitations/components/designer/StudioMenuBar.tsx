@@ -57,7 +57,7 @@ export function StudioMenuBar({
               sideOffset={6}
               collisionPadding={12}
               className={cn(
-                "z-[100] min-w-56 max-h-[70dvh] overflow-auto rounded-2xl border p-1.5 shadow-xl",
+                "z-(--studio-z-top) min-w-56 max-h-[70dvh] overflow-auto rounded-2xl border p-1.5 shadow-xl",
                 dark
                   ? "border-white/15 bg-[var(--studio-surface-dark)] text-[var(--studio-cream)]"
                   : "border-hairline bg-ivory text-night"

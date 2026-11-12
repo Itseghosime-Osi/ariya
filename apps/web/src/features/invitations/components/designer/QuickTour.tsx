@@ -74,7 +74,7 @@ export function QuickTour({
       aria-label="Quick tour"
       data-testid="quick-tour"
       className={cn(
-        "fixed bottom-[72px] left-3 z-30 w-[min(20rem,calc(100%-1.5rem))] rounded-2xl border p-4 shadow-xl sm:left-16",
+        "fixed bottom-[72px] left-3 z-(--studio-z-panel) w-[min(20rem,calc(100%-1.5rem))] rounded-2xl border p-4 shadow-xl sm:left-16",
         t.panel
       )}
     >

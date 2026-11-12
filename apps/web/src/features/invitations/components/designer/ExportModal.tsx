@@ -174,7 +174,7 @@ export function ExportModal({
           aria-modal="true"
           aria-labelledby="export-dialog-title"
           className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md",
+            "fixed inset-0 z-(--studio-z-overlay) flex items-center justify-center p-4 backdrop-blur-md",
             t.overlay
           )}
           onClick={(e) => {

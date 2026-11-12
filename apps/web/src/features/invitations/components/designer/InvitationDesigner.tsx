@@ -1726,7 +1726,7 @@ export function InvitationDesigner({
       {/* The card's stage fills the screen with brand matte studio workspace */}
       <div
         className={cn(
-          "fixed inset-0 z-0 transition-colors",
+          "fixed inset-0 z-(--studio-z-base) transition-colors",
           dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]"
         )}
       >
@@ -1771,7 +1771,7 @@ export function InvitationDesigner({
           ) && (
             <div
               data-testid="studio-empty-state"
-              className="pointer-events-none absolute inset-0 z-10 grid place-items-center p-6"
+              className="pointer-events-none absolute inset-0 z-(--studio-z-raised) grid place-items-center p-6"
             >
               <div
                 className={cn(
@@ -1817,7 +1817,7 @@ export function InvitationDesigner({
           aria-label="Event details changed"
           data-testid="event-facts-banner"
           className={cn(
-            "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-sm shadow-xl",
+            "pointer-events-auto fixed bottom-16 left-1/2 z-(--studio-z-floating) w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-sm shadow-xl",
             dark
               ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
               : "border-[var(--studio-gold)] bg-[#fffaf0] text-[var(--studio-ink-2)]"
@@ -1871,14 +1871,14 @@ export function InvitationDesigner({
         <div
           data-testid="drag-readout"
           aria-hidden="true"
-          className="pointer-events-none fixed bottom-[72px] left-1/2 z-40 -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-xs font-semibold text-ivory shadow-lg"
+          className="pointer-events-none fixed bottom-[72px] left-1/2 z-(--studio-z-floating) -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-xs font-semibold text-ivory shadow-lg"
         >
           {readout}
         </div>
       )}
 
       {notice && (
-        <div className="pointer-events-auto fixed top-[100px] left-1/2 -translate-x-1/2 z-50 flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2">
+        <div className="pointer-events-auto fixed top-[100px] left-1/2 -translate-x-1/2 z-(--studio-z-overlay) flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2">
           <p
             role="status"
             className={cn(
@@ -1929,7 +1929,7 @@ export function InvitationDesigner({
           role="alert"
           data-testid="studio-error-alert"
           className={cn(
-            "pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold shadow-xl",
+            "pointer-events-auto fixed bottom-14 left-4 z-(--studio-z-overlay) flex max-w-sm items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold shadow-xl",
             dark
               ? "border-red-800 bg-red-950/90 text-red-200"
               : "border-red-200 bg-red-50 text-red-900"
@@ -2120,7 +2120,7 @@ export function InvitationDesigner({
               }}
               onPointerDown={startSidebarResize}
               className={cn(
-                "hidden lg:block absolute left-0 inset-y-0 w-2.5 -translate-x-1/2 cursor-col-resize z-40 transition-colors group",
+                "hidden lg:block absolute left-0 inset-y-0 w-2.5 -translate-x-1/2 cursor-col-resize z-(--studio-z-floating) transition-colors group",
                 dark
                   ? "hover:bg-[var(--studio-gold)]/40 active:bg-[var(--studio-gold)]"
                   : "hover:bg-[var(--studio-wine)]/30 active:bg-[var(--studio-wine)]"
@@ -2275,7 +2275,7 @@ export function InvitationDesigner({
                 );
               }}
               className={cn(
-                "relative z-10 hidden h-2 shrink-0 cursor-row-resize lg:block",
+                "relative z-(--studio-z-raised) hidden h-2 shrink-0 cursor-row-resize lg:block",
                 dark
                   ? "hover:bg-[var(--studio-gold)]/30"
                   : "hover:bg-[var(--studio-wine)]/20"
@@ -2432,7 +2432,7 @@ export function InvitationDesigner({
           aria-label="Invitation questions"
           className={cn(
             styles.simplePanel,
-            "fixed z-20 flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
+            "fixed z-(--studio-z-sticky) flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
             dark
               ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-l border-[var(--studio-edge-dark)]"
               : "bg-[var(--studio-paper)] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",

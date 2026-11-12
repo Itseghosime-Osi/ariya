@@ -94,7 +94,7 @@ function ToolButton({
       {/* Hover tooltip */}
       <div
         className={cn(
-          "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-50 hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
+          "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-(--studio-z-overlay) hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
           dark
             ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-white/15"
             : "bg-[#ffffff] text-[var(--studio-ink)] border-[#e6ded2] shadow-black/10"
@@ -403,7 +403,7 @@ export function ToolRail({
               aria-label="Shape presets"
               aria-labelledby={undefined}
               className={cn(
-                "z-50 rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
+                "z-(--studio-z-overlay) rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
                 dark
                   ? "border-[var(--studio-edge-dark)] bg-[var(--studio-night)] text-white"
                   : "border-[var(--studio-line)] bg-[#ffffff] text-[var(--studio-ink)] shadow-black/15"
@@ -646,7 +646,7 @@ export function ToolRail({
           {/* Primary / Foreground Swatch */}
           <div
             title="Active Fill colour (Click to open Color Panel)"
-            className="absolute top-0 left-0 h-6 w-6 rounded border-2 border-white/70 shadow-md cursor-pointer transition-transform hover:scale-105 z-10"
+            className="absolute top-0 left-0 h-6 w-6 rounded border-2 border-white/70 shadow-md cursor-pointer transition-transform hover:scale-105 z-(--studio-z-raised)"
             style={{ background: primaryColor }}
             onClick={() => onOpenColorPicker?.()}
           />

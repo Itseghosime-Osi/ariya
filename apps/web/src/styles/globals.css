@@ -25,6 +25,33 @@
   --studio-paper: #fcfbfa;
   --studio-wine-2: #6b1e2e;
   --studio-gold-hover: #edd49d;
+  /* Spacing (4/8 scale), control radius, stacking order and shadows for the invitation studio. */
+  --studio-space-1: 4px;
+  --studio-space-2: 8px;
+  --studio-space-3: 12px;
+  --studio-space-4: 16px;
+  --studio-space-6: 24px;
+  --studio-radius-control: 10px;
+  --studio-z-base: 0;
+  --studio-z-raised: 10;
+  --studio-z-sticky: 20;
+  --studio-z-panel: 30;
+  --studio-z-rail: 35;
+  --studio-z-floating: 40;
+  --studio-z-menus: 42;
+  --studio-z-header: 45;
+  --studio-z-overlay: 50;
+  --studio-z-top: 100;
+  --studio-glow-gold: 0 0 6px var(--studio-gold);
+  --studio-glow-bronze: 0 0 3px var(--studio-bronze);
+  --studio-glow-selection: 0 0 2px #00e5ff;
+  --studio-shadow-float-dark: 0 12px 40px rgba(0, 0, 0, 0.65);
+  --studio-shadow-float-light: 0 10px 35px rgba(74, 14, 23, 0.12);
+  --studio-shadow-stage:
+    0 25px 70px -15px rgba(0, 0, 0, 0.7), 0 0 1px rgba(255, 255, 255, 0.2);
+  --studio-shadow-dim: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  --studio-shadow-sheet-top: 0 6px 18px -12px rgba(74, 14, 23, 0.35);
+  --studio-shadow-sheet-bottom: 0 -10px 30px -18px rgba(74, 14, 23, 0.45);
   --ivory: #f7f2ea;
   --chrome: #f7f2ea;
   --surface: #ffffff;

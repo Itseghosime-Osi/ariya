@@ -95,7 +95,7 @@ export function CommandPalette({
           aria-describedby={undefined}
           data-testid="command-palette"
           className={cn(
-            "fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] backdrop-blur-sm",
+            "fixed inset-0 z-(--studio-z-overlay) flex items-start justify-center p-4 pt-[12vh] backdrop-blur-sm",
             t.overlay
           )}
           onClick={(e) => {

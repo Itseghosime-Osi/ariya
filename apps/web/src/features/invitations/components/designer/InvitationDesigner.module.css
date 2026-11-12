@@ -6,12 +6,12 @@
   position: fixed;
   inset: 0 0 auto;
   height: 64px;
-  z-index: 45;
+  z-index: var(--studio-z-header);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 24px;
-  padding: 0 20px;
+  gap: var(--studio-space-6);
+  padding: 0 var(--studio-space-4);
   border-bottom: 1px solid var(--hairline);
   background: var(--ivory);
   color: var(--night);
@@ -20,7 +20,7 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 12px;
+  gap: var(--studio-space-3);
 }
 .document {
   min-width: 0;
@@ -42,7 +42,7 @@
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--studio-space-3);
 }
 .mobileMenus {
   display: none;
@@ -65,7 +65,7 @@
   left: 0;
   right: 0;
   height: 44px;
-  z-index: 35;
+  z-index: var(--studio-z-rail);
 }
 .options > div {
   height: 44px;
@@ -76,7 +76,7 @@
   bottom: 56px;
   left: 0;
   width: 56px;
-  z-index: 35;
+  z-index: var(--studio-z-rail);
   border-right: 1px solid var(--hairline);
   background: var(--ivory);
   box-shadow: none;
@@ -87,7 +87,7 @@
   right: 0;
   bottom: 56px;
   width: var(--studio-sidebar-width);
-  z-index: 30;
+  z-index: var(--studio-z-panel);
   background: var(--ivory);
   border-left: 1px solid var(--hairline);
 }
@@ -109,14 +109,14 @@
   background: var(--ivory);
 }
 .documentSettings {
-  margin: 12px;
+  margin: var(--studio-space-3);
   border: 1px solid var(--hairline);
   border-radius: 16px;
 }
 @media (max-width: 1199px) {
   .header {
-    gap: 12px;
-    padding: 0 12px;
+    gap: var(--studio-space-3);
+    padding: 0 var(--studio-space-3);
   }
   .documentTitle {
     font-size: 14px;
@@ -138,9 +138,9 @@
   }
   .header {
     height: var(--studio-header-h);
-    gap: 8px;
+    gap: var(--studio-space-2);
     grid-template-columns: auto minmax(0, 1fr) auto;
-    padding: 0 10px;
+    padding: 0 var(--studio-space-2);
   }
   .document {
     text-align: left;
@@ -154,7 +154,7 @@
     line-height: 1.3;
   }
   .headerActions {
-    gap: 4px;
+    gap: var(--studio-space-1);
   }
   .desktopMenus,
   .wordmark {
@@ -167,8 +167,8 @@
     left: 0;
     right: 0;
     height: var(--studio-menus-h);
-    z-index: 42;
-    padding: 0 8px;
+    z-index: var(--studio-z-menus);
+    padding: 0 var(--studio-space-2);
     background: var(--ivory);
     border-bottom: 1px solid var(--hairline);
   }
@@ -212,7 +212,7 @@
     border: 1px solid var(--hairline);
     border-radius: 16px;
     overflow: visible;
-    box-shadow: 0 6px 18px -12px rgba(74, 14, 23, 0.35);
+    box-shadow: var(--studio-shadow-sheet-top);
   }
   .sidebar {
     top: auto;
@@ -223,7 +223,7 @@
     height: var(--studio-drawer-height);
     border-radius: 18px 18px 0 0;
     border-width: 1px 0 0;
-    box-shadow: 0 -10px 30px -18px rgba(74, 14, 23, 0.45);
+    box-shadow: var(--studio-shadow-sheet-bottom);
   }
   /* An open sheet hides the tool row, which is reachable again once it is closed, so the card
      keeps as much room as possible above it. */
@@ -240,10 +240,10 @@
   .mobileTabs {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--studio-space-1);
     height: 52px;
     flex-shrink: 0;
-    padding: 4px 6px;
+    padding: var(--studio-space-1) var(--studio-space-2);
     border-bottom: 1px solid var(--hairline);
   }
   .mobileTabs button {
@@ -279,8 +279,8 @@
     display: none !important;
   }
   .studio :global([data-testid="studio-statusbar"]) {
-    gap: 4px;
-    padding: 8px;
+    gap: var(--studio-space-1);
+    padding: var(--studio-space-2);
     height: var(--studio-status-h);
   }
 }

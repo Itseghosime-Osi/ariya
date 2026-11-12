@@ -70,7 +70,7 @@ export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
           aria-describedby="studio-help-desc"
           data-testid="studio-help"
           className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md",
+            "fixed inset-0 z-(--studio-z-overlay) flex items-center justify-center p-4 backdrop-blur-md",
             t.overlay
           )}
           onClick={(e) => {
