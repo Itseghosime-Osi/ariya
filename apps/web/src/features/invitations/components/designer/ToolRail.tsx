@@ -303,7 +303,7 @@ export function ToolRail({
   return (
     <div
       className={cn(
-        "relative h-full flex flex-col justify-between items-center py-2 select-none border-r transition-colors",
+        "relative h-full flex flex-col justify-between items-center py-2 select-none border-r transition-colors lg:[@media(max-height:940px)]:overflow-y-auto lg:[@media(max-height:940px)]:overflow-x-hidden",
         dark
           ? "bg-[var(--studio-night)] border-[#382630] text-zinc-200"
           : "bg-[#fcfbfa] border-[var(--studio-line)] text-[#3b2b31]"
@@ -597,13 +597,13 @@ export function ToolRail({
             onColorChange?.("#000000");
           }}
           className={cn(
-            "self-start ml-2 transition-colors",
+            "grid h-8 w-8 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
             dark
-              ? "text-zinc-500 hover:text-white"
-              : "text-zinc-400 hover:text-black"
+              ? "text-zinc-300 hover:bg-white/10 hover:text-white"
+              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
           )}
         >
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <rect
               x="1"
               y="1"
@@ -659,15 +659,15 @@ export function ToolRail({
             onColorChange?.(secondaryColor);
           }}
           className={cn(
-            "transition-colors",
+            "grid h-8 w-8 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
             dark
-              ? "text-zinc-400 hover:text-white"
-              : "text-[#4a363f] hover:text-[var(--studio-wine)]"
+              ? "text-zinc-300 hover:bg-white/10 hover:text-white"
+              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
           )}
         >
           <svg
-            width="12"
-            height="12"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

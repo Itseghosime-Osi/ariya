@@ -123,3 +123,12 @@ The last `dark:` styles (empty-card prompt, "Add text" button in the options bar
 ### D1: alignment shown twice, on purpose (change tried and reverted)
 
 The alignment icons appear in the options bar and again in the inspector. Removing the inspector row looked like a tidy-up and passed local checks, but CI caught a case it broke: the options bar shows each tool's own options, so its Align row exists only while the Select tool is active. After drawing a shape the options bar shows shape options, and the inspector row is then the only way to align the layer (`studio-checklist-audit.spec.ts` clicks "Align left" in that state). So both stay. A better tidy would keep an Align row in the options bar for every tool; that is a larger change and is left open.
+
+### Second batch: B1, C3, E3 and H1
+
+- **B1** The back, help and theme buttons in the header share one size (40 px), border, radius and focus ring.
+- **H1/H2** The "could not save" box uses the same colours and 13 px text as the message pill at the top. It keeps its `studio-error-alert` test id and its Retry button.
+- **C3** The colour reset and swap buttons are 32 px buttons with the same hover and focus look as the tools. While doing this I found a defect that was already there: on a desktop window shorter than about 940 px the tool rail was cut off, and the tools below the hand could not be reached. The rail now scrolls in that case (`RD-C5`).
+- **E3** On touch screens the undo, redo, zoom −/+, zoom percentage and Export buttons are 44 px. Below 430 px wide the zoom presets menu is hidden to make room (the −/+ buttons and the percentage button remain). Desktop sizes are unchanged. Checked at 360, 390 and 1440 px (`evidence/tidy-batch38.json`).
+- Evidence: `evidence/tidy-batch36.json`, `tidy-batch37.json`, `tidy-batch38.json`; screenshots `screenshots/tidy-*-after-*.png`.
+- Still open from the list: B2, B3, C1, C2, C4, D2 to D4, E1, E2, F1, F3, G1, G2, I1 to I3, J1, J2, K.

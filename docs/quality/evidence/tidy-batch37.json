@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-C5-1440",
+    "name": "On a short window the rail scrolls so every tool and colour button can be reached",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-C3-1440",
+    "name": "Colour reset and swap are 32px targets and on screen",
+    "ok": true,
+    "detail": "{\"Default colours\":{\"w\":32,\"h\":32,\"bottom\":750},\"Swap colours\":{\"w\":32,\"h\":32,\"bottom\":830},\"vh\":900}"
+  },
+  {
+    "id": "RD-C5-1280",
+    "name": "On a short window the rail scrolls so every tool and colour button can be reached",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-C3-1280",
+    "name": "Colour reset and swap are 32px targets and on screen",
+    "ok": true,
+    "detail": "{\"Default colours\":{\"w\":32,\"h\":32,\"bottom\":750},\"Swap colours\":{\"w\":32,\"h\":32,\"bottom\":830},\"vh\":720}"
+  }
+]
