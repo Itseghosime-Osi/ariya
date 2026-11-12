@@ -104,8 +104,11 @@ function Num({
   disabled,
   onChange,
   dark,
+  hint,
 }: {
   label: string;
+  /** A short tooltip that explains the field in plainer or fuller words. */
+  hint?: string;
   value: number;
   min: number;
   max: number;
@@ -126,7 +129,7 @@ function Num({
     if (next !== value) onChange(next);
   };
   return (
-    <label className="block">
+    <label className="block" title={hint}>
       <span
         className={cn(
           "mb-1 block text-xs font-semibold",
@@ -479,7 +482,7 @@ export function Inspector({
         >
           <div className="space-y-3">
             <p className="text-xs text-label-2 leading-relaxed">
-              Align or distribute {selectedLayers.length} layers together
+              Align or space evenly {selectedLayers.length} layers together
               relative to their boundary.
             </p>
 
@@ -554,7 +557,7 @@ export function Inspector({
         </Section>
 
         {selectedLayers.length >= 3 && (
-          <Section collapsible dark={dark} title="Distribute Spacing">
+          <Section collapsible dark={dark} title="Space evenly">
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
@@ -566,7 +569,7 @@ export function Inspector({
                     : "border-hairline bg-white/60 text-night hover:bg-white"
                 )}
               >
-                Distribute Vertically
+                Space evenly, top to bottom
               </button>
               <button
                 type="button"
@@ -578,7 +581,7 @@ export function Inspector({
                     : "border-hairline bg-white/60 text-night hover:bg-white"
                 )}
               >
-                Distribute Horizontally
+                Space evenly, left to right
               </button>
             </div>
           </Section>
@@ -1317,6 +1320,7 @@ export function Inspector({
             <Num
               dark={dark}
               label="See-through"
+              hint="Opacity: 0% is solid, 100% is invisible"
               suffix="%"
               disabled={layer.kind === "code"}
               value={

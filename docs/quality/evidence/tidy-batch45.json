@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-J2",
+    "name": "Every tool with a keyboard shortcut shows it in its tooltip",
+    "ok": true,
+    "detail": "13 tools with shortcuts; without: Add monogram seal, Guest pass seal added"
+  },
+  {
+    "id": "RD-J1a",
+    "name": "The See-through field keeps its name and now explains itself in a tooltip",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-J1b",
+    "name": "'Distribute' no longer appears; 'Space evenly' buttons are there",
+    "ok": true,
+    "detail": "[\"Space evenly, left to right\",\"Space evenly, top to bottom\",\"▾Space evenly\"]"
+  }
+]
