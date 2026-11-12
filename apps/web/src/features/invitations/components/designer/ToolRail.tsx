@@ -69,7 +69,7 @@ function ToolButton({
         disabled={disabled}
         onClick={onClick}
         className={cn(
-          "relative grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
+          "relative grid h-10 w-10 pointer-coarse:h-11 pointer-coarse:w-11 shrink-0 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
           active
             ? dark
               ? "bg-[var(--studio-active-dark)] text-[var(--studio-gold)] shadow-inner"
