@@ -185,7 +185,7 @@ function RowButton({
         onClick();
       }}
       className={cn(
-        "grid h-7 w-7 shrink-0 place-items-center rounded disabled:opacity-20 transition-colors focus-visible:outline-2",
+        "grid h-7 w-7 pointer-coarse:h-11 pointer-coarse:w-11 shrink-0 place-items-center rounded disabled:opacity-20 transition-colors focus-visible:outline-2",
         dark
           ? "text-zinc-300 hover:bg-white/10 hover:text-white aria-pressed:text-[var(--studio-gold)]"
           : "text-[#5c474e] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)] aria-pressed:text-[var(--studio-wine)]"
@@ -286,7 +286,7 @@ function SortableRow({
           }
         }}
         className={cn(
-          "group flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 transition-all select-none border",
+          "group flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-[10px] px-2 py-1 transition-all select-none border",
           on
             ? dark
               ? "bg-[#3d2733] text-white border-[#5e384c] shadow-xs"
@@ -310,10 +310,10 @@ function SortableRow({
           }
           disabled={layer.kind === "code"}
           className={cn(
-            "grid h-6 w-4 shrink-0 cursor-grab place-items-center active:cursor-grabbing",
+            "grid h-7 w-5 pointer-coarse:h-11 pointer-coarse:w-7 shrink-0 cursor-grab place-items-center active:cursor-grabbing",
             dark
-              ? "text-zinc-500 hover:text-zinc-200"
-              : "text-zinc-400 hover:text-[var(--studio-wine)]"
+              ? "text-zinc-400 hover:text-zinc-100"
+              : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -579,7 +579,7 @@ export function LayersDock({
       {selectedLayer && (
         <div
           className={cn(
-            "border-b px-3 py-1.5 transition-colors",
+            "border-b px-3 py-2 transition-colors",
             dark
               ? "border-[#382630] bg-[#1c1217] text-zinc-200"
               : "border-[var(--studio-line)] bg-[#f5efe7] text-[#3b2b31]"
@@ -676,7 +676,7 @@ export function LayersDock({
       {/* Layer Kind Filter Tabs */}
       <div
         className={cn(
-          "flex border-b px-2 py-1.5 text-xs font-semibold",
+          "flex gap-1 border-b px-3 py-2 text-xs font-semibold",
           dark
             ? "border-[#382630] bg-[var(--studio-night)] text-zinc-400"
             : "border-[var(--studio-line)] bg-[#fcfbfa] text-[var(--studio-mauve)]"
@@ -704,7 +704,7 @@ export function LayersDock({
             type="button"
             onClick={() => setFilter(tab.id)}
             className={cn(
-              "flex-1 rounded px-1.5 py-1 transition-colors text-center truncate",
+              "flex-1 rounded-[10px] px-1.5 py-1 pointer-coarse:min-h-11 transition-colors text-center truncate",
               filter === tab.id
                 ? dark
                   ? "bg-[#3d2733] font-bold text-white shadow-2xs"

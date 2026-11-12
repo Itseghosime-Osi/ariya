@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-E1-1440",
+    "name": "Layer rows share one height on desktop",
+    "ok": true,
+    "detail": "{\"rows\":[38],\"eye\":[\"28x28\"],\"grip\":[\"20x28\"],\"n\":10}"
+  },
+  {
+    "id": "RD-E2-1440",
+    "name": "Blend/opacity strip and the filter tabs share one padding",
+    "ok": true,
+    "detail": "{\"strip\":[\"12px\",\"8px\"],\"tabs\":[\"12px\",\"8px\"]}"
+  },
+  {
+    "id": "RD-E1-390",
+    "name": "Layer rows, grip, eye and lock are 44px on touch",
+    "ok": true,
+    "detail": "{\"rows\":[54],\"eye\":[\"44x44\"],\"grip\":[\"28x44\"],\"n\":10}"
+  },
+  {
+    "id": "RD-E2-390",
+    "name": "Blend/opacity strip and the filter tabs share one padding",
+    "ok": true,
+    "detail": "{\"strip\":[\"12px\",\"8px\"],\"tabs\":[\"12px\",\"8px\"]}"
+  }
+]

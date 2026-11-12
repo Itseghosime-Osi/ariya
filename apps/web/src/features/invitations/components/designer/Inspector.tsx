@@ -87,7 +87,7 @@ type Patch = Partial<InvitationLayer>;
 
 const fieldClass = (dark?: boolean) =>
   cn(
-    "min-h-10 w-full rounded-lg border px-3 text-xs outline-none transition-colors",
+    "min-h-10 w-full rounded-[10px] border px-3 text-xs outline-none transition-colors",
     dark
       ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] placeholder-zinc-400 focus:border-[var(--studio-gold)] focus:ring-1 focus:ring-[var(--studio-gold)] focus:bg-white/[0.09]"
       : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] placeholder-[#a6929a] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)] shadow-xs"
@@ -244,7 +244,7 @@ function HexColorInput({
 
       <div className="flex items-center gap-2 pt-0.5">
         <div
-          className="h-8 w-8 shrink-0 rounded-lg border border-black/15 shadow-inner"
+          className="h-8 w-8 shrink-0 rounded-[10px] border border-black/15 shadow-inner"
           style={{ background: value || "transparent" }}
         />
         <div className="relative flex-1">
@@ -261,7 +261,7 @@ function HexColorInput({
               }
             }}
             className={cn(
-              "h-9 w-full rounded-lg border px-2.5 font-mono text-xs uppercase outline-none transition-colors",
+              "h-9 w-full rounded-[10px] border px-2.5 font-mono text-xs uppercase outline-none transition-colors",
               dark
                 ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)] focus:ring-1 focus:ring-[var(--studio-gold)] focus:bg-white/[0.09]"
                 : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)]"
@@ -286,7 +286,7 @@ function HexColorInput({
               }
             }}
             className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-lg border transition-colors",
+              "grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border transition-colors",
               dark
                 ? "border-white/12 bg-white/[0.06] text-zinc-300 hover:bg-white/[0.12] hover:text-white"
                 : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec]"
@@ -347,7 +347,7 @@ function IconBtn({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "grid h-10 w-10 place-items-center rounded-lg border disabled:opacity-25 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1",
+        "grid h-10 w-10 place-items-center rounded-[10px] border disabled:opacity-25 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1",
         dark
           ? "border-white/12 bg-white/[0.06] text-zinc-200 hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
           : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] hover:text-[var(--studio-ink)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
@@ -541,7 +541,7 @@ export function Inspector({
                 type="button"
                 onClick={() => onAlignSelection?.(selectedIds, btn.how)}
                 className={cn(
-                  "inline-flex min-h-10 items-center justify-center rounded-xl border px-2 py-1.5 text-xs font-medium transition",
+                  "inline-flex min-h-10 items-center justify-center rounded-[10px] border px-2 py-1.5 text-xs font-medium transition",
                   dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
@@ -555,12 +555,12 @@ export function Inspector({
 
         {selectedLayers.length >= 3 && (
           <Section collapsible dark={dark} title="Distribute Spacing">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => onDistribute?.(selectedIds, false)}
                 className={cn(
-                  "inline-flex min-h-10 items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold transition",
+                  "inline-flex min-h-10 items-center justify-center rounded-[10px] border px-3 py-1.5 text-xs font-semibold transition",
                   dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
@@ -572,7 +572,7 @@ export function Inspector({
                 type="button"
                 onClick={() => onDistribute?.(selectedIds, true)}
                 className={cn(
-                  "inline-flex min-h-10 items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold transition",
+                  "inline-flex min-h-10 items-center justify-center rounded-[10px] border px-3 py-1.5 text-xs font-semibold transition",
                   dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                     : "border-hairline bg-white/60 text-night hover:bg-white"
@@ -590,7 +590,7 @@ export function Inspector({
               <div
                 key={l.id}
                 className={cn(
-                  "flex items-center justify-between rounded-xl border px-3 py-2 text-xs",
+                  "flex items-center justify-between rounded-[10px] border px-3 py-2 text-xs",
                   dark
                     ? "border-white/10 bg-white/[0.04] text-[var(--studio-cream)]"
                     : "border-hairline bg-white/40 text-night"
@@ -637,13 +637,13 @@ export function Inspector({
             Your template already includes its size and paper.
           </p>
         </div>
-        <details className="mx-3 my-3 rounded-2xl border border-hairline">
+        <details className="mx-3 my-3 rounded-[10px] border border-hairline">
           <summary className="cursor-pointer px-4 py-3 text-xs font-semibold text-night">
             Document settings{" "}
             <span className="font-normal text-label-2">· optional</span>
           </summary>
           <Section collapsible dark={dark} title="Invitation size">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {CANVAS_PRESETS.map((p) => {
                 const on =
                   Math.abs(p.widthPx - dims.width) <= 4 &&
@@ -657,7 +657,7 @@ export function Inspector({
                       onDesign((d) => resizeCanvasPx(d, p.widthPx, p.heightPx))
                     }
                     className={cn(
-                      "rounded-lg border px-3 py-2 text-left transition-colors",
+                      "rounded-[10px] border px-3 py-2 text-left transition-colors",
                       on
                         ? dark
                           ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 text-[var(--studio-gold)] shadow-xs ring-1 ring-[var(--studio-gold)]/40"
@@ -701,7 +701,7 @@ export function Inspector({
             </div>
             <div
               className={cn(
-                "mt-3 rounded-lg border p-2.5 transition-colors",
+                "mt-3 rounded-[10px] border p-2.5 transition-colors",
                 dark
                   ? "border-white/10 bg-white/[0.03]"
                   : "border-[var(--studio-line)] bg-[#f8f6f2]"
@@ -715,7 +715,7 @@ export function Inspector({
               >
                 Exact Size (px)
               </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <Num
                   dark={dark}
                   label="Width"
@@ -859,7 +859,7 @@ export function Inspector({
         </Section>
 
         <Section collapsible dark={dark} title="Colours">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {INVITATION_THEMES.map((t) => {
               const p = THEME_PALETTES[t];
               return (
@@ -869,7 +869,7 @@ export function Inspector({
                   aria-pressed={design.theme === t}
                   onClick={() => onDesign((d) => applyInvitationTheme(d, t))}
                   className={cn(
-                    "rounded-xl border p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
+                    "rounded-[10px] border p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
                     design.theme === t
                       ? dark
                         ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/15 shadow-xs ring-1 ring-[var(--studio-gold)]/40"
@@ -925,7 +925,7 @@ export function Inspector({
                 type="button"
                 onClick={() => onDesign((d) => applyLayoutPreset(d, preset.id))}
                 className={cn(
-                  "w-full rounded-xl border p-2.5 text-left transition focus-visible:outline-2 focus-visible:outline-[var(--studio-gold)]",
+                  "w-full rounded-[10px] border p-2.5 text-left transition focus-visible:outline-2 focus-visible:outline-[var(--studio-gold)]",
                   dark
                     ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20"
                     : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec]"
@@ -1029,8 +1029,8 @@ export function Inspector({
         aside={
           <span
             className={cn(
-              "truncate text-xs",
-              dark ? "text-zinc-400" : "text-label-2"
+              "truncate text-[15px] font-semibold",
+              dark ? "text-[var(--studio-cream)]" : "text-[var(--studio-ink)]"
             )}
           >
             {layer.name}
@@ -1038,7 +1038,7 @@ export function Inspector({
         }
       >
         {layer.locked && (
-          <p className="mb-3 rounded-xl bg-gold/15 px-3 py-2 text-[12px] text-gold-ink">
+          <p className="mb-3 rounded-[10px] bg-gold/15 px-3 py-2 text-[12px] text-gold-ink">
             This layer is locked. Unlock it in the layers list to move, resize,
             or edit its style.
           </p>
@@ -1051,11 +1051,11 @@ export function Inspector({
             <div className="flex items-center gap-1.5">
               <span
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider",
-                  dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
+                  "text-[13px] font-semibold",
+                  dark ? "text-zinc-300" : "text-[var(--studio-ink)]"
                 )}
               >
-                Position & Size
+                Position & size
               </span>
               {hasBox && layer.shape !== "line" && (
                 <button
@@ -1085,7 +1085,7 @@ export function Inspector({
             </div>
             <div
               className={cn(
-                "inline-flex rounded-lg border p-0.5 transition-colors",
+                "inline-flex rounded-[10px] border p-0.5 transition-colors",
                 dark
                   ? "border-white/10 bg-white/[0.05]"
                   : "border-[var(--studio-line)] bg-white/60"
@@ -1344,7 +1344,7 @@ export function Inspector({
               aria-pressed={layer.kind !== "code" && Boolean(layer.flipX)}
               onClick={() => patch({ flipX: !layer.flipX })}
               className={cn(
-                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
+                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-[10px] border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
                 layer.flipX
                   ? dark
                     ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
@@ -1381,7 +1381,7 @@ export function Inspector({
               aria-pressed={layer.kind !== "code" && Boolean(layer.flipY)}
               onClick={() => patch({ flipY: !layer.flipY })}
               className={cn(
-                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
+                "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-[10px] border px-2 text-xs font-semibold transition-colors focus-visible:outline-2",
                 layer.flipY
                   ? dark
                     ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
@@ -1417,7 +1417,7 @@ export function Inspector({
                 patch({ rotation: next === -180 ? 180 : next });
               }}
               className={cn(
-                "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
+                "inline-flex min-h-9 items-center justify-center rounded-[10px] border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                   : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
@@ -1436,7 +1436,7 @@ export function Inspector({
                 patch({ rotation: next === -180 ? 180 : next });
               }}
               className={cn(
-                "inline-flex min-h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-mono font-semibold transition-colors",
+                "inline-flex min-h-9 items-center justify-center rounded-[10px] border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
                   : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
@@ -1687,7 +1687,7 @@ export function Inspector({
                 type="button"
                 aria-pressed={layer.italic}
                 onClick={() => patch({ italic: !layer.italic })}
-                className="min-h-11 w-full rounded-xl border border-hairline bg-white/60 text-sm italic text-night aria-pressed:border-burgundy aria-pressed:bg-burgundy/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
+                className="min-h-11 w-full rounded-[10px] border border-hairline bg-white/60 text-sm italic text-night aria-pressed:border-burgundy aria-pressed:bg-burgundy/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
               >
                 Italic
               </button>
@@ -1785,7 +1785,7 @@ export function Inspector({
                   </span>
                   <div
                     className={cn(
-                      "inline-flex rounded-lg border p-0.5",
+                      "inline-flex rounded-[10px] border p-0.5",
                       dark
                         ? "border-white/10 bg-white/[0.05]"
                         : "border-[var(--studio-line)] bg-white/60"
@@ -1841,7 +1841,7 @@ export function Inspector({
                 {fillMode === "gradient" && (
                   <div
                     className={cn(
-                      "space-y-2 rounded-xl border p-2.5",
+                      "space-y-2 rounded-[10px] border p-2.5",
                       dark
                         ? "border-white/10 bg-white/[0.03]"
                         : "border-[var(--studio-line)] bg-white/40"
@@ -1864,7 +1864,7 @@ export function Inspector({
                             patch({ gradient: g.value, fill: null })
                           }
                           className={cn(
-                            "flex items-center gap-2 rounded-lg border p-1 text-left transition-all",
+                            "flex items-center gap-2 rounded-[10px] border p-1 text-left transition-all",
                             layer.gradient === g.value
                               ? dark
                                 ? "border-[var(--studio-gold)] ring-1 ring-[var(--studio-gold)] bg-[var(--studio-gold)]/15 text-[var(--studio-gold)]"
@@ -1954,7 +1954,7 @@ export function Inspector({
             {(layer.shape === "rect" || layer.shape === "arch") && (
               <div
                 className={cn(
-                  "space-y-2 rounded-xl border p-2.5",
+                  "space-y-2 rounded-[10px] border p-2.5",
                   dark
                     ? "border-white/10 bg-white/[0.03]"
                     : "border-[var(--studio-line)] bg-white/40"
@@ -2016,7 +2016,7 @@ export function Inspector({
                     onChange={(v) => patch({ radius: v })}
                   />
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <Num
                       dark={dark}
                       label="Top Left"
@@ -2120,7 +2120,7 @@ export function Inspector({
             {(!layer.maskShape || layer.maskShape === "rect") && (
               <div
                 className={cn(
-                  "space-y-2.5 rounded-xl border p-2.5",
+                  "space-y-2.5 rounded-[10px] border p-2.5",
                   dark
                     ? "border-white/10 bg-white/[0.03]"
                     : "border-[var(--studio-line)] bg-white/40"
@@ -2179,7 +2179,7 @@ export function Inspector({
                     onChange={(v) => patch({ radius: v })}
                   />
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <Num
                       dark={dark}
                       label="Top Left"
@@ -2256,7 +2256,7 @@ export function Inspector({
             )}
             <div
               className={cn(
-                "space-y-2 rounded-xl border p-2.5",
+                "space-y-2 rounded-[10px] border p-2.5",
                 dark
                   ? "border-white/10 bg-white/[0.03]"
                   : "border-[var(--studio-line)] bg-white/40"
@@ -2286,7 +2286,7 @@ export function Inspector({
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <Num
                   dark={dark}
                   label="Pan X"
@@ -2454,7 +2454,7 @@ export function Inspector({
                         })
                       }
                       className={cn(
-                        "rounded-lg border py-1.5 text-center text-xs font-semibold transition-colors",
+                        "rounded-[10px] border py-1.5 text-center text-xs font-semibold transition-colors",
                         active
                           ? dark
                             ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-cream)]"
@@ -2472,7 +2472,7 @@ export function Inspector({
             </div>
 
             {/* Custom Shadow sliders */}
-            <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2">
+            <div className="rounded-[10px] border border-hairline bg-white/[0.03] p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
@@ -2551,7 +2551,7 @@ export function Inspector({
             </div>
 
             {/* Photo & Color Adjustments (Brightness, Contrast, Saturation, Warmth) */}
-            <div className="rounded-xl border border-hairline bg-white/[0.03] p-3 space-y-2.5">
+            <div className="rounded-[10px] border border-hairline bg-white/[0.03] p-3 space-y-2.5">
               <span
                 className={cn(
                   "text-xs font-semibold uppercase tracking-wider block",
