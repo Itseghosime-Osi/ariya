@@ -1908,9 +1908,9 @@ export function DesignerCanvas({
                 className="pointer-events-none absolute inset-y-0 z-30 flex items-center"
                 style={{ left: `${guide.posPct}%` }}
               >
-                <div className="h-full w-px bg-[#b8864b] shadow-[0_0_3px_#b8864b]" />
+                <div className="h-full w-px bg-[var(--studio-bronze)] shadow-[0_0_3px_#b8864b]" />
                 {guide.label && (
-                  <span className="absolute top-2 -translate-x-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
+                  <span className="absolute top-2 -translate-x-1/2 rounded-full bg-[var(--studio-bronze)] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
                     {guide.label}
                   </span>
                 )}
@@ -1924,9 +1924,9 @@ export function DesignerCanvas({
               className="pointer-events-none absolute inset-x-0 z-30 flex justify-center"
               style={{ top: `${guide.posPct}%` }}
             >
-              <div className="h-px w-full bg-[#b8864b] shadow-[0_0_3px_#b8864b]" />
+              <div className="h-px w-full bg-[var(--studio-bronze)] shadow-[0_0_3px_#b8864b]" />
               {guide.label && (
-                <span className="absolute left-2 -translate-y-1/2 rounded-full bg-[#b8864b] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
+                <span className="absolute left-2 -translate-y-1/2 rounded-full bg-[var(--studio-bronze)] px-1.5 py-0.5 text-xs font-mono font-bold text-white shadow-xs">
                   {guide.label}
                 </span>
               )}
@@ -2039,7 +2039,7 @@ export function DesignerCanvas({
                     onPointerDown={(e) => startHandle(e, h)}
                     className={`pointer-events-auto absolute grid h-7 w-7 place-items-center ${HANDLES[h]}`}
                   >
-                    <span className="block h-2.5 w-2.5 rounded-[3px] border border-[#b8864b] bg-white shadow" />
+                    <span className="block h-2.5 w-2.5 rounded-[3px] border border-[var(--studio-bronze)] bg-white shadow" />
                   </span>
                 ))}
               {editable && !multiple && (
@@ -2048,7 +2048,7 @@ export function DesignerCanvas({
                   onPointerDown={(e) => startHandle(e, "rotate")}
                   className="pointer-events-auto absolute -top-9 left-1/2 grid h-7 w-7 -translate-x-1/2 cursor-grab place-items-center"
                 >
-                  <span className="block h-3 w-3 rounded-full border border-[#b8864b] bg-white shadow" />
+                  <span className="block h-3 w-3 rounded-full border border-[var(--studio-bronze)] bg-white shadow" />
                 </span>
               )}
 

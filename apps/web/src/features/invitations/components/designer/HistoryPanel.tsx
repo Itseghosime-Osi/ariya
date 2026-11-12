@@ -90,7 +90,7 @@ export function HistoryPanel({
                   : isPast
                     ? dark
                       ? "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
-                      : "text-[#3b2b31] hover:bg-black/5"
+                      : "text-[var(--studio-ink-2)] hover:bg-black/5"
                     : dark
                       ? "text-zinc-600 opacity-60 hover:opacity-100 hover:bg-white/[0.03]"
                       : "text-zinc-400 opacity-60 hover:opacity-100 hover:bg-black/5"
@@ -140,7 +140,7 @@ export function HistoryPanel({
             "flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold disabled:opacity-30 transition",
             dark
               ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
-              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
           )}
         >
           <Icon name="undo" size={14} />
@@ -155,7 +155,7 @@ export function HistoryPanel({
             "flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold disabled:opacity-30 transition",
             dark
               ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
-              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
           )}
         >
           <Icon name="redo" size={14} />

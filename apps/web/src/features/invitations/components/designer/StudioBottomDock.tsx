@@ -43,7 +43,7 @@ export function StudioBottomDock({
       className={cn(
         "pointer-events-auto fixed inset-x-0 bottom-0 z-30 flex h-14 items-center justify-center gap-2 px-2 py-2 sm:px-4 pointer-coarse:py-1 transition-colors select-none border-t",
         dark
-          ? "border-[#3f2935] bg-[#23181e]/92 text-[var(--studio-cream)] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
+          ? "border-[#3f2935] bg-[var(--studio-surface-dark)]/92 text-[var(--studio-cream)] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
           : "border-[#e6ded2] bg-[#ffffff]/95 text-[var(--studio-ink)] shadow-[0_10px_35px_rgba(74,14,23,0.12)]"
       )}
     >
@@ -111,7 +111,7 @@ export function StudioBottomDock({
             "rounded-md px-2 py-0.5 pointer-coarse:grid pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:place-items-center font-mono text-xs font-semibold tabular-nums transition-colors",
             dark
               ? "hover:bg-white/10 text-[var(--studio-gold)]"
-              : "hover:bg-[var(--studio-wine)]/10 text-[#6b1e2e]"
+              : "hover:bg-[var(--studio-wine)]/10 text-[var(--studio-wine-2)]"
           )}
         >
           {Math.round(zoom * 100)}%
@@ -145,7 +145,7 @@ export function StudioBottomDock({
             "h-7 w-8 pointer-coarse:h-11 pointer-coarse:w-9 pointer-coarse:max-[430px]:hidden cursor-pointer appearance-none rounded-md border bg-transparent text-center text-xs font-semibold",
             dark
               ? "border-white/15 text-[var(--studio-gold)]"
-              : "border-black/10 text-[#6b1e2e]"
+              : "border-black/10 text-[var(--studio-wine-2)]"
           )}
         >
           <option value="" disabled>
@@ -173,7 +173,7 @@ export function StudioBottomDock({
         <span
           className={cn(
             "font-medium",
-            dark ? "text-zinc-300" : "text-[#4a363f]"
+            dark ? "text-zinc-300" : "text-[var(--studio-ink-3)]"
           )}
         >
           {dimensions.width} × {dimensions.height} px
@@ -182,7 +182,7 @@ export function StudioBottomDock({
           <span
             className={cn(
               "text-xs",
-              dark ? "text-[var(--studio-gold)]" : "text-[#6b1e2e]"
+              dark ? "text-[var(--studio-gold)]" : "text-[var(--studio-wine-2)]"
             )}
           >
             (X: {cursorPx.x}, Y: {cursorPx.y})
@@ -205,8 +205,8 @@ export function StudioBottomDock({
         className={cn(
           "inline-flex h-8 pointer-coarse:h-11 items-center gap-1.5 rounded-full px-4 pointer-coarse:px-3 text-xs font-bold transition-transform active:scale-95 shadow-md",
           dark
-            ? "bg-[var(--studio-gold)] text-[var(--studio-night)] hover:bg-[#edd49d]"
-            : "bg-[#6b1e2e] text-white hover:bg-[var(--studio-wine)]"
+            ? "bg-[var(--studio-gold)] text-[var(--studio-night)] hover:bg-[var(--studio-gold-hover)]"
+            : "bg-[var(--studio-wine-2)] text-white hover:bg-[var(--studio-wine)]"
         )}
       >
         <Icon name="download" size={14} />

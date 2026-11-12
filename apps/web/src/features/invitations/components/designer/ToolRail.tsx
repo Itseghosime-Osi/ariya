@@ -72,11 +72,11 @@ function ToolButton({
           "relative grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
           active
             ? dark
-              ? "bg-[#3d2733] text-[var(--studio-gold)] shadow-inner"
+              ? "bg-[var(--studio-active-dark)] text-[var(--studio-gold)] shadow-inner"
               : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] shadow-inner font-semibold"
             : dark
               ? "text-zinc-300 hover:bg-white/10 hover:text-white disabled:opacity-30"
-              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)] disabled:opacity-30"
+              : "text-[var(--studio-ink-3)] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)] disabled:opacity-30"
         )}
       >
         {children}
@@ -96,7 +96,7 @@ function ToolButton({
         className={cn(
           "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-50 hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
           dark
-            ? "bg-[#23181e] text-[var(--studio-cream)] border-white/15"
+            ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-white/15"
             : "bg-[#ffffff] text-[var(--studio-ink)] border-[#e6ded2] shadow-black/10"
         )}
       >
@@ -305,8 +305,8 @@ export function ToolRail({
       className={cn(
         "relative h-full flex flex-col justify-between items-center py-2 select-none border-r transition-colors lg:[@media(max-height:940px)]:overflow-y-auto lg:[@media(max-height:940px)]:overflow-x-hidden",
         dark
-          ? "bg-[var(--studio-night)] border-[#382630] text-zinc-200"
-          : "bg-[#fcfbfa] border-[var(--studio-line)] text-[#3b2b31]"
+          ? "bg-[var(--studio-night)] border-[var(--studio-edge-dark)] text-zinc-200"
+          : "bg-[var(--studio-paper)] border-[var(--studio-line)] text-[var(--studio-ink-2)]"
       )}
     >
       <div
@@ -405,7 +405,7 @@ export function ToolRail({
               className={cn(
                 "z-50 rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
                 dark
-                  ? "border-[#382630] bg-[var(--studio-night)] text-white"
+                  ? "border-[var(--studio-edge-dark)] bg-[var(--studio-night)] text-white"
                   : "border-[var(--studio-line)] bg-[#ffffff] text-[var(--studio-ink)] shadow-black/15"
               )}
             >
@@ -443,10 +443,10 @@ export function ToolRail({
                           : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/5"),
                       dark
                         ? "border-white/5 text-zinc-200 hover:border-[var(--studio-gold)]/40 hover:bg-white/10 hover:text-white"
-                        : "border-[var(--studio-line)] text-[#3b2b31] hover:border-[var(--studio-wine)]/30 hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
+                        : "border-[var(--studio-line)] text-[var(--studio-ink-2)] hover:border-[var(--studio-wine)]/30 hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
                     )}
                   >
-                    <span className="shrink-0 text-[#b8864b]">
+                    <span className="shrink-0 text-[var(--studio-bronze)]">
                       {shape.icon}
                     </span>
                     <span className="truncate">{shape.label}</span>
@@ -465,7 +465,12 @@ export function ToolRail({
           active={activeTool === "gradient"}
           onClick={() => onSelectTool?.("gradient")}
         >
-          <span className="h-4 w-4 rounded-sm bg-gradient-to-tr from-amber-600 via-amber-300 to-amber-100 border border-white/40 shadow-xs" />
+          <span
+            aria-hidden="true"
+            className="grid h-[18px] w-[18px] place-items-center rounded-[4px] border-[1.5px] border-current"
+          >
+            <span className="h-2 w-2 rounded-[2px] bg-gradient-to-tr from-amber-600 via-amber-300 to-amber-100" />
+          </span>
         </ToolButton>
 
         {/* Eyedropper Tool (I) */}
@@ -520,7 +525,7 @@ export function ToolRail({
           dark={dark}
           onClick={() => onAdd("seal")}
         >
-          <Icon name="celebration" size={18} />
+          <Icon name="celebration" size={18} strokeWidth={1.8} />
         </ToolButton>
 
         {/* Security QR Pass */}
@@ -530,7 +535,7 @@ export function ToolRail({
           onClick={() => onAdd("code")}
           disabled={hasEntrySeal}
         >
-          <Icon name="qr_code_scanner" size={18} />
+          <Icon name="qr_code_scanner" size={18} strokeWidth={1.8} />
         </ToolButton>
 
         <Divider dark={dark} />
@@ -571,7 +576,7 @@ export function ToolRail({
             onClick={resetColors}
             dark={dark}
           >
-            <Icon name="swatch" size={18} />
+            <Icon name="swatch" size={18} strokeWidth={1.8} />
           </ToolButton>
           <ToolButton
             label="Swap colours"
@@ -600,7 +605,7 @@ export function ToolRail({
             "grid h-8 w-8 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
             dark
               ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
+              : "text-[var(--studio-ink-3)] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
           )}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -662,7 +667,7 @@ export function ToolRail({
             "grid h-8 w-8 place-items-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--studio-gold)]",
             dark
               ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-              : "text-[#4a363f] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
+              : "text-[var(--studio-ink-3)] hover:bg-[var(--studio-wine)]/5 hover:text-[var(--studio-wine)]"
           )}
         >
           <svg
@@ -671,7 +676,7 @@ export function ToolRail({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.8"
           >
             <path d="m7 16-4-4 4-4" />
             <path d="M3 12h18" />

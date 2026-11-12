@@ -152,3 +152,11 @@ The alignment icons appear in the options bar and again in the inspector. Removi
 - Left open: the phone tabs are 38 px tall inside a 48 px row (the studio's 44 px rule is met for the controls people use most, but not for these); fixing it means changing the sheet's height budget.
 - Evidence: `evidence/tidy-batch41.json` (4 checks), `tidy-batch42.json` (4 checks); `batch28`, `batch29` and `batch33` still pass. Screenshots `screenshots/tidy-f-after-1440.png`, `tidy-g-before-390.png`, `tidy-g-after-390.png`.
 - Still open from the list: B2, B3, C1, C2, C4, I1 to I3, J1, J2, K.
+
+### Fifth batch: B2, B3, C1, C2, C4 and I1
+
+- **B2, B3, C2, C4** Measured at 360, 390, 768, 1024 and 1440 px: the status line under the title already has one size, weight and colour (12 px, regular, muted); the menu row buttons already share one text size and padding; active and resting tools already share size and corner shape; the space above and below each tool-rail divider is equal (10 px). Nothing to change; the checks are kept as guards (`evidence/tidy-batch43.json`, `tidy-batch44.json`).
+- **C1** All tool icons now share one size (18 px) and one stroke (1.8; the three icons from the shared icon set were 2). The gradient tool is an outlined square with a small gradient inside instead of a filled square.
+- **I1** Ten colours used again and again in the designer are now named studio tokens in `globals.css` (`--studio-sand`, `--studio-surface-dark`, `--studio-ink-2`, `--studio-edge-dark`, `--studio-bronze`, `--studio-active-dark`, `--studio-ink-3`, `--studio-paper`, `--studio-wine-2`, `--studio-gold-hover`), replacing 98 hard-coded values. I compared the computed colour of every element in the studio, light and dark, before and after: the only differences are the gradient chip (on purpose) and the same colours printed in a different colour space.
+- **I2, I3** The designer's arbitrary text sizes are already only 12, 13 and 15 px and its one-off radii are the 10 px control radius plus three small ones (2, 3 and 4 px) used inside swatches and handles. Nothing further to change.
+- Still open from the list: J1, J2 (wording and tooltips), K (final before/after set).

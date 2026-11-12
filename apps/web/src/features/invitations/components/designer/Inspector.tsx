@@ -289,7 +289,7 @@ function HexColorInput({
               "grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border transition-colors",
               dark
                 ? "border-white/12 bg-white/[0.06] text-zinc-300 hover:bg-white/[0.12] hover:text-white"
-                : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)]"
             )}
           >
             <svg
@@ -350,7 +350,7 @@ function IconBtn({
         "grid h-10 w-10 place-items-center rounded-[10px] border disabled:opacity-25 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1",
         dark
           ? "border-white/12 bg-white/[0.06] text-zinc-200 hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
-          : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] hover:text-[var(--studio-ink)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
+          : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] hover:text-[var(--studio-ink)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
       )}
     >
       {children}
@@ -664,7 +664,7 @@ export function Inspector({
                           : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] shadow-xs"
                         : dark
                           ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[var(--studio-cream)]"
-                          : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec] text-[var(--studio-ink)]"
+                          : "border-[var(--studio-line)] bg-white hover:bg-[var(--studio-sand)] text-[var(--studio-ink)]"
                     )}
                   >
                     <span
@@ -834,7 +834,7 @@ export function Inspector({
                   "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                   dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
-                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
                 )}
               >
                 <Icon name="upload" size={16} />
@@ -876,7 +876,7 @@ export function Inspector({
                         : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 shadow-xs"
                       : dark
                         ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200"
-                        : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec] text-night"
+                        : "border-[var(--studio-line)] bg-white hover:bg-[var(--studio-sand)] text-night"
                   )}
                 >
                   <span className="mb-1.5 flex gap-1">
@@ -928,7 +928,7 @@ export function Inspector({
                   "w-full rounded-[10px] border p-2.5 text-left transition focus-visible:outline-2 focus-visible:outline-[var(--studio-gold)]",
                   dark
                     ? "border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20"
-                    : "border-[var(--studio-line)] bg-white hover:bg-[#f6f2ec]"
+                    : "border-[var(--studio-line)] bg-white hover:bg-[var(--studio-sand)]"
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -983,7 +983,7 @@ export function Inspector({
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
               )}
             >
               <Icon name="download" size={16} />
@@ -996,7 +996,7 @@ export function Inspector({
                 "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-within:outline-2 focus-within:outline-[var(--studio-gold)]",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
               )}
             >
               <Icon name="upload" size={16} />
@@ -1351,7 +1351,7 @@ export function Inspector({
                     : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                   : dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
-                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] focus-visible:outline-[var(--studio-wine)] shadow-xs"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
               )}
             >
               <svg
@@ -1388,7 +1388,7 @@ export function Inspector({
                     : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)]"
                   : dark
                     ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white focus-visible:outline-[var(--studio-gold)]"
-                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] focus-visible:outline-[var(--studio-wine)] shadow-xs"
+                    : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] focus-visible:outline-[var(--studio-wine)] shadow-xs"
               )}
             >
               <svg
@@ -1420,7 +1420,7 @@ export function Inspector({
                 "inline-flex min-h-9 items-center justify-center rounded-[10px] border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
-                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
               )}
             >
               -90°
@@ -1439,7 +1439,7 @@ export function Inspector({
                 "inline-flex min-h-9 items-center justify-center rounded-[10px] border px-2.5 text-xs font-mono font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
-                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
               )}
             >
               +90°
@@ -2075,7 +2075,7 @@ export function Inspector({
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
                 dark
                   ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12] hover:text-white"
-                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[var(--studio-sand)] shadow-xs"
               )}
             >
               <Icon name="upload" size={16} />
@@ -2356,7 +2356,7 @@ export function Inspector({
                     value={m.value}
                     className={
                       dark
-                        ? "bg-[#23181e] text-[var(--studio-cream)]"
+                        ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)]"
                         : "bg-white text-[var(--studio-ink)]"
                     }
                   >

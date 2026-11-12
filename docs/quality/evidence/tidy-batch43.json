@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-C4",
+    "name": "Space above and below every divider is the same",
+    "ok": true,
+    "detail": "[[10,10],[10,10]]"
+  },
+  {
+    "id": "RD-C1",
+    "name": "Tool icons share one size and stroke; the gradient tool is an outline with a small gradient",
+    "ok": true,
+    "detail": "{\"sizes\":[\"18\"],\"strokes\":[\"1.8\"],\"gradBorder\":\"1px\"}"
+  },
+  {
+    "id": "RD-C2",
+    "name": "Active and resting tools share size and corner shape",
+    "ok": true,
+    "detail": "{\"on\":{\"w\":40,\"h\":40,\"r\":\"8px\"},\"offSizes\":[\"{\\\"w\\\":40,\\\"h\\\":40,\\\"r\\\":\\\"8px\\\"}\"]}"
+  }
+]
