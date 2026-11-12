@@ -56,6 +56,7 @@ import { seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
 import { HistoryMenu, HistoryPanel, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
+import { RoofControl, useRoofSetting } from "./RoofControl";
 import { shareOf } from "./share";
 import { clearanceOf, gapText } from "./clearance";
 import { ruleBreaks, type SeatRule } from "./rules";
@@ -269,6 +270,8 @@ export function HallStudio({
   const [flyout, setFlyout] = useState<Flyout>(null);
   const [labels, setLabels] = useState(true);
   const [rain, setRain] = useState(false);
+  // How solid a tent roof is drawn, remembered on this device.
+  const [roof, setRoof] = useRoofSetting();
   const [keysOpen, setKeysOpen] = useState(false);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [cam, setCam] = useState<{ pct: number; view: "top" | "3d" }>({
@@ -866,6 +869,7 @@ export function HallStudio({
       field: thermal?.field ?? null,
       heat,
       placing: placingUnit,
+      roof,
     }),
     [
       layout,
@@ -886,6 +890,7 @@ export function HallStudio({
       thermal,
       heat,
       placingUnit,
+      roof,
     ]
   );
 
@@ -1913,6 +1918,10 @@ export function HallStudio({
   const warnCount = Object.values(warnings).filter((w) => w !== "tight").length;
   const unseatedSeats = counts.toSeat.people;
   const evening = layout.mood === "evening";
+  // Only a tent has a roof drawn over the tables; a hall's ceiling is never drawn.
+  const tented = ["marquee", "pole-tent", "stretch-tent"].includes(
+    layout.venue.type
+  );
   // Rain only makes sense where there is sky above the tables.
   const openVenue =
     layout.venue.environment === "outdoor" ||
@@ -3039,6 +3048,13 @@ export function HallStudio({
                     </button>
                   </div>
                 </div>
+                {/* Its own chip beside the view bar: the bar scrolls sideways on a narrow screen,
+                    which would clip the roof panel that opens above it. */}
+                {tented && (
+                  <div className={cn(float, "pointer-events-auto p-1")}>
+                    <RoofControl value={roof} onChange={setRoof} />
+                  </div>
+                )}
               </div>
             </div>
 

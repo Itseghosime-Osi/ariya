@@ -5,7 +5,7 @@ import type {
   Environment,
   VenueType,
 } from "@ariya/studio";
-import type { HallLayout } from "./model";
+import { withVenueType, type HallLayout } from "./model";
 import { normaliseCatering, type CateringAnswers } from "./catering";
 
 /**
@@ -101,14 +101,13 @@ export function applySimpleAnswers(
   layout: HallLayout,
   answers: SimpleAnswers
 ): HallLayout {
+  const placed = withVenueType(layout, answers.venueType, answers.environment);
   return {
-    ...layout,
+    ...placed,
     // Evening is the studio's existing mood value; it drives the render, not the numbers.
     mood: answers.timeOfDay === "evening" ? "evening" : "day",
     venue: {
-      ...layout.venue,
-      type: answers.venueType,
-      environment: answers.environment,
+      ...placed.venue,
       catering: {
         ...(layout.venue.catering ?? {}),
         ...cateringFromSimple(answers),
@@ -152,7 +151,7 @@ export const VENUE_CARDS: { key: VenueType; label: string; blurb: string }[] = [
   {
     key: "church",
     label: "Church",
-    blurb: "Pews, and ceremony rather than dinner",
+    blurb: "An aisle and an altar, ceremony rather than dinner",
   },
   {
     key: "hybrid",
