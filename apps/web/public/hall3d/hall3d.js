@@ -3141,18 +3141,17 @@ function applyCamera() {
       m.depthWrite = !near && m.blending !== THREE.AdditiveBlending;
     }
   }
-  // A roof over the tables fades as soon as the camera rises above its eaves, so the plan stays
-  // readable from above. Unlike a wall this does not depend on the polar angle: looking straight
-  // down is exactly when the roof is most in the way.
-  // In the tilted 3D view it stays faintly there, so a tent still reads as a tent; straight down,
-  // where the plan matters most, it all but disappears.
+  // A tent roof is drawn as solid as the host chooses, so they can see the venue and still work on
+  // the tables under it. Straight down, where the plan matters most, it is always see-through, and
+  // hidden means not drawn at all.
+  const roofSetting = typeof state.roof === "number" ? state.roof : 0.6;
   for (const r of roofs) {
-    const above = camera.position.y > r.y;
-    const faded = pol < 0.25 ? 0.06 : 0.55;
+    const amount = pol < 0.25 ? Math.min(roofSetting, 0.08) : roofSetting;
     for (const m of r.mats) {
       m.userData.base ??= m.opacity;
-      m.opacity = above ? faded : m.userData.base;
-      m.depthWrite = !above;
+      m.opacity = m.userData.base * amount;
+      m.visible = amount > 0.001;
+      m.depthWrite = amount > 0.95;
     }
   }
   // Glow sprites face the camera.
