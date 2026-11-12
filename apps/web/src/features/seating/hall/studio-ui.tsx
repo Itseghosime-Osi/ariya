@@ -71,7 +71,7 @@ export function Section({
     }
   };
   const headingClass = cn(
-    "text-[11px] font-semibold uppercase tracking-[0.16em]",
+    "text-xs font-semibold uppercase tracking-[0.16em]",
     dark ? "text-zinc-400" : "text-[#7a5b67]"
   );
   return (
@@ -239,7 +239,7 @@ export function Tiles<T extends string>({
               [next]?.focus();
           }}
           onClick={() => onPick(o.key)}
-          className="group flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-hairline bg-white px-1 py-2 text-[11px] font-medium leading-tight text-night transition-all hover:-translate-y-px hover:border-night/30 hover:shadow-sm aria-checked:border-night aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          className="group flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-hairline bg-white px-1 py-2 text-xs font-medium leading-tight text-night transition-all hover:-translate-y-px hover:border-night/30 hover:shadow-sm aria-checked:border-night aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
         >
           {o.icon && (
             <span className="grid h-7 place-items-center text-night/80 group-aria-checked:text-[#e9c98a]">
@@ -349,7 +349,7 @@ export function MetreField({
   };
   return (
     <div>
-      <label htmlFor={id} className="text-[11px] font-semibold text-label-2">
+      <label htmlFor={id} className="text-xs font-semibold text-label-2">
         {label}
       </label>
       <div className="mt-1 flex items-center rounded-lg border border-hairline bg-white pr-2.5 focus-within:border-night">
@@ -393,7 +393,7 @@ export function Stepper({
         aria-label={`Fewer ${label.toLowerCase()}`}
         disabled={value <= min}
         onClick={() => onChange(value - 1)}
-        className="grid h-9 w-9 place-items-center rounded-lg text-lg text-night hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-burgundy"
+        className="grid h-9 w-9 place-items-center rounded-lg text-xl text-night hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-burgundy"
       >
         −
       </button>
@@ -408,7 +408,7 @@ export function Stepper({
         aria-label={`More ${label.toLowerCase()}`}
         disabled={value >= max}
         onClick={() => onChange(value + 1)}
-        className="grid h-9 w-9 place-items-center rounded-lg text-lg text-night hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-burgundy"
+        className="grid h-9 w-9 place-items-center rounded-lg text-xl text-night hover:bg-[#f1ece4] disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-burgundy"
       >
         +
       </button>
@@ -443,7 +443,7 @@ export function Toggle({
         {hint && (
           <span
             className={cn(
-              "block text-[11px] transition-colors",
+              "block text-xs transition-colors",
               dark ? "text-zinc-400" : "text-[#7a5b67]"
             )}
           >

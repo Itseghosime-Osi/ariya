@@ -1781,7 +1781,7 @@ export function InvitationDesigner({
               >
                 <p
                   className={cn(
-                    "font-serif text-lg font-bold",
+                    "font-serif text-xl font-bold",
                     dialogTheme(dark).title
                   )}
                 >
@@ -1817,7 +1817,7 @@ export function InvitationDesigner({
           aria-label="Event details changed"
           data-testid="event-facts-banner"
           className={cn(
-            "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-[13px] shadow-xl",
+            "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-sm shadow-xl",
             dark
               ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
               : "border-[var(--studio-gold)] bg-[#fffaf0] text-[var(--studio-ink-2)]"
@@ -1826,7 +1826,7 @@ export function InvitationDesigner({
           <p className="font-semibold">
             The event&rsquo;s details have changed since this card was saved.
           </p>
-          <ul className="mt-1 space-y-0.5 text-[12px] opacity-80">
+          <ul className="mt-1 space-y-0.5 text-xs opacity-80">
             {staleFacts.map((fact) => (
               <li key={fact.id}>
                 <b>{fact.label}:</b> {fact.current || "(empty)"} &rarr;{" "}
@@ -1845,7 +1845,7 @@ export function InvitationDesigner({
                   text: "Card updated from the event details. You can undo this.",
                 });
               }}
-              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
+              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#6e1426]"
             >
               Update the card
             </button>
@@ -1859,7 +1859,7 @@ export function InvitationDesigner({
                 }
                 setKeptKey(factsKey);
               }}
-              className="rounded-full border px-4 py-1.5 text-[12px] font-semibold hover:bg-black/5"
+              className="rounded-full border px-4 py-1.5 text-xs font-semibold hover:bg-black/5"
             >
               Keep my wording
             </button>
@@ -1871,7 +1871,7 @@ export function InvitationDesigner({
         <div
           data-testid="drag-readout"
           aria-hidden="true"
-          className="pointer-events-none fixed bottom-[72px] left-1/2 z-40 -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-[12px] font-semibold text-ivory shadow-lg"
+          className="pointer-events-none fixed bottom-[72px] left-1/2 z-40 -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-xs font-semibold text-ivory shadow-lg"
         >
           {readout}
         </div>
@@ -1882,7 +1882,7 @@ export function InvitationDesigner({
           <p
             role="status"
             className={cn(
-              "flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold shadow-xl border",
+              "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow-xl border",
               notice.tone === "ok"
                 ? dark
                   ? "bg-emerald-950/90 text-emerald-200 border-emerald-800"
@@ -1902,7 +1902,7 @@ export function InvitationDesigner({
                   run();
                 }}
                 className={cn(
-                  "min-h-8 rounded-full px-3 text-[13px] font-bold underline",
+                  "min-h-8 rounded-full px-3 text-sm font-bold underline",
                   dark ? "hover:bg-white/10" : "hover:bg-black/10"
                 )}
               >
@@ -1929,7 +1929,7 @@ export function InvitationDesigner({
           role="alert"
           data-testid="studio-error-alert"
           className={cn(
-            "pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-semibold shadow-xl",
+            "pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold shadow-xl",
             dark
               ? "border-red-800 bg-red-950/90 text-red-200"
               : "border-red-200 bg-red-50 text-red-900"
@@ -1942,7 +1942,7 @@ export function InvitationDesigner({
             type="button"
             onClick={doc.retrySave}
             className={cn(
-              "min-h-8 shrink-0 rounded-full px-3 text-[13px] font-bold underline",
+              "min-h-8 shrink-0 rounded-full px-3 text-sm font-bold underline",
               dark ? "hover:bg-white/10" : "hover:bg-black/10"
             )}
           >

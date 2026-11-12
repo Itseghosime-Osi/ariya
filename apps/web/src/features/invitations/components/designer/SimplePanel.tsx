@@ -331,11 +331,11 @@ export function SimplePanel({
           >
             Draft it
           </BigButton>
-          {summary && <p className="text-[13px] text-label-2">{summary}</p>}
+          {summary && <p className="text-sm text-label-2">{summary}</p>}
         </div>
       </Section>
 
-      <p className="px-4 py-4 text-[13px] text-label-2">
+      <p className="px-4 py-4 text-sm text-label-2">
         Want to place things anywhere, draw shapes or turn things? Switch to Pro
         at the top. Everything you did here stays.
       </p>

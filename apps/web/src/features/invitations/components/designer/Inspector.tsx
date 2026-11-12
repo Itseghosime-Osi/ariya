@@ -632,7 +632,7 @@ export function Inspector({
     return (
       <div data-testid="inspector-card">
         <div className="px-4 pt-4 pb-2">
-          <p className="font-serif text-lg text-night">
+          <p className="font-serif text-xl text-night">
             Your invitation is ready to edit
           </p>
           <p className="mt-1 text-xs leading-relaxed text-label-2">
@@ -781,7 +781,7 @@ export function Inspector({
             )}
             <p
               className={cn(
-                "mt-2 text-[12px] leading-relaxed",
+                "mt-2 text-xs leading-relaxed",
                 dark ? "text-zinc-400" : "text-label-2"
               )}
             >
@@ -893,7 +893,7 @@ export function Inspector({
                   </span>
                   <span
                     className={cn(
-                      "text-[13px] font-semibold",
+                      "text-sm font-semibold",
                       design.theme === t
                         ? dark
                           ? "text-[var(--studio-gold)]"
@@ -1032,7 +1032,7 @@ export function Inspector({
         aside={
           <span
             className={cn(
-              "truncate text-[15px] font-semibold",
+              "truncate text-base font-semibold",
               dark ? "text-[var(--studio-cream)]" : "text-[var(--studio-ink)]"
             )}
           >
@@ -1041,7 +1041,7 @@ export function Inspector({
         }
       >
         {layer.locked && (
-          <p className="mb-3 rounded-[10px] bg-gold/15 px-3 py-2 text-[12px] text-gold-ink">
+          <p className="mb-3 rounded-[10px] bg-gold/15 px-3 py-2 text-xs text-gold-ink">
             This layer is locked. Unlock it in the layers list to move, resize,
             or edit its style.
           </p>
@@ -1054,7 +1054,7 @@ export function Inspector({
             <div className="flex items-center gap-1.5">
               <span
                 className={cn(
-                  "text-[13px] font-semibold",
+                  "text-sm font-semibold",
                   dark ? "text-zinc-300" : "text-[var(--studio-ink)]"
                 )}
               >
@@ -2321,7 +2321,7 @@ export function Inspector({
         <Section collapsible dark={dark} title="Entry seal">
           <p
             className={cn(
-              "text-[13px] leading-relaxed",
+              "text-sm leading-relaxed",
               dark ? "text-zinc-300" : "text-label-2"
             )}
           >
