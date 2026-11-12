@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-G2-360",
+    "name": "Five phone tabs fit without clipping and have a resting background",
+    "ok": true,
+    "detail": "[\"Properties:66x38\",\"Colours:66x38\",\"Layers:66x38\",\"History:66x38\",\"View:66x38\"]"
+  },
+  {
+    "id": "RD-G2-axe-360",
+    "name": "Tab contrast and names pass axe",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-G2-390",
+    "name": "Five phone tabs fit without clipping and have a resting background",
+    "ok": true,
+    "detail": "[\"Properties:72x38\",\"Colours:72x38\",\"Layers:72x38\",\"History:72x38\",\"View:72x38\"]"
+  },
+  {
+    "id": "RD-G2-axe-390",
+    "name": "Tab contrast and names pass axe",
+    "ok": true,
+    "detail": ""
+  }
+]

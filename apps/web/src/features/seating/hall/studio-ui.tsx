@@ -39,6 +39,7 @@ export function Section({
   aside,
   dark,
   collapsible = false,
+  defaultClosed = false,
 }: {
   title: string;
   children: React.ReactNode;
@@ -46,23 +47,25 @@ export function Section({
   dark?: boolean;
   /** The heading becomes a button that folds the section; the choice is remembered per title. */
   collapsible?: boolean;
+  /** With `collapsible`: start folded until the person opens it (their choice is then remembered). */
+  defaultClosed?: boolean;
 }) {
   const key = `ariya:section-closed:${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-  const [closed, setClosed] = React.useState(false);
+  const [closed, setClosed] = React.useState(collapsible && defaultClosed);
   React.useEffect(() => {
     if (!collapsible) return;
     try {
-      setClosed(localStorage.getItem(key) === "1");
+      const saved = localStorage.getItem(key);
+      setClosed(saved === null ? defaultClosed : saved === "1");
     } catch {
       /* storage blocked: sections simply start open */
     }
-  }, [collapsible, key]);
+  }, [collapsible, defaultClosed, key]);
   const toggle = () => {
     const next = !closed;
     setClosed(next);
     try {
-      if (next) localStorage.setItem(key, "1");
-      else localStorage.removeItem(key);
+      localStorage.setItem(key, next ? "1" : "0");
     } catch {
       /* not remembered */
     }
