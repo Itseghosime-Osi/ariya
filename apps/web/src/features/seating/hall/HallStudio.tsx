@@ -43,6 +43,7 @@ import {
   Users,
   Wand2,
   X,
+  History as HistoryIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -53,7 +54,7 @@ import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
 import { seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
-import { HistoryMenu, type HistoryEntry } from "./HistoryMenu";
+import { HistoryMenu, HistoryPanel, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
 import { shareOf } from "./share";
 import { clearanceOf, gapText } from "./clearance";
@@ -407,8 +408,8 @@ export function HallStudio({
     mode === "simple"
       ? "left-3"
       : dockShown
-        ? "left-[4.25rem] lg:left-[392px]"
-        : "left-[4.25rem] lg:left-[76px]";
+        ? "left-[4.25rem] lg:left-[368px]"
+        : "left-[4.25rem] lg:left-[68px]";
 
   // How much of the hall the side panel covers, so "fit" centres the room in the visible part.
   const body = useRef<HTMLDivElement>(null);
@@ -434,20 +435,20 @@ export function HallStudio({
           r.left +
             (wide
               ? dockShown
-                ? 392
+                ? 356
                 : mode === "studio"
-                  ? 76
-                  : 12
+                  ? 56
+                  : 0
               : mode === "studio"
                 ? 72
                 : 12)
         ),
-        top: Math.round(r.top + 64),
+        top: Math.round(r.top + (wide ? 56 : 64)),
         right: Math.round(
-          outRight + (wide && panelOpen ? p.offsetWidth + 12 : 12)
+          outRight + (wide ? (panelOpen ? p.offsetWidth : 0) : 12)
         ),
         bottom: Math.round(
-          outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : 0)
+          outBottom + (!wide && panelOpen ? p.offsetHeight + 12 : wide ? 32 : 0)
         ),
       };
       setInset((cur) =>
@@ -1981,6 +1982,14 @@ export function HallStudio({
       stat: catering ? `${catering.portions} portions` : "—",
     },
     {
+      key: "history",
+      label: "History",
+      icon: HistoryIcon,
+      stat: hall.history.length
+        ? `${hall.history.length} ${hall.history.length === 1 ? "step" : "steps"}`
+        : "No steps yet",
+    },
+    {
       key: "risk",
       label: "Risks",
       icon: ShieldAlert,
@@ -2108,6 +2117,12 @@ export function HallStudio({
           {/* The hall fills the whole studio; the controls and the side panel float over it, so
               panning never crops it at a box edge. */}
           <div ref={body} className="relative min-h-0 flex-1">
+            {/* On a laptop or desktop the studio is three fixed zones under one top bar, like a
+                design tool: this strip is that bar's background; the title and actions sit on it. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-14 border-b border-hairline bg-[#fbf9f5]"
+            />
             <Hall3D
               ref={view3d}
               scene={scene}
@@ -2122,11 +2137,11 @@ export function HallStudio({
                 // be clicked.
                 "pointer-events-none absolute inset-0 z-10 transition-[right,bottom] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
                 panelOpen &&
-                  "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[372px]"
+                  "max-lg:bottom-[calc(44%+0.75rem)] lg:right-[360px]"
               )}
             >
               {/* Back, the page's name and the mode switch: the only chrome the app leaves. */}
-              <div className="pointer-events-auto absolute left-3 top-3 max-w-[calc(100%-23.5rem)]">
+              <div className="pointer-events-auto absolute left-3 top-0 flex h-14 max-w-[calc(100%-30rem)] items-center">
                 <WorkspaceBar
                   backHref={backHref ?? `/events/${eventId}`}
                   eventTitle={eventTitle}
@@ -2134,14 +2149,12 @@ export function HallStudio({
                   status={
                     <SaveStatus state={hall.saveState} onRetry={hall.retry} />
                   }
-                >
-                  <ModeSwitch mode={mode} onChange={chooseMode} />
-                </WorkspaceBar>
+                />
               </div>
               {/* What needs attention, under the bar and clear of the tool rail and dock. */}
               <div
                 className={cn(
-                  "pointer-events-none absolute right-3 top-[80px] flex flex-col items-center gap-1.5",
+                  "pointer-events-none absolute right-3 top-[80px] flex flex-col items-center gap-1.5 lg:top-[68px]",
                   leftEdge
                 )}
               >
@@ -2243,10 +2256,15 @@ export function HallStudio({
               {/* Undo, redo, picture */}
               <div
                 className={cn(
-                  float,
-                  "pointer-events-auto absolute right-3 top-3 flex items-center gap-0.5 p-1"
+                  "pointer-events-auto absolute top-0 flex h-14 items-center gap-0.5",
+                  // The canvas controls stop at the side panel on a laptop; the top bar runs to
+                  // the screen's edge, so its actions reach past that by the panel's width.
+                  panelOpen ? "right-3 lg:right-[-348px]" : "right-3"
                 )}
               >
+                <div className="mr-2 hidden sm:block">
+                  <ModeSwitch mode={mode} onChange={chooseMode} />
+                </div>
                 {onNewTable && (
                   <>
                     <button
@@ -2387,7 +2405,7 @@ export function HallStudio({
                 // the left dock never covers the start of a message.
                 <div
                   className={cn(
-                    "pointer-events-none absolute bottom-20 right-3 flex justify-center",
+                    "pointer-events-none absolute bottom-20 right-3 flex justify-center lg:bottom-[6.5rem]",
                     leftEdge
                   )}
                 >
@@ -2429,7 +2447,7 @@ export function HallStudio({
                     aria-orientation="vertical"
                     className={cn(
                       float,
-                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[80px] max-lg:max-h-[calc(100%-6rem)] max-lg:overflow-y-auto lg:top-1/2 lg:max-h-[calc(100%-9rem)] lg:-translate-y-1/2"
+                      "pointer-events-auto absolute left-3 flex flex-col items-center gap-1 rounded-[26px] p-1.5 max-lg:top-[80px] max-lg:max-h-[calc(100%-6rem)] max-lg:overflow-y-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-14 lg:overflow-y-auto lg:rounded-none lg:border-y-0 lg:border-l-0 lg:py-3 lg:shadow-none"
                     )}
                   >
                     <button
@@ -2614,7 +2632,7 @@ export function HallStudio({
                   {/* Flyouts */}
                   {flyout && (
                     <div
-                      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
+                      className="pointer-events-auto absolute left-[4.25rem] top-[80px] z-30 max-h-[calc(100%-6rem)] lg:left-[4.5rem] lg:top-[68px] w-[min(300px,calc(100%-6rem))] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-3 shadow-[0_20px_50px_-20px_rgba(28,7,13,0.45)]"
                       role="dialog"
                       aria-label={
                         flyout === "table"
@@ -2799,7 +2817,7 @@ export function HallStudio({
                   {dockShown && (
                     <div
                       id="left-dock"
-                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[80px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300"
+                      className="animate-in fade-in slide-in-from-left-2 pointer-events-auto absolute bottom-3 left-[4.25rem] top-[80px] z-20 w-[min(310px,calc(100%-5.5rem))] duration-300 lg:bottom-0 lg:left-14 lg:top-14 lg:w-[300px] lg:border-r lg:border-hairline lg:bg-[#fbf9f5] lg:[&>*]:h-full lg:[&>*]:rounded-none lg:[&>*]:border-0 lg:[&>*]:shadow-none"
                     >
                       <LeftDock
                         layout={layout}
@@ -2862,12 +2880,49 @@ export function HallStudio({
                 </>
               )}
 
-              {/* Zoom and camera */}
+              {/* Status line on a laptop, like a design tool's: the mouse and keys on the left, the
+                  plan's totals and the zoom on the right. It replaces the hints that used to
+                  crowd the bottom of the side panel. */}
+              <div
+                className={cn(
+                  "pointer-events-auto absolute bottom-0 right-0 hidden h-8 items-center justify-between gap-4 border-t border-hairline bg-[#fbf9f5] px-3 text-[11px] text-label-2 lg:flex",
+                  mode === "simple"
+                    ? "left-0"
+                    : dockShown
+                      ? "left-[356px]"
+                      : "left-14"
+                )}
+                data-testid="hall-status-line"
+              >
+                <p className="min-w-0 truncate">
+                  <kbd className="font-sans font-semibold text-night">Drag</kbd>{" "}
+                  a table to move ·{" "}
+                  <kbd className="font-sans font-semibold text-night">Drag</kbd>{" "}
+                  empty space to turn ·{" "}
+                  <kbd className="font-sans font-semibold text-night">
+                    Space
+                  </kbd>{" "}
+                  to pan ·{" "}
+                  <kbd className="font-sans font-semibold text-night">
+                    Shift
+                  </kbd>
+                  -drag to select many ·{" "}
+                  <kbd className="font-sans font-semibold text-night">?</kbd>{" "}
+                  for shortcuts
+                </p>
+                <p className="shrink-0 tabular-nums">
+                  {data.tables.length}{" "}
+                  {data.tables.length === 1 ? "table" : "tables"} · {seats}{" "}
+                  seats · {counts.seated.people} of {counts.accepted.people}{" "}
+                  seated · {cam.pct}%
+                </p>
+              </div>
+
               <div
                 // Centred in the free space between the rail (or dock) and the panel, and wrapping
                 // rather than running off the edge when that space is narrow.
                 className={cn(
-                  "pointer-events-none absolute bottom-3 right-3 flex flex-wrap items-center justify-center gap-2",
+                  "pointer-events-none absolute bottom-3 right-3 flex flex-wrap items-center justify-center gap-2 lg:bottom-10",
                   leftEdge
                 )}
               >
@@ -2993,7 +3048,7 @@ export function HallStudio({
               inert={!panelOpen}
               aria-hidden={!panelOpen || undefined}
               className={cn(
-                "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-0 lg:h-auto lg:w-[360px]",
+                "absolute inset-x-0 bottom-0 flex h-[44%] min-h-0 flex-col overflow-hidden rounded-[22px] border border-hairline bg-[#fbf9f5] shadow-[0_0_0_rgba(0,0,0,0)] transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:inset-x-auto lg:bottom-0 lg:right-0 lg:top-14 lg:h-auto lg:w-[360px] lg:rounded-none lg:border-y-0 lg:border-r-0",
                 !panelOpen &&
                   "pointer-events-none translate-y-[calc(100%+1rem)] scale-[0.98] opacity-0 blur-[2px] lg:translate-x-[calc(100%+1.5rem)] lg:translate-y-0"
               )}
@@ -3059,7 +3114,7 @@ export function HallStudio({
                 {TOOL_GROUPS.map((g) => (
                   <div key={g.label} role="presentation">
                     <p
-                      className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-ink"
+                      className="px-1 pb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a5b67]"
                       aria-hidden="true"
                     >
                       {g.label}
@@ -3427,6 +3482,8 @@ export function HallStudio({
                     onExport={exportCatering}
                     exporting={exporting}
                   />
+                ) : deck === "history" ? (
+                  <HistoryPanel entries={historyEntries} />
                 ) : deck === "risk" ? (
                   <RiskPanel
                     report={risk}
@@ -3449,14 +3506,6 @@ export function HallStudio({
                   />
                 )}
               </div>
-              <p
-                hidden={mode === "simple"}
-                className="hidden border-t border-hairline px-4 py-2 text-[11px] leading-snug text-label-2 lg:block"
-              >
-                Drag a table to move it · drag empty space to turn the hall ·
-                right-drag or Space to pan · Shift-drag to select many · press ?
-                for shortcuts
-              </p>
             </div>
           </div>
         </>

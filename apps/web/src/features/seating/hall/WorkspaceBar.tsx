@@ -13,48 +13,45 @@ export function WorkspaceBar({
   detail,
   status,
   title = "Seating & Floor Plan",
-  children,
 }: {
   backHref: string;
   /** The page's own name. The workspace keeps it as the screen's heading. */
   title?: string;
   eventTitle?: string;
-  /** A short line after the event name: the hall's size and whether it has saved. */
+  /** A short note after the event name, such as the hall's size. */
   detail?: string;
-  /** Whether the hall is saved, shown under the title on every screen size. */
+  /** Whether the hall is saved, on the same quiet line as the event name. */
   status?: ReactNode;
-  /** Sits at the end of the bar: the mode switch. */
-  children?: ReactNode;
 }) {
+  // Compact, like the invitation designer's bar: a round back button, the page's name, and one
+  // small line under it with the event, the hall size and whether it is saved. The mode switch
+  // and the actions live on the right of the same top bar.
   return (
-    <div className="flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/95 p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(28,7,13,0.35)] backdrop-blur">
+    <div className="flex min-w-0 max-w-full items-center gap-3">
       <BackLink
         href={backHref}
         aria-label="Back"
-        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-night px-4 text-xs font-semibold text-white transition-colors hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-hairline bg-white text-night transition-colors hover:bg-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
       >
-        <ArrowLeft size={15} aria-hidden="true" />
-        Back
+        <ArrowLeft size={17} aria-hidden="true" />
       </BackLink>
-      <div className="mx-2 min-w-0 pr-1">
+      <div className="min-w-0">
         <h1 className="truncate font-display text-[15px] font-bold leading-tight text-night">
           {title}
         </h1>
-        <p className="truncate text-[11px] leading-tight text-label-2">
-          {[eventTitle, detail].filter(Boolean).join(" · ")}
-        </p>
-        {status && <div className="mt-0.5 leading-tight">{status}</div>}
+        {/* The save status comes first, so a long event name is what gets cut short. */}
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] leading-tight text-label-2">
+          {status && (
+            <>
+              <span className="shrink-0">{status}</span>
+              <span aria-hidden="true">·</span>
+            </>
+          )}
+          <span className="truncate">
+            {[eventTitle, detail].filter(Boolean).join(" · ")}
+          </span>
+        </div>
       </div>
-      {children && (
-        <>
-          <div
-            className="mx-1 hidden h-6 w-px shrink-0 bg-hairline sm:block"
-            aria-hidden="true"
-          />
-          {/* The mode switch lives here at every width; on a phone it drops below the bar. */}
-          <div className="hidden shrink-0 sm:block">{children}</div>
-        </>
-      )}
     </div>
   );
 }
