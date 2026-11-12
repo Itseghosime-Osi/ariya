@@ -140,6 +140,10 @@ function beforeCanvasResize(
  * The invitation designer: a full-screen workspace like the seating studio. Simple mode asks
  * plain questions; Pro puts every tool in reach. Both edit one document, which saves itself.
  */
+// One look for the three round header buttons: back, help, theme.
+const HEADER_BUTTON =
+  "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-hairline text-night hover:bg-burgundy/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--studio-wine)]";
+
 export function InvitationDesigner({
   eventId,
   eventTitle,
@@ -1646,7 +1650,7 @@ export function InvitationDesigner({
           <Link
             href={backHref}
             aria-label="Back to invitations"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-hairline text-night hover:bg-burgundy/10"
+            className={HEADER_BUTTON}
           >
             <Icon name="arrow_back" size={18} />
           </Link>
@@ -1672,7 +1676,7 @@ export function InvitationDesigner({
             aria-label="Help and shortcuts"
             title="Help and shortcuts (?)"
             onClick={() => setHelpOpen(true)}
-            className="hidden h-11 w-11 place-items-center rounded-full text-sm font-bold text-night hover:bg-burgundy/10 sm:grid"
+            className={cn(HEADER_BUTTON, "hidden text-sm font-bold sm:grid")}
           >
             ?
           </button>
@@ -1686,7 +1690,7 @@ export function InvitationDesigner({
             title={dark ? "Light interface" : "Dark interface"}
             aria-pressed={dark}
             onClick={toggleDark}
-            className="grid h-10 w-10 place-items-center rounded-full text-night hover:bg-burgundy/10"
+            className={HEADER_BUTTON}
           >
             <Icon name="swatch" size={18} />
           </button>
@@ -1924,7 +1928,12 @@ export function InvitationDesigner({
         <div
           role="alert"
           data-testid="studio-error-alert"
-          className="pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl bg-red-600/95 text-white px-4 py-2 text-[12px] font-semibold shadow-lg"
+          className={cn(
+            "pointer-events-auto fixed bottom-14 left-4 z-50 flex max-w-sm items-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-semibold shadow-xl",
+            dark
+              ? "border-red-800 bg-red-950/90 text-red-200"
+              : "border-red-200 bg-red-50 text-red-900"
+          )}
         >
           <span className="flex-1">
             {doc.saveError ?? "Your last change was not saved."}
@@ -1932,7 +1941,10 @@ export function InvitationDesigner({
           <button
             type="button"
             onClick={doc.retrySave}
-            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-bold hover:bg-white/30 transition-colors"
+            className={cn(
+              "min-h-8 shrink-0 rounded-full px-3 text-[13px] font-bold underline",
+              dark ? "hover:bg-white/10" : "hover:bg-black/10"
+            )}
           >
             Retry
           </button>

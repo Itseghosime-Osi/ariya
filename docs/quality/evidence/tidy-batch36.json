@@ -1,0 +1,32 @@
+[
+  {
+    "id": "RD-B1-390",
+    "name": "Round header buttons share size, border and radius",
+    "ok": true,
+    "detail": "[{\"n\":\"Back to invitations\",\"shown\":true,\"w\":40,\"h\":40,\"border\":\"1px\",\"radius\":\"3.35544e+07px\"},{\"n\":\"Switch to the\",\"shown\":true,\"w\":40,\"h\":40,\"border\":\"1px\",\"radius\":\"3.35544e+07px\"}]"
+  },
+  {
+    "id": "RD-B1-390-fit",
+    "name": "Header does not overflow",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-B1-1440",
+    "name": "Round header buttons share size, border and radius",
+    "ok": true,
+    "detail": "[{\"n\":\"Back to invitations\",\"shown\":true,\"w\":40,\"h\":40,\"border\":\"1px\",\"radius\":\"3.35544e+07px\"},{\"n\":\"Help and shortcuts\",\"shown\":true,\"w\":40,\"h\":40,\"border\":\"1px\",\"radius\":\"3.35544e+07px\"},{\"n\":\"Switch to the\",\"shown\":true,\"w\":40,\"h\":40,\"border\":\"1px\",\"radius\":\"3.35544e+07px\"}]"
+  },
+  {
+    "id": "RD-B1-1440-fit",
+    "name": "Header does not overflow",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-H1-note",
+    "name": "Error alert only shows on save failure (not at rest)",
+    "ok": true,
+    "detail": ""
+  }
+]

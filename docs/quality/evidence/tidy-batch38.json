@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-E3-360",
+    "name": "Bottom bar targets are touch size and fit",
+    "ok": true,
+    "detail": "{\"n\":6,\"over\":false}"
+  },
+  {
+    "id": "RD-E3-390",
+    "name": "Bottom bar targets are touch size and fit",
+    "ok": true,
+    "detail": "{\"n\":6,\"over\":false}"
+  },
+  {
+    "id": "RD-E3-1440",
+    "name": "Bottom bar targets keep desktop size and fit",
+    "ok": true,
+    "detail": "{\"n\":7,\"over\":false}"
+  }
+]
