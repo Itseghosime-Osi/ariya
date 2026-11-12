@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RD-TT-360",
+    "name": "Tool buttons and phone tabs are at least 44px on touch",
+    "ok": true,
+    "detail": "{\"tools\":[\"44x44\"],\"tabs\":[\"66x44\"]}"
+  },
+  {
+    "id": "RD-TT-fit-360",
+    "name": "Nothing overflows sideways and the canvas does not run under the bottom bar",
+    "ok": true,
+    "detail": "{\"stageBottom\":568,\"statusTop\":688}"
+  },
+  {
+    "id": "RD-TT-390",
+    "name": "Tool buttons and phone tabs are at least 44px on touch",
+    "ok": true,
+    "detail": "{\"tools\":[\"44x44\"],\"tabs\":[\"72x44\"]}"
+  },
+  {
+    "id": "RD-TT-fit-390",
+    "name": "Nothing overflows sideways and the canvas does not run under the bottom bar",
+    "ok": true,
+    "detail": "{\"stageBottom\":672,\"statusTop\":792}"
+  },
+  {
+    "id": "RD-TT-768",
+    "name": "Tool buttons and phone tabs are at least 44px on touch",
+    "ok": true,
+    "detail": "{\"tools\":[\"44x44\"],\"tabs\":[\"148x44\"]}"
+  },
+  {
+    "id": "RD-TT-fit-768",
+    "name": "Nothing overflows sideways and the canvas does not run under the bottom bar",
+    "ok": true,
+    "detail": "{\"stageBottom\":852,\"statusTop\":972}"
+  },
+  {
+    "id": "RD-TT-1440",
+    "name": "Desktop tool buttons keep 40px",
+    "ok": true,
+    "detail": "[\"40x40\"]"
+  },
+  {
+    "id": "RD-TT-fit-1440",
+    "name": "Nothing overflows sideways and the canvas does not run under the bottom bar",
+    "ok": true,
+    "detail": "{\"stageBottom\":844,\"statusTop\":844}"
+  }
+]

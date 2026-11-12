@@ -170,3 +170,8 @@ The alignment icons appear in the options bar and again in the inspector. Removi
 - **K3** Pixel comparison was done as a computed-colour comparison of every studio element before and after the colour-token change (light and dark): the only difference is the gradient chip, on purpose.
 - **K4** `designer-redesign-checklist.md` now has progress notes on K2, K3, K6, K8, K9 and L7. None is closed: the items ask for more than the tidy covers (tool buttons are 40 px not 44 px, no written type scale, spacing and shadow still literal, 50-layer test not run, header order not redesigned).
 - **Open after the tidy:** the phone tabs are 38 px tall (see the fourth batch); the shared panel components used by the seating studio (`studio-ui.tsx`) still have their own radii and colours; a real-device pass on phones.
+
+### After the tidy: 44 px touch targets for the tool buttons and phone tabs
+
+- On touch screens the tool rail buttons are 44 px (they were 40 px) and the five phone tabs (Properties, Colours, Layers, History, View) are 44 px tall (they were 38 px). To make room the phone tab row and the tool strip are 52 px tall instead of 48 px; the canvas still ends above the bottom bar at 360, 390 and 768 px. Desktop tool buttons stay 40 px (mouse). Evidence: `evidence/tidy-batch46.json` (8 checks), `screenshots/tidy-touch-after-390.png`.
+- This closes the first two items in "Open after the tidy" above. Still open: the shared panel components used by the seating studio, and a real-device pass on phones.
