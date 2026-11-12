@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
+import { dialogTheme } from "./dialog-theme";
 import {
   exportInvitation,
   invitationExportSize,
@@ -19,6 +21,8 @@ interface ExportModalProps {
   eventId: string;
   coupleName?: string;
   getCardElement: () => HTMLElement | null;
+  /** Called after a file has been handed to the browser, so the studio can confirm it. */
+  onExported?: (format: ExportFormat) => void;
 }
 
 interface FormatCard {
@@ -34,36 +38,41 @@ const FORMATS: FormatCard[] = [
   {
     id: "pdf",
     title: "PDF for printing",
-    badge: "Recommended for Print",
-    description:
-      "A flattened PDF, 5 inches wide, with the invitation rendered at 300 DPI.",
+    badge: "Print",
+    description: "A flat PDF at 300 DPI, 5 inches wide. Best for a printer.",
     resolution: "300 DPI · 5 inches wide",
     icon: "document",
   },
   {
     id: "png",
     title: "High-Resolution PNG",
-    badge: "Lossless (3x)",
-    description:
-      "A high-resolution image of your invitation, suitable for screens and sharing.",
+    badge: "Lossless",
+    description: "A sharp picture for screens and sharing.",
     resolution: "3x Native Canvas Size",
     icon: "sparkles",
   },
   {
     id: "jpeg",
     title: "Compressed JPEG",
-    badge: "Fast & Light",
-    description:
-      "Optimised for WhatsApp, email attachments, and instant guest preview.",
+    badge: "Light",
+    description: "A medium-size picture for email and quick previews.",
     resolution: "2x Scaled (95% Quality)",
+    icon: "swatch",
+  },
+  {
+    id: "whatsapp",
+    title: "Small for WhatsApp",
+    badge: "Under 400 KB",
+    description: "Sends fast on a slow connection and still reads on a phone.",
+    resolution: "Up to 1600 px, compressed",
     icon: "swatch",
   },
   {
     id: "json",
     title: "Design Backup (.json)",
-    badge: "Editable Source",
+    badge: "Editable",
     description:
-      "An editable backup of your invitation, including its layers and styling.",
+      "A copy you can open again in the studio, with every layer kept.",
     resolution: "Editable design",
     icon: "download",
   },
@@ -77,6 +86,7 @@ export function ExportModal({
   eventId,
   coupleName,
   getCardElement,
+  onExported,
 }: ExportModalProps) {
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
@@ -87,6 +97,7 @@ export function ExportModal({
   const returnFocus = useRef<HTMLElement | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
   const [exporting, setExporting] = useState(false);
+  const [printMarks, setPrintMarks] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
@@ -106,6 +117,7 @@ export function ExportModal({
         eventId,
         coupleName,
         format: selectedFormat,
+        printMarks: selectedFormat === "pdf" && printMarks,
         signal: active.signal,
       });
 
@@ -113,6 +125,7 @@ export function ExportModal({
       if (!res.ok) {
         setError(res.error || "Export failed");
       } else {
+        onExported?.(selectedFormat);
         onClose();
       }
     } catch (err) {
@@ -121,6 +134,19 @@ export function ExportModal({
       setExporting(false);
     }
   };
+
+  const t = dialogTheme(dark);
+  const focusRing =
+    "focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-[var(--studio-gold)]";
+  const sizeOf = (f: ExportFormat) =>
+    f === "json"
+      ? "Editable design backup"
+      : f === "pdf"
+        ? `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in · 300 DPI`
+        : `${invitationExportSize(design, f).width} × ${invitationExportSize(design, f).height} px`;
+  const hasSeal = design.layers.some(
+    (layer) => layer.kind === "code" && layer.visible
+  );
 
   return (
     <Dialog.Root
@@ -131,9 +157,12 @@ export function ExportModal({
     >
       <Dialog.Portal>
         <Dialog.Content
-          onOpenAutoFocus={() => {
+          onOpenAutoFocus={(e) => {
             returnFocus.current = document.activeElement as HTMLElement;
             setError(null);
+            // Land on the chosen format, so Enter or Tab goes straight to the decision.
+            e.preventDefault();
+            document.getElementById(`export-format-${selectedFormat}`)?.focus();
           }}
           onCloseAutoFocus={(e) => {
             e.preventDefault();
@@ -143,29 +172,42 @@ export function ExportModal({
           aria-describedby={undefined}
           role="dialog"
           aria-modal="true"
-          aria-label="Export invitation artwork"
           aria-labelledby="export-dialog-title"
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity ${dark ? "dark" : ""}`}
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md",
+            t.overlay
+          )}
           onClick={(e) => {
             if (e.target === e.currentTarget) close();
           }}
         >
           <div
-            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-black/10 bg-ivory p-6 max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-2xl dark:border-white/10 dark:bg-[#1a1118] dark:text-ivory"
+            className={cn(
+              "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl border shadow-2xl",
+              t.panel
+            )}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-black/10 dark:border-white/10">
+            {/* Header stays put */}
+            <div
+              className={cn(
+                "flex items-start justify-between gap-4 border-b px-6 pb-4 pt-5",
+                t.divider
+              )}
+            >
               <div>
                 <Dialog.Title asChild>
                   <h2
                     id="export-dialog-title"
-                    className="font-serif text-2xl font-bold tracking-tight text-night dark:text-ivory"
+                    className={cn(
+                      "font-serif text-2xl font-bold tracking-tight",
+                      t.title
+                    )}
                   >
                     Export Invitation
                   </h2>
                 </Dialog.Title>
-                <p className="mt-1 text-xs text-label-2">
+                <p className={cn("mt-1 text-xs", t.muted)}>
                   Canvas: {dims.width} × {dims.height} px • Edge:{" "}
                   {design.canvas?.edgeStyle ?? "sharp"}
                 </p>
@@ -174,83 +216,167 @@ export function ExportModal({
                 type="button"
                 aria-label="Close export dialog"
                 onClick={close}
-                className="rounded-full p-2 text-label-2 transition hover:bg-black/5 hover:text-night dark:hover:bg-white/10 dark:hover:text-ivory"
+                className={cn(
+                  "grid h-11 w-11 shrink-0 place-items-center rounded-full transition",
+                  t.ghost,
+                  focusRing
+                )}
               >
-                <span className="text-xl leading-none">✕</span>
+                <span aria-hidden="true" className="text-xl leading-none">
+                  ✕
+                </span>
               </button>
             </div>
 
-            {/* Format Selection Grid */}
-            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {FORMATS.map((f) => {
-                const isSelected = selectedFormat === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setSelectedFormat(f.id)}
-                    className={`relative flex flex-col items-start rounded-2xl border p-3.5 text-left transition-all ${
-                      isSelected
-                        ? "border-burgundy bg-burgundy/5 ring-2 ring-burgundy/20 dark:border-[#e5a93c] dark:bg-[#e5a93c]/10 dark:ring-[#e5a93c]/20"
-                        : "border-hairline bg-white/60 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10"
-                    }`}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <span className="font-semibold text-sm text-night dark:text-ivory">
-                        {f.title}
-                      </span>
+            {/* Only this part scrolls */}
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+              <p className={cn("mb-2 text-xs font-semibold", t.muted)}>
+                What is it for?
+              </p>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {FORMATS.map((f) => {
+                  const on = selectedFormat === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      id={`export-format-${f.id}`}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setSelectedFormat(f.id)}
+                      className={cn(
+                        "flex min-h-[7.25rem] flex-col items-start rounded-2xl border p-3.5 text-left transition-colors",
+                        f.id === "json" && "sm:col-span-2 sm:min-h-0",
+                        on ? t.cardOn : t.card,
+                        focusRing
+                      )}
+                    >
+                      <span className="text-sm font-semibold">{f.title}</span>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide ${
-                          isSelected
-                            ? "bg-burgundy text-white dark:bg-[#e5a93c] dark:text-black"
-                            : "bg-black/5 text-label-2 dark:bg-white/10"
-                        }`}
+                        className={cn(
+                          "mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold",
+                          on ? t.badgeOn : t.badge
+                        )}
                       >
                         {f.badge}
                       </span>
-                    </div>
-                    <p className="mt-1.5 text-xs text-label-2 leading-relaxed">
-                      {f.description}
-                    </p>
-                    <span className="mt-2.5 text-[11px] font-mono text-black/40 dark:text-white/40">
-                      {f.id === "json"
-                        ? "Editable design backup"
-                        : f.id === "pdf"
-                          ? `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in · 300 DPI`
-                          : `${invitationExportSize(design, f.id).width} × ${invitationExportSize(design, f.id).height} px`}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span
+                        className={cn("mt-2 text-xs leading-relaxed", t.muted)}
+                      >
+                        {f.description}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-auto pt-2 font-mono text-xs",
+                          t.muted
+                        )}
+                      >
+                        {sizeOf(f.id)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedFormat === "pdf" && (
+                <label
+                  className={cn(
+                    "mt-3 flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border p-3 text-xs",
+                    t.well
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    data-testid="export-print-marks"
+                    checked={printMarks}
+                    onChange={(e) => setPrintMarks(e.target.checked)}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--studio-wine)]"
+                  />
+                  <span className={cn("leading-relaxed", t.muted)}>
+                    <strong className="text-sm font-semibold text-inherit">
+                      <span
+                        className={cn(
+                          dark ? "text-[#fff6dc]" : "text-[var(--studio-ink)]"
+                        )}
+                      >
+                        Add bleed and crop marks for a print shop
+                      </span>
+                    </strong>
+                    <br />
+                    Adds 0.125 in of bleed by stretching the card&rsquo;s edges
+                    outwards, plus crop marks. Pictures are not extended. Keep
+                    important words inside the green safe-area guide.
+                  </span>
+                </label>
+              )}
+
+              <p
+                data-testid="export-summary"
+                aria-live="polite"
+                className={cn("mt-3 text-xs", t.muted)}
+              >
+                You will get:{" "}
+                <strong
+                  className={
+                    dark ? "text-[#fff6dc]" : "text-[var(--studio-ink)]"
+                  }
+                >
+                  {FORMATS.find((f) => f.id === selectedFormat)?.title}
+                </strong>
+                {" · "}
+                {selectedFormat === "json"
+                  ? "an editable backup you can open again in the studio"
+                  : selectedFormat === "whatsapp"
+                    ? `${invitationExportSize(design, "whatsapp").width} × ${invitationExportSize(design, "whatsapp").height} px, compressed to about 400 KB or less`
+                    : selectedFormat === "pdf"
+                      ? printMarks
+                        ? `${(5 + 0.75).toFixed(2)} × ${((dims.height / dims.width) * 5 + 0.75).toFixed(2)} in page with bleed and crop marks, card trims to 5 × ${((dims.height / dims.width) * 5).toFixed(2)} in`
+                        : `5 × ${((dims.height / dims.width) * 5).toFixed(2)} in at 300 DPI`
+                      : `${invitationExportSize(design, selectedFormat).width} × ${invitationExportSize(design, selectedFormat).height} px`}
+                .
+              </p>
+
+              {error && (
+                <div
+                  role="alert"
+                  className={cn(
+                    "mt-3 rounded-xl p-3 text-xs font-medium",
+                    t.error
+                  )}
+                >
+                  {error}
+                </div>
+              )}
+
+              {hasSeal && (
+                <p
+                  role="note"
+                  className={cn(
+                    "mt-3 rounded-xl border p-3 text-xs leading-relaxed",
+                    t.well,
+                    t.muted
+                  )}
+                >
+                  This artwork contains a sample entry seal. Guests receive
+                  their own pass after accepting their personal invitation.
+                </p>
+              )}
             </div>
 
-            {error && (
-              <div
-                role="alert"
-                className="mt-4 rounded-xl bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400"
-              >
-                {error}
-              </div>
-            )}
-
-            {design.layers.some(
-              (layer) => layer.kind === "code" && layer.visible
-            ) && (
-              <p
-                role="note"
-                className="mt-4 rounded-xl border border-hairline bg-burgundy/5 p-3 text-xs leading-relaxed text-label-2"
-              >
-                This artwork contains a sample entry seal. Guests receive their
-                own pass after accepting their personal invitation.
-              </p>
-            )}
-
-            {/* Footer Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
+            {/* The decision stays in view */}
+            <div
+              className={cn(
+                "flex items-center justify-end gap-3 border-t px-6 py-3",
+                t.divider
+              )}
+            >
               <button
                 type="button"
                 onClick={close}
-                className="rounded-full px-5 py-2.5 text-sm font-semibold text-label-2 transition hover:text-night dark:hover:text-ivory"
+                className={cn(
+                  "min-h-11 rounded-full px-5 text-sm font-semibold transition",
+                  t.ghost,
+                  focusRing
+                )}
               >
                 Cancel
               </button>
@@ -258,11 +384,15 @@ export function ExportModal({
                 type="button"
                 onClick={handleExport}
                 disabled={exporting}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-burgundy px-6 py-2.5 text-sm font-semibold text-ivory shadow-md transition hover:bg-burgundy/90 active:scale-98 disabled:opacity-50 dark:bg-[#e5a93c] dark:text-black dark:hover:bg-[#d4982b]"
+                className={cn(
+                  "inline-flex min-h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold shadow-md transition disabled:opacity-50",
+                  t.primary,
+                  focusRing
+                )}
               >
                 {exporting ? (
                   <>
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none" />
                     Preparing {selectedFormat.toUpperCase()}…
                   </>
                 ) : (

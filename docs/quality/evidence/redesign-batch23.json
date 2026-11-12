@@ -1,0 +1,32 @@
+[
+  {
+    "id": "RD-G1-^The Cathedral Arch",
+    "name": "^The Cathedral Arch: long names/venue/message stay inside the card and do not overlap",
+    "ok": true,
+    "detail": "texts=7 outside= overlaps="
+  },
+  {
+    "id": "RD-G1-^Royal Monogram",
+    "name": "^Royal Monogram: long names/venue/message stay inside the card and do not overlap",
+    "ok": true,
+    "detail": "texts=7 outside= overlaps="
+  },
+  {
+    "id": "RD-G1-^Modern Minimalist",
+    "name": "^Modern Minimalist: long names/venue/message stay inside the card and do not overlap",
+    "ok": true,
+    "detail": "texts=7 outside= overlaps="
+  },
+  {
+    "id": "RD-G1-^Owambe Opulence",
+    "name": "^Owambe Opulence: long names/venue/message stay inside the card and do not overlap",
+    "ok": true,
+    "detail": "texts=7 outside= overlaps="
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

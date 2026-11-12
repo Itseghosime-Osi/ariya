@@ -18,6 +18,12 @@ interface Doc {
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
+/** The server answered and said no (conflict, invalid design): retrying the same write cannot help. */
+class SaveRejected extends Error {}
+
+/** Waits between automatic retries after a network failure: 2s, 4s, 8s, 16s, then every 30s. */
+const RETRY_DELAYS_MS = [2000, 4000, 8000, 16000, 30000];
+
 /**
  * The designer's one document: every edit goes through `commit`, can be undone, and saves itself
  * a moment after the last change. There is no save button to forget.
@@ -31,7 +37,7 @@ export function useDesignerDoc(
   const revisionRef = useRef(initialRevision);
   const [recovered] = useState(() => {
     try {
-      const raw = sessionStorage.getItem(recoveryKey);
+      const raw = localStorage.getItem(recoveryKey);
       if (!raw) return null;
       const draft = JSON.parse(raw);
       if (
@@ -56,6 +62,11 @@ export function useDesignerDoc(
   latestRef.current = doc.present;
   const mountedRef = useRef(true);
   const inFlightRef = useRef<Promise<boolean> | null>(null);
+  const retryRef = useRef<{ timer: number | null; attempt: number }>({
+    timer: null,
+    attempt: 0,
+  });
+  const flushRef = useRef<() => Promise<boolean>>(async () => true);
 
   /** `record: false` is for the frames of a drag; the gesture is recorded once when it ends. */
   const commit = useCallback(
@@ -145,14 +156,14 @@ export function useDesignerDoc(
             snapshot,
             revisionRef.current
           );
-          if (!result.ok) throw new Error(result.error);
+          if (!result.ok) throw new SaveRejected(result.error);
           savedRef.current = serialised;
           if (result.revision) revisionRef.current = result.revision;
           try {
             if (JSON.stringify(latestRef.current) === serialised)
-              sessionStorage.removeItem(recoveryKey);
+              localStorage.removeItem(recoveryKey);
             else
-              sessionStorage.setItem(
+              localStorage.setItem(
                 recoveryKey,
                 JSON.stringify({
                   base: savedRef.current,
@@ -165,7 +176,7 @@ export function useDesignerDoc(
           }
         } catch (error) {
           try {
-            sessionStorage.setItem(
+            localStorage.setItem(
               recoveryKey,
               JSON.stringify({
                 base: savedRef.current,
@@ -175,6 +186,20 @@ export function useDesignerDoc(
             );
           } catch {
             /* Keep the in-memory document editable. */
+          }
+          // A dropped connection is retried by itself; a refusal from the server is not.
+          if (!(error instanceof SaveRejected) && mountedRef.current) {
+            const state = retryRef.current;
+            const delay =
+              RETRY_DELAYS_MS[
+                Math.min(state.attempt, RETRY_DELAYS_MS.length - 1)
+              ];
+            state.attempt += 1;
+            if (state.timer) window.clearTimeout(state.timer);
+            state.timer = window.setTimeout(() => {
+              state.timer = null;
+              void flushRef.current();
+            }, delay);
           }
           if (mountedRef.current) {
             setSaveState("error");
@@ -186,6 +211,11 @@ export function useDesignerDoc(
           }
           return false;
         }
+      }
+      retryRef.current.attempt = 0;
+      if (retryRef.current.timer) {
+        window.clearTimeout(retryRef.current.timer);
+        retryRef.current.timer = null;
       }
       if (mountedRef.current) {
         setSaveState("saved");
@@ -200,11 +230,27 @@ export function useDesignerDoc(
     return pending;
   }, [eventId, recoveryKey]);
 
+  flushRef.current = flushSave;
+
+  // Back online: save what was queued while the connection was down, straight away.
+  useEffect(() => {
+    const resume = () => {
+      retryRef.current.attempt = 0;
+      if (JSON.stringify(latestRef.current) !== savedRef.current)
+        void flushRef.current();
+    };
+    window.addEventListener("online", resume);
+    return () => {
+      window.removeEventListener("online", resume);
+      if (retryRef.current.timer) window.clearTimeout(retryRef.current.timer);
+    };
+  }, []);
+
   useEffect(() => {
     const dirty = JSON.stringify(doc.present) !== savedRef.current;
     if (!dirty) return;
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         recoveryKey,
         JSON.stringify({
           base: savedRef.current,

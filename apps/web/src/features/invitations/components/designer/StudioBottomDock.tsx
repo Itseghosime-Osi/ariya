@@ -43,8 +43,8 @@ export function StudioBottomDock({
       className={cn(
         "pointer-events-auto fixed inset-x-0 bottom-0 z-30 flex h-14 items-center justify-center gap-2 px-4 py-2 transition-colors select-none border-t",
         dark
-          ? "border-[#3f2935] bg-[#23181e]/92 text-[#fff6dc] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
-          : "border-[#e6ded2] bg-[#ffffff]/95 text-[#2d1f24] shadow-[0_10px_35px_rgba(74,14,23,0.12)]"
+          ? "border-[#3f2935] bg-[#23181e]/92 text-[var(--studio-cream)] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
+          : "border-[#e6ded2] bg-[#ffffff]/95 text-[var(--studio-ink)] shadow-[0_10px_35px_rgba(74,14,23,0.12)]"
       )}
     >
       {/* Undo / Redo */}
@@ -59,7 +59,7 @@ export function StudioBottomDock({
             "grid h-8 w-8 place-items-center rounded-full transition-colors disabled:opacity-25",
             dark
               ? "hover:bg-white/10 hover:text-white"
-              : "hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+              : "hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
           )}
         >
           <Icon name="undo" size={15} />
@@ -74,7 +74,7 @@ export function StudioBottomDock({
             "grid h-8 w-8 place-items-center rounded-full transition-colors disabled:opacity-25",
             dark
               ? "hover:bg-white/10 hover:text-white"
-              : "hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+              : "hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
           )}
         >
           <Icon name="redo" size={15} />
@@ -97,7 +97,7 @@ export function StudioBottomDock({
             "grid h-7 w-7 place-items-center rounded-full text-base font-semibold leading-none transition-colors",
             dark
               ? "hover:bg-white/10 hover:text-white"
-              : "hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+              : "hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
           )}
         >
           −
@@ -110,8 +110,8 @@ export function StudioBottomDock({
           className={cn(
             "rounded-md px-2 py-0.5 font-mono text-xs font-semibold tabular-nums transition-colors",
             dark
-              ? "hover:bg-white/10 text-[#dfba73]"
-              : "hover:bg-[#4a0e17]/10 text-[#6b1e2e]"
+              ? "hover:bg-white/10 text-[var(--studio-gold)]"
+              : "hover:bg-[var(--studio-wine)]/10 text-[#6b1e2e]"
           )}
         >
           {Math.round(zoom * 100)}%
@@ -125,11 +125,39 @@ export function StudioBottomDock({
             "grid h-7 w-7 place-items-center rounded-full text-base font-semibold leading-none transition-colors",
             dark
               ? "hover:bg-white/10 hover:text-white"
-              : "hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+              : "hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
           )}
         >
           +
         </button>
+        <select
+          aria-label="Zoom presets"
+          title="Zoom presets"
+          data-testid="zoom-presets"
+          value=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === "fit") onFit();
+            else if (v) onZoomChange(Number(v));
+            e.target.value = "";
+          }}
+          className={cn(
+            "h-7 w-8 cursor-pointer appearance-none rounded-md border bg-transparent text-center text-xs font-semibold",
+            dark
+              ? "border-white/15 text-[var(--studio-gold)]"
+              : "border-black/10 text-[#6b1e2e]"
+          )}
+        >
+          <option value="" disabled>
+            ▾
+          </option>
+          <option value="fit">Fit</option>
+          <option value="0.25">25%</option>
+          <option value="0.5">50%</option>
+          <option value="1">100%</option>
+          <option value="2">200%</option>
+          <option value="4">400%</option>
+        </select>
       </div>
 
       <span
@@ -141,7 +169,7 @@ export function StudioBottomDock({
       />
 
       {/* Dimensions & Coordinates */}
-      <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px]">
+      <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs">
         <span
           className={cn(
             "font-medium",
@@ -153,8 +181,8 @@ export function StudioBottomDock({
         {cursorPx && (
           <span
             className={cn(
-              "text-[10px]",
-              dark ? "text-[#dfba73]" : "text-[#6b1e2e]"
+              "text-xs",
+              dark ? "text-[var(--studio-gold)]" : "text-[#6b1e2e]"
             )}
           >
             (X: {cursorPx.x}, Y: {cursorPx.y})
@@ -174,8 +202,8 @@ export function StudioBottomDock({
         className={cn(
           "inline-flex h-8 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-transform active:scale-95 shadow-md",
           dark
-            ? "bg-[#dfba73] text-[#20161b] hover:bg-[#edd49d]"
-            : "bg-[#6b1e2e] text-white hover:bg-[#4a0e17]"
+            ? "bg-[var(--studio-gold)] text-[var(--studio-night)] hover:bg-[#edd49d]"
+            : "bg-[#6b1e2e] text-white hover:bg-[var(--studio-wine)]"
         )}
       >
         <Icon name="download" size={14} />

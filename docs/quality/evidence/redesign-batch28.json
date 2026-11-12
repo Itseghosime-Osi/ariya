@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RD-D3-pro",
+    "name": "Every visible control has a name (pro mode)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L12-proa",
+    "name": "Tab reaches many distinct controls without getting stuck (pro)",
+    "ok": true,
+    "detail": "distinct=70 stuck=0"
+  },
+  {
+    "id": "RD-L12-prob",
+    "name": "Focused controls show a visible focus indicator (pro)",
+    "ok": true,
+    "detail": "0/70 without: "
+  },
+  {
+    "id": "RD-ERR-pro",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D3-simple",
+    "name": "Every visible control has a name (simple mode)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L12-simplea",
+    "name": "Tab reaches many distinct controls without getting stuck (simple)",
+    "ok": true,
+    "detail": "distinct=63 stuck=1"
+  },
+  {
+    "id": "RD-L12-simpleb",
+    "name": "Focused controls show a visible focus indicator (simple)",
+    "ok": true,
+    "detail": "1/63 without: NEXTJS-PORTAL|||"
+  },
+  {
+    "id": "RD-ERR-simple",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

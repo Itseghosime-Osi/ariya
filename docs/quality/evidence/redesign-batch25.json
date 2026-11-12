@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RD-K4a",
+    "name": "Inspector sections are collapsible buttons",
+    "ok": true,
+    "detail": "▾\nNAMES | ▾\nWORDS | ▾\nCOLOUR | ▾\nVISUAL FX & BLENDING"
+  },
+  {
+    "id": "RD-K4b",
+    "name": "Section header is a 44px target",
+    "ok": true,
+    "detail": "44"
+  },
+  {
+    "id": "RD-K4c",
+    "name": "Clicking folds the section",
+    "ok": true,
+    "detail": "NAMES"
+  },
+  {
+    "id": "RD-K4d",
+    "name": "Folded state is remembered after a reload",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K4e",
+    "name": "Clicking again reopens it",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K4f",
+    "name": "Enter on the heading toggles it",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K4g",
+    "name": "Space toggles it back",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors (the reload hydration notice about the restored draft status is the existing behaviour and is excluded)",
+    "ok": true,
+    "detail": ""
+  }
+]

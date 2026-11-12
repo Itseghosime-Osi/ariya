@@ -56,15 +56,15 @@ export function HistoryPanel({
         <div className="mb-2 flex items-center justify-between">
           <span
             className={cn(
-              "text-[11px] font-semibold uppercase tracking-wide",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs font-semibold uppercase tracking-wide",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Action History ({allEntries.length} steps)
           </span>
           <span
             className={cn(
-              "text-[10px] font-mono",
+              "text-xs font-mono",
               dark ? "text-zinc-500" : "text-zinc-400"
             )}
           >
@@ -85,8 +85,8 @@ export function HistoryPanel({
                 "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-medium transition",
                 isCurrent
                   ? dark
-                    ? "bg-[#dfba73]/15 text-[#dfba73] ring-1 ring-[#dfba73]/40 font-bold"
-                    : "bg-[#4a0e17]/10 text-[#4a0e17] ring-1 ring-[#4a0e17]/30 font-bold"
+                    ? "bg-[var(--studio-gold)]/15 text-[var(--studio-gold)] ring-1 ring-[var(--studio-gold)]/40 font-bold"
+                    : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] ring-1 ring-[var(--studio-wine)]/30 font-bold"
                   : isPast
                     ? dark
                       ? "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
@@ -98,11 +98,11 @@ export function HistoryPanel({
             >
               <span
                 className={cn(
-                  "grid h-5 w-5 place-items-center rounded-md text-[11px]",
+                  "grid h-5 w-5 place-items-center rounded-md text-xs",
                   isCurrent
                     ? dark
-                      ? "bg-[#dfba73] text-[#20161b]"
-                      : "bg-[#4a0e17] text-white"
+                      ? "bg-[var(--studio-gold)] text-[var(--studio-night)]"
+                      : "bg-[var(--studio-wine)] text-white"
                     : dark
                       ? "bg-white/[0.06] text-zinc-400"
                       : "bg-black/5 text-zinc-500"
@@ -123,7 +123,7 @@ export function HistoryPanel({
               </span>
 
               {isCurrent && (
-                <span className="h-1.5 w-1.5 rounded-full bg-[#dfba73] shrink-0" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--studio-gold)] shrink-0" />
               )}
             </button>
           );
@@ -139,8 +139,8 @@ export function HistoryPanel({
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold disabled:opacity-30 transition",
             dark
-              ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
-              : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+              ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
+              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
           )}
         >
           <Icon name="undo" size={14} />
@@ -154,8 +154,8 @@ export function HistoryPanel({
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold disabled:opacity-30 transition",
             dark
-              ? "border-white/12 bg-white/[0.06] text-[#fff6dc] hover:bg-white/[0.12]"
-              : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec] shadow-xs"
+              ? "border-white/12 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/[0.12]"
+              : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec] shadow-xs"
           )}
         >
           <Icon name="redo" size={14} />

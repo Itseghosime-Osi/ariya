@@ -1,0 +1,68 @@
+[
+  {
+    "id": "RD-K10-light-idle",
+    "name": "axe: no serious or critical issues — light, idle",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-light-selected",
+    "name": "axe: no serious or critical issues — light, layer selected",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-light-help",
+    "name": "axe: no serious or critical issues — light, help dialog",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-light-export",
+    "name": "axe: no serious or critical issues — light, export dialog",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-light-palette",
+    "name": "axe: no serious or critical issues — light, command palette",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-dark-idle",
+    "name": "axe: no serious or critical issues — dark, idle",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-dark-selected",
+    "name": "axe: no serious or critical issues — dark, layer selected",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-dark-help",
+    "name": "axe: no serious or critical issues — dark, help dialog",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-dark-export",
+    "name": "axe: no serious or critical issues — dark, export dialog",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-dark-palette",
+    "name": "axe: no serious or critical issues — dark, command palette",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-simple",
+    "name": "axe: no serious or critical issues — light, Simple mode",
+    "ok": true,
+    "detail": ""
+  }
+]

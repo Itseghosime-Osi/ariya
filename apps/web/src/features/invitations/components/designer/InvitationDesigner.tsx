@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Segmented } from "@/features/seating/hall/studio-ui";
 import { uploadInvitationImageAction } from "../../actions";
 import { optimizeImageForUpload } from "../../image-compressor";
+import { IMPORT_ACCEPT, toRasterPicture } from "../../import-formats";
 import {
   normaliseDesign,
   constrainEntrySeals,
@@ -54,6 +55,10 @@ import { StudioMenuBar, type MenuGroup } from "./StudioMenuBar";
 import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
+import { HelpDialog } from "./HelpDialog";
+import { CommandPalette } from "./CommandPalette";
+import { QuickTour } from "./QuickTour";
+import { dialogTheme } from "./dialog-theme";
 import { ColorSwatchesPanel } from "./ColorSwatchesPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { NavigatorPanel } from "./NavigatorPanel";
@@ -163,8 +168,8 @@ export function InvitationDesigner({
     design,
     commit,
     recordSnapshot,
-    undo,
-    redo,
+    undo: rawUndo,
+    redo: rawRedo,
     past,
     future,
     restoreState,
@@ -377,17 +382,66 @@ export function InvitationDesigner({
     window.addEventListener("blur", onPointerUp);
   }, []);
 
-  const [showRulers, setShowRulers] = useState(true);
+  // Rulers start on in Pro and off in Simple; once the host picks, their choice stands.
+  const [rulersChoice, setRulersChoice] = useState<boolean | null>(null);
+  const proRef = useRef(false);
+  proRef.current = mode === "pro";
+  const showRulers = rulersChoice ?? mode === "pro";
   const [showGrid, setShowGrid] = useState(false);
+  const [showPrintGuides, setShowPrintGuides] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(false);
   const [guidesLocked, setGuidesLocked] = useState(false);
   const [clearGuidesRequest, setClearGuidesRequest] = useState(0);
   const [busy, setBusy] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [online, setOnline] = useState(true);
   const [notice, setNotice] = useState<{
     tone: "ok" | "bad";
     text: string;
+    action?: { label: string; ariaLabel?: string; onClick: () => void };
   } | null>(null);
+  // Live position and size while a layer is dragged or resized (L3). Cleared a moment after the
+  // last move so it never lingers over the card.
+  const [readout, setReadout] = useState<string | null>(null);
+  const readoutTimer = useRef<number | null>(null);
+  const undo = useCallback(() => {
+    if (!doc.canUndo) return;
+    rawUndo();
+    setNotice({
+      tone: "ok",
+      text: "Undone",
+      action: {
+        label: "Redo",
+        ariaLabel: "Redo this change",
+        onClick: () => redoRef.current(),
+      },
+    });
+  }, [doc.canUndo, rawUndo]);
+  const redo = useCallback(() => {
+    if (!doc.canRedo) return;
+    rawRedo();
+    setNotice({
+      tone: "ok",
+      text: "Redone",
+      action: {
+        label: "Undo",
+        ariaLabel: "Undo this change",
+        onClick: () => undoRef.current(),
+      },
+    });
+  }, [doc.canRedo, rawRedo]);
+  const undoRef = useRef(undo);
+  undoRef.current = undo;
+  const redoRef = useRef(redo);
+  redoRef.current = redo;
+  useEffect(() => {
+    if (!notice || notice.tone !== "ok") return;
+    const t = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
   // Lines of a saved card that no longer match the event, judged once when the designer opens so
   // the host's own edits during this visit are never second-guessed. The card keeps the host's
   // words until they choose to update it; "Keep my wording" hides the offer for these exact changes.
@@ -542,6 +596,20 @@ export function InvitationDesigner({
     ) => {
       const target = designRef.current.layers.find((l) => l.id === id);
       if (target?.locked) return;
+      if (target && !options?.commit) {
+        const dims = designDimensionsPx(designRef.current);
+        const next = { ...target, ...patch };
+        const parts = [
+          `X ${Math.round((next.x / 100) * dims.width)}`,
+          `Y ${Math.round((next.y / 100) * dims.height)}`,
+          `W ${Math.round((next.width / 100) * dims.width)}`,
+        ];
+        if (next.height != null)
+          parts.push(`H ${Math.round((next.height / 100) * dims.height)}`);
+        setReadout(`${parts.join(" · ")} px`);
+        if (readoutTimer.current) window.clearTimeout(readoutTimer.current);
+        readoutTimer.current = window.setTimeout(() => setReadout(null), 900);
+      }
       commit(
         (d) => ({
           ...d,
@@ -670,18 +738,14 @@ export function InvitationDesigner({
       });
       return;
     }
-    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
-      setNotice({
-        tone: "bad",
-        text: "Please choose a PNG, JPG or WebP picture.",
-      });
-      return;
-    }
     setBusy(true);
     setNotice(null);
     let optimized;
+    let importNote: string | undefined;
     try {
-      optimized = await optimizeImageForUpload(file);
+      const raster = await toRasterPicture(file);
+      importNote = raster.note;
+      optimized = await optimizeImageForUpload(raster.file);
     } catch (err: unknown) {
       setBusy(false);
       setNotice({
@@ -716,6 +780,13 @@ export function InvitationDesigner({
       setNotice({
         tone: "bad",
         text: result.error || "Failed to upload image.",
+        action: {
+          label: "Try again",
+          onClick: () => {
+            uploadRef.current = purpose;
+            void onFile(file);
+          },
+        },
       });
       return;
     }
@@ -755,6 +826,7 @@ export function InvitationDesigner({
       setSelectedId(out.id);
       setSheetTab("properties");
     }
+    if (importNote) setNotice({ tone: "ok", text: importNote });
   }
 
   function exportDesign() {
@@ -838,6 +910,17 @@ export function InvitationDesigner({
     }
   }, [selectedId, patchLayer]);
 
+  useEffect(() => {
+    const sync = () => setOnline(navigator.onLine);
+    sync();
+    window.addEventListener("online", sync);
+    window.addEventListener("offline", sync);
+    return () => {
+      window.removeEventListener("online", sync);
+      window.removeEventListener("offline", sync);
+    };
+  }, []);
+
   // -------------------------------------------------------------- keyboard
 
   useEffect(() => {
@@ -860,6 +943,16 @@ export function InvitationDesigner({
       )
         return;
       const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (!mod && e.key === "?") {
+        e.preventDefault();
+        setHelpOpen(true);
+        return;
+      }
       if (mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
         if (e.shiftKey) redo();
@@ -1011,7 +1104,7 @@ export function InvitationDesigner({
       }
       if (mod && e.key.toLowerCase() === "r") {
         e.preventDefault();
-        setShowRulers((r) => !r);
+        setRulersChoice((c) => !(c ?? proRef.current));
         return;
       }
       if (mod && e.shiftKey && (e.key === "'" || e.key === '"')) {
@@ -1167,13 +1260,15 @@ export function InvitationDesigner({
 
   const status = busy
     ? "Uploading picture…"
-    : doc.isDirty
-      ? doc.saveState === "error"
-        ? "not saved"
-        : "saving…"
-      : initialRevision || doc.saveState === "saved"
-        ? "saved"
-        : "";
+    : !online
+      ? "offline · will save when you reconnect"
+      : doc.isDirty
+        ? doc.saveState === "error"
+          ? "not saved"
+          : "saving…"
+        : initialRevision || doc.saveState === "saved"
+          ? "saved"
+          : "";
 
   const menuGroups: MenuGroup[] = [
     {
@@ -1422,7 +1517,13 @@ export function InvitationDesigner({
         {
           label: showRulers ? "Hide Rulers" : "Show Rulers",
           shortcut: "Cmd+R",
-          onClick: () => setShowRulers((r) => !r),
+          onClick: () => setRulersChoice((c) => !(c ?? proRef.current)),
+        },
+        {
+          label: showPrintGuides
+            ? "Hide print guides"
+            : "Show print guides (safe area and bleed)",
+          onClick: () => setShowPrintGuides((g) => !g),
         },
         {
           label: showGrid ? "Hide Grid" : "Show Grid",
@@ -1448,6 +1549,25 @@ export function InvitationDesigner({
           label: dark ? "Switch to Light Mode" : "Switch to Dark Mode",
           icon: <Icon name="swatch" size={14} />,
           onClick: toggleDark,
+        },
+      ],
+    },
+    {
+      title: "Help",
+      items: [
+        {
+          label: "Help and shortcuts…",
+          shortcut: "?",
+          onClick: () => setHelpOpen(true),
+        },
+        {
+          label: "Find a command…",
+          shortcut: "Cmd+K",
+          onClick: () => setPaletteOpen(true),
+        },
+        {
+          label: "Show the quick tour",
+          onClick: () => setTourOpen(true),
         },
       ],
     },
@@ -1486,7 +1606,9 @@ export function InvitationDesigner({
       className={cn(
         styles.studio,
         "relative h-dvh overflow-hidden select-none",
-        dark ? "dark studio-dark text-[#fff6dc]" : "text-[#2d1f24]"
+        dark
+          ? "dark studio-dark text-[var(--studio-cream)]"
+          : "text-[var(--studio-ink)]"
       )}
     >
       <input
@@ -1505,7 +1627,7 @@ export function InvitationDesigner({
       <input
         ref={fileRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept={IMPORT_ACCEPT}
         className="sr-only"
         aria-label="Choose a picture"
         tabIndex={-1}
@@ -1547,6 +1669,15 @@ export function InvitationDesigner({
         <div className={styles.headerActions}>
           <button
             type="button"
+            aria-label="Help and shortcuts"
+            title="Help and shortcuts (?)"
+            onClick={() => setHelpOpen(true)}
+            className="hidden h-11 w-11 place-items-center rounded-full text-sm font-bold text-night hover:bg-burgundy/10 sm:grid"
+          >
+            ?
+          </button>
+          <button
+            type="button"
             aria-label={
               dark
                 ? "Switch to the light interface"
@@ -1559,7 +1690,7 @@ export function InvitationDesigner({
           >
             <Icon name="swatch" size={18} />
           </button>
-          <div className="w-28 shrink-0">
+          <div className="w-[7.5rem] shrink-0">
             <Segmented
               dark={dark}
               label="Mode"
@@ -1592,7 +1723,7 @@ export function InvitationDesigner({
       <div
         className={cn(
           "fixed inset-0 z-0 transition-colors",
-          dark ? "bg-[#20161b]" : "bg-[#ede6da]"
+          dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]"
         )}
       >
         <div className={cn(styles.stage, !pro && styles.stageSimple)}>
@@ -1611,6 +1742,7 @@ export function InvitationDesigner({
             activeTool={activeTool}
             showRulers={showRulers}
             showGrid={showGrid}
+            showPrintGuides={showPrintGuides}
             snapToGrid={snapToGrid}
             guidesLocked={guidesLocked}
             clearGuidesRequest={clearGuidesRequest}
@@ -1630,6 +1762,48 @@ export function InvitationDesigner({
             onAddLayerWithGeometry={addLayerWithGeometry}
             activeShapeKind={activeShapeKind}
           />
+          {!design.layers.some(
+            (layer) => layer.visible && layer.kind !== "code"
+          ) && (
+            <div
+              data-testid="studio-empty-state"
+              className="pointer-events-none absolute inset-0 z-10 grid place-items-center p-6"
+            >
+              <div
+                className={cn(
+                  "pointer-events-auto max-w-xs rounded-2xl border p-5 text-center shadow-lg",
+                  dialogTheme(dark).panel
+                )}
+              >
+                <p
+                  className={cn(
+                    "font-serif text-lg font-bold",
+                    dialogTheme(dark).title
+                  )}
+                >
+                  Your card is empty
+                </p>
+                <p
+                  className={cn(
+                    "mt-1 text-xs leading-relaxed",
+                    dialogTheme(dark).muted
+                  )}
+                >
+                  Add some text to begin, or upload a picture.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => add("text")}
+                  className={cn(
+                    "mt-3 inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold",
+                    dialogTheme(dark).primary
+                  )}
+                >
+                  Add text
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1641,8 +1815,8 @@ export function InvitationDesigner({
           className={cn(
             "pointer-events-auto fixed bottom-16 left-1/2 z-40 w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-[13px] shadow-xl",
             dark
-              ? "border-[#5e384c] bg-[#2a1b23] text-[#fff6dc]"
-              : "border-[#dfba73] bg-[#fffaf0] text-[#3b2b31]"
+              ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
+              : "border-[var(--studio-gold)] bg-[#fffaf0] text-[#3b2b31]"
           )}
         >
           <p className="font-semibold">
@@ -1667,7 +1841,7 @@ export function InvitationDesigner({
                   text: "Card updated from the event details. You can undo this.",
                 });
               }}
-              className="rounded-full bg-[#4a0e17] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
+              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-[#6e1426]"
             >
               Update the card
             </button>
@@ -1689,6 +1863,16 @@ export function InvitationDesigner({
         </div>
       )}
 
+      {readout && (
+        <div
+          data-testid="drag-readout"
+          aria-hidden="true"
+          className="pointer-events-none fixed bottom-[72px] left-1/2 z-40 -translate-x-1/2 rounded-full bg-night/90 px-3 py-1 font-mono text-[12px] font-semibold text-ivory shadow-lg"
+        >
+          {readout}
+        </div>
+      )}
+
       {notice && (
         <div className="pointer-events-auto fixed top-[100px] left-1/2 -translate-x-1/2 z-50 flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2">
           <p
@@ -1705,11 +1889,30 @@ export function InvitationDesigner({
             )}
           >
             {notice.text}
+            {notice.action && (
+              <button
+                type="button"
+                aria-label={notice.action.ariaLabel ?? notice.action.label}
+                onClick={() => {
+                  const run = notice.action!.onClick;
+                  run();
+                }}
+                className={cn(
+                  "min-h-8 rounded-full px-3 text-[13px] font-bold underline",
+                  dark ? "hover:bg-white/10" : "hover:bg-black/10"
+                )}
+              >
+                {notice.action.label}
+              </button>
+            )}
             <button
               type="button"
               aria-label="Dismiss"
               onClick={() => setNotice(null)}
-              className="grid h-6 w-6 place-items-center rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+              className={cn(
+                "grid h-6 w-6 place-items-center rounded-full",
+                dark ? "hover:bg-white/10" : "hover:bg-black/10"
+              )}
             >
               <Icon name="close" size={14} />
             </button>
@@ -1729,7 +1932,7 @@ export function InvitationDesigner({
           <button
             type="button"
             onClick={doc.retrySave}
-            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-bold hover:bg-white/30 transition-colors"
+            className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-bold hover:bg-white/30 transition-colors"
           >
             Retry
           </button>
@@ -1795,7 +1998,7 @@ export function InvitationDesigner({
                 }
               }}
               showRulers={showRulers}
-              onToggleRulers={() => setShowRulers(!showRulers)}
+              onToggleRulers={() => setRulersChoice(!showRulers)}
               showGrid={showGrid}
               onToggleGrid={() => setShowGrid(!showGrid)}
               snapToGrid={snapToGrid}
@@ -1810,7 +2013,7 @@ export function InvitationDesigner({
               "transition-colors",
               dark
                 ? "bg-[#23181e] border-r border-[#382630]"
-                : "bg-[#fcfbfa] border-r border-[#e8e2d6]",
+                : "bg-[#fcfbfa] border-r border-[var(--studio-line)]",
               "max-lg:bottom-[calc(44dvh+0.5rem)] max-lg:left-3 max-lg:right-3 max-lg:h-12 max-lg:rounded-2xl max-lg:border",
               "lg:left-0 lg:top-[92px] lg:bottom-0 lg:w-12"
             )}
@@ -1849,8 +2052,8 @@ export function InvitationDesigner({
               styles.sidebar,
               "flex min-h-0 flex-col overflow-hidden transition-colors",
               dark
-                ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
-                : "bg-[#fcfbfa] text-[#2d1f24] border-l border-[#e8e2d6]",
+                ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
+                : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
               "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-t-2xl max-lg:border-t max-lg:!w-full",
               "lg:bottom-0 lg:right-0 lg:top-[92px]"
             )}
@@ -1907,12 +2110,12 @@ export function InvitationDesigner({
               className={cn(
                 "hidden lg:block absolute left-0 inset-y-0 w-2.5 -translate-x-1/2 cursor-col-resize z-40 transition-colors group",
                 dark
-                  ? "hover:bg-[#dfba73]/40 active:bg-[#dfba73]"
-                  : "hover:bg-[#4a0e17]/30 active:bg-[#4a0e17]"
+                  ? "hover:bg-[var(--studio-gold)]/40 active:bg-[var(--studio-gold)]"
+                  : "hover:bg-[var(--studio-wine)]/30 active:bg-[var(--studio-wine)]"
               )}
               title="Drag to resize studio panel"
             >
-              <div className="h-full w-0.5 mx-auto opacity-0 group-hover:opacity-100 bg-[#dfba73]" />
+              <div className="h-full w-0.5 mx-auto opacity-0 group-hover:opacity-100 bg-[var(--studio-gold)]" />
             </div>
 
             {/* Top Half of Studio Sidebar: Properties / Color & Swatches */}
@@ -1922,7 +2125,7 @@ export function InvitationDesigner({
               }
               className={cn(
                 styles.panelTop,
-                "flex flex-col h-[52%] lg:h-[var(--studio-split)] min-h-[160px] border-b border-[#dfba73]/20"
+                "flex flex-col h-[52%] lg:h-[var(--studio-split)] min-h-[160px] border-b border-[var(--studio-gold)]/20"
               )}
             >
               {/* Top Tab Bar */}
@@ -1932,7 +2135,7 @@ export function InvitationDesigner({
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
-                    : "bg-[#f4efe8] border-[#e8e2d6]"
+                    : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
                 <button
@@ -1942,11 +2145,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     topTab === "properties"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="styler" size={13} />
@@ -1959,11 +2162,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     topTab === "swatches"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="swatch" size={13} />
@@ -2061,10 +2264,12 @@ export function InvitationDesigner({
               }}
               className={cn(
                 "relative z-10 hidden h-2 shrink-0 cursor-row-resize lg:block",
-                dark ? "hover:bg-[#dfba73]/30" : "hover:bg-[#4a0e17]/20"
+                dark
+                  ? "hover:bg-[var(--studio-gold)]/30"
+                  : "hover:bg-[var(--studio-wine)]/20"
               )}
             >
-              <div className="mx-auto mt-[3px] h-0.5 w-10 rounded-full bg-[#dfba73]/60" />
+              <div className="mx-auto mt-[3px] h-0.5 w-10 rounded-full bg-[var(--studio-gold)]/60" />
             </div>
 
             {/* Bottom Half of Studio Sidebar: Layers / History / Navigator */}
@@ -2078,7 +2283,7 @@ export function InvitationDesigner({
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
                     ? "bg-[#1d1419] border-[#382630]"
-                    : "bg-[#f4efe8] border-[#e8e2d6]"
+                    : "bg-[#f4efe8] border-[var(--studio-line)]"
                 )}
               >
                 <button
@@ -2088,25 +2293,25 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "layers"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="table_chart_view" size={13} />
                   <span>Layers</span>
                   <span
                     className={cn(
-                      "rounded-full px-1.5 py-0.2 text-[10px] font-mono",
+                      "rounded-full px-1.5 py-0.2 text-xs font-mono",
                       bottomTab === "layers"
                         ? dark
-                          ? "bg-black/40 text-[#dfba73]"
+                          ? "bg-black/40 text-[var(--studio-gold)]"
                           : "bg-white/20 text-white"
                         : dark
                           ? "bg-black/30 text-zinc-400"
-                          : "bg-black/5 text-[#7a5b67]"
+                          : "bg-black/5 text-[var(--studio-mauve)]"
                     )}
                   >
                     {design.layers.length}
@@ -2119,11 +2324,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "history"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="schedule" size={13} />
@@ -2136,11 +2341,11 @@ export function InvitationDesigner({
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-all",
                     bottomTab === "navigator"
                       ? dark
-                        ? "bg-[#dfba73]/20 text-[#dfba73] border border-[#dfba73]/40 shadow-xs"
-                        : "bg-[#4a0e17] text-white shadow-xs"
+                        ? "bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-xs"
+                        : "bg-[var(--studio-wine)] text-white shadow-xs"
                       : dark
-                        ? "text-zinc-400 hover:text-[#fff6dc] hover:bg-white/[0.04]"
-                        : "text-[#7a5b67] hover:text-[#4a0e17] hover:bg-black/5"
+                        ? "text-zinc-400 hover:text-[var(--studio-cream)] hover:bg-white/[0.04]"
+                        : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)] hover:bg-black/5"
                   )}
                 >
                   <Icon name="search" size={13} />
@@ -2217,8 +2422,8 @@ export function InvitationDesigner({
             styles.simplePanel,
             "fixed z-20 flex min-h-0 flex-col overflow-y-auto transition-colors shadow-2xl",
             dark
-              ? "bg-[#23181e] text-[#fff6dc] border-l border-[#382630]"
-              : "bg-[#fcfbfa] text-[#2d1f24] border-l border-[#e8e2d6]",
+              ? "bg-[#23181e] text-[var(--studio-cream)] border-l border-[#382630]"
+              : "bg-[#fcfbfa] text-[var(--studio-ink)] border-l border-[var(--studio-line)]",
             "max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[44dvh] max-lg:rounded-b-none",
             "lg:bottom-0 lg:right-0 lg:top-[52px] lg:w-96"
           )}
@@ -2258,10 +2463,38 @@ export function InvitationDesigner({
         onExport={() => setExportOpen(true)}
       />
 
+      <CommandPalette
+        dark={dark}
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        menus={menuGroups}
+      />
+      <QuickTour
+        dark={dark}
+        forceOpen={tourOpen}
+        onForceClose={() => setTourOpen(false)}
+      />
+      <HelpDialog
+        dark={dark}
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+      />
+
       <ExportModal
         dark={dark}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
+        onExported={(format) =>
+          // A success message never replaces an error the host has not dismissed yet.
+          setNotice((current) =>
+            current?.tone === "bad"
+              ? current
+              : {
+                  tone: "ok",
+                  text: `Exported as ${format === "json" ? "a design backup" : format === "whatsapp" ? "a small WhatsApp picture" : format.toUpperCase()}. Check your downloads.`,
+                }
+          )
+        }
         design={design}
         eventId={eventId}
         coupleName={coupleName}

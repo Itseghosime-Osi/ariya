@@ -229,11 +229,11 @@ export function ColorSwatchesPanel({
             "flex-1 rounded-md py-1 text-center font-medium transition",
             target === "layer"
               ? dark
-                ? "bg-[#dfba73] text-[#20161b] font-bold shadow-xs"
-                : "bg-[#4a0e17] text-white shadow-xs"
+                ? "bg-[var(--studio-gold)] text-[var(--studio-night)] font-bold shadow-xs"
+                : "bg-[var(--studio-wine)] text-white shadow-xs"
               : dark
                 ? "text-zinc-400 hover:text-white"
-                : "text-[#7a5b67] hover:text-[#4a0e17]"
+                : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
           )}
         >
           Selected Layer
@@ -245,11 +245,11 @@ export function ColorSwatchesPanel({
             "flex-1 rounded-md py-1 text-center font-medium transition",
             target === "background"
               ? dark
-                ? "bg-[#dfba73] text-[#20161b] font-bold shadow-xs"
-                : "bg-[#4a0e17] text-white shadow-xs"
+                ? "bg-[var(--studio-gold)] text-[var(--studio-night)] font-bold shadow-xs"
+                : "bg-[var(--studio-wine)] text-white shadow-xs"
               : dark
                 ? "text-zinc-400 hover:text-white"
-                : "text-[#7a5b67] hover:text-[#4a0e17]"
+                : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
           )}
         >
           Background
@@ -357,8 +357,8 @@ export function ColorSwatchesPanel({
         <div className="col-span-2">
           <span
             className={cn(
-              "block text-[10px] font-semibold mb-1",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "block text-xs font-semibold mb-1",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             HEX
@@ -396,8 +396,8 @@ export function ColorSwatchesPanel({
         <div>
           <span
             className={cn(
-              "block text-[10px] font-semibold mb-1",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "block text-xs font-semibold mb-1",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             R
@@ -421,8 +421,8 @@ export function ColorSwatchesPanel({
         <div>
           <span
             className={cn(
-              "block text-[10px] font-semibold mb-1",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "block text-xs font-semibold mb-1",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             G
@@ -443,7 +443,7 @@ export function ColorSwatchesPanel({
           />
         </div>
         <div>
-          <span className="mb-1 block text-[10px] font-semibold text-label-2">
+          <span className="mb-1 block text-xs font-semibold text-label-2">
             B
           </span>
           <input
@@ -467,8 +467,8 @@ export function ColorSwatchesPanel({
       <div className="space-y-3 pt-2">
         <span
           className={cn(
-            "block text-[11px] font-semibold tracking-wide uppercase",
-            dark ? "text-zinc-400" : "text-[#7a5b67]"
+            "block text-xs font-semibold tracking-wide uppercase",
+            dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
           )}
         >
           Luxury Palette Swatches
@@ -481,8 +481,8 @@ export function ColorSwatchesPanel({
             >
               <span
                 className={cn(
-                  "text-[10px] font-medium block",
-                  dark ? "text-zinc-300" : "text-[#2d1f24]"
+                  "text-xs font-medium block",
+                  dark ? "text-zinc-300" : "text-[var(--studio-ink)]"
                 )}
               >
                 {pal.name}
@@ -498,7 +498,7 @@ export function ColorSwatchesPanel({
                       const rgbVal = hexToRgb(c);
                       setHsv(rgbToHsv(rgbVal.r, rgbVal.g, rgbVal.b));
                     }}
-                    className="h-6 flex-1 rounded-md border border-white/10 shadow-xs transition hover:scale-105 hover:ring-2 hover:ring-[#dfba73]"
+                    className="h-6 flex-1 rounded-md border border-white/10 shadow-xs transition hover:scale-105 hover:ring-2 hover:ring-[var(--studio-gold)]"
                     style={{ background: c }}
                   />
                 ))}

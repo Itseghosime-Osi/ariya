@@ -1,0 +1,68 @@
+[
+  {
+    "id": "RD-D6",
+    "name": "Help button opens shortcut sheet",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D6b",
+    "name": "Escape closes help",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-D6c",
+    "name": "? key opens help",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-F1",
+    "name": "Help button size recorded",
+    "ok": true,
+    "detail": "44x44"
+  },
+  {
+    "id": "RD-A2",
+    "name": "Offline status shown",
+    "ok": true,
+    "detail": "offline · will save when you reconnect"
+  },
+  {
+    "id": "RD-A2b",
+    "name": "Status recovers online",
+    "ok": true,
+    "detail": "saving…"
+  },
+  {
+    "id": "RD-L2a",
+    "name": "No empty state with layers",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L2b",
+    "name": "Empty state appears when card is empty",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L2c",
+    "name": "Add text removes empty state",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-B2",
+    "name": "Export summary follows format",
+    "ok": true,
+    "detail": "You will get: PDF for printing · 5 × 7.00 in at 300 DPI. | You will get: Compressed JPEG · 2160 × 3024 px."
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

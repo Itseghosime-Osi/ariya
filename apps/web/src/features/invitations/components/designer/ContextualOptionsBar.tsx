@@ -64,6 +64,23 @@ function CanvasDimensionInput({
   );
 }
 
+/** Scroll-edge shadows with no script: covers scroll with the content, shadows stay fixed. */
+function scrollEdges(bg: string, dark: boolean): React.CSSProperties {
+  const shade = dark ? "rgba(255,255,255,0.22)" : "rgba(45,31,36,0.28)";
+  return {
+    backgroundImage: [
+      `linear-gradient(to right, ${bg} 30%, transparent)`,
+      `linear-gradient(to left, ${bg} 30%, transparent)`,
+      `radial-gradient(farthest-side at 0 50%, ${shade}, transparent)`,
+      `radial-gradient(farthest-side at 100% 50%, ${shade}, transparent)`,
+    ].join(", "),
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "left center, right center, left center, right center",
+    backgroundSize: "32px 100%, 32px 100%, 12px 100%, 12px 100%",
+    backgroundAttachment: "local, local, scroll, scroll",
+  };
+}
+
 export function ContextualOptionsBar({
   activeTool,
   onSelectTool,
@@ -140,8 +157,10 @@ export function ContextualOptionsBar({
         "flex h-10 w-full items-center gap-2 overflow-x-auto border-b px-3 text-xs select-none shadow-xs transition-colors",
         dark
           ? "border-[#382630] bg-[#23181e] text-zinc-200"
-          : "border-[#e8e2d6] bg-[#fcfbfa] text-[#3b2b31]"
+          : "border-[var(--studio-line)] bg-[#fcfbfa] text-[#3b2b31]"
       )}
+      // A soft edge shows on a side only while there is more to scroll to in that direction.
+      style={scrollEdges(dark ? "#23181e" : "#fcfbfa", dark)}
     >
       {/* Tool-Specific Controls */}
 
@@ -150,8 +169,8 @@ export function ContextualOptionsBar({
         <div className="flex items-center gap-1.5 shrink-0">
           <span
             className={cn(
-              "text-[11px] max-md:hidden",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs max-md:hidden",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Align:
@@ -203,7 +222,7 @@ export function ContextualOptionsBar({
                 "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
                 dark
                   ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-                  : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+                  : "text-[#4a363f] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
               )}
             >
               <svg
@@ -230,8 +249,8 @@ export function ContextualOptionsBar({
           />
           <span
             className={cn(
-              "text-[11px] max-md:hidden",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs max-md:hidden",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Distribute:
@@ -246,7 +265,7 @@ export function ContextualOptionsBar({
               "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
               dark
                 ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-                : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+                : "text-[#4a363f] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
             )}
           >
             <svg
@@ -272,7 +291,7 @@ export function ContextualOptionsBar({
               "grid h-7 w-7 place-items-center rounded disabled:opacity-30 transition-colors",
               dark
                 ? "text-zinc-300 hover:bg-white/10 hover:text-white"
-                : "text-[#4a363f] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+                : "text-[#4a363f] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
             )}
           >
             <svg
@@ -305,8 +324,8 @@ export function ContextualOptionsBar({
                 className={cn(
                   "flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold transition-colors",
                   dark
-                    ? "bg-white/[0.08] text-[#fff6dc] hover:bg-white/[0.14]"
-                    : "bg-[#4a0e17]/10 text-[#4a0e17] hover:bg-[#4a0e17]/15"
+                    ? "bg-white/[0.08] text-[var(--studio-cream)] hover:bg-white/[0.14]"
+                    : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] hover:bg-[var(--studio-wine)]/15"
                 )}
               >
                 <svg
@@ -331,8 +350,8 @@ export function ContextualOptionsBar({
         <div className="flex items-center gap-2 shrink-0">
           <span
             className={cn(
-              "text-[11px] font-semibold",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs font-semibold",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Ratio:
@@ -351,14 +370,16 @@ export function ContextualOptionsBar({
             className={cn(
               "h-7 rounded border px-2 text-xs outline-none transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
-                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)]"
             )}
           >
             <option
               value="portrait"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               Portrait 5:7 (1080 × 1512)
@@ -366,7 +387,9 @@ export function ContextualOptionsBar({
             <option
               value="standard"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               Standard 4:5 (1080 × 1350)
@@ -374,7 +397,9 @@ export function ContextualOptionsBar({
             <option
               value="square"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               Square 1:1 (1080 × 1080)
@@ -382,7 +407,9 @@ export function ContextualOptionsBar({
             <option
               value="story"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               Story 9:16 (1080 × 1920)
@@ -390,7 +417,9 @@ export function ContextualOptionsBar({
             <option
               value="landscape"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               Landscape 7:5 (1512 × 1080)
@@ -398,7 +427,9 @@ export function ContextualOptionsBar({
             <option
               value="a5"
               className={
-                dark ? "bg-[#23181e] text-[#fff6dc]" : "bg-white text-[#2d1f24]"
+                dark
+                  ? "bg-[#23181e] text-[var(--studio-cream)]"
+                  : "bg-white text-[var(--studio-ink)]"
               }
             >
               A5 Fine Art (1200 × 1700)
@@ -408,8 +439,8 @@ export function ContextualOptionsBar({
           <div className="flex items-center gap-1">
             <span
               className={cn(
-                "text-[11px]",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
+                "text-xs",
+                dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
               )}
             >
               W:
@@ -424,14 +455,14 @@ export function ContextualOptionsBar({
               className={cn(
                 "h-7 w-16 rounded border px-1.5 font-mono text-xs outline-none",
                 dark
-                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
-                  : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+                  ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)]"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)]"
               )}
             />
             <span
               className={cn(
-                "text-[11px]",
-                dark ? "text-zinc-400" : "text-[#7a5b67]"
+                "text-xs",
+                dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
               )}
             >
               H:
@@ -446,8 +477,8 @@ export function ContextualOptionsBar({
               className={cn(
                 "h-7 w-16 rounded border px-1.5 font-mono text-xs outline-none",
                 dark
-                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
-                  : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+                  ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)]"
+                  : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)]"
               )}
             />
           </div>
@@ -458,7 +489,7 @@ export function ContextualOptionsBar({
             onClick={() =>
               onApplyCrop ? onApplyCrop() : onSelectTool("select")
             }
-            className="flex items-center gap-1 rounded bg-[#dfba73] px-2.5 py-1 text-xs font-bold text-[#20161b] hover:bg-[#edd49d] transition-colors shadow-xs"
+            className="flex items-center gap-1 rounded bg-[var(--studio-gold)] px-2.5 py-1 text-xs font-bold text-[var(--studio-night)] hover:bg-[#edd49d] transition-colors shadow-xs"
           >
             <svg
               width="12"
@@ -483,7 +514,7 @@ export function ContextualOptionsBar({
               "flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium transition-colors",
               dark
                 ? "border-white/12 bg-white/[0.06] text-zinc-300 hover:text-white"
-                : "border-[#e8e2d6] bg-white text-[#4a0e17] hover:bg-[#f6f2ec]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-wine)] hover:bg-[#f6f2ec]"
             )}
           >
             <svg
@@ -519,8 +550,8 @@ export function ContextualOptionsBar({
             className={cn(
               "h-7 rounded border px-2 text-xs outline-none transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
-                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)]"
             )}
           >
             {INVITATION_FONTS.map((f) => (
@@ -542,8 +573,8 @@ export function ContextualOptionsBar({
             className={cn(
               "h-7 rounded border px-1.5 text-xs outline-none transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] focus:border-[#dfba73]"
-                : "border-[#e8e2d6] bg-white text-[#2d1f24] focus:border-[#4a0e17]"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] focus:border-[var(--studio-gold)]"
+                : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] focus:border-[var(--studio-wine)]"
             )}
           >
             {[12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72].map(
@@ -553,8 +584,8 @@ export function ContextualOptionsBar({
                   value={s}
                   className={
                     dark
-                      ? "bg-[#23181e] text-[#fff6dc]"
-                      : "bg-white text-[#2d1f24]"
+                      ? "bg-[#23181e] text-[var(--studio-cream)]"
+                      : "bg-white text-[var(--studio-ink)]"
                   }
                 >
                   {s} pt
@@ -569,7 +600,7 @@ export function ContextualOptionsBar({
               "flex items-center rounded border p-0.5",
               dark
                 ? "border-white/10 bg-white/[0.05]"
-                : "border-[#e8e2d6] bg-white"
+                : "border-[var(--studio-line)] bg-white"
             )}
           >
             {(
@@ -592,11 +623,11 @@ export function ContextualOptionsBar({
                   "grid h-6 w-6 place-items-center rounded text-xs transition-colors",
                   (currentLayer?.align ?? "center") === item.align
                     ? dark
-                      ? "bg-[#3d2733] text-[#dfba73]"
-                      : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                      ? "bg-[#3d2733] text-[var(--studio-gold)]"
+                      : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] font-semibold"
                     : dark
                       ? "text-zinc-400 hover:text-white"
-                      : "text-[#7a5b67] hover:text-[#4a0e17]"
+                      : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
                 )}
               >
                 {item.align === "left" && (
@@ -649,7 +680,12 @@ export function ContextualOptionsBar({
           <button
             type="button"
             onClick={() => onAddLayer("text")}
-            className="flex items-center gap-1 rounded bg-[#4a0e17] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#6b1e2e] dark:bg-[#dfba73] dark:text-[#2d1f24] dark:hover:bg-[#edd49d] transition-colors"
+            className={cn(
+              "flex items-center gap-1 rounded px-2.5 py-1 text-xs font-semibold transition-colors",
+              dark
+                ? "bg-[var(--studio-gold)] text-[var(--studio-ink)] hover:bg-[#edd49d]"
+                : "bg-[var(--studio-wine)] text-white hover:bg-[#6b1e2e]"
+            )}
           >
             <svg
               width="12"
@@ -672,8 +708,8 @@ export function ContextualOptionsBar({
         <div className="flex items-center gap-2 shrink-0">
           <span
             className={cn(
-              "text-[11px] max-sm:hidden",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs max-sm:hidden",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Add:
@@ -699,11 +735,11 @@ export function ContextualOptionsBar({
                     "rounded-l border-y border-l px-2.5 py-1 text-xs font-medium transition-all",
                     isSelected
                       ? dark
-                        ? "border-[#dfba73] bg-[#dfba73]/20 text-[#dfba73] shadow-xs font-bold"
-                        : "border-[#4a0e17] bg-[#4a0e17]/10 text-[#4a0e17] font-bold"
+                        ? "border-[var(--studio-gold)] bg-[var(--studio-gold)]/20 text-[var(--studio-gold)] shadow-xs font-bold"
+                        : "border-[var(--studio-wine)] bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] font-bold"
                       : dark
-                        ? "border-white/10 bg-white/[0.06] text-[#fff6dc] hover:border-[#dfba73]/50 hover:text-[#dfba73]"
-                        : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/50 hover:text-[#4a0e17]"
+                        ? "border-white/10 bg-white/[0.06] text-[var(--studio-cream)] hover:border-[var(--studio-gold)]/50 hover:text-[var(--studio-gold)]"
+                        : "border-[var(--studio-line)] bg-white text-[#3b2b31] hover:border-[var(--studio-wine)]/50 hover:text-[var(--studio-wine)]"
                   )}
                 >
                   {s.label}
@@ -716,8 +752,8 @@ export function ContextualOptionsBar({
                   className={cn(
                     "rounded-r border px-1.5 py-1 text-xs font-bold transition-colors",
                     dark
-                      ? "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-[#dfba73]/25 hover:text-[#dfba73]"
-                      : "border-[#e8e2d6] bg-white/80 text-[#7a5b67] hover:bg-[#4a0e17]/10 hover:text-[#4a0e17]"
+                      ? "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-[var(--studio-gold)]/25 hover:text-[var(--studio-gold)]"
+                      : "border-[var(--studio-line)] bg-white/80 text-[var(--studio-mauve)] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)]"
                   )}
                 >
                   +
@@ -733,8 +769,8 @@ export function ContextualOptionsBar({
         <div className="flex items-center gap-1.5 shrink-0">
           <span
             className={cn(
-              "text-[11px] max-sm:hidden",
-              dark ? "text-zinc-400" : "text-[#7a5b67]"
+              "text-xs max-sm:hidden",
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Presets:
@@ -753,10 +789,10 @@ export function ContextualOptionsBar({
                 }
               }}
               className={cn(
-                "flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] transition-colors",
+                "flex items-center gap-1 rounded border px-2 py-0.5 text-xs transition-colors",
                 dark
-                  ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:border-white/40 hover:text-white"
-                  : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:border-[#4a0e17]/40 hover:text-[#4a0e17]"
+                  ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] hover:border-white/40 hover:text-white"
+                  : "border-[var(--studio-line)] bg-white text-[#3b2b31] hover:border-[var(--studio-wine)]/40 hover:text-[var(--studio-wine)]"
               )}
             >
               <span
@@ -774,7 +810,7 @@ export function ContextualOptionsBar({
         <div
           className={cn(
             "flex items-center gap-2 shrink-0",
-            dark ? "text-zinc-400" : "text-[#7a5b67]"
+            dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
           )}
         >
           <span>
@@ -787,8 +823,8 @@ export function ContextualOptionsBar({
             className={cn(
               "rounded border px-2.5 py-1 text-xs font-medium transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:bg-white/12"
-                : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:bg-[#4a0e17]/5"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/12"
+                : "border-[var(--studio-line)] bg-white text-[#3b2b31] hover:bg-[var(--studio-wine)]/5"
             )}
           >
             Reset View
@@ -808,11 +844,11 @@ export function ContextualOptionsBar({
                 "rounded px-2 py-1 text-xs font-medium transition-colors",
                 zoom === z
                   ? dark
-                    ? "bg-[#3d2733] text-[#dfba73] font-semibold"
-                    : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                    ? "bg-[#3d2733] text-[var(--studio-gold)] font-semibold"
+                    : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] font-semibold"
                   : dark
                     ? "text-zinc-400 hover:text-white"
-                    : "text-[#7a5b67] hover:text-[#4a0e17]"
+                    : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
               )}
             >
               {Math.round(z * 100)}%
@@ -824,8 +860,8 @@ export function ContextualOptionsBar({
             className={cn(
               "rounded border px-2 py-1 text-xs font-medium transition-colors",
               dark
-                ? "border-white/15 bg-white/[0.06] text-[#fff6dc] hover:bg-white/12"
-                : "border-[#e8e2d6] bg-white text-[#3b2b31] hover:bg-[#4a0e17]/5"
+                ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] hover:bg-white/12"
+                : "border-[var(--studio-line)] bg-white text-[#3b2b31] hover:bg-[var(--studio-wine)]/5"
             )}
           >
             Fit Screen
@@ -852,11 +888,11 @@ export function ContextualOptionsBar({
             "rounded px-2 py-1 text-xs font-medium transition-colors",
             showRulers
               ? dark
-                ? "bg-[#3d2733] text-[#dfba73]"
-                : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                ? "bg-[#3d2733] text-[var(--studio-gold)]"
+                : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] font-semibold"
               : dark
                 ? "text-zinc-400 hover:text-white"
-                : "text-[#7a5b67] hover:text-[#4a0e17]"
+                : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
           )}
         >
           Rulers
@@ -870,11 +906,11 @@ export function ContextualOptionsBar({
             "rounded px-2 py-1 text-xs font-medium transition-colors",
             showGrid
               ? dark
-                ? "bg-[#3d2733] text-[#dfba73]"
-                : "bg-[#4a0e17]/10 text-[#4a0e17] font-semibold"
+                ? "bg-[#3d2733] text-[var(--studio-gold)]"
+                : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] font-semibold"
               : dark
                 ? "text-zinc-400 hover:text-white"
-                : "text-[#7a5b67] hover:text-[#4a0e17]"
+                : "text-[var(--studio-mauve)] hover:text-[var(--studio-wine)]"
           )}
         >
           Grid

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "RD-B4-svg",
+    "name": "SVG becomes a flat PNG and uploads",
+    "ok": true,
+    "detail": "{\"dims\":{\"type\":\"png\",\"width\":800,\"height\":400},\"status\":\"saving… | Your SVG is in as a flat picture. Its text and shapes are not editable here. | \"}"
+  },
+  {
+    "id": "RD-B4-pdf",
+    "name": "PDF page 1 becomes a picture with the page's proportions",
+    "ok": true,
+    "detail": "{\"dims\":{\"type\":\"webp\",\"width\":1242,\"height\":1674},\"status\":\"saving… | Page 1 of your file is in as a flat picture. Its text and shapes are not editable here. | \"}"
+  },
+  {
+    "id": "RD-B4-ai",
+    "name": ".ai (PDF-compatible) is read through the PDF reader",
+    "ok": true,
+    "detail": "{\"dims\":{\"type\":\"webp\",\"width\":1242,\"height\":1674},\"status\":\"saving… | Page 1 of your file is in as a flat picture. Its text and shapes are not editable here. | \"}"
+  },
+  {
+    "id": "RD-B4-psd",
+    "name": "PSD flattened preview becomes a 300x200 PNG",
+    "ok": true,
+    "detail": "{\"dims\":{\"type\":\"png\",\"width\":300,\"height\":200},\"status\":\"saving… | Your Photoshop file is in as one flat picture. Its layers are not kept; edit the original to change them. | \"}"
+  },
+  {
+    "id": "RD-B4-bad",
+    "name": "Unsupported file gets a clear message and no upload",
+    "ok": true,
+    "detail": "{\"dims\":null,\"status\":\"not saved | Please choose a PNG, JPG, WebP, SVG, PDF, Illustrator (.ai) or Photoshop (.psd) file. | \"}"
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-B7a",
+    "name": "Summary describes the WhatsApp picture",
+    "ok": true,
+    "detail": "You will get: Small for WhatsApp · 1142 × 1600 px, compressed to about 400 KB or less."
+  },
+  {
+    "id": "RD-B7b",
+    "name": "File is named for WhatsApp and is a JPG",
+    "ok": true,
+    "detail": "Adaeze-Tunde-invitation-whatsapp.jpg"
+  },
+  {
+    "id": "RD-B7c",
+    "name": "File is at most 400 KB",
+    "ok": true,
+    "detail": "120 KB"
+  },
+  {
+    "id": "RD-ERR",
+    "name": "No page errors",
+    "ok": true,
+    "detail": ""
+  }
+]
