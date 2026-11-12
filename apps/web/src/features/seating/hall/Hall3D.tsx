@@ -100,6 +100,8 @@ export interface Scene {
   heat?: boolean;
   /** Whether the next floor click places a unit. */
   placing?: boolean;
+  /** How solid a tent roof is drawn, from 0 (hidden) to 1. */
+  roof?: number;
 }
 
 export type HallCommand =

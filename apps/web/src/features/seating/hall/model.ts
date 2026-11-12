@@ -414,11 +414,11 @@ export const VENUE_BLURB: Record<VenueType, string> = {
   marquee: "A tent on a leg grid, open to the air.",
   "pole-tent": "Poles down the middle, fabric over.",
   "stretch-tent": "Fabric pulled over irregular ground.",
-  garden: "Lawn, trees and a house behind you.",
+  garden: "Lawn, trees and the house beyond the stage.",
   field: "Open ground with nothing to fix to.",
   beach: "Sand, wind and a tide line.",
   rooftop: "A terrace with a parapet and a view.",
-  church: "Pews, an aisle and a raised altar.",
+  church: "An aisle, a chancel rail and a raised altar.",
   hybrid: "Ceremony in one place, reception in another.",
 };
 
@@ -436,6 +436,92 @@ export function defaultVenue(type: VenueType = "hall"): VenueProfile {
     sun: null,
     wind: null,
   };
+}
+
+/** Pillars the studio drew itself for a pillared hall, so it can take them away again. */
+export const AUTO_PILLAR_PREFIX = "auto-pillar-";
+
+/**
+ * The fixed uprights a venue type comes with, as pillars on the plan so tables are planned round
+ * them. A pillared hall gets two rows of columns, a quarter of the width in from each side and
+ * about six metres apart. A pole tent gets its centre poles down the middle of the long side,
+ * about twelve metres apart. An upright that would land on an existing area is left out, and the
+ * hall never goes over the zone limit.
+ */
+export function pillarZones(
+  type: VenueType,
+  width: number,
+  length: number,
+  existing: Zone[],
+  maxZones = 40
+): Zone[] {
+  const spots: [number, number][] = [];
+  if (type === "pillared-hall") {
+    const run = Math.max(1, length - 4);
+    const n = Math.max(2, Math.round(run / 6));
+    for (const x of [width * 0.25, width * 0.75])
+      for (let i = 0; i < n; i++) spots.push([x, 2 + ((i + 0.5) * run) / n]);
+  } else if (type === "pole-tent") {
+    const along = width >= length;
+    const long = along ? width : length;
+    const n = Math.max(1, Math.round(long / 12));
+    for (let i = 0; i < n; i++) {
+      const t = ((i + 0.5) / n) * long;
+      spots.push(along ? [t, length / 2] : [width / 2, t]);
+    }
+  }
+  const size = type === "pole-tent" ? 0.3 : 0.6;
+  const label = type === "pole-tent" ? "Tent pole" : "Pillar";
+  const clear = (x: number, y: number) =>
+    existing.every(
+      (z) =>
+        Math.abs(z.x - x) > z.w / 2 + size / 2 + 0.3 ||
+        Math.abs(z.y - y) > z.h / 2 + size / 2 + 0.3
+    );
+  const out: Zone[] = [];
+  for (const [x, y] of spots) {
+    if (!clear(x, y)) continue;
+    if (existing.length + out.length >= maxZones) break;
+    out.push({
+      id: `${AUTO_PILLAR_PREFIX}${out.length + 1}`,
+      kind: "pillar",
+      label,
+      x: Math.round(x * 100) / 100,
+      y: Math.round(y * 100) / 100,
+      w: size,
+      h: size,
+      shape: "round",
+    });
+  }
+  return out;
+}
+
+/**
+ * Change the venue type, and with it the setting it starts in. A pillared hall gets its columns and
+ * a pole tent its centre poles, unless the host has already placed pillars; moving to another venue
+ * takes away the ones the studio drew, and keeps any the host added themselves.
+ */
+export function withVenueType(
+  layout: HallLayout,
+  type: VenueType,
+  environment: Environment = VENUE_ENVIRONMENT[type]
+): HallLayout {
+  const own = (z: Zone) => z.id.startsWith(AUTO_PILLAR_PREFIX);
+  // The studio's own uprights belong to the venue they were drawn for.
+  let zones =
+    type === layout.venue.type
+      ? layout.zones
+      : layout.zones.filter((z) => !own(z));
+  if (
+    (type === "pillared-hall" || type === "pole-tent") &&
+    !zones.some((z) => z.kind === "pillar")
+  ) {
+    zones = [
+      ...zones,
+      ...pillarZones(type, layout.width, layout.length, zones),
+    ];
+  }
+  return { ...layout, zones, venue: { ...layout.venue, type, environment } };
 }
 
 let idCounter = 0;

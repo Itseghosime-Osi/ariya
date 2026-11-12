@@ -732,13 +732,20 @@ function groundTexture(venue) {
   if (floor === "soil") return T.grass("#6b5a44");
   if (floor === "deck") return T.wood();
   if (venue.type === "beach") return T.sand();
-  if (venue.type === "garden" || venue.type === "field") return T.grass();
+  if (venue.type === "garden") return T.grass();
+  // A field is rougher, drier ground than a kept lawn.
+  if (venue.type === "field") return T.grass(FIELD_GRASS);
+  // A tent goes up on a lawn unless the host said what is underneath.
+  if (isTent(venue)) return T.grass();
   return null;
 }
 
+const FIELD_GRASS = "#7a8a45";
+
 /** The leg module a tent snaps to, in metres, or 0 when the venue has no leg grid. */
 function legModule(venue) {
-  if (!isTent(venue)) return 0;
+  // Only a marquee stands on a leg grid; a pole tent and a stretch tent are held up by poles.
+  if (venue.type !== "marquee") return 0;
   const m = venue.structure?.legModule;
   return m === 3 || m === 5 ? m : 0;
 }
@@ -760,6 +767,7 @@ function buildShell(L) {
     venue.environment,
     venue.structure?.floor,
     venue.structure?.legModule,
+    venue.type === "pole-tent" ? tentPoles(L).map((p) => [p.x, p.z]) : null,
   ]);
   if (sig === shellSig) return;
   shellSig = sig;
@@ -798,7 +806,7 @@ function buildShell(L) {
   if (open) {
     buildOpenVenue(venue, W, Ln, evening);
   } else if (tent) {
-    buildTent(venue, W, Ln, H, evening);
+    buildTent(venue, W, Ln, H, evening, L);
   } else {
     buildWalls(decor, W, Ln, H, evening);
     if (venue.type === "church") buildChurch(W, Ln, evening);
@@ -851,10 +859,25 @@ function buildOpenVenue(venue, W, Ln, evening) {
       wall.receiveShadow = true;
       shell.add(wall);
     }
+    buildSkyline(W, Ln, evening);
+    return;
+  }
+
+  if (venue.type === "beach") {
+    buildShore(W, Ln, evening);
+    return;
+  }
+
+  if (venue.type === "field") {
+    // Open ground running off in every direction, and a line of trees far away.
+    groundApron(W, Ln, T.grass(FIELD_GRASS), 3.2);
+    treeLine(W, Ln, evening);
     return;
   }
 
   if (venue.type === "garden") {
+    groundApron(W, Ln, T.grass(), 1.8);
+    buildHouse(W, Ln, evening);
     // A few trees around the edge, so the ground reads as a garden and not a lawn.
     const trunk = new THREE.MeshStandardMaterial({
       color: "#5a4632",
@@ -869,7 +892,6 @@ function buildOpenVenue(venue, W, Ln, evening) {
       [W - 1.6, 1.6],
       [1.6, Ln - 1.6],
       [W - 1.6, Ln - 1.6],
-      [W / 2, -1.4],
     ];
     for (const [x, z] of spots) {
       const g = new THREE.Group();
@@ -889,8 +911,510 @@ function buildOpenVenue(venue, W, Ln, evening) {
   }
 }
 
+/**
+ * A sheet of fabric over the hall, shaped by a height function, for the tents whose roof is not a
+ * flat-sided hip. Returns the material so the caller can fade it with the other roofs.
+ */
+function fabricSheet(x0, x1, z0, z1, heightAt, colour, seg = 64) {
+  const geo = new THREE.PlaneGeometry(x1 - x0, z1 - z0, seg, seg);
+  geo.rotateX(-Math.PI / 2);
+  geo.translate((x0 + x1) / 2, 0, (z0 + z1) / 2);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    pos.setY(i, heightAt(pos.getX(i), pos.getZ(i)));
+  }
+  geo.computeVertexNormals();
+  const fabric = new THREE.MeshStandardMaterial({
+    color: colour,
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  const mesh = new THREE.Mesh(geo, fabric);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  shell.add(mesh);
+  return fabric;
+}
+
+/** A plain upright pole, from the ground to a height. */
+function pole(x, z, h, r, material) {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(r, r * 1.15, h, 10),
+    material
+  );
+  m.position.set(x, h / 2, z);
+  m.castShadow = true;
+  shell.add(m);
+  return m;
+}
+
+/** A guy rope from the top of a pole down to a stake outside the tent. */
+function guyRope(x, z, h, dx, dz, material) {
+  const geo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(x, h, z),
+    new THREE.Vector3(x + dx, 0.02, z + dz),
+  ]);
+  shell.add(new THREE.Line(geo, material));
+}
+
+/**
+ * The centre poles of a pole tent. They are the pillars on the plan, so the host can move one and
+ * the peak moves with it; without any, they run down the middle of the long side.
+ */
+function tentPoles(L) {
+  const placed = (L.zones ?? []).filter((z) => z.kind === "pillar");
+  if (placed.length) return placed.map((z) => ({ x: z.x, z: z.y }));
+  const along = L.width >= L.length;
+  const long = along ? L.width : L.length;
+  const n = Math.max(1, Math.round(long / 12));
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const t = ((i + 0.5) / n) * long;
+    out.push(along ? { x: t, z: L.length / 2 } : { x: L.width / 2, z: t });
+  }
+  return out;
+}
+
+/**
+ * A pole tent: tall centre poles with the fabric pulled up to a peak over each one, falling to a
+ * ring of short side poles round the edge.
+ */
+function buildPoleTent(L, W, Ln, H, evening) {
+  const sideH = Math.min(2.6, Math.max(2.2, H - 1.8));
+  // A pole tent rises steeply: the peaks stand well above the eaves, whatever the hall height.
+  const peak = Math.max(H, sideH + Math.max(3.5, Math.min(W, Ln) * 0.28));
+  const poles = tentPoles(L);
+  const reach = Math.max(
+    Math.min(W, Ln) / 2 + 0.6,
+    (Math.max(W, Ln) / poles.length) * 0.62
+  );
+  const overhang = 0.4;
+  const heightAt = (x, z) => {
+    let lift = 0;
+    for (const p of poles) {
+      const d = Math.hypot(x - p.x, z - p.z);
+      const t = Math.max(0, 1 - d / reach);
+      // Fabric hangs in a curve from the peak, not a straight cone.
+      lift = Math.max(lift, Math.pow(t, 1.7));
+    }
+    return sideH + (peak - sideH) * lift;
+  };
+  const fabric = fabricSheet(
+    -overhang,
+    W + overhang,
+    -overhang,
+    Ln + overhang,
+    heightAt,
+    evening ? "#e6dfd2" : "#efe7d8",
+    72
+  );
+  // Seams running down from every peak, so the fabric reads as a peaked roof from any angle.
+  const seam = new THREE.LineBasicMaterial({
+    color: evening ? "#a99e8c" : "#b8ab95",
+    transparent: true,
+  });
+  for (const p of poles) {
+    for (let k = 0; k < 16; k++) {
+      const a = (k / 16) * Math.PI * 2;
+      const pts = [];
+      for (let t = 0; t <= 1.0001; t += 0.05) {
+        const x = p.x + Math.cos(a) * reach * t;
+        const z = p.z + Math.sin(a) * reach * t;
+        if (
+          x < -overhang ||
+          x > W + overhang ||
+          z < -overhang ||
+          z > Ln + overhang
+        )
+          break;
+        pts.push(new THREE.Vector3(x, heightAt(x, z) + 0.04, z));
+      }
+      if (pts.length > 1)
+        shell.add(
+          new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), seam)
+        );
+    }
+  }
+  roofs.push({ mats: [fabric, seam], y: sideH });
+
+  const wood = new THREE.MeshStandardMaterial({
+    color: "#a98b62",
+    roughness: 0.8,
+  });
+  const rope = new THREE.LineBasicMaterial({ color: "#8c8273" });
+  // The centre poles run right up to the peaks; a pillar on the plan marks where each one stands.
+  for (const p of poles) pole(p.x, p.z, peak + 0.3, 0.14, wood);
+  // A finial on every peak.
+  for (const p of poles) {
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 10), wood);
+    tip.position.set(p.x, peak + 0.4, p.z);
+    shell.add(tip);
+  }
+  // Side poles round the edge, about three metres apart, each with its guy rope.
+  const ring = (len) => Math.max(2, Math.round(len / 3));
+  const nx = ring(W);
+  const nz = ring(Ln);
+  for (let i = 0; i <= nx; i++) {
+    const x = (i / nx) * W;
+    for (const [z, dz] of [
+      [-overhang, -1.4],
+      [Ln + overhang, 1.4],
+    ]) {
+      pole(x, z, sideH, 0.05, wood);
+      guyRope(x, z, sideH, 0, dz, rope);
+    }
+  }
+  for (let i = 1; i < nz; i++) {
+    const z = (i / nz) * Ln;
+    for (const [x, dx] of [
+      [-overhang, -1.4],
+      [W + overhang, 1.4],
+    ]) {
+      pole(x, z, sideH, 0.05, wood);
+      guyRope(x, z, sideH, dx, 0, rope);
+    }
+  }
+}
+
+/**
+ * A stretch tent: one sheet of fabric pulled over poles round the edge, high on some and low on
+ * others, so the roof rolls in waves. Nothing stands inside.
+ */
+function buildStretchTent(W, Ln, H, evening) {
+  const high = Math.max(3.6, Math.min(H, 5.5));
+  const low = 2.5;
+  const anchors = [];
+  const step = 5.5;
+  const perim = [];
+  const nx = Math.max(2, Math.round(W / step));
+  const nz = Math.max(2, Math.round(Ln / step));
+  for (let i = 0; i <= nx; i++) perim.push([(i / nx) * W, 0, 0, -1]);
+  for (let i = 1; i <= nz; i++) perim.push([W, (i / nz) * Ln, 1, 0]);
+  for (let i = nx - 1; i >= 0; i--) perim.push([(i / nx) * W, Ln, 0, 1]);
+  for (let i = nz - 1; i >= 1; i--) perim.push([0, (i / nz) * Ln, -1, 0]);
+  perim.forEach(([x, z, ox, oz], i) => {
+    const corner = (x === 0 || x === W) && (z === 0 || z === Ln);
+    anchors.push({
+      x,
+      z,
+      ox,
+      oz,
+      // Corners are pegged low; the poles between them alternate high and low.
+      h: corner ? low - 0.4 : i % 2 === 0 ? high : low + 0.3,
+      pole: !corner,
+    });
+  });
+  // Inverse-distance blend of the anchor heights, with a slight sag where nothing holds it up.
+  const heightAt = (x, z) => {
+    let num = 0;
+    let den = 0;
+    for (const a of anchors) {
+      const d2 = (x - a.x) ** 2 + (z - a.z) ** 2 + 0.25;
+      const w = 1 / (d2 * d2);
+      num += a.h * w;
+      den += w;
+    }
+    const edge = Math.min(x, W - x, z, Ln - z) / (Math.min(W, Ln) / 2);
+    const sag = 0.35 * Math.sin(Math.PI * Math.min(1, Math.max(0, edge)));
+    return Math.max(low - 0.4, num / den - sag);
+  };
+  const fabric = fabricSheet(
+    -0.3,
+    W + 0.3,
+    -0.3,
+    Ln + 0.3,
+    heightAt,
+    evening ? "#b98f63" : "#d8b88c",
+    72
+  );
+  roofs.push({ mats: [fabric], y: low });
+
+  const wood = new THREE.MeshStandardMaterial({
+    color: "#8a6d4c",
+    roughness: 0.8,
+  });
+  const rope = new THREE.LineBasicMaterial({ color: "#7d6b55" });
+  for (const a of anchors) {
+    if (!a.pole) continue;
+    const h = heightAt(a.x, a.z) + 0.15;
+    pole(a.x, a.z, h, 0.07, wood);
+    guyRope(a.x, a.z, h, a.ox * 2.2, a.oz * 2.2, rope);
+  }
+}
+
+/** Ground that carries on past the edge of the event area, a little below its surface. */
+function groundApron(W, Ln, texture, scale) {
+  const size = Math.max(W, Ln) * scale + 20;
+  const m = new THREE.MeshStandardMaterial({
+    map: texture.clone(),
+    roughness: 1,
+  });
+  m.map.needsUpdate = true;
+  m.map.repeat.set(size / 2, size / 2);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(size, size), m);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.set(W / 2, -0.12, Ln / 2);
+  shell.add(ground);
+}
+
+/** A rounded tree: a trunk and a crown, scaled. */
+function tree(x, z, scale, trunk, leaf) {
+  const g = new THREE.Group();
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.16, 0.22, 2.6, 8),
+    trunk
+  );
+  stem.position.y = 1.3;
+  const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 1), leaf);
+  crown.position.y = 3.4;
+  stem.castShadow = crown.castShadow = true;
+  g.add(stem, crown);
+  g.scale.setScalar(scale);
+  g.position.set(x, 0, z);
+  shell.add(g);
+}
+
+/** The house a garden belongs to, behind the stage end: walls, windows, a door and a roof. */
+function buildHouse(W, Ln, evening) {
+  const w = Math.min(Math.max(W * 0.55, 10), 18);
+  const d = 8;
+  const h = 6;
+  const z = -3.5 - d / 2;
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: "#efe6d6",
+    roughness: 0.9,
+  });
+  const roofMat = new THREE.MeshStandardMaterial({
+    color: "#9a4b32",
+    roughness: 0.85,
+  });
+  const glass = new THREE.MeshStandardMaterial({
+    color: evening ? "#ffd58a" : "#3c4a55",
+    emissive: evening ? "#ffb347" : "#000000",
+    emissiveIntensity: evening ? 0.8 : 0,
+    roughness: 0.3,
+  });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+  body.position.set(W / 2, h / 2, z);
+  body.castShadow = body.receiveShadow = true;
+  shell.add(body);
+  // A pitched roof: a prism along the width.
+  const rise = 2.6;
+  const shape = new THREE.Shape();
+  shape.moveTo(-d / 2 - 0.5, 0);
+  shape.lineTo(d / 2 + 0.5, 0);
+  shape.lineTo(0, rise);
+  shape.closePath();
+  const roofGeo = new THREE.ExtrudeGeometry(shape, {
+    depth: w + 1,
+    bevelEnabled: false,
+  });
+  roofGeo.rotateY(Math.PI / 2);
+  roofGeo.translate(W / 2 - (w + 1) / 2, h, z);
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.castShadow = true;
+  shell.add(roof);
+  // Windows on two floors and a door, on the side facing the guests.
+  const face = z + d / 2 + 0.02;
+  const cols = Math.max(3, Math.round(w / 3));
+  for (let i = 0; i < cols; i++) {
+    const x = W / 2 - w / 2 + ((i + 0.5) * w) / cols;
+    for (const y of [1.6, 4.3]) {
+      if (y < 2 && i === Math.floor(cols / 2)) continue;
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.3), glass);
+      win.position.set(x, y, face);
+      shell.add(win);
+    }
+  }
+  const door = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.2, 2.3),
+    new THREE.MeshStandardMaterial({ color: "#5b3a26", roughness: 0.7 })
+  );
+  door.position.set(W / 2, 1.15, face);
+  shell.add(door);
+}
+
+/** A ragged line of trees far off across a field, so the open ground has a horizon. */
+function treeLine(W, Ln, evening) {
+  const trunk = new THREE.MeshStandardMaterial({
+    color: "#5a4632",
+    roughness: 1,
+  });
+  const leaf = new THREE.MeshStandardMaterial({
+    color: evening ? "#2c3f28" : "#4d6b3a",
+    roughness: 1,
+  });
+  const r = Math.max(W, Ln) * 1.25 + 12;
+  let seed = 7;
+  const rand = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  for (let a = -0.9; a <= 0.9; a += 0.09) {
+    const ang = Math.PI + a;
+    const dist = r * (0.92 + rand() * 0.16);
+    tree(
+      W / 2 + Math.sin(ang) * dist,
+      Ln / 2 + Math.cos(ang) * dist,
+      1.2 + rand() * 0.9,
+      trunk,
+      leaf
+    );
+  }
+}
+
+/** The sea behind the stage end: wet sand, a line of surf, water to the horizon, and two palms. */
+function buildShore(W, Ln, evening) {
+  // Dry sand round the event area.
+  groundApron(W, Ln, T.sand(), 1.4);
+  const span = Math.max(W, Ln) * 6 + 200;
+  const flat = (w, d, x, y, z, material) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), material);
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(x, y, z);
+    m.receiveShadow = true;
+    shell.add(m);
+  };
+  const edge = -4;
+  // Wet sand, darker where the tide has been.
+  flat(
+    span,
+    5,
+    W / 2,
+    -0.1,
+    edge + 2.5,
+    new THREE.MeshStandardMaterial({
+      color: evening ? "#7f6c52" : "#b39b74",
+      roughness: 0.6,
+    })
+  );
+  // The tide line: a band of surf.
+  flat(
+    span,
+    0.6,
+    W / 2,
+    -0.09,
+    edge,
+    new THREE.MeshStandardMaterial({
+      color: "#f4f6f4",
+      roughness: 0.4,
+    })
+  );
+  // The water, to the horizon.
+  flat(
+    span,
+    span / 2,
+    W / 2,
+    -0.11,
+    edge - span / 4 - 0.3,
+    new THREE.MeshStandardMaterial({
+      color: evening ? "#1d3445" : "#3f87a6",
+      roughness: 0.15,
+      metalness: 0.1,
+    })
+  );
+  // Two palms, one on each side.
+  const trunk = new THREE.MeshStandardMaterial({
+    color: "#8a6a48",
+    roughness: 0.9,
+  });
+  const frond = new THREE.MeshStandardMaterial({
+    color: evening ? "#2d4a2a" : "#3f7a3a",
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+  });
+  for (const [x, lean] of [
+    [-2.5, -0.12],
+    [W + 2.5, 0.12],
+  ]) {
+    const g = new THREE.Group();
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.22, 6, 8),
+      trunk
+    );
+    stem.position.y = 3;
+    stem.castShadow = true;
+    g.add(stem);
+    for (let i = 0; i < 7; i++) {
+      const leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 3), frond);
+      leaf.position.set(0, 6, 0);
+      leaf.rotation.set(-1.05, (i / 7) * Math.PI * 2, 0, "YXZ");
+      leaf.translateY(1.4);
+      leaf.castShadow = true;
+      g.add(leaf);
+    }
+    g.rotation.z = lean;
+    g.position.set(x, 0, Ln * 0.3);
+    shell.add(g);
+  }
+}
+
+/** How far below the terrace the street is, in metres. */
+const STREET = 24;
+
+/** The city round a rooftop: the street far below, and blocks rising from it to about our height. */
+function buildSkyline(W, Ln, evening) {
+  const size = Math.max(W, Ln) * 8 + 300;
+  const street = new THREE.Mesh(
+    new THREE.PlaneGeometry(size, size),
+    new THREE.MeshStandardMaterial({
+      color: evening ? "#23252b" : "#8c9096",
+      roughness: 1,
+    })
+  );
+  street.rotation.x = -Math.PI / 2;
+  street.position.set(W / 2, -STREET, Ln / 2);
+  shell.add(street);
+  const cols = evening
+    ? ["#2c2f3a", "#363a47", "#2a2d36"]
+    : ["#a9b1bd", "#9aa3b0", "#c3c8cf", "#8e98a6", "#b8a998"];
+  const lit = new THREE.MeshStandardMaterial({
+    color: "#ffd58a",
+    emissive: "#ffb347",
+    emissiveIntensity: 0.9,
+  });
+  let seed = 11;
+  const rand = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const r0 = Math.max(W, Ln) * 1.2 + 22;
+  for (let i = 0; i < 46; i++) {
+    const ang = (i / 46) * Math.PI * 2 + rand() * 0.1;
+    const dist = r0 + rand() * 50;
+    const w = 6 + rand() * 10;
+    // The terrace is high up: the blocks in front of the guests sit below the parapet, and only a
+    // few beyond the far side rise above it.
+    const far = -Math.cos(ang);
+    const top = far > 0.3 ? -14 + rand() * 17 : -20 + rand() * 9;
+    const h = top + STREET;
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, w),
+      new THREE.MeshStandardMaterial({
+        color: cols[Math.floor(rand() * cols.length)],
+        roughness: 0.8,
+      })
+    );
+    const x = W / 2 + Math.sin(ang) * dist;
+    const z = Ln / 2 + Math.cos(ang) * dist;
+    m.position.set(x, top - h / 2, z);
+    m.rotation.y = ang;
+    shell.add(m);
+    if (evening) {
+      for (let k = 0; k < 6; k++) {
+        // On the face that looks back at the terrace.
+        const win = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.7), lit);
+        win.position.set(
+          (rand() - 0.5) * w * 0.8,
+          h / 2 - rand() * Math.min(h, 30),
+          -w / 2 - 0.02
+        );
+        win.rotation.y = Math.PI;
+        m.add(win);
+      }
+    }
+  }
+}
+
 /** A marquee, pole tent or stretch tent: legs on the module, and a fabric roof. */
-function buildTent(venue, W, Ln, H, evening) {
+function buildTent(venue, W, Ln, H, evening, L) {
+  if (venue.type === "pole-tent") return buildPoleTent(L, W, Ln, H, evening);
+  if (venue.type === "stretch-tent") return buildStretchTent(W, Ln, H, evening);
   const module = legModule(venue) || 5;
   const legMat = new THREE.MeshStandardMaterial({
     color: "#b9b3a6",
@@ -2617,15 +3141,17 @@ function applyCamera() {
       m.depthWrite = !near && m.blending !== THREE.AdditiveBlending;
     }
   }
-  // A roof over the tables fades as soon as the camera rises above its eaves, so the plan stays
-  // readable from above. Unlike a wall this does not depend on the polar angle: looking straight
-  // down is exactly when the roof is most in the way.
+  // A tent roof is drawn as solid as the host chooses, so they can see the venue and still work on
+  // the tables under it. Straight down, where the plan matters most, it is always see-through, and
+  // hidden means not drawn at all.
+  const roofSetting = typeof state.roof === "number" ? state.roof : 0.6;
   for (const r of roofs) {
-    const above = camera.position.y > r.y;
+    const amount = pol < 0.25 ? Math.min(roofSetting, 0.08) : roofSetting;
     for (const m of r.mats) {
       m.userData.base ??= m.opacity;
-      m.opacity = above ? 0.06 : m.userData.base;
-      m.depthWrite = !above;
+      m.opacity = m.userData.base * amount;
+      m.visible = amount > 0.001;
+      m.depthWrite = amount > 0.95;
     }
   }
   // Glow sprites face the camera.

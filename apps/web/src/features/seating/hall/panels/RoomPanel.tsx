@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   HALL_PRESETS,
   VENUE_BLURB,
-  VENUE_ENVIRONMENT,
+  withVenueType,
   VENUE_LABEL,
   formatFeet,
   type FloorFinish,
@@ -268,15 +268,10 @@ export function RoomPanel({
               <button
                 key={type}
                 type="button"
-                onClick={() =>
-                  onChange({
-                    venue: {
-                      ...layout.venue,
-                      type,
-                      environment: VENUE_ENVIRONMENT[type],
-                    },
-                  })
-                }
+                onClick={() => {
+                  const next = withVenueType(layout, type);
+                  onChange({ venue: next.venue, zones: next.zones });
+                }}
                 aria-pressed={active}
                 className={cn(
                   "flex items-start gap-2 rounded-xl border border-hairline bg-white p-2 text-left transition-colors hover:border-night/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy",
