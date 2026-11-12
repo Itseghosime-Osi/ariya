@@ -64,6 +64,23 @@ function CanvasDimensionInput({
   );
 }
 
+/** Scroll-edge shadows with no script: covers scroll with the content, shadows stay fixed. */
+function scrollEdges(bg: string, dark: boolean): React.CSSProperties {
+  const shade = dark ? "rgba(255,255,255,0.22)" : "rgba(45,31,36,0.28)";
+  return {
+    backgroundImage: [
+      `linear-gradient(to right, ${bg} 30%, transparent)`,
+      `linear-gradient(to left, ${bg} 30%, transparent)`,
+      `radial-gradient(farthest-side at 0 50%, ${shade}, transparent)`,
+      `radial-gradient(farthest-side at 100% 50%, ${shade}, transparent)`,
+    ].join(", "),
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "left center, right center, left center, right center",
+    backgroundSize: "32px 100%, 32px 100%, 12px 100%, 12px 100%",
+    backgroundAttachment: "local, local, scroll, scroll",
+  };
+}
+
 export function ContextualOptionsBar({
   activeTool,
   onSelectTool,
@@ -142,6 +159,8 @@ export function ContextualOptionsBar({
           ? "border-[#382630] bg-[#23181e] text-zinc-200"
           : "border-[var(--studio-line)] bg-[#fcfbfa] text-[#3b2b31]"
       )}
+      // A soft edge shows on a side only while there is more to scroll to in that direction.
+      style={scrollEdges(dark ? "#23181e" : "#fcfbfa", dark)}
     >
       {/* Tool-Specific Controls */}
 
@@ -661,7 +680,12 @@ export function ContextualOptionsBar({
           <button
             type="button"
             onClick={() => onAddLayer("text")}
-            className="flex items-center gap-1 rounded bg-[var(--studio-wine)] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#6b1e2e] dark:bg-[var(--studio-gold)] dark:text-[var(--studio-ink)] dark:hover:bg-[#edd49d] transition-colors"
+            className={cn(
+              "flex items-center gap-1 rounded px-2.5 py-1 text-xs font-semibold transition-colors",
+              dark
+                ? "bg-[var(--studio-gold)] text-[var(--studio-ink)] hover:bg-[#edd49d]"
+                : "bg-[var(--studio-wine)] text-white hover:bg-[#6b1e2e]"
+            )}
           >
             <svg
               width="12"

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RD-SWEEP-idle-os-dark-studio-light",
+    "name": "axe: idle (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-selected-os-dark-studio-light",
+    "name": "axe: selected (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-undo-toast-os-dark-studio-light",
+    "name": "axe: undo-toast (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-empty-card-os-dark-studio-light",
+    "name": "axe: empty-card (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-idle-os-dark-studio-dark",
+    "name": "axe: idle (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-selected-os-dark-studio-dark",
+    "name": "axe: selected (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-undo-toast-os-dark-studio-dark",
+    "name": "axe: undo-toast (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-SWEEP-empty-card-os-dark-studio-dark",
+    "name": "axe: empty-card (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  }
+]

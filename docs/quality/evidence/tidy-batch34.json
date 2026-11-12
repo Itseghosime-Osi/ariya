@@ -1,0 +1,68 @@
+[
+  {
+    "id": "RD-A2-360",
+    "name": "Simple/Pro switch is fully on screen at 360px",
+    "ok": true,
+    "detail": "{\"right\":350,\"vw\":360,\"kidsRight\":346,\"over\":false}"
+  },
+  {
+    "id": "RD-A2-390",
+    "name": "Simple/Pro switch is fully on screen at 390px",
+    "ok": true,
+    "detail": "{\"right\":380,\"vw\":390,\"kidsRight\":376,\"over\":false}"
+  },
+  {
+    "id": "RD-A2-430",
+    "name": "Simple/Pro switch is fully on screen at 430px",
+    "ok": true,
+    "detail": "{\"right\":420,\"vw\":430,\"kidsRight\":416,\"over\":false}"
+  },
+  {
+    "id": "RD-A1-1440",
+    "name": "Zoom menu shows a full chevron, not clipped text (1440px)",
+    "ok": true,
+    "detail": "{\"w\":32,\"text\":\"▾\",\"sw\":30,\"cw\":30}"
+  },
+  {
+    "id": "RD-A1-1440-works",
+    "name": "Zoom menu still sets the zoom",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-A1-390",
+    "name": "Zoom menu shows a full chevron, not clipped text (390px)",
+    "ok": true,
+    "detail": "{\"w\":32,\"text\":\"▾\",\"sw\":30,\"cw\":30}"
+  },
+  {
+    "id": "RD-A1-390-works",
+    "name": "Zoom menu still sets the zoom",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-A3",
+    "name": "Options row scrolls on a phone and has scroll-edge shading",
+    "ok": true,
+    "detail": "{\"scrolls\":true,\"attach\":\"local, local, scroll, scroll\",\"layers\":4}"
+  },
+  {
+    "id": "RD-A4a",
+    "name": "Simple mode starts with rulers off",
+    "ok": true,
+    "detail": "Show Rulers\n⌘ / Ctrl+R"
+  },
+  {
+    "id": "RD-A4b",
+    "name": "The host can turn rulers on in Simple mode",
+    "ok": true,
+    "detail": "Hide Rulers\n⌘ / Ctrl+R"
+  },
+  {
+    "id": "RD-A4c",
+    "name": "Pro mode still starts with rulers on",
+    "ok": true,
+    "detail": "Hide Rulers\n⌘ / Ctrl+R"
+  }
+]

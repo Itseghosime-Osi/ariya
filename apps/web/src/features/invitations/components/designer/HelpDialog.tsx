@@ -2,6 +2,8 @@
 
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { cn } from "@/lib/utils";
+import { dialogTheme } from "./dialog-theme";
 
 interface HelpDialogProps {
   open: boolean;
@@ -55,6 +57,7 @@ const TIPS = [
 ];
 
 export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
+  const t = dialogTheme(dark);
   return (
     <Dialog.Root
       open={open}
@@ -66,18 +69,39 @@ export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
         <Dialog.Content
           aria-describedby="studio-help-desc"
           data-testid="studio-help"
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md ${dark ? "dark" : ""}`}
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md",
+            t.overlay
+          )}
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
         >
-          <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-3xl border border-black/10 bg-ivory p-6 shadow-2xl dark:border-white/10 dark:bg-[#1a1118] dark:text-ivory">
-            <div className="flex items-start justify-between border-b border-black/10 pb-4 dark:border-white/10">
+          <div
+            className={cn(
+              "relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-3xl border p-6 shadow-2xl",
+              t.panel
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-start justify-between border-b pb-4",
+                t.divider
+              )}
+            >
               <div>
-                <Dialog.Title className="font-serif text-2xl font-bold tracking-tight text-night dark:text-ivory">
+                <Dialog.Title
+                  className={cn(
+                    "font-serif text-2xl font-bold tracking-tight",
+                    t.title
+                  )}
+                >
                   Help and shortcuts
                 </Dialog.Title>
-                <p id="studio-help-desc" className="mt-1 text-xs text-label-2">
+                <p
+                  id="studio-help-desc"
+                  className={cn("mt-1 text-xs", t.muted)}
+                >
                   Quick tips for the invitation studio.
                 </p>
               </div>
@@ -85,16 +109,24 @@ export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
                 type="button"
                 aria-label="Close help"
                 onClick={onClose}
-                className="grid h-11 w-11 place-items-center rounded-full text-label-2 transition hover:bg-black/5 hover:text-night dark:hover:bg-white/10 dark:hover:text-ivory"
+                className={cn(
+                  "grid h-11 w-11 place-items-center rounded-full transition",
+                  t.ghost
+                )}
               >
                 <span className="text-xl leading-none">✕</span>
               </button>
             </div>
 
-            <h3 className="mt-4 text-sm font-semibold text-night dark:text-ivory">
+            <h3 className={cn("mt-4 text-sm font-semibold", t.strong)}>
               Getting started
             </h3>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-label-2">
+            <ul
+              className={cn(
+                "mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed",
+                t.muted
+              )}
+            >
               {TIPS.map((tip) => (
                 <li key={tip}>{tip}</li>
               ))}
@@ -102,26 +134,30 @@ export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
 
             {SHORTCUTS.map((section) => (
               <section key={section.group} className="mt-5">
-                <h3 className="text-sm font-semibold text-night dark:text-ivory">
+                <h3 className={cn("text-sm font-semibold", t.strong)}>
                   {section.group}
                 </h3>
-                <dl className="mt-2 divide-y divide-black/5 text-xs dark:divide-white/10">
+                <dl className={cn("mt-2 divide-y text-xs", t.rows)}>
                   {section.items.map(([label, keys]) => (
                     <div
                       key={label}
                       className="flex items-center justify-between gap-4 py-1.5"
                     >
-                      <dt className="text-label-2">{label}</dt>
-                      <dd className="font-mono text-night dark:text-ivory">
-                        {keys}
-                      </dd>
+                      <dt className={t.muted}>{label}</dt>
+                      <dd className={cn("font-mono", t.strong)}>{keys}</dd>
                     </div>
                   ))}
                 </dl>
               </section>
             ))}
 
-            <p className="mt-5 rounded-xl border border-hairline bg-burgundy/5 p-3 text-xs leading-relaxed text-label-2">
+            <p
+              className={cn(
+                "mt-5 rounded-xl border p-3 text-xs leading-relaxed",
+                t.well,
+                t.muted
+              )}
+            >
               Stuck? Email{" "}
               <a
                 href="mailto:help@ariyaday.com"

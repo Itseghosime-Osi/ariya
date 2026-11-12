@@ -1,0 +1,116 @@
+[
+  {
+    "id": "RD-EXP-axe-os-light-studio-light",
+    "name": "axe: no serious/critical issues in the export dialog (os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-footer-os-light-studio-light",
+    "name": "Download button is visible without scrolling",
+    "ok": true,
+    "detail": "bottom=865"
+  },
+  {
+    "id": "RD-EXP-fit-os-light-studio-light",
+    "name": "Dialog fits the screen",
+    "ok": true,
+    "detail": "h=855"
+  },
+  {
+    "id": "RD-EXP-cards",
+    "name": "Five format cards, one pressed",
+    "ok": true,
+    "detail": "5/1"
+  },
+  {
+    "id": "RD-EXP-focus",
+    "name": "Focus lands on the selected format",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-select",
+    "name": "Choosing a card updates the summary and button",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-heights",
+    "name": "Cards in a row share one height",
+    "ok": true,
+    "detail": "145,145,145,145,126"
+  },
+  {
+    "id": "RD-EXP-json",
+    "name": "Backup still downloads",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-axe-os-dark-studio-light",
+    "name": "axe: no serious/critical issues in the export dialog (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-footer-os-dark-studio-light",
+    "name": "Download button is visible without scrolling",
+    "ok": true,
+    "detail": "bottom=865"
+  },
+  {
+    "id": "RD-EXP-fit-os-dark-studio-light",
+    "name": "Dialog fits the screen",
+    "ok": true,
+    "detail": "h=855"
+  },
+  {
+    "id": "RD-EXP-axe-os-dark-studio-dark",
+    "name": "axe: no serious/critical issues in the export dialog (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-footer-os-dark-studio-dark",
+    "name": "Download button is visible without scrolling",
+    "ok": true,
+    "detail": "bottom=865"
+  },
+  {
+    "id": "RD-EXP-fit-os-dark-studio-dark",
+    "name": "Dialog fits the screen",
+    "ok": true,
+    "detail": "h=855"
+  },
+  {
+    "id": "RD-EXP-axe-os-light-studio-dark",
+    "name": "axe: no serious/critical issues in the export dialog (os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-EXP-footer-os-light-studio-dark",
+    "name": "Download button is visible without scrolling",
+    "ok": true,
+    "detail": "bottom=865"
+  },
+  {
+    "id": "RD-EXP-fit-os-light-studio-dark",
+    "name": "Dialog fits the screen",
+    "ok": true,
+    "detail": "h=855"
+  },
+  {
+    "id": "RD-EXP-phone-footer",
+    "name": "Phone: Download button visible without scrolling",
+    "ok": true,
+    "detail": "bottom=815"
+  },
+  {
+    "id": "RD-EXP-phone-h",
+    "name": "Phone: Download button is 44px or taller",
+    "ok": true,
+    "detail": "44"
+  }
+]

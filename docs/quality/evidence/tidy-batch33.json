@@ -1,0 +1,56 @@
+[
+  {
+    "id": "RD-DLG-help-os-dark-studio-light",
+    "name": "axe: help has no serious or critical issues (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-palette-os-dark-studio-light",
+    "name": "axe: palette has no serious or critical issues (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-tour-os-dark-studio-light",
+    "name": "axe: tour has no serious or critical issues (os-dark-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-help-os-dark-studio-dark",
+    "name": "axe: help has no serious or critical issues (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-palette-os-dark-studio-dark",
+    "name": "axe: palette has no serious or critical issues (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-tour-os-dark-studio-dark",
+    "name": "axe: tour has no serious or critical issues (os-dark-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-help-os-light-studio-dark",
+    "name": "axe: help has no serious or critical issues (os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-palette-os-light-studio-dark",
+    "name": "axe: palette has no serious or critical issues (os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-DLG-tour-os-light-studio-dark",
+    "name": "axe: tour has no serious or critical issues (os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  }
+]

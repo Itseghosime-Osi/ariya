@@ -142,14 +142,14 @@ export function StudioBottomDock({
             e.target.value = "";
           }}
           className={cn(
-            "h-7 w-[3.25rem] cursor-pointer rounded-md border bg-transparent px-1 text-xs font-semibold",
+            "h-7 w-8 cursor-pointer appearance-none rounded-md border bg-transparent text-center text-xs font-semibold",
             dark
               ? "border-white/15 text-[var(--studio-gold)]"
               : "border-black/10 text-[#6b1e2e]"
           )}
         >
           <option value="" disabled>
-            Zoom
+            ▾
           </option>
           <option value="fit">Fit</option>
           <option value="0.25">25%</option>
