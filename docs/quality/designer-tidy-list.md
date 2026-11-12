@@ -142,3 +142,13 @@ The alignment icons appear in the options bar and again in the inspector. Removi
 - **E2** The blend/opacity strip and the layer filter tabs share one padding (12 px sides, 8 px top and bottom); the filter tabs have a 44 px minimum height on touch.
 - Evidence: `evidence/tidy-batch39.json` (4 checks), `tidy-batch40.json` (4 checks); `batch28`, `batch29` and `batch33` still pass. Screenshots `screenshots/tidy-d-*` and `tidy-e-after-390.png`.
 - Still open from the list: B2, B3, C1, C2, C4, F1, F3, G1, G2, I1 to I3, J1, J2, K.
+
+### Fourth batch: F1, F3, G1 and G2
+
+- **F1** Simple mode starts with "Words". The import moved down into "Use your own card", which starts folded (it stays open when a card has already been imported). This needed one small option on the shared panel section (`defaultClosed`); sections that do not use it behave as before.
+- **F3** Each word field's label and its "Show" checkbox now sit on one line (same 44 px row, both centred).
+- **G1** Checked, nothing to change: the phone tab row and the status bar already share one background and one separator.
+- **G2** The phone tabs (Properties, Colours, Layers, History, View) have a soft pill background while the panel is closed, so they read as buttons; the open tab keeps its wine fill. The tab text is 12 px (it was 11.5 px). Checked at 360 and 390 px, with axe.
+- Left open: the phone tabs are 38 px tall inside a 48 px row (the studio's 44 px rule is met for the controls people use most, but not for these); fixing it means changing the sheet's height budget.
+- Evidence: `evidence/tidy-batch41.json` (4 checks), `tidy-batch42.json` (4 checks); `batch28`, `batch29` and `batch33` still pass. Screenshots `screenshots/tidy-f-after-1440.png`, `tidy-g-before-390.png`, `tidy-g-after-390.png`.
+- Still open from the list: B2, B3, C1, C2, C4, I1 to I3, J1, J2, K.
