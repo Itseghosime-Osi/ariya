@@ -105,35 +105,6 @@ export function SimplePanel({
 
   return (
     <div data-testid="simple-panel">
-      <Section title="Your own card">
-        {carded ? (
-          <div className="space-y-3">
-            <p className="text-sm text-label-2">
-              Your card is the background. Turn on any of the words below to put
-              them on top of it.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <BigButton icon="upload" onClick={onImportCard} busy={busy}>
-                Use a different card
-              </BigButton>
-              <BigButton icon="undo" onClick={onRemoveCard}>
-                Use our design instead
-              </BigButton>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-label-2">
-              Already made a card in Canva, Photoshop or anywhere else? Bring it
-              in as a picture (PNG, JPG or WebP, up to 5 MB).
-            </p>
-            <BigButton icon="upload" onClick={onImportCard} busy={busy}>
-              {busy ? "Importing…" : "Import my card"}
-            </BigButton>
-          </div>
-        )}
-      </Section>
-
       <Section title="Words">
         <div className="space-y-4">
           {WORDS.map(({ kind, label, long }) => {
@@ -142,10 +113,10 @@ export function SimplePanel({
             const id = `simple-${layer.id}`;
             return (
               <div key={layer.id}>
-                <div className="mb-1.5 flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                   <label
                     htmlFor={id}
-                    className="text-sm font-semibold text-night"
+                    className="flex min-h-11 items-center text-sm font-semibold text-night"
                   >
                     {label}
                   </label>
@@ -193,10 +164,10 @@ export function SimplePanel({
           })}
           {extras.map((layer) => (
             <div key={layer.id}>
-              <div className="mb-1.5 flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <label
                   htmlFor={`simple-${layer.id}`}
-                  className="text-sm font-semibold text-night"
+                  className="flex min-h-11 items-center text-sm font-semibold text-night"
                 >
                   Extra words
                 </label>
@@ -229,6 +200,35 @@ export function SimplePanel({
             </BigButton>
           </div>
         </div>
+      </Section>
+
+      <Section collapsible defaultClosed={!carded} title="Use your own card">
+        {carded ? (
+          <div className="space-y-3">
+            <p className="text-sm text-label-2">
+              Your card is the background. Turn on any of the words below to put
+              them on top of it.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <BigButton icon="upload" onClick={onImportCard} busy={busy}>
+                Use a different card
+              </BigButton>
+              <BigButton icon="undo" onClick={onRemoveCard}>
+                Use our design instead
+              </BigButton>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-label-2">
+              Already made a card in Canva, Photoshop or anywhere else? Bring it
+              in as a picture (PNG, JPG or WebP, up to 5 MB).
+            </p>
+            <BigButton icon="upload" onClick={onImportCard} busy={busy}>
+              {busy ? "Importing…" : "Import my card"}
+            </BigButton>
+          </div>
+        )}
       </Section>
 
       <Section title="Look">

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-F1-1440",
+    "name": "Words come first; 'Use your own card' is lower down and starts folded",
+    "ok": true,
+    "detail": "[\"Words\",\"Use your own card\",\"Look\",\"Entry pass\",\"Describe it\"] expanded=false"
+  },
+  {
+    "id": "RD-F3-1440",
+    "name": "Each field's label and its Show checkbox sit on one line",
+    "ok": true,
+    "detail": "{\"showY\":127,\"wordY\":127}"
+  },
+  {
+    "id": "RD-F1-390",
+    "name": "Words come first; 'Use your own card' is lower down and starts folded",
+    "ok": true,
+    "detail": "[\"Words\",\"Use your own card\",\"Look\",\"Entry pass\",\"Describe it\"] expanded=false"
+  },
+  {
+    "id": "RD-F3-390",
+    "name": "Each field's label and its Show checkbox sit on one line",
+    "ok": true,
+    "detail": "{\"showY\":517,\"wordY\":517}"
+  }
+]
