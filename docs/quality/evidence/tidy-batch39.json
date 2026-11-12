@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-D3",
+    "name": "Field grids use one gap and every field label one spacing",
+    "ok": true,
+    "detail": "{\"gaps\":[\"10px/10px\"],\"radii\":[\"0px\",\"10px\"],\"labels\":[\"4px\"],\"grids\":4}"
+  },
+  {
+    "id": "RD-D2",
+    "name": "The sub-heading is plain text, clearly different from the section heading",
+    "ok": true,
+    "detail": "{\"sec\":\"11px\",\"sub\":{\"size\":\"13px\",\"caps\":\"none\"}}"
+  },
+  {
+    "id": "RD-D4-pro",
+    "name": "Pro fields share the 10px control radius",
+    "ok": true,
+    "detail": "[\"10px\"]"
+  },
+  {
+    "id": "RD-D4-simple",
+    "name": "Simple fields use the same 10px radius as Pro (pill-shaped search boxes excluded)",
+    "ok": true,
+    "detail": "[\"10px\"]"
+  }
+]

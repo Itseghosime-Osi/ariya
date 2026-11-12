@@ -132,3 +132,13 @@ The alignment icons appear in the options bar and again in the inspector. Removi
 - **E3** On touch screens the undo, redo, zoom −/+, zoom percentage and Export buttons are 44 px. Below 430 px wide the zoom presets menu is hidden to make room (the −/+ buttons and the percentage button remain). Desktop sizes are unchanged. Checked at 360, 390 and 1440 px (`evidence/tidy-batch38.json`).
 - Evidence: `evidence/tidy-batch36.json`, `tidy-batch37.json`, `tidy-batch38.json`; screenshots `screenshots/tidy-*-after-*.png`.
 - Still open from the list: B2, B3, C1, C2, C4, D2 to D4, E1, E2, F1, F3, G1, G2, I1 to I3, J1, J2, K.
+
+### Third batch: D2, D3, D4, E1 and E2
+
+- **D2** In the inspector the layer's own name is now the title (15 px, semibold, dark ink) and "Position & size" is a plain 13 px sub-heading instead of a second small-caps heading, so the two no longer look equal in weight.
+- **D3** Every two-column field grid in the inspector uses one gap (10 px) and every number field has one label spacing (4 px).
+- **D4** Fields, buttons and cards in the inspector and in Simple mode use one corner radius (10 px). Pills stay fully round (for example the search box). The shared panel components that the seating studio also uses were left alone on purpose.
+- **E1** Layer rows are 38 px on a desktop and 44 px on touch screens; the eye and lock buttons are 44 px on touch; the drag grip is wider and darker.
+- **E2** The blend/opacity strip and the layer filter tabs share one padding (12 px sides, 8 px top and bottom); the filter tabs have a 44 px minimum height on touch.
+- Evidence: `evidence/tidy-batch39.json` (4 checks), `tidy-batch40.json` (4 checks); `batch28`, `batch29` and `batch33` still pass. Screenshots `screenshots/tidy-d-*` and `tidy-e-after-390.png`.
+- Still open from the list: B2, B3, C1, C2, C4, F1, F3, G1, G2, I1 to I3, J1, J2, K.
