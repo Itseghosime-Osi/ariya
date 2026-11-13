@@ -2431,6 +2431,7 @@ export function InvitationDesigner({
                 ) : bottomTab === "history" ? (
                   <HistoryPanel
                     dark={dark}
+                    eventId={eventId}
                     past={past}
                     present={design}
                     future={future}

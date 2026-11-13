@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
 import type { InvitationDesign } from "../../types";
 import { describeStep } from "./history-labels";
+import { VersionsSection } from "./VersionsSection";
 
 interface HistoryPanelProps {
   dark?: boolean;
+  /** With an event, named versions can be saved and restored (F3). */
+  eventId?: string;
   past: InvitationDesign[];
   present: InvitationDesign;
   future: InvitationDesign[];
@@ -18,6 +21,7 @@ interface HistoryPanelProps {
 
 export function HistoryPanel({
   dark,
+  eventId,
   past,
   present,
   future,
@@ -53,6 +57,14 @@ export function HistoryPanel({
       className="flex h-full flex-col justify-between p-3 text-xs select-none"
     >
       <div className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
+        {eventId && (
+          <VersionsSection
+            eventId={eventId}
+            design={present}
+            dark={dark}
+            onRestore={onRestoreState}
+          />
+        )}
         <div className="mb-2 flex items-center justify-between">
           <span
             className={cn(
