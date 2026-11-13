@@ -349,6 +349,7 @@ export function Sidebar({
               <div className="flex flex-col gap-1">{renderItem(HOME)}</div>
             )}
             <div
+              data-tour="switcher"
               className={cn(
                 "flex",
                 collapsed || events.length === 0 ? "justify-start" : "block"
@@ -366,6 +367,7 @@ export function Sidebar({
             {sections.length > 0 && (
               <div
                 data-testid="sidebar-event-sections"
+                data-tour="nav"
                 className="flex flex-col gap-3"
               >
                 {NAV_GROUPS.map((group) => {
@@ -520,6 +522,17 @@ export function Sidebar({
                 <span>{label}</span>
               </Link>
             ))}
+            {activeEvent && (
+              <Link
+                href={`/events/${activeEvent.id}?tour=1`}
+                tabIndex={accountOpen ? 0 : -1}
+                onClick={() => setAccountOpen(false)}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold tracking-wide text-ivory/85 transition-colors hover:bg-ivory/[0.08] hover:text-gold"
+              >
+                <Icon name="help" size={16} />
+                <span>Show me around</span>
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setSignOutOpen(true)}

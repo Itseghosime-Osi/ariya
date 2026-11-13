@@ -3,6 +3,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import type { SwitcherEvent } from "@/components/layout/nav-items";
 import { countPendingProposals } from "@/features/approvals/queries";
 import { getCurrentUser } from "@/features/auth/queries";
+import { readOnboarding, readRole } from "@/features/onboarding/state";
 import { getArchivedEvents, getUserEvents } from "@/features/events/queries";
 import {
   partitionEvents,
@@ -47,9 +48,18 @@ export default async function AppLayout({
     couple: item.event.couple,
   }));
 
+  const fullName =
+    typeof user?.user_metadata?.full_name === "string"
+      ? user.user_metadata.full_name.trim()
+      : "";
+  const firstName = fullName.split(/\s+/)[0] || null;
+
   return (
     <AppShell
       userEmail={user?.email}
+      firstName={firstName}
+      onboarding={readOnboarding(user?.user_metadata)}
+      role={readRole(user?.user_metadata)}
       events={switcherEvents}
       archivedEvents={archivedEvents}
       primaryEventId={primaryEvent?.event.id}

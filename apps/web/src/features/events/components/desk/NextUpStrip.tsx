@@ -26,6 +26,7 @@ export function NextUpStrip({ actions }: { actions: NextAction[] }) {
   return (
     <section
       aria-label="Next up"
+      data-tour="next-up"
       className="glass flex items-center gap-3 rounded-full py-2 pl-5 pr-2 sm:gap-4"
     >
       <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">

@@ -281,9 +281,11 @@ export function startFireworks(options: FireworksOptions = {}): () => void {
   };
 
   const burst = (r: Rocket) => {
+    // Every burst at the film's strength, whatever its size on screen: the film's send-off plays
+    // each one at full power, and a quieter small shell made the welcome sound thin beside it.
     playFireworkSound("burst", {
       pan: (r.x / w) * 2 - 1,
-      power: Math.min(1.3, 0.6 + r.power * 0.45),
+      power: Math.max(1, Math.min(1.3, 0.6 + r.power * 0.45)),
     });
     const u = unit();
     const big = cfg.size * r.power;
