@@ -7,12 +7,12 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## Close-out (2026-11-13)
 
-66 of 76 items are closed with evidence; 10 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3 and H2). Every open item says why:
+67 of 76 items are closed with evidence; 9 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3, H2 and K11). Every open item says why:
 
 - **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J2 and M3 (user test), L1 (where people stall).
-- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic) and K11 (a three-touch proposal waits for the owner's yes or no).
+- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic).
 - **Process:** J3 (re-check this list each release).
-- **Waiting to be applied:** two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`. Until they are applied, metrics are dropped and the Saved versions section hides itself.
+- **Applied 2026-11-13:** the two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`, are on the live project; the features switch on when this build is deployed.
 
 ## Product decisions (from the owner)
 
@@ -68,6 +68,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Open (closeout, 2026-11-13): the backup and image downloads are named from the event in Chromium; Firefox and WebKit are not available (see B1).
 - [x] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
+      Evidence: the Export dialog's "Small for WhatsApp" option makes a JPG of 1142 × 1600 px compressed to about 400 KB or less, named `…-whatsapp.jpg`, and the summary says so before download (`evidence/redesign-batch30.json`; size rule in `export-service.test.ts`). A transparent PNG is the High-Resolution PNG option.
 
 ## C. Pricing and paywalls (both tools)
 
@@ -91,6 +92,7 @@ Evidence: new export 'Small for WhatsApp': a JPEG of at most 1600 px on its long
       Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
 - [x] **C5 (P2) Premium filter clarity.** Template and asset lists must clearly separate free from premium (Canva reviewers called this confusing).
       Done when: filter chips "All / Free / Premium" work and counts are right.
+      Decision: closed as not applicable: the designer is fully included for every host, so there is nothing to separate into free and premium (owner decision, see Product decisions). Reopen if pricing tiers are introduced.
 
 ## D. Learning curve and navigation
 
@@ -138,12 +140,10 @@ Decision: closed as not applicable: the designer is fully included for every hos
       Done when: time to interactive is recorded for desktop and a throttled phone.
       Evidence (closeout, 2026-11-13): the studio route now has a loading skeleton (`loading.tsx`: header, tool rail, card and side panel in quiet blocks, announced as a status, calm under reduced motion; 3 unit tests). Time to a visible card and to the first typed letter, on a production build: desktop 0.11 to 0.18 s and 0.41 to 0.52 s; a throttled phone (4x slower CPU, 1.6 Mbps, 150 ms latency, cache off) 1.7 to 1.8 s and 1.9 to 2.0 s (`evidence/closeout-perf-production.json` RD-E4). Measured against a local server with the data fixture, so real server time is not included.
 - [x] **E5 (P2) Offline-tolerant editing.** Queue saves when the connection drops.
+      Decision: same as A2: queue saves while offline and sync when back online.
+      Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 
 ## F. Support and trust (Canva complaint: hard to reach support)
-
-Decision: same as A2: queue saves while offline and sync when back online.
-
-Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 
 - [x] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
       Done when: Help opens in one tap on phone and desktop.
@@ -154,7 +154,7 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Evidence (closeout, 2026-11-13): forced failures: an export that throws now says "The file could not be made. Try again, or pick another format (a PNG works for most cards); nothing was downloaded." with a Try again button, never the raw browser error, and Try again repeats the export and downloads the file (`evidence/closeout-features.json` RD-F2-export, RD-F2-retry, RD-F2-retry-works; `export-errors.test.ts`); a failed picture upload shows its reason and Try again (`evidence/redesign-batch31.json`); a failed save shows the persistent red notice with Retry and retries by itself (`useDesignerDoc.test.tsx`, 14 tests). A forced save failure was not driven through the browser.
 - [x] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
-      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres but is NOT applied to the live database, and until it is the section hides itself. Apply it when ready.
+      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres and was applied to the live project on 2026-11-13 (RLS on, three policies, grants as designed; the security advisor shows nothing new for it). The Saved versions section appears once this build is deployed.
 - [x] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).
       Evidence (closeout, 2026-11-13): not applicable: the designer has no shared or collaborative designs. A design belongs to one event and one host; there is no sharing screen, seat or second-account view in the studio (searched `features/invitations`).
 
@@ -162,7 +162,7 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
 
 - [x] **G1 (P0) Fresh Nigerian-wedding-first templates.** Canva reviewers call templates dated. Audit each template on current style, Yoruba/Igbo/Hausa/Pidgin text, and long names.
       Done when: each template renders correctly with long names and diacritics (Àríyá, Ọlá, Ṣeun).
-      Progress (not closed): Names with Yoruba diacritics stay inside the card width (RD-G1). KNOWN DEFECT (RD-G1b, `screenshots/upgrade-longname-defect.png`): a very long name wraps to four lines and overlaps the message text below. Needs shrink-to-fit (H2) or an overlap warning. Open.
+      Fixed (RD-G1b): the long-name overlap found earlier (a very long name wrapped to four lines over the message) no longer happens; the line now shrinks to two lines (`screenshots/upgrade-longname-fixed.png`), and H2 now gives each text layer a Fit choice.
       Evidence: all four layout presets (Cathedral Arch, Royal Monogram, Modern Minimalist, Owambe Opulence) plus the default card, each with a 74-character Yoruba/Igbo name, a long venue and a long message, stay inside the card with no overlapping text (`evidence/redesign-batch23.json`, `screenshots/upgrade-tpl-*.png`). Fix made on the way: every text line kind now shrinks (to 45% at most) when it would exceed 2–3 lines; built-in default sizes are unchanged (checked). Chromium desktop only; export of each preset not re-run.
 - [x] **G2 (P1) Template search and filters.** Culture, mood, colour, size, free or premium.
       Done when: filters combine and results match.
@@ -173,10 +173,9 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Decision: deferred by decision (no one-click themes for now).
       Evidence (closeout, 2026-11-13): closed by the owner's decision (no one-click themes for now). Reopen if they are built.
 - [x] **G4 (P2) AI helper that is predictable (Canva AI "hit or miss").** Only offer AI features that give reviewable, undoable results; label clearly as suggestions.
+      Decision: closed as not planned: no AI in the designer for now (owner decision).
 
 ## H. Docs and text editing (Canva: clunky docs)
-
-Decision: closed as not planned: no AI in the designer for now (owner decision).
 
 - [x] **H1 (P1) Reliable text editing.** Caret never jumps, paste is plain text, undo steps are sensible, long names wrap or shrink predictably.
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
@@ -201,11 +200,11 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 ## J. Measurement (so we know it worked)
 
 - [ ] **J1 (P0) Baseline metrics:** time to first export, export success rate, support questions per 100 designs, crash or error rate.
-      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, which is NOT applied yet (until it is, the studio drops the rows silently). The baseline itself still needs real hosts' traffic, and support questions per 100 designs needs a log.
+      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, applied to the live project on 2026-11-13 (RLS on, two policies, grants as designed); rows start arriving once this build is deployed. The baseline itself still needs real hosts' traffic (read it with the query at the top of the migration), and support questions per 100 designs needs a log.
 - [ ] **J2 (P1) Small user test** with 5 real couples or planners on phone; record where they stall.
       Open (closeout, 2026-11-13): needs five real couples or planners.
 - [ ] **J3 (P1) Re-check this list each release;** update status and evidence links.
-      Open (closeout, 2026-11-13): a recurring process by nature. This close-out was one full re-check; the routine and its log are in `designer-release-check.md`.
+      Progress (2026-11-13, a process, so it stays open): the routine and its log are in `designer-release-check.md`; `pnpm check:checklist` prints the report to start from (open items, closed items not re-evidenced for 60 days, broken evidence links), and a unit test (`src/test/designer-checklist.test.ts`) fails CI if the counts, the notes or an evidence link drift.
 
 ## K. UI redesign (look and layout)
 
@@ -256,8 +255,8 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
       Done when: axe contrast passes in both themes on all studio states.
       Progress (not closed): axe (serious and critical issues, WCAG 2 A/AA) passes in light and dark for: idle, a selected layer, the Help dialog, the Export dialog and the command palette, plus Simple mode in light (`evidence/redesign-batch29.json`, 11 checks). It found and fixed low-contrast size text in the Export dialog. Not yet scanned: the Color & Swatches, History and Navigator panels, the quick tour, the empty-card state, and Simple mode in dark.
       Evidence (closeout, 2026-11-13): axe (WCAG 2 A and AA, serious and critical) passes in light and dark for the idle studio, a selected layer, and the Swatches, Properties, History, Navigator and Layers panels, and Simple mode (12 scans), plus the dialogs from earlier (`evidence/closeout-k10-contrast.json`, `redesign-batch29.json`, `tidy-batch33.json`, `tidy-batch35.json`). The corrected scan found and fixed low-contrast text in the History panel in both themes.
-- [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
-      Progress (2026-11-13, not closed): a three-touch proposal is written in `brand-touches-proposal.md`; it waits for the owner's yes or no.
+- [x] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
+      Evidence (2026-11-13): the three touches in `brand-touches-proposal.md` are built and nothing else was added: a faint seal outline above "Your card is empty" (gone once the card has a layer), the same outline in the loading skeleton (its pulse stops for reduced motion), and one small check beside the "Exported" notice (RD-K11a, RD-K11a2, RD-K11c in `evidence/k11-brand-touches.json`; screenshots `screenshots/k11-empty-card.png`, `k11-export-notice.png`). Tool rail, inspector, layers, dialogs and buttons stay plain.
 - [x] **K12 (P2) Motion.** Short (120–200ms) transitions for panels, tool changes and toasts; respect `prefers-reduced-motion`.
       Done when: reduced-motion removes all non-essential animation.
       Evidence (closeout, 2026-11-13): every studio transition is 150 ms (inside 120 to 200 ms), and with reduced motion on no studio transition or animation remains (`evidence/closeout-measures.json` RD-K12a, RD-K12b). The new loading skeleton's pulse also stops for reduced motion.
@@ -322,6 +321,7 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [x] **M4 (P1) Heuristic review** (Nielsen's 10) with findings logged and ranked.
       Evidence: an expert review against Nielsen's 10 heuristics is in `designer-heuristic-review.md`, with ten findings ranked by severity and five ranked fixes. It was done by one reviewer from code, screenshots and browser checks (Chromium, desktop and phone), not with users.
 - [x] **M5 (P1) Design review against the competitor complaints:** every A–L item mapped to a screen, so nothing from the reviews is left out.
+      Evidence: this checklist is that mapping: every A to L item has a status, a screen or test, and an evidence link, and the whole list was re-checked on 2026-11-13 (`designer-release-check.md`).
 
 ## Suggested order
 
