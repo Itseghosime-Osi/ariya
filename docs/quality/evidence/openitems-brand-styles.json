@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-A3a",
+    "name": "Updating one style changes every layer that follows it",
+    "ok": true,
+    "detail": "{\"s0\":{\"date\":19.93,\"venue\":19.93,\"dressCode\":19.93},\"dateBig\":13.61,\"s1\":{\"date\":13.61,\"venue\":13.61,\"dressCode\":13.61},\"notice\":\"3 lines follow this style.\"}"
+  },
+  {
+    "id": "RD-A3b",
+    "name": "One Undo reverses the whole style update",
+    "ok": true,
+    "detail": "{\"s2\":{\"date\":13.61,\"venue\":19.93,\"dressCode\":19.93}}"
+  },
+  {
+    "id": "RD-A3c",
+    "name": "Stack lays three lines out with the same gap",
+    "ok": true,
+    "detail": "{\"before\":[626,667,735],\"after\":[626,694,734],\"gaps\":[14,14]}"
+  }
+]

@@ -7,12 +7,12 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## Close-out (2026-11-13)
 
-56 of 76 items are closed with evidence; 20 are open. Every open item has an "Open (closeout)" note saying why. They fall into four groups:
+66 of 76 items are closed with evidence; 10 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3 and H2). Every open item says why:
 
-- **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J1 (production metrics), J2 and M3 (user test), L1 (where people stall), L5 (phone keyboard).
-- **Needs a decision or a backend:** A3 (brand styles and stack), D1 (trim Simple mode), D7 (videos), F3 (version history storage), H2 (per-layer text fit), K5 (options bar by layer type), L6 (a "More" level).
-- **Needs Firefox and WebKit in CI:** B1, B6.
-- **Judgement or process:** K11 (brand touches), J3 (recurring re-check).
+- **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J2 and M3 (user test), L1 (where people stall).
+- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic) and K11 (a three-touch proposal waits for the owner's yes or no).
+- **Process:** J3 (re-check this list each release).
+- **Waiting to be applied:** two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`. Until they are applied, metrics are dropped and the Saved versions section hides itself.
 
 ## Product decisions (from the owner)
 
@@ -35,9 +35,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Progress (not closed): the status now reads "offline · will save when you reconnect" and recovers (RD-A2, RD-A2b). Not yet tested: edits made offline surviving a reload.
       Decision: queue and sync saves with conflict handling (bigger build than the current device-side recovery).
       Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
-- [ ] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
+- [x] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
       Done when: changing one named style updates every layer using it, and undo reverses it in one step.
-      Open (closeout, 2026-11-13): a new feature (named "brand styles" and a "stack" auto-spacing) that needs a model change and an owner decision; not built.
+      Evidence (2026-11-13): text layers have a "Brand style" section: name a line's look, put it on other lines, change one, press "Update style from this line", and every line that follows changes together; one Undo reverses it (RD-A3a, RD-A3b, `evidence/openitems-brand-styles.json`; unit tests in `brand-styles.test.ts`). Selecting two or more layers offers "Stack": the lines are laid top to bottom with one gap you type, in one undo step (RD-A3c). The saved design carries `textStyles` and `styleId`, kept by the Rust engine too (two new Rust tests; wasm rebuilt).
 - [x] **A4 (P1) Developer-style handoff, our version: print handoff.** Figma wins on handoff. Ours is the printer. One "Send to printer" export with bleed, crop marks and size notes.
       Done when: the export opens correctly in a PDF viewer at true size.
       Evidence (closeout, 2026-11-13): the PDF export card ("PDF for printing") with the print marks option produces one page of 5.75 x 7.75 in (414 x 558 pt) with bleed, crop marks and a one-line size note in the margin ("Trim size 5 x 7 in - bleed 0.125 in - 300 DPI - cut on the crop marks"), read back from the downloaded file with a PDF library (`evidence/closeout-print-k1.json` RD-A4a, RD-A4b; unit test for the note). Page size and marks were also measured earlier (B5). Not opened in a real print shop or a desktop PDF viewer.
@@ -152,9 +152,9 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Done when: forced failures (export, save, image upload) each show a readable message and a retry.
       Progress (not closed): a failed picture **upload** (server or network error) now shows the reason and a **Try again** button that repeats the same file; an unreadable or damaged file shows its reason without a button, because trying the same file again cannot help (`evidence/redesign-batch31.json`: a forced server error, then retry succeeds and adds the picture). Still open: a next step on export failures, and forced-failure checks for save errors in the browser (the unit tests cover save retry).
       Evidence (closeout, 2026-11-13): forced failures: an export that throws now says "The file could not be made. Try again, or pick another format (a PNG works for most cards); nothing was downloaded." with a Try again button, never the raw browser error, and Try again repeats the export and downloads the file (`evidence/closeout-features.json` RD-F2-export, RD-F2-retry, RD-F2-retry-works; `export-errors.test.ts`); a failed picture upload shows its reason and Try again (`evidence/redesign-batch31.json`); a failed save shows the persistent red notice with Retry and retries by itself (`useDesignerDoc.test.tsx`, 14 tests). A forced save failure was not driven through the browser.
-- [ ] **F3 (P1) Version history users can find.** Name versions, restore one.
+- [x] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
-      Open (closeout, 2026-11-13): needs somewhere to store named versions (a table and a restore action). Today History is this visit's undo steps only. Needs a backend decision.
+      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres but is NOT applied to the live database, and until it is the section hides itself. Apply it when ready.
 - [x] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).
       Evidence (closeout, 2026-11-13): not applicable: the designer has no shared or collaborative designs. A design belongs to one event and one host; there is no sharing screen, seat or second-account view in the studio (searched `features/invitations`).
 
@@ -182,8 +182,8 @@ Decision: closed as not planned: no AI in the designer for now (owner decision).
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
       Progress (not closed): same long-name overlap as G1; typing, paste and undo regression specs from the earlier checklist still pass in CI.
       Evidence (closeout, 2026-11-13): the long-name fixture stays inside the card for all four presets (`evidence/redesign-batch23.json`), and the typing, paste and undo specs pass in CI on every merged designer PR.
-- [ ] **H2 (P2) Text fit options.** "Shrink to fit" and "Grow box" per text layer.
-      Open (closeout, 2026-11-13): a per-layer "shrink to fit / grow box" option needs a new field in the design file and the Rust engine. Lines already shrink automatically (to 45%) to fit.
+- [x] **H2 (P2) Text fit options.** "Shrink to fit" and "Grow box" per text layer.
+      Evidence (2026-11-13): each text layer has Fit: Card rule (as before), Shrink to fit, or Grow the box. The new `textFit` field is in the design file, the schema and the Rust engine (new Rust test, wasm rebuilt). On a long dress-code line: Grow keeps full size and the box grows, Shrink keeps it to two lines, Card rule returns to the old size (RD-H2, `evidence/openitems-textfit.json`).
 
 ## I. Accessibility and phones
 

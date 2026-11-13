@@ -6,7 +6,7 @@ import { invitationDesignSchema } from "./schemas";
 import type { InvitationDesign } from "./types";
 import type { Json } from "@/lib/supabase/database.types";
 
-export const MAX_VERSIONS = 30;
+const MAX_VERSIONS = 30;
 
 export type DesignVersion = { id: string; name: string; createdAt: string };
 type Result<T> = ({ ok: true } & T) | { ok: false; error: string };

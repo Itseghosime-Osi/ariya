@@ -32,6 +32,27 @@ export const invitationPaletteSchema = z.object({
   stageTo: hexColour,
 });
 
+export const invitationTextStyleSchema = z.object({
+  id: z.string().min(1).max(48),
+  name: z.string().trim().min(1).max(40),
+  font: z.enum(INVITATION_FONTS),
+  size: z.number().finite().min(1).max(20),
+  weight: z.union([
+    z.literal(400),
+    z.literal(500),
+    z.literal(600),
+    z.literal(700),
+  ]),
+  italic: z.boolean(),
+  tracking: z.number().finite().min(0).max(1),
+  colorRole: z.enum(["ink", "title", "body", "accent", "foil", "custom"]),
+  color: hexColour.nullable().optional(),
+  lineHeight: z.number().finite().min(0.5).max(10).optional(),
+  textTransform: z
+    .enum(["none", "uppercase", "lowercase", "capitalize"])
+    .optional(),
+});
+
 export const invitationLayerSchema = z.object({
   id: z.string().min(1).max(48),
   kind: z.enum(INVITATION_LAYER_KINDS),
@@ -71,6 +92,8 @@ export const invitationLayerSchema = z.object({
   textTransform: z
     .enum(["none", "uppercase", "lowercase", "capitalize"])
     .optional(),
+  textFit: z.enum(["shrink", "grow"]).optional(),
+  styleId: z.string().min(1).max(48).optional(),
   shadow: z.enum(["none", "soft", "foil", "glow"]).optional(),
   blendMode: z.string().trim().max(40).optional(),
   blur: z.number().finite().min(0).max(500).optional(),
@@ -107,6 +130,7 @@ export const invitationDesignSchema = z.object({
     })
     .optional(),
   chrome: z.boolean().optional(),
+  textStyles: z.array(invitationTextStyleSchema).max(24).optional(),
   theme: z.enum(INVITATION_THEMES),
   palette: invitationPaletteSchema,
   background: z.object({

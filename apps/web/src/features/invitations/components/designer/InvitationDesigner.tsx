@@ -37,6 +37,7 @@ import {
 } from "../../engine";
 import {
   designDimensionsPx,
+  stackLayers,
   type Alignment,
   type StackMove,
 } from "../../layer-ops";
@@ -2238,6 +2239,15 @@ export function InvitationDesigner({
                         )
                       )
                     }
+                    onStackLayers={(ids, gap) => {
+                      commit((d) =>
+                        withRenderedHeights(d, (m) => stackLayers(m, ids, gap))
+                      );
+                      setNotice({
+                        tone: "ok",
+                        text: `Stacked ${ids.length} layers. Undo puts them back.`,
+                      });
+                    }}
                     onGroup={(ids) => {
                       const gid =
                         "group_" + Math.random().toString(36).slice(2, 9);

@@ -250,6 +250,13 @@ pub struct Layer {
     pub line_height: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text_transform: Option<String>,
+    /// How a text layer meets its box: "shrink" keeps the words to a few lines by making them
+    /// smaller, "grow" lets the box grow with the words. Absent is the card's own rule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_fit: Option<String>,
+    /// The brand style this layer follows, by `TextStyle::id`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shadow: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -279,6 +286,10 @@ pub struct Layer {
 #[serde(rename_all = "camelCase")]
 pub struct Design {
     pub version: u8,
+    /// Named text styles ("brand styles"). A layer that points at one by `style_id` is kept in
+    /// step with it when the style is updated.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_styles: Option<Vec<TextStyle>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub canvas: Option<Canvas>,
     /// False hides the house ribbon, border and sheen.
@@ -288,6 +299,31 @@ pub struct Design {
     pub palette: Palette,
     pub background: Background,
     pub layers: Vec<Layer>,
+}
+
+/// A named set of text settings that several layers can share.
+#[cfg_attr(feature = "ts", derive(TS))]
+#[cfg_attr(
+    feature = "ts",
+    ts(export, export_to = "../../../packages/design/src/generated/")
+)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextStyle {
+    pub id: String,
+    pub name: String,
+    pub font: Font,
+    pub size: f64,
+    pub weight: u16,
+    pub italic: bool,
+    pub tracking: f64,
+    pub color_role: ColorRole,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_height: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_transform: Option<String>,
 }
 
 /// The house card is a portrait 5:7, like printed stationery.
@@ -379,6 +415,8 @@ impl Layer {
             focal_y: None,
             line_height: None,
             text_transform: None,
+            text_fit: None,
+            style_id: None,
             shadow: None,
             blend_mode: None,
             blur: None,

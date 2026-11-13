@@ -4,6 +4,7 @@ import type {
   InvitationLayer,
   InvitationShape,
   PaperEdge,
+  InvitationTextStyle,
 } from "./types";
 
 /** Pure edits on a design, so the designer's every button can be tested without a browser. */
@@ -668,4 +669,184 @@ export function flipLayer(
       };
     }),
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Brand styles (checklist A3). A style is a named set of text settings. Layers that follow one
+// are kept in step with it. Every function here returns a whole new design, so a caller that
+// commits the result once makes one undo step, however many layers changed.
+// ---------------------------------------------------------------------------------------------
+
+const MAX_TEXT_STYLES = 24;
+
+/** The settings a brand style carries. Position, size of the box and the words stay per layer. */
+function styleFrom(
+  layer: InvitationLayer
+): Omit<InvitationTextStyle, "id" | "name"> {
+  const style: Omit<InvitationTextStyle, "id" | "name"> = {
+    font: layer.font,
+    size: layer.size,
+    weight: layer.weight,
+    italic: layer.italic,
+    tracking: layer.tracking,
+    colorRole: layer.colorRole,
+  };
+  if (layer.color != null) style.color = layer.color;
+  if (layer.lineHeight != null) style.lineHeight = layer.lineHeight;
+  if (layer.textTransform != null) style.textTransform = layer.textTransform;
+  return style;
+}
+
+/** A layer with a style's settings written over its own; the style's absent options clear. */
+function withStyle(
+  layer: InvitationLayer,
+  style: InvitationTextStyle
+): InvitationLayer {
+  const { color, lineHeight, textTransform, ...rest } = layer;
+  void color;
+  void lineHeight;
+  void textTransform;
+  return {
+    ...rest,
+    font: style.font,
+    size: style.size,
+    weight: style.weight,
+    italic: style.italic,
+    tracking: style.tracking,
+    colorRole: style.colorRole,
+    color: style.color ?? null,
+    ...(style.lineHeight != null ? { lineHeight: style.lineHeight } : {}),
+    ...(style.textTransform != null
+      ? { textTransform: style.textTransform }
+      : {}),
+    styleId: style.id,
+  };
+}
+
+/** Saves a text layer's look as a new named style and makes that layer follow it. */
+export function createTextStyle(
+  design: InvitationDesign,
+  layerId: string,
+  name: string,
+  id: string
+): InvitationDesign {
+  const cleanName = name.trim().slice(0, 40);
+  const layer = design.layers.find((l) => l.id === layerId);
+  const styles = design.textStyles ?? [];
+  if (!layer || !cleanName || styles.length >= MAX_TEXT_STYLES) return design;
+  const style: InvitationTextStyle = {
+    id,
+    name: cleanName,
+    ...styleFrom(layer),
+  };
+  return {
+    ...design,
+    textStyles: [...styles, style],
+    layers: design.layers.map((l) =>
+      l.id === layerId ? { ...l, styleId: id } : l
+    ),
+  };
+}
+
+/** Makes the given layers follow a style, taking on its settings. */
+export function applyTextStyle(
+  design: InvitationDesign,
+  layerIds: string[],
+  styleId: string
+): InvitationDesign {
+  const style = design.textStyles?.find((s) => s.id === styleId);
+  if (!style) return design;
+  return {
+    ...design,
+    layers: design.layers.map((l) =>
+      layerIds.includes(l.id) ? withStyle(l, style) : l
+    ),
+  };
+}
+
+/**
+ * Rewrites a style from one layer's current look and passes it to every layer that follows the
+ * style. This is the "change one style, change them all" step.
+ */
+export function updateTextStyle(
+  design: InvitationDesign,
+  styleId: string,
+  fromLayerId: string
+): InvitationDesign {
+  const source = design.layers.find((l) => l.id === fromLayerId);
+  const current = design.textStyles?.find((s) => s.id === styleId);
+  if (!source || !current) return design;
+  const next: InvitationTextStyle = {
+    id: current.id,
+    name: current.name,
+    ...styleFrom(source),
+  };
+  return {
+    ...design,
+    textStyles: design.textStyles!.map((s) => (s.id === styleId ? next : s)),
+    layers: design.layers.map((l) =>
+      l.styleId === styleId ? withStyle(l, next) : l
+    ),
+  };
+}
+
+/** Stops the given layers following their style; they keep how they look now. */
+export function detachTextStyle(
+  design: InvitationDesign,
+  layerIds: string[]
+): InvitationDesign {
+  return {
+    ...design,
+    layers: design.layers.map((l) => {
+      if (!layerIds.includes(l.id) || !l.styleId) return l;
+      const { styleId, ...rest } = l;
+      void styleId;
+      return rest;
+    }),
+  };
+}
+
+/** Removes a style; layers that followed it keep how they look and stop following. */
+export function deleteTextStyle(
+  design: InvitationDesign,
+  styleId: string
+): InvitationDesign {
+  if (!design.textStyles?.some((s) => s.id === styleId)) return design;
+  const rest = design.textStyles.filter((s) => s.id !== styleId);
+  const { textStyles, ...others } = design;
+  void textStyles;
+  return {
+    ...others,
+    ...(rest.length ? { textStyles: rest } : {}),
+    layers: design.layers.map((l) => {
+      if (l.styleId !== styleId) return l;
+      const { styleId: gone, ...kept } = l;
+      void gone;
+      return kept;
+    }),
+  };
+}
+
+/**
+ * Stacks layers top to bottom with the same gap between them, keeping the highest one where it
+ * is. Heights are percentages of the card; pass a design whose text layers carry measured heights.
+ * The gap is a percentage of the card's height.
+ */
+export function stackLayers(
+  design: InvitationDesign,
+  ids: string[],
+  gap: number
+): InvitationDesign {
+  const picked = design.layers
+    .map((layer, index) => ({ layer, index }))
+    .filter(({ layer }) => ids.includes(layer.id));
+  if (picked.length < 2) return design;
+  picked.sort((a, b) => a.layer.y - b.layer.y);
+  const layers = [...design.layers];
+  let y = picked[0].layer.y;
+  for (const { layer, index } of picked) {
+    layers[index] = { ...layer, y: Math.round(y * 100) / 100 };
+    y += (layer.height ?? 4) + gap;
+  }
+  return { ...design, layers };
 }

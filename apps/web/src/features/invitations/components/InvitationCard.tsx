@@ -219,6 +219,16 @@ const MAX_LINES: Partial<Record<InvitationLayer["kind"], number>> = {
 };
 
 /**
+ * Lines a layer may take before its words shrink. Auto follows the kind's own rule; "shrink" fits
+ * every kind (two lines where the kind has no rule); "grow" never shrinks, the box grows instead.
+ */
+export function linesFor(layer: InvitationLayer): number | undefined {
+  if (layer.textFit === "grow") return undefined;
+  if (layer.textFit === "shrink") return MAX_LINES[layer.kind] ?? 2;
+  return MAX_LINES[layer.kind];
+}
+
+/**
  * A text layer that keeps the headline to a fixed number of lines. A very long pair of names
  * shrinks (down to 45%) instead of wrapping into the lines below it. Sizes are container-query
  * units, so the line count does not change as the card scales: it is measured once per change.
@@ -237,7 +247,12 @@ function FittedText({
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || !maxLines) return;
+    if (!el) return;
+    if (!maxLines) {
+      // Not fitting (or no longer): undo any earlier shrink so the words return to full size.
+      el.style.fontSize = `${layer.size}cqw`;
+      return;
+    }
     const fit = () => {
       let scale = 1;
       el.style.fontSize = `${layer.size}cqw`;
@@ -759,7 +774,7 @@ export function InvitationCard({
           <FittedText
             key={layer.id}
             layer={layer}
-            maxLines={MAX_LINES[layer.kind]}
+            maxLines={linesFor(layer)}
             style={{ ...textStyle(layer, design, interactive), ...common }}
             pointerProps={pointerProps}
           />
