@@ -55,6 +55,7 @@ import { StudioMenuBar, type MenuGroup } from "./StudioMenuBar";
 import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
+import { recordStudioMetricAction } from "../../metrics-actions";
 import { HelpDialog } from "./HelpDialog";
 import { GuestPreviewDialog } from "./GuestPreviewDialog";
 import { missingFontMessage } from "../../font-check";
@@ -259,6 +260,11 @@ export function InvitationDesigner({
   const isResizingSidebar = useRef(false);
   const sidebarCleanup = useRef<(() => void) | null>(null);
   useEffect(() => () => sidebarCleanup.current?.(), []);
+
+  // J1: one anonymous "opened" per visit, so exports can be counted against openings.
+  useEffect(() => {
+    void recordStudioMetricAction({ eventId, kind: "opened" });
+  }, [eventId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

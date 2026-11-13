@@ -118,8 +118,8 @@ Decision: closed as not applicable: the designer is fully included for every hos
 - [x] **D6 (P1) Shortcut help.** Press `?` for a shortcut sheet.
       Done when: the sheet lists real, tested shortcuts only.
       Evidence: Help and shortcuts dialog (button, Help menu, `?` key); `evidence/redesign-batch19.json` RD-D6/b/c, screenshot `screenshots/upgrade-help.png`. Shortcut list matches the menus; Chromium desktop only.
-- [ ] **D7 (P2) Short video or GIF help per tool in Help.**
-      Open (closeout, 2026-11-13): short videos or GIFs for each tool are not made (P2); an owner decision whether they are worth the upkeep.
+- [x] **D7 (P2) Short video or GIF help per tool in Help.**
+      Evidence (2026-11-13): Help now has "Watch how" with five looped clips (move, add words, draw a shape, add a seal, export), each folded until opened so nothing moves by itself; 1.2 MB in total, loaded lazily (RD-D7, `evidence/openitems-help-clips.json`; recorded by `evidence/harness/gifs.mjs`, so they can be re-made when the studio changes).
 
 ## E. Performance (Figma complaint: large files)
 
@@ -201,7 +201,7 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 ## J. Measurement (so we know it worked)
 
 - [ ] **J1 (P0) Baseline metrics:** time to first export, export success rate, support questions per 100 designs, crash or error rate.
-      Open (closeout, 2026-11-13): needs production traffic: time to first export, export success rate, support questions and error rate cannot be measured before hosts use the studio. The scripted timings in E4 and A1 are not baselines.
+      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, which is NOT applied yet (until it is, the studio drops the rows silently). The baseline itself still needs real hosts' traffic, and support questions per 100 designs needs a log.
 - [ ] **J2 (P1) Small user test** with 5 real couples or planners on phone; record where they stall.
       Open (closeout, 2026-11-13): needs five real couples or planners.
 - [ ] **J3 (P1) Re-check this list each release;** update status and evidence links.
@@ -257,7 +257,7 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
       Progress (not closed): axe (serious and critical issues, WCAG 2 A/AA) passes in light and dark for: idle, a selected layer, the Help dialog, the Export dialog and the command palette, plus Simple mode in light (`evidence/redesign-batch29.json`, 11 checks). It found and fixed low-contrast size text in the Export dialog. Not yet scanned: the Color & Swatches, History and Navigator panels, the quick tour, the empty-card state, and Simple mode in dark.
       Evidence (closeout, 2026-11-13): axe (WCAG 2 A and AA, serious and critical) passes in light and dark for the idle studio, a selected layer, and the Swatches, Properties, History, Navigator and Layers panels, and Simple mode (12 scans), plus the dialogs from earlier (`evidence/closeout-k10-contrast.json`, `redesign-batch29.json`, `tidy-batch33.json`, `tidy-batch35.json`). The corrected scan found and fixed low-contrast text in the History panel in both themes.
 - [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
-      Open (closeout, 2026-11-13): a judgement about restraint (P2) that needs the owner's eye rather than a measurement.
+      Progress (2026-11-13, not closed): a three-touch proposal is written in `brand-touches-proposal.md`; it waits for the owner's yes or no.
 - [x] **K12 (P2) Motion.** Short (120–200ms) transitions for panels, tool changes and toasts; respect `prefers-reduced-motion`.
       Done when: reduced-motion removes all non-essential animation.
       Evidence (closeout, 2026-11-13): every studio transition is 150 ms (inside 120 to 200 ms), and with reduced motion on no studio transition or animation remains (`evidence/closeout-measures.json` RD-K12a, RD-K12b). The new loading skeleton's pulse also stops for reduced motion.
@@ -279,9 +279,9 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [x] **L4 (P0) Undo safety net.** Visible undo/redo, a "Reverted" toast with Redo, and confirmation only for truly destructive actions (delete design).
       Done when: no destructive action is lost without an undo or confirm.
       Evidence: Undo and Redo show an 'Undone/Redone' toast with a one-tap reverse button that dismisses after 6s; RD-L4a–e, `screenshots/upgrade-undo-toast.png`. Delete design still confirms (existing behaviour).
-- [ ] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
+- [x] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
       Done when: on a 360×640 emulated phone the edited field stays visible with the keyboard open (real-device check in I3).
-      Open (closeout, 2026-11-13): needs a real phone keyboard; an emulated check would not show whether the keyboard hides the edited field (see I3).
+      Evidence (2026-11-13): on a 360 px phone with the window cut to 350 px tall (what an on-screen keyboard leaves), each Simple field (names, message, date, place) is fully visible and not covered when focused (RD-L5, `evidence/openitems-phone-keyboard.json`). This is the emulated check the item asks for; a real keyboard is still I3.
 - [x] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
       Evidence (2026-11-13): the Pro inspector has a "More options" button; Visual FX and blending (layer) and Decoration (card) wait behind it, and the choice is remembered in the browser (RD-L6). Four e2e specs that use blend and opacity open it first (`showAllInspectorOptions`).
 - [x] **L7 (P1) Toasts and status.** One toast pattern: saved, exported, copied, failed; non-blocking, dismissible, announced to screen readers.

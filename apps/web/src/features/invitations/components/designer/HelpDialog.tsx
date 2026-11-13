@@ -51,6 +51,35 @@ const SHORTCUTS: { group: string; items: [string, string][] }[] = [
   },
 ];
 
+/** D7: short looped clips, one per tool. They sit folded, so nothing moves until someone opens one. */
+const CLIPS: { file: string; title: string; text: string }[] = [
+  {
+    file: "move",
+    title: "Move something",
+    text: "Drag any line on the card to a new place.",
+  },
+  {
+    file: "text",
+    title: "Add words",
+    text: "Press T, drag a box on the card, then type.",
+  },
+  {
+    file: "shape",
+    title: "Draw a shape",
+    text: "Press O for a circle (R for a rectangle), then drag.",
+  },
+  {
+    file: "seal",
+    title: "Add a seal",
+    text: "Press B for the monogram seal, Q for the guest pass seal.",
+  },
+  {
+    file: "export",
+    title: "Export your card",
+    text: "Press Export, choose what it is for, then download.",
+  },
+];
+
 const TIPS = [
   "Start from a template, then change the names, date and venue. Simple mode shows only what you need.",
   "Your work saves by itself. The status under the title says saved, saving or not saved.",
@@ -133,6 +162,37 @@ export function HelpDialog({ open, onClose, dark = false }: HelpDialogProps) {
                 <li key={tip}>{tip}</li>
               ))}
             </ul>
+
+            <h3 className={cn("mt-5 text-sm font-semibold", t.strong)}>
+              Watch how
+            </h3>
+            <div className="mt-2 space-y-1.5">
+              {CLIPS.map((clip) => (
+                <details
+                  key={clip.file}
+                  data-testid={`help-clip-${clip.file}`}
+                  className={cn("rounded-md border px-3 py-2", t.divider)}
+                >
+                  <summary
+                    className={cn(
+                      "cursor-pointer text-xs font-semibold",
+                      t.strong
+                    )}
+                  >
+                    {clip.title}
+                  </summary>
+                  <p className={cn("mt-1.5 text-xs", t.muted)}>{clip.text}</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a looped GIF; next/image would freeze it */}
+                  <img
+                    src={`/help/${clip.file}.gif`}
+                    alt={`${clip.title}: ${clip.text}`}
+                    loading="lazy"
+                    width={560}
+                    className="mt-2 h-auto w-full rounded"
+                  />
+                </details>
+              ))}
+            </div>
 
             {SHORTCUTS.map((section) => (
               <section key={section.group} className="mt-5">

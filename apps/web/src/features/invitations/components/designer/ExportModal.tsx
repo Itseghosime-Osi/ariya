@@ -1,5 +1,6 @@
 "use client";
 
+import { recordStudioMetricAction } from "../../metrics-actions";
 import { describeExportFailure } from "../../export-errors";
 import { failedCardFonts } from "../../font-check";
 import React, { useEffect, useRef, useState } from "react";
@@ -127,12 +128,30 @@ export function ExportModal({
       if (res.cancelled) return;
       if (!res.ok) {
         setError(describeExportFailure(res.error));
+        void recordStudioMetricAction({
+          eventId,
+          kind: "export_failed",
+          format: selectedFormat,
+          ms: Math.round(performance.now()),
+        });
       } else {
+        void recordStudioMetricAction({
+          eventId,
+          kind: "export_ok",
+          format: selectedFormat,
+          ms: Math.round(performance.now()),
+        });
         onExported?.(selectedFormat, missingFonts);
         onClose();
       }
     } catch (err) {
       setError(describeExportFailure(err));
+      void recordStudioMetricAction({
+        eventId,
+        kind: "export_failed",
+        format: selectedFormat,
+        ms: Math.round(performance.now()),
+      });
     } finally {
       setExporting(false);
     }
