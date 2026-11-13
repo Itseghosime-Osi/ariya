@@ -319,6 +319,11 @@ select.desk-field {
 .studio-dark .text-\[\#1f6b4a\] {
   color: #84d6ad !important;
 }
+/* The panel's section headings (Design, Seat and history, Plan): a dusty mauve that reads on ivory
+   but only reached 3:1 on the dark panel. */
+.studio-dark .text-\[\#7a5b67\] {
+  color: #d3b9c3 !important;
+}
 /* The studio's remaining light tints: notices, fields and the selected state of its segmented controls. */
 .studio-dark .bg-\[\#fbf8f2\],
 .studio-dark .bg-\[\#faf6ee\] {
@@ -336,6 +341,29 @@ select.desk-field {
 .studio-dark .bg-\[\#efe7d8\],
 .studio-dark .bg-\[\#d9d2c6\] {
   background-color: #3a2d33 !important;
+}
+/* The last light tints: chips (a guest's diet note), avatars and quiet rows. */
+.studio-dark .bg-\[\#eadfd9\],
+.studio-dark .bg-\[\#efe7da\],
+.studio-dark .bg-\[\#f7f4ef\] {
+  background-color: #2f2228 !important;
+}
+.studio-dark .bg-\[\#e7f1ea\] {
+  background-color: #1e3329 !important;
+}
+/* Laptop-only variants (lg:) are separate classes the rules above do not reach: the mode switch's
+   pills and the top strip. Without these, "Simple" kept a light pill under light text, and the
+   chosen pill's ivory text turned as dark as its burgundy. */
+@media (min-width: 64rem) {
+  .studio-dark .lg\:bg-\[\#f1ece4\] {
+    background-color: #2b1f24 !important;
+  }
+  .studio-dark .lg\:bg-\[\#fbf9f5\] {
+    background-color: #1f1619 !important;
+  }
+  .studio-dark .lg\:text-ivory {
+    color: #fff6dc !important;
+  }
 }
 .studio-dark .aria-checked\:bg-white[aria-checked="true"] {
   background-color: #7a2236 !important;
