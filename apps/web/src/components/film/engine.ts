@@ -498,7 +498,8 @@ export class FilmEngine {
    * module never writes to.
    */
   private host = sceneHost();
-  private op: Record<string, unknown> = this.host?.op ?? {};
+  // With no 3D hall on this device the film plays without it, so the gate has nothing to wait for.
+  private op: Record<string, unknown> = this.host?.op ?? { failed: true };
 
   get loaded(): number {
     return Number(this.op.loaded) || 0;
