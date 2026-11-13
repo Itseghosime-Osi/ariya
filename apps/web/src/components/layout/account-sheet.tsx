@@ -17,7 +17,7 @@ interface AccountSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userEmail?: string;
-  /** Kept for callers; the sheet's links no longer depend on the open event. */
+  /** The open celebration, for "Show me around" (its desk's tour). */
   eventId?: string;
   /** Where focus goes when the sheet closes — the icon that opened it. */
   returnFocusTo?: React.RefObject<HTMLElement | null>;
@@ -40,6 +40,7 @@ export function AccountSheet({
   open,
   onOpenChange,
   userEmail,
+  eventId,
   returnFocusTo,
 }: AccountSheetProps) {
   const [signOutOpen, setSignOutOpen] = useState(false);
@@ -67,6 +68,17 @@ export function AccountSheet({
       href: "/profile",
       testId: "account-profile",
     },
+    ...(eventId
+      ? [
+          {
+            label: "Show me around",
+            hint: "A short tour of your celebration desk",
+            icon: "help" as IconName,
+            href: `/events/${eventId}?tour=1`,
+            testId: "account-tour",
+          },
+        ]
+      : []),
   ];
 
   return (
