@@ -40,6 +40,6 @@ create policy "invitation_versions_delete_editors" on public.invitation_versions
   for delete to authenticated
   using (public.has_event_role(event_id, array['owner', 'planner', 'couple']));
 
-revoke all on table public.invitation_versions from anon;
-revoke update, truncate, references, trigger on table public.invitation_versions from authenticated;
+revoke all on table public.invitation_versions from anon, authenticated, service_role;
 grant select, insert, delete on table public.invitation_versions to authenticated;
+grant select, insert, delete on table public.invitation_versions to service_role;

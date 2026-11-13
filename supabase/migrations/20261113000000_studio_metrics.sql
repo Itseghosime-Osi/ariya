@@ -39,6 +39,6 @@ create policy "studio_metrics_select_members" on public.studio_metrics
   for select to authenticated
   using (public.is_event_member(event_id));
 
-revoke all on table public.studio_metrics from anon;
-revoke update, delete, truncate, references, trigger on table public.studio_metrics from authenticated;
+revoke all on table public.studio_metrics from anon, authenticated, service_role;
 grant select, insert on table public.studio_metrics to authenticated;
+grant select, insert, delete on table public.studio_metrics to service_role;

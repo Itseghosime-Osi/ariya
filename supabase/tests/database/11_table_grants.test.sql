@@ -32,6 +32,8 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
+      ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('notification_preferences'),
@@ -51,6 +53,8 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
+      ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('notification_preferences'),
@@ -71,6 +75,7 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
       ('ai_connection_settings'),
       ('check_ins'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
@@ -111,6 +116,8 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
+      ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('notification_preferences'),
@@ -131,6 +138,8 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
+      ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('notification_preferences'),
@@ -171,6 +180,8 @@ select set_eq(
   $$,
   $$
     values
+      ('invitation_versions'),
+      ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
       ('events'), ('guests'), ('invoices'), ('payments'), ('profiles'),
