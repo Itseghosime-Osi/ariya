@@ -583,6 +583,7 @@ export function PhoneDock({
               ref={pillRef}
               aria-label="Mobile navigation"
               data-testid="phone-tab-bar"
+              data-tour="dock"
               className="dock-pill flex min-w-0 flex-1 items-center rounded-full bg-white p-1.5"
               animate={{ scale: compact && !menuOpen ? 0.94 : 1 }}
               transition={SPRING}
@@ -655,6 +656,7 @@ export function PhoneDock({
                 <button
                   type="button"
                   data-testid="phone-more-button"
+                  data-tour="dock-more"
                   ref={moreRef}
                   aria-expanded={moreOpen}
                   aria-controls={moreOpen ? moreId : undefined}
@@ -701,6 +703,7 @@ export function PhoneDock({
             ref={createRef}
             type="button"
             data-testid="phone-create-button"
+            data-tour="create"
             aria-expanded={createOpen}
             aria-controls={createOpen ? menuId : undefined}
             onClick={toggleCreate}

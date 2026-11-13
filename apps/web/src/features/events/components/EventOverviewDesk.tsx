@@ -21,11 +21,16 @@ import { BudgetWeave } from "./desk/BudgetWeave";
 import { PlanningRibbon } from "./desk/PlanningRibbon";
 import { InvitationPreview } from "./desk/InvitationPreview";
 import { Guestbook } from "./desk/Guestbook";
+import { FirstSteps } from "@/features/onboarding/FirstSteps";
+import { DashboardTour } from "@/features/onboarding/DashboardTour";
+import type { FirstStepsStatus } from "@/features/onboarding/state";
 
 interface EventOverviewDeskProps {
   data: EventWithMetrics;
   recentResponses: RecentGuestResponse[];
   planning: EventPlanningSnapshot;
+  /** How far this celebration is through its first five steps. */
+  firstSteps?: FirstStepsStatus;
   /** Server time and the Lagos date key, so first paint matches the server. */
   now: number;
   todayKey: string;
@@ -36,6 +41,7 @@ export function EventOverviewDesk({
   data,
   recentResponses,
   planning,
+  firstSteps,
   now,
   todayKey,
   eventDateKey,
@@ -44,6 +50,8 @@ export function EventOverviewDesk({
   const searchParams = useSearchParams();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const celebrated = useRef(false);
+  // Whether this visit began with a new celebration's fireworks, read before the URL is tidied.
+  const arrivedCreated = useRef(Boolean(searchParams?.get("created"))).current;
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -89,6 +97,7 @@ export function EventOverviewDesk({
 
   return (
     <div className="sm:pb-16">
+      <DashboardTour created={arrivedCreated} />
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-night text-gold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-gold/30">
@@ -110,6 +119,12 @@ export function EventOverviewDesk({
         <DeskItem>
           <NextUpStrip actions={nextActions} />
         </DeskItem>
+
+        {firstSteps && (
+          <DeskItem>
+            <FirstSteps eventId={event.id} status={firstSteps} />
+          </DeskItem>
+        )}
 
         <div className="grid grid-cols-1 gap-3.5 sm:gap-6 lg:grid-cols-12 lg:gap-8">
           <DeskItem className="lg:col-span-5">
