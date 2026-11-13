@@ -12,7 +12,7 @@ describe("public marketing integrity", () => {
     "%s route carries canonical metadata",
     (page) => {
       // pageMetadata builds the canonical URL from the route path; the
-      // layout supplies the https://ariya-two.vercel.app metadataBase.
+      // layout supplies the site address as metadataBase (src/lib/site-url.ts).
       const metadata = pageMetadata({
         title: page,
         description: page,

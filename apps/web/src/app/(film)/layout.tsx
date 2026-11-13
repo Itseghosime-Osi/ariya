@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
+import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ariya-two.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Àríyá · The Yes",
     template: "%s · Àríyá",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
   description:
     "Àríyá plans Nigerian weddings and parties with one personal RSVP link per guest. The Yes is a wedding film in seventeen chapters.",
   alternates: { canonical: "/" },
+  icons: SITE_ICONS,
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     siteName: "Àríyá",
@@ -31,6 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    ...(TWITTER_HANDLE ? { site: TWITTER_HANDLE } : {}),
     title: "The Yes · Àríyá",
     description:
       "One personal invitation for every guest, and a guest list that keeps itself. A Lagos wedding in seventeen chapters.",

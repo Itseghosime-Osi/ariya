@@ -3,29 +3,17 @@ import "@/styles/site/ariya.css";
 import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ariya-two.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Àríyá · The Yes",
     template: "%s · Àríyá",
   },
   applicationName: "Àríyá",
-  icons: {
-    icon: [
-      { url: "/site/assets/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-    ],
-    apple: [
-      {
-        url: "/icons/apple-touch-icon.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ],
-  },
+  icons: SITE_ICONS,
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
@@ -40,7 +28,10 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    ...(TWITTER_HANDLE ? { site: TWITTER_HANDLE } : {}),
+  },
 };
 
 export const viewport: Viewport = {

@@ -4,6 +4,7 @@ import { Bodoni_Moda, Great_Vibes, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { AppSplash, splashScript } from "@/components/layout/app-splash";
 import { OfflineCache } from "@/components/layout/offline-cache";
+import { SITE_URL } from "@/lib/site-url";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -25,7 +26,7 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ariya-two.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Àríyá — Wedding & Event Suite",
   description: "Wedding and event planner for Nigerian couples and planners.",
   applicationName: "Àríyá",
