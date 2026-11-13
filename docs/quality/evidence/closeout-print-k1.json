@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-A4a",
+    "name": "The print PDF has one page of 5.75 x 7.75 in (card, bleed and margin) at true size",
+    "ok": true,
+    "detail": "pages=1 size=414x558pt"
+  },
+  {
+    "id": "RD-A4b",
+    "name": "The margin carries a plain size note (trim size, bleed, resolution, crop marks)",
+    "ok": true,
+    "detail": "Trim size 5 x 7 in - bleed 0.125 in - 300 DPI - cut on the crop marks"
+  },
+  {
+    "id": "RD-K1",
+    "name": "Every studio state shows exactly one solid primary action",
+    "ok": true,
+    "detail": "[{\"label\":\"pro idle\",\"primaries\":[\"Export\"]},{\"label\":\"pro selected layer\",\"primaries\":[\"Export\"]},{\"label\":\"pro history panel open\",\"primaries\":[\"Export\"]},{\"label\":\"pro export dialog\",\"primaries\":[\"Export\"]},{\"label\":\"simple idle\",\"primaries\":[\"Export\"]}]"
+  }
+]

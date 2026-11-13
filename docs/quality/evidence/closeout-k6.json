@@ -1,0 +1,14 @@
+[
+  {
+    "id": "RD-K6-50",
+    "name": "50 layers: one row height and the list scrolls",
+    "ok": true,
+    "detail": "{\"layersOnCard\":50,\"rows\":50,\"heights\":[38],\"scrolls\":true}"
+  },
+  {
+    "id": "RD-K6-rename",
+    "name": "Inline rename works with 50 layers",
+    "ok": true,
+    "detail": ""
+  }
+]

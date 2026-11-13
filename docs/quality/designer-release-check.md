@@ -28,7 +28,7 @@ Any failed check is either fixed or written into the checklist as a known defect
 
 ## 3. Performance budget (checklist E1)
 
-With 60 layers (the studio's maximum), dragging a layer must keep the **95th-percentile frame under 100 ms** in the harness (`batch21`, headless Chromium, dev build). Last measured: median 16.7 ms, p95 66.6 ms. A phone measurement is still missing; record it here when someone runs the harness on a mid-range phone.
+With 60 layers (the studio's maximum), dragging a layer must keep the **95th-percentile frame under 100 ms**. Measure it on a **production build** (`SKIP_ENV_VALIDATION=1 next build`, then `next start`) with `batch51.mjs` (set `BASE`); the development build is several times slower and gives misleading numbers. Last measured (2026-11-13, production build, headless Chromium): median 16.7 ms, p95 16.7 ms and no long task, also with the CPU slowed 4x. A real mid-range phone has not been measured; record it here when someone runs the harness on one.
 
 ## 4. Update the documents
 
@@ -39,5 +39,6 @@ With 60 layers (the studio's maximum), dragging a layer must keep the **95th-per
 
 ## Check log
 
-| Date | Commit | Who | Notes |
-| ---- | ------ | --- | ----- |
+| Date       | Commit                      | Who                   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------- | --------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-13 | feat/studio-checklist-close | Claude, for the owner | Full re-check after the studio tidy and polish. Closed 31 more checklist items with evidence (`evidence/closeout-*.json`); 20 remain, each with a reason in the checklist (people and devices, owner decisions or backend, Firefox and WebKit, judgement). Found and fixed on the way: History panel contrast in both themes, a raw browser error shown on a failed export, a blocked font changing an export silently. The first contrast scan did not switch panels (they are buttons, not tabs) and was thrown away; the corrected scan is the one recorded. |

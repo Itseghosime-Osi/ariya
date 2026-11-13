@@ -1,0 +1,80 @@
+[
+  {
+    "id": "RD-K3-1440x900",
+    "name": "The rail has the six groups in order, one divider between each",
+    "ok": true,
+    "detail": "[[\"Move & Select\",\"Canvas size & ratio\"],[\"Type text\"],[\"Cathedral Arch\",\"Vector Shapes & Geometry\",\"Gradient Fill\",\"Eyedropper sampler\"],[\"Place image / photo\",\"Import external design\"],[\"Add monogram seal\",\"Add guest pass seal\"],[\"Hand / Pan\",\"Zoom Tool\"]]"
+  },
+  {
+    "id": "RD-K3-fit-1440x900",
+    "name": "The colour buttons are on screen without scrolling the rail",
+    "ok": true,
+    "detail": "{\"swapBottom\":841,\"statusTop\":844}"
+  },
+  {
+    "id": "RD-K2a-1440x900",
+    "name": "The header has no separate Help button",
+    "ok": true,
+    "detail": "[\"Back to invitations\",\"File\",\"Edit\",\"Insert\",\"Arrange\",\"View\",\"Help\",\"Switch to the dark interface\",\"Simple\",\"Pro\",\"Àríyá home\"]"
+  },
+  {
+    "id": "RD-K2b-1440x900",
+    "name": "Order: back, menus, then theme, Simple/Pro, logo",
+    "ok": true,
+    "detail": "Back to invitations | File | Edit | Insert | Arrange | View | Help | Switch to the dark interface | Simple | Pro | Àríyá home"
+  },
+  {
+    "id": "RD-K2c",
+    "name": "The ? key still opens Help",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K2d",
+    "name": "Help menu > Help and shortcuts opens Help",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K3-1440x1000",
+    "name": "The rail has the six groups in order, one divider between each",
+    "ok": true,
+    "detail": "[[\"Move & Select\",\"Canvas size & ratio\"],[\"Type text\"],[\"Cathedral Arch\",\"Vector Shapes & Geometry\",\"Gradient Fill\",\"Eyedropper sampler\"],[\"Place image / photo\",\"Import external design\"],[\"Add monogram seal\",\"Add guest pass seal\"],[\"Hand / Pan\",\"Zoom Tool\"]]"
+  },
+  {
+    "id": "RD-K3-fit-1440x1000",
+    "name": "The colour buttons are on screen without scrolling the rail",
+    "ok": true,
+    "detail": "{\"swapBottom\":928,\"statusTop\":944}"
+  },
+  {
+    "id": "RD-K2a-1440x1000",
+    "name": "The header has no separate Help button",
+    "ok": true,
+    "detail": "[\"Back to invitations\",\"File\",\"Edit\",\"Insert\",\"Arrange\",\"View\",\"Help\",\"Switch to the dark interface\",\"Simple\",\"Pro\",\"Àríyá home\"]"
+  },
+  {
+    "id": "RD-K2b-1440x1000",
+    "name": "Order: back, menus, then theme, Simple/Pro, logo",
+    "ok": true,
+    "detail": "Back to invitations | File | Edit | Insert | Arrange | View | Help | Switch to the dark interface | Simple | Pro | Àríyá home"
+  },
+  {
+    "id": "RD-K3-390x844",
+    "name": "The rail has the six groups in order, one divider between each",
+    "ok": true,
+    "detail": "[[\"Move & Select\",\"Canvas size & ratio\"],[\"Type text\"],[\"Cathedral Arch\",\"Vector Shapes & Geometry\",\"Gradient Fill\",\"Eyedropper sampler\"],[\"Place image / photo\",\"Import external design\"],[\"Add monogram seal\",\"Add guest pass seal\"],[\"Hand / Pan\",\"Zoom Tool\",\"Default colours\"]]"
+  },
+  {
+    "id": "RD-K2a-390x844",
+    "name": "The header has no separate Help button",
+    "ok": true,
+    "detail": "[\"Back to invitations\",\"Switch to the dark interface\",\"Simple\",\"Pro\"]"
+  },
+  {
+    "id": "RD-K2b-390x844",
+    "name": "Order: back, menus, then theme, Simple/Pro, logo",
+    "ok": true,
+    "detail": "Back to invitations | Switch to the dark interface | Simple | Pro"
+  }
+]
