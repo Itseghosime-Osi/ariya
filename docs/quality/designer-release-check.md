@@ -2,6 +2,10 @@
 
 Run this before each release that touches the studio. It keeps `designer-redesign-checklist.md` honest.
 
+## 0. Start from the report
+
+Run `pnpm check:checklist` in `apps/web`. It lists the open items, the closed items whose evidence is undated or older than 60 days (set `STALE_DAYS` to change that), and any evidence link that no longer exists. Re-check those first, then update the item's note with the new date and evidence. A unit test keeps the counts in the close-out summary equal to the items, and fails when a closed item has no proof line or a link points at a missing file.
+
 ## 1. Automated
 
 1. `pnpm lint && pnpm typecheck && pnpm test` in `apps/web` (designer unit tests are in `src/features/invitations`).

@@ -68,6 +68,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Open (closeout, 2026-11-13): the backup and image downloads are named from the event in Chromium; Firefox and WebKit are not available (see B1).
 - [x] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
+      Evidence: the Export dialog's "Small for WhatsApp" option makes a JPG of 1142 × 1600 px compressed to about 400 KB or less, named `…-whatsapp.jpg`, and the summary says so before download (`evidence/redesign-batch30.json`; size rule in `export-service.test.ts`). A transparent PNG is the High-Resolution PNG option.
 
 ## C. Pricing and paywalls (both tools)
 
@@ -91,6 +92,7 @@ Evidence: new export 'Small for WhatsApp': a JPEG of at most 1600 px on its long
       Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
 - [x] **C5 (P2) Premium filter clarity.** Template and asset lists must clearly separate free from premium (Canva reviewers called this confusing).
       Done when: filter chips "All / Free / Premium" work and counts are right.
+      Decision: closed as not applicable: the designer is fully included for every host, so there is nothing to separate into free and premium (owner decision, see Product decisions). Reopen if pricing tiers are introduced.
 
 ## D. Learning curve and navigation
 
@@ -138,12 +140,10 @@ Decision: closed as not applicable: the designer is fully included for every hos
       Done when: time to interactive is recorded for desktop and a throttled phone.
       Evidence (closeout, 2026-11-13): the studio route now has a loading skeleton (`loading.tsx`: header, tool rail, card and side panel in quiet blocks, announced as a status, calm under reduced motion; 3 unit tests). Time to a visible card and to the first typed letter, on a production build: desktop 0.11 to 0.18 s and 0.41 to 0.52 s; a throttled phone (4x slower CPU, 1.6 Mbps, 150 ms latency, cache off) 1.7 to 1.8 s and 1.9 to 2.0 s (`evidence/closeout-perf-production.json` RD-E4). Measured against a local server with the data fixture, so real server time is not included.
 - [x] **E5 (P2) Offline-tolerant editing.** Queue saves when the connection drops.
+      Decision: same as A2: queue saves while offline and sync when back online.
+      Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 
 ## F. Support and trust (Canva complaint: hard to reach support)
-
-Decision: same as A2: queue saves while offline and sync when back online.
-
-Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
 
 - [x] **F1 (P0) Visible help.** A Help button in the studio with a short guide, contact email (`help@ariyaday.com` once created) and expected reply time.
       Done when: Help opens in one tap on phone and desktop.
@@ -162,7 +162,7 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
 
 - [x] **G1 (P0) Fresh Nigerian-wedding-first templates.** Canva reviewers call templates dated. Audit each template on current style, Yoruba/Igbo/Hausa/Pidgin text, and long names.
       Done when: each template renders correctly with long names and diacritics (Àríyá, Ọlá, Ṣeun).
-      Progress (not closed): Names with Yoruba diacritics stay inside the card width (RD-G1). KNOWN DEFECT (RD-G1b, `screenshots/upgrade-longname-defect.png`): a very long name wraps to four lines and overlaps the message text below. Needs shrink-to-fit (H2) or an overlap warning. Open.
+      Fixed (RD-G1b): the long-name overlap found earlier (a very long name wrapped to four lines over the message) no longer happens; the line now shrinks to two lines (`screenshots/upgrade-longname-fixed.png`), and H2 now gives each text layer a Fit choice.
       Evidence: all four layout presets (Cathedral Arch, Royal Monogram, Modern Minimalist, Owambe Opulence) plus the default card, each with a 74-character Yoruba/Igbo name, a long venue and a long message, stay inside the card with no overlapping text (`evidence/redesign-batch23.json`, `screenshots/upgrade-tpl-*.png`). Fix made on the way: every text line kind now shrinks (to 45% at most) when it would exceed 2–3 lines; built-in default sizes are unchanged (checked). Chromium desktop only; export of each preset not re-run.
 - [x] **G2 (P1) Template search and filters.** Culture, mood, colour, size, free or premium.
       Done when: filters combine and results match.
@@ -173,10 +173,9 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Decision: deferred by decision (no one-click themes for now).
       Evidence (closeout, 2026-11-13): closed by the owner's decision (no one-click themes for now). Reopen if they are built.
 - [x] **G4 (P2) AI helper that is predictable (Canva AI "hit or miss").** Only offer AI features that give reviewable, undoable results; label clearly as suggestions.
+      Decision: closed as not planned: no AI in the designer for now (owner decision).
 
 ## H. Docs and text editing (Canva: clunky docs)
-
-Decision: closed as not planned: no AI in the designer for now (owner decision).
 
 - [x] **H1 (P1) Reliable text editing.** Caret never jumps, paste is plain text, undo steps are sensible, long names wrap or shrink predictably.
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
@@ -205,7 +204,7 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 - [ ] **J2 (P1) Small user test** with 5 real couples or planners on phone; record where they stall.
       Open (closeout, 2026-11-13): needs five real couples or planners.
 - [ ] **J3 (P1) Re-check this list each release;** update status and evidence links.
-      Open (closeout, 2026-11-13): a recurring process by nature. This close-out was one full re-check; the routine and its log are in `designer-release-check.md`.
+      Progress (2026-11-13, a process, so it stays open): the routine and its log are in `designer-release-check.md`; `pnpm check:checklist` prints the report to start from (open items, closed items not re-evidenced for 60 days, broken evidence links), and a unit test (`src/test/designer-checklist.test.ts`) fails CI if the counts, the notes or an evidence link drift.
 
 ## K. UI redesign (look and layout)
 
@@ -322,6 +321,7 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [x] **M4 (P1) Heuristic review** (Nielsen's 10) with findings logged and ranked.
       Evidence: an expert review against Nielsen's 10 heuristics is in `designer-heuristic-review.md`, with ten findings ranked by severity and five ranked fixes. It was done by one reviewer from code, screenshots and browser checks (Chromium, desktop and phone), not with users.
 - [x] **M5 (P1) Design review against the competitor complaints:** every A–L item mapped to a screen, so nothing from the reviews is left out.
+      Evidence: this checklist is that mapping: every A to L item has a status, a screen or test, and an evidence link, and the whole list was re-checked on 2026-11-13 (`designer-release-check.md`).
 
 ## Suggested order
 

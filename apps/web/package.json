@@ -15,7 +15,8 @@
     "build:wasm": "node scripts/build-wasm.mjs",
     "check:bundle": "tsx scripts/check-bundle.ts",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
-    "db:seed": "tsx scripts/seed-demo.ts"
+    "db:seed": "tsx scripts/seed-demo.ts",
+    "check:checklist": "tsx scripts/designer-recheck.ts"
   },
   "dependencies": {
     "@ariya/design": "workspace:*",
