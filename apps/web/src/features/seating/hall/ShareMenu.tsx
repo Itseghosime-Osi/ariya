@@ -217,7 +217,7 @@ export function ShareMenu({
               : "Download the measured floor plan (PDF)"}
           </button>
 
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid gap-2">
             {onSnapshot && (
               <button
                 type="button"
