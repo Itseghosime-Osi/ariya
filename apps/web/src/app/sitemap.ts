@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { siteUrl } from "@/lib/site-url";
 import { DOC_PAGES } from "@/lib/docs";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -12,6 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "documentation",
     ...DOC_PAGES.map((p) => `documentation/${p.slug}`),
   ].map((path) => ({
-    url: `https://ariya-two.vercel.app/${path}`,
+    url: siteUrl(`/${path}`),
   }));
 }

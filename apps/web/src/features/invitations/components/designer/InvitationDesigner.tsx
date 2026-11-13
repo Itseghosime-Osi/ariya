@@ -56,6 +56,7 @@ import { StudioMenuBar, type MenuGroup } from "./StudioMenuBar";
 import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
+import { SealOutline } from "./SealOutline";
 import { recordStudioMetricAction } from "../../metrics-actions";
 import { HelpDialog } from "./HelpDialog";
 import { GuestPreviewDialog } from "./GuestPreviewDialog";
@@ -1790,6 +1791,12 @@ export function InvitationDesigner({
                   dialogTheme(dark).panel
                 )}
               >
+                <SealOutline
+                  className={cn(
+                    "mx-auto mb-2 opacity-20",
+                    dark ? "text-(--studio-gold)" : "text-(--studio-wine)"
+                  )}
+                />
                 <p
                   className={cn(
                     "font-serif text-xl font-bold",
@@ -1920,6 +1927,15 @@ export function InvitationDesigner({
                   : "bg-red-50 text-red-900 border-red-200"
             )}
           >
+            {notice.tone === "ok" && notice.text.startsWith("Exported") && (
+              <Icon
+                name="check"
+                size={16}
+                className={
+                  dark ? "text-(--studio-gold)" : "text-(--studio-wine)"
+                }
+              />
+            )}
             {notice.text}
             {notice.action && (
               <button

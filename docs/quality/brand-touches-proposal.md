@@ -1,6 +1,6 @@
 # Brand touches in the studio: a proposal (K11)
 
-Checklist K11 asks for Àríyá colours and motifs "used sparingly (accent, empty states, loading), not on every control". Whether that is restrained enough is a taste call, so this is a short proposal for the owner to accept or change. Nothing here is built yet.
+Checklist K11 asks for Àríyá colours and motifs "used sparingly (accent, empty states, loading), not on every control". Whether that is restrained enough is a taste call, so this is a short proposal for the owner to accept or change. The owner said yes on 2026-11-13 and all three are built.
 
 ## Where the brand shows today
 
@@ -20,6 +20,6 @@ Checklist K11 asks for Àríyá colours and motifs "used sparingly (accent, empt
 
 Tool rail, inspector, layers, history, dialogs and every button other than the one primary action. A second accent colour on controls would compete with the card, which is the thing the host is making.
 
-## To decide
+## Decision
 
-Reply "yes" to build the three touches, "no" to keep the studio fully neutral, or name the ones to keep.
+Yes, all three (2026-11-13). Built: the seal outline on the empty card and in the loading skeleton, and the check on the export notice.

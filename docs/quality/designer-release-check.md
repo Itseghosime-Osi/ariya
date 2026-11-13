@@ -2,6 +2,10 @@
 
 Run this before each release that touches the studio. It keeps `designer-redesign-checklist.md` honest.
 
+## 0. Start from the report
+
+Run `pnpm check:checklist` in `apps/web`. It lists the open items, the closed items whose evidence is undated or older than 60 days (set `STALE_DAYS` to change that), and any evidence link that no longer exists. Re-check those first, then update the item's note with the new date and evidence. A unit test keeps the counts in the close-out summary equal to the items, and fails when a closed item has no proof line or a link points at a missing file.
+
 ## 1. Automated
 
 1. `pnpm lint && pnpm typecheck && pnpm test` in `apps/web` (designer unit tests are in `src/features/invitations`).
@@ -49,4 +53,4 @@ With 60 layers (the studio's maximum), dragging a layer must keep the **95th-per
 - D1, K5, L6: Simple mode opens with seven items; the options bar shows type controls for a selected text layer; the Pro inspector has "More options" (remembered). Four e2e specs open it first via `showAllInspectorOptions`.
 - D7, L5: five help clips in Help; the emulated 350 px-tall phone window keeps focused fields visible.
 - A3, F3, H2: brand styles and Stack, saved versions, per-layer text fit. Rust model gained `textFit`, `textStyles`, `styleId`; wasm rebuilt and the generated types refreshed.
-- J1: anonymous studio metrics, migration written and not applied. F3's migration is also not applied.
+- J1: anonymous studio metrics and F3: saved versions. Both migrations were applied to the live project on 2026-11-13.

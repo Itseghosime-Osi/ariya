@@ -1,3 +1,5 @@
+import { SealOutline } from "@/features/invitations/components/designer/SealOutline";
+
 /**
  * Shown straight away while the studio's data loads. It draws the studio's own frame (header, tool
  * rail, card and side panel) in quiet blocks, so the screen is never blank and nothing jumps when
@@ -38,7 +40,12 @@ export default function InvitationDesignLoading() {
           ))}
         </div>
         <div className="grid flex-1 place-items-center p-6">
-          <div className="aspect-[5/7] h-[min(70vh,34rem)] animate-pulse rounded-sm bg-white/70 shadow-(--studio-shadow-stage) motion-reduce:animate-none" />
+          <div className="grid aspect-[5/7] h-[min(70vh,34rem)] animate-pulse place-items-center rounded-sm bg-white/70 shadow-(--studio-shadow-stage) motion-reduce:animate-none">
+            <SealOutline
+              size={72}
+              className="text-(--studio-wine) opacity-15"
+            />
+          </div>
         </div>
         <div className="hidden w-[360px] flex-col gap-4 border-l border-hairline bg-ivory p-4 lg:flex">
           <div
