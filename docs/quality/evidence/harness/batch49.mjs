@@ -56,7 +56,12 @@ const layerCount = async (p) =>
   await p.keyboard.press("b");
   await p.waitForTimeout(500);
   const after = await layerCount(p);
-  check("RD-K3-B", "Pressing B adds a monogram seal", after === before + 1, `${before} -> ${after}`);
+  check(
+    "RD-K3-B",
+    "Pressing B adds a monogram seal",
+    after === before + 1,
+    `${before} -> ${after}`
+  );
   await p.keyboard.press("q");
   await p.waitForTimeout(400);
   const after2 = await layerCount(p);
@@ -96,7 +101,9 @@ const layerCount = async (p) =>
   check(
     "RD-L11b",
     "No guest link or real code is shown",
-    !/https?:\/\//i.test(text) && !/[?&]code=/i.test(text) && /sample code/.test(text)
+    !/https?:\/\//i.test(text) &&
+      !/[?&]code=/i.test(text) &&
+      /sample code/.test(text)
   );
   const ax = await new Axe({ page: p })
     .withTags(["wcag2a", "wcag2aa"])
@@ -105,11 +112,20 @@ const layerCount = async (p) =>
   const bad = ax.violations.filter((v) =>
     ["serious", "critical"].includes(v.impact)
   );
-  check("RD-L11c", "The guest preview passes axe", bad.length === 0, bad.map((v) => v.id).join(","));
+  check(
+    "RD-L11c",
+    "The guest preview passes axe",
+    bad.length === 0,
+    bad.map((v) => v.id).join(",")
+  );
   await p.screenshot({ path: "/tmp/guest-preview.png" });
   await p.keyboard.press("Escape");
   await p.waitForTimeout(300);
-  check("RD-L11d", "Escape closes it", (await p.getByTestId("guest-preview").count()) === 0);
+  check(
+    "RD-L11d",
+    "Escape closes it",
+    (await p.getByTestId("guest-preview").count()) === 0
+  );
   await b.close();
 }
 
@@ -132,7 +148,10 @@ const layerCount = async (p) =>
     };
   });
   await p.getByRole("button", { name: "Export", exact: true }).click();
-  await p.getByRole("button").filter({ hasText: "High-Resolution PNG" }).click();
+  await p
+    .getByRole("button")
+    .filter({ hasText: "High-Resolution PNG" })
+    .click();
   await p.getByRole("button", { name: "Download PNG", exact: true }).click();
   const alert = p.getByRole("dialog").getByRole("alert");
   await alert.waitFor({ timeout: 30000 });
@@ -145,7 +164,11 @@ const layerCount = async (p) =>
       !/Boom|toBlob|toDataURL/.test(msg),
     msg.replace(/\n/g, " | ")
   );
-  check("RD-F2-retry", "There is a Try again button next to the error", (await p.getByTestId("export-retry").count()) === 1);
+  check(
+    "RD-F2-retry",
+    "There is a Try again button next to the error",
+    (await p.getByTestId("export-retry").count()) === 1
+  );
   await p.evaluate(() => {
     window.__failExport = false;
   });
@@ -173,7 +196,10 @@ const layerCount = async (p) =>
   }
   await p.waitForTimeout(800);
   const n = await layerCount(p);
-  await p.getByRole("button", { name: /^Layers/ }).first().click();
+  await p
+    .getByRole("button", { name: /^Layers/ })
+    .first()
+    .click();
   await p.waitForTimeout(500);
   const dock = p.locator('[data-testid="layers-dock"]:visible').first();
   const info = await dock.evaluate((d) => {
@@ -181,11 +207,18 @@ const layerCount = async (p) =>
       ...d.querySelectorAll('button[aria-label="Drag to reorder layer"]'),
     ].map((g) => g.closest("[class*=min-h-]"));
     let sc = rows[0]?.parentElement;
-    while (sc && sc !== d && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+    while (
+      sc &&
+      sc !== d &&
+      !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)
+    )
+      sc = sc.parentElement;
     if (sc === d) sc = null;
     const hs = [
       ...new Set(
-        rows.filter(Boolean).map((r) => Math.round(r.getBoundingClientRect().height))
+        rows
+          .filter(Boolean)
+          .map((r) => Math.round(r.getBoundingClientRect().height))
       ),
     ];
     return {
@@ -223,4 +256,7 @@ const layerCount = async (p) =>
   await p.screenshot({ path: "/tmp/layers-50.png" });
   await b.close();
 }
-writeFileSync(process.argv[2] ?? "/tmp/batch49.json", JSON.stringify(results, null, 2));
+writeFileSync(
+  process.argv[2] ?? "/tmp/batch49.json",
+  JSON.stringify(results, null, 2)
+);
