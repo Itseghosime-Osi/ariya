@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
-import { searchCheckInGuestsAction } from "../actions";
 import type { CheckInMatch } from "../types";
 
 interface GuestNameSearchProps {
   eventId: string;
+  /** The desk's search: the server when there is a signal, the phone's copy when there is not. */
+  search: (query: string) => Promise<{ ok: boolean; guests: CheckInMatch[] }>;
   disabled: boolean;
   /** Continues exactly as a scan does: the desk verifies the pass, then the door staff taps Admit. */
   onPick: (code: string) => void;
@@ -17,6 +18,7 @@ const WAIT_MS = 300;
 /** For a seal that will not scan: find the guest by name, then verify and admit as usual. */
 export function GuestNameSearch({
   eventId,
+  search,
   disabled,
   onPick,
 }: GuestNameSearchProps) {
@@ -33,7 +35,7 @@ export function GuestNameSearch({
     let stale = false;
     setSearching(true);
     const timer = setTimeout(async () => {
-      const res = await searchCheckInGuestsAction(eventId, query);
+      const res = await search(query);
       if (stale) return;
       setMatches(res.guests);
       setFailed(!res.ok);
@@ -43,7 +45,7 @@ export function GuestNameSearch({
       stale = true;
       clearTimeout(timer);
     };
-  }, [eventId, query, ready]);
+  }, [eventId, query, ready, search]);
 
   const shown = ready ? matches : [];
 

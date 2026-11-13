@@ -35,6 +35,8 @@ export interface RecentCheckIn {
   count: number;
   checked_in_at: string;
   table_name: string | null;
+  /** Admitted without a signal and not sent to the server yet. */
+  waiting?: boolean;
 }
 
 export interface CheckInDeskData {

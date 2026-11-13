@@ -82,10 +82,27 @@ export async function getCheckInDeskData(
     } | null;
   }>;
 
-  const totalCheckedIn = rawCheckIns.reduce(
-    (sum, c) => sum + (c.checked_in_count || 1),
-    0
-  );
+  // Everyone admitted so far: every check-in, not just the twenty shown as recent. A page at a time,
+  // because the API returns at most a thousand rows per request.
+  let totalCheckedIn = 0;
+  for (let from = 0; from < 50_000; from += 1000) {
+    const { data, error } = await supabase
+      .from("check_ins")
+      .select("checked_in_count")
+      .eq("event_id", cleanId)
+      .order("id")
+      .range(from, from + 999);
+    if (error) {
+      // Fall back to the recent ones rather than failing the desk.
+      totalCheckedIn = rawCheckIns.reduce(
+        (sum, c) => sum + (c.checked_in_count || 1),
+        0
+      );
+      break;
+    }
+    for (const c of data ?? []) totalCheckedIn += c.checked_in_count || 1;
+    if (!data || data.length < 1000) break;
+  }
 
   const remaining = Math.max(0, totalExpected - totalCheckedIn);
   const attendanceRate =
