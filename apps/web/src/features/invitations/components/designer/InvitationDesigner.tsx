@@ -56,6 +56,8 @@ import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
 import { HelpDialog } from "./HelpDialog";
+import { GuestPreviewDialog } from "./GuestPreviewDialog";
+import { missingFontMessage } from "../../font-check";
 import { CommandPalette } from "./CommandPalette";
 import { QuickTour } from "./QuickTour";
 import { dialogTheme } from "./dialog-theme";
@@ -399,6 +401,7 @@ export function InvitationDesigner({
   const [busy, setBusy] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [guestPreviewOpen, setGuestPreviewOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [online, setOnline] = useState(true);
@@ -1181,6 +1184,11 @@ export function InvitationDesigner({
           setActiveTool("shape");
           return;
         }
+        if (k === "b" || k === "q") {
+          e.preventDefault();
+          add(k === "b" ? "seal" : "code");
+          return;
+        }
         if (k === "g") {
           e.preventDefault();
           setActiveTool("gradient");
@@ -1497,6 +1505,11 @@ export function InvitationDesigner({
     {
       title: "View",
       items: [
+        {
+          label: "See it as a guest…",
+          onClick: () => setGuestPreviewOpen(true),
+        },
+        "separator",
         {
           label: "Fit invitation",
           shortcut: "Cmd+0",
@@ -2477,6 +2490,13 @@ export function InvitationDesigner({
         forceOpen={tourOpen}
         onForceClose={() => setTourOpen(false)}
       />
+      <GuestPreviewDialog
+        open={guestPreviewOpen}
+        onClose={() => setGuestPreviewOpen(false)}
+        design={design}
+        coupleName={coupleName}
+        dark={dark}
+      />
       <HelpDialog
         dark={dark}
         open={helpOpen}
@@ -2487,15 +2507,17 @@ export function InvitationDesigner({
         dark={dark}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
-        onExported={(format) =>
+        onExported={(format, missingFonts) =>
           // A success message never replaces an error the host has not dismissed yet.
           setNotice((current) =>
             current?.tone === "bad"
               ? current
-              : {
-                  tone: "ok",
-                  text: `Exported as ${format === "json" ? "a design backup" : format === "whatsapp" ? "a small WhatsApp picture" : format.toUpperCase()}. Check your downloads.`,
-                }
+              : missingFonts.length > 0
+                ? { tone: "bad", text: missingFontMessage(missingFonts) }
+                : {
+                    tone: "ok",
+                    text: `Exported as ${format === "json" ? "a design backup" : format === "whatsapp" ? "a small WhatsApp picture" : format.toUpperCase()}. Check your downloads.`,
+                  }
           )
         }
         design={design}

@@ -1,5 +1,7 @@
 "use client";
 
+import { describeExportFailure } from "../../export-errors";
+import { failedCardFonts } from "../../font-check";
 import React, { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Icon } from "@/components/ui/icon";
@@ -22,7 +24,7 @@ interface ExportModalProps {
   coupleName?: string;
   getCardElement: () => HTMLElement | null;
   /** Called after a file has been handed to the browser, so the studio can confirm it. */
-  onExported?: (format: ExportFormat) => void;
+  onExported?: (format: ExportFormat, missingFonts: string[]) => void;
 }
 
 interface FormatCard {
@@ -111,6 +113,7 @@ export function ExportModal({
     setError(null);
     try {
       const cardEl = getCardElement();
+      const missingFonts = failedCardFonts(cardEl);
       const res = await exportInvitation({
         cardElement: cardEl,
         design,
@@ -123,13 +126,13 @@ export function ExportModal({
 
       if (res.cancelled) return;
       if (!res.ok) {
-        setError(res.error || "Export failed");
+        setError(describeExportFailure(res.error));
       } else {
-        onExported?.(selectedFormat);
+        onExported?.(selectedFormat, missingFonts);
         onClose();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Export failed");
+      setError(describeExportFailure(err));
     } finally {
       setExporting(false);
     }
@@ -339,11 +342,23 @@ export function ExportModal({
                 <div
                   role="alert"
                   className={cn(
-                    "mt-3 rounded-xl p-3 text-xs font-medium",
+                    "mt-3 flex items-start justify-between gap-3 rounded-xl p-3 text-xs font-medium",
                     t.error
                   )}
                 >
-                  {error}
+                  <span>{error}</span>
+                  <button
+                    type="button"
+                    data-testid="export-retry"
+                    onClick={handleExport}
+                    disabled={exporting}
+                    className={cn(
+                      "min-h-11 shrink-0 rounded-full px-3 font-bold underline disabled:opacity-50",
+                      focusRing
+                    )}
+                  >
+                    Try again
+                  </button>
                 </div>
               )}
 

@@ -533,6 +533,7 @@ export function ToolRail({
         {/* Luxury Wax Seal */}
         <ToolButton
           label="Add monogram seal"
+          shortcut="B"
           dark={dark}
           onClick={() => onAdd("seal")}
         >
@@ -542,6 +543,7 @@ export function ToolRail({
         {/* Security QR Pass */}
         <ToolButton
           label={hasEntrySeal ? "Guest pass seal added" : "Add guest pass seal"}
+          shortcut="Q"
           dark={dark}
           onClick={() => onAdd("code")}
           disabled={hasEntrySeal}
