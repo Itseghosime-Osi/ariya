@@ -59,8 +59,13 @@ export function RecentCheckInsList({ checkIns }: RecentCheckInsListProps) {
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 text-[13px] text-label-2">
+              <span className="shrink-0 text-right text-[13px] text-label-2">
                 {formatLagosTime(ci.checked_in_at)}
+                {ci.waiting && (
+                  <span className="mt-0.5 block text-[11px] font-semibold text-gold-ink">
+                    Waiting to send
+                  </span>
+                )}
               </span>
             </li>
           ))}

@@ -8,6 +8,8 @@ interface CheckInHeaderProps {
   eventId: string;
   stats: CheckInStats;
   isRealtimeActive: boolean;
+  /** No signal: the desk is working from this phone's copy of the guest list. */
+  offline?: boolean;
 }
 
 /** The desk's heading and its numbers: how many are in, how many are still to come. */
@@ -15,6 +17,7 @@ export function CheckInHeader({
   eventId,
   stats,
   isRealtimeActive,
+  offline = false,
 }: CheckInHeaderProps) {
   return (
     <>
@@ -46,7 +49,11 @@ export function CheckInHeader({
               isRealtimeActive ? "animate-pulse bg-emerald-600" : "bg-gold"
             }`}
           />
-          {isRealtimeActive ? "Live updates on" : "Connecting"}
+          {offline
+            ? "Offline"
+            : isRealtimeActive
+              ? "Live updates on"
+              : "Connecting"}
         </span>
       </header>
 
