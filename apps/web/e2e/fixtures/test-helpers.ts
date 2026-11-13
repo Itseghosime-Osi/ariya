@@ -321,3 +321,14 @@ export async function pickDateTime(page: Page, triggerId: string, iso: string) {
   await sheet.getByRole("button", { name: "Done" }).click();
   await expect(sheet).toBeHidden();
 }
+
+/** Opens the studio inspector's "More options" level (remembered per browser) for the next pages. */
+export async function showAllInspectorOptions(page: Page) {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("ariya.studio.inspector.more", "1");
+    } catch {
+      // Storage unavailable: the options simply stay folded.
+    }
+  });
+}

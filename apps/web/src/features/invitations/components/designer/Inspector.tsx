@@ -10,6 +10,7 @@ import {
   Toggle,
 } from "@/features/seating/hall/studio-ui";
 import { applyInvitationTheme } from "../../design";
+import { BrandStyleSection } from "./BrandStyleSection";
 import {
   CANVAS_PRESETS,
   designDimensionsPx,
@@ -378,7 +379,7 @@ const ROLES: { value: InvitationColorRole; label: string }[] = [
   { value: "foil", label: "Foil" },
 ];
 
-const TEXT_KINDS: InvitationLayer["kind"][] = [
+export const TEXT_KINDS: InvitationLayer["kind"][] = [
   "kicker",
   "names",
   "message",
@@ -389,6 +390,89 @@ const TEXT_KINDS: InvitationLayer["kind"][] = [
   "text",
 ];
 
+/** Auto-spacing for a group of lines: one gap between them, top to bottom (A3). */
+function StackControl({
+  dark,
+  onStack,
+}: {
+  dark?: boolean;
+  onStack: (gap: number) => void;
+}) {
+  const [gap, setGap] = useState("2");
+  const value = Number(gap);
+  const valid = Number.isFinite(value) && value >= 0 && value <= 50;
+  return (
+    <form
+      className="flex items-end gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (valid) onStack(value);
+      }}
+    >
+      <div className="min-w-0 flex-1">
+        <label
+          htmlFor="stack-gap"
+          className={cn(
+            "mb-1 block text-xs font-semibold",
+            dark ? "text-zinc-400" : "text-(--studio-mauve)"
+          )}
+        >
+          Gap between lines (% of card height)
+        </label>
+        <input
+          id="stack-gap"
+          inputMode="decimal"
+          value={gap}
+          onChange={(e) => setGap(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
+          className={fieldClass(dark)}
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={!valid}
+        className={cn(
+          "inline-flex min-h-10 items-center justify-center rounded-(--studio-radius-control) border px-3 text-xs font-semibold transition disabled:opacity-40",
+          dark
+            ? "border-white/12 bg-white/[0.06] text-(--studio-cream) hover:bg-white/[0.12]"
+            : "border-hairline bg-white/60 text-night hover:bg-white"
+        )}
+      >
+        Stack
+      </button>
+    </form>
+  );
+}
+
+const MORE_KEY = "ariya.studio.inspector.more";
+
+function MoreToggle({
+  on,
+  onToggle,
+  dark,
+}: {
+  on: boolean;
+  onToggle: () => void;
+  dark?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-expanded={on}
+      data-testid="inspector-more"
+      onClick={onToggle}
+      className={cn(
+        "mx-3 my-2 flex min-h-8 w-[calc(100%-1.5rem)] items-center justify-center rounded-(--studio-radius-control) border border-dashed text-xs font-semibold pointer-coarse:min-h-11",
+        dark
+          ? "border-white/20 text-zinc-300 hover:bg-white/5"
+          : "border-(--studio-line) text-(--studio-ink-2) hover:bg-black/[0.03]"
+      )}
+    >
+      {on ? "Fewer options" : "More options"}
+    </button>
+  );
+}
+
 export function Inspector({
   design,
   layer,
@@ -398,6 +482,7 @@ export function Inspector({
   onAlign,
   onAlignSelection,
   onDistribute,
+  onStackLayers,
   onGroup,
   onUngroup,
   onDeleteBatch,
@@ -419,6 +504,8 @@ export function Inspector({
   onAlign: (id: string, how: Alignment) => void;
   onAlignSelection?: (ids: string[], how: Alignment) => void;
   onDistribute?: (ids: string[], horizontal: boolean) => void;
+  /** Stacks the layers top to bottom with this gap, a percentage of the card's height. */
+  onStackLayers?: (ids: string[], gap: number) => void;
   onGroup?: (ids: string[]) => void;
   onUngroup?: (ids: string[]) => void;
   onDeleteBatch?: (ids: string[]) => void;
@@ -446,6 +533,24 @@ export function Inspector({
   const [fillMode, setFillMode] = useState<"solid" | "gradient" | "none">(
     layer?.gradient ? "gradient" : layer?.fill ? "solid" : "none"
   );
+  // L6: the less-used controls wait behind "More options"; the choice is remembered.
+  const [showMore, setShowMore] = useState(false);
+  useEffect(() => {
+    try {
+      setShowMore(localStorage.getItem(MORE_KEY) === "1");
+    } catch {
+      // Storage can be blocked; the panel then starts with the essentials.
+    }
+  }, []);
+  const toggleMore = () =>
+    setShowMore((on) => {
+      try {
+        localStorage.setItem(MORE_KEY, on ? "0" : "1");
+      } catch {
+        // Not remembered, still works for this visit.
+      }
+      return !on;
+    });
 
   useEffect(() => {
     setUnlinkCorners(
@@ -586,6 +691,13 @@ export function Inspector({
             </div>
           </Section>
         )}
+
+        <Section collapsible dark={dark} title="Stack">
+          <StackControl
+            dark={dark}
+            onStack={(gap) => onStackLayers?.(selectedIds, gap)}
+          />
+        </Section>
 
         <Section collapsible dark={dark} title="Layers in Selection">
           <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
@@ -747,49 +859,51 @@ export function Inspector({
             </div>
           </Section>
 
-          <Section collapsible dark={dark} title="Paper & edges">
-            <Segmented
-              dark={dark}
-              label="Paper edge style"
-              value={edgeStyle}
-              options={[
-                { key: "sharp", label: "Sharp paper" },
-                { key: "rounded", label: "Rounded" },
-                { key: "deckled", label: "Deckled" },
-              ]}
-              onPick={(edge) =>
-                onDesign((d) =>
-                  setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
-                )
-              }
-            />
-            {edgeStyle === "rounded" && (
-              <div className="mt-3">
-                <Num
-                  dark={dark}
-                  label="Corner radius"
-                  suffix="px"
-                  value={cornerRadiusPx || 16}
-                  min={0}
-                  max={120}
-                  step={2}
-                  onChange={(r) =>
-                    onDesign((d) => setPaperEdge(d, "rounded", r))
-                  }
-                />
-              </div>
-            )}
-            <p
-              className={cn(
-                "mt-2 text-xs leading-relaxed",
-                dark ? "text-zinc-400" : "text-label-2"
+          {showMore && (
+            <Section collapsible dark={dark} title="Paper & edges">
+              <Segmented
+                dark={dark}
+                label="Paper edge style"
+                value={edgeStyle}
+                options={[
+                  { key: "sharp", label: "Sharp paper" },
+                  { key: "rounded", label: "Rounded" },
+                  { key: "deckled", label: "Deckled" },
+                ]}
+                onPick={(edge) =>
+                  onDesign((d) =>
+                    setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
+                  )
+                }
+              />
+              {edgeStyle === "rounded" && (
+                <div className="mt-3">
+                  <Num
+                    dark={dark}
+                    label="Corner radius"
+                    suffix="px"
+                    value={cornerRadiusPx || 16}
+                    min={0}
+                    max={120}
+                    step={2}
+                    onChange={(r) =>
+                      onDesign((d) => setPaperEdge(d, "rounded", r))
+                    }
+                  />
+                </div>
               )}
-            >
-              {edgeStyle === "sharp" && "Straight invitation edges."}
-              {edgeStyle === "rounded" && "Rounded invitation corners."}
-              {edgeStyle === "deckled" && "A decorative torn-paper edge."}
-            </p>
-          </Section>
+              <p
+                className={cn(
+                  "mt-2 text-xs leading-relaxed",
+                  dark ? "text-zinc-400" : "text-label-2"
+                )}
+              >
+                {edgeStyle === "sharp" && "Straight invitation edges."}
+                {edgeStyle === "rounded" && "Rounded invitation corners."}
+                {edgeStyle === "deckled" && "A decorative torn-paper edge."}
+              </p>
+            </Section>
+          )}
         </details>
 
         <Section collapsible dark={dark} title="Background">
@@ -967,15 +1081,18 @@ export function Inspector({
           </div>
         </Section>
 
-        <Section collapsible dark={dark} title="Decoration">
-          <Toggle
-            dark={dark}
-            label="House ribbon and border"
-            hint="Turn off to draw your card from scratch."
-            checked={design.chrome !== false}
-            onChange={(on) => onDesign((d) => ({ ...d, chrome: on }))}
-          />
-        </Section>
+        <MoreToggle on={showMore} onToggle={toggleMore} dark={dark} />
+        {showMore && (
+          <Section collapsible dark={dark} title="Decoration">
+            <Toggle
+              dark={dark}
+              label="House ribbon and border"
+              hint="Turn off to draw your card from scratch."
+              checked={design.chrome !== false}
+              onChange={(on) => onDesign((d) => ({ ...d, chrome: on }))}
+            />
+          </Section>
+        )}
 
         <Section collapsible dark={dark} title="Design file">
           <div className="flex flex-wrap gap-2">
@@ -1664,6 +1781,33 @@ export function Inspector({
                     dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
                   )}
                 >
+                  Fit
+                </span>
+                <select
+                  aria-label="Text fit"
+                  value={layer.textFit ?? "auto"}
+                  onChange={(e) =>
+                    patch({
+                      textFit:
+                        e.target.value === "auto"
+                          ? undefined
+                          : (e.target.value as InvitationLayer["textFit"]),
+                    })
+                  }
+                  className={fieldClass(dark)}
+                >
+                  <option value="auto">Card rule</option>
+                  <option value="shrink">Shrink to fit</option>
+                  <option value="grow">Grow the box</option>
+                </select>
+              </div>
+              <div>
+                <span
+                  className={cn(
+                    "mb-1 block text-xs font-semibold",
+                    dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
+                  )}
+                >
                   Shadow / Foil
                 </span>
                 <select
@@ -1698,6 +1842,15 @@ export function Inspector({
             </div>
           </div>
         </Section>
+      )}
+
+      {isText && (
+        <BrandStyleSection
+          design={design}
+          layer={layer}
+          dark={dark}
+          onDesign={onDesign}
+        />
       )}
 
       {(isText || layer.kind === "divider" || layer.kind === "seal") && (
@@ -2336,7 +2489,8 @@ export function Inspector({
       )}
 
       {/* Universal Studio Visual FX & Blending Section */}
-      {layer.kind !== "code" && (
+      <MoreToggle on={showMore} onToggle={toggleMore} dark={dark} />
+      {showMore && layer.kind !== "code" && (
         <Section collapsible dark={dark} title="Visual FX & Blending">
           <div className="space-y-3">
             <div>

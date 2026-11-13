@@ -1,0 +1,74 @@
+{
+  "results": [
+    {
+      "id": "RD-L5",
+      "name": "With a 350px-tall window (keyboard open) on a 360px phone, each Simple field stays fully visible and uncovered when focused",
+      "ok": true,
+      "detail": "[{\"label\":\"Names\",\"top\":242,\"bottom\":292,\"vh\":350,\"covered\":false,\"coveredBy\":null,\"visible\":true},{\"label\":\"Message\",\"top\":203,\"bottom\":301,\"vh\":350,\"covered\":false,\"coveredBy\":null,\"visible\":true},{\"label\":\"Date\",\"top\":203,\"bottom\":253,\"vh\":350,\"covered\":false,\"coveredBy\":null,\"visible\":true},{\"label\":\"Place\",\"top\":203,\"bottom\":253,\"vh\":350,\"covered\":false,\"coveredBy\":null,\"visible\":true}]"
+    }
+  ],
+  "rows": [
+    {
+      "label": "Names",
+      "top": 242,
+      "bottom": 292,
+      "vh": 350,
+      "covered": false,
+      "coveredBy": null,
+      "visible": true
+    },
+    {
+      "label": "Message",
+      "top": 203,
+      "bottom": 301,
+      "vh": 350,
+      "covered": false,
+      "coveredBy": null,
+      "visible": true
+    },
+    {
+      "label": "Date",
+      "top": 203,
+      "bottom": 253,
+      "vh": 350,
+      "covered": false,
+      "coveredBy": null,
+      "visible": true
+    },
+    {
+      "label": "Place",
+      "top": 203,
+      "bottom": 253,
+      "vh": 350,
+      "covered": false,
+      "coveredBy": null,
+      "visible": true
+    }
+  ],
+  "tabs": [
+    "Menu",
+    "",
+    "",
+    "",
+    "Add a photo",
+    "▾\nMORE WORDS",
+    "▾\nUSE YOUR OWN CARD",
+    "Royal Gold",
+    "Emerald Regal",
+    "Sunset Aso-Ebi",
+    "Velvet Onyx",
+    "Portrait 5:7",
+    "Standard 4:5",
+    "Square 1:1",
+    "Story 9:16",
+    "▾\nENTRY PASS",
+    "▾\nDESCRIBE IT",
+    "",
+    "",
+    "−",
+    "15%",
+    "+",
+    "Export",
+    "Rendering\n.\n.\n."
+  ]
+}

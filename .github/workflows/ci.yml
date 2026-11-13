@@ -225,3 +225,80 @@ jobs:
         run: pnpm test:e2e
         env:
           PAYSTACK_SECRET_KEY: sk_test_ci_mock_secret
+
+  cross-browser:
+    name: Export check in Firefox and WebKit
+    runs-on: ubuntu-latest
+    # The suite grows with every spec: main took about 34 minutes by November 2026, so 40 left no
+    # room for a slow runner once the seating safety and floor plan sharing specs joined it.
+    # New check: reports but does not block until it has run green on main for a while.
+    continue-on-error: true
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      # Supabase's local ports (57320-57329, see supabase/config.toml) sit inside Linux's range for
+      # temporary outgoing connections (32768-60999). While Docker pulls the images the kernel can hand
+      # one of those ports to a download, and `supabase start` then fails with "address already in use".
+      # Reserving them keeps the kernel from ever picking them for an outgoing connection.
+      - name: Reserve the local Supabase ports
+        run: sudo sysctl -w net.ipv4.ip_local_reserved_ports=57320-57329
+
+      - name: Start Supabase
+        # One retry for anything else that flakes while the containers come up.
+        run: supabase start || { supabase stop --no-backup; supabase start; }
+
+      - name: Start Mailpit
+        run: |
+          docker run -d --name mailpit -p 8025:8025 -p 1025:1025 axllent/mailpit:latest
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps firefox webkit
+
+      - name: Generate test-only secrets and environment
+        run: |
+          STATUS_JSON=$(supabase status -o json 2>/dev/null)
+          ANON_KEY=$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')
+          SERVICE_KEY=$(echo "$STATUS_JSON" | jq -r '.SERVICE_ROLE_KEY')
+          API_URL=$(echo "$STATUS_JSON" | jq -r '.API_URL')
+          PAYSTACK_KEY="sk_test_ci_mock_secret"
+
+          echo "PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}" >> "$GITHUB_ENV"
+
+          # The app lives in apps/web, so both `pnpm dev` and Playwright's
+          # loadEnvFile(".env.local") resolve relative to that directory.
+          cat <<EOF > apps/web/.env.local
+          NEXT_PUBLIC_APP_URL=http://localhost:3000
+          NEXT_PUBLIC_SUPABASE_URL=${API_URL}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}
+          SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}
+          PAYSTACK_SECRET_KEY=${PAYSTACK_KEY}
+          PAYSTACK_API_BASE=http://127.0.0.1:57328
+          NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_ci_mock_public
+          EMAIL_TRANSPORT=mailpit
+          MAILPIT_URL=http://127.0.0.1:8025
+          RESEND_API_KEY=re_sample_mock_resend_key
+          RESEND_FROM_EMAIL=rsvps@ariya-two.vercel.app
+          RATE_LIMIT_SECRET=$(openssl rand -hex 32)
+          CRON_SECRET=$(openssl rand -hex 16)
+          EOF
+
+      - name: Run Playwright tests
+        run: pnpm --filter @ariya/web exec playwright test --project=firefox --project=webkit
+        env:
+          CROSS_BROWSER: "1"
+          PAYSTACK_SECRET_KEY: sk_test_ci_mock_secret

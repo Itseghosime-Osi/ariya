@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import { inspectInvitationWithRetry } from "./fixtures/invitation-image";
 import { writeFileSync } from "node:fs";
 test("pass placement, rounded paper and foreground readability", async ({
@@ -7,6 +11,7 @@ test("pass placement, rounded paper and foreground readability", async ({
 }) => {
   test.setTimeout(180000);
   page.setDefaultTimeout(12000);
+  await showAllInspectorOptions(page);
   if (process.env.STUDIO_TEST_EMAIL) {
     await page.goto("/sign-in");
     await page.locator("#signin-email").fill(process.env.STUDIO_TEST_EMAIL);

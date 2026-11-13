@@ -1,5 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import { PDFDocument, PDFName, PDFRawStream } from "pdf-lib";
 import { inflateSync } from "node:zlib";
 import { writeFileSync } from "node:fs";
@@ -77,6 +81,7 @@ test("PNG, JPEG and PDF agree on rotated, rounded, blended and transparent artwo
 }) => {
   test.setTimeout(420000);
   page.setDefaultTimeout(20000);
+  await showAllInspectorOptions(page);
   await createAndLoginUser(page, undefined, "studio_exports");
   const { eventId } = await createTestEvent(page, {
     title: "Export matrix",

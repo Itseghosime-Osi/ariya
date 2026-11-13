@@ -1,5 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -51,6 +55,7 @@ test("pictures, masks, effects, drops, large files, slow fonts and backups", asy
     results.push({ id, ok, detail });
     expect.soft(ok, `${id}: ${detail}`).toBe(true);
   };
+  await showAllInspectorOptions(page);
   await createAndLoginUser(page, undefined, "studio_remaining");
   const { eventId } = await createTestEvent(page, {
     title: "Remaining studio checks",
@@ -373,6 +378,7 @@ test("pictures, masks, effects, drops, large files, slow fonts and backups", asy
 test("export waits for slow fonts", async ({ page }) => {
   test.setTimeout(240000);
   page.setDefaultTimeout(20000);
+  await showAllInspectorOptions(page);
   await createAndLoginUser(page, undefined, "studio_slow_fonts");
   const { eventId } = await createTestEvent(page, {
     title: "Slow font checks",

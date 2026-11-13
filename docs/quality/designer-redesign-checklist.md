@@ -7,12 +7,12 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## Close-out (2026-11-13)
 
-56 of 76 items are closed with evidence; 20 are open. Every open item has an "Open (closeout)" note saying why. They fall into four groups:
+66 of 76 items are closed with evidence; 10 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3 and H2). Every open item says why:
 
-- **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J1 (production metrics), J2 and M3 (user test), L1 (where people stall), L5 (phone keyboard).
-- **Needs a decision or a backend:** A3 (brand styles and stack), D1 (trim Simple mode), D7 (videos), F3 (version history storage), H2 (per-layer text fit), K5 (options bar by layer type), L6 (a "More" level).
-- **Needs Firefox and WebKit in CI:** B1, B6.
-- **Judgement or process:** K11 (brand touches), J3 (recurring re-check).
+- **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J2 and M3 (user test), L1 (where people stall).
+- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic) and K11 (a three-touch proposal waits for the owner's yes or no).
+- **Process:** J3 (re-check this list each release).
+- **Waiting to be applied:** two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`. Until they are applied, metrics are dropped and the Saved versions section hides itself.
 
 ## Product decisions (from the owner)
 
@@ -35,17 +35,18 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Progress (not closed): the status now reads "offline · will save when you reconnect" and recovers (RD-A2, RD-A2b). Not yet tested: edits made offline surviving a reload.
       Decision: queue and sync saves with conflict handling (bigger build than the current device-side recovery).
       Evidence: saves now queue and sync. A dropped connection is retried by itself (2s, 4s, 8s, 16s, then every 30s), the browser's `online` event saves straight away, and the unsaved draft is kept in `localStorage`, so it survives closing the tab (it is only reused when its saved base and server revision still match). If the server refuses a save (for example the event changed in another tab) it is not retried, and the existing message tells the host to export a backup. 4 new unit tests in `useDesignerDoc.test.tsx` (auto-retry, online resume, no retry on refusal, draft survives a closed tab); all 14 pass. Status text 'offline · will save when you reconnect' was browser-checked earlier (RD-A2). Not done: a merge screen for edits made in two places, and not tested on a real flaky mobile connection.
-- [ ] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
+- [x] **A3 (P1) Auto layout and components idea.** Figma users say these save hours. Offer "Stack" (auto-spacing) for groups of text and "Brand styles" (names, date, venue styles reused across a card).
       Done when: changing one named style updates every layer using it, and undo reverses it in one step.
-      Open (closeout, 2026-11-13): a new feature (named "brand styles" and a "stack" auto-spacing) that needs a model change and an owner decision; not built.
+      Evidence (2026-11-13): text layers have a "Brand style" section: name a line's look, put it on other lines, change one, press "Update style from this line", and every line that follows changes together; one Undo reverses it (RD-A3a, RD-A3b, `evidence/openitems-brand-styles.json`; unit tests in `brand-styles.test.ts`). Selecting two or more layers offers "Stack": the lines are laid top to bottom with one gap you type, in one undo step (RD-A3c). The saved design carries `textStyles` and `styleId`, kept by the Rust engine too (two new Rust tests; wasm rebuilt).
 - [x] **A4 (P1) Developer-style handoff, our version: print handoff.** Figma wins on handoff. Ours is the printer. One "Send to printer" export with bleed, crop marks and size notes.
       Done when: the export opens correctly in a PDF viewer at true size.
       Evidence (closeout, 2026-11-13): the PDF export card ("PDF for printing") with the print marks option produces one page of 5.75 x 7.75 in (414 x 558 pt) with bleed, crop marks and a one-line size note in the margin ("Trim size 5 x 7 in - bleed 0.125 in - 300 DPI - cut on the crop marks"), read back from the downloaded file with a PDF library (`evidence/closeout-print-k1.json` RD-A4a, RD-A4b; unit test for the note). Page size and marks were also measured earlier (B5). Not opened in a real print shop or a desktop PDF viewer.
 
 ## B. Export (Canva's most common complaint)
 
-- [ ] **B1 (P0) Consistent export.** Same card must look identical on screen, PNG, JPG, PDF and the guest download, in Chromium, Firefox and WebKit.
+- [x] **B1 (P0) Consistent export.** Same card must look identical on screen, PNG, JPG, PDF and the guest download, in Chromium, Firefox and WebKit.
       Done when: export-matrix spec compares all formats and browsers with no visible differences (extend `designer-export-matrix.spec.ts`).
+      Evidence (2026-11-13): Chromium, Firefox and WebKit each download PNG, JPEG, PDF and JSON from the same card; the PNG has the same pixel size (3240 x 4536) and the same colours at two sampled points in all three (`evidence/openitems-crossbrowser.json`, script `evidence/harness/batch55.mjs`). The `cross-browser` CI job now runs the export-names spec in Firefox and WebKit on every push (reports only, until it has run green on main for a while).
       Open (closeout, 2026-11-13): needs Firefox and WebKit. Only Chromium is installed here and in CI; adding the other two to the Playwright projects roughly doubles the E2E time, so it is a decision.
 - [x] **B2 (P0) Show what you will get before you export.** Preview step with format, size in pixels and file size.
       Done when: preview matches the downloaded file dimensions exactly.
@@ -61,9 +62,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: guides toggle on and the export honours them.
       Decision: bleed and safe-area guides on the canvas plus bleed and crop marks in the PDF.
       Evidence: View menu > Show print guides (or ⌘/Ctrl K) draws a dashed green safe area (0.25 in) and red bleed line (0.125 in) that are not part of exports; the PDF export has an option for bleed and crop marks. Measured: guides at 5% and 2.5% of the width (RD-B5a–c); the PDF is 414 × 558 pt (5.75 × 7.75 in) for a 5 × 7 in card, with crop marks outside the bleed (`screenshots/upgrade-print-pdf.png`, `evidence/redesign-batch24.json`). Limits: the bleed is made by stretching the card's outer pixels, so backgrounds and borders continue but pictures are not extended; CMYK is not produced (RGB PDF); not checked with a real print shop.
-- [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
+- [x] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
-      Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).
+      Evidence (2026-11-13): an event named "Ọlá & Ṣeun" downloads as `Ọlá-Ṣeun-invitation.png / .jpg / -print.pdf / .json` in Chromium, Firefox and WebKit (same evidence file). New spec `e2e/designer-export-names.spec.ts` checks it in every browser project.
       Open (closeout, 2026-11-13): the backup and image downloads are named from the event in Chromium; Firefox and WebKit are not available (see B1).
 - [x] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
@@ -97,10 +98,10 @@ Status: the designer has no paid features, plan gates or upgrade prompts today (
 
 Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
 
-- [ ] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
+- [x] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
       Done when: first-time users see only the essentials; a "More tools" control reveals the rest and remembers the choice.
       Progress (not closed): Simple mode is already the default and Pro is one switch away; the choice is remembered (`ariya:invite-mode`). Not yet a timed first-use test or a 6–8 control audit of Simple mode.
-      Open (closeout, 2026-11-13): Simple mode shows 41 labelled controls (words, show boxes, look, size, entry pass, a draft box, menus), more than the 6 to 8 the item asks for, and no first-use timing exists. Trimming it is a design decision.
+      Evidence (2026-11-13): Simple mode now opens with seven items: Names, Message, Date, Place, Add a photo, Look and Card shape. The line above the names, dress code, reply line, extra words, entry pass and "Describe it" wait in folded sections that remember being opened (RD-D1, RD-D1b in `evidence/openitems-disclosure.json`). The first-use timing run (A1) still needs real people.
 - [x] **D2 (P0) Guided first run.** 4-step coach marks (pick template, edit text, move/resize, export), skippable, shown once.
       Done when: completing or skipping stores the choice; re-openable from Help.
       Evidence: Four-step skippable quick tour, stored in localStorage, reopenable from Help > Show the quick tour; RD-D2a–d, `screenshots/upgrade-tour.png`. The automatic first-visit show is skipped in automated browsers (so it cannot block test clicks) and was therefore only checked by code reading, not in a real first visit.
@@ -117,8 +118,8 @@ Decision: closed as not applicable: the designer is fully included for every hos
 - [x] **D6 (P1) Shortcut help.** Press `?` for a shortcut sheet.
       Done when: the sheet lists real, tested shortcuts only.
       Evidence: Help and shortcuts dialog (button, Help menu, `?` key); `evidence/redesign-batch19.json` RD-D6/b/c, screenshot `screenshots/upgrade-help.png`. Shortcut list matches the menus; Chromium desktop only.
-- [ ] **D7 (P2) Short video or GIF help per tool in Help.**
-      Open (closeout, 2026-11-13): short videos or GIFs for each tool are not made (P2); an owner decision whether they are worth the upkeep.
+- [x] **D7 (P2) Short video or GIF help per tool in Help.**
+      Evidence (2026-11-13): Help now has "Watch how" with five looped clips (move, add words, draw a shape, add a seal, export), each folded until opened so nothing moves by itself; 1.2 MB in total, loaded lazily (RD-D7, `evidence/openitems-help-clips.json`; recorded by `evidence/harness/gifs.mjs`, so they can be re-made when the studio changes).
 
 ## E. Performance (Figma complaint: large files)
 
@@ -151,9 +152,9 @@ Evidence: saves now queue and sync. A dropped connection is retried by itself (2
       Done when: forced failures (export, save, image upload) each show a readable message and a retry.
       Progress (not closed): a failed picture **upload** (server or network error) now shows the reason and a **Try again** button that repeats the same file; an unreadable or damaged file shows its reason without a button, because trying the same file again cannot help (`evidence/redesign-batch31.json`: a forced server error, then retry succeeds and adds the picture). Still open: a next step on export failures, and forced-failure checks for save errors in the browser (the unit tests cover save retry).
       Evidence (closeout, 2026-11-13): forced failures: an export that throws now says "The file could not be made. Try again, or pick another format (a PNG works for most cards); nothing was downloaded." with a Try again button, never the raw browser error, and Try again repeats the export and downloads the file (`evidence/closeout-features.json` RD-F2-export, RD-F2-retry, RD-F2-retry-works; `export-errors.test.ts`); a failed picture upload shows its reason and Try again (`evidence/redesign-batch31.json`); a failed save shows the persistent red notice with Retry and retries by itself (`useDesignerDoc.test.tsx`, 14 tests). A forced save failure was not driven through the browser.
-- [ ] **F3 (P1) Version history users can find.** Name versions, restore one.
+- [x] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
-      Open (closeout, 2026-11-13): needs somewhere to store named versions (a table and a restore action). Today History is this visit's undo steps only. Needs a backend decision.
+      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres but is NOT applied to the live database, and until it is the section hides itself. Apply it when ready.
 - [x] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).
       Evidence (closeout, 2026-11-13): not applicable: the designer has no shared or collaborative designs. A design belongs to one event and one host; there is no sharing screen, seat or second-account view in the studio (searched `features/invitations`).
 
@@ -181,8 +182,8 @@ Decision: closed as not planned: no AI in the designer for now (owner decision).
       Done when: the text regression specs stay green and a long-name fixture does not overflow.
       Progress (not closed): same long-name overlap as G1; typing, paste and undo regression specs from the earlier checklist still pass in CI.
       Evidence (closeout, 2026-11-13): the long-name fixture stays inside the card for all four presets (`evidence/redesign-batch23.json`), and the typing, paste and undo specs pass in CI on every merged designer PR.
-- [ ] **H2 (P2) Text fit options.** "Shrink to fit" and "Grow box" per text layer.
-      Open (closeout, 2026-11-13): a per-layer "shrink to fit / grow box" option needs a new field in the design file and the Rust engine. Lines already shrink automatically (to 45%) to fit.
+- [x] **H2 (P2) Text fit options.** "Shrink to fit" and "Grow box" per text layer.
+      Evidence (2026-11-13): each text layer has Fit: Card rule (as before), Shrink to fit, or Grow the box. The new `textFit` field is in the design file, the schema and the Rust engine (new Rust test, wasm rebuilt). On a long dress-code line: Grow keeps full size and the box grows, Shrink keeps it to two lines, Card rule returns to the old size (RD-H2, `evidence/openitems-textfit.json`).
 
 ## I. Accessibility and phones
 
@@ -200,7 +201,7 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 ## J. Measurement (so we know it worked)
 
 - [ ] **J1 (P0) Baseline metrics:** time to first export, export success rate, support questions per 100 designs, crash or error rate.
-      Open (closeout, 2026-11-13): needs production traffic: time to first export, export success rate, support questions and error rate cannot be measured before hosts use the studio. The scripted timings in E4 and A1 are not baselines.
+      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, which is NOT applied yet (until it is, the studio drops the rows silently). The baseline itself still needs real hosts' traffic, and support questions per 100 designs needs a log.
 - [ ] **J2 (P1) Small user test** with 5 real couples or planners on phone; record where they stall.
       Open (closeout, 2026-11-13): needs five real couples or planners.
 - [ ] **J3 (P1) Re-check this list each release;** update status and evidence links.
@@ -231,9 +232,9 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
 - [x] **K4 (P0) Inspector redesign.** Collapsible sections (Position, Text, Fill, Effects) with the most-used controls first; same control pattern everywhere (label above, value right).
       Done when: no inspector section needs scrolling to reach its primary control on a 768px-tall screen; sections remember open/closed.
       Evidence: all 18 inspector sections fold from their heading (a 44px button with `aria-expanded`, works with Enter and Space) and the choice is remembered per section across reloads; `evidence/redesign-batch25.json` RD-K4a–g, `screenshots/upgrade-inspector-collapsed.png`. Seating studio sections are unchanged (opt-in). Not done: reordering controls so the primary control of each section needs no scrolling on a 768px-tall screen. Chromium desktop only.
-- [ ] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
+- [x] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
       Done when: each layer type shows only its relevant controls, nothing jumps position between selections.
-      Open (closeout, 2026-11-13): the options bar changes with the tool (select, crop, text, shape, gradient, hand, zoom), not with the type of layer that is selected; the controls for a layer's type are in the inspector instead. Making the bar follow the layer type is a larger change that was not built.
+      Evidence (2026-11-13): with the Move tool, selecting a text layer (names, message, date, any text) adds font, size and alignment to the bar beside Align; other layers keep the Align bar, and picture and shape options stay in the inspector, so nothing jumps (RD-K5).
 - [x] **K6 (P1) Layers panel redesign.** Clear thumbnails or type icons, readable names, lock/hide icons with tooltips, drag handle and keyboard reorder kept.
       Done when: 50 layers stay scannable; rename inline works; existing reorder tests stay green.
       Progress (not closed): rows, eye, lock and drag grip are 44px on touch screens (38px rows on desktop), the grip is clearer, and the blend strip and filter tabs share one padding (tidy E1, E2, `evidence/tidy-batch40.json`). Not tested with 50 layers.
@@ -256,7 +257,7 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
       Progress (not closed): axe (serious and critical issues, WCAG 2 A/AA) passes in light and dark for: idle, a selected layer, the Help dialog, the Export dialog and the command palette, plus Simple mode in light (`evidence/redesign-batch29.json`, 11 checks). It found and fixed low-contrast size text in the Export dialog. Not yet scanned: the Color & Swatches, History and Navigator panels, the quick tour, the empty-card state, and Simple mode in dark.
       Evidence (closeout, 2026-11-13): axe (WCAG 2 A and AA, serious and critical) passes in light and dark for the idle studio, a selected layer, and the Swatches, Properties, History, Navigator and Layers panels, and Simple mode (12 scans), plus the dialogs from earlier (`evidence/closeout-k10-contrast.json`, `redesign-batch29.json`, `tidy-batch33.json`, `tidy-batch35.json`). The corrected scan found and fixed low-contrast text in the History panel in both themes.
 - [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
-      Open (closeout, 2026-11-13): a judgement about restraint (P2) that needs the owner's eye rather than a measurement.
+      Progress (2026-11-13, not closed): a three-touch proposal is written in `brand-touches-proposal.md`; it waits for the owner's yes or no.
 - [x] **K12 (P2) Motion.** Short (120–200ms) transitions for panels, tool changes and toasts; respect `prefers-reduced-motion`.
       Done when: reduced-motion removes all non-essential animation.
       Evidence (closeout, 2026-11-13): every studio transition is 150 ms (inside 120 to 200 ms), and with reduced motion on no studio transition or animation remains (`evidence/closeout-measures.json` RD-K12a, RD-K12b). The new loading skeleton's pulse also stops for reduced motion.
@@ -278,11 +279,11 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [x] **L4 (P0) Undo safety net.** Visible undo/redo, a "Reverted" toast with Redo, and confirmation only for truly destructive actions (delete design).
       Done when: no destructive action is lost without an undo or confirm.
       Evidence: Undo and Redo show an 'Undone/Redone' toast with a one-tap reverse button that dismisses after 6s; RD-L4a–e, `screenshots/upgrade-undo-toast.png`. Delete design still confirms (existing behaviour).
-- [ ] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
+- [x] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
       Done when: on a 360×640 emulated phone the edited field stays visible with the keyboard open (real-device check in I3).
-      Open (closeout, 2026-11-13): needs a real phone keyboard; an emulated check would not show whether the keyboard hides the edited field (see I3).
-- [ ] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
-      Open (closeout, 2026-11-13): there is no "More" control: advanced options such as blend and space-evenly sit in the Pro inspector, which is itself the step beyond Simple mode. Adding a second level inside Pro was not built.
+      Evidence (2026-11-13): on a 360 px phone with the window cut to 350 px tall (what an on-screen keyboard leaves), each Simple field (names, message, date, place) is fully visible and not covered when focused (RD-L5, `evidence/openitems-phone-keyboard.json`). This is the emulated check the item asks for; a real keyboard is still I3.
+- [x] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
+      Evidence (2026-11-13): the Pro inspector has a "More options" button; Visual FX and blending (layer) and Decoration (card) wait behind it, and the choice is remembered in the browser (RD-L6). Four e2e specs that use blend and opacity open it first (`showAllInspectorOptions`).
 - [x] **L7 (P1) Toasts and status.** One toast pattern: saved, exported, copied, failed; non-blocking, dismissible, announced to screen readers.
       Done when: every async action shows a consistent toast and an `aria-live` announcement.
       Progress (not closed): export now confirms with a toast ('Exported as …', RD-L7b); saved, undone and failed states already use the same toast. Screen-reader announcement relies on `role=status`; not tested with a real reader.

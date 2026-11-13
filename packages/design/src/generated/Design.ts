@@ -3,8 +3,14 @@ import type { Background } from "./Background";
 import type { Canvas } from "./Canvas";
 import type { Layer } from "./Layer";
 import type { Palette } from "./Palette";
+import type { TextStyle } from "./TextStyle";
 
-export type Design = { version: number, canvas: Canvas | null, 
+export type Design = { version: number, 
+/**
+ * Named text styles ("brand styles"). A layer that points at one by `style_id` is kept in
+ * step with it when the style is updated.
+ */
+textStyles: Array<TextStyle> | null, canvas: Canvas | null, 
 /**
  * False hides the house ribbon, border and sheen.
  */

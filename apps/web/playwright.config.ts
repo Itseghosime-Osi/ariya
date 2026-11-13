@@ -22,6 +22,22 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    // Firefox and WebKit run only the cross-browser export check, and only when asked for
+    // (CROSS_BROWSER=1), so the main suite stays on Chromium.
+    ...(process.env.CROSS_BROWSER
+      ? [
+          {
+            name: "firefox",
+            testMatch: /designer-export-names\.spec\.ts/,
+            use: { ...devices["Desktop Firefox"] },
+          },
+          {
+            name: "webkit",
+            testMatch: /designer-export-names\.spec\.ts/,
+            use: { ...devices["Desktop Safari"] },
+          },
+        ]
+      : []),
   ],
   webServer: {
     command: "pnpm dev",

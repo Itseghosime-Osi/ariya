@@ -1,0 +1,8 @@
+[
+  {
+    "id": "RD-D7",
+    "name": "Help lists five short clips, folded until opened, and an opened clip loads",
+    "ok": true,
+    "detail": "clips=5 openAtStart=0 loaded=true"
+  }
+]

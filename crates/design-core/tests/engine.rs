@@ -504,3 +504,26 @@ fn the_pass_boundary_edit_preserves_artwork_and_rotated_corners() {
         }
     }
 }
+
+#[test]
+fn a_text_fit_choice_survives_validation_and_stays_absent_when_not_chosen() {
+    let mut value: Value = serde_json::from_str(HOUSE).unwrap();
+    value["layers"][0]["textFit"] = json!("shrink");
+    let out = ok(&dispatch(OP_VALIDATE, value.to_string().as_bytes()));
+    assert_eq!(out["design"]["layers"][0]["textFit"], "shrink");
+    // The other layers never chose one, so none is written for them.
+    assert!(out["design"]["layers"][1].get("textFit").is_none());
+}
+
+#[test]
+fn brand_styles_and_the_layers_that_follow_them_survive_validation() {
+    let mut value: Value = serde_json::from_str(HOUSE).unwrap();
+    value["textStyles"] = json!([{
+        "id": "s1", "name": "Detail", "font": "sans", "size": 3.2, "weight": 500,
+        "italic": false, "tracking": 0.1, "colorRole": "body"
+    }]);
+    value["layers"][2]["styleId"] = json!("s1");
+    let out = ok(&dispatch(OP_VALIDATE, value.to_string().as_bytes()));
+    assert_eq!(out["design"]["textStyles"][0]["name"], "Detail");
+    assert_eq!(out["design"]["layers"][2]["styleId"], "s1");
+}

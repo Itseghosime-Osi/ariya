@@ -1,0 +1,123 @@
+{
+  "results": [
+    {
+      "id": "RD-B1-formats-chromium",
+      "name": "chromium: all four exports download",
+      "ok": true,
+      "detail": "{\"png\":\"Ọlá-Ṣeun-invitation.png\",\"jpeg\":\"Ọlá-Ṣeun-invitation.jpg\",\"pdf\":\"Ọlá-Ṣeun-invitation-print.pdf\",\"json\":\"Ọlá-Ṣeun-invitation.json\"}"
+    },
+    {
+      "id": "RD-B1-formats-firefox",
+      "name": "firefox: all four exports download",
+      "ok": true,
+      "detail": "{\"png\":\"Ọlá-Ṣeun-invitation.png\",\"jpeg\":\"Ọlá-Ṣeun-invitation.jpg\",\"pdf\":\"Ọlá-Ṣeun-invitation-print.pdf\",\"json\":\"Ọlá-Ṣeun-invitation.json\"}"
+    },
+    {
+      "id": "RD-B1-formats-webkit",
+      "name": "webkit: all four exports download",
+      "ok": true,
+      "detail": "{\"png\":\"Ọlá-Ṣeun-invitation.png\",\"jpeg\":\"Ọlá-Ṣeun-invitation.jpg\",\"pdf\":\"Ọlá-Ṣeun-invitation-print.pdf\",\"json\":\"Ọlá-Ṣeun-invitation.json\"}"
+    },
+    {
+      "id": "RD-B1-size-firefox",
+      "name": "firefox PNG has the same pixel size as Chromium",
+      "ok": true,
+      "detail": "3240,4536 vs 3240,4536"
+    },
+    {
+      "id": "RD-B1-pixels-firefox",
+      "name": "firefox PNG matches Chromium at two sampled points (within 12 of 441)",
+      "ok": true,
+      "detail": "{\"centre\":[[74,58,48],[74,58,48]],\"paper\":[[255,250,241],[255,250,241]]}"
+    },
+    {
+      "id": "RD-B1-size-webkit",
+      "name": "webkit PNG has the same pixel size as Chromium",
+      "ok": true,
+      "detail": "3240,4536 vs 3240,4536"
+    },
+    {
+      "id": "RD-B1-pixels-webkit",
+      "name": "webkit PNG matches Chromium at two sampled points (within 12 of 441)",
+      "ok": true,
+      "detail": "{\"centre\":[[74,58,48],[74,58,48]],\"paper\":[[255,250,241],[255,250,241]]}"
+    },
+    {
+      "id": "RD-B6-names-firefox",
+      "name": "firefox: files are named from the event, like Chromium",
+      "ok": true,
+      "detail": "{\"png\":\"Ọlá-Ṣeun-invitation.png\",\"jpeg\":\"Ọlá-Ṣeun-invitation.jpg\",\"pdf\":\"Ọlá-Ṣeun-invitation-print.pdf\",\"json\":\"Ọlá-Ṣeun-invitation.json\"}"
+    },
+    {
+      "id": "RD-B6-names-webkit",
+      "name": "webkit: files are named from the event, like Chromium",
+      "ok": true,
+      "detail": "{\"png\":\"Ọlá-Ṣeun-invitation.png\",\"jpeg\":\"Ọlá-Ṣeun-invitation.jpg\",\"pdf\":\"Ọlá-Ṣeun-invitation-print.pdf\",\"json\":\"Ọlá-Ṣeun-invitation.json\"}"
+    }
+  ],
+  "out": {
+    "chromium": {
+      "png": {
+        "file": "Ọlá-Ṣeun-invitation.png",
+        "bytes": 6209726,
+        "size": [3240, 4536],
+        "centre": [74, 58, 48],
+        "paper": [255, 250, 241]
+      },
+      "jpeg": {
+        "file": "Ọlá-Ṣeun-invitation.jpg",
+        "bytes": 448493
+      },
+      "pdf": {
+        "file": "Ọlá-Ṣeun-invitation-print.pdf",
+        "bytes": 564200
+      },
+      "json": {
+        "file": "Ọlá-Ṣeun-invitation.json",
+        "bytes": 4057
+      }
+    },
+    "firefox": {
+      "png": {
+        "file": "Ọlá-Ṣeun-invitation.png",
+        "bytes": 1184781,
+        "size": [3240, 4536],
+        "centre": [74, 58, 48],
+        "paper": [255, 250, 241]
+      },
+      "jpeg": {
+        "file": "Ọlá-Ṣeun-invitation.jpg",
+        "bytes": 718009
+      },
+      "pdf": {
+        "file": "Ọlá-Ṣeun-invitation-print.pdf",
+        "bytes": 271860
+      },
+      "json": {
+        "file": "Ọlá-Ṣeun-invitation.json",
+        "bytes": 4053
+      }
+    },
+    "webkit": {
+      "png": {
+        "file": "Ọlá-Ṣeun-invitation.png",
+        "bytes": 941076,
+        "size": [3240, 4536],
+        "centre": [74, 58, 48],
+        "paper": [255, 250, 241]
+      },
+      "jpeg": {
+        "file": "Ọlá-Ṣeun-invitation.jpg",
+        "bytes": 454525
+      },
+      "pdf": {
+        "file": "Ọlá-Ṣeun-invitation-print.pdf",
+        "bytes": 299329
+      },
+      "json": {
+        "file": "Ọlá-Ṣeun-invitation.json",
+        "bytes": 4057
+      }
+    }
+  }
+}

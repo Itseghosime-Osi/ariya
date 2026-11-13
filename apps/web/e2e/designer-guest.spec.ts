@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { inspectInvitationImage } from "./fixtures/invitation-image";
@@ -12,6 +16,7 @@ test("saved invitation reaches an accepted guest and downloads at document resol
 }) => {
   test.setTimeout(240000);
   page.setDefaultTimeout(12000);
+  await showAllInspectorOptions(page);
   if (process.env.STUDIO_TEST_EMAIL) {
     await page.goto("/sign-in");
     await page.locator("#signin-email").fill(process.env.STUDIO_TEST_EMAIL);

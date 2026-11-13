@@ -167,6 +167,13 @@ export interface InvitationLayer {
   lineHeight?: number;
   /** Text transformation case. */
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+  /**
+   * How the words meet their box. "shrink" makes them smaller to keep to a few lines; "grow" lets
+   * the box grow with them. Absent follows the card's own rule for that kind of line.
+   */
+  textFit?: "shrink" | "grow";
+  /** The brand style this layer follows (see InvitationDesign.textStyles). */
+  styleId?: string;
   /** Optional luxury shadow or foil glow effect. */
   shadow?: "none" | "soft" | "foil" | "glow";
   /** CSS mix-blend-mode (e.g. "normal", "multiply", "screen", "overlay") */
@@ -241,8 +248,25 @@ export interface InvitationCanvas {
   cornerRadiusPx?: number;
 }
 
+/** A named set of text settings ("brand style") that several layers can share. */
+export interface InvitationTextStyle {
+  id: string;
+  name: string;
+  font: InvitationFont;
+  size: number;
+  weight: 400 | 500 | 600 | 700;
+  italic: boolean;
+  tracking: number;
+  colorRole: InvitationColorRole;
+  color?: string | null;
+  lineHeight?: number;
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+}
+
 export interface InvitationDesign {
   version: 1;
+  /** Brand styles: change one and every layer that follows it changes with it. */
+  textStyles?: InvitationTextStyle[];
   /** The card's shape. Absent means the house 5:7 portrait card. */
   canvas?: InvitationCanvas;
   /** False hides the house ribbon, inner border and foil sheen, for a card drawn from scratch. */

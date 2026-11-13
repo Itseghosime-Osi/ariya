@@ -37,6 +37,7 @@ import {
 } from "../../engine";
 import {
   designDimensionsPx,
+  stackLayers,
   type Alignment,
   type StackMove,
 } from "../../layer-ops";
@@ -55,6 +56,7 @@ import { StudioMenuBar, type MenuGroup } from "./StudioMenuBar";
 import { StudioBottomDock } from "./StudioBottomDock";
 import { useDesignerDoc } from "./useDesignerDoc";
 import { ExportModal } from "./ExportModal";
+import { recordStudioMetricAction } from "../../metrics-actions";
 import { HelpDialog } from "./HelpDialog";
 import { GuestPreviewDialog } from "./GuestPreviewDialog";
 import { missingFontMessage } from "../../font-check";
@@ -259,6 +261,11 @@ export function InvitationDesigner({
   const isResizingSidebar = useRef(false);
   const sidebarCleanup = useRef<(() => void) | null>(null);
   useEffect(() => () => sidebarCleanup.current?.(), []);
+
+  // J1: one anonymous "opened" per visit, so exports can be counted against openings.
+  useEffect(() => {
+    void recordStudioMetricAction({ eventId, kind: "opened" });
+  }, [eventId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -2232,6 +2239,15 @@ export function InvitationDesigner({
                         )
                       )
                     }
+                    onStackLayers={(ids, gap) => {
+                      commit((d) =>
+                        withRenderedHeights(d, (m) => stackLayers(m, ids, gap))
+                      );
+                      setNotice({
+                        tone: "ok",
+                        text: `Stacked ${ids.length} layers. Undo puts them back.`,
+                      });
+                    }}
                     onGroup={(ids) => {
                       const gid =
                         "group_" + Math.random().toString(36).slice(2, 9);
@@ -2425,6 +2441,7 @@ export function InvitationDesigner({
                 ) : bottomTab === "history" ? (
                   <HistoryPanel
                     dark={dark}
+                    eventId={eventId}
                     past={past}
                     present={design}
                     future={future}

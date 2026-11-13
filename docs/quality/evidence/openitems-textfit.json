@@ -1,0 +1,8 @@
+[
+  {
+    "id": "RD-H2",
+    "name": "Grow keeps full size (box grows); Shrink makes long words smaller to fit; Card rule returns to the kind's own rule",
+    "ok": true,
+    "detail": "{\"base\":11.1974,\"grown\":15.552,\"shrunk\":11.1974,\"linesAfterShrink\":2,\"back\":11.1974}"
+  }
+]
