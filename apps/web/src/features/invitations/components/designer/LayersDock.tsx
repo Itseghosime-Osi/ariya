@@ -286,7 +286,7 @@ function SortableRow({
           }
         }}
         className={cn(
-          "group flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-[10px] px-2 py-1 transition-all select-none border",
+          "group flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-(--studio-radius-control) px-2 py-1 transition-all select-none border",
           on
             ? dark
               ? "bg-[var(--studio-active-dark)] text-white border-[#5e384c] shadow-xs"
@@ -704,7 +704,7 @@ export function LayersDock({
             type="button"
             onClick={() => setFilter(tab.id)}
             className={cn(
-              "flex-1 rounded-[10px] px-1.5 py-1 pointer-coarse:min-h-11 transition-colors text-center truncate",
+              "flex-1 rounded-(--studio-radius-control) px-1.5 py-1 pointer-coarse:min-h-11 transition-colors text-center truncate",
               filter === tab.id
                 ? dark
                   ? "bg-[var(--studio-active-dark)] font-bold text-white shadow-2xs"

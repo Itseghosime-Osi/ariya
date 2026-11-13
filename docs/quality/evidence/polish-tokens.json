@@ -1,0 +1,34 @@
+{
+  "what": "Computed z-index and box-shadow of every studio element (card excluded), before and after the studio tokens; zero means identical",
+  "results": {
+    "pro-1440": {
+      "z_index_changes": 0,
+      "box_shadow_changes": 0
+    },
+    "pro-1100": {
+      "z_index_changes": 0,
+      "box_shadow_changes": 0
+    },
+    "pro-390": {
+      "z_index_changes": 0,
+      "box_shadow_changes": 0
+    },
+    "simple-1440": {
+      "z_index_changes": 0,
+      "box_shadow_changes": 0
+    },
+    "simple-390": {
+      "z_index_changes": 0,
+      "box_shadow_changes": 0
+    }
+  },
+  "spacing_changes_on_purpose": [
+    "desktop header side padding 20px -> 16px",
+    "phone header side padding 10px -> 8px",
+    "phone tab row side padding 6px -> 8px"
+  ],
+  "left_alone": [
+    "pt-[12vh] (viewport-relative dialog offset)",
+    "mt-[3px] (one optical nudge)"
+  ]
+}

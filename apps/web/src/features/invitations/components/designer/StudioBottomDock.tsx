@@ -41,10 +41,10 @@ export function StudioBottomDock({
       role="region"
       aria-label="Studio controls and export"
       className={cn(
-        "pointer-events-auto fixed inset-x-0 bottom-0 z-30 flex h-14 items-center justify-center gap-2 px-2 py-2 sm:px-4 pointer-coarse:py-1 transition-colors select-none border-t",
+        "pointer-events-auto fixed inset-x-0 bottom-0 z-(--studio-z-panel) flex h-14 items-center justify-center gap-2 px-2 py-2 sm:px-4 pointer-coarse:py-1 transition-colors select-none border-t",
         dark
-          ? "border-[#3f2935] bg-[var(--studio-surface-dark)]/92 text-[var(--studio-cream)] shadow-[0_12px_40px_rgba(0,0,0,0.65)]"
-          : "border-[#e6ded2] bg-[#ffffff]/95 text-[var(--studio-ink)] shadow-[0_10px_35px_rgba(74,14,23,0.12)]"
+          ? "border-[#3f2935] bg-[var(--studio-surface-dark)]/92 text-[var(--studio-cream)] shadow-(--studio-shadow-float-dark)"
+          : "border-[#e6ded2] bg-[#ffffff]/95 text-[var(--studio-ink)] shadow-(--studio-shadow-float-light)"
       )}
     >
       {/* Undo / Redo */}

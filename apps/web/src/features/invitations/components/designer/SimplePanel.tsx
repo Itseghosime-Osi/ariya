@@ -20,7 +20,7 @@ import {
 } from "../../types";
 
 const FIELD =
-  "desk-field min-h-12 w-full rounded-[10px] px-4 py-3 text-base text-night focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-burgundy";
+  "desk-field min-h-12 w-full rounded-(--studio-radius-control) px-4 py-3 text-base text-night focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-burgundy";
 
 /** What a person calls each line, in their words, not the designer's. */
 const WORDS: {
@@ -241,7 +241,7 @@ export function SimplePanel({
                 type="button"
                 aria-pressed={design.theme === t}
                 onClick={() => onDesign((d) => applyInvitationTheme(d, t))}
-                className="rounded-[10px] border border-hairline bg-white/60 p-3 text-left hover:bg-white aria-pressed:border-burgundy aria-pressed:bg-burgundy/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
+                className="rounded-(--studio-radius-control) border border-hairline bg-white/60 p-3 text-left hover:bg-white aria-pressed:border-burgundy aria-pressed:bg-burgundy/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-burgundy"
               >
                 <span className="mb-2 flex gap-1">
                   {[p.paper, p.title, p.accent, p.foil].map((c) => (
