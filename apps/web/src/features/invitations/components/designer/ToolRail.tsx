@@ -120,7 +120,7 @@ const Divider = ({ dark }: { dark?: boolean }) => (
   <span
     aria-hidden="true"
     className={cn(
-      "my-1.5 h-px w-6 shrink-0 max-lg:h-6 max-lg:w-px max-lg:my-0 max-lg:mx-1",
+      "my-0.5 h-px w-6 shrink-0 max-lg:h-6 max-lg:w-px max-lg:my-0 max-lg:mx-1",
       dark ? "bg-white/15" : "bg-black/10"
     )}
   />
@@ -315,6 +315,7 @@ export function ToolRail({
         aria-orientation={vertical ? "vertical" : "horizontal"}
         className="flex items-center gap-1 overflow-x-auto max-lg:max-w-full lg:flex-col lg:overflow-visible"
       >
+        {/* Group 1: Select */}
         {/* Move & Select Tool (V) */}
         <ToolButton
           label="Move & Select"
@@ -342,6 +343,9 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 2: Text */}
         {/* Text Tool (T) */}
         <ToolButton
           label="Type text"
@@ -360,6 +364,9 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 3: Shapes and colour */}
         {/* Cathedral Arch Quick Tool (A) */}
         <ToolButton
           label="Cathedral Arch"
@@ -489,6 +496,7 @@ export function ToolRail({
 
         <Divider dark={dark} />
 
+        {/* Group 4: Pictures */}
         {/* Picture / Image Upload Tool (Shift+I) */}
         <ToolButton
           label="Place image / photo"
@@ -519,6 +527,9 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 5: Seal and entry pass */}
         {/* Luxury Wax Seal */}
         <ToolButton
           label="Add monogram seal"
@@ -540,6 +551,7 @@ export function ToolRail({
 
         <Divider dark={dark} />
 
+        {/* Group 6: View */}
         {/* Hand Tool (H) */}
         <ToolButton
           label="Hand / Pan"

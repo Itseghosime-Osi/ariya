@@ -1673,15 +1673,6 @@ export function InvitationDesigner({
         <div className={styles.headerActions}>
           <button
             type="button"
-            aria-label="Help and shortcuts"
-            title="Help and shortcuts (?)"
-            onClick={() => setHelpOpen(true)}
-            className={cn(HEADER_BUTTON, "hidden text-sm font-bold sm:grid")}
-          >
-            ?
-          </button>
-          <button
-            type="button"
             aria-label={
               dark
                 ? "Switch to the light interface"
