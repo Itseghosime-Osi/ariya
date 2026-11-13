@@ -7,10 +7,10 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## Close-out (2026-11-13)
 
-66 of 76 items are closed with evidence; 10 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3 and H2). Every open item says why:
+67 of 76 items are closed with evidence; 9 are open (the first close-out left 20; the follow-up on 2026-11-13 closed B1, B6, D1, D7, K5, L5, L6, A3, F3, H2 and K11). Every open item says why:
 
 - **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J2 and M3 (user test), L1 (where people stall).
-- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic) and K11 (a three-touch proposal waits for the owner's yes or no).
+- **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic).
 - **Process:** J3 (re-check this list each release).
 - **Waiting to be applied:** two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`. Until they are applied, metrics are dropped and the Saved versions section hides itself.
 
@@ -256,8 +256,8 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
       Done when: axe contrast passes in both themes on all studio states.
       Progress (not closed): axe (serious and critical issues, WCAG 2 A/AA) passes in light and dark for: idle, a selected layer, the Help dialog, the Export dialog and the command palette, plus Simple mode in light (`evidence/redesign-batch29.json`, 11 checks). It found and fixed low-contrast size text in the Export dialog. Not yet scanned: the Color & Swatches, History and Navigator panels, the quick tour, the empty-card state, and Simple mode in dark.
       Evidence (closeout, 2026-11-13): axe (WCAG 2 A and AA, serious and critical) passes in light and dark for the idle studio, a selected layer, and the Swatches, Properties, History, Navigator and Layers panels, and Simple mode (12 scans), plus the dialogs from earlier (`evidence/closeout-k10-contrast.json`, `redesign-batch29.json`, `tidy-batch33.json`, `tidy-batch35.json`). The corrected scan found and fixed low-contrast text in the History panel in both themes.
-- [ ] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
-      Progress (2026-11-13, not closed): a three-touch proposal is written in `brand-touches-proposal.md`; it waits for the owner's yes or no.
+- [x] **K11 (P2) Iconography and brand touches.** Àríyá colours and motifs used sparingly (accent, empty states, loading), not on every control.
+      Evidence (2026-11-13): the three touches in `brand-touches-proposal.md` are built and nothing else was added: a faint seal outline above "Your card is empty" (gone once the card has a layer), the same outline in the loading skeleton (its pulse stops for reduced motion), and one small check beside the "Exported" notice (RD-K11a, RD-K11a2, RD-K11c in `evidence/k11-brand-touches.json`; screenshots `screenshots/k11-empty-card.png`, `k11-export-notice.png`). Tool rail, inspector, layers, dialogs and buttons stay plain.
 - [x] **K12 (P2) Motion.** Short (120–200ms) transitions for panels, tool changes and toasts; respect `prefers-reduced-motion`.
       Done when: reduced-motion removes all non-essential animation.
       Evidence (closeout, 2026-11-13): every studio transition is 150 ms (inside 120 to 200 ms), and with reduced motion on no studio transition or animation remains (`evidence/closeout-measures.json` RD-K12a, RD-K12b). The new loading skeleton's pulse also stops for reduced motion.
