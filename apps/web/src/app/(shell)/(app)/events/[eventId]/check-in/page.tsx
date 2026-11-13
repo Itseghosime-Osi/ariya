@@ -1,3 +1,4 @@
+import { PageTips } from "@/features/onboarding/PageTips";
 import React from "react";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
@@ -29,6 +30,14 @@ export default async function CheckInPageRoute({ params }: CheckInPageProps) {
 
   return (
     <>
+      <PageTips
+        tipKey="check-in"
+        items={[
+          "Scan the QR code on a guest's invitation with your phone's camera to let them in.",
+          "No phone with them? Search their name, or type the code printed on the card.",
+          "Bringing extra people? Use + and − to admit one more or one fewer.",
+        ]}
+      />
       <CheckInDesk eventId={eventId} initialData={checkInData} />
     </>
   );

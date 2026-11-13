@@ -1,3 +1,4 @@
+import { PageTips } from "@/features/onboarding/PageTips";
 import { EndedLock } from "@/components/layout/ended-lock";
 import { getRunSheetData } from "@/features/day-of/queries";
 import { isEventExpired } from "@/lib/event-expiry";
@@ -21,6 +22,14 @@ export default async function RunSheetPage({ params }: RunSheetPageProps) {
 
   return (
     <EndedLock ended={isEventExpired(data.eventDate)}>
+      <PageTips
+        tipKey="run-sheet"
+        items={[
+          "This is the day from start to finish: a time, what happens, and whether it is done.",
+          "It fills in from your checklist. To change a time, change it there.",
+          "Call or email a vendor straight from their row. It still opens without signal.",
+        ]}
+      />
       <RunSheetClient data={data} />
     </EndedLock>
   );

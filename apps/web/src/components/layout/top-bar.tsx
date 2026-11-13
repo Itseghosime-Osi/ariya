@@ -47,6 +47,7 @@ export function TopBar({
 
           <button
             type="button"
+            data-tour="search"
             onClick={() => setSearchOpen(true)}
             className="hidden md:flex w-full min-h-[44px] items-center justify-between bg-white/70 hover:bg-white px-4 py-2 rounded-full border border-gold-ink/25 hover:border-gold-ink/60 transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
