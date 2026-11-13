@@ -1,0 +1,14 @@
+[
+  {
+    "id": "RD-A1-desktop",
+    "name": "Scripted run on desktop: change names, date and place, export (no help opened)",
+    "ok": true,
+    "detail": "{\"seconds\":1.7,\"steps\":5,\"file\":\"Adaeze-Tunde-invitation-print.pdf\",\"cardShowsNames\":true}"
+  },
+  {
+    "id": "RD-A1-phone",
+    "name": "Scripted run on phone: change names, date and place, export (no help opened)",
+    "ok": true,
+    "detail": "{\"seconds\":1.8,\"steps\":5,\"file\":\"Adaeze-Tunde-invitation-print.pdf\",\"cardShowsNames\":true}"
+  }
+]

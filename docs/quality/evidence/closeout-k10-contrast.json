@@ -1,0 +1,74 @@
+[
+  {
+    "id": "RD-K10-swatches-pro-os-light-studio-light",
+    "name": "axe: swatches (pro-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-properties-pro-os-light-studio-light",
+    "name": "axe: properties (pro-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-history-pro-os-light-studio-light",
+    "name": "axe: history (pro-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-navigator-pro-os-light-studio-light",
+    "name": "axe: navigator (pro-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-layers-pro-os-light-studio-light",
+    "name": "axe: layers (pro-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-swatches-pro-os-light-studio-dark",
+    "name": "axe: swatches (pro-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-properties-pro-os-light-studio-dark",
+    "name": "axe: properties (pro-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-history-pro-os-light-studio-dark",
+    "name": "axe: history (pro-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-navigator-pro-os-light-studio-dark",
+    "name": "axe: navigator (pro-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-layers-pro-os-light-studio-dark",
+    "name": "axe: layers (pro-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-simple-idle-simple-os-light-studio-light",
+    "name": "axe: simple-idle (simple-os-light-studio-light)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-K10-simple-idle-simple-os-light-studio-dark",
+    "name": "axe: simple-idle (simple-os-light-studio-dark)",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -1,0 +1,167 @@
+{
+  "results": [
+    {
+      "id": "RD-K12a",
+      "name": "Every studio transition is 200 ms or shorter",
+      "ok": true,
+      "detail": "{\"150\":176}"
+    },
+    {
+      "id": "RD-K12b",
+      "name": "With reduced motion on, studio transitions are removed",
+      "ok": true,
+      "detail": "{\"trans\":{\"0\":1},\"anims\":{}}"
+    },
+    {
+      "id": "RD-L14-pro-1440",
+      "name": "UI text 30% longer (pro, 1440px): nothing newly clipped and no sideways page scroll",
+      "ok": true,
+      "detail": "{\"newly\":[],\"pageOverflow\":false}"
+    },
+    {
+      "id": "RD-L14-pro-390",
+      "name": "UI text 30% longer (pro, 390px): nothing newly clipped and no sideways page scroll",
+      "ok": true,
+      "detail": "{\"newly\":[],\"pageOverflow\":false}"
+    },
+    {
+      "id": "RD-L14-simple-1440",
+      "name": "UI text 30% longer (simple, 1440px): nothing newly clipped and no sideways page scroll",
+      "ok": true,
+      "detail": "{\"newly\":[],\"pageOverflow\":false}"
+    },
+    {
+      "id": "RD-L14-simple-390",
+      "name": "UI text 30% longer (simple, 390px): nothing newly clipped and no sideways page scroll",
+      "ok": true,
+      "detail": "{\"newly\":[],\"pageOverflow\":false}"
+    },
+    {
+      "id": "RD-D3-simple",
+      "name": "No unexplained jargon in Simple mode",
+      "ok": true,
+      "detail": "{\"count\":41,\"jargon\":[]}"
+    },
+    {
+      "id": "RD-D5",
+      "name": "One click on Back leaves the studio for the event's page",
+      "ok": true,
+      "detail": "href=/documentation"
+    },
+    {
+      "id": "RD-L7-live",
+      "name": "The undo notice is announced (role=status) and so is the save status",
+      "ok": true,
+      "detail": "[\"status:saving…\",\"status:UndoneRedo\"]"
+    },
+    {
+      "id": "RD-B3",
+      "name": "With fonts blocked the file still downloads and the host is told which font was missing",
+      "ok": true,
+      "detail": "download=Adaeze-Tunde-invitation.png notice=\"Exported, but the fonts Bodoni Moda, Plus Jakarta Sans could not be loaded, so the file uses a plain fallback font. Chec\""
+    },
+    {
+      "id": "RD-E1",
+      "name": "Dragging with the studio's maximum layers stays under the 100 ms budget at the 95th percentile, also with a 4x slower CPU",
+      "ok": true,
+      "detail": "{\"normal\":{\"layers\":60,\"frames\":82,\"p50\":16.7,\"p95\":16.7,\"max\":17,\"longTasks\":0,\"longMax\":0,\"longOver100\":0},\"slow4x\":{\"layers\":60,\"frames\":85,\"p50\":16.7,\"p95\":16.8,\"max\":17,\"longTasks\":0,\"longMax\":0,\"longOver100\":0}}"
+    },
+    {
+      "id": "RD-E2",
+      "name": "Long tasks while dragging are listed (none over 100 ms at normal speed)",
+      "ok": true,
+      "detail": "{\"normal\":{\"longTasks\":0,\"longMax\":0},\"slow4x\":{\"longTasks\":0,\"longMax\":0,\"over100\":0}}"
+    },
+    {
+      "id": "RD-E4",
+      "name": "Time to a visible card and to the first typed letter is recorded for desktop and a throttled phone",
+      "ok": true,
+      "detail": "{\"desktop\":{\"cardVisibleMs\":113,\"firstTypedMs\":414},\"phone\":{\"cardVisibleMs\":1731,\"firstTypedMs\":1884}}"
+    }
+  ],
+  "data": {
+    "motion-normal": {
+      "trans": {
+        "150": 176
+      },
+      "anims": {}
+    },
+    "motion-reduced": {
+      "trans": {
+        "0": 1
+      },
+      "anims": {}
+    },
+    "simple-labels": [
+      "File",
+      "Edit",
+      "Insert",
+      "Arrange",
+      "View",
+      "Help",
+      "Switch to the dark interface",
+      "Simple",
+      "Pro",
+      "Retry",
+      "Words",
+      "Names",
+      "Show",
+      "Line above the names",
+      "Your message",
+      "Date",
+      "Place",
+      "Dress code",
+      "Reply line",
+      "Add more words",
+      "Add a photo",
+      "▾Use your own card",
+      "Look",
+      "Royal Gold",
+      "Emerald Regal",
+      "Sunset Aso-Ebi",
+      "Velvet Onyx",
+      "Portrait 5:7",
+      "Standard 4:5",
+      "Square 1:1",
+      "Story 9:16",
+      "Entry pass",
+      "Describe it",
+      "Describe the invitation you want",
+      "Draft it",
+      "Undo",
+      "Redo",
+      "Zoom out",
+      "48% — reset zoom to fit",
+      "Zoom in",
+      "Export"
+    ],
+    "perf-1x": {
+      "layers": 60,
+      "frames": 82,
+      "p50": 16.7,
+      "p95": 16.7,
+      "max": 17,
+      "longTasks": 0,
+      "longMax": 0,
+      "longOver100": 0
+    },
+    "perf-4x": {
+      "layers": 60,
+      "frames": 85,
+      "p50": 16.7,
+      "p95": 16.8,
+      "max": 17,
+      "longTasks": 0,
+      "longMax": 0,
+      "longOver100": 0
+    },
+    "open-desktop": {
+      "cardVisibleMs": 113,
+      "firstTypedMs": 414
+    },
+    "open-phone-throttled": {
+      "cardVisibleMs": 1731,
+      "firstTypedMs": 1884
+    }
+  }
+}
