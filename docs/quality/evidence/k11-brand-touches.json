@@ -1,0 +1,20 @@
+[
+  {
+    "id": "RD-K11c",
+    "name": "A finished export shows one small check beside the notice",
+    "ok": true,
+    "detail": "svgs=2"
+  },
+  {
+    "id": "RD-K11a",
+    "name": "An empty card shows a faint seal outline above the prompt",
+    "ok": true,
+    "detail": "seal=1"
+  },
+  {
+    "id": "RD-K11a2",
+    "name": "The seal outline is gone as soon as the card has a layer",
+    "ok": true,
+    "detail": ""
+  }
+]
