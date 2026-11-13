@@ -24,6 +24,12 @@ import { EventArchivedBanner, EventEndedBanner } from "./event-ended-banner";
 import { cn } from "@/lib/utils";
 import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 import { PREVIOUS_PAGE_KEY } from "@/lib/previous-page";
+import { OnboardingProvider } from "@/features/onboarding/OnboardingProvider";
+import { WelcomeCard } from "@/features/onboarding/WelcomeCard";
+import { RouteTips } from "@/features/onboarding/RouteTips";
+import { FirstStepsPill } from "@/features/onboarding/FirstStepsPill";
+import { isOverviewPath } from "@/features/onboarding/page-help";
+import type { HostRole, Onboarding } from "@/features/onboarding/state";
 
 const SIDEBAR_KEY = "ariya-sidebar";
 
@@ -36,6 +42,12 @@ interface AppShellProps {
   primaryEventId?: string;
   /** How many proposals are waiting at the approvals desk, for the top bar's badge. */
   pendingProposals?: number;
+  /** For the welcome card's hello. */
+  firstName?: string | null;
+  /** What the host has seen of the onboarding, from their account. */
+  onboarding?: Onboarding;
+  /** Planning their own celebration, or someone else's. */
+  role?: HostRole;
 }
 
 /**
@@ -49,6 +61,9 @@ export function AppShell({
   archivedEvents = [],
   primaryEventId,
   pendingProposals,
+  firstName,
+  onboarding = {},
+  role = "couple",
 }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -248,94 +263,109 @@ export function AppShell({
   const isWorkspace = isWorkspaceRoute(pathname);
 
   return (
-    <div
-      data-app-shell
-      data-workspace={isWorkspace ? "" : undefined}
-      className={cn(
-        isWorkspace
-          ? "min-h-screen bg-ivory"
-          : "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
-        ready && "sb-ready"
-      )}
-      style={
-        {
-          "--sb-offset": narrow || collapsed ? "108px" : "292px",
-        } as React.CSSProperties
-      }
+    <OnboardingProvider
+      initial={onboarding}
+      initialRole={role}
+      storageKey={`ariya:onboarding:${userKey}`}
     >
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2.5 focus:rounded-xl focus:bg-burgundy focus:text-white focus:font-semibold focus:shadow-lg"
+      <div
+        data-app-shell
+        data-workspace={isWorkspace ? "" : undefined}
+        className={cn(
+          isWorkspace
+            ? "min-h-screen bg-ivory"
+            : "min-h-screen bg-ivory text-night flex flex-col scroll-pt-20 scroll-pb-32 md:scroll-pb-8",
+          ready && "sb-ready"
+        )}
+        style={
+          {
+            "--sb-offset": narrow || collapsed ? "108px" : "292px",
+          } as React.CSSProperties
+        }
       >
-        Skip to main content
-      </a>
-
-      {!isWorkspace && narrow && drawerOpen && (
-        <div
-          aria-hidden="true"
-          data-testid="sidebar-scrim"
-          onClick={() => setDrawerOpen(false)}
-          className="animate-in fade-in fixed inset-0 z-40 hidden bg-night/25 backdrop-blur-[2px] duration-200 md:block"
-        />
-      )}
-
-      {!isWorkspace && (
-        <Sidebar
-          events={availableEvents}
-          activeEvent={activeEvent}
-          onSelectEvent={handleSelectEvent}
-          userEmail={userEmail}
-          collapsed={folded}
-          onToggle={toggleSidebar}
-          ready={ready}
-        />
-      )}
-
-      {isWorkspace ? (
-        <main
-          id="main-content"
-          tabIndex={-1}
-          className="fixed inset-0 overflow-y-auto focus:outline-none"
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2.5 focus:rounded-xl focus:bg-burgundy focus:text-white focus:font-semibold focus:shadow-lg"
         >
-          {children}
-        </main>
-      ) : (
-        <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
-          <TopBar
-            hideOnPhone={hasOwnPhoneHeader(pathname)}
-            eventId={activeEvent?.id}
-            userEmail={userEmail}
-            pendingProposals={pendingProposals}
+          Skip to main content
+        </a>
+
+        {!isWorkspace && narrow && drawerOpen && (
+          <div
+            aria-hidden="true"
+            data-testid="sidebar-scrim"
+            onClick={() => setDrawerOpen(false)}
+            className="animate-in fade-in fixed inset-0 z-40 hidden bg-night/25 backdrop-blur-[2px] duration-200 md:block"
           />
+        )}
 
-          <main
-            id="main-content"
-            tabIndex={-1}
-            className={cn(
-              "flex-1 px-4 sm:px-6 lg:px-8 pt-6 w-full mx-auto focus:outline-none",
-              /\/events\/[^/]+\/seating$/.test(pathname)
-                ? "max-w-none"
-                : "max-w-[1280px]"
-            )}
-          >
-            {archivedMatch && <EventArchivedBanner />}
-            {eventEnded && <EventEndedBanner />}
-            {children}
-          </main>
-        </div>
-      )}
-
-      {!isWorkspace && (
-        <>
-          <EventDayCelebration events={availableEvents} />
-          <PhoneDock
+        {!isWorkspace && (
+          <Sidebar
             events={availableEvents}
             activeEvent={activeEvent}
             onSelectEvent={handleSelectEvent}
+            userEmail={userEmail}
+            collapsed={folded}
+            onToggle={toggleSidebar}
+            ready={ready}
           />
-          <InstallHint />
-        </>
-      )}
-    </div>
+        )}
+
+        {isWorkspace ? (
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="fixed inset-0 overflow-y-auto focus:outline-none"
+          >
+            {children}
+          </main>
+        ) : (
+          <div className="sb-offset flex-1 flex flex-col md:pl-[var(--sb-offset)] pb-[calc(8.75rem+env(safe-area-inset-bottom))] md:pb-12">
+            <TopBar
+              hideOnPhone={hasOwnPhoneHeader(pathname)}
+              eventId={activeEvent?.id}
+              userEmail={userEmail}
+              pendingProposals={pendingProposals}
+            />
+
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className={cn(
+                "flex-1 px-4 sm:px-6 lg:px-8 pt-6 w-full mx-auto focus:outline-none",
+                /\/events\/[^/]+\/seating$/.test(pathname)
+                  ? "max-w-none"
+                  : "max-w-[1280px]"
+              )}
+            >
+              {archivedMatch && <EventArchivedBanner />}
+              {/* A way back to First steps, and the page's own tips, on every celebration page. */}
+              {eventId && !isOverviewPath(pathname) && (
+                <FirstStepsPill eventId={eventId} pathname={pathname} />
+              )}
+              <RouteTips />
+              {eventEnded && <EventEndedBanner />}
+              {children}
+            </main>
+          </div>
+        )}
+
+        {!isWorkspace && (
+          <>
+            <EventDayCelebration events={availableEvents} />
+            <WelcomeCard
+              firstName={firstName}
+              primaryEventId={activeEvent?.id ?? primaryEventId}
+            />
+            <PhoneDock
+              events={availableEvents}
+              activeEvent={activeEvent}
+              onSelectEvent={handleSelectEvent}
+            />
+            <InstallHint />
+          </>
+        )}
+      </div>
+    </OnboardingProvider>
   );
 }

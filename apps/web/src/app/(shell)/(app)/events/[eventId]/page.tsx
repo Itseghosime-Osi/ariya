@@ -7,6 +7,7 @@ import {
   getEventRecentResponses,
 } from "@/features/events/queries";
 import { getLagosDateKey } from "@/lib/format";
+import { getFirstStepsStatus } from "@/features/onboarding/queries";
 
 interface EventPageProps {
   params: Promise<{
@@ -35,6 +36,7 @@ export default async function EventOverviewPage({ params }: EventPageProps) {
     getEventRecentResponses(eventId),
     getEventPlanningSnapshot(eventId),
   ]);
+  const firstSteps = await getFirstStepsStatus(eventId, planning.guests.length);
   const now = Date.now();
 
   return (
@@ -42,6 +44,7 @@ export default async function EventOverviewPage({ params }: EventPageProps) {
       data={data}
       recentResponses={recentResponses}
       planning={planning}
+      firstSteps={firstSteps}
       now={now}
       todayKey={getLagosDateKey(now) ?? ""}
       eventDateKey={getLagosDateKey(data.event.date)}

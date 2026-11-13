@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { m } from "motion/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ReminderRecipient } from "../types";
@@ -8,6 +9,8 @@ interface ReminderRecipientsTableProps {
   selectedIds: string[];
   onToggleSelect: (guestId: string) => void;
   onSelectAll: () => void;
+  /** Set when the celebration has no guests at all, so the empty list can say where to start. */
+  addGuestsHref?: string;
 }
 
 const STATUS = {
@@ -35,12 +38,29 @@ export function ReminderRecipientsTable({
   selectedIds,
   onToggleSelect,
   onSelectAll,
+  addGuestsHref,
 }: ReminderRecipientsTableProps) {
   const eligible = recipients.filter((r) => r.isEligibleForEmail);
   const allSelected =
     eligible.length > 0 && selectedIds.length === eligible.length;
 
   if (recipients.length === 0) {
+    if (addGuestsHref) {
+      return (
+        <div className="flex flex-col items-center py-12 text-center">
+          <p className="max-w-xs text-sm text-on-surface-variant">
+            There is no one to remind yet. Add your guests first, then come back
+            here.
+          </p>
+          <Link
+            href={addGuestsHref}
+            className="mt-4 inline-flex min-h-11 items-center rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory hover:bg-wine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+          >
+            Add guests
+          </Link>
+        </div>
+      );
+    }
     return (
       <p className="py-12 text-center text-sm text-on-surface-variant">
         No guests in this list.

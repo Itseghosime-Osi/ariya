@@ -34,14 +34,18 @@ function getContext() {
   return context;
 }
 
-/** One output for every shell, with a limiter, so a finale's volley is loud but never clips. */
+/**
+ * One output for every shell, at the film's level (each of its rockets plays at 0.85), so the
+ * welcome sounds like the film's send-off. The limiter only catches the peaks of a finale's
+ * volley, where many shells overlap, so it never clips.
+ */
 function output(audio: AudioContext) {
   if (!chain) {
     const input = audio.createGain();
-    input.gain.value = 0.7;
+    input.gain.value = 0.85;
     const comp = audio.createDynamicsCompressor();
-    comp.threshold.value = -14;
-    comp.ratio.value = 6;
+    comp.threshold.value = -3;
+    comp.ratio.value = 12;
     input.connect(comp);
     comp.connect(audio.destination);
     chain = { input };

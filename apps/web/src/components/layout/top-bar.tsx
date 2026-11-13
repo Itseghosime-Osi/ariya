@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { AccountSheet } from "./account-sheet";
 import { GlobalSearch } from "./global-search";
+import { HelpButton } from "@/features/onboarding/HelpButton";
 import { accountInitials } from "./nav-items";
 
 interface TopBarProps {
@@ -47,6 +48,7 @@ export function TopBar({
 
           <button
             type="button"
+            data-tour="search"
             onClick={() => setSearchOpen(true)}
             className="hidden md:flex w-full min-h-[44px] items-center justify-between bg-white/70 hover:bg-white px-4 py-2 rounded-full border border-gold-ink/25 hover:border-gold-ink/60 transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
           >
@@ -66,6 +68,7 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          <HelpButton className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/70 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy" />
           <Link
             href="/approvals"
             aria-label={
