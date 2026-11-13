@@ -114,6 +114,8 @@ test.describe("RSVP & Email Dispatch", () => {
 
     // Names, the line above them and the message are ordinary fields.
     await page.locator("#simple-names").fill(customHeadline);
+    // The line above the names sits under "More words" (the rest of the words are folded away).
+    await page.getByRole("button", { name: /More words/ }).click();
     await page.locator("#simple-kicker").fill(customSubheadline);
     await page.locator("#simple-message").fill(customMessage);
 
