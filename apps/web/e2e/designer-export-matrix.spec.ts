@@ -1,5 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import { PDFDocument, PDFName, PDFRawStream } from "pdf-lib";
 import { inflateSync } from "node:zlib";
 import { writeFileSync } from "node:fs";
@@ -67,6 +71,7 @@ test("all twelve blend modes agree across PNG, JPEG and PDF; every typeface expo
 }) => {
   test.setTimeout(900000);
   page.setDefaultTimeout(30000);
+  await showAllInspectorOptions(page);
   await createAndLoginUser(page, undefined, "studio_matrix");
   const { eventId } = await createTestEvent(page, {
     title: "Matrix",

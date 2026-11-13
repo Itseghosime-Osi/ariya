@@ -378,7 +378,7 @@ const ROLES: { value: InvitationColorRole; label: string }[] = [
   { value: "foil", label: "Foil" },
 ];
 
-const TEXT_KINDS: InvitationLayer["kind"][] = [
+export const TEXT_KINDS: InvitationLayer["kind"][] = [
   "kicker",
   "names",
   "message",
@@ -388,6 +388,35 @@ const TEXT_KINDS: InvitationLayer["kind"][] = [
   "footer",
   "text",
 ];
+
+const MORE_KEY = "ariya.studio.inspector.more";
+
+function MoreToggle({
+  on,
+  onToggle,
+  dark,
+}: {
+  on: boolean;
+  onToggle: () => void;
+  dark?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-expanded={on}
+      data-testid="inspector-more"
+      onClick={onToggle}
+      className={cn(
+        "mx-3 my-2 flex min-h-8 w-[calc(100%-1.5rem)] items-center justify-center rounded-(--studio-radius-control) border border-dashed text-xs font-semibold pointer-coarse:min-h-11",
+        dark
+          ? "border-white/20 text-zinc-300 hover:bg-white/5"
+          : "border-(--studio-line) text-(--studio-ink-2) hover:bg-black/[0.03]"
+      )}
+    >
+      {on ? "Fewer options" : "More options"}
+    </button>
+  );
+}
 
 export function Inspector({
   design,
@@ -446,6 +475,24 @@ export function Inspector({
   const [fillMode, setFillMode] = useState<"solid" | "gradient" | "none">(
     layer?.gradient ? "gradient" : layer?.fill ? "solid" : "none"
   );
+  // L6: the less-used controls wait behind "More options"; the choice is remembered.
+  const [showMore, setShowMore] = useState(false);
+  useEffect(() => {
+    try {
+      setShowMore(localStorage.getItem(MORE_KEY) === "1");
+    } catch {
+      // Storage can be blocked; the panel then starts with the essentials.
+    }
+  }, []);
+  const toggleMore = () =>
+    setShowMore((on) => {
+      try {
+        localStorage.setItem(MORE_KEY, on ? "0" : "1");
+      } catch {
+        // Not remembered, still works for this visit.
+      }
+      return !on;
+    });
 
   useEffect(() => {
     setUnlinkCorners(
@@ -747,49 +794,51 @@ export function Inspector({
             </div>
           </Section>
 
-          <Section collapsible dark={dark} title="Paper & edges">
-            <Segmented
-              dark={dark}
-              label="Paper edge style"
-              value={edgeStyle}
-              options={[
-                { key: "sharp", label: "Sharp paper" },
-                { key: "rounded", label: "Rounded" },
-                { key: "deckled", label: "Deckled" },
-              ]}
-              onPick={(edge) =>
-                onDesign((d) =>
-                  setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
-                )
-              }
-            />
-            {edgeStyle === "rounded" && (
-              <div className="mt-3">
-                <Num
-                  dark={dark}
-                  label="Corner radius"
-                  suffix="px"
-                  value={cornerRadiusPx || 16}
-                  min={0}
-                  max={120}
-                  step={2}
-                  onChange={(r) =>
-                    onDesign((d) => setPaperEdge(d, "rounded", r))
-                  }
-                />
-              </div>
-            )}
-            <p
-              className={cn(
-                "mt-2 text-xs leading-relaxed",
-                dark ? "text-zinc-400" : "text-label-2"
+          {showMore && (
+            <Section collapsible dark={dark} title="Paper & edges">
+              <Segmented
+                dark={dark}
+                label="Paper edge style"
+                value={edgeStyle}
+                options={[
+                  { key: "sharp", label: "Sharp paper" },
+                  { key: "rounded", label: "Rounded" },
+                  { key: "deckled", label: "Deckled" },
+                ]}
+                onPick={(edge) =>
+                  onDesign((d) =>
+                    setPaperEdge(d, edge as PaperEdge, cornerRadiusPx)
+                  )
+                }
+              />
+              {edgeStyle === "rounded" && (
+                <div className="mt-3">
+                  <Num
+                    dark={dark}
+                    label="Corner radius"
+                    suffix="px"
+                    value={cornerRadiusPx || 16}
+                    min={0}
+                    max={120}
+                    step={2}
+                    onChange={(r) =>
+                      onDesign((d) => setPaperEdge(d, "rounded", r))
+                    }
+                  />
+                </div>
               )}
-            >
-              {edgeStyle === "sharp" && "Straight invitation edges."}
-              {edgeStyle === "rounded" && "Rounded invitation corners."}
-              {edgeStyle === "deckled" && "A decorative torn-paper edge."}
-            </p>
-          </Section>
+              <p
+                className={cn(
+                  "mt-2 text-xs leading-relaxed",
+                  dark ? "text-zinc-400" : "text-label-2"
+                )}
+              >
+                {edgeStyle === "sharp" && "Straight invitation edges."}
+                {edgeStyle === "rounded" && "Rounded invitation corners."}
+                {edgeStyle === "deckled" && "A decorative torn-paper edge."}
+              </p>
+            </Section>
+          )}
         </details>
 
         <Section collapsible dark={dark} title="Background">
@@ -967,15 +1016,18 @@ export function Inspector({
           </div>
         </Section>
 
-        <Section collapsible dark={dark} title="Decoration">
-          <Toggle
-            dark={dark}
-            label="House ribbon and border"
-            hint="Turn off to draw your card from scratch."
-            checked={design.chrome !== false}
-            onChange={(on) => onDesign((d) => ({ ...d, chrome: on }))}
-          />
-        </Section>
+        <MoreToggle on={showMore} onToggle={toggleMore} dark={dark} />
+        {showMore && (
+          <Section collapsible dark={dark} title="Decoration">
+            <Toggle
+              dark={dark}
+              label="House ribbon and border"
+              hint="Turn off to draw your card from scratch."
+              checked={design.chrome !== false}
+              onChange={(on) => onDesign((d) => ({ ...d, chrome: on }))}
+            />
+          </Section>
+        )}
 
         <Section collapsible dark={dark} title="Design file">
           <div className="flex flex-wrap gap-2">
@@ -2336,7 +2388,8 @@ export function Inspector({
       )}
 
       {/* Universal Studio Visual FX & Blending Section */}
-      {layer.kind !== "code" && (
+      <MoreToggle on={showMore} onToggle={toggleMore} dark={dark} />
+      {showMore && layer.kind !== "code" && (
         <Section collapsible dark={dark} title="Visual FX & Blending">
           <div className="space-y-3">
             <div>

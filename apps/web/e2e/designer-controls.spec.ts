@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  showAllInspectorOptions,
+} from "./fixtures/test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { writeFileSync } from "node:fs";
 
@@ -9,6 +13,7 @@ test("studio offered shapes, layer operations and effects", async ({
 }) => {
   test.setTimeout(240000);
   page.setDefaultTimeout(12000);
+  await showAllInspectorOptions(page);
   if (process.env.STUDIO_TEST_EMAIL) {
     await page.goto("/sign-in");
     await page.locator("#signin-email").fill(process.env.STUDIO_TEST_EMAIL);

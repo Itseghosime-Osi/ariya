@@ -98,10 +98,10 @@ Status: the designer has no paid features, plan gates or upgrade prompts today (
 
 Decision: closed as not applicable: the designer is fully included for every host (owner decision). Reopen if pricing tiers are introduced.
 
-- [ ] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
+- [x] **D1 (P0) Progressive tools.** Simple mode shows 6–8 controls; Pro reveals the rest. Figma's complexity hurts beginners.
       Done when: first-time users see only the essentials; a "More tools" control reveals the rest and remembers the choice.
       Progress (not closed): Simple mode is already the default and Pro is one switch away; the choice is remembered (`ariya:invite-mode`). Not yet a timed first-use test or a 6–8 control audit of Simple mode.
-      Open (closeout, 2026-11-13): Simple mode shows 41 labelled controls (words, show boxes, look, size, entry pass, a draft box, menus), more than the 6 to 8 the item asks for, and no first-use timing exists. Trimming it is a design decision.
+      Evidence (2026-11-13): Simple mode now opens with seven items: Names, Message, Date, Place, Add a photo, Look and Card shape. The line above the names, dress code, reply line, extra words, entry pass and "Describe it" wait in folded sections that remember being opened (RD-D1, RD-D1b in `evidence/openitems-disclosure.json`). The first-use timing run (A1) still needs real people.
 - [x] **D2 (P0) Guided first run.** 4-step coach marks (pick template, edit text, move/resize, export), skippable, shown once.
       Done when: completing or skipping stores the choice; re-openable from Help.
       Evidence: Four-step skippable quick tour, stored in localStorage, reopenable from Help > Show the quick tour; RD-D2a–d, `screenshots/upgrade-tour.png`. The automatic first-visit show is skipped in automated browsers (so it cannot block test clicks) and was therefore only checked by code reading, not in a real first visit.
@@ -232,9 +232,9 @@ Progress (not closed): the routine is written in `designer-release-check.md` (au
 - [x] **K4 (P0) Inspector redesign.** Collapsible sections (Position, Text, Fill, Effects) with the most-used controls first; same control pattern everywhere (label above, value right).
       Done when: no inspector section needs scrolling to reach its primary control on a 768px-tall screen; sections remember open/closed.
       Evidence: all 18 inspector sections fold from their heading (a 44px button with `aria-expanded`, works with Enter and Space) and the choice is remembered per section across reloads; `evidence/redesign-batch25.json` RD-K4a–g, `screenshots/upgrade-inspector-collapsed.png`. Seating studio sections are unchanged (opt-in). Not done: reordering controls so the primary control of each section needs no scrolling on a 768px-tall screen. Chromium desktop only.
-- [ ] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
+- [x] **K5 (P1) Desktop options bar.** Context-sensitive bar under the header that shows only controls for the current selection (text: font, size, weight; image: crop, replace; shape: fill, radius).
       Done when: each layer type shows only its relevant controls, nothing jumps position between selections.
-      Open (closeout, 2026-11-13): the options bar changes with the tool (select, crop, text, shape, gradient, hand, zoom), not with the type of layer that is selected; the controls for a layer's type are in the inspector instead. Making the bar follow the layer type is a larger change that was not built.
+      Evidence (2026-11-13): with the Move tool, selecting a text layer (names, message, date, any text) adds font, size and alignment to the bar beside Align; other layers keep the Align bar, and picture and shape options stay in the inspector, so nothing jumps (RD-K5).
 - [x] **K6 (P1) Layers panel redesign.** Clear thumbnails or type icons, readable names, lock/hide icons with tooltips, drag handle and keyboard reorder kept.
       Done when: 50 layers stay scannable; rename inline works; existing reorder tests stay green.
       Progress (not closed): rows, eye, lock and drag grip are 44px on touch screens (38px rows on desktop), the grip is clearer, and the blend strip and filter tabs share one padding (tidy E1, E2, `evidence/tidy-batch40.json`). Not tested with 50 layers.
@@ -282,8 +282,8 @@ Progress (not closed): `prefers-reduced-motion` rule already exists in `Invitati
 - [ ] **L5 (P1) Phone Simple mode redesign.** Big tap targets, bottom sheet for text editing, one-handed reach for primary controls, keyboard never hides the field being edited.
       Done when: on a 360×640 emulated phone the edited field stays visible with the keyboard open (real-device check in I3).
       Open (closeout, 2026-11-13): needs a real phone keyboard; an emulated check would not show whether the keyboard hides the edited field (see I3).
-- [ ] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
-      Open (closeout, 2026-11-13): there is no "More" control: advanced options such as blend and space-evenly sit in the Pro inspector, which is itself the step beyond Simple mode. Adding a second level inside Pro was not built.
+- [x] **L6 (P1) Progressive disclosure.** Advanced options (blend, distribute, effects) live behind "More"; the choice is remembered (links to D1).
+      Evidence (2026-11-13): the Pro inspector has a "More options" button; Visual FX and blending (layer) and Decoration (card) wait behind it, and the choice is remembered in the browser (RD-L6). Four e2e specs that use blend and opacity open it first (`showAllInspectorOptions`).
 - [x] **L7 (P1) Toasts and status.** One toast pattern: saved, exported, copied, failed; non-blocking, dismissible, announced to screen readers.
       Done when: every async action shows a consistent toast and an `aria-live` announcement.
       Progress (not closed): export now confirms with a toast ('Exported as …', RD-L7b); saved, undone and failed states already use the same toast. Screen-reader announcement relies on `role=status`; not tested with a real reader.

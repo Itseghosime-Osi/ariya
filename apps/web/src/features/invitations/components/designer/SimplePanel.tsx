@@ -29,13 +29,16 @@ const WORDS: {
   long?: boolean;
 }[] = [
   { kind: "names", label: "Names" },
-  { kind: "kicker", label: "Line above the names" },
   { kind: "message", label: "Your message", long: true },
   { kind: "date", label: "Date" },
   { kind: "venue", label: "Place" },
+  { kind: "kicker", label: "Line above the names" },
   { kind: "dressCode", label: "Dress code" },
   { kind: "footer", label: "Reply line" },
 ];
+
+/** D1: the first four are what nearly every card changes; the rest wait under "More words". */
+const ESSENTIAL_COUNT = 4;
 
 const SHAPES = CANVAS_PRESETS.slice(0, 4);
 
@@ -103,65 +106,76 @@ export function SimplePanel({
   const ratio = designRatio(design);
   const extras = design.layers.filter((l) => l.kind === "text");
 
+  const wordRow = ({ kind, label, long }: (typeof WORDS)[number]) => {
+    const layer = design.layers.find((l) => l.kind === kind);
+    if (!layer) return null;
+    const id = `simple-${layer.id}`;
+    return (
+      <div key={layer.id}>
+        <div className="flex items-center justify-between gap-3">
+          <label
+            htmlFor={id}
+            className="flex min-h-11 items-center text-sm font-semibold text-night"
+          >
+            {label}
+          </label>
+          <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-label-2">
+            <input
+              type="checkbox"
+              checked={layer.visible}
+              onChange={(e) => onPatch(layer.id, { visible: e.target.checked })}
+              className="h-5 w-5 accent-[var(--burgundy)]"
+            />
+            Show
+          </label>
+        </div>
+        {long ? (
+          <textarea
+            id={id}
+            rows={3}
+            value={layer.text}
+            onChange={(e) =>
+              onPatch(layer.id, {
+                text: e.target.value.slice(0, 600),
+                ...(e.target.value.trim() ? { visible: true } : {}),
+              })
+            }
+            className={FIELD}
+          />
+        ) : (
+          <input
+            id={id}
+            type="text"
+            value={layer.text}
+            onChange={(e) =>
+              onPatch(layer.id, {
+                text: e.target.value.slice(0, 600),
+                ...(e.target.value.trim() ? { visible: true } : {}),
+              })
+            }
+            className={FIELD}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div data-testid="simple-panel">
       <Section title="Words">
         <div className="space-y-4">
-          {WORDS.map(({ kind, label, long }) => {
-            const layer = design.layers.find((l) => l.kind === kind);
-            if (!layer) return null;
-            const id = `simple-${layer.id}`;
-            return (
-              <div key={layer.id}>
-                <div className="flex items-center justify-between gap-3">
-                  <label
-                    htmlFor={id}
-                    className="flex min-h-11 items-center text-sm font-semibold text-night"
-                  >
-                    {label}
-                  </label>
-                  <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-label-2">
-                    <input
-                      type="checkbox"
-                      checked={layer.visible}
-                      onChange={(e) =>
-                        onPatch(layer.id, { visible: e.target.checked })
-                      }
-                      className="h-5 w-5 accent-[var(--burgundy)]"
-                    />
-                    Show
-                  </label>
-                </div>
-                {long ? (
-                  <textarea
-                    id={id}
-                    rows={3}
-                    value={layer.text}
-                    onChange={(e) =>
-                      onPatch(layer.id, {
-                        text: e.target.value.slice(0, 600),
-                        ...(e.target.value.trim() ? { visible: true } : {}),
-                      })
-                    }
-                    className={FIELD}
-                  />
-                ) : (
-                  <input
-                    id={id}
-                    type="text"
-                    value={layer.text}
-                    onChange={(e) =>
-                      onPatch(layer.id, {
-                        text: e.target.value.slice(0, 600),
-                        ...(e.target.value.trim() ? { visible: true } : {}),
-                      })
-                    }
-                    className={FIELD}
-                  />
-                )}
-              </div>
-            );
-          })}
+          {WORDS.slice(0, ESSENTIAL_COUNT).map(wordRow)}
+          <div className="flex flex-wrap gap-2">
+            <BigButton icon="image" onClick={onAddPhoto} busy={busy}>
+              Add a photo
+            </BigButton>
+          </div>
+        </div>
+      </Section>
+
+      <Section collapsible defaultClosed title="More words">
+        <div className="space-y-4">
+          {WORDS.slice(ESSENTIAL_COUNT).map(wordRow)}
           {extras.map((layer) => (
             <div key={layer.id}>
               <div className="flex items-center justify-between">
@@ -194,9 +208,6 @@ export function SimplePanel({
           <div className="flex flex-wrap gap-2">
             <BigButton icon="text_fields" onClick={onAddText}>
               Add more words
-            </BigButton>
-            <BigButton icon="image" onClick={onAddPhoto} busy={busy}>
-              Add a photo
             </BigButton>
           </div>
         </div>
@@ -281,7 +292,7 @@ export function SimplePanel({
         </div>
       </Section>
 
-      <Section title="Entry pass">
+      <Section collapsible defaultClosed title="Entry pass">
         {passRequired ? (
           <p className="text-sm leading-relaxed text-label-2">
             The access pass is on. Every guest who accepts gets their card with
@@ -303,7 +314,7 @@ export function SimplePanel({
         )}
       </Section>
 
-      <Section title="Describe it">
+      <Section collapsible defaultClosed title="Describe it">
         <p className="mb-2 text-sm text-label-2">
           Say the feel you want and we will set the colours and layout. This
           replaces your current layout; Undo brings it back.

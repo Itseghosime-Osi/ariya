@@ -7,7 +7,7 @@ import type {
   InvitationLayer,
   InvitationFont,
 } from "../../types";
-import { GRADIENT_PRESETS } from "./Inspector";
+import { GRADIENT_PRESETS, TEXT_KINDS } from "./Inspector";
 import { INVITATION_FONTS, INVITATION_FONT_LABELS } from "../../types";
 import { designDimensionsPx } from "../../layer-ops";
 
@@ -148,6 +148,12 @@ export function ContextualOptionsBar({
   dark?: boolean;
 }) {
   const currentLayer = selectedLayer;
+  // K5: with the Move tool, a selected text layer brings its own type options next to Align.
+  const showTextOptions =
+    activeTool === "text" ||
+    (activeTool === "select" &&
+      currentLayer != null &&
+      TEXT_KINDS.includes(currentLayer.kind));
 
   return (
     <div
@@ -537,7 +543,7 @@ export function ContextualOptionsBar({
       )}
 
       {/* TYPOGRAPHY TOOL OPTIONS */}
-      {activeTool === "text" && (
+      {showTextOptions && (
         <div className="flex items-center gap-2 shrink-0">
           {/* Font Family */}
           <select

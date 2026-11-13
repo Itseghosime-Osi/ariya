@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RD-K5",
+    "name": "Options bar shows type controls when a text layer is selected with the Move tool",
+    "ok": true,
+    "detail": "before=0 selected=1"
+  },
+  {
+    "id": "RD-D1",
+    "name": "Simple mode opens with the four essential fields, a photo button, look and card shape (7 items)",
+    "ok": true,
+    "detail": "{\"visibleFields\":[\"simple-names\",\"simple-message\",\"simple-date\",\"simple-venue\"],\"sections\":[]}"
+  },
+  {
+    "id": "RD-D1b",
+    "name": "'More words' opens the rest",
+    "ok": true,
+    "detail": "fields after open=7"
+  },
+  {
+    "id": "RD-L6",
+    "name": "Visual FX waits behind 'More options', opens on click, and is remembered after a reload",
+    "ok": true,
+    "detail": "closed=0 opened=1 afterReload=1"
+  }
+]
