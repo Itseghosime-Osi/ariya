@@ -245,7 +245,10 @@ html.cm-on body {
   letter-spacing: -0.01em;
 }
 .cm-list .t span {
-  display: inline-block;
+  /* A block (not inline-block): a title that wraps to two lines takes its baseline from its first
+     line, so it lines up with the number and is not pushed above its row and clipped. */
+  display: block;
+  width: fit-content;
   transition:
     transform 0.6s var(--cm-ease),
     letter-spacing 0.6s var(--cm-ease);
@@ -378,6 +381,13 @@ html.cm-on body {
 }
 .cm-foot a {
   color: var(--cm-gold);
+}
+/* Privacy and Terms are in the menu's own footer; the film's fixed copy would sit on top of it. */
+html.cm-on .legal-nav {
+  visibility: hidden;
+}
+.cm-legal {
+  white-space: nowrap;
 }
 .cm.open .cm-top,
 .cm.open .cm-foot {

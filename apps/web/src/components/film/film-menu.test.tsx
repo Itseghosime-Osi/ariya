@@ -65,9 +65,8 @@ describe("landing page menu", () => {
       ).toHaveFocus()
     );
     const first = within(dialog).getByRole("button", { name: "Close" });
-    const last = within(dialog).getByRole("link", {
-      name: "Open a sample invitation",
-    });
+    // The last stop in the menu is now the Terms link in its footer.
+    const last = within(dialog).getByRole("link", { name: "Terms" });
     last.focus();
     await user.tab();
     expect(first).toHaveFocus();

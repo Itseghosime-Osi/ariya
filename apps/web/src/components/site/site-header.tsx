@@ -322,6 +322,10 @@ export function SiteHeader({
             <span>Àríyá (ah-ree-YAH): merriment, in Yoruba</span>
             <span>Lagos · Benin · Abuja</span>
             <Link href="/i/k701Qx">Open a sample invitation</Link>
+            <span className="cm-legal">
+              <Link href="/privacy">Privacy</Link> ·{" "}
+              <Link href="/terms">Terms</Link>
+            </span>
           </div>
         </div>
       </div>
