@@ -22,9 +22,25 @@ export interface SceneHost {
   adopt(el: HTMLElement): void;
 }
 
+/**
+ * Software renderers (SwiftShader, llvmpipe, "Microsoft Basic Render Driver") draw the hall on the
+ * CPU, a frame at a time, so the main thread never goes idle. That is how PageSpeed's headless
+ * Chrome, a phone with no GPU access and a remote desktop all run, and the page then looks
+ * frozen, or PageSpeed gives up on it. They get the film without the 3D hall instead.
+ */
+export function isSoftwareRenderer(name: string): boolean {
+  return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
+}
+
 function canRender3d(): boolean {
   try {
-    if (!document.createElement("canvas").getContext("webgl2")) return false;
+    const gl = document.createElement("canvas").getContext("webgl2");
+    if (!gl) return false;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info
+      ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) ?? "")
+      : "";
+    if (isSoftwareRenderer(renderer)) return false;
   } catch {
     return false;
   }
@@ -32,6 +48,19 @@ function canRender3d(): boolean {
     navigator as unknown as { connection?: { saveData?: boolean } }
   ).connection?.saveData;
   return !saveData;
+}
+
+/** Runs `fn` after the page's load event, then at the next idle moment (at most 1.5 s later). */
+function whenQuiet(fn: () => void) {
+  const idle = () => {
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void;
+    };
+    if (w.requestIdleCallback) w.requestIdleCallback(fn, { timeout: 1500 });
+    else setTimeout(fn, 200);
+  };
+  if (document.readyState === "complete") idle();
+  else window.addEventListener("load", idle, { once: true });
 }
 
 export function velvetHint(): string {
@@ -102,6 +131,7 @@ export function sceneHost(): SceneHost | null {
   const t0 = performance.now();
 
   let script: HTMLScriptElement | null = null;
+  let scheduled = false;
 
   host = {
     canvas,
@@ -111,12 +141,17 @@ export function sceneHost(): SceneHost | null {
       // The module looks #gl up by id when it evaluates, so the canvas has to be
       // in the page before the script is appended.
       if (canvas.parentElement !== el) el.appendChild(canvas);
-      if (script) return;
-      script = document.createElement("script");
-      script.type = "module";
-      script.src = SCENE_URL;
-      script.async = true;
-      document.body.appendChild(script);
+      if (script || scheduled) return;
+      // The module is large and builds the whole hall when it evaluates, so it starts once the
+      // page has painted and the browser has a quiet moment, never in the way of first paint.
+      scheduled = true;
+      whenQuiet(() => {
+        script = document.createElement("script");
+        script.type = "module";
+        script.src = SCENE_URL;
+        script.async = true;
+        document.body.appendChild(script);
+      });
     },
   };
 
