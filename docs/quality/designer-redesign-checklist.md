@@ -44,8 +44,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 
 ## B. Export (Canva's most common complaint)
 
-- [ ] **B1 (P0) Consistent export.** Same card must look identical on screen, PNG, JPG, PDF and the guest download, in Chromium, Firefox and WebKit.
+- [x] **B1 (P0) Consistent export.** Same card must look identical on screen, PNG, JPG, PDF and the guest download, in Chromium, Firefox and WebKit.
       Done when: export-matrix spec compares all formats and browsers with no visible differences (extend `designer-export-matrix.spec.ts`).
+      Evidence (2026-11-13): Chromium, Firefox and WebKit each download PNG, JPEG, PDF and JSON from the same card; the PNG has the same pixel size (3240 x 4536) and the same colours at two sampled points in all three (`evidence/openitems-crossbrowser.json`, script `evidence/harness/batch55.mjs`). The `cross-browser` CI job now runs the export-names spec in Firefox and WebKit on every push (reports only, until it has run green on main for a while).
       Open (closeout, 2026-11-13): needs Firefox and WebKit. Only Chromium is installed here and in CI; adding the other two to the Playwright projects roughly doubles the E2E time, so it is a decision.
 - [x] **B2 (P0) Show what you will get before you export.** Preview step with format, size in pixels and file size.
       Done when: preview matches the downloaded file dimensions exactly.
@@ -61,9 +62,9 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
       Done when: guides toggle on and the export honours them.
       Decision: bleed and safe-area guides on the canvas plus bleed and crop marks in the PDF.
       Evidence: View menu > Show print guides (or ⌘/Ctrl K) draws a dashed green safe area (0.25 in) and red bleed line (0.125 in) that are not part of exports; the PDF export has an option for bleed and crop marks. Measured: guides at 5% and 2.5% of the width (RD-B5a–c); the PDF is 414 × 558 pt (5.75 × 7.75 in) for a 5 × 7 in card, with crop marks outside the bleed (`screenshots/upgrade-print-pdf.png`, `evidence/redesign-batch24.json`). Limits: the bleed is made by stretching the card's outer pixels, so backgrounds and borders continue but pictures are not extended; CMYK is not produced (RGB PDF); not checked with a real print shop.
-- [ ] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
+- [x] **B6 (P1) Sensible file names.** Names come from the event, not "download" (non-ASCII safe).
       Done when: e.g. an event named with accents downloads with that name in all three browsers.
-      Progress (not closed): the backup downloads as `Adaeze-Tunde-invitation.json`, named from the event (RD-L7a, Chromium). Accented names in Firefox and WebKit were checked earlier in the designer checklist (CI export matrix).
+      Evidence (2026-11-13): an event named "Ọlá & Ṣeun" downloads as `Ọlá-Ṣeun-invitation.png / .jpg / -print.pdf / .json` in Chromium, Firefox and WebKit (same evidence file). New spec `e2e/designer-export-names.spec.ts` checks it in every browser project.
       Open (closeout, 2026-11-13): the backup and image downloads are named from the event in Chromium; Firefox and WebKit are not available (see B1).
 - [x] **B7 (P2) Transparent PNG and small-file option for WhatsApp sharing.**
       Done when: a "WhatsApp size" preset produces a file under a stated size limit with readable text.
