@@ -1,5 +1,6 @@
 import Link from "next/link";
 import "@/styles/site/product.css";
+import { siteUrl } from "@/lib/site-url";
 import { pageMetadata } from "@/lib/site-metadata";
 import "@/styles/site/story.css";
 import { ChapterMark } from "@/components/site/chapter-mark";
@@ -30,7 +31,7 @@ const APP_LD = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "Àríyá",
-  url: "https://ariya-two.vercel.app/product",
+  url: siteUrl("/product"),
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:

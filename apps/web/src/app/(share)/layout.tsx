@@ -2,6 +2,7 @@ import { BRAND_IVORY } from "@/lib/brand";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * The root for pages shared outside the app (a view-only floor plan). It has no loading screen on
@@ -22,7 +23,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ariya-two.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Àríyá",
   icons: { icon: "/site/assets/icon.svg" },
   robots: { index: false, follow: false },
