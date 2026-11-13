@@ -12,7 +12,7 @@ Rules that still apply: keep brand, template-first flow, Rust/WASM engine, Next.
 - **Needs people or real devices:** A1 (first-time users), I2 (screen reader), I3 (real phones), I4 (stylus and trackpad), J2 and M3 (user test), L1 (where people stall).
 - **Built, waiting on something outside the code:** J1 (the studio records anonymous metrics once the `studio_metrics` migration is applied; the baseline needs real traffic).
 - **Process:** J3 (re-check this list each release).
-- **Waiting to be applied:** two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`. Until they are applied, metrics are dropped and the Saved versions section hides itself.
+- **Applied 2026-11-13:** the two migrations, `20261113000000_studio_metrics.sql` and `20261113000100_invitation_versions.sql`, are on the live project; the features switch on when this build is deployed.
 
 ## Product decisions (from the owner)
 
@@ -154,7 +154,7 @@ Decision: closed as not applicable: the designer is fully included for every hos
       Evidence (closeout, 2026-11-13): forced failures: an export that throws now says "The file could not be made. Try again, or pick another format (a PNG works for most cards); nothing was downloaded." with a Try again button, never the raw browser error, and Try again repeats the export and downloads the file (`evidence/closeout-features.json` RD-F2-export, RD-F2-retry, RD-F2-retry-works; `export-errors.test.ts`); a failed picture upload shows its reason and Try again (`evidence/redesign-batch31.json`); a failed save shows the persistent red notice with Retry and retries by itself (`useDesignerDoc.test.tsx`, 14 tests). A forced save failure was not driven through the browser.
 - [x] **F3 (P1) Version history users can find.** Name versions, restore one.
       Done when: restore from history returns the exact earlier design.
-      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres but is NOT applied to the live database, and until it is the section hides itself. Apply it when ready.
+      Evidence (2026-11-13): the History tab has "Saved versions": name the current design, list, restore and delete; a restore puts the exact saved design on the canvas as an undoable step (component test `VersionsSection.test.tsx`: the restored design equals the saved one). The store is `supabase/migrations/20261113000100_invitation_versions.sql` (newest 30 kept, event members read, editors write); it ran clean twice on a scratch Postgres and was applied to the live project on 2026-11-13 (RLS on, three policies, grants as designed; the security advisor shows nothing new for it). The Saved versions section appears once this build is deployed.
 - [x] **F4 (P2) Account sharing clarity.** Shared designs always say who owns them and which account is open (Canva complaint).
       Evidence (closeout, 2026-11-13): not applicable: the designer has no shared or collaborative designs. A design belongs to one event and one host; there is no sharing screen, seat or second-account view in the studio (searched `features/invitations`).
 
@@ -200,7 +200,7 @@ Progress (not closed): the Names line now shrinks automatically to keep to two l
 ## J. Measurement (so we know it worked)
 
 - [ ] **J1 (P0) Baseline metrics:** time to first export, export success rate, support questions per 100 designs, crash or error rate.
-      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, which is NOT applied yet (until it is, the studio drops the rows silently). The baseline itself still needs real hosts' traffic, and support questions per 100 designs needs a log.
+      Progress (2026-11-13, not closed): the studio now records anonymous per-event counts (opened, export ok, export failed, with the format and the time since opening; no user, no card content) through `recordStudioMetricAction`, and `summarizeStudioMetrics` turns them into time to first export, success rate and error count. The table is created by `supabase/migrations/20261113000000_studio_metrics.sql`, applied to the live project on 2026-11-13 (RLS on, two policies, grants as designed); rows start arriving once this build is deployed. The baseline itself still needs real hosts' traffic (read it with the query at the top of the migration), and support questions per 100 designs needs a log.
 - [ ] **J2 (P1) Small user test** with 5 real couples or planners on phone; record where they stall.
       Open (closeout, 2026-11-13): needs five real couples or planners.
 - [ ] **J3 (P1) Re-check this list each release;** update status and evidence links.
