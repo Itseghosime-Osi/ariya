@@ -13,8 +13,11 @@ export function failedCardFonts(
   if (!card || !fonts) return [];
   const failed = new Set<string>();
   fonts.forEach((face) => {
-    if (face.status === "error")
-      failed.add(face.family.replace(/^["']|["']$/g, "").trim());
+    if (face.status === "error") {
+      const family = face.family.replace(/^["']|["']$/g, "").trim();
+      // Next generates "<Font> Fallback" faces to stop layout shift; they are not fonts the host chose.
+      if (!/\bFallback$/i.test(family)) failed.add(family);
+    }
   });
   if (!failed.size) return [];
   const used: string[] = [];

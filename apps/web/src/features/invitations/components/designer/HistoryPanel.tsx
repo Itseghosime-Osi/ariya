@@ -65,7 +65,7 @@ export function HistoryPanel({
           <span
             className={cn(
               "text-xs font-mono",
-              dark ? "text-zinc-500" : "text-zinc-400"
+              dark ? "text-zinc-400" : "text-[var(--studio-mauve)]"
             )}
           >
             Max 50
@@ -92,8 +92,8 @@ export function HistoryPanel({
                       ? "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
                       : "text-[var(--studio-ink-2)] hover:bg-black/5"
                     : dark
-                      ? "text-zinc-600 opacity-60 hover:opacity-100 hover:bg-white/[0.03]"
-                      : "text-zinc-400 opacity-60 hover:opacity-100 hover:bg-black/5"
+                      ? "text-zinc-400 italic hover:bg-white/[0.03]"
+                      : "text-[var(--studio-mauve)] italic hover:bg-black/5"
               )}
             >
               <span
@@ -105,7 +105,7 @@ export function HistoryPanel({
                       : "bg-[var(--studio-wine)] text-white"
                     : dark
                       ? "bg-white/[0.06] text-zinc-400"
-                      : "bg-black/5 text-zinc-500"
+                      : "bg-black/5 text-[var(--studio-mauve)]"
                 )}
               >
                 {idx === 0 ? (

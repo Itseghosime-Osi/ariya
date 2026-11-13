@@ -35,6 +35,21 @@ describe("failedCardFonts", () => {
     ).toEqual(["Bodoni Moda"]);
   });
 
+  it("ignores the generated fallback faces", () => {
+    const c = card(
+      `<p style="font-family: 'Bodoni Moda', 'Bodoni Moda Fallback', serif">Adaeze</p>`
+    );
+    expect(
+      failedCardFonts(
+        c,
+        fonts([
+          { family: '"Bodoni Moda"', status: "error" },
+          { family: '"Bodoni Moda Fallback"', status: "error" },
+        ])
+      )
+    ).toEqual(["Bodoni Moda"]);
+  });
+
   it("says nothing when every font loaded or nothing failed is used", () => {
     const c = card(`<p style="font-family: Arial">date</p>`);
     expect(
