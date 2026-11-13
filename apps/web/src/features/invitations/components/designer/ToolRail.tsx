@@ -97,7 +97,7 @@ function ToolButton({
           "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-(--studio-z-overlay) hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
           dark
             ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-white/15"
-            : "bg-[#ffffff] text-[var(--studio-ink)] border-[#e6ded2] shadow-black/10"
+            : "bg-[var(--studio-white)] text-[var(--studio-ink)] border-[var(--studio-line-4)] shadow-black/10"
         )}
       >
         <span>{label}</span>
@@ -120,7 +120,7 @@ const Divider = ({ dark }: { dark?: boolean }) => (
   <span
     aria-hidden="true"
     className={cn(
-      "my-1.5 h-px w-6 shrink-0 max-lg:h-6 max-lg:w-px max-lg:my-0 max-lg:mx-1",
+      "my-0.5 h-px w-6 shrink-0 max-lg:h-6 max-lg:w-px max-lg:my-0 max-lg:mx-1",
       dark ? "bg-white/15" : "bg-black/10"
     )}
   />
@@ -315,6 +315,7 @@ export function ToolRail({
         aria-orientation={vertical ? "vertical" : "horizontal"}
         className="flex items-center gap-1 overflow-x-auto max-lg:max-w-full lg:flex-col lg:overflow-visible"
       >
+        {/* Group 1: Select */}
         {/* Move & Select Tool (V) */}
         <ToolButton
           label="Move & Select"
@@ -342,6 +343,9 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 2: Text */}
         {/* Text Tool (T) */}
         <ToolButton
           label="Type text"
@@ -360,6 +364,9 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 3: Shapes and colour */}
         {/* Cathedral Arch Quick Tool (A) */}
         <ToolButton
           label="Cathedral Arch"
@@ -406,7 +413,7 @@ export function ToolRail({
                 "z-(--studio-z-overlay) rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
                 dark
                   ? "border-[var(--studio-edge-dark)] bg-[var(--studio-night)] text-white"
-                  : "border-[var(--studio-line)] bg-[#ffffff] text-[var(--studio-ink)] shadow-black/15"
+                  : "border-[var(--studio-line)] bg-[var(--studio-white)] text-[var(--studio-ink)] shadow-black/15"
               )}
             >
               <div
@@ -489,6 +496,7 @@ export function ToolRail({
 
         <Divider dark={dark} />
 
+        {/* Group 4: Pictures */}
         {/* Picture / Image Upload Tool (Shift+I) */}
         <ToolButton
           label="Place image / photo"
@@ -519,9 +527,13 @@ export function ToolRail({
           </svg>
         </ToolButton>
 
+        <Divider dark={dark} />
+
+        {/* Group 5: Seal and entry pass */}
         {/* Luxury Wax Seal */}
         <ToolButton
           label="Add monogram seal"
+          shortcut="B"
           dark={dark}
           onClick={() => onAdd("seal")}
         >
@@ -531,6 +543,7 @@ export function ToolRail({
         {/* Security QR Pass */}
         <ToolButton
           label={hasEntrySeal ? "Guest pass seal added" : "Add guest pass seal"}
+          shortcut="Q"
           dark={dark}
           onClick={() => onAdd("code")}
           disabled={hasEntrySeal}
@@ -540,6 +553,7 @@ export function ToolRail({
 
         <Divider dark={dark} />
 
+        {/* Group 6: View */}
         {/* Hand Tool (H) */}
         <ToolButton
           label="Hand / Pan"

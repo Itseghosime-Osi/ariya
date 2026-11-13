@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "id": "RD-E1",
+      "name": "Dragging with the studio's maximum layers stays under the 100 ms budget at the 95th percentile, also with a 4x slower CPU",
+      "ok": true,
+      "detail": "{\"normal\":{\"layers\":60,\"frames\":83,\"p50\":16.7,\"p95\":16.7,\"max\":17,\"longTasks\":0,\"longMax\":0,\"longOver100\":0},\"slow4x\":{\"layers\":60,\"frames\":85,\"p50\":16.7,\"p95\":16.7,\"max\":17,\"longTasks\":0,\"longMax\":0,\"longOver100\":0}}"
+    },
+    {
+      "id": "RD-E2",
+      "name": "Long tasks while dragging are listed (none over 100 ms at normal speed)",
+      "ok": true,
+      "detail": "{\"normal\":{\"longTasks\":0,\"longMax\":0},\"slow4x\":{\"longTasks\":0,\"longMax\":0,\"over100\":0}}"
+    },
+    {
+      "id": "RD-E4",
+      "name": "Time to a visible card and to the first typed letter is recorded for desktop and a throttled phone",
+      "ok": true,
+      "detail": "{\"desktop\":{\"cardVisibleMs\":168,\"firstTypedMs\":490},\"phone\":{\"cardVisibleMs\":1817,\"firstTypedMs\":2042}}"
+    }
+  ],
+  "data": {
+    "perf-1x": {
+      "layers": 60,
+      "frames": 83,
+      "p50": 16.7,
+      "p95": 16.7,
+      "max": 17,
+      "longTasks": 0,
+      "longMax": 0,
+      "longOver100": 0
+    },
+    "perf-4x": {
+      "layers": 60,
+      "frames": 85,
+      "p50": 16.7,
+      "p95": 16.7,
+      "max": 17,
+      "longTasks": 0,
+      "longMax": 0,
+      "longOver100": 0
+    },
+    "open-desktop": {
+      "cardVisibleMs": 168,
+      "firstTypedMs": 490
+    },
+    "open-phone-throttled": {
+      "cardVisibleMs": 1817,
+      "firstTypedMs": 2042
+    }
+  }
+}

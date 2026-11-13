@@ -160,7 +160,10 @@ export function ContextualOptionsBar({
           : "border-[var(--studio-line)] bg-[var(--studio-paper)] text-[var(--studio-ink-2)]"
       )}
       // A soft edge shows on a side only while there is more to scroll to in that direction.
-      style={scrollEdges(dark ? "#23181e" : "#fcfbfa", dark)}
+      style={scrollEdges(
+        dark ? "var(--studio-surface-dark)" : "var(--studio-paper)",
+        dark
+      )}
     >
       {/* Tool-Specific Controls */}
 

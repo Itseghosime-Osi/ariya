@@ -1,0 +1,80 @@
+[
+  {
+    "id": "RD-K3-shortcuts",
+    "name": "Both seal tools show a shortcut in their tooltip",
+    "ok": true,
+    "detail": "{\"Add monogram seal\":\"Add monogram seal (B)\",\"Guest pass seal added\":\"Guest pass seal added (Q)\"}"
+  },
+  {
+    "id": "RD-K3-B",
+    "name": "Pressing B adds a monogram seal",
+    "ok": true,
+    "detail": "10 -> 11"
+  },
+  {
+    "id": "RD-K3-Q",
+    "name": "Pressing Q does not add a second entry seal when one is there",
+    "ok": true,
+    "detail": "11 -> 11"
+  },
+  {
+    "id": "RD-K3-help",
+    "name": "Help lists both new shortcuts",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L11a",
+    "name": "View > See it as a guest shows the card and what guests get",
+    "ok": true,
+    "detail": "See it as a guest  The card as it arrives on a guest's phone, without the studio"
+  },
+  {
+    "id": "RD-L11b",
+    "name": "No guest link or real code is shown",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L11c",
+    "name": "The guest preview passes axe",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-L11d",
+    "name": "Escape closes it",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-F2-export",
+    "name": "A failed export says what happened and what to do, without the raw browser error",
+    "ok": true,
+    "detail": "The file could not be made. Try again, or pick another format (a PNG works for most cards); nothing was downloaded. | Try again"
+  },
+  {
+    "id": "RD-F2-retry",
+    "name": "There is a Try again button next to the error",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "RD-F2-retry-works",
+    "name": "Try again repeats the export and downloads the file",
+    "ok": true,
+    "detail": "Adaeze-Tunde-invitation.png"
+  },
+  {
+    "id": "RD-K6-50",
+    "name": "50 layers: one row height and the list scrolls",
+    "ok": false,
+    "detail": "{\"layersOnCard\":50,\"rows\":50,\"heights\":[38],\"scrolls\":false} (test bug: the scroll container was found by the wrong ancestor; re-run in closeout-k6.json: scrolls=true)"
+  },
+  {
+    "id": "RD-K6-rename",
+    "name": "Inline rename works with 50 layers",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -43,8 +43,8 @@ export function StudioBottomDock({
       className={cn(
         "pointer-events-auto fixed inset-x-0 bottom-0 z-(--studio-z-panel) flex h-14 items-center justify-center gap-2 px-2 py-2 sm:px-4 pointer-coarse:py-1 transition-colors select-none border-t",
         dark
-          ? "border-[#3f2935] bg-[var(--studio-surface-dark)]/92 text-[var(--studio-cream)] shadow-(--studio-shadow-float-dark)"
-          : "border-[#e6ded2] bg-[#ffffff]/95 text-[var(--studio-ink)] shadow-(--studio-shadow-float-light)"
+          ? "border-[var(--studio-edge-dark-3)] bg-[var(--studio-surface-dark)]/92 text-[var(--studio-cream)] shadow-(--studio-shadow-float-dark)"
+          : "border-[var(--studio-line-4)] bg-[var(--studio-white)]/95 text-[var(--studio-ink)] shadow-(--studio-shadow-float-light)"
       )}
     >
       {/* Undo / Redo */}

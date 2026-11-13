@@ -258,7 +258,7 @@
   }
   .mobileTabs button[aria-expanded="true"] {
     background: var(--burgundy);
-    color: #fffaf0;
+    color: var(--studio-ivory-text);
   }
   .panelTop,
   .panelBottom {

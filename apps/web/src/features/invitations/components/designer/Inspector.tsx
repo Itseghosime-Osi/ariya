@@ -90,7 +90,7 @@ const fieldClass = (dark?: boolean) =>
     "min-h-10 w-full rounded-(--studio-radius-control) border px-3 text-xs outline-none transition-colors",
     dark
       ? "border-white/15 bg-white/[0.06] text-[var(--studio-cream)] placeholder-zinc-400 focus:border-[var(--studio-gold)] focus:ring-1 focus:ring-[var(--studio-gold)] focus:bg-white/[0.09]"
-      : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] placeholder-[#a6929a] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)] shadow-xs"
+      : "border-[var(--studio-line)] bg-white text-[var(--studio-ink)] placeholder-[var(--studio-placeholder)] focus:border-[var(--studio-wine)] focus:ring-1 focus:ring-[var(--studio-wine)] shadow-xs"
   );
 
 /** A number that commits on Enter or when you leave it, so typing "12" never passes through "1". */
@@ -707,7 +707,7 @@ export function Inspector({
                 "mt-3 rounded-(--studio-radius-control) border p-2.5 transition-colors",
                 dark
                   ? "border-white/10 bg-white/[0.03]"
-                  : "border-[var(--studio-line)] bg-[#f8f6f2]"
+                  : "border-[var(--studio-line)] bg-[var(--studio-well-light-2)]"
               )}
             >
               <span

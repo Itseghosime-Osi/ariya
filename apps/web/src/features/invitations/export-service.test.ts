@@ -47,3 +47,19 @@ describe("export dimensions", () => {
     expect(size.width).toBeGreaterThan(400);
   });
 });
+
+describe("print size note", () => {
+  it("states the trim size, bleed and resolution in plain words", async () => {
+    const { printNote } = await import("./export-service");
+    expect(printNote(360, 504)).toBe(
+      "Trim size 5 x 7 in - bleed 0.125 in - 300 DPI - cut on the crop marks"
+    );
+    expect(printNote(414, 558)).toContain("5.75 x 7.75 in");
+  });
+
+  it("uses only characters a standard PDF font can draw", async () => {
+    const { printNote } = await import("./export-service");
+    for (const ch of printNote(360, 504))
+      expect(ch.charCodeAt(0)).toBeLessThan(128);
+  });
+});

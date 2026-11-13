@@ -175,3 +175,9 @@ The alignment icons appear in the options bar and again in the inspector. Removi
 
 - On touch screens the tool rail buttons are 44 px (they were 40 px) and the five phone tabs (Properties, Colours, Layers, History, View) are 44 px tall (they were 38 px). To make room the phone tab row and the tool strip are 52 px tall instead of 48 px; the canvas still ends above the bottom bar at 360, 390 and 768 px. Desktop tool buttons stay 40 px (mouse). Evidence: `evidence/tidy-batch46.json` (8 checks), `screenshots/tidy-touch-after-390.png`.
 - This closes the first two items in "Open after the tidy" above. Still open: the shared panel components used by the seating studio, and a real-device pass on phones.
+
+### Polish batch 3: header and tool rail (K2, K3)
+
+- **Header:** the separate Help "?" button is removed; Help stays in the Help menu and on the `?` key. The header is three fixed groups: back and menus, title and save status, theme, Simple/Pro and logo.
+- **Tool rail:** six groups with one divider between each: Select, Text, Shapes and colour, Pictures, Seal and entry pass, View. The dividers are tighter (4 px of margin instead of 12 px) so the colour buttons still fit on a 900 px tall screen.
+- Evidence: `evidence/polish-batch47.json` (13 checks); screenshots `screenshots/polish3-before-*.png` and `polish3-after-*.png` (1440x900, 1440x720, 390).

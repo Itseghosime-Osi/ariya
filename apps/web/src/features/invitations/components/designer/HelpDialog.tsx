@@ -33,6 +33,8 @@ const SHORTCUTS: { group: string; items: [string, string][] }[] = [
       ["Line", "L"],
       ["Arrow", "A"],
       ["Star", "S"],
+      ["Monogram seal", "B"],
+      ["Guest pass seal", "Q"],
     ],
   },
   {
