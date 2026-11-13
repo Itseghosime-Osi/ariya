@@ -13,15 +13,21 @@ export function PageTips({
   tipKey,
   title = "Three things to know",
   items,
+  forced = false,
+  onDismiss,
 }: {
   tipKey: string;
   title?: string;
   items: React.ReactNode[];
+  /** Shown again on request (the Help button), even after it was dismissed. */
+  forced?: boolean;
+  onDismiss?: () => void;
 }) {
   const onboarding = useOnboarding();
   const [allowed, setAllowed] = React.useState(false);
   React.useEffect(() => setAllowed(autoOnboardingAllowed()), []);
-  if (!onboarding || !allowed || onboarding.state.tips?.includes(tipKey))
+  if (!onboarding) return null;
+  if (!forced && (!allowed || onboarding.state.tips?.includes(tipKey)))
     return null;
 
   return (
@@ -55,7 +61,10 @@ export function PageTips({
         </div>
         <button
           type="button"
-          onClick={() => onboarding.update({ tips: [tipKey] })}
+          onClick={() => {
+            onboarding.update({ tips: [tipKey] });
+            onDismiss?.();
+          }}
           className="min-h-11 shrink-0 rounded-full border border-hairline bg-white px-4 text-xs font-semibold text-night hover:border-night/40 focus-visible:outline-2 focus-visible:outline-burgundy"
         >
           Got it

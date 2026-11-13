@@ -101,7 +101,7 @@ export function WelcomeCard({
             {firstName ? `Hello, ${firstName}.` : "Hello, and welcome."}
           </DialogTitle>
           <DialogDescription className="mt-1.5 text-sm leading-relaxed text-ivory/75">
-            Let us get you set up. It takes about a minute, and you can change
+            Let's get you set up. It takes about a minute, and you can change
             anything later.
           </DialogDescription>
         </div>

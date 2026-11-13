@@ -257,6 +257,11 @@ export function RemindersClient({ eventId, data }: RemindersClientProps) {
               selectedIds={selectedIds}
               onToggleSelect={handleToggleSelect}
               onSelectAll={handleSelectAll}
+              addGuestsHref={
+                data.recipients.length === 0
+                  ? `/events/${eventId}/guests`
+                  : undefined
+              }
             />
           </DeskItem>
 

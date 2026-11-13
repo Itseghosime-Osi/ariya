@@ -26,6 +26,9 @@ import { enableFireworkAudioOnInteraction } from "@/lib/firework-audio";
 import { PREVIOUS_PAGE_KEY } from "@/lib/previous-page";
 import { OnboardingProvider } from "@/features/onboarding/OnboardingProvider";
 import { WelcomeCard } from "@/features/onboarding/WelcomeCard";
+import { RouteTips } from "@/features/onboarding/RouteTips";
+import { FirstStepsPill } from "@/features/onboarding/FirstStepsPill";
+import { isOverviewPath } from "@/features/onboarding/page-help";
 import type { HostRole, Onboarding } from "@/features/onboarding/state";
 
 const SIDEBAR_KEY = "ariya-sidebar";
@@ -336,6 +339,11 @@ export function AppShell({
               )}
             >
               {archivedMatch && <EventArchivedBanner />}
+              {/* A way back to First steps, and the page's own tips, on every celebration page. */}
+              {eventId && !isOverviewPath(pathname) && (
+                <FirstStepsPill eventId={eventId} pathname={pathname} />
+              )}
+              <RouteTips />
               {eventEnded && <EventEndedBanner />}
               {children}
             </main>

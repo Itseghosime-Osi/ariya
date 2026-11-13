@@ -99,6 +99,33 @@ test("a new host is welcomed, toured and given their first steps", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("dashboard-tour")).toBeHidden();
 
+  // Away from the desk: the page's own tips, a Help button that brings them back, and a pill that
+  // leads back to First steps.
+  await page.goto(`/events/${eventId}/reminders`);
+  const tips = page.getByTestId("page-tips-reminders");
+  await expect(tips).toBeVisible({ timeout: 15_000 });
+  await expectAccessible(page, '[data-testid="page-tips-reminders"]');
+  await tips.getByRole("button", { name: "Got it" }).click();
+  await expect(tips).toBeHidden();
+  await page.getByTestId("help-button").click();
+  await expect(page.getByTestId("page-tips-reminders")).toBeVisible();
+  // With no guests yet, the empty list says where to start.
+  await expect(page.getByRole("link", { name: "Add guests" })).toBeVisible();
+
+  const pill = page.getByTestId("first-steps-pill");
+  await expect(pill).toContainText("First steps · 0 of 5");
+  await pill.click();
+  await page.getByRole("link", { name: /^Lay out the seating/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/events/${eventId}/seating`));
+
+  // Help on the desk is the tour.
+  await page.goto(`/events/${eventId}`);
+  await page.getByTestId("help-button").click();
+  await expect(page.getByTestId("dashboard-tour")).toBeVisible({
+    timeout: 10_000,
+  });
+  await page.keyboard.press("Escape");
+
   // Hiding First steps is for good.
   await steps.getByRole("button", { name: "Hide first steps" }).click();
   await expect(steps).toBeHidden();

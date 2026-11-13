@@ -2,7 +2,13 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { mergeOnboarding, readOnboarding, type Onboarding } from "./state";
+import { getFirstStepsStatus } from "./queries";
+import {
+  mergeOnboarding,
+  readOnboarding,
+  type FirstStepsStatus,
+  type Onboarding,
+} from "./state";
 
 export type OnboardingResult = { ok: true } | { ok: false; error: string };
 
@@ -54,4 +60,18 @@ export async function setHostRoleAction(
   const { error } = await supabase.auth.updateUser({ data: { role } });
   if (error) return { ok: false, error: "Could not save that just now." };
   return { ok: true };
+}
+
+/** First steps for one celebration, for the pill on its other pages. */
+export async function getFirstStepsAction(
+  eventId: string
+): Promise<FirstStepsStatus | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(eventId)) return null;
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("guests")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", eventId);
+  if (error) return null;
+  return getFirstStepsStatus(eventId, count ?? 0);
 }
