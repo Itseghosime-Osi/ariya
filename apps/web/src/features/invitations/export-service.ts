@@ -2,7 +2,7 @@
 
 import { updateEntrySealPlates } from "./components/seal-plate";
 import { toPng, toJpeg } from "html-to-image";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { InvitationDesign } from "./types";
 import { designDimensionsPx } from "./layer-ops";
 
@@ -157,6 +157,12 @@ function exportWait<T>(
 /** Print bleed and the crop-mark margin, in PDF points (72 per inch): 0.125 in of bleed. */
 export const PRINT_BLEED_PT = 9;
 export const PRINT_MARK_PT = 18;
+
+/** The size note printed in the margin of a print-ready PDF (WinAnsi characters only). */
+export function printNote(widthPt: number, heightPt: number): string {
+  const inches = (pt: number) => (pt / 72).toFixed(2).replace(/\.?0+$/, "");
+  return `Trim size ${inches(widthPt)} x ${inches(heightPt)} in - bleed ${PRINT_BLEED_PT / 72} in - 300 DPI - cut on the crop marks`;
+}
 
 /**
  * Pad a rendered card with `bleedPx` on every side by stretching its outermost pixel row and
@@ -407,6 +413,15 @@ export async function exportInvitation({
         mark(left - gap, y, left - gap - len, y);
         mark(right + gap, y, right + gap + len, y);
       }
+      // A one-line size note in the margin, so the printer knows what they are holding.
+      const noteFont = await pdf.embedFont(StandardFonts.Helvetica);
+      page.drawText(printNote(size.widthPt, size.heightPt), {
+        x: left + 12,
+        y: 6,
+        size: 6,
+        font: noteFont,
+        color: rgb(0.25, 0.25, 0.25),
+      });
     } else {
       const embedded = await pdf.embedPng(bytes(image));
       page = pdf.addPage([size.widthPt, size.heightPt]);

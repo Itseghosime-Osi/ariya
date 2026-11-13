@@ -97,7 +97,7 @@ function ToolButton({
           "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 z-(--studio-z-overlay) hidden rounded-md px-2 py-1 text-xs font-medium shadow-xl whitespace-nowrap group-hover:block border",
           dark
             ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)] border-white/15"
-            : "bg-[#ffffff] text-[var(--studio-ink)] border-[#e6ded2] shadow-black/10"
+            : "bg-[var(--studio-white)] text-[var(--studio-ink)] border-[var(--studio-line-4)] shadow-black/10"
         )}
       >
         <span>{label}</span>
@@ -413,7 +413,7 @@ export function ToolRail({
                 "z-(--studio-z-overlay) rounded-xl border p-3 shadow-2xl backdrop-blur-md w-64 animate-in fade-in zoom-in-95 duration-150",
                 dark
                   ? "border-[var(--studio-edge-dark)] bg-[var(--studio-night)] text-white"
-                  : "border-[var(--studio-line)] bg-[#ffffff] text-[var(--studio-ink)] shadow-black/15"
+                  : "border-[var(--studio-line)] bg-[var(--studio-white)] text-[var(--studio-ink)] shadow-black/15"
               )}
             >
               <div

@@ -1731,7 +1731,7 @@ export function InvitationDesigner({
       <div
         className={cn(
           "fixed inset-0 z-(--studio-z-base) transition-colors",
-          dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]"
+          dark ? "bg-[var(--studio-night)]" : "bg-[var(--studio-stage-light)]"
         )}
       >
         <div className={cn(styles.stage, !pro && styles.stageSimple)}>
@@ -1823,8 +1823,8 @@ export function InvitationDesigner({
           className={cn(
             "pointer-events-auto fixed bottom-16 left-1/2 z-(--studio-z-floating) w-[min(34rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-2xl border p-3 text-sm shadow-xl",
             dark
-              ? "border-[#5e384c] bg-[#2a1b23] text-[var(--studio-cream)]"
-              : "border-[var(--studio-gold)] bg-[#fffaf0] text-[var(--studio-ink-2)]"
+              ? "border-[var(--studio-edge-dark-2)] bg-[var(--studio-notice-dark)] text-[var(--studio-cream)]"
+              : "border-[var(--studio-gold)] bg-[var(--studio-ivory-text)] text-[var(--studio-ink-2)]"
           )}
         >
           <p className="font-semibold">
@@ -1849,7 +1849,7 @@ export function InvitationDesigner({
                   text: "Card updated from the event details. You can undo this.",
                 });
               }}
-              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#6e1426]"
+              className="rounded-full bg-[var(--studio-wine)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--studio-wine-3)]"
             >
               Update the card
             </button>
@@ -1862,6 +1862,23 @@ export function InvitationDesigner({
                   /* the offer comes back next time */
                 }
                 setKeptKey(factsKey);
+                setNotice({
+                  tone: "ok",
+                  text: "Keeping your wording. The card is unchanged.",
+                  action: {
+                    label: "Undo",
+                    ariaLabel: "Undo keeping my wording",
+                    onClick: () => {
+                      try {
+                        localStorage.removeItem(factsKey);
+                      } catch {
+                        /* the offer was only hidden for this visit */
+                      }
+                      setKeptKey(null);
+                      setNotice(null);
+                    },
+                  },
+                });
               }}
               className="rounded-full border px-4 py-1.5 text-xs font-semibold hover:bg-black/5"
             >
@@ -2150,8 +2167,8 @@ export function InvitationDesigner({
                   styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
-                    ? "bg-[#1d1419] border-[var(--studio-edge-dark)]"
-                    : "bg-[#f4efe8] border-[var(--studio-line)]"
+                    ? "bg-[var(--studio-well-dark)] border-[var(--studio-edge-dark)]"
+                    : "bg-[var(--studio-well-light)] border-[var(--studio-line)]"
                 )}
               >
                 <button
@@ -2298,8 +2315,8 @@ export function InvitationDesigner({
                   styles.panelTabs,
                   "flex items-center gap-1 px-2 py-1.5 border-b select-none transition-colors",
                   dark
-                    ? "bg-[#1d1419] border-[var(--studio-edge-dark)]"
-                    : "bg-[#f4efe8] border-[var(--studio-line)]"
+                    ? "bg-[var(--studio-well-dark)] border-[var(--studio-edge-dark)]"
+                    : "bg-[var(--studio-well-light)] border-[var(--studio-line)]"
                 )}
               >
                 <button

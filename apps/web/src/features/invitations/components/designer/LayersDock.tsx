@@ -136,7 +136,7 @@ function LayerThumbnail({
           "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-2xs",
           dark
             ? "border-[var(--studio-gold)]/40 bg-[var(--studio-gold)]/20 text-[var(--studio-gold)]"
-            : "border-[var(--studio-bronze)]/40 bg-[var(--studio-bronze)]/15 text-[#7a5612]"
+            : "border-[var(--studio-bronze)]/40 bg-[var(--studio-bronze)]/15 text-[var(--studio-bronze-ink)]"
         )}
       >
         <Icon name="celebration" size={13} />
@@ -188,7 +188,7 @@ function RowButton({
         "grid h-7 w-7 pointer-coarse:h-11 pointer-coarse:w-11 shrink-0 place-items-center rounded disabled:opacity-20 transition-colors focus-visible:outline-2",
         dark
           ? "text-zinc-300 hover:bg-white/10 hover:text-white aria-pressed:text-[var(--studio-gold)]"
-          : "text-[#5c474e] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)] aria-pressed:text-[var(--studio-wine)]"
+          : "text-[var(--studio-ink-5)] hover:bg-[var(--studio-wine)]/10 hover:text-[var(--studio-wine)] aria-pressed:text-[var(--studio-wine)]"
       )}
     >
       {children}
@@ -289,7 +289,7 @@ function SortableRow({
           "group flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-(--studio-radius-control) px-2 py-1 transition-all select-none border",
           on
             ? dark
-              ? "bg-[var(--studio-active-dark)] text-white border-[#5e384c] shadow-xs"
+              ? "bg-[var(--studio-active-dark)] text-white border-[var(--studio-edge-dark-2)] shadow-xs"
               : "bg-[var(--studio-wine)]/10 text-[var(--studio-wine)] border-[var(--studio-wine)]/25 shadow-xs font-semibold"
             : dark
               ? "text-zinc-200 border-transparent hover:bg-white/5 hover:text-white"
@@ -353,7 +353,7 @@ function SortableRow({
             className={cn(
               "min-w-0 flex-1 rounded px-2 py-0.5 text-xs outline-none",
               dark
-                ? "border border-[var(--studio-gold)] bg-[#161619] text-white"
+                ? "border border-[var(--studio-gold)] bg-[var(--studio-chip-dark)] text-white"
                 : "border border-[var(--studio-wine)] bg-white text-[var(--studio-ink)]"
             )}
           />
@@ -572,7 +572,7 @@ export function LayersDock({
         "flex min-h-0 flex-1 flex-col select-none transition-colors",
         dark
           ? "bg-[var(--studio-surface-dark)] text-[var(--studio-cream)]"
-          : "bg-[#faf8f5] text-[var(--studio-ink)]"
+          : "bg-[var(--studio-panel-light)] text-[var(--studio-ink)]"
       )}
     >
       {/* Blend Mode & Opacity Strip */}
@@ -581,8 +581,8 @@ export function LayersDock({
           className={cn(
             "border-b px-3 py-2 transition-colors",
             dark
-              ? "border-[var(--studio-edge-dark)] bg-[#1c1217] text-zinc-200"
-              : "border-[var(--studio-line)] bg-[#f5efe7] text-[var(--studio-ink-2)]"
+              ? "border-[var(--studio-edge-dark)] bg-[var(--studio-strip-dark)] text-zinc-200"
+              : "border-[var(--studio-line)] bg-[var(--studio-strip-light)] text-[var(--studio-ink-2)]"
           )}
         >
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3">
@@ -854,7 +854,7 @@ export function LayersDock({
                           className="h-full w-full object-cover"
                         />
                       ) : background?.kind === "velvet" ? (
-                        <span className="h-4 w-4 rounded-sm bg-[#5c1322] border border-[var(--studio-gold)]/40" />
+                        <span className="h-4 w-4 rounded-sm bg-[var(--studio-wine-4)] border border-[var(--studio-gold)]/40" />
                       ) : (
                         <span className="h-4 w-4 rounded-sm bg-[var(--studio-paper)] border border-black/10 shadow-2xs" />
                       )}
@@ -885,8 +885,8 @@ export function LayersDock({
         className={cn(
           "flex h-9 items-center justify-between border-t px-3",
           dark
-            ? "border-[var(--studio-edge-dark)] bg-[#1c1217] text-zinc-400"
-            : "border-[var(--studio-line)] bg-[#f5efe7] text-[var(--studio-mauve)]"
+            ? "border-[var(--studio-edge-dark)] bg-[var(--studio-strip-dark)] text-zinc-400"
+            : "border-[var(--studio-line)] bg-[var(--studio-strip-light)] text-[var(--studio-mauve)]"
         )}
       >
         <div className="flex items-center gap-2">

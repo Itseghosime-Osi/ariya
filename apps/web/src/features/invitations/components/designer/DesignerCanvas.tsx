@@ -118,7 +118,7 @@ function ViewportHorizontalRuler({
         y1={isOrigin ? 4 : isMajor ? 8 : isHalf ? 14 : 18}
         x2={screenX}
         y2={24}
-        stroke={isOrigin ? "#dfba73" : "currentColor"}
+        stroke={isOrigin ? "var(--studio-gold)" : "currentColor"}
         strokeWidth={isOrigin ? 1.5 : isMajor ? 1.2 : 0.8}
         opacity={isOrigin ? 1 : isMajor ? 0.7 : isHalf ? 0.4 : 0.25}
       />
@@ -132,7 +132,7 @@ function ViewportHorizontalRuler({
           y={11}
           fontSize="9"
           fontFamily="monospace"
-          fill={isOrigin ? "#dfba73" : "currentColor"}
+          fill={isOrigin ? "var(--studio-gold)" : "currentColor"}
           opacity={isOrigin ? 1 : 0.8}
         >
           {x}
@@ -151,8 +151,8 @@ function ViewportHorizontalRuler({
       className={cn(
         "pointer-events-auto cursor-row-resize absolute left-7 right-0 top-0 h-6 select-none overflow-hidden border-b z-(--studio-z-panel) transition-colors",
         dark
-          ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
+          ? "border-[var(--studio-ink-4)] bg-[var(--studio-night-2)] text-zinc-400 hover:text-white"
+          : "border-[var(--studio-line-3)] bg-[var(--studio-line-2)] text-[var(--studio-mauve-2)] hover:text-[var(--studio-wine)]"
       )}
     >
       {paperEnd > paperStart && (
@@ -176,7 +176,7 @@ function ViewportHorizontalRuler({
             y1={0}
             x2={cardLeft + cursorX * scale}
             y2={24}
-            stroke="#dfba73"
+            stroke="var(--studio-gold)"
             strokeWidth={2}
           />
         )}
@@ -230,7 +230,7 @@ function ViewportVerticalRuler({
         y1={screenY}
         x2={26}
         y2={screenY}
-        stroke={isOrigin ? "#dfba73" : "currentColor"}
+        stroke={isOrigin ? "var(--studio-gold)" : "currentColor"}
         strokeWidth={isOrigin ? 1.5 : isMajor ? 1.2 : 0.8}
         opacity={isOrigin ? 1 : isMajor ? 0.7 : isHalf ? 0.4 : 0.25}
       />
@@ -244,7 +244,7 @@ function ViewportVerticalRuler({
           y={screenY + 9}
           fontSize="8"
           fontFamily="monospace"
-          fill={isOrigin ? "#dfba73" : "currentColor"}
+          fill={isOrigin ? "var(--studio-gold)" : "currentColor"}
           opacity={isOrigin ? 1 : 0.8}
         >
           {y}
@@ -260,8 +260,8 @@ function ViewportVerticalRuler({
       className={cn(
         "pointer-events-auto cursor-col-resize absolute left-0 top-6 bottom-0 w-7 select-none overflow-hidden border-r z-(--studio-z-panel) transition-colors",
         dark
-          ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-          : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
+          ? "border-[var(--studio-ink-4)] bg-[var(--studio-night-2)] text-zinc-400 hover:text-white"
+          : "border-[var(--studio-line-3)] bg-[var(--studio-line-2)] text-[var(--studio-mauve-2)] hover:text-[var(--studio-wine)]"
       )}
     >
       <div
@@ -283,7 +283,7 @@ function ViewportVerticalRuler({
             y1={cardTop + cursorY * scale}
             x2={26}
             y2={cardTop + cursorY * scale}
-            stroke="#dfba73"
+            stroke="var(--studio-gold)"
             strokeWidth={2}
           />
         )}
@@ -1460,7 +1460,7 @@ export function DesignerCanvas({
       data-testid="designer-stage"
       className={cn(
         "absolute inset-0 overflow-hidden select-none",
-        dark ? "bg-[var(--studio-night)]" : "bg-[#ede6da]",
+        dark ? "bg-[var(--studio-night)]" : "bg-[var(--studio-stage-light)]",
         isPanMode &&
           (gesture.current?.type === "pan" ? "cursor-grabbing" : "cursor-grab")
       )}
@@ -1758,8 +1758,8 @@ export function DesignerCanvas({
             className={cn(
               "pointer-events-auto absolute left-0 top-0 z-(--studio-z-floating) flex h-6 w-7 select-none items-center justify-center border-b border-r font-mono text-xs font-bold transition-colors",
               dark
-                ? "border-[#2f1f27] bg-[#1a1217] text-zinc-400 hover:text-white"
-                : "border-[#ded6c9] bg-[#e6dfd3] text-[#6d545e] hover:text-[var(--studio-wine)]"
+                ? "border-[var(--studio-ink-4)] bg-[var(--studio-night-2)] text-zinc-400 hover:text-white"
+                : "border-[var(--studio-line-3)] bg-[var(--studio-line-2)] text-[var(--studio-mauve-2)] hover:text-[var(--studio-wine)]"
             )}
           >
             px
@@ -1845,8 +1845,8 @@ export function DesignerCanvas({
                 }}
                 className="group absolute inset-y-0 z-(--studio-z-panel) flex items-center cursor-col-resize pointer-events-auto"
               >
-                <div className="h-full w-px bg-[#00e5ff] shadow-(--studio-glow-selection) transition-all group-hover:w-0.5 group-hover:bg-[var(--studio-gold)]" />
-                <span className="absolute top-2 -left-6 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
+                <div className="h-full w-px bg-[var(--studio-selection)] shadow-(--studio-glow-selection) transition-all group-hover:w-0.5 group-hover:bg-[var(--studio-gold)]" />
+                <span className="absolute top-2 -left-6 hidden rounded bg-[var(--studio-selection)] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
                   X: {guide.pos}px
                 </span>
               </div>
@@ -1866,8 +1866,8 @@ export function DesignerCanvas({
               }}
               className="group absolute inset-x-0 z-(--studio-z-panel) flex justify-center cursor-row-resize pointer-events-auto"
             >
-              <div className="h-px w-full bg-[#00e5ff] shadow-(--studio-glow-selection) transition-all group-hover:h-0.5 group-hover:bg-[var(--studio-gold)]" />
-              <span className="absolute right-2 -top-5 hidden rounded bg-[#00e5ff] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
+              <div className="h-px w-full bg-[var(--studio-selection)] shadow-(--studio-glow-selection) transition-all group-hover:h-0.5 group-hover:bg-[var(--studio-gold)]" />
+              <span className="absolute right-2 -top-5 hidden rounded bg-[var(--studio-selection)] px-1.5 py-0.5 text-xs font-mono font-bold text-black shadow-md group-hover:block whitespace-nowrap">
                 Y: {guide.pos}px
               </span>
             </div>
@@ -2020,7 +2020,7 @@ export function DesignerCanvas({
                   !multiple && selected.rotation
                     ? `rotate(${selected.rotation}deg)`
                     : undefined,
-                outline: "1.5px solid #b8864b",
+                outline: "1.5px solid var(--studio-bronze)",
                 outlineOffset: 2,
               }}
             >
@@ -2148,7 +2148,7 @@ export function DesignerCanvas({
               height: drawingBox.height,
             }}
           >
-            <div className="absolute -bottom-7 right-0 rounded-md bg-[#1c070d]/95 backdrop-blur px-2 py-0.5 font-mono text-xs font-bold text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-md whitespace-nowrap">
+            <div className="absolute -bottom-7 right-0 rounded-md bg-[var(--studio-wine-ink)]/95 backdrop-blur px-2 py-0.5 font-mono text-xs font-bold text-[var(--studio-gold)] border border-[var(--studio-gold)]/40 shadow-md whitespace-nowrap">
               {Math.round(drawingBox.width / zoom)} ×{" "}
               {Math.round(drawingBox.height / zoom)} px
             </div>
@@ -2159,7 +2159,7 @@ export function DesignerCanvas({
       {/* Floating Radius Tooltip (PhotoCraft Style: R: 93.5 px) */}
       {radiusTooltip?.show && (
         <div
-          className="fixed z-(--studio-z-overlay) pointer-events-none -translate-x-1/2 -translate-y-9 rounded-md bg-[#1c070d]/95 backdrop-blur px-2.5 py-1 font-mono text-xs font-bold text-[var(--studio-gold)] shadow-lg border border-[var(--studio-gold)]/40 flex items-center gap-1.5"
+          className="fixed z-(--studio-z-overlay) pointer-events-none -translate-x-1/2 -translate-y-9 rounded-md bg-[var(--studio-wine-ink)]/95 backdrop-blur px-2.5 py-1 font-mono text-xs font-bold text-[var(--studio-gold)] shadow-lg border border-[var(--studio-gold)]/40 flex items-center gap-1.5"
           style={{ left: radiusTooltip.x, top: radiusTooltip.y }}
         >
           <span className="text-xs text-zinc-400">R:</span>

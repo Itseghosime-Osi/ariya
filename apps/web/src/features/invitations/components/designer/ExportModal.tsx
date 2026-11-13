@@ -298,7 +298,9 @@ export function ExportModal({
                     <strong className="text-sm font-semibold text-inherit">
                       <span
                         className={cn(
-                          dark ? "text-[#fff6dc]" : "text-[var(--studio-ink)]"
+                          dark
+                            ? "text-[var(--studio-cream)]"
+                            : "text-[var(--studio-ink)]"
                         )}
                       >
                         Add bleed and crop marks for a print shop
@@ -320,7 +322,9 @@ export function ExportModal({
                 You will get:{" "}
                 <strong
                   className={
-                    dark ? "text-[#fff6dc]" : "text-[var(--studio-ink)]"
+                    dark
+                      ? "text-[var(--studio-cream)]"
+                      : "text-[var(--studio-ink)]"
                   }
                 >
                   {FORMATS.find((f) => f.id === selectedFormat)?.title}

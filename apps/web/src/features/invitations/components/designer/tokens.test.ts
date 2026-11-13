@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
  * `styles/globals.css` as `--studio-*` variables. This keeps one-off numbers from coming back.
  */
 const sources = readdirSync(__dirname)
-  .filter((f) => /\.(tsx|css)$/.test(f) && !/\.test\./.test(f))
+  .filter((f) => /\.(tsx?|css)$/.test(f) && !/\.test\./.test(f))
   .map((f) => ({ name: f, text: readFileSync(join(__dirname, f), "utf8") }));
 const tsx = sources.filter((s) => s.name.endsWith(".tsx"));
 const css = sources.filter((s) => s.name.endsWith(".css"));
@@ -36,5 +36,23 @@ describe("studio tokens", () => {
     expect(find(css, /\b(?:gap|padding|margin):[^;]*\b(?:20|10|6)px/g)).toEqual(
       []
     );
+  });
+
+  it("keeps hex colours to the files that hold design data", () => {
+    // Swatch palettes, gradient presets, default layer colours and icon art are the host's colours,
+    // not the studio's chrome, so they stay literal. Everything else reads a --studio-* token.
+    const designData = new Set([
+      "ColorSwatchesPanel.tsx",
+      "Inspector.tsx",
+      "InvitationDesigner.tsx",
+      "LayersDock.tsx",
+      "NavigatorPanel.tsx",
+      "ToolRail.tsx",
+    ]);
+    const hits = find(
+      sources.filter((s) => !designData.has(s.name)),
+      /#[0-9a-fA-F]{6}\b/g
+    );
+    expect(hits).toEqual([]);
   });
 });
