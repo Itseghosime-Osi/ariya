@@ -3,11 +3,12 @@
 import { useEffect } from "react";
 
 /**
- * Registers the service worker so the checklist and the run sheet open without a signal (6.4.5).
+ * Registers the service worker so the checklist, the run sheet and the check-in desk open without a
+ * signal (6.4.5).
  *
  * Registration used to happen only when someone turned notifications on, which left the offline
  * cache unavailable to a host who never did. It is a no-op everywhere that matters: the worker
- * itself decides what to cache, and it caches only those two pages.
+ * itself decides what to cache, and it caches only those three pages.
  */
 export function OfflineCache() {
   useEffect(() => {
