@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
+import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
@@ -67,13 +68,7 @@ export default function FilmLayout({
   return (
     <html lang="en-NG" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="stylesheet" href={FONTS} precedence="default" />
+        <WebFonts href={FONTS} />
         <script
           type="importmap"
           dangerouslySetInnerHTML={{ __html: SCENE_IMPORT_MAP }}
