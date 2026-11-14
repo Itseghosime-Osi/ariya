@@ -25,11 +25,11 @@ Open `/connect-ai` for a guided wizard with one-click buttons. Àríyá exposes 
 
 ## What an app can do
 
-| Kind                     | Tools                                                                                                                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Read                     | `whoami`, `list_events`, `get_event_overview`, `list_guests`, `get_rsvp_summary`, `list_tables_and_seating`, `get_hall_layout`, `get_hall_rules`, `get_invitation_design`, `check_invitation_layout` |
-| Write (owner or planner) | `create_event`, `update_event`, `add_guest`, `update_guest`, `import_guests`, `update_invitation_design`                                                                                             |
-| Propose                  | `propose_send_invitations`, `propose_send_reminders`, `propose_hall_layout`, `propose_seating_plan`, `list_my_proposals`                                                                             |
+| Kind                     | Tools                                                                                                                                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Read                     | `whoami`, `list_events`, `get_event_overview`, `list_guests`, `get_rsvp_summary`, `list_tables_and_seating`, `get_hall_layout`, `get_hall_rules`, `get_invitation_design`, `check_invitation_layout`                                       |
+| Write (owner or planner) | `create_event`, `update_event`, `add_guest`, `update_guest`, `import_guests`, `update_invitation_design`, `edit_invitation_text`, `edit_invitation_layers`, `apply_invitation_look`, `edit_invitation_styles`, `replace_invitation_design` |
+| Propose                  | `propose_send_invitations`, `propose_send_reminders`, `propose_hall_layout`, `propose_seating_plan`, `list_my_proposals`                                                                                                                   |
 
 ## The approvals desk
 
@@ -48,6 +48,6 @@ Open `/connect-ai` for a guided wizard with one-click buttons. Àríyá exposes 
 | Assignments in one seating proposal        | 300     |
 | Hall layout payload                        | 64 KB   |
 
-> Deliberately not available to AI: Sending email, writing the hall or seating directly, applying its own proposal, deleting anything, writing an RSVP, billing, and team or sign-in changes. The database refuses these for an app token even if a tool were added by mistake.
+> Card edits apply at once and each is one restore away: the card as it was is kept as a version, so restoring it undoes the whole AI change. Deliberately not available to AI: Sending email, writing the hall or seating directly, applying its own proposal, deleting anything, writing an RSVP, billing, and team or sign-in changes. The database refuses these for an app token even if a tool were added by mistake.
 
 Revoke any app from Connect your AI. Full technical detail is in [AI connections (MCP)](mcp.md).
