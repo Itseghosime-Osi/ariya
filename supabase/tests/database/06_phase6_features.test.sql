@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap;
 
-select plan(17);
+select plan(18);
 
 -- Set up test data
 create temp table _test_p6_feat_data (
@@ -288,7 +288,7 @@ select is(
   'check_invitation_quota permits unlimited recipients for paid event'
 );
 
--- Test 16: check_invitation_quota enforces max 20 for unpaid event
+-- Test 16: check_invitation_quota allows up to 50 for an unpaid event, and no more
 do $$
 declare
   v_unpaid_eid uuid;
@@ -307,15 +307,24 @@ begin
   insert into _test_p6_feat_data (event_id) values (v_unpaid_eid);
 end $$;
 
+select is(
+  public.check_invitation_quota(
+    p_event_id := (select event_id from _test_p6_feat_data where event_id != (select event_id from _test_p6_feat_data limit 1) limit 1),
+    p_recipient_count := 50
+  ),
+  true,
+  'Unpaid event may send to 50 guests'
+);
+
 select throws_matching(
   $$
     select public.check_invitation_quota(
       p_event_id := (select event_id from _test_p6_feat_data where event_id != (select event_id from _test_p6_feat_data limit 1) limit 1),
-      p_recipient_count := 25
+      p_recipient_count := 51
     );
   $$,
-  'Free tier limit reached.*20 guests',
-  'Unpaid event rejects sending to > 20 guests'
+  'Free tier limit reached.*50 guests',
+  'Unpaid event rejects sending to > 50 guests'
 );
 
 select * from finish();

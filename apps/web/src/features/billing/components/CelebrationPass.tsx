@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { Icon } from "@/components/ui/icon";
 import { formatKobo } from "@/lib/format";
+import { FREE_PLAN_LIMIT } from "@/lib/plan";
 import { TiltCard } from "@/features/events/components/desk/TiltCard";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import { PassStamp } from "./PassStamp";
@@ -135,7 +136,7 @@ export function CelebrationPass({
                 </>
               ) : (
                 <>
-                  The trial covers 20 invitations and reminders.
+                  The trial covers {FREE_PLAN_LIMIT} invitations and reminders.
                   <span className="hidden sm:inline">
                     {" "}
                     Unlock the pass once to remove every limit for this

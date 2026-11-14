@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CELEBRATION_PASS_AMOUNT_KOBO } from "./paystack";
+import { FREE_PLAN_LIMIT } from "./plan";
 import { pageMetadata } from "./site-metadata";
 const routes = join(process.cwd(), "src/app/(marketing)");
 const filmLayout = join(process.cwd(), "src/app/(film)/layout.tsx");
@@ -36,7 +37,8 @@ describe("public marketing integrity", () => {
     const source = readFileSync(join(routes, "pricing/page.tsx"), "utf8");
     const amount = (CELEBRATION_PASS_AMOUNT_KOBO / 100).toLocaleString("en-NG");
     expect(source).toContain(`₦${amount}`);
-    expect(source).toContain("Up to 20 guest invitations");
+    expect(source).toContain(`Up to ${FREE_PLAN_LIMIT} guest invitations`);
+    expect(source).not.toMatch(/\b20 guest invitations/);
     expect(source).not.toMatch(
       /₦45,000|₦30,000|SMS reminders|Placeholder prices/
     );

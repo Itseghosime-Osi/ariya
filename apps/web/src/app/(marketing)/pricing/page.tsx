@@ -11,7 +11,7 @@ export const metadata = pageMetadata({
   path: "/pricing",
   socialTitle: "Pricing · Àríyá",
   socialDescription:
-    "Pay per event. Free for up to 20 guest invitations. Celebration Pass: ₦50,000.",
+    "Pay per event. Free for up to 50 guest invitations. Celebration Pass: ₦50,000.",
 });
 
 const FAQ = [
@@ -29,15 +29,15 @@ const FAQ = [
   },
   {
     q: "Is there a subscription?",
-    a: "No. You pay once for each event. A free event stays free up to 20 guest invitations.",
+    a: "No. You pay once for each event. A free event stays free up to 50 guest invitations.",
   },
   {
-    q: "What happens when I pass 20 guests?",
+    q: "What happens when I pass 50 invitations?",
     a: "Àríyá asks for the Celebration Pass before it lets you invite more. Nothing already on your list is lost.",
   },
   {
     q: "Do you send WhatsApp messages or texts for me?",
-    a: "Not yet. Email invitations are sent for you, ten guests at a time. For WhatsApp or text, copy each guest's personal link into the chat.",
+    a: "Email invitations are sent for you, ten guests at a time. For WhatsApp, Àríyá opens each guest's chat with the message and their personal link ready, and you press Send. Texts are not sent for you.",
   },
   {
     q: "Is it ready to use today?",
@@ -87,7 +87,7 @@ export default function PricingPage() {
             <div className="price-rows">
               <div className="price-row">
                 <h3>
-                  Intimate<small>Up to 20 guest invitations</small>
+                  Intimate<small>Up to 50 guest invitations</small>
                 </h3>
                 <p className="muted">
                   Personal invitations and RSVP links, a live headcount and
