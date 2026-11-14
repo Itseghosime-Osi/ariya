@@ -40,6 +40,40 @@ function Never({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Every app the Connect your AI page offers, with what it needs and how its card reads. */
+const APPS: { name: string; badge: string; body: string }[] = [
+  {
+    name: "Claude",
+    badge: "Known app",
+    body: "On the web, the desktop app or the phone app. The button opens Claude with Àríyá already filled in: press Add, then Connect, then Approve. On a Team or Enterprise plan, an owner may have to allow custom connectors first.",
+  },
+  {
+    name: "ChatGPT",
+    badge: "Known app",
+    body: "On the web. Open Plugins (on some accounts, Settings then Connectors), turn on Developer mode under Advanced if you see it, add a custom MCP server and paste the name, description and link. What you can add depends on your ChatGPT plan; if you do not see the option, ask your workspace admin.",
+  },
+  {
+    name: "Gemini",
+    badge: "Not verified",
+    body: "On the web, with a personal Google account. Open Settings, then Connectors, choose + Custom and paste the link. Google is still rolling this out, so it may not be offered in your country yet. Gemini is not on our verified list, so its card says Not verified: check the address on the card ends in googleusercontent.com (Google's own), tick the box and approve.",
+  },
+  {
+    name: "Claude Code and Gemini CLI",
+    badge: "An app on your computer",
+    body: "Run the command shown under For developers. A sign-in page opens in your browser; approve it there.",
+  },
+  {
+    name: "Codex",
+    badge: "An app on your computer",
+    body: "Add the setting shown under For developers to Codex's config file, then follow Codex's prompt to sign in and approve it in your browser.",
+  },
+  {
+    name: "Any other app",
+    badge: "Depends on the app",
+    body: "Any app that accepts a remote (HTTP) MCP link can use the address under Copy the MCP link. If the card says Not verified, approve only when the address shown belongs to the app you are setting up.",
+  },
+];
+
 export default async function ConnectAiGuidePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=%2Fconnect-ai%2Fguide");
@@ -82,7 +116,7 @@ export default async function ConnectAiGuidePage() {
                 >
                   Connect your AI
                 </Link>{" "}
-                and copy the address at the top of the page.
+                and choose your app.
               </span>
             </li>
             <li className="flex gap-3">
@@ -90,8 +124,8 @@ export default async function ConnectAiGuidePage() {
                 2
               </span>
               <span>
-                Give it to Claude Code, Claude.ai, ChatGPT or Codex. That page
-                has the exact command or setting for each one.
+                Follow its steps there. Each app is a little different; the
+                notes below say what each one needs.
               </span>
             </li>
             <li className="flex gap-3">
@@ -104,6 +138,27 @@ export default async function ConnectAiGuidePage() {
               </span>
             </li>
           </ol>
+        </DeskItem>
+
+        <DeskItem className={CARD}>
+          <p className={EYEBROW}>Which apps work</p>
+          <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+            Every app connects to the same Àríyá address and asks you to approve
+            it. The sign-in card shows which kind of app is asking.
+          </p>
+          <dl className="mt-4 space-y-4 text-sm text-on-surface-variant">
+            {APPS.map((app) => (
+              <div key={app.name}>
+                <dt className="font-semibold text-on-surface">
+                  {app.name}
+                  <span className="ml-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-ink">
+                    {app.badge}
+                  </span>
+                </dt>
+                <dd className="mt-1 leading-relaxed">{app.body}</dd>
+              </div>
+            ))}
+          </dl>
         </DeskItem>
 
         <DeskItem className={CARD}>
