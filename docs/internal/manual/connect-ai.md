@@ -25,11 +25,11 @@ Open `/connect-ai` for a guided wizard with one-click buttons. Àríyá exposes 
 
 ## What an app can do
 
-| Kind                     | Tools                                                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Read                     | `whoami`, `list_events`, `get_event_overview`, `list_guests`, `get_rsvp_summary`, `list_tables_and_seating`, `get_hall_layout`, `get_hall_rules` |
-| Write (owner or planner) | `create_event`, `update_event`, `add_guest`, `update_guest`, `import_guests`, `update_invitation_design`                                         |
-| Propose                  | `propose_send_invitations`, `propose_send_reminders`, `propose_hall_layout`, `propose_seating_plan`, `list_my_proposals`                         |
+| Kind                     | Tools                                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Read                     | `whoami`, `list_events`, `get_event_overview`, `list_guests`, `get_rsvp_summary`, `list_tables_and_seating`, `get_hall_layout`, `get_hall_rules`, `get_invitation_design`, `check_invitation_layout` |
+| Write (owner or planner) | `create_event`, `update_event`, `add_guest`, `update_guest`, `import_guests`, `update_invitation_design`                                                                                             |
+| Propose                  | `propose_send_invitations`, `propose_send_reminders`, `propose_hall_layout`, `propose_seating_plan`, `list_my_proposals`                                                                             |
 
 ## The approvals desk
 

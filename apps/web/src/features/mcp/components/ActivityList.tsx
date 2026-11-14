@@ -14,6 +14,8 @@ const TOOL_LABEL: Record<string, string> = {
   propose_send_invitations: "Asked to send invitations",
   propose_send_reminders: "Asked to send reminders",
   list_my_proposals: "Checked its own requests",
+  get_invitation_design: "Read the invitation design",
+  check_invitation_layout: "Checked the invitation layout",
 };
 
 const OUTCOME_LABEL: Record<ActivityEntry["outcome"], string> = {

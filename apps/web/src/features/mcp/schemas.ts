@@ -86,6 +86,10 @@ export const listTablesAndSeatingInput = z.object({ eventId });
 
 export const getHallLayoutInput = z.object({ eventId });
 
+export const getInvitationDesignInput = z.object({ eventId });
+
+export const checkInvitationLayoutInput = z.object({ eventId });
+
 /** Asks about the hall designer's rules themselves, so it takes nothing. */
 export const getHallRulesInput = z.object({});
 
@@ -284,6 +288,10 @@ export type ListTablesAndSeatingArgs = z.infer<
   typeof listTablesAndSeatingInput
 >;
 export type GetHallLayoutArgs = z.infer<typeof getHallLayoutInput>;
+export type GetInvitationDesignArgs = z.infer<typeof getInvitationDesignInput>;
+export type CheckInvitationLayoutArgs = z.infer<
+  typeof checkInvitationLayoutInput
+>;
 export type GetHallRulesArgs = z.infer<typeof getHallRulesInput>;
 export type WhoamiArgs = z.infer<typeof whoamiInput>;
 export type CreateEventArgs = z.infer<typeof createEventInput>;
