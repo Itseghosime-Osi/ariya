@@ -1061,7 +1061,13 @@ export class FilmEngine {
 
   // ---------------------------------------------------------------- the frame
 
+  /** Where the closing section sits in the viewport, read once at the start of a frame. */
+  private bizTop = 0;
+
   private step() {
+    // Layout is read here, before this frame writes any style. Read after the writes below, the
+    // browser had to redo layout in the middle of the frame (a "forced reflow", every frame).
+    this.bizTop = this.q("biz")?.getBoundingClientRect().top ?? 0;
     if (this.embed) {
       if (this.embed === "hero") {
         if (this.loaded >= 1 && !this.embedT0) this.embedT0 = performance.now();
@@ -1113,7 +1119,9 @@ export class FilmEngine {
     this.op.scene = sc;
     this.op.velvet = this.velvet();
     this.op.entered = this.status.entered;
-    this.op.covered = this.covered;
+    // The scene stops drawing when it is covered; it also stops once it was switched off for
+    // being too slow on this device.
+    this.op.covered = this.covered || Boolean(this.host?.degraded);
     this.op.blackout = this.blackout;
 
     if (this.status.entered) this.opts.onScene?.(p, pro, sc.mode, sc.local);
@@ -1345,7 +1353,7 @@ export class FilmEngine {
   private updateBiz(r: number, sv: number) {
     const biz = this.q("biz");
     if (!biz) return;
-    const bt = biz.getBoundingClientRect().top;
+    const bt = this.bizTop;
     const vh = window.innerHeight;
     this.covered = !this.embed && bt <= 0;
     const nav = this.q("nav");
