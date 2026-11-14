@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { FREE_PLAN_LIMIT } from "@/lib/plan";
 
 interface InvitationQuotaBannerProps {
   eventId: string;
@@ -14,13 +15,13 @@ export function InvitationQuotaBanner({
 }: InvitationQuotaBannerProps) {
   if (isPaid) return null;
 
-  const remaining = Math.max(0, 20 - invitedCount);
+  const remaining = Math.max(0, FREE_PLAN_LIMIT - invitedCount);
 
   return (
     <div className="flex flex-col justify-between gap-3 rounded-3xl border border-gold/40 bg-gold/10 p-4 sm:flex-row sm:items-center sm:p-5 sm:px-6">
       <div>
         <p className="font-serif text-base font-bold sm:text-lg text-on-surface">
-          Free plan: {invitedCount} of 20 invitations used
+          Free plan: {invitedCount} of {FREE_PLAN_LIMIT} invitations used
         </p>
         <p className="text-[13px] leading-snug text-on-surface-variant sm:text-sm">
           {remaining > 0

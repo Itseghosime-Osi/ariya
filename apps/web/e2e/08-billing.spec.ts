@@ -107,7 +107,7 @@ test.describe("Billing & Paystack Checkout", () => {
     // Quota banner unlocked on Invitations
     await page.goto(`/events/${eventId}/invitations`);
     await expect(
-      page.getByText(/Free plan: \d+ of 20 invitations used/i)
+      page.getByText(/Free plan: \d+ of 50 invitations used/i)
     ).not.toBeVisible();
   });
 });

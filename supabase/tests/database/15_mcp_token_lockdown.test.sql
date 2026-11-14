@@ -64,8 +64,8 @@ begin
   insert into public.guests (event_id, name, party_size) values (v_a, 'Stable', 1);
   insert into public.guests (event_id, name, party_size) values (v_a, 'Stable Two', 1);
 
-  -- 21 uninvited guests on B exist to exercise the free-tier ceiling.
-  for i in 1..21 loop
+  -- 51 uninvited guests on B exist to exercise the free-tier ceiling of 50.
+  for i in 1..51 loop
     insert into public.guests (event_id, name, party_size)
     values (v_b, 'Quota Guest ' || i, 1);
   end loop;
@@ -107,7 +107,7 @@ select set_config('request.jwt.claims',
   json_build_object('sub', (select host from lk), 'role', 'authenticated')::text, true);
 set local role authenticated;
 
-select is((select count(*)::integer from public.guests), 24,
+select is((select count(*)::integer from public.guests), 54,
   'first-party session still reads guests across both celebrations');
 
 reset role;
@@ -200,16 +200,16 @@ set local role authenticated;
 select is(
   (select public.track_invitations_sent(array_agg(id))
    from public.guests where event_id = (select event_b from lk)
-     and name <> 'Quota Guest 21'),
-  20,
-  'first-party session invites the first twenty guests on an unpaid celebration');
+     and name <> 'Quota Guest 51'),
+  50,
+  'first-party session invites the first fifty guests on an unpaid celebration');
 
 select throws_ok(
   format('select public.track_invitations_sent(%L::uuid[])',
          (select array_agg(id)::text from public.guests
-          where event_id = (select event_b from lk) and name = 'Quota Guest 21')),
+          where event_id = (select event_b from lk) and name = 'Quota Guest 51')),
   'P0001', null,
-  'the twenty-first invitation on an unpaid celebration is refused');
+  'the fifty-first invitation on an unpaid celebration is refused');
 
 reset role;
 
