@@ -34,6 +34,10 @@ test.describe("Admin desk", () => {
     for (const path of ["/admin", DESK]) {
       const signedOut = await page.goto(path);
       expect(signedOut?.status(), path).toBe(404);
+      // The same branded "not found" page as any missing address, never the framework's plain one.
+      await expect(
+        page.getByRole("heading", { name: "This page has wandered off" })
+      ).toBeVisible();
     }
 
     await createAndLoginUser(page, context, "not_admin");
@@ -45,6 +49,9 @@ test.describe("Admin desk", () => {
     ]) {
       const res = await page.goto(D(path));
       expect(res?.status(), path).toBe(404);
+      await expect(
+        page.getByRole("heading", { name: "This page has wandered off" })
+      ).toBeVisible();
     }
   });
 
@@ -67,6 +74,14 @@ test.describe("Admin desk", () => {
     const me = await createAndLoginUser(page, context, "admin_user");
     const { eventId, title } = await createTestEvent(page);
     makeAdmin(await userIdFor(me.email));
+
+    // Signing in as an admin lands on the desk (its code screen), not on the celebrations.
+    await context.clearCookies();
+    await page.goto("/sign-in", { waitUntil: "networkidle" });
+    await page.locator("#signin-email").fill(me.email);
+    await page.locator("#signin-password").fill(me.password);
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.waitForURL(DESK_RE("/verify"), { timeout: 15000 });
 
     // Admin, but without the second step: the code screen, not the desk.
     const desk = await page.goto(D("/admin/accounts"));

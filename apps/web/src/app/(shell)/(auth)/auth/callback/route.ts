@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { landingAfterSignIn } from "@/features/admin/landing";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -22,10 +23,14 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(new URL(next, request.url));
+      // A link that asked for a page goes there; otherwise an admin lands on the admin desk.
+      const target = rawNext
+        ? next
+        : await landingAfterSignIn(data.user?.id, null);
+      return NextResponse.redirect(new URL(target, request.url));
     }
   }
 
