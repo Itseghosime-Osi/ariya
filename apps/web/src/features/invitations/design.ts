@@ -95,6 +95,25 @@ export function resolveLayerColour(
   return palette[role];
 }
 
+/**
+ * The colour the card actually draws a layer's words in. On velvet the paper roles flip to light
+ * ones so words stay readable on the dark stage. Shared by the card and the layout checker.
+ */
+export function drawnLayerColour(
+  layer: InvitationLayer,
+  design: Pick<InvitationDesign, "background" | "palette">
+): string {
+  if (design.background.kind === "velvet") {
+    if (layer.colorRole === "custom" && layer.color) return layer.color;
+    if (layer.colorRole === "body") return design.palette.paperEdge;
+    if (layer.colorRole === "accent" || layer.colorRole === "foil") {
+      return design.palette.foil;
+    }
+    return design.palette.paper;
+  }
+  return resolveLayerColour(layer, design.palette);
+}
+
 function textLayer(
   kind: InvitationLayerKind,
   text: string,
