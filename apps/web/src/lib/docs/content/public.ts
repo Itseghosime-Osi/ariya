@@ -68,7 +68,7 @@ export const publicPages: DocPage[] = [
       { t: "h2", x: "Before you send" },
       {
         t: "p",
-        x: "Check the date, venue and RSVP deadline, then preview the invitation as a guest would see it. A free celebration can send up to 20 guest invitations; the [Celebration Pass](/documentation/celebration-pass) lifts the limit. See [Create an event](/documentation/events) and [Send invitations](/documentation/invitations).",
+        x: "Check the date, venue and RSVP deadline, then preview the invitation as a guest would see it. A free celebration can send up to 50 guest invitations; the [Celebration Pass](/documentation/celebration-pass) lifts the limit. See [Create an event](/documentation/events) and [Send invitations](/documentation/invitations).",
       },
     ],
   },
@@ -415,12 +415,12 @@ export const publicPages: DocPage[] = [
     title: "The Celebration Pass",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Free up to 20 invitations; pay once to invite everyone.",
+    summary: "Free up to 50 invitations; pay once to invite everyone.",
     blocks: [
       { t: "h2", x: "What is free" },
       {
         t: "p",
-        x: "Every celebration is free up to 20 guest invitations, with the same tools as a paid one.",
+        x: "Every celebration is free up to 50 guest invitations, with the same tools as a paid one. An invitation is one guest party, so a couple or a family counts once.",
       },
       { t: "h2", x: "The pass" },
       {
@@ -620,7 +620,7 @@ export const publicPages: DocPage[] = [
       { t: "h2", x: "How much does it cost?" },
       {
         t: "p",
-        x: "Free up to 20 guest invitations. The [Celebration Pass](/documentation/celebration-pass) is ₦50,000, once per celebration.",
+        x: "Free up to 50 guest invitations. The [Celebration Pass](/documentation/celebration-pass) is ₦50,000, once per celebration.",
       },
       { t: "h2", x: "How do I get help?" },
       {
