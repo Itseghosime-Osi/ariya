@@ -74,3 +74,49 @@ export async function verifyPaystackTransaction(
 
   return (await response.json()) as PaystackVerifyResult;
 }
+
+export interface PaystackRefundResult {
+  status: boolean;
+  message: string;
+  data?: {
+    id?: number;
+    status?: string;
+    amount?: number;
+    currency?: string;
+    transaction?: { reference?: string };
+  };
+}
+
+/**
+ * Ask Paystack to refund a transaction in full. Paystack processes refunds asynchronously; a
+ * `status: true` answer means the refund was accepted and is on its way to the customer.
+ */
+export async function createPaystackRefund(
+  reference: string,
+  secretKey: string,
+  apiBase = "https://api.paystack.co"
+): Promise<PaystackRefundResult> {
+  const response = await fetch(`${apiBase.replace(/\/$/, "")}/refund`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ transaction: reference }),
+    cache: "no-store",
+  });
+
+  let body: PaystackRefundResult | null = null;
+  try {
+    body = (await response.json()) as PaystackRefundResult;
+  } catch {
+    body = null;
+  }
+  if (!response.ok || !body) {
+    return {
+      status: false,
+      message: body?.message || `Paystack API returned HTTP ${response.status}`,
+    };
+  }
+  return body;
+}

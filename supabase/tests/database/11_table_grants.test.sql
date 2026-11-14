@@ -117,6 +117,7 @@ select set_eq(
   $$
     values
       ('invitation_versions'),
+      ('admin_audit_log'), ('platform_admins'),
       ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
@@ -139,6 +140,7 @@ select set_eq(
   $$
     values
       ('invitation_versions'),
+      ('admin_audit_log'),
       ('studio_metrics'),
       ('ai_activity_log'), ('ai_connection_settings'), ('ai_proposals'), ('ai_quota_usage'),
       ('check_ins'), ('digest_log'), ('email_log'), ('event_invites'), ('event_members'),
