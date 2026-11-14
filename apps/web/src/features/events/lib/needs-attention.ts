@@ -1,12 +1,12 @@
 import { daysBetweenLagos } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
+import { FREE_PLAN_LIMIT, FREE_PLAN_WARN_THRESHOLD } from "@/lib/plan";
 import type { EventWithMetrics } from "../types";
 
 export const NEEDS_ATTENTION_LIMIT = 5;
 export const RSVP_DEADLINE_WARN_DAYS = 7;
 export const EVENT_SOON_WARN_DAYS = 14;
-export const FREE_PLAN_WARN_THRESHOLD = 16;
-export const FREE_PLAN_LIMIT = 20;
+export { FREE_PLAN_LIMIT, FREE_PLAN_WARN_THRESHOLD } from "@/lib/plan";
 
 export type NeedsAttentionKind =
   "rsvp_deadline" | "unseated_guests" | "free_plan_limit" | "event_soon";
@@ -38,7 +38,7 @@ function formatCloseRelative(days: number): string {
  * ordered strictly by urgency:
  * 1. RSVP deadline within 7 days AND awaitingParties > 0
  * 2. Accepted guests not yet seated (seatedGuests < acceptedGuests)
- * 3. Free plan near 20-invite limit (used >= 16 of 20 on unpaid event)
+ * 3. Free plan near its invite limit (40 or more of 50 used on an unpaid event)
  * 4. Event within 14 days
  */
 export function buildNeedsAttention(
@@ -93,7 +93,7 @@ export function buildNeedsAttention(
       });
     }
 
-    // (c) Free plan near the 20-invite limit (unpaid event with >= 16 of 20 used)
+    // (c) Free plan near its invite limit (unpaid event with 40 or more of 50 used)
     const invitesUsed = invitedCountByEventId[event.id];
     if (
       !event.paid_at &&

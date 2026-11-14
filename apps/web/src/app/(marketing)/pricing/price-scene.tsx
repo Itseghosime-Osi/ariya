@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { seg, useScene } from "@/components/site/use-scene";
+import { FREE_PLAN_LIMIT } from "@/lib/plan";
 
 const MAX = 300;
-const FREE = 20;
+const FREE = FREE_PLAN_LIMIT;
 
 /**
  * How the price behaves, shown rather than told: the guest list grows as you scroll, and the price
- * is free until the 21st invitation, then one flat amount however far it keeps climbing.
+ * is free until the 51st invitation, then one flat amount however far it keeps climbing.
  */
 export function PriceScene() {
   const [guests, setGuests] = useState(0);
@@ -32,8 +33,8 @@ export function PriceScene() {
               One price. <em className="foil-text">Whatever the list.</em>
             </h2>
             <p>
-              Up to 20 invitations are free. Past that, one Celebration Pass
-              covers the whole event, whether the list stops at 60 or keeps
+              Up to {FREE} invitations are free. Past that, one Celebration Pass
+              covers the whole event, whether the list stops at 120 or keeps
               going. There is no per-guest fee and no subscription.
             </p>
           </div>
@@ -49,7 +50,7 @@ export function PriceScene() {
                   className="pr-tick"
                   style={{ left: `${(FREE / MAX) * 100}%` }}
                 >
-                  20
+                  {FREE}
                 </span>
               </div>
               <p className={paid ? "pr-price paid" : "pr-price"}>
@@ -57,13 +58,13 @@ export function PriceScene() {
                 <span>
                   {paid
                     ? "Celebration Pass · once for the event"
-                    : "Up to 20 invitations"}
+                    : `Up to ${FREE} invitations`}
                 </span>
               </p>
               <p className="pr-flat">
                 {paid
-                  ? `The same ₦50,000 at ${guests} as at 21.`
-                  : "Keep scrolling: nothing changes after the 21st except the pass."}
+                  ? `The same ₦50,000 at ${guests} as at ${FREE + 1}.`
+                  : `Keep scrolling: nothing changes after the ${FREE + 1}st except the pass.`}
               </p>
             </div>
           </div>
