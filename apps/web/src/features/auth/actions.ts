@@ -7,7 +7,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAuthEmail } from "@/lib/email/auth-mail";
 import { checkRateLimit, getClientIpHmac } from "@/lib/rate-limit";
 import { AuthLinkEmail } from "@/emails/AuthLinkEmail";
-import { safeRedirectPath } from "@/lib/safe-redirect";
 import { mapError } from "@/lib/errors";
 import {
   forgotPasswordSchema,
@@ -23,6 +22,7 @@ import {
 } from "./schemas";
 import { normalizePhoneNumber } from "@/lib/phone";
 import { revalidatePath } from "next/cache";
+import { landingAfterSignIn } from "@/features/admin/landing";
 
 export type ActionResult<T = void> =
   { ok: true; data?: T; redirectTo?: string } | { ok: false; error: string };
@@ -36,7 +36,7 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: signedIn, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
@@ -45,7 +45,10 @@ export async function signInAction(input: SignInInput): Promise<ActionResult> {
     return { ok: false, error: mapError(error, "Failed to sign in") };
   }
 
-  const redirectTo = safeRedirectPath(parsed.data.next, "/events");
+  const redirectTo = await landingAfterSignIn(
+    signedIn.user?.id,
+    parsed.data.next
+  );
   return { ok: true, redirectTo };
 }
 
