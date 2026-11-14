@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useLayoutEffect, useRef } from "react";
+import { linesFor } from "../text-fit";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import { constrainEntrySeals } from "../pass-layout";
 import { updateEntrySealPlates } from "./seal-plate";
-import { resolveLayerColour } from "../design";
+import { drawnLayerColour } from "../design";
 import { designRatio } from "../layer-ops";
 import { EntrySeal, SAMPLE_ENTRY_CODE } from "./EntrySeal";
 import type {
@@ -44,15 +45,7 @@ function cssUrl(url: string | null | undefined): string | undefined {
 }
 
 function colourFor(layer: InvitationLayer, design: InvitationDesign): string {
-  if (design.background.kind === "velvet") {
-    if (layer.colorRole === "custom" && layer.color) return layer.color;
-    if (layer.colorRole === "body") return design.palette.paperEdge;
-    if (layer.colorRole === "accent" || layer.colorRole === "foil") {
-      return design.palette.foil;
-    }
-    return design.palette.paper;
-  }
-  return resolveLayerColour(layer, design.palette);
+  return drawnLayerColour(layer, design);
 }
 
 function isColorDark(colorHexOrRgb?: string | null): boolean {
@@ -202,30 +195,6 @@ function textStyle(
     touchAction: interactive ? "none" : undefined,
     userSelect: interactive ? "none" : undefined,
   };
-}
-
-/**
- * The most lines each kind of text may take before it shrinks. Chosen above what the built-in
- * templates use, so a normal card is never touched and only very long words are fitted.
- */
-const MAX_LINES: Partial<Record<InvitationLayer["kind"], number>> = {
-  kicker: 2,
-  names: 2,
-  message: 3,
-  date: 2,
-  venue: 3,
-  dressCode: 2,
-  footer: 2,
-};
-
-/**
- * Lines a layer may take before its words shrink. Auto follows the kind's own rule; "shrink" fits
- * every kind (two lines where the kind has no rule); "grow" never shrinks, the box grows instead.
- */
-export function linesFor(layer: InvitationLayer): number | undefined {
-  if (layer.textFit === "grow") return undefined;
-  if (layer.textFit === "shrink") return MAX_LINES[layer.kind] ?? 2;
-  return MAX_LINES[layer.kind];
 }
 
 /**

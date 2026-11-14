@@ -67,8 +67,8 @@ Size: S = small, M = medium, L = large. Every item says how we will know it is d
 
 All tools validate against the saved-design schema, respect locked layers, never remove the guest entry seal, and write through the same revision check as the studio.
 
-- [ ] **C1 (M) Read the whole design.** Layers with ids, kinds, text, fonts, sizes, positions, theme, palette, canvas, brand styles, and the list of available fonts, themes and layout presets. Done when: an AI can describe the card accurately from this alone.
-- [ ] **C2 (M) A layout check the AI can read.** Because the AI cannot see the card, a tool reports overlaps, text that leaves the card, long names that need shrinking, and low contrast, using the same rules the studio already uses. Done when: it flags the known long-name case and a deliberately broken layout.
+- [x] **C1 (M) Read the whole design.** Layers with ids, kinds, text, fonts, sizes, positions, theme, palette, canvas, brand styles, and the list of available fonts, themes and layout presets. Done when: an AI can describe the card accurately from this alone. Built as `get_invitation_design`.
+- [x] **C2 (M) A layout check the AI can read.** Because the AI cannot see the card, a tool reports overlaps, text that leaves the card, long names that need shrinking, and low contrast, using the same rules the studio already uses. Done when: it flags the known long-name case and a deliberately broken layout. Built as `check_invitation_layout` (also flags tiny text and words over the entry seal).
 - [ ] **C3 (M) Edit text and style:** change the words, font, size, weight, case, alignment, colour role. Done when: each is one tool call and one undo step in the studio.
 - [ ] **C4 (M) Move and size layers; add and remove text and shapes; reorder.** Done when: the entry seal and locked layers are protected, and the 60-layer limit gives a clear message.
 - [ ] **C5 (M) Apply a theme, a layout preset or a canvas size.** Done when: results match what the same action does in the studio.

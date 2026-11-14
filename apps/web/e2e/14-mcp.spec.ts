@@ -13,6 +13,8 @@ const TOOL_NAMES = [
   "list_tables_and_seating",
   "get_hall_layout",
   "get_hall_rules",
+  "get_invitation_design",
+  "check_invitation_layout",
   "create_event",
   "update_event",
   "add_guest",
