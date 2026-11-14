@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/features/admin/guard";
 import { AdminShell } from "@/features/admin/components/AdminShell";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = {
   title: { default: "Admin • Àríyá", template: "%s • Àríyá admin" },
@@ -14,5 +15,9 @@ export default async function AdminDeskLayout({
   children: React.ReactNode;
 }) {
   const admin = await requireAdmin();
-  return <AdminShell email={admin.email}>{children}</AdminShell>;
+  return (
+    <AdminShell email={admin.email} base={adm("/admin")}>
+      {children}
+    </AdminShell>
+  );
 }

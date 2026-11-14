@@ -2,6 +2,7 @@ import { BRAND_IVORY } from "@/lib/brand";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
+import "@/styles/admin.css";
 import { SITE_URL } from "@/lib/site-url";
 
 /**

@@ -1,3 +1,4 @@
+import { Children, cloneElement, isValidElement } from "react";
 import Link from "next/link";
 import { formatKobo } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ export function Notice({ text }: { text: string }) {
   return (
     <p
       role="status"
-      className="mb-4 rounded-2xl border border-[#b9dcc6] bg-[#e3f1e8] px-4 py-3 text-sm font-semibold text-[#1e5b3c]"
+      className="mb-4 rounded-3xl border border-[#b9dcc6] bg-[#e3f1e8] px-4 py-3 text-sm font-semibold text-[#1e5b3c]"
     >
       {text}
     </p>
@@ -68,7 +69,7 @@ export function Stat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-hairline bg-white/60 p-4">
+    <div className="rounded-3xl adm-glass border border-hairline p-4">
       <p className="text-xs font-semibold text-label-2">{label}</p>
       <p className="mt-1 font-display text-2xl font-bold tabular-nums text-night">
         {typeof value === "number" ? value.toLocaleString("en-NG") : value}
@@ -141,7 +142,7 @@ export function SearchBar({
           name="q"
           defaultValue={query}
           placeholder={placeholder}
-          className="min-h-11 w-full max-w-md rounded-xl border border-outline-variant bg-white px-4 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
+          className="min-h-11 w-full max-w-md desk-field rounded-xl px-4 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
         />
         <button
           type="submit"
@@ -166,7 +167,7 @@ export function SearchBar({
                   "inline-flex min-h-9 items-center rounded-full border px-3 text-xs font-semibold capitalize",
                   on
                     ? "border-night bg-night text-gold"
-                    : "border-hairline bg-white/60 text-label-2 hover:text-night"
+                    : "desk-chip text-label-2 hover:text-night"
                 )}
               >
                 {f}
@@ -230,7 +231,10 @@ export function Pager({
   );
 }
 
-/** A table that scrolls sideways inside its card on a phone instead of widening the page. */
+/**
+ * A table on wide screens; on a phone each row becomes a card, with the column names as labels
+ * (styles/admin.css), so nothing scrolls sideways.
+ */
 export function DataTable({
   head,
   children,
@@ -244,14 +248,27 @@ export function DataTable({
 }) {
   if (rows === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-hairline bg-white/40 p-6 text-center text-sm text-label-2">
+      <p className="rounded-3xl border border-dashed border-hairline bg-white/30 p-6 text-center text-sm text-label-2">
         {empty}
       </p>
     );
   }
+  // Give every cell its column name, for the phone's card layout.
+  const labelled = Children.map(children, (row) => {
+    if (!isValidElement<{ children?: React.ReactNode }>(row)) return row;
+    let i = 0;
+    const cells = Children.map(row.props.children, (cell) => {
+      if (!isValidElement(cell)) return cell;
+      const label = head[i++] ?? "";
+      return cloneElement(cell as React.ReactElement<{ label?: string }>, {
+        label,
+      });
+    });
+    return cloneElement(row, {}, cells);
+  });
   return (
-    <div className="overflow-x-auto rounded-2xl border border-hairline bg-white/60">
-      <table className="w-full min-w-[640px] text-left text-sm">
+    <div className="adm-table adm-glass rounded-3xl border border-hairline sm:overflow-x-auto">
+      <table className="w-full text-left text-sm sm:min-w-[640px]">
         <thead className="border-b border-hairline text-[11px] uppercase tracking-[0.08em] text-label-2">
           <tr>
             {head.map((h) => (
@@ -261,7 +278,7 @@ export function DataTable({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-hairline">{children}</tbody>
+        <tbody className="divide-y divide-hairline">{labelled}</tbody>
       </table>
     </div>
   );
@@ -270,11 +287,18 @@ export function DataTable({
 export function Td({
   children,
   className,
+  label,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** The column name, filled in by DataTable. */
+  label?: string;
 }) {
-  return <td className={cn("px-4 py-3 align-top", className)}>{children}</td>;
+  return (
+    <td data-label={label} className={cn("px-4 py-3 align-top", className)}>
+      {children}
+    </td>
+  );
 }
 
 const dateTime = new Intl.DateTimeFormat("en-NG", {

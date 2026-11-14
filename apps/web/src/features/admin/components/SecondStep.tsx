@@ -17,8 +17,11 @@ interface Enrolment {
  */
 export function SecondStep({
   hasAuthenticator,
+  home,
 }: {
   hasAuthenticator: boolean;
+  /** Where the desk is (its secret address), to go to once the code is right. */
+  home: string;
 }) {
   const router = useRouter();
   const [enrolment, setEnrolment] = useState<Enrolment | null>(null);
@@ -86,14 +89,14 @@ export function SecondStep({
       setError("That code did not match. Wait for a fresh code and try again.");
       return;
     }
-    router.replace("/admin");
+    router.replace(home);
     router.refresh();
   };
 
   const setup = !hasAuthenticator;
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-[28px] border border-hairline bg-white/50 p-7 shadow-[0_24px_48px_-30px_rgba(42,10,20,0.4)] sm:p-9">
+    <div className="mx-auto w-full max-w-md rounded-[28px] adm-glass border border-hairline p-7 shadow-[0_24px_48px_-30px_rgba(42,10,20,0.4)] sm:p-9">
       <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink">
         Admin desk
       </p>
@@ -158,7 +161,7 @@ export function SecondStep({
           maxLength={6}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          className="min-h-12 rounded-xl border border-outline-variant bg-white px-4 text-center font-mono text-2xl tracking-[0.4em] text-night focus-visible:outline-2 focus-visible:outline-burgundy"
+          className="min-h-12 desk-field rounded-xl px-4 text-center font-mono text-2xl tracking-[0.4em] text-night focus-visible:outline-2 focus-visible:outline-burgundy"
           aria-describedby={error ? "admin-code-error" : undefined}
           disabled={busy || (setup && !enrolment)}
         />

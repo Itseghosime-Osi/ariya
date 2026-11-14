@@ -18,6 +18,7 @@ import {
   paymentTone,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Payment" };
 export const dynamic = "force-dynamic";
@@ -38,7 +39,10 @@ export default async function AdminPaymentPage({
   return (
     <>
       <p className="mb-2 text-sm">
-        <Link href="/admin/payments" className="text-label-2 hover:underline">
+        <Link
+          href={adm("/admin/payments")}
+          className="text-label-2 hover:underline"
+        >
           Payments
         </Link>
       </p>
@@ -67,14 +71,14 @@ export default async function AdminPaymentPage({
         Paid by{" "}
         <Link
           className="text-burgundy hover:underline"
-          href={`/admin/accounts/${p.user_id}`}
+          href={adm(`/admin/accounts/${p.user_id}`)}
         >
           {p.profile?.email ?? p.user_id}
         </Link>{" "}
         for{" "}
         <Link
           className="text-burgundy hover:underline"
-          href={`/admin/events/${p.event_id}`}
+          href={adm(`/admin/events/${p.event_id}`)}
         >
           {p.event?.title ?? "a deleted celebration"}
         </Link>

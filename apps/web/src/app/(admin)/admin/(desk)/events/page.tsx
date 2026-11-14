@@ -18,6 +18,7 @@ import {
   textFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Celebrations" };
 export const dynamic = "force-dynamic";
@@ -41,7 +42,7 @@ export default async function AdminEventsPage({
       <PageTitle title="Celebrations" sub="Every celebration, newest first." />
       <Notice text={textFrom(sp.notice, 300)} />
       <SearchBar
-        action="/admin/events"
+        action={adm("/admin/events")}
         query={q}
         placeholder="Search by name, couple or page address"
         filters={EVENT_FILTERS}
@@ -57,7 +58,7 @@ export default async function AdminEventsPage({
             <Td>
               <Link
                 className="font-semibold text-burgundy hover:underline"
-                href={`/admin/events/${e.id}`}
+                href={adm(`/admin/events/${e.id}`)}
               >
                 {e.title}
               </Link>
@@ -66,10 +67,12 @@ export default async function AdminEventsPage({
             <Td>{e.owner_email ?? "—"}</Td>
             <Td>
               {when(e.date, false)}
-              <span className="mt-1 flex gap-1">
-                {e.status === "archived" && <Pill>Archived</Pill>}
-                {e.ended && <Pill>Ended</Pill>}
-              </span>
+              {(e.status === "archived" || e.ended) && (
+                <span className="mt-1 flex gap-1">
+                  {e.status === "archived" && <Pill>Archived</Pill>}
+                  {e.ended && <Pill>Ended</Pill>}
+                </span>
+              )}
             </Td>
             <Td className="tabular-nums">
               {e.invited} / {e.guests}
@@ -82,7 +85,7 @@ export default async function AdminEventsPage({
         ))}
       </DataTable>
       <Pager
-        path="/admin/events"
+        path={adm("/admin/events")}
         page={page}
         total={total}
         pageSize={PAGE_SIZE}

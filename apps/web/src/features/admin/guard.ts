@@ -3,6 +3,7 @@ import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { adm, adminBase } from "./path";
 
 /**
  * Who may open /admin.
@@ -27,6 +28,8 @@ export type AdminState =
   | { kind: "admin"; admin: AdminIdentity };
 
 export const getAdminState = cache(async (): Promise<AdminState> => {
+  // No secret address configured: the desk is closed.
+  if (!adminBase()) return { kind: "none" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,7 +61,7 @@ export const getAdminState = cache(async (): Promise<AdminState> => {
 export async function requireAdmin(): Promise<AdminIdentity> {
   const state = await getAdminState();
   if (state.kind === "none") notFound();
-  if (state.kind === "needs-second-step") redirect("/admin/verify");
+  if (state.kind === "needs-second-step") redirect(adm("/admin/verify"));
   return state.admin;
 }
 

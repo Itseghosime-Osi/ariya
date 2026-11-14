@@ -52,7 +52,7 @@ export default async function AdminHealthPage() {
         sub="Whether the scheduled jobs and the busy parts of Àríyá are working."
       />
       <Section title="Scheduled jobs" className="mt-0">
-        <ul className="divide-y divide-hairline rounded-2xl border border-hairline bg-white/60">
+        <ul className="divide-y divide-hairline adm-glass rounded-3xl border border-hairline">
           <Row
             label="Daily reply reminders"
             value={when(h.last_reminder_email)}
@@ -68,7 +68,7 @@ export default async function AdminHealthPage() {
         </ul>
       </Section>
       <Section title="Last 7 days">
-        <ul className="divide-y divide-hairline rounded-2xl border border-hairline bg-white/60">
+        <ul className="divide-y divide-hairline adm-glass rounded-3xl border border-hairline">
           <Row
             label="Emails that failed"
             value={String(h.emails_failed_7d)}

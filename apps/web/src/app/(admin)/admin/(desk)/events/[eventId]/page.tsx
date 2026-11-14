@@ -21,6 +21,7 @@ import {
   paymentTone,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Celebration" };
 export const dynamic = "force-dynamic";
@@ -39,7 +40,10 @@ export default async function AdminEventPage({
   return (
     <>
       <p className="mb-2 text-sm">
-        <Link href="/admin/events" className="text-label-2 hover:underline">
+        <Link
+          href={adm("/admin/events")}
+          className="text-label-2 hover:underline"
+        >
           Celebrations
         </Link>
       </p>
@@ -92,7 +96,7 @@ export default async function AdminEventPage({
               <Td>
                 <Link
                   className="text-burgundy hover:underline"
-                  href={`/admin/accounts/${m.user_id}`}
+                  href={adm(`/admin/accounts/${m.user_id}`)}
                 >
                   {m.email ?? m.user_id}
                 </Link>
@@ -114,7 +118,7 @@ export default async function AdminEventPage({
               <Td>
                 <Link
                   className="font-mono text-xs text-burgundy hover:underline"
-                  href={`/admin/payments/${p.id}`}
+                  href={adm(`/admin/payments/${p.id}`)}
                 >
                   {p.paystack_reference}
                 </Link>
@@ -130,12 +134,12 @@ export default async function AdminEventPage({
       </Section>
 
       <Section title="Guest list">
-        <p className="rounded-2xl border border-hairline bg-white/60 px-4 py-3 text-sm text-label-2">
+        <p className="adm-glass rounded-3xl border border-hairline px-4 py-3 text-sm text-label-2">
           Guests&rsquo; names, emails and phone numbers are private. Opening the
           list asks why, and the visit is written to the admin log.{" "}
           <Link
             className="font-semibold text-burgundy hover:underline"
-            href={`/admin/events/${event.id}/guests`}
+            href={adm(`/admin/events/${event.id}/guests`)}
           >
             Open the guest list
           </Link>
@@ -157,7 +161,7 @@ export default async function AdminEventPage({
             danger
             confirmPrompt="Type the celebration's name"
             confirmValue={event.title}
-            redirectTo="/admin/events"
+            redirectTo={adm("/admin/events")}
             run={deleteEventAction.bind(null, event.id)}
           />
         </div>

@@ -10,6 +10,7 @@ import {
   naira,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const dynamic = "force-dynamic";
 
@@ -36,14 +37,18 @@ export default async function AdminOverviewPage() {
             value={o.accounts.total}
             hint={`${o.accounts.d1} today · ${o.accounts.d7} this week`}
           />
-          <Stat label="New accounts (30 days)" value={o.accounts.d30} />
+          <Stat
+            label="New accounts"
+            hint="last 30 days"
+            value={o.accounts.d30}
+          />
           <Stat
             label="Celebrations"
             value={o.events.total}
             hint={`${o.events.upcoming} upcoming`}
           />
           <Stat
-            label="New celebrations (30 days)"
+            label="New celebrations"
             value={o.events.d30}
             hint={`${o.events.d7} this week`}
           />
@@ -52,19 +57,19 @@ export default async function AdminOverviewPage() {
 
       <Section title="Activity">
         <StatGrid>
-          <Stat label="Invitations sent today" value={o.invitations.d1} />
+          <Stat label="Invites today" value={o.invitations.d1} />
           <Stat
-            label="Invitations sent (7 days)"
+            label="Invites this week"
             value={o.invitations.d7}
             hint={`${o.invitations.d30.toLocaleString("en-NG")} in 30 days`}
           />
           <Stat
-            label="Replies (7 days)"
+            label="Replies this week"
             value={o.replies.d7}
             hint={`${o.replies.d30.toLocaleString("en-NG")} in 30 days`}
           />
           <Stat
-            label="Guests checked in (7 days)"
+            label="Checked in this week"
             value={o.checkins.d7}
             hint={`${o.checkins.d30.toLocaleString("en-NG")} in 30 days`}
           />
@@ -73,11 +78,8 @@ export default async function AdminOverviewPage() {
 
       <Section title="Money">
         <StatGrid>
-          <Stat label="Revenue (30 days)" value={naira(o.revenue.d30_kobo)} />
-          <Stat
-            label="Revenue (all time)"
-            value={naira(o.revenue.total_kobo)}
-          />
+          <Stat label="Revenue this month" value={naira(o.revenue.d30_kobo)} />
+          <Stat label="Revenue, all time" value={naira(o.revenue.total_kobo)} />
           <Stat
             label="Paid celebrations"
             value={o.revenue.paid_events}
@@ -86,7 +88,7 @@ export default async function AdminOverviewPage() {
           <Stat
             label="Free to paid"
             value={`${conversion}%`}
-            hint={`${o.conversion.paid_sending_events} of ${o.conversion.sending_events} celebrations that sent invitations`}
+            hint={`${o.conversion.paid_sending_events} of ${o.conversion.sending_events} sending invitations paid`}
           />
         </StatGrid>
       </Section>
@@ -102,7 +104,7 @@ export default async function AdminOverviewPage() {
               <Td>
                 <Link
                   className="font-semibold text-burgundy hover:underline"
-                  href={`/admin/events/${e.id}`}
+                  href={adm(`/admin/events/${e.id}`)}
                 >
                   {e.title}
                 </Link>

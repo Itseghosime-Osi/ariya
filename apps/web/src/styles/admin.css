@@ -1,0 +1,148 @@
+/* The admin desk: the host dashboard's look (velvet sidebar, glass cards, the same type) in navy and
+   blue, so staff always know which side of Àríyá they are on. Scoped to `.admin-theme`, so nothing
+   outside /admin changes. Tailwind reads its colour tokens from these custom properties, so
+   redefining them here recolours every utility (bg-wine, text-burgundy, ring colours…) inside. */
+.admin-theme {
+  --color-wine: #16264d;
+  --color-burgundy: #1d4ed8;
+  --color-primary: #16264d;
+  --color-night: #0d1526;
+  --color-ivory: #f3f5f9;
+  --color-on-surface: #0d1526;
+  --color-on-surface-variant: #3c4658;
+  --color-label-2: #45506a;
+  --color-label-3: #5b667e;
+  --color-hairline: rgba(13, 21, 38, 0.08);
+  --color-outline-variant: #c9d1e0;
+  --color-surface-container: #e8ecf4;
+  --color-surface-container-high: #dfe4ef;
+  background-color: #f3f5f9;
+  color: #0d1526;
+}
+
+/* The sidebar panel: navy velvet instead of wine, with the same gold accents. */
+.admin-theme .sb {
+  background:
+    radial-gradient(
+      120% 60% at 0% 0%,
+      rgba(59, 104, 214, 0.38),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 40% at 100% 100%,
+      rgba(233, 201, 138, 0.1),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #13244a 0%, #0c1733 55%, #070e22 100%);
+  box-shadow:
+    0 30px 60px -20px rgba(7, 14, 34, 0.55),
+    0 12px 24px -12px rgba(7, 14, 34, 0.4),
+    inset 0 0 0 1px rgba(233, 201, 138, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.admin-theme .sb-mono {
+  background: linear-gradient(
+    145deg,
+    rgba(37, 72, 160, 0.95),
+    rgba(7, 14, 34, 0.95)
+  );
+}
+
+/* The active page: the dashboard's gold chip and gold label, here on each link itself. */
+.admin-theme .adm-on .sb-ico {
+  background: linear-gradient(145deg, #f6dca8, #e9c98a 55%, #c9a465);
+  box-shadow:
+    0 8px 20px -8px rgba(233, 201, 138, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.admin-theme .adm-on .sb-label {
+  border-radius: 16px;
+  background: linear-gradient(90deg, #e9c98a, #f3d9a6);
+  box-shadow: 0 8px 22px -10px rgba(233, 201, 138, 0.6);
+}
+
+/* Cards: the dashboard's bento card, a translucent wash over the page and never a white block. */
+.admin-theme .adm-glass {
+  background-color: rgba(255, 255, 255, 0.4);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-radius: 24px;
+}
+
+/* The top bar: the dashboard's frosted glass, cooled to the admin palette. */
+.admin-theme .adm-bar {
+  background: rgba(243, 245, 249, 0.96);
+}
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .admin-theme .adm-bar {
+    background: rgba(243, 245, 249, 0.74);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    backdrop-filter: saturate(160%) blur(18px);
+  }
+}
+
+/* The phone dock's active capsule: a soft blue wash with the same gold rim. */
+.admin-theme .dock-capsule {
+  background:
+    radial-gradient(
+      120% 140% at 50% 120%,
+      rgba(233, 201, 138, 0.28),
+      transparent 60%
+    ),
+    rgba(29, 78, 216, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(29, 78, 216, 0.1);
+}
+.admin-theme .dock-pill {
+  box-shadow:
+    0 22px 44px -22px rgba(7, 14, 34, 0.38),
+    0 6px 14px -8px rgba(7, 14, 34, 0.16),
+    inset 0 0 0 1px rgba(7, 14, 34, 0.05);
+}
+
+/* Tables on a phone: each row a card, each cell a "label  value" line. */
+@media (max-width: 639px) {
+  .admin-theme .adm-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .admin-theme .adm-table table,
+  .admin-theme .adm-table tbody,
+  .admin-theme .adm-table tr,
+  .admin-theme .adm-table td {
+    display: block;
+    width: 100%;
+  }
+  .admin-theme .adm-table tr {
+    padding: 12px 16px;
+  }
+  .admin-theme .adm-table td {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 12px;
+    justify-items: start;
+    padding: 4px 0;
+    overflow-wrap: anywhere;
+  }
+  .admin-theme .adm-table td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-label-2);
+    padding-top: 2px;
+  }
+  .admin-theme .adm-table td:first-child {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 6px;
+  }
+  .admin-theme .adm-table td:first-child::before {
+    content: none;
+  }
+}

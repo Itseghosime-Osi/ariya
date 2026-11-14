@@ -18,6 +18,7 @@ import {
   textFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Payments" };
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ export default async function AdminPaymentsPage({
             <Td>
               <Link
                 className="font-mono text-xs text-burgundy hover:underline"
-                href={`/admin/payments/${p.id}`}
+                href={adm(`/admin/payments/${p.id}`)}
               >
                 {p.paystack_reference}
               </Link>
@@ -84,7 +85,7 @@ export default async function AdminPaymentsPage({
         ))}
       </DataTable>
       <Pager
-        path="/admin/payments"
+        path={adm("/admin/payments")}
         page={page}
         total={total}
         pageSize={PAGE_SIZE}
@@ -101,12 +102,16 @@ function StatusFilters({ filter }: { filter: PaymentFilter }) {
       {PAYMENT_FILTERS.map((f) => (
         <Link
           key={f}
-          href={f === "all" ? "/admin/payments" : `/admin/payments?filter=${f}`}
+          href={
+            f === "all"
+              ? adm("/admin/payments")
+              : adm(`/admin/payments?filter=${f}`)
+          }
           aria-current={filter === f ? "page" : undefined}
           className={
             filter === f
               ? "inline-flex min-h-9 items-center rounded-full border border-night bg-night px-3 text-xs font-semibold capitalize text-gold"
-              : "inline-flex min-h-9 items-center rounded-full border border-hairline bg-white/60 px-3 text-xs font-semibold capitalize text-label-2 hover:text-night"
+              : "inline-flex min-h-9 items-center rounded-full desk-chip px-3 text-xs font-semibold capitalize text-label-2 hover:text-night"
           }
         >
           {f}

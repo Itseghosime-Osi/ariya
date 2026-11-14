@@ -13,6 +13,7 @@ import {
   Td,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "AI connections" };
 export const dynamic = "force-dynamic";
@@ -60,7 +61,7 @@ export default async function AdminAiPage() {
               <Td>
                 <Link
                   className="text-burgundy hover:underline"
-                  href={`/admin/accounts/${c.user_id}`}
+                  href={adm(`/admin/accounts/${c.user_id}`)}
                 >
                   {c.user_email}
                 </Link>

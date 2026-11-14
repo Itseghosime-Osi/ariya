@@ -17,6 +17,7 @@ import {
   textFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Emails" };
 export const dynamic = "force-dynamic";
@@ -70,12 +71,16 @@ export default async function AdminEmailsPage({
           {EMAIL_FILTERS.map((f) => (
             <Link
               key={f}
-              href={f === "all" ? "/admin/emails" : `/admin/emails?filter=${f}`}
+              href={
+                f === "all"
+                  ? adm("/admin/emails")
+                  : adm(`/admin/emails?filter=${f}`)
+              }
               aria-current={filter === f ? "page" : undefined}
               className={
                 filter === f
                   ? "inline-flex min-h-9 items-center rounded-full border border-night bg-night px-3 text-xs font-semibold capitalize text-gold"
-                  : "inline-flex min-h-9 items-center rounded-full border border-hairline bg-white/60 px-3 text-xs font-semibold capitalize text-label-2 hover:text-night"
+                  : "inline-flex min-h-9 items-center rounded-full desk-chip px-3 text-xs font-semibold capitalize text-label-2 hover:text-night"
               }
             >
               {f}
@@ -99,7 +104,7 @@ export default async function AdminEmailsPage({
               <Td>
                 <Link
                   className="text-burgundy hover:underline"
-                  href={`/admin/events/${e.event_id}`}
+                  href={adm(`/admin/events/${e.event_id}`)}
                 >
                   {e.event?.title ?? "—"}
                 </Link>
@@ -116,7 +121,7 @@ export default async function AdminEmailsPage({
           ))}
         </DataTable>
         <Pager
-          path="/admin/emails"
+          path={adm("/admin/emails")}
           page={page}
           total={total}
           pageSize={PAGE_SIZE}

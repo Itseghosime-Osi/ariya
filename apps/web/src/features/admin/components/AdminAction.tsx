@@ -67,8 +67,8 @@ export function AdminAction({
     <div
       className={
         danger
-          ? "rounded-2xl border border-error/30 bg-error/[0.04] p-4"
-          : "rounded-2xl border border-hairline bg-white/60 p-4"
+          ? "rounded-3xl border border-error/30 bg-error/[0.04] p-4 sm:p-5"
+          : "rounded-3xl adm-glass border border-hairline p-4 sm:p-5"
       }
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -109,7 +109,7 @@ export function AdminAction({
                 onChange={(e) => setReason(e.target.value)}
                 rows={2}
                 maxLength={500}
-                className="rounded-xl border border-outline-variant bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
+                className="desk-field rounded-xl px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
               />
             </>
           )}
@@ -127,7 +127,7 @@ export function AdminAction({
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
                 autoComplete="off"
-                className="min-h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
+                className="min-h-10 desk-field rounded-xl px-3 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
               />
             </>
           )}

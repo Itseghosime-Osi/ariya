@@ -24,6 +24,7 @@ import {
   paymentTone,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Account" };
 export const dynamic = "force-dynamic";
@@ -48,7 +49,10 @@ export default async function AdminAccountPage({
   return (
     <>
       <p className="mb-2 text-sm">
-        <Link href="/admin/accounts" className="text-label-2 hover:underline">
+        <Link
+          href={adm("/admin/accounts")}
+          className="text-label-2 hover:underline"
+        >
           Accounts
         </Link>
       </p>
@@ -88,7 +92,7 @@ export default async function AdminAccountPage({
                 <Td>
                   <Link
                     className="font-semibold text-burgundy hover:underline"
-                    href={`/admin/events/${m.event.id}`}
+                    href={adm(`/admin/events/${m.event.id}`)}
                   >
                     {m.event.title}
                   </Link>
@@ -119,7 +123,7 @@ export default async function AdminAccountPage({
               <Td>
                 <Link
                   className="font-mono text-xs text-burgundy hover:underline"
-                  href={`/admin/payments/${p.id}`}
+                  href={adm(`/admin/payments/${p.id}`)}
                 >
                   {p.paystack_reference}
                 </Link>
@@ -190,7 +194,7 @@ export default async function AdminAccountPage({
               danger
               confirmPrompt="Type their email"
               confirmValue={profile.email}
-              redirectTo="/admin/accounts"
+              redirectTo={adm("/admin/accounts")}
               run={deleteAccountAction.bind(null, userId)}
             />
           </div>

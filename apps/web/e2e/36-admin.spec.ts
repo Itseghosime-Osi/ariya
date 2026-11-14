@@ -1,13 +1,20 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
-import { makeAdmin, totp, userIdFor } from "./fixtures/admin";
 import { serviceRoleClient } from "./fixtures/service-role";
+import { DESK, makeAdmin, totp, userIdFor } from "./fixtures/admin";
+
+/** The test server's secret desk address (see playwright.config.ts) for an internal /admin path. */
+const D = (path: string) => path.replace(/^\/admin(?=\/|\?|$)/, DESK);
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** A URL pattern under the desk; "$" means the desk's front page itself. */
+const DESK_RE = (rest: string) =>
+  rest === "$" ? new RegExp(`${esc(DESK)}$`) : new RegExp(esc(DESK + rest));
 
 /** Pass the two-step screen, setting up the authenticator the first time. */
 async function passSecondStep(page: Page) {
-  await page.goto("/admin");
-  await page.waitForURL(/\/admin\/verify/);
+  await page.goto(D("/admin"));
+  await page.waitForURL(DESK_RE("/verify"));
   await expect(
     page.getByRole("heading", { name: "Set up two-step sign-in" })
   ).toBeVisible();
@@ -16,7 +23,7 @@ async function passSecondStep(page: Page) {
   expect(secret.length).toBeGreaterThan(10);
   await page.getByLabel("Six-digit code").fill(totp(secret));
   await page.getByRole("button", { name: "Open the admin desk" }).click();
-  await page.waitForURL(/\/admin$/);
+  await page.waitForURL(DESK_RE("$"));
 }
 
 test.describe("Admin desk", () => {
@@ -24,8 +31,10 @@ test.describe("Admin desk", () => {
     page,
     context,
   }) => {
-    const signedOut = await page.goto("/admin");
-    expect(signedOut?.status()).toBe(404);
+    for (const path of ["/admin", DESK]) {
+      const signedOut = await page.goto(path);
+      expect(signedOut?.status(), path).toBe(404);
+    }
 
     await createAndLoginUser(page, context, "not_admin");
     for (const path of [
@@ -34,7 +43,7 @@ test.describe("Admin desk", () => {
       "/admin/verify",
       "/admin/log",
     ]) {
-      const res = await page.goto(path);
+      const res = await page.goto(D(path));
       expect(res?.status(), path).toBe(404);
     }
   });
@@ -60,18 +69,18 @@ test.describe("Admin desk", () => {
     makeAdmin(await userIdFor(me.email));
 
     // Admin, but without the second step: the code screen, not the desk.
-    const desk = await page.goto("/admin/accounts");
+    const desk = await page.goto(D("/admin/accounts"));
     expect(desk?.status()).toBe(200);
-    await expect(page).toHaveURL(/\/admin\/verify/);
+    await expect(page).toHaveURL(DESK_RE("/verify"));
 
     await passSecondStep(page);
     await expect(
       page.getByRole("heading", { name: "Overview", level: 1 })
     ).toBeVisible();
-    await expect(page.getByText("Revenue (all time)")).toBeVisible();
+    await expect(page.getByText("Revenue, all time")).toBeVisible();
 
     // Celebrations: find mine, grant a complimentary pass.
-    await page.goto(`/admin/events?q=${encodeURIComponent(title)}`);
+    await page.goto(D(`/admin/events?q=${encodeURIComponent(title)}`));
     await page.getByRole("link", { name: title }).click();
     await expect(
       page.getByRole("heading", { name: title, level: 1 })
@@ -97,10 +106,10 @@ test.describe("Admin desk", () => {
     ).toBeVisible();
 
     // Withdraw the complimentary pass from the payment page (needs the reference typed).
-    await page.goto(`/admin/events/${eventId}`);
+    await page.goto(D(`/admin/events/${eventId}`));
     await page.getByRole("link", { name: /^COMP-/ }).click();
-    await page.waitForURL(/\/admin\/payments\//);
-    await page.waitForURL(/\/admin\/payments\//);
+    await page.waitForURL(DESK_RE("/payments/"));
+    await page.waitForURL(DESK_RE("/payments/"));
     const reference =
       (await page.getByRole("heading", { level: 1 }).textContent())?.trim() ??
       "";
@@ -117,7 +126,7 @@ test.describe("Admin desk", () => {
     );
 
     // Accounts: suspend, then restore, someone else.
-    await page.goto(`/admin/accounts?q=${encodeURIComponent(other)}`);
+    await page.goto(D(`/admin/accounts?q=${encodeURIComponent(other)}`));
     await page.getByRole("link", { name: "Target Person" }).click();
     await page.getByRole("button", { name: "Suspend account" }).click();
     await page.getByLabel(/Why\?/).fill("Spam invitations");
@@ -138,7 +147,7 @@ test.describe("Admin desk", () => {
     await page.getByLabel(/Why\?/).fill("Asked us to close it");
     await page.getByLabel(/Type their email/).fill(other);
     await page.getByRole("button", { name: "Confirm: delete account" }).click();
-    await page.waitForURL(/\/admin\/accounts\?notice=/);
+    await page.waitForURL(DESK_RE("/accounts?notice="));
     await expect(page.getByRole("status")).toContainText("was deleted");
     const { data: gone } = await serviceRoleClient().auth.admin.getUserById(
       created.user!.id
@@ -146,23 +155,25 @@ test.describe("Admin desk", () => {
     expect(gone.user).toBeNull();
 
     // My own account cannot be acted on from here.
-    await page.goto(`/admin/accounts/${await userIdFor(me.email)}`);
+    await page.goto(D(`/admin/accounts/${await userIdFor(me.email)}`));
     await expect(page.getByText(/This is your own account/)).toBeVisible();
 
     // Delete my test celebration: its name must be typed.
-    await page.goto(`/admin/events/${eventId}`);
+    await page.goto(D(`/admin/events/${eventId}`));
     await page.getByRole("button", { name: "Delete celebration" }).click();
     await page.getByLabel(/Why\?/).fill("Test data");
     await page.getByLabel(/Type the celebration's name/).fill(title);
     await page
       .getByRole("button", { name: "Confirm: delete celebration" })
       .click();
-    await page.waitForURL(/\/admin\/events\?notice=/);
+    await page.waitForURL(DESK_RE("/events?notice="));
     await expect(page.getByRole("status")).toContainText("was deleted");
-    expect((await page.goto(`/admin/events/${eventId}`))?.status()).toBe(404);
+    expect((await page.goto(D(`/admin/events/${eventId}`)))?.status()).toBe(
+      404
+    );
 
     // The log has it all, newest first.
-    await page.goto("/admin/log");
+    await page.goto(D("/admin/log"));
     const log = page.getByRole("table");
     for (const text of [
       "Granted a complimentary pass",
@@ -177,6 +188,10 @@ test.describe("Admin desk", () => {
       await expect(log.getByText(text).first()).toBeVisible();
     }
 
+    // Even for an admin, the plain address stays "not found": the desk lives only at its secret one.
+    expect((await page.goto("/admin"))?.status()).toBe(404);
+    expect((await page.goto("/admin/accounts"))?.status()).toBe(404);
+
     // Every page renders, without accessibility errors.
     for (const [path, heading] of [
       ["/admin", "Overview"],
@@ -188,7 +203,7 @@ test.describe("Admin desk", () => {
       ["/admin/ai", "AI connections"],
       ["/admin/health", "Health"],
     ] as const) {
-      await page.goto(path);
+      await page.goto(D(path));
       await expect(
         page.getByRole("heading", { name: heading, level: 1 })
       ).toBeVisible();

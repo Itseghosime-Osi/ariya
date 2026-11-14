@@ -10,15 +10,16 @@ import {
   pageFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Admin log" };
 export const dynamic = "force-dynamic";
 
 const TARGET_PATHS: Record<string, string> = {
-  account: "/admin/accounts/",
-  event: "/admin/events/",
-  guest_list: "/admin/events/",
-  payment: "/admin/payments/",
+  account: adm("/admin/accounts/"),
+  event: adm("/admin/events/"),
+  guest_list: adm("/admin/events/"),
+  payment: adm("/admin/payments/"),
 };
 
 export default async function AdminLogPage({
@@ -70,7 +71,12 @@ export default async function AdminLogPage({
           );
         })}
       </DataTable>
-      <Pager path="/admin/log" page={page} total={total} pageSize={PAGE_SIZE} />
+      <Pager
+        path={adm("/admin/log")}
+        page={page}
+        total={total}
+        pageSize={PAGE_SIZE}
+      />
     </>
   );
 }

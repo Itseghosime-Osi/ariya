@@ -13,6 +13,7 @@ import {
   textFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Accounts" };
 export const dynamic = "force-dynamic";
@@ -35,7 +36,7 @@ export default async function AdminAccountsPage({
       />
       <Notice text={textFrom(sp.notice, 300)} />
       <SearchBar
-        action="/admin/accounts"
+        action={adm("/admin/accounts")}
         query={q}
         placeholder="Search by name or email"
       />
@@ -52,7 +53,7 @@ export default async function AdminAccountsPage({
               <Td>
                 <Link
                   className="font-semibold text-burgundy hover:underline"
-                  href={`/admin/accounts/${a.id}`}
+                  href={adm(`/admin/accounts/${a.id}`)}
                 >
                   {a.full_name || a.email}
                 </Link>
@@ -79,7 +80,7 @@ export default async function AdminAccountsPage({
         })}
       </DataTable>
       <Pager
-        path="/admin/accounts"
+        path={adm("/admin/accounts")}
         page={page}
         total={total}
         pageSize={PAGE_SIZE}

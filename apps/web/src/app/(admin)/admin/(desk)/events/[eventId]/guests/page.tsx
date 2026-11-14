@@ -12,6 +12,7 @@ import {
   textFrom,
   when,
 } from "@/features/admin/components/ui";
+import { adm } from "@/features/admin/path";
 
 export const metadata: Metadata = { title: "Guest list" };
 export const dynamic = "force-dynamic";
@@ -36,7 +37,7 @@ export default async function AdminGuestListPage({
   const back = (
     <p className="mb-2 text-sm">
       <Link
-        href={`/admin/events/${eventId}`}
+        href={adm(`/admin/events/${eventId}`)}
         className="text-label-2 hover:underline"
       >
         {detail.event.title}
@@ -54,7 +55,7 @@ export default async function AdminGuestListPage({
         />
         <form
           className="flex max-w-lg flex-col gap-2"
-          action={`/admin/events/${eventId}/guests`}
+          action={adm(`/admin/events/${eventId}/guests`)}
         >
           <label htmlFor="why" className="text-sm font-semibold">
             Why are you opening this guest list? (goes in the admin log)
@@ -66,7 +67,7 @@ export default async function AdminGuestListPage({
             minLength={3}
             maxLength={300}
             rows={3}
-            className="rounded-xl border border-outline-variant bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
+            className="desk-field rounded-xl px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
           />
           <button
             type="submit"

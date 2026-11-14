@@ -27,13 +27,13 @@ export function AuditList({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-hairline bg-white/40 p-6 text-center text-sm text-label-2">
+      <p className="rounded-3xl border border-dashed border-hairline bg-white/30 p-6 text-center text-sm text-label-2">
         {empty}
       </p>
     );
   }
   return (
-    <ol className="divide-y divide-hairline rounded-2xl border border-hairline bg-white/60">
+    <ol className="divide-y divide-hairline rounded-3xl adm-glass border border-hairline">
       {rows.map((r) => (
         <li key={r.id} className="px-4 py-3 text-sm">
           <p className="font-semibold text-night">
