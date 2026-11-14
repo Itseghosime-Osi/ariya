@@ -20,6 +20,8 @@ export interface SceneHost {
   now(): number;
   /** Points the canvas at `el`, loading the module the first time it is asked. */
   adopt(el: HTMLElement): void;
+  /** True once the hall was switched off because this device could not keep up with it. */
+  readonly degraded: boolean;
 }
 
 /**
@@ -32,6 +34,36 @@ export function isSoftwareRenderer(name: string): boolean {
   return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
 }
 
+/**
+ * Phones too weak to draw the hall at a watchable frame rate: the scene is a full cinematic
+ * pipeline (multisampled HDR, depth of field, bloom, ambient occlusion, anti-aliasing), so a
+ * budget GPU stutters at any resolution. They get the film without the hall instead.
+ * Returns why, or null when the device can try the hall (a runtime check still protects it).
+ */
+export function lowEndReason(device: {
+  memoryGb?: number;
+  cores?: number;
+  renderer?: string;
+}): string | null {
+  const { memoryGb, cores, renderer = "" } = device;
+  if (memoryGb !== undefined && memoryGb <= 2) return "memory";
+  if (
+    memoryGb !== undefined &&
+    memoryGb <= 4 &&
+    cores !== undefined &&
+    cores <= 4
+  )
+    return "cpu";
+  // Older and entry-level mobile GPUs: PowerVR, Mali-400/T/G31/G51/G52/G71, Adreno 2xx to 5xx and 610/612.
+  if (
+    /PowerVR|Mali-(4\d\d|T\d+|G31|G51|G52|G71)\b|Adreno \(TM\) ?([2-5]\d\d|60\d|61[0-2])\b/i.test(
+      renderer
+    )
+  )
+    return "gpu";
+  return null;
+}
+
 function canRender3d(): boolean {
   try {
     const gl = document.createElement("canvas").getContext("webgl2");
@@ -41,6 +73,18 @@ function canRender3d(): boolean {
       ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) ?? "")
       : "";
     if (isSoftwareRenderer(renderer)) return false;
+    const nav = navigator as unknown as {
+      deviceMemory?: number;
+      hardwareConcurrency?: number;
+    };
+    if (
+      lowEndReason({
+        memoryGb: nav.deviceMemory,
+        cores: nav.hardwareConcurrency,
+        renderer,
+      })
+    )
+      return false;
   } catch {
     return false;
   }
@@ -132,11 +176,62 @@ export function sceneHost(): SceneHost | null {
 
   let script: HTMLScriptElement | null = null;
   let scheduled = false;
+  let degraded = false;
+
+  /**
+   * A safety net for devices that pass the checks above and still cannot keep up. The scene
+   * lowers its own resolution when frames run long, so this only steps in when that is not
+   * enough: under about 10 frames a second for 2.5 s, or under about 22 frames a second for 4 s
+   * once the scene is already at its lowest resolution. The hall is then switched off and the
+   * film carries on without it, rather than stutter.
+   */
+  function watchFrameRate() {
+    let last = 0;
+    let avg = 16;
+    let started = 0;
+    let verySlowSince = 0;
+    let slowSince = 0;
+    const off = () => {
+      degraded = true;
+      canvas.style.display = "none";
+      document.documentElement.setAttribute("data-scene", "off");
+    };
+    const tick = (now: number) => {
+      if (degraded) return;
+      requestAnimationFrame(tick);
+      if (document.hidden) {
+        last = 0;
+        verySlowSince = slowSince = 0;
+        return;
+      }
+      if (last) {
+        const dt = now - last;
+        if (dt > 0 && dt < 1500) avg = avg * 0.8 + dt * 0.2;
+      }
+      last = now;
+      if ((Number(op.loaded) || 0) < 1) return;
+      started ||= now;
+      if (now - started < 3000) return; // let the first seconds settle
+      const info = op.frameInfo as { pixelRatio?: number } | undefined;
+      const atFloor = info?.pixelRatio !== undefined && info.pixelRatio <= 0.75;
+      verySlowSince = avg > 100 ? verySlowSince || now : 0;
+      slowSince = atFloor && avg > 45 ? slowSince || now : 0;
+      if (
+        (verySlowSince && now - verySlowSince > 2500) ||
+        (slowSince && now - slowSince > 4000)
+      )
+        off();
+    };
+    requestAnimationFrame(tick);
+  }
 
   host = {
     canvas,
     op,
     now: () => (performance.now() - t0) / 1000,
+    get degraded() {
+      return degraded;
+    },
     adopt(el) {
       // The module looks #gl up by id when it evaluates, so the canvas has to be
       // in the page before the script is appended.
@@ -151,6 +246,7 @@ export function sceneHost(): SceneHost | null {
         script.src = SCENE_URL;
         script.async = true;
         document.body.appendChild(script);
+        watchFrameRate();
       });
     },
   };
