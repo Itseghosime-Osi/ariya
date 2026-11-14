@@ -4,6 +4,7 @@ import {
   claudeInstallLink,
   claudeCodeCommand,
   codexConfig,
+  geminiCliCommand,
   findNewApp,
 } from "./clients";
 import type { ConnectedApp } from "./types";
@@ -35,6 +36,9 @@ describe("install links and commands", () => {
   it("gives the exact command and setting for developer tools", () => {
     expect(claudeCodeCommand(ADDRESS)).toBe(
       `claude mcp add --transport http ariya ${ADDRESS}`
+    );
+    expect(geminiCliCommand(ADDRESS)).toBe(
+      `gemini mcp add --transport http ariya ${ADDRESS}`
     );
     expect(codexConfig(ADDRESS)).toBe(
       `[mcp_servers.ariya]\nurl = "${ADDRESS}"`
