@@ -86,6 +86,12 @@ export function Film() {
     };
   }, []);
 
+  // Once the film is playing the legal links step out of the way of the player controls (they stay
+  // in the menu); the gate, where the page first opens, still shows them.
+  useEffect(() => {
+    rootRef.current?.classList.toggle("entered", status.entered);
+  }, [status.entered]);
+
   return (
     <div ref={rootRef} className="film">
       <FilmStage />

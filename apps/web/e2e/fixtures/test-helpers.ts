@@ -99,11 +99,16 @@ export async function createTestEvent(
     await page.locator("#name-1").fill(first);
     await page.locator("#name-2").fill(rest.join(" & "));
     await page.locator("#title").fill(title);
+    // `isEnabled` answers at once and ignores a timeout, so it read "disabled" in the moment before
+    // React had caught up with the typing and sent a good page back to reload (WebKit, under load).
+    // Waiting for the button to enable gives the page its three seconds.
     if (
-      await page
-        .getByTestId("wizard-next")
-        .isEnabled({ timeout: 3000 })
-        .catch(() => false)
+      await expect(page.getByTestId("wizard-next"))
+        .toBeEnabled({ timeout: 3000 })
+        .then(
+          () => true,
+          () => false
+        )
     )
       break;
     await page.reload({ waitUntil: "networkidle" });
