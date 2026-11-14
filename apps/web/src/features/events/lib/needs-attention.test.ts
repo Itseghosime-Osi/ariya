@@ -75,9 +75,9 @@ function makeEventItem(overrides: {
 describe("needs-attention", () => {
   const now = "2026-11-10T10:00:00Z";
 
-  it("exports FREE_PLAN_WARN_THRESHOLD = 16 and FREE_PLAN_LIMIT = 20", () => {
-    expect(FREE_PLAN_WARN_THRESHOLD).toBe(16);
-    expect(FREE_PLAN_LIMIT).toBe(20);
+  it("exports FREE_PLAN_WARN_THRESHOLD = 40 and FREE_PLAN_LIMIT = 50", () => {
+    expect(FREE_PLAN_WARN_THRESHOLD).toBe(40);
+    expect(FREE_PLAN_LIMIT).toBe(50);
   });
 
   it("evaluates each rule in isolation and pluralises 1 vs n", () => {
@@ -111,13 +111,13 @@ describe("needs-attention", () => {
     expect(unseated[0].message).toBe("Seat 3 accepted guests");
     expect(unseated[0].href).toBe("/events/e2/seating");
 
-    // Rule (c): Free plan near 20-invite limit (>= 16)
+    // Rule (c): Free plan near its 50-invite limit (>= 40)
     const freeNear = buildNeedsAttention([makeEventItem({ id: "e3" })], {
       now,
-      invitedCountByEventId: { e3: 16 },
+      invitedCountByEventId: { e3: 40 },
     });
     expect(freeNear).toHaveLength(1);
-    expect(freeNear[0].message).toBe("16 of 20 free invites used");
+    expect(freeNear[0].message).toBe("40 of 50 free invites used");
     expect(freeNear[0].href).toBe("/events/e3/billing");
 
     // Rule (d): Event within 14 days
@@ -158,7 +158,7 @@ describe("needs-attention", () => {
 
     const items = buildNeedsAttention([busyEvent, secondEvent], {
       now,
-      invitedCountByEventId: { "all-four": 18, second: 17 },
+      invitedCountByEventId: { "all-four": 45, second: 42 },
     });
 
     expect(items).toHaveLength(5);
