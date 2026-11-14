@@ -11,7 +11,7 @@ test.describe("Pricing", () => {
     await expect(
       page.locator("main").getByText("₦50,000").first()
     ).toBeVisible();
-    await expect(page.getByText(/Up to 20 guest invitations/)).toBeVisible();
+    await expect(page.getByText(/Up to 50 guest invitations/)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /What the pass/ })
     ).toBeVisible();
@@ -22,6 +22,9 @@ test.describe("Pricing", () => {
     await page
       .getByText("Do you send WhatsApp messages or texts for me?")
       .click();
-    await expect(page.getByText(/Not yet\. Email invitations/)).toBeVisible();
+    // WhatsApp opens ready to send, but the host presses Send; texts are never sent for them.
+    await expect(
+      page.getByText(/you press Send\. Texts are not sent for you/)
+    ).toBeVisible();
   });
 });

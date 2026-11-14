@@ -287,23 +287,23 @@ begin
     p_area := 'Victoria Island'
   )->>'id')::uuid;
 
-  -- Insert 20 guests
-  for i in 1..20 loop
+  -- Insert 50 guests (the free allowance)
+  for i in 1..50 loop
     insert into public.guests (event_id, name, email, party_size)
     values (v_unpaid_event, 'Guest ' || i, 'guest' || i || '@owambe.ng', 1)
     returning id into v_gid;
     v_guest_ids := array_append(v_guest_ids, v_gid);
   end loop;
 
-  -- Inviting 20 guests succeeds
+  -- Inviting 50 guests succeeds
   perform public.track_invitations_sent(v_guest_ids);
 
-  -- Insert 21st guest
+  -- Insert the 51st guest
   insert into public.guests (event_id, name, email, party_size)
-  values (v_unpaid_event, 'Guest 21', 'guest21@owambe.ng', 1)
+  values (v_unpaid_event, 'Guest 51', 'guest51@owambe.ng', 1)
   returning id into v_gid;
 
-  -- Inviting 21st guest on unpaid event must fail with PAYMENT_REQUIRED
+  -- Inviting the 51st guest on an unpaid event must fail with PAYMENT_REQUIRED
   begin
     perform public.track_invitations_sent(array[v_gid]);
     raise exception 'Expected PAYMENT_REQUIRED exception but none was thrown';
