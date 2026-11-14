@@ -65,6 +65,7 @@ describe("the manual", () => {
       "/terms",
       "/documentation",
       "/events",
+      "/pricing",
     ]);
     for (const p of DOC_PAGES) {
       for (const block of p.blocks) {
@@ -113,6 +114,11 @@ describe("the manual", () => {
       "team",
       "faq",
       "public-page",
+      "reminders",
+      "the-day",
+      "celebration-pass",
+      "ai-helpers",
+      "account",
     ];
     for (const slug of needed) expect(getDocPage(slug), slug).toBeDefined();
   });

@@ -1,5 +1,9 @@
 import type { DocPage } from "../types";
 
+/**
+ * The public manual. Every step names the button or page as it appears in the app, so keep these
+ * words in step with the screens when a label changes.
+ */
 export const publicPages: DocPage[] = [
   {
     slug: "overview",
@@ -10,28 +14,28 @@ export const publicPages: DocPage[] = [
       "A short guide to planning, replying and welcoming guests with Àríyá.",
     blocks: [
       {
-        t: "h2",
-        x: "For hosts and planners",
+        t: "p",
+        x: "Àríyá plans a celebration from the first guest to the last one through the door: weddings, traditional engagements, birthdays, naming ceremonies and every other owambe.",
       },
+      { t: "h2", x: "For hosts and planners" },
       {
         t: "p",
-        x: "Create a celebration, organise your guests, design invitations and follow their replies. When the day arrives, your team can use the seating plan and check-in desk.",
+        x: "Create a celebration, build the guest list, design the invitation and its film, and follow every reply. Seat guests in a 3D hall, keep a checklist and a run sheet for the day, track vendors, and bring in a team. Start with [Start your celebration](/documentation/quick-start).",
       },
-      {
-        t: "h2",
-        x: "For guests",
-      },
+      { t: "h2", x: "For guests" },
       {
         t: "p",
-        x: "Open the personal invitation your host sends you. Read the details, accept or decline, and keep your entry code handy if one is shown. You do not need a host account to reply.",
+        x: "Open the personal invitation your host sends you, read the details, then accept or decline. Accepted guests see their table and their entry pass. You do not need an account or an app. See [Reply to your invitation](/documentation/rsvp).",
       },
-      {
-        t: "h2",
-        x: "For the welcome team",
-      },
+      { t: "h2", x: "For the welcome team" },
       {
         t: "p",
-        x: "Ask the host to add you to the event team before the day. Use the [check-in guide](/documentation/check-in) to find a guest, verify their pass and record their arrival.",
+        x: "Ask the host to add you to the event team before the day. On the day, the Check-in desk scans passes, finds guests by name and keeps working with no signal. See [Welcome guests at the door](/documentation/check-in).",
+      },
+      { t: "h2", x: "Help inside the app" },
+      {
+        t: "p",
+        x: "New accounts get a short welcome and a tour of the celebration's Overview. The **Help** button at the top of every page shows tips for that page, and on the Overview it replays the tour. You can also replay it any time from **Show me around** in the account menu.",
       },
     ],
   },
@@ -43,28 +47,28 @@ export const publicPages: DocPage[] = [
     summary:
       "From your first event to the first invitation, one step at a time.",
     blocks: [
-      {
-        t: "h2",
-        x: "Your first steps",
-      },
+      { t: "h2", x: "Your first steps" },
       {
         t: "ol",
         x: [
-          "Open Àríyá and create an account, or sign in. Follow any email-confirmation instructions shown.",
-          "From My Events, create a celebration. Complete the steps with its occasion, names, date and venue.",
-          "Add a small group of guests and check their names and contact details.",
-          "Open Invitations, personalise the card and save your design.",
-          "Send an invitation or copy a guest’s personal link to share with them.",
-          "Return to the guest list to follow replies, then seat confirmed guests.",
+          "Create an account with your email and a passcode, or with Google. Tell us whether the celebration is your own or one you are planning for a client.",
+          "From your celebrations, choose **New event**. Pick the occasion, the day, the venue and roughly how many guests are coming.",
+          "Open **Guests** and add a few guests, or import a spreadsheet.",
+          "Open **Invitations**, design the card and save it.",
+          "Send by email, or open each guest's WhatsApp chat with their personal link ready to go.",
+          "Follow the replies on the Overview and in Guests, then seat the guests who accepted.",
         ],
       },
       {
-        t: "h2",
-        x: "Before you send",
+        t: "note",
+        tone: "tip",
+        title: "First steps",
+        x: "The Overview of a new celebration shows a **First steps** list: add guests, design the invitation, send it, seat guests and invite your team. Each one ticks itself off as you go.",
       },
+      { t: "h2", x: "Before you send" },
       {
         t: "p",
-        x: "Check the event date, venue and RSVP deadline. Preview the invitation as a guest would see it. See [Create an event](/documentation/events) and [Send invitations](/documentation/invitations).",
+        x: "Check the date, venue and RSVP deadline, then preview the invitation as a guest would see it. A free celebration can send up to 50 guest invitations; the [Celebration Pass](/documentation/celebration-pass) lifts the limit. See [Create an event](/documentation/events) and [Send invitations](/documentation/invitations).",
       },
     ],
   },
@@ -76,33 +80,35 @@ export const publicPages: DocPage[] = [
     summary:
       "Set the occasion, add the details and keep your celebration up to date.",
     blocks: [
-      {
-        t: "h2",
-        x: "Create the celebration",
-      },
+      { t: "h2", x: "Create the celebration" },
       {
         t: "ol",
         x: [
-          "In My Events, choose the option to create a new celebration.",
-          "Choose the occasion and enter the names requested.",
-          "Complete the date, venue and remaining wizard steps, then finish creating the event.",
+          "From your celebrations, choose **New event**.",
+          "**What are we celebrating?** Pick the occasion and enter the names.",
+          "**Pick the day.** Choose the date and the time of day.",
+          "**Where will you gather?** Enter the venue.",
+          "**Who's coming?** Say roughly how many guests, and whether you will add them one by one or from a spreadsheet.",
         ],
       },
       {
-        t: "h2",
-        x: "Keep details current",
+        t: "p",
+        x: "The new celebration opens on its **Overview**: the countdown, the replies so far, what is next and the First steps list. When you run more than one celebration, switch between them from the switcher at the top of the sidebar.",
       },
+      { t: "h2", x: "Keep details current" },
       {
         t: "p",
-        x: "Use the event’s Settings and Page editor to update its details. Check what is shown on invitations and the public page before sharing them.",
+        x: "Change the name, date, venue and dress code in **Event settings**. Every page and invitation uses these details. The celebration page itself is edited in the **Page editor**.",
       },
-      {
-        t: "h2",
-        x: "Public or private",
-      },
+      { t: "h2", x: "Public or private" },
       {
         t: "p",
-        x: "Only enable a public event page if you want its details to be accessible to people who have that page’s link. A personal guest invitation is different: it belongs to one guest party and should be shared only with that party.",
+        x: "Turn on **Public event page** in Event settings only when you want anyone with the page's address to see the celebration's details. A guest's personal invitation is different: it belongs to one party and works whether the public page is on or off.",
+      },
+      { t: "h2", x: "After the day" },
+      {
+        t: "p",
+        x: "A celebration ends with its day. From the next morning (Lagos time) it becomes a read-only record: the public page and invitation links close, and nothing can be changed. **Archive** a celebration in Event settings to file it away; find it again under Profile, where you can restore it or delete it for good. Deleting cannot be undone.",
       },
     ],
   },
@@ -112,44 +118,39 @@ export const publicPages: DocPage[] = [
     group: "hosts",
     audience: "Hosts and planners",
     summary:
-      "Add guests, review imports and keep each party’s details together.",
+      "Add guests, import a list and keep each party's details together.",
     blocks: [
-      {
-        t: "h2",
-        x: "Add a guest",
-      },
+      { t: "h2", x: "Add a guest" },
       {
         t: "p",
-        x: "Open Guests in your event. Add the guest’s name and any contact details you have. Set the party size and plus-one allowance carefully so the invitation reflects who is invited.",
+        x: "Open **Guests** and choose **Add guest**. Enter the name, and a phone number or email if you have them. Set the **party size** (how many people the invitation is for) and whether a **+1 companion** is allowed. You can also give the guest a side (bride, groom, mutual), a group such as Family or Work, VIP status and notes.",
       },
+      { t: "h2", x: "Import a list" },
       {
-        t: "h2",
-        x: "Import a list",
-      },
-      {
-        t: "p",
-        x: "Use Import to upload a CSV spreadsheet and review the column mapping and validation before saving. Contact-picker and contacts-file options are also available; the phone contact picker depends on your browser.",
-      },
-      {
-        t: "h2",
-        x: "Review and organise",
-      },
-      {
-        t: "ul",
+        t: "ol",
         x: [
-          "Search for a guest or filter the list by response and group.",
-          "Open a guest to edit their details or copy their personal invitation link.",
-          "Review possible duplicates before importing again.",
-          "Keep dietary information and private notes limited to what you need to run the celebration.",
+          "Choose **Import** and pick a CSV spreadsheet. A sample file is offered if you need one.",
+          "Match each column to a guest field.",
+          "Review the rows, including possible duplicates and rows that will be skipped, then import.",
         ],
       },
       {
-        t: "h2",
-        x: "Follow replies",
+        t: "p",
+        x: "You can also import a contacts file, or pick contacts straight from your phone where the browser allows it.",
       },
+      { t: "h2", x: "Review and organise" },
+      {
+        t: "ul",
+        x: [
+          "Search by name, phone or email, and filter by reply, side, group or seating.",
+          "Open a guest to edit their details or copy their personal invitation link.",
+          "Keep dietary details and private notes to what you need for the day.",
+        ],
+      },
+      { t: "h2", x: "Follow replies" },
       {
         t: "p",
-        x: "Accepted and declined replies appear in the guest list. Use the attendance figures as well as the number of guest parties when planning seats.",
+        x: "Each guest shows as attending, declined or awaiting. Plan seats and catering from the number of people attending, not the number of invitations.",
       },
     ],
   },
@@ -158,44 +159,37 @@ export const publicPages: DocPage[] = [
     title: "Send invitations",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Send by email, or share a guest’s personal link yourself.",
+    summary: "Send by email, or by WhatsApp with each guest's personal link.",
     blocks: [
-      {
-        t: "h2",
-        x: "Choose who to invite",
-      },
+      { t: "h2", x: "Choose who to invite" },
       {
         t: "ol",
         x: [
-          "Open Invitations for the event and review the saved card.",
+          "Open **Invitations** and check the saved card.",
           "Select the guests you want to invite.",
-          "Choose email delivery, or copy a personal link or message for manual sharing.",
-          "Check the delivery result before sending again.",
+          "Choose **Email** or **WhatsApp**.",
+          "Check the result before sending again.",
         ],
       },
-      {
-        t: "h2",
-        x: "Share through WhatsApp",
-      },
+      { t: "h2", x: "By email" },
       {
         t: "p",
-        x: "Share copied links or messages in your own WhatsApp conversation. Copying a link does not send it automatically.",
+        x: "Àríyá sends the emails for you, up to ten guests at a time. Guests without an email address are skipped; reach them by WhatsApp instead.",
       },
-      {
-        t: "h2",
-        x: "Keep personal links personal",
-      },
+      { t: "h2", x: "By WhatsApp" },
       {
         t: "p",
-        x: "Each invitation belongs to a guest party. Send it directly to that party rather than posting it in a public group. Use the [public event page](/documentation/public-page) to share general celebration details.",
+        x: "For each selected guest with a phone number, WhatsApp opens on their chat with the message and their personal link ready to go. Press Send in WhatsApp. Àríyá never sends WhatsApp messages or texts on its own.",
       },
-      {
-        t: "h2",
-        x: "If an email is missing",
-      },
+      { t: "h2", x: "Keep personal links personal" },
       {
         t: "p",
-        x: "Ask the guest to check spam or junk folders and confirm their email address. You can share the same personal link directly while you check the delivery result.",
+        x: "Each link belongs to one guest party: it shows their name and lets them reply. Send it straight to that party rather than posting it in a group. To share general details, use the [public event page](/documentation/public-page).",
+      },
+      { t: "h2", x: "If an email is missing" },
+      {
+        t: "p",
+        x: "Ask the guest to check their spam or junk folder and to confirm the address. You can send the same personal link by WhatsApp while you check.",
       },
     ],
   },
@@ -204,36 +198,27 @@ export const publicPages: DocPage[] = [
     title: "Make the invitation yours",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Personalise your card and preview it before inviting guests.",
+    summary: "Design the card, add the entry seal and preview it.",
     blocks: [
-      {
-        t: "h2",
-        x: "Open the designer",
-      },
+      { t: "h2", x: "Open the designer" },
       {
         t: "p",
-        x: "From Invitations, open the designer. Use Simple mode for a guided design or Pro mode for more detailed editing.",
+        x: "From **Invitations**, open the designer. **Simple** guides you through colours, wording and pictures; **Pro** gives you every layer, font and setting.",
       },
-      {
-        t: "h2",
-        x: "Edit and preview",
-      },
+      { t: "h2", x: "Edit and preview" },
       {
         t: "ul",
         x: [
-          "Choose the card’s colours and wording.",
-          "Add the available text, shapes or pictures you need.",
-          "Keep names, date and venue easy to read on a phone.",
-          "Save your design and check it from Invitations before sending.",
+          "Choose the colours and the wording.",
+          "Add text, shapes and your own pictures.",
+          "Keep the names, date and venue easy to read on a phone.",
+          "Save the design. Earlier versions are kept, so you can go back to one.",
         ],
       },
-      {
-        t: "h2",
-        x: "Your guest’s copy",
-      },
+      { t: "h2", x: "The entry seal" },
       {
         t: "p",
-        x: "Guest-specific details appear on their personal invitation. An accepted guest can use the entry information shown on that page; the welcome team can also find them by name.",
+        x: "Add the **entry seal** to the design and each accepted guest's invitation carries their own pass, woven into your card. The door staff scan the seal. Without it, guests are shown a plain QR card instead. Whether guests get a pass at all is set under **Give each guest an access card** in the Page editor's **RSVP & card** tab; with it off, your team checks guests in by name.",
       },
     ],
   },
@@ -242,31 +227,27 @@ export const publicPages: DocPage[] = [
     title: "Share the celebration",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Choose what visitors can see on your event page.",
+    summary: "Shape the page guests open and the questions they answer.",
     blocks: [
-      {
-        t: "h2",
-        x: "Prepare the page",
-      },
+      { t: "h2", x: "Prepare the page" },
       {
         t: "p",
-        x: "Open the Page editor to review the celebration’s description, cover image, schedule and other details. Keep travel and venue information clear.",
+        x: "Open the **Page editor**. On the **Page** tab, set the story, the cover picture, the schedule and the venue details, then preview it on a phone-sized screen. Guests can add the date to their calendar and open the venue on a map.",
       },
-      {
-        t: "h2",
-        x: "Choose visibility",
-      },
+      { t: "h2", x: "RSVP questions and the access card" },
       {
         t: "p",
-        x: "Review the event’s public visibility setting before sharing its page. A public page is for general event details; it does not replace a guest’s personal invitation.",
+        x: "On the **RSVP & card** tab, write the questions guests answer when they reply, such as dietary needs or which events they will attend. Answers so far are shown below each question. The same tab sets whether accepted guests get an access card for the door.",
       },
-      {
-        t: "h2",
-        x: "Images and privacy",
-      },
+      { t: "h2", x: "Choose visibility" },
       {
         t: "p",
-        x: "Use images you have permission to share. Cover-image links can remain accessible to anyone who already has the image link, even after an event is made private.",
+        x: "Turn on **Public event page** in Event settings when you are ready. A public page carries the general details; it does not replace a guest's personal invitation.",
+      },
+      { t: "h2", x: "Pictures and privacy" },
+      {
+        t: "p",
+        x: "Use only pictures you have permission to share. Anyone who already has the address of a picture may still open it after the page is made private.",
       },
     ],
   },
@@ -275,31 +256,219 @@ export const publicPages: DocPage[] = [
     title: "Your celebration film",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Personalise the event film and check how guests will see it.",
+    summary: "Make the short film guests see before their invitation.",
     blocks: [
+      { t: "h2", x: "Tell your story" },
       {
-        t: "h2",
-        x: "Tell your story",
+        t: "p",
+        x: "Open the **Page editor** and choose the **Film** tab. Add scenes with your photos and words, make each one longer or shorter, choose the colours and add your song. Preview it, then **Save film**. Turn on **Play the film for guests** to show it before the invitation.",
+      },
+      { t: "h2", x: "Test mode" },
+      {
+        t: "p",
+        x: "The same tab has the **Invitation is live** switch. Turn it off for test mode: only your team can open the invitation while you get it right. Turn it back on before you send, or guests' links will not open.",
+      },
+      { t: "h2", x: "Sound and accessibility" },
+      {
+        t: "p",
+        x: "Guests choose whether to play the film with sound, and can go straight to the invitation with **Open the invitation**. A **Watch the film** button lets them see it again. Keep the important details on the invitation and the page too, not only in the film.",
+      },
+      { t: "h2", x: "Music and pictures" },
+      {
+        t: "p",
+        x: "Upload only music and pictures you own or have permission to use. A credit alone does not give permission. Ask the rights holder if you are unsure.",
+      },
+    ],
+  },
+  {
+    slug: "reminders",
+    title: "Remind guests to reply",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary: "Nudge the guests who have not replied, by email.",
+    blocks: [
+      { t: "h2", x: "Send a reminder" },
+      {
+        t: "ol",
+        x: [
+          "Open **Reminders**.",
+          "Choose who to remind: everyone, or only those still awaiting a reply.",
+          "Write the message and preview the email.",
+          "Send.",
+        ],
       },
       {
         t: "p",
-        x: "Open the film studio in your event to work with the available photos, wording and music controls. Preview the film before sharing it with guests.",
+        x: "Guests with no email address are listed so you can message them another way, such as WhatsApp from the guest list.",
       },
+      { t: "h2", x: "Automatic reminders" },
       {
-        t: "h2",
-        x: "Sound and accessibility",
+        t: "p",
+        x: "In the two weeks before the celebration, Àríyá emails a reminder each morning to guests who have an email address and have not replied yet. Anyone already emailed in the last day is skipped.",
+      },
+    ],
+  },
+  {
+    slug: "seating",
+    title: "Give everyone a place",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary: "Lay out the hall, seat confirmed guests and share the plan.",
+    blocks: [
+      { t: "h2", x: "Plan the room" },
+      {
+        t: "p",
+        x: "Open **Seating**. Set the size of the hall, then add tables, chairs and areas such as the stage, the dance floor and the cake table. Drag them into place in the 3D hall, or let **Auto layout** offer a few arrangements to start from. On a phone, the list view seats guests table by table.",
+      },
+      { t: "h2", x: "Seat confirmed guests" },
+      {
+        t: "ul",
+        x: [
+          "Only guests who accepted can be seated, and their whole attending party sits together.",
+          "A table shows its free seats; a full table cannot take another party.",
+          "**Seat everyone** fills the tables for you. Check the result before you rely on it.",
+          "**Seating rules** keep guests together, or apart, when seats are filled for you.",
+          "**History** lists every change. Undo one with the button or Ctrl + Z.",
+        ],
+      },
+      { t: "h2", x: "Share and print" },
+      {
+        t: "ul",
+        x: [
+          "**Share the floor plan** makes a view-only link for the venue or caterer. Stop sharing at any time and the old link stops working.",
+          "Download the measured floor plan as a PDF.",
+          "**Print cards and chart** prints place cards and a seating chart for the door.",
+        ],
+      },
+      { t: "h2", x: "Before the day" },
+      {
+        t: "p",
+        x: "Check that nobody who accepted is still waiting for a seat. Accepted guests see their table on their invitation. Wait for **Saved** before you close the studio.",
+      },
+    ],
+  },
+  {
+    slug: "the-day",
+    title: "Checklist, run sheet and vendors",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary:
+      "Plan the work, set the order of the day and keep suppliers close.",
+    blocks: [
+      { t: "h2", x: "Checklist" },
+      {
+        t: "p",
+        x: "Open **Checklist** and build it once: it plans the tasks from your date and your hall, each with a due date and a reason. Tick tasks off as they are done and mark the ones waiting on someone else. A weekly email lists what is due; turn it off in Settings.",
+      },
+      { t: "h2", x: "Run sheet" },
+      {
+        t: "p",
+        x: "The **Run sheet** is the day from start to finish: a time, what happens and whether it is done. It fills in from the checklist, so change a time there. It still opens on a phone with no signal, once it has been opened with one.",
+      },
+      { t: "h2", x: "Vendors" },
+      {
+        t: "p",
+        x: "Add each vendor in **Vendors** with their contact details, cost and deposit; the Overview adds them up into your budget. Give vendors tasks with due dates, and call or email them straight from their row.",
+      },
+    ],
+  },
+  {
+    slug: "team",
+    title: "Prepare your welcome team",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary: "Bring in planners, the couple and door staff before the day.",
+    blocks: [
+      { t: "h2", x: "Invite your helpers" },
+      {
+        t: "p",
+        x: "Open **Team** and choose **Invite member**. Enter their email and a role. They get a link by email that lasts seven days; if it runs out, send another. Only owners and planners can invite people or change roles.",
+      },
+      { t: "h2", x: "Roles" },
+      {
+        t: "ul",
+        x: [
+          "**Owner**: everything, including payment, access and every decision.",
+          "**Lead Planner**: the day-to-day work: guests, seating, vendors and reminders.",
+          "**Celebrant Couple**: sees the whole plan and weighs in, without changing it.",
+          "**Event Staff**: the door: the check-in desk and pass scanning.",
+        ],
       },
       {
         t: "p",
-        x: "Let guests choose whether to listen with sound. Check names and text on a phone, and make sure the important event information is also available on the invitation or event page.",
+        x: "A celebration always keeps at least one owner.",
       },
+      { t: "h2", x: "Before the day" },
       {
-        t: "h2",
-        x: "Sharing music and pictures",
+        t: "p",
+        x: "Ask door staff to sign in and open the Check-in desk once, with a signal, before guests arrive. That saves the guest list on their phone for the moments the signal drops. A short practice helps everyone find the search and the Admit button.",
+      },
+      { t: "h2", x: "Keep access tidy" },
+      {
+        t: "p",
+        x: "Ask helpers to use their own accounts, and remove access that is no longer needed after the celebration.",
+      },
+    ],
+  },
+  {
+    slug: "celebration-pass",
+    title: "The Celebration Pass",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary: "Free up to 50 invitations; pay once to invite everyone.",
+    blocks: [
+      { t: "h2", x: "What is free" },
+      {
+        t: "p",
+        x: "Every celebration is free up to 50 guest invitations, with the same tools as a paid one. An invitation is one guest party, so a couple or a family counts once.",
+      },
+      { t: "h2", x: "The pass" },
+      {
+        t: "p",
+        x: "The Celebration Pass costs ₦50,000, once for the celebration, and unlocks unlimited guest invitations. There is no subscription. Planners buy one pass per client celebration. See [pricing](/pricing).",
+      },
+      { t: "h2", x: "How to pay" },
+      {
+        t: "ol",
+        x: [
+          "Open **Billing** in the celebration.",
+          "Choose to pay for the Celebration Pass and pay in naira through Paystack.",
+          "The celebration unlocks as soon as Paystack confirms the payment.",
+        ],
       },
       {
         t: "p",
-        x: "Only upload music and pictures you own or have permission to use. A credit alone does not grant permission. Ask the rights holder if you are unsure whether your intended use is covered.",
+        x: "Your card details go to Paystack, never to Àríyá. Every attempt and tax invoice stays on the Billing page; copy the reference beside any payment for your records. Owners and planners can pay.",
+      },
+    ],
+  },
+  {
+    slug: "ai-helpers",
+    title: "Plan with an AI assistant",
+    group: "hosts",
+    audience: "Hosts and planners",
+    summary:
+      "Connect Claude, ChatGPT, Gemini or another AI app, and approve what it prepares.",
+    blocks: [
+      { t: "h2", x: "Connect an app" },
+      {
+        t: "p",
+        x: "Choose **Connect to an AI** at the top of the screen (on a phone, it is in the account menu) and follow the steps for your app: Claude, ChatGPT, Gemini, any other app that takes an MCP link, or, on a computer, Claude Code, Gemini CLI and Codex. Gemini works on the web with a personal Google account, where Google offers it. Once connected, ask in your own words, for example to add guests or draft a seating plan.",
+      },
+      { t: "h2", x: "What it can and cannot do" },
+      {
+        t: "ul",
+        x: [
+          "It can read your celebrations, guests, replies and seating.",
+          "It can create and edit celebrations, add or import guests and adjust invitation wording.",
+          "It can prepare an invitation send, a hall layout or a seating plan, but these wait for your approval.",
+          "It can never delete anything, touch payments, change your team or change how you sign in.",
+        ],
+      },
+      { t: "h2", x: "Approvals and undo" },
+      {
+        t: "p",
+        x: "Requests that need your yes appear in **Approvals**, with the changes shown before you decide. A change you approved can be put back for seven days from the decided list. Disconnect an app at any time from the same page.",
       },
     ],
   },
@@ -311,114 +480,35 @@ export const publicPages: DocPage[] = [
     summary:
       "Accept or decline, add the details your host needs and find your pass.",
     blocks: [
-      {
-        t: "h2",
-        x: "Open your invitation",
-      },
+      { t: "h2", x: "Open your invitation" },
       {
         t: "p",
-        x: "Use the personal link sent by your host. Check that it shows your name and the correct celebration. You do not need to create a host account.",
+        x: "Use the personal link your host sent you by email or WhatsApp. It shows your name and the celebration. You do not need an account or an app; it opens in any phone browser. Some hosts open with a short film, which you can play with or without sound, or skip.",
       },
-      {
-        t: "h2",
-        x: "Send your reply",
-      },
+      { t: "h2", x: "Send your reply" },
       {
         t: "ol",
         x: [
-          "Choose whether you are attending.",
-          "If accepting, confirm how many of your invited party will attend.",
-          "Add your plus-one’s name if your invitation allows one, and answer any questions shown.",
-          "Submit and check the confirmation on the page.",
+          "Choose **Joyfully Accept** or **Regretfully Decline**.",
+          "If accepting, say how many of your invited party are coming.",
+          "Add your +1's name if your invitation allows one, and answer any questions shown, such as dietary needs.",
+          "Add a warm wish if you like, and submit.",
         ],
       },
-      {
-        t: "h2",
-        x: "Bring your entry details",
-      },
+      { t: "h2", x: "Your table and your pass" },
       {
         t: "p",
-        x: "If an entry seal or code is shown after accepting, keep it available for arrival. The welcome team can also search for you by name.",
+        x: "Once you accept, your invitation shows your table when the host has seated you, and your entry pass if the host uses one. Keep the invitation on your phone and show it at the door. The welcome team can also find you by name.",
       },
-      {
-        t: "h2",
-        x: "Need to change something?",
-      },
+      { t: "h2", x: "Getting there" },
       {
         t: "p",
-        x: "Use the update option if it is available. If the deadline has passed, the event is closed, or the link does not work, contact the host. Do not use another guest’s link.",
+        x: "Use **Add to Calendar** to save the date, and **Get Directions** to open the venue on a map.",
       },
-    ],
-  },
-  {
-    slug: "seating",
-    title: "Give everyone a place",
-    group: "hosts",
-    audience: "Hosts and planners",
-    summary:
-      "Arrange tables, seat confirmed guests and prepare a plan for the day.",
-    blocks: [
-      {
-        t: "h2",
-        x: "Plan the room",
-      },
+      { t: "h2", x: "Need to change something?" },
       {
         t: "p",
-        x: "Open Seating for your event. Add tables with the right capacity, then arrange them in the hall. Use the list view if you prefer working with rows rather than the room view.",
-      },
-      {
-        t: "h2",
-        x: "Seat confirmed guests",
-      },
-      {
-        t: "ul",
-        x: [
-          "Seat guests who have accepted their invitations.",
-          "Count the whole attending party when assigning a table.",
-          "Use the capacity shown on each table; a full table cannot take another party.",
-          "Review any auto-seating suggestions before relying on the final plan.",
-        ],
-      },
-      {
-        t: "h2",
-        x: "Before the day",
-      },
-      {
-        t: "p",
-        x: "Check for confirmed guests without a seat. Review the table list and use the print option for a seating chart your team can refer to. Wait for changes to save before leaving the studio.",
-      },
-    ],
-  },
-  {
-    slug: "team",
-    title: "Prepare your welcome team",
-    group: "hosts",
-    audience: "Hosts and planners",
-    summary: "Give helpers access before the celebration begins.",
-    blocks: [
-      {
-        t: "h2",
-        x: "Invite your helpers",
-      },
-      {
-        t: "p",
-        x: "Open Team in the celebration and invite the people who will help. Choose the role that matches the work each person needs to do.",
-      },
-      {
-        t: "h2",
-        x: "At the door",
-      },
-      {
-        t: "p",
-        x: "Use the staff role for helpers who need to verify passes and admit guests. Arrange a short practice before the day so everyone knows the event, the search tools and the Admit button.",
-      },
-      {
-        t: "h2",
-        x: "Keep access appropriate",
-      },
-      {
-        t: "p",
-        x: "Ask helpers to use their own accounts. Review the team after the event and remove access that is no longer needed.",
+        x: "Open the same link and choose **Update RSVP or dietary preferences**. After the RSVP deadline, or once the celebration has ended, the link no longer takes changes; contact the host. Never use another guest's link.",
       },
     ],
   },
@@ -427,43 +517,66 @@ export const publicPages: DocPage[] = [
     title: "Welcome guests at the door",
     group: "staff",
     audience: "Door staff",
-    summary: "Find the guest, check the details, then tap Admit.",
+    summary: "Scan or find the guest, check the details, then tap Admit.",
     blocks: [
-      {
-        t: "h2",
-        x: "Get ready",
-      },
+      { t: "h2", x: "Get ready" },
       {
         t: "p",
-        x: "Sign in with the account the host added to the event team. Open the correct celebration’s Check-in desk. Allow camera access if you want to scan passes.",
+        x: "Sign in with the account the host added to the team, and open the celebration's **Check-in** desk. Do this once with a signal before guests arrive, so the guest list is saved on your phone. Allow camera access to scan passes.",
       },
-      {
-        t: "h2",
-        x: "Find and verify",
-      },
+      { t: "h2", x: "Find and verify" },
       {
         t: "ol",
         x: [
-          "Scan the guest’s entry seal, type their entry code, or search by name.",
-          "Check the name, attending party and table shown. Read any warning before continuing.",
-          "When you are ready to let the party in, tap Admit. Verifying a pass alone does not admit anyone.",
+          "Scan the pass on the guest's invitation, type the code printed on it, or search their name.",
+          "Check the name, the party size and the table shown, and read any warning.",
+          "Tap **Admit**. Use + and − to admit more or fewer of the party. Verifying a pass alone admits nobody.",
         ],
       },
-      {
-        t: "h2",
-        x: "Already admitted or not confirmed",
-      },
+      { t: "h2", x: "Already admitted or not confirmed" },
       {
         t: "p",
-        x: "If a guest is already admitted, do not admit them again. If their invitation is not accepted or the details do not match, ask the host or lead planner to resolve it.",
+        x: "The desk refuses a party that is already fully in, and a guest whose reply is not accepted. Ask the host or lead planner to sort out anything that does not match.",
       },
-      {
-        t: "h2",
-        x: "Keep the desk connected",
-      },
+      { t: "h2", x: "When the signal drops" },
       {
         t: "p",
-        x: "Check the connection and arrival counts during the event. If the service is unavailable, follow the host’s agreed fallback and keep a record to reconcile later; do not assume an unsent action was recorded.",
+        x: "The desk keeps working from the copy on your phone: scan, search and admit as usual. The status line says **No signal**, and admissions show **Waiting to send**. When the signal returns they are sent on their own. If another phone let the same guest in meanwhile, nobody is counted twice, and the desk lists them as already let in on another phone.",
+      },
+      {
+        t: "note",
+        tone: "warn",
+        x: "Keep the Check-in page open, and do not sign out, while admissions are waiting to send. The copy of the guest list is wiped from the phone two days after the celebration.",
+      },
+    ],
+  },
+  {
+    slug: "account",
+    title: "Your account and the app",
+    group: "start",
+    audience: "Hosts, planners and staff",
+    summary:
+      "Install Àríyá on your phone, choose notifications and keep your account safe.",
+    blocks: [
+      { t: "h2", x: "Put Àríyá on your home screen" },
+      {
+        t: "p",
+        x: "Àríyá installs like an app, with no app store. On iPhone, open it in Safari, tap Share, then **Add to Home Screen**. On Android, open it in Chrome and choose **Install app**. On a computer, use the install icon at the right of Chrome's or Edge's address bar.",
+      },
+      { t: "h2", x: "Notifications" },
+      {
+        t: "p",
+        x: "In **Settings**, choose to hear the moment a guest replies, and whether to get the Monday checklist email. Set quiet hours so nothing arrives at night.",
+      },
+      { t: "h2", x: "Signing in" },
+      {
+        t: "p",
+        x: "Sign in with your email and passcode, or with Google. Forgot your passcode? Choose to reset it on the sign-in page. **Sign out of all devices** in Settings ends every session, including the one you are using.",
+      },
+      { t: "h2", x: "Archived celebrations" },
+      {
+        t: "p",
+        x: "Celebrations you file away are kept under **Profile**. Restore one to bring it back, or delete it for good.",
       },
     ],
   },
@@ -474,45 +587,45 @@ export const publicPages: DocPage[] = [
     audience: "Everyone",
     summary: "Answers to common questions before and on the day.",
     blocks: [
-      {
-        t: "h2",
-        x: "Do guests need an account?",
-      },
+      { t: "h2", x: "Do guests need an account or an app?" },
       {
         t: "p",
-        x: "No. Guests reply using their personal invitation links. Hosts and event team members sign in to manage the celebration.",
+        x: "No. Guests reply from their personal link in any phone browser. Hosts and their team sign in to manage the celebration.",
       },
-      {
-        t: "h2",
-        x: "Can I send invitations through WhatsApp?",
-      },
+      { t: "h2", x: "Does Àríyá send WhatsApp messages for me?" },
       {
         t: "p",
-        x: "Yes. Copy a guest’s personal link or message and share it yourself. Copying does not automatically send a message.",
+        x: "No. Àríyá opens each guest's WhatsApp chat with the message and link ready, and you press Send. Emails, though, are sent for you.",
       },
-      {
-        t: "h2",
-        x: "Can someone bring a plus-one?",
-      },
+      { t: "h2", x: "Can someone bring a plus-one?" },
       {
         t: "p",
-        x: "Only when their invitation allows it. Hosts set party sizes and plus-one allowances in the guest list.",
+        x: "Only when their invitation allows it. Hosts set the party size and the +1 allowance for each guest.",
       },
-      {
-        t: "h2",
-        x: "Why can’t I seat a guest?",
-      },
+      { t: "h2", x: "Why can't I seat a guest?" },
       {
         t: "p",
-        x: "Check that they have accepted, that the table has room for their attending party and that the event is not archived.",
+        x: "Check that they have accepted, that the table has room for their whole attending party, and that the celebration has not ended or been archived.",
       },
-      {
-        t: "h2",
-        x: "How do I get help with an invitation?",
-      },
+      { t: "h2", x: "Why won't a guest's link open?" },
       {
         t: "p",
-        x: "Contact the host who sent it. For help with Àríyá itself, email help@ariyaday.com. Our [Privacy Policy](/privacy) explains data handling, and our [Terms](/terms) explain use of the service.",
+        x: "The invitation may be in test mode (see [the film](/documentation/film)), or the celebration has ended. Links close the day after the celebration.",
+      },
+      { t: "h2", x: "Does check-in work without a signal?" },
+      {
+        t: "p",
+        x: "Yes, if the desk was opened once with a signal on that phone. See [Welcome guests at the door](/documentation/check-in).",
+      },
+      { t: "h2", x: "How much does it cost?" },
+      {
+        t: "p",
+        x: "Free up to 50 guest invitations. The [Celebration Pass](/documentation/celebration-pass) is ₦50,000, once per celebration.",
+      },
+      { t: "h2", x: "How do I get help?" },
+      {
+        t: "p",
+        x: "Guests: contact the host who sent the invitation. For help with Àríyá itself, email help@ariyaday.com. Our [Privacy Policy](/privacy) explains how data is handled, and our [Terms](/terms) cover use of the service.",
       },
     ],
   },
