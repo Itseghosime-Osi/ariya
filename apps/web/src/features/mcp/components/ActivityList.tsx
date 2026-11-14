@@ -16,6 +16,11 @@ const TOOL_LABEL: Record<string, string> = {
   list_my_proposals: "Checked its own requests",
   get_invitation_design: "Read the invitation design",
   check_invitation_layout: "Checked the invitation layout",
+  edit_invitation_text: "Edited invitation text",
+  edit_invitation_layers: "Edited invitation layers",
+  apply_invitation_look: "Applied invitation look",
+  edit_invitation_styles: "Edited invitation brand styles",
+  replace_invitation_design: "Replaced invitation design",
 };
 
 const OUTCOME_LABEL: Record<ActivityEntry["outcome"], string> = {

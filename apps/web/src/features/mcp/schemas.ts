@@ -1,6 +1,15 @@
 import { z } from "zod";
 import { GUEST_SIDE_ENUM } from "@/features/guests/schemas";
-import { INVITATION_THEMES } from "@/features/invitations/types";
+import {
+  LAYOUT_PRESETS,
+  type LayoutPreset,
+} from "@/features/invitations/presets";
+import { invitationDesignSchema } from "@/features/invitations/schemas";
+import {
+  INVITATION_FONTS,
+  INVITATION_SHAPES,
+  INVITATION_THEMES,
+} from "@/features/invitations/types";
 import {
   hallLayoutSchema,
   tablePositionsSchema,
@@ -311,3 +320,240 @@ export type ProposeSendRemindersArgs = z.infer<
 export type ProposeHallLayoutArgs = z.infer<typeof proposeHallLayoutInput>;
 export type ProposeSeatingPlanArgs = z.infer<typeof proposeSeatingPlanInput>;
 export type ListMyProposalsArgs = z.infer<typeof listMyProposalsInput>;
+
+const layerId = z
+  .string()
+  .min(1)
+  .max(48)
+  .describe("A layer id from get_invitation_design, e.g. 'names'.");
+
+const hexColour = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, "Use a six-digit hex colour");
+
+const fontId = z.enum(INVITATION_FONTS);
+const weightValue = z.union([
+  z.literal(400),
+  z.literal(500),
+  z.literal(600),
+  z.literal(700),
+]);
+
+const styleId = z
+  .string()
+  .trim()
+  .min(1)
+  .max(48)
+  .describe("A brand style id from get_invitation_design, e.g. 'style-1'.");
+
+/**
+ * One layer's new words and look. Every field is optional: send only what should change and the
+ * rest keeps its stored value. Several layers may be changed in one call.
+ */
+const textEdit = z.object({
+  layerId,
+  text: z.string().max(600).optional().describe("The new words on the layer."),
+  font: fontId.optional(),
+  size: z
+    .number()
+    .finite()
+    .min(1)
+    .max(20)
+    .optional()
+    .describe(
+      "Font size in percent of the card's width, so the card scales as one."
+    ),
+  weight: weightValue.optional(),
+  italic: z.boolean().optional(),
+  textTransform: z
+    .enum(["none", "uppercase", "lowercase", "capitalize"])
+    .optional(),
+  align: z.enum(["left", "center", "right"]).optional(),
+  colorRole: z
+    .enum(["ink", "title", "body", "accent", "foil", "custom"])
+    .optional()
+    .describe("Which palette colour the layer follows."),
+  color: hexColour
+    .nullable()
+    .optional()
+    .describe(
+      "Exact colour, used only with colorRole 'custom'. Null follows the role."
+    ),
+  tracking: z
+    .number()
+    .finite()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe("Letter spacing in em."),
+  lineHeight: z.number().finite().min(0.5).max(10).optional(),
+  textFit: z
+    .enum(["shrink", "grow"])
+    .optional()
+    .describe(
+      "shrink keeps the words to their lines by making them smaller; grow lets the box grow."
+    ),
+});
+
+export const editInvitationTextInput = z.object({
+  eventId,
+  edits: z
+    .array(textEdit)
+    .min(1)
+    .max(20)
+    .describe("One entry per layer to change."),
+});
+
+const boxNumber = (label: string, min: number, max: number) =>
+  z.number().finite().min(min).max(max).optional().describe(label);
+
+/** Move and size one layer. Every field is optional: omitted fields keep their stored value. */
+const layerGeometry = z.object({
+  layerId,
+  x: boxNumber("Left edge, percent of the card's width.", -500, 500),
+  y: boxNumber("Top edge, percent of the card's height.", -500, 500),
+  width: boxNumber("Box width, percent of the card's width.", 1, 1000),
+  height: boxNumber(
+    "Box height, percent of the card's height (shapes and pictures; words grow with their text).",
+    0.2,
+    1000
+  ),
+  rotation: boxNumber(
+    "Degrees, clockwise, about the layer's centre.",
+    -360,
+    360
+  ),
+  opacity: boxNumber("0 hides the layer, 1 shows it fully.", 0, 1),
+  reorder: z
+    .enum(["front", "back", "up", "down"])
+    .optional()
+    .describe(
+      "Move the layer through the stack: later layers draw over earlier ones."
+    ),
+});
+
+const newTextLayer = z.object({
+  kind: z
+    .enum(["text", "seal", "divider"])
+    .describe(
+      "What to add: text (the host's words), seal (a wax seal) or divider (a gold rule)."
+    ),
+  text: z.string().max(600).optional().describe("The words, for text layers."),
+});
+
+const newShapeLayer = z.object({
+  kind: z.literal("shape"),
+  shape: z.enum(INVITATION_SHAPES).describe("Which drawn shape to add."),
+  fill: hexColour
+    .nullable()
+    .optional()
+    .describe("Fill colour, or null for none."),
+});
+
+export const editInvitationLayersInput = z.object({
+  eventId,
+  move: z
+    .array(layerGeometry)
+    .max(20)
+    .optional()
+    .describe("Layers to move, resize or reorder."),
+  addText: newTextLayer
+    .optional()
+    .describe("One text, seal or divider layer to add."),
+  addShape: newShapeLayer.optional().describe("One drawn shape to add."),
+  removeLayerIds: z
+    .array(layerId)
+    .max(20)
+    .optional()
+    .describe(
+      "Layers to remove. The entry seal and locked layers are refused."
+    ),
+});
+
+const presetIds = LAYOUT_PRESETS.map((preset) => preset.id) as [
+  LayoutPreset["id"],
+  ...LayoutPreset["id"][],
+];
+
+const canvasPreset = z
+  .enum([
+    "portrait_5_7",
+    "standard_4_5",
+    "square_1_1",
+    "story_9_16",
+    "landscape_7_5",
+    "a5_fine_art",
+  ])
+  .describe("portrait_5_7 is the house stationery card.");
+
+export const applyInvitationLookInput = z.object({
+  eventId,
+  theme: z
+    .enum(INVITATION_THEMES)
+    .optional()
+    .describe(
+      "Recolours the card with this theme's palette; words and layout stay as they are."
+    ),
+  layoutPreset: z
+    .enum(presetIds)
+    .optional()
+    .describe(
+      "Rebuilds the card in this arrangement, keeping the host's words."
+    ),
+  canvasPreset: canvasPreset.optional().describe("Reshapes the card."),
+});
+
+export const editInvitationStylesInput = z.object({
+  eventId,
+  createFromLayerId: layerId
+    .optional()
+    .describe(
+      "Save this text layer's look as a new brand style and make the layer follow it."
+    ),
+  createName: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .optional()
+    .describe("Name for the new style, e.g. 'Names'."),
+  applyStyleId: styleId
+    .optional()
+    .describe("Brand style to put on the layers below."),
+  applyLayerIds: z
+    .array(layerId)
+    .max(20)
+    .optional()
+    .describe("Layers that should follow the style above."),
+  updateStyleId: styleId
+    .optional()
+    .describe(
+      "Rewrite this style from the layer below, so every layer following it changes too."
+    ),
+  updateFromLayerId: layerId
+    .optional()
+    .describe("The layer whose look becomes the style's new look."),
+});
+
+/**
+ * The whole card at once, for "design me a card in emerald and gold". Validated against the same
+ * schema the studio saves with; invalid designs are refused with the exact paths that failed.
+ */
+export const replaceInvitationDesignInput = z.object({
+  eventId,
+  design: invitationDesignSchema.describe(
+    "The complete card: version 1, theme, palette, background and up to 60 layers."
+  ),
+});
+
+export type EditInvitationTextArgs = z.infer<typeof editInvitationTextInput>;
+export type EditInvitationLayersArgs = z.infer<
+  typeof editInvitationLayersInput
+>;
+export type ApplyInvitationLookArgs = z.infer<typeof applyInvitationLookInput>;
+export type EditInvitationStylesArgs = z.infer<
+  typeof editInvitationStylesInput
+>;
+export type ReplaceInvitationDesignArgs = z.infer<
+  typeof replaceInvitationDesignInput
+>;
