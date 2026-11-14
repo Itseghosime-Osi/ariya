@@ -447,12 +447,13 @@ export const publicPages: DocPage[] = [
     title: "Plan with an AI assistant",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Connect Claude, ChatGPT or Codex, and approve what it prepares.",
+    summary:
+      "Connect Claude, ChatGPT, Gemini or another AI app, and approve what it prepares.",
     blocks: [
       { t: "h2", x: "Connect an app" },
       {
         t: "p",
-        x: "Choose **Connect to an AI** at the top of the screen (on a phone, it is in the account menu) and follow the guide for your app. Once connected, ask in your own words, for example to add guests or draft a seating plan.",
+        x: "Choose **Connect to an AI** at the top of the screen (on a phone, it is in the account menu) and follow the steps for your app: Claude, ChatGPT, Gemini, any other app that takes an MCP link, or, on a computer, Claude Code, Gemini CLI and Codex. Gemini works on the web with a personal Google account, where Google offers it. Once connected, ask in your own words, for example to add guests or draft a seating plan.",
       },
       { t: "h2", x: "What it can and cannot do" },
       {
