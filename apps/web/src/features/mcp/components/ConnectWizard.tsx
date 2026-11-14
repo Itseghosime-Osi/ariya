@@ -8,6 +8,7 @@ import {
   aiClients,
   claudeCodeCommand,
   codexConfig,
+  geminiCliCommand,
   findNewApp,
   type AiClient,
   type AiClientId,
@@ -318,6 +319,11 @@ export function ConnectWizard({ address, connectedIds }: ConnectWizardProps) {
           <DevSnippet
             title="Claude Code"
             value={claudeCodeCommand(address)}
+            label="Copy command"
+          />
+          <DevSnippet
+            title="Gemini CLI"
+            value={geminiCliCommand(address)}
             label="Copy command"
           />
           <DevSnippet

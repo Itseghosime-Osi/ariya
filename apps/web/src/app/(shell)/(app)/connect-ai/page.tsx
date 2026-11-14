@@ -18,7 +18,7 @@ import { mcpResourceUrl } from "@/features/mcp/metadata";
 export const metadata: Metadata = {
   title: "Connect your AI • Àríyá",
   description:
-    "Connect Claude, ChatGPT or Codex to your Àríyá celebration desk.",
+    "Connect Claude, ChatGPT, Gemini, Codex or another AI app to your Àríyá celebration desk.",
 };
 
 const CARD =
@@ -50,9 +50,9 @@ export default async function ConnectAiPage() {
             Connect your AI
           </h1>
           <p className="mt-2 max-w-xl text-sm text-on-surface-variant">
-            Let Claude, ChatGPT or another AI read your guest list and prepare
-            work for you. It runs as you, and anything that sends something
-            waits for your approval.
+            Let Claude, ChatGPT, Gemini or another AI read your guest list and
+            prepare work for you. It runs as you, and anything that sends
+            something waits for your approval.
           </p>
         </DeskItem>
 
