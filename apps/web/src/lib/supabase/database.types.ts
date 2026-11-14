@@ -34,6 +34,46 @@ export type Database = {
   };
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string;
+          admin_email: string;
+          admin_id: string | null;
+          created_at: string;
+          details: NonNullable<Json>;
+          id: number;
+          reason: string | null;
+          target_id: string | null;
+          target_label: string | null;
+          target_type: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          admin_email: string;
+          admin_id?: string | null;
+          created_at?: string;
+          details?: NonNullable<Json>;
+          id?: never;
+          reason?: string | null;
+          target_id?: string | null;
+          target_label?: string | null;
+          target_type: string;
+        };
+        Update: {
+          action?: string;
+          admin_email?: string;
+          admin_id?: string | null;
+          created_at?: string;
+          details?: NonNullable<Json>;
+          id?: never;
+          reason?: string | null;
+          target_id?: string | null;
+          target_label?: string | null;
+          target_type?: string;
+        };
+        Relationships: [];
+      };
       ai_activity_log: {
         Row: {
           client_id: string | null;
@@ -611,6 +651,49 @@ export type Database = {
           },
         ];
       };
+      invitation_versions: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          design: NonNullable<Json>;
+          event_id: string;
+          id: string;
+          name: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          design: NonNullable<Json>;
+          event_id: string;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          design?: NonNullable<Json>;
+          event_id?: string;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invitation_versions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invitation_versions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invoices: {
         Row: {
           amount_kobo: number;
@@ -756,6 +839,25 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      platform_admins: {
+        Row: {
+          added_at: string;
+          note: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          added_at?: string;
+          note?: string | null;
+          user_id: string;
+        };
+        Update: {
+          added_at?: string;
+          note?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -976,6 +1078,42 @@ export type Database = {
             columns: ["table_id"];
             isOneToOne: false;
             referencedRelation: "tables";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      studio_metrics: {
+        Row: {
+          created_at: string;
+          event_id: string;
+          format: string | null;
+          id: number;
+          kind: string;
+          ms: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          event_id: string;
+          format?: string | null;
+          id?: never;
+          kind: string;
+          ms?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          event_id?: string;
+          format?: string | null;
+          id?: never;
+          kind?: string;
+          ms?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "studio_metrics_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
             referencedColumns: ["id"];
           },
         ];
@@ -1219,6 +1357,95 @@ export type Database = {
     };
     Functions: {
       accept_team_invite: { Args: { p_token: string }; Returns: Json };
+      admin_account_activity: {
+        Args: { p_users: string[] };
+        Returns: {
+          banned_until: string;
+          email_confirmed: boolean;
+          last_sign_in_at: string;
+          provider: string;
+          user_id: string;
+        }[];
+      };
+      admin_accounts: {
+        Args: { p_limit: number; p_offset: number; p_query: string };
+        Returns: Json;
+      };
+      admin_ai_connections: {
+        Args: { p_limit?: number };
+        Returns: {
+          calls_7d: number;
+          client_id: string;
+          client_name: string;
+          consent_id: string;
+          granted_at: string;
+          last_used_at: string;
+          redirect_uris: string;
+          revoked_at: string;
+          scopes: string;
+          user_email: string;
+          user_id: string;
+        }[];
+      };
+      admin_check: {
+        Args: { p_admin: string; p_reason: string };
+        Returns: undefined;
+      };
+      admin_delete_event: {
+        Args: { p_admin: string; p_event: string; p_reason: string };
+        Returns: undefined;
+      };
+      admin_end_sessions: {
+        Args: { p_admin: string; p_reason: string; p_user: string };
+        Returns: number;
+      };
+      admin_events: {
+        Args: {
+          p_filter: string;
+          p_limit: number;
+          p_offset: number;
+          p_query: string;
+        };
+        Returns: Json;
+      };
+      admin_grant_comp_pass: {
+        Args: { p_admin: string; p_event: string; p_reason: string };
+        Returns: Json;
+      };
+      admin_health: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_log: {
+        Args: {
+          p_action: string;
+          p_admin: string;
+          p_details?: Json;
+          p_reason: string;
+          p_target_id: string;
+          p_target_label: string;
+          p_target_type: string;
+        };
+        Returns: undefined;
+      };
+      admin_overview: {
+        Args: { p_free_limit?: number; p_warn_at?: number };
+        Returns: Json;
+      };
+      admin_prepare_account_deletion: {
+        Args: { p_admin: string; p_reason: string; p_user: string };
+        Returns: Json;
+      };
+      admin_record_refund: {
+        Args: {
+          p_admin: string;
+          p_payment: string;
+          p_provider?: Json;
+          p_reason: string;
+        };
+        Returns: Json;
+      };
+      admin_revoke_ai_connection: {
+        Args: { p_admin: string; p_consent: string; p_reason: string };
+        Returns: undefined;
+      };
       ai_connection_event_allowed: {
         Args: { p_event_id: string };
         Returns: boolean;
@@ -1335,6 +1562,7 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      is_platform_admin: { Args: { p_user: string }; Returns: boolean };
       record_ai_proposal_result: {
         Args: { p_id: string; p_result: Json; p_status: string };
         Returns: Json;

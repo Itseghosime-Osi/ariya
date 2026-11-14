@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { internalAdminPath, isHiddenAdminPath } from "@/features/admin/path";
 
 // Note: /reset-password is deliberately excluded from AUTH_PATHS so
 // that users arriving via a password-recovery link (who receive a temporary
@@ -38,7 +39,26 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // The admin desk answers only at its secret address; its real path is never served directly.
+  if (isHiddenAdminPath(pathname)) {
+    return NextResponse.rewrite(new URL("/__not-found", request.url), {
+      status: 404,
+    });
+  }
+
   const { supabaseResponse, user } = await updateSession(request);
+
+  const adminTarget = internalAdminPath(pathname);
+  if (adminTarget) {
+    const rewriteUrl = new URL(`${adminTarget}${search}`, request.url);
+    const rewritten = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: request.headers },
+    });
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      rewritten.cookies.set(cookie);
+    });
+    return rewritten;
+  }
 
   const isAuthPath = AUTH_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
