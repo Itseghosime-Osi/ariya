@@ -4,6 +4,7 @@ import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
+import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 
 export const metadata: Metadata = {
@@ -55,13 +56,7 @@ export default function MarketingLayout({
   return (
     <html lang="en-NG" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="stylesheet" href={FONTS} precedence="default" />
+        <WebFonts href={FONTS} />
         {/* /about mounts the film's 3D module directly; it imports three by bare specifier. */}
         <script
           type="importmap"
