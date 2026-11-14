@@ -56,6 +56,11 @@ export function claudeCodeCommand(address: string): string {
   return `claude mcp add --transport http ${SERVER_NAME} ${address}`;
 }
 
+/** Gemini CLI's own command for a remote server; it signs in through a page on this computer. */
+export function geminiCliCommand(address: string): string {
+  return `gemini mcp add --transport http ${SERVER_NAME} ${address}`;
+}
+
 export function codexConfig(address: string): string {
   return `[mcp_servers.${SERVER_NAME}]\nurl = "${address}"`;
 }
@@ -122,16 +127,16 @@ export function aiClients(address: string): AiClient[] {
       },
       steps: [
         "Press the button. We copy your Àríyá link and open Gemini in a new tab.",
-        "In Gemini open Settings, then Connected apps (it can also be called Connectors), and choose Add a custom app.",
-        "Paste the link below into the box and press Next. If it asks for a name, use the chip too.",
-        "Sign in to Àríyá if asked, then press Approve on the card you see.",
+        "In Gemini open Settings, then Connectors, and choose + Custom.",
+        "Tap each chip below to copy it, then paste it into the matching box and save.",
+        "Sign in to Àríyá. The card says Not verified, because Gemini is not on our verified list yet: check the address on it is Google's (it ends in googleusercontent.com), tick the box and press Approve.",
       ],
       stepCopies: [
         { step: 2, label: "Copy link", value: address },
         { step: 2, label: "Copy name", value: CONNECTION_NAME },
       ],
       notes: [
-        "Gemini adds custom apps on the web, not in the phone app, and not with a work or school Google account.",
+        "Gemini adds custom apps on the web, not in the phone app, and only for personal Google accounts. Google is still rolling it out, so it may not be offered in your country yet. If you do not see + Custom, use Claude or ChatGPT, or Gemini CLI on a computer.",
         "Gemini has no link that fills the form in for you yet, so these chips stand in for typing.",
       ],
     },
