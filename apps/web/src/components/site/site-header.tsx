@@ -217,12 +217,21 @@ export function SiteHeader({
       ) : (
         <header className="site-head on-dark" id="top">
           <div className="wrap">
-            <Link className="lockup" href="/" aria-label="Àríyá, the film">
+            <Link
+              prefetch={false}
+              className="lockup"
+              href="/"
+              aria-label="Àríyá, the film"
+            >
               <b>Àríyá</b>
             </Link>
 
             <nav className="site-nav" aria-label="Main">
-              <Link href="/" aria-current={current("/") ? "page" : undefined}>
+              <Link
+                prefetch={false}
+                href="/"
+                aria-current={current("/") ? "page" : undefined}
+              >
                 The film
               </Link>
               <Link
@@ -244,12 +253,17 @@ export function SiteHeader({
                 Pricing
               </Link>
               <Link
+                prefetch={false}
                 href="/documentation"
                 aria-current={current("/documentation") ? "page" : undefined}
               >
                 Docs
               </Link>
-              <Link className="btn btn-primary btn-small" href="/events">
+              <Link
+                prefetch={false}
+                className="btn btn-primary btn-small"
+                href="/events"
+              >
                 Start planning
               </Link>
             </nav>
@@ -321,10 +335,17 @@ export function SiteHeader({
           <div className="cm-foot">
             <span>Àríyá (ah-ree-YAH): merriment, in Yoruba</span>
             <span>Lagos · Benin · Abuja</span>
-            <Link href="/i/k701Qx">Open a sample invitation</Link>
+            <Link prefetch={false} href="/i/k701Qx">
+              Open a sample invitation
+            </Link>
             <span className="cm-legal">
-              <Link href="/privacy">Privacy</Link> ·{" "}
-              <Link href="/terms">Terms</Link>
+              <Link prefetch={false} href="/privacy">
+                Privacy
+              </Link>{" "}
+              ·{" "}
+              <Link prefetch={false} href="/terms">
+                Terms
+              </Link>
             </span>
           </div>
         </div>

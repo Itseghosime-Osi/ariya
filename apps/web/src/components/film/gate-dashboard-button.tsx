@@ -44,6 +44,7 @@ export function GateDashboardButton() {
 
   return (
     <Link
+      prefetch={false}
       className="btn gate-dashboard-btn"
       id="gateDashboardBtn"
       href={href}
