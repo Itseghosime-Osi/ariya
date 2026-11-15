@@ -145,14 +145,27 @@ owner or planner.
 
 ### Write
 
-| Tool                       | Effect                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `create_event`             | Creates a celebration owned by the host. Subject to the 10-per-24-hours ceiling.                        |
-| `update_event`             | Changes title, couple, date, venue, area, dress code, description, status, visibility or RSVP deadline. |
-| `add_guest`                | Adds one guest party.                                                                                   |
-| `update_guest`             | Changes one guest party; omitted fields keep their stored value.                                        |
-| `import_guests`            | Adds up to 200 parties at once. Rows are validated together — one bad row rejects the whole import.     |
-| `update_invitation_design` | Sets the invitation theme, headline, subheadline, attire note and personal message.                     |
+| Tool                        | Effect                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_event`              | Creates a celebration owned by the host. Subject to the 10-per-24-hours ceiling.                                                                              |
+| `update_event`              | Changes title, couple, date, venue, area, dress code, description, status, visibility or RSVP deadline.                                                       |
+| `add_guest`                 | Adds one guest party.                                                                                                                                         |
+| `update_guest`              | Changes one guest party; omitted fields keep their stored value.                                                                                              |
+| `import_guests`             | Adds up to 200 parties at once. Rows are validated together — one bad row rejects the whole import.                                                           |
+| `update_invitation_design`  | Sets the invitation theme, headline, subheadline, attire note and personal message.                                                                           |
+| `edit_invitation_text`      | Changes layer words and styling by id — font, size, weight, case, alignment, colour. Omitted fields keep their stored value.                                  |
+| `edit_invitation_layers`    | Moves, resizes, reorders, adds and removes layers. The entry seal and locked layers are refused; a card holds at most 60 layers.                              |
+| `apply_invitation_look`     | Applies a theme, a layout preset or a canvas shape — the same result as the studio's own buttons.                                                             |
+| `edit_invitation_styles`    | Creates a brand style from a layer, puts a style on layers, or rewrites a style so every following layer changes too.                                         |
+| `replace_invitation_design` | Replaces the whole card at once, keeping locked layers and the entry seal exactly as they are. Invalid designs are refused with the exact fields that failed. |
+
+Every card edit is saved at once through the studio's revision check: a save that lands on a design
+another tab changed is refused, and the model is told to read the design again and retry. Before
+writing, the previous design is kept as `Before AI: <summary>` in the card's versions, so restoring
+that version undoes the whole change. The newest 5 AI backups are kept on their own allowance, so
+they never push out the 30 versions the host saved; the answer also carries the layout check's findings on the new
+design. Refusals that name a locked layer, the entry seal, an unknown id or the 60-layer limit
+change nothing.
 
 ### Propose
 
@@ -194,8 +207,9 @@ have reached, and nothing is recorded.
 ### Deliberately not exposed
 
 No tool sends email or invitations, writes the hall or the seating directly, applies or restores its
-own proposal, uses invitation quota, deletes anything, writes an RSVP, touches billing or payments,
-or changes team members or authentication. Every proposing tool above stops at a pending row;
+own proposal, uses invitation quota, deletes any record, writes an RSVP, touches billing or payments,
+or changes team members or authentication. The card-editing tools only change the invitation design,
+one saved design at a time, through the studio's own validation and revision check. Every proposing tool above stops at a pending row;
 sending, applying and restoring happen only from the approvals desk, through the app's own actions,
 in the host's own session. None of the rest should be added without a product decision — the consent
 card and the guide tell hosts that AI cannot do them, and restrictive policies in the database refuse
@@ -382,7 +396,10 @@ longer connected.
 ## Tests
 
 - Unit: `src/app/mcp/route.test.ts`, `src/features/mcp/{guard,schemas,metadata,result,origin,diagnostics}.test.ts`,
-  `src/features/mcp/tools/{read,hall-read,write,proposals,hall-proposals}.test.ts`,
+  `src/features/mcp/tools/{read,hall-read,write,proposals,hall-proposals,design-read,design-edit}.test.ts`,
+  where `design-edit.test.ts` mocks the save actions and covers the five card-editing tools — backup,
+  revision check, refusals (locked, seal, limit, unknown ids, invalid designs) and the read-only and
+  out-of-scope refusals on every tool.
   `src/lib/supabase/request-context.test.ts`, and the consent safety suite:
   `src/features/mcp/app-trust.test.ts` (the classifier and every look-alike),
   `src/features/mcp/consent.test.ts` (the action refuses an unacknowledged unknown app) and

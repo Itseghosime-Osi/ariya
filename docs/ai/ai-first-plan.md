@@ -69,12 +69,12 @@ All tools validate against the saved-design schema, respect locked layers, never
 
 - [x] **C1 (M) Read the whole design.** Layers with ids, kinds, text, fonts, sizes, positions, theme, palette, canvas, brand styles, and the list of available fonts, themes and layout presets. Done when: an AI can describe the card accurately from this alone. Built as `get_invitation_design`.
 - [x] **C2 (M) A layout check the AI can read.** Because the AI cannot see the card, a tool reports overlaps, text that leaves the card, long names that need shrinking, and low contrast, using the same rules the studio already uses. Done when: it flags the known long-name case and a deliberately broken layout. Built as `check_invitation_layout` (also flags tiny text and words over the entry seal).
-- [ ] **C3 (M) Edit text and style:** change the words, font, size, weight, case, alignment, colour role. Done when: each is one tool call and one undo step in the studio.
-- [ ] **C4 (M) Move and size layers; add and remove text and shapes; reorder.** Done when: the entry seal and locked layers are protected, and the 60-layer limit gives a clear message.
-- [ ] **C5 (M) Apply a theme, a layout preset or a canvas size.** Done when: results match what the same action does in the studio.
-- [ ] **C6 (S) Brand styles:** create a style, put it on lines, update it. Done when: changing one style changes every line that follows it, as in the studio.
-- [ ] **C7 (M) Replace the whole design** (power tool) with a full validated design, for "design me a card in emerald and gold". Done when: invalid designs are refused with a message the AI can act on, and the previous design stays one Undo away.
-- [ ] **C8 (S) Updated server instructions** so AI apps know the workflow: read the design, edit, run the layout check. Done when: a scripted session from a blank prompt produces a sensible card.
+- [x] **C3 (M) Edit text and style:** change the words, font, size, weight, case, alignment, colour role. Done when: each is one tool call and one undo step in the studio. Built as `edit_invitation_text`.
+- [x] **C4 (M) Move and size layers; add and remove text and shapes; reorder.** Done when: the entry seal and locked layers are protected, and the 60-layer limit gives a clear message. Built as `edit_invitation_layers`.
+- [x] **C5 (M) Apply a theme, a layout preset or a canvas size.** Done when: results match what the same action does in the studio. Built as `apply_invitation_look`.
+- [x] **C6 (S) Brand styles:** create a style, put it on lines, update it. Done when: changing one style changes every line that follows it, as in the studio. Built as `edit_invitation_styles`.
+- [x] **C7 (M) Replace the whole design** (power tool) with a full validated design, for "design me a card in emerald and gold". Done when: invalid designs are refused with a message the AI can act on, and the previous design stays one Undo away. Built as `replace_invitation_design`.
+- [x] **C8 (S) Updated server instructions** so AI apps know the workflow: read the design, edit, run the layout check. Done when: a scripted session from a blank prompt produces a sensible card. Built into `MCP_INSTRUCTIONS`.
 
 ### D. Trust and safety
 
