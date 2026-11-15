@@ -11,6 +11,11 @@ import {
   useReducedMotion,
 } from "motion/react";
 import {
+  SHEET_MOTION,
+  SHEET_RULE_MOTION,
+  sheetItemMotion,
+} from "@/components/layout/sheet-motion";
+import {
   CalendarPlus,
   House,
   LayoutGrid,
@@ -408,49 +413,13 @@ export function PhoneDock({
                 // Stops catching taps as soon as it starts drawing back in.
                 pointerEvents: moreOpen ? "auto" : "none",
               }}
-              initial={{ opacity: 0, scaleX: 0.05, scaleY: 0.05 }}
-              animate={{
-                opacity: 1,
-                scaleX: 1,
-                scaleY: 1,
-                transition: {
-                  // Chewing-gum: the two axes spring at different rates and
-                  // are barely damped, so it stretches, squashes and wobbles.
-                  scaleX: {
-                    type: "spring",
-                    stiffness: 108,
-                    damping: 7.46,
-                    mass: 1.2,
-                  },
-                  scaleY: {
-                    type: "spring",
-                    stiffness: 79.5,
-                    damping: 6.39,
-                    mass: 1.2,
-                  },
-                  opacity: { duration: 0.25 },
-                },
-              }}
-              exit={{
-                opacity: 0,
-                scaleX: [1, 0.9, 0.05],
-                scaleY: [1, 1.08, 0.05],
-                transition: {
-                  // Pulled back into the tab: it thins, stretches, then snaps shut.
-                  scaleX: {
-                    duration: 0.8,
-                    times: [0, 0.4, 1],
-                    ease: "easeInOut",
-                  },
-                  scaleY: {
-                    duration: 0.8,
-                    times: [0, 0.4, 1],
-                    ease: "easeInOut",
-                  },
-                  opacity: { duration: 0.2, delay: 0.6 },
-                },
-              }}
+              {...SHEET_MOTION}
             >
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-8 top-0 h-px origin-center bg-gradient-to-r from-transparent via-gold to-transparent"
+                {...SHEET_RULE_MOTION}
+              />
               <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
                 <h2 className="font-display text-lg font-bold text-night">
                   Celebration menu
@@ -474,16 +443,7 @@ export function PhoneDock({
                   {moreSections.map((item, i) => {
                     const active = isSectionActive(pathname, item.href);
                     return (
-                      <motion.div
-                        key={item.name}
-                        initial={{ opacity: 0, y: 14, scale: 0.92 }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                          scale: 1,
-                          transition: { ...SPRING, delay: 0.3 + i * 0.05 },
-                        }}
-                      >
+                      <motion.div key={item.name} {...sheetItemMotion(i)}>
                         <Link
                           href={item.href}
                           aria-current={active ? "page" : undefined}
