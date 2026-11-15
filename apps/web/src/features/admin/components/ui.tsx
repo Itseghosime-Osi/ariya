@@ -71,7 +71,14 @@ export function Stat({
   return (
     <div className="rounded-3xl adm-glass border border-hairline p-4">
       <p className="text-xs font-semibold text-label-2">{label}</p>
-      <p className="mt-1 font-display text-2xl font-bold tabular-nums text-night">
+      <p
+        className={cn(
+          "mt-1 font-bold tabular-nums text-night",
+          typeof value === "number" || value.length <= 6
+            ? "font-display text-2xl"
+            : "text-base leading-snug"
+        )}
+      >
         {typeof value === "number" ? value.toLocaleString("en-NG") : value}
       </p>
       {hint && <p className="mt-0.5 text-xs text-label-2">{hint}</p>}
@@ -142,7 +149,7 @@ export function SearchBar({
           name="q"
           defaultValue={query}
           placeholder={placeholder}
-          className="min-h-11 w-full max-w-md desk-field rounded-xl px-4 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
+          className="min-h-11 w-full min-w-0 max-w-md desk-field rounded-xl px-4 text-sm focus-visible:outline-2 focus-visible:outline-burgundy"
         />
         <button
           type="submit"
@@ -152,7 +159,10 @@ export function SearchBar({
         </button>
       </form>
       {filters && (
-        <nav aria-label="Filter" className="flex flex-wrap gap-1.5">
+        <nav
+          aria-label="Filter"
+          className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        >
           {filters.map((f) => {
             const params = new URLSearchParams();
             if (query) params.set("q", query);
@@ -164,7 +174,7 @@ export function SearchBar({
                 href={`${action}${params.size ? `?${params}` : ""}`}
                 aria-current={on ? "page" : undefined}
                 className={cn(
-                  "inline-flex min-h-9 items-center rounded-full border px-3 text-xs font-semibold capitalize",
+                  "inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 text-xs font-semibold capitalize",
                   on
                     ? "border-night bg-night text-gold"
                     : "desk-chip text-label-2 hover:text-night"
@@ -288,14 +298,20 @@ export function Td({
   children,
   className,
   label,
+  wide = false,
 }: {
   children: React.ReactNode;
   className?: string;
   /** The column name, filled in by DataTable. */
   label?: string;
+  /** On a phone, take the card's full width (emails, reasons, long names). */
+  wide?: boolean;
 }) {
   return (
-    <td data-label={label} className={cn("px-4 py-3 align-top", className)}>
+    <td
+      data-label={label}
+      className={cn("px-4 py-3 align-top", wide && "adm-wide", className)}
+    >
       {children}
     </td>
   );
