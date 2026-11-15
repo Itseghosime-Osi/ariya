@@ -14,6 +14,8 @@ interface HistoryPanelProps {
   past: InvitationDesign[];
   present: InvitationDesign;
   future: InvitationDesign[];
+  /** Parallel to [...past, present, ...future]: "AI: <summary>" for AI steps, else null. */
+  stepLabels?: (string | null)[];
   onUndo: () => void;
   onRedo: () => void;
   onRestoreState: (target: InvitationDesign) => void;
@@ -25,6 +27,7 @@ export function HistoryPanel({
   past,
   present,
   future,
+  stepLabels,
   onUndo,
   onRedo,
   onRestoreState,
@@ -128,10 +131,11 @@ export function HistoryPanel({
               </span>
 
               <span className="truncate flex-1">
-                {describeStep(
-                  idx > 0 ? allEntries[idx - 1].design : null,
-                  entry.design
-                )}
+                {stepLabels?.[entry.index] ??
+                  describeStep(
+                    idx > 0 ? allEntries[idx - 1].design : null,
+                    entry.design
+                  )}
               </span>
 
               {isCurrent && (

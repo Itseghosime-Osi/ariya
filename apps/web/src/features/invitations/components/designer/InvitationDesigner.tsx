@@ -66,6 +66,7 @@ import { QuickTour } from "./QuickTour";
 import { dialogTheme } from "./dialog-theme";
 import { ColorSwatchesPanel } from "./ColorSwatchesPanel";
 import { HistoryPanel } from "./HistoryPanel";
+import { useAiLiveSync, type AiLiveSyncDoc } from "./useAiLiveSync";
 import { NavigatorPanel } from "./NavigatorPanel";
 
 type Mode = "simple" | "pro";
@@ -422,6 +423,17 @@ export function InvitationDesigner({
   // last move so it never lingers over the card.
   const [readout, setReadout] = useState<string | null>(null);
   const readoutTimer = useRef<number | null>(null);
+  // The live sync reads the document through this ref, so the realtime channel is set up once
+  // and never resubscribes while the host types. The ref updates every render; the getter below
+  // is stable, so only the channel setup's eventId matters.
+  const docRef = useRef<AiLiveSyncDoc | null>(null);
+  docRef.current = doc;
+  const getSyncDoc = useCallback(() => docRef.current, []);
+  const notifyAiChange = useCallback(
+    (text: string) => setNotice({ tone: "ok", text }),
+    [setNotice]
+  );
+  const aiSync = useAiLiveSync(eventId, getSyncDoc, notifyAiChange);
   const undo = useCallback(() => {
     if (!doc.canUndo) return;
     rawUndo();
@@ -1968,6 +1980,54 @@ export function InvitationDesigner({
         </div>
       )}
 
+      {aiSync.conflict && (
+        <div
+          role="alert"
+          data-testid="studio-ai-conflict"
+          className={cn(
+            "pointer-events-auto fixed bottom-14 left-4 z-(--studio-z-overlay) flex max-w-sm flex-col gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-xl",
+            dark
+              ? "border-[var(--studio-gold)]/50 bg-night/95 text-[var(--studio-cream)]"
+              : "border-[var(--studio-wine)]/40 bg-white text-[var(--studio-ink)]"
+          )}
+        >
+          <span>
+            Your AI changed the card
+            {aiSync.conflict.summary ? `: ${aiSync.conflict.summary}` : ""}.
+          </span>
+          <span className="text-xs font-normal opacity-80">
+            Either way nothing is lost: applying keeps your edits one Undo away,
+            keeping yours keeps the AI change one Undo away.
+          </span>
+          <span className="flex gap-2">
+            <button
+              type="button"
+              onClick={aiSync.applyConflict}
+              className={cn(
+                "min-h-9 flex-1 rounded-full px-3 text-sm font-bold",
+                dark
+                  ? "bg-[var(--studio-gold)] text-[var(--studio-night)] hover:brightness-110"
+                  : "bg-[var(--studio-wine)] text-white hover:brightness-110"
+              )}
+            >
+              Apply it (Undo available)
+            </button>
+            <button
+              type="button"
+              onClick={aiSync.keepConflict}
+              className={cn(
+                "min-h-9 flex-1 rounded-full border px-3 text-sm font-bold",
+                dark
+                  ? "border-white/20 hover:bg-white/10"
+                  : "border-[var(--studio-line)] hover:bg-black/5"
+              )}
+            >
+              Keep mine
+            </button>
+          </span>
+        </div>
+      )}
+
       {doc.saveState === "error" && (
         <div
           role="alert"
@@ -2461,6 +2521,7 @@ export function InvitationDesigner({
                     past={past}
                     present={design}
                     future={future}
+                    stepLabels={doc.stepLabels}
                     onUndo={undo}
                     onRedo={redo}
                     onRestoreState={restoreState}

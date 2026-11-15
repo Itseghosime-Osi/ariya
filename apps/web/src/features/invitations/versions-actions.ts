@@ -12,7 +12,7 @@ const MAX_VERSIONS = 30;
  * backups have their own small allowance, so a busy AI session can never push out the
  * versions the host chose to keep.
  */
-const AI_BACKUP_PREFIX = "Before AI:";
+export const AI_BACKUP_PREFIX = "Before AI:";
 const MAX_AI_BACKUPS = 5;
 
 export type DesignVersion = { id: string; name: string; createdAt: string };

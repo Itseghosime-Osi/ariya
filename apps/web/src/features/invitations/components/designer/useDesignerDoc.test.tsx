@@ -231,6 +231,20 @@ describe("invitation document save queue", () => {
     expect(result.current.saveState).toBe("error");
     expect(result.current.saveError).toMatch(/another tab/);
   });
+  it("applies a remote AI design as one undo step labelled AI, with redo", () => {
+    const before = initial();
+    const { result } = renderHook(() => useDesignerDoc("event", before));
+    const ai = { ...before, chrome: false };
+    act(() => result.current.applyRemoteDesign(ai, "rev-2", "AI: emerald"));
+    expect(result.current.design).toEqual(ai);
+    expect(result.current.stepLabels?.[result.current.past.length]).toBe(
+      "AI: emerald"
+    );
+    act(() => result.current.undo());
+    expect(result.current.design).toEqual(before);
+    act(() => result.current.redo());
+    expect(result.current.design).toEqual(ai);
+  });
   it("keeps an unsaved draft after the tab is closed and reopened", async () => {
     save.mockRejectedValue(new TypeError("Failed to fetch"));
     const original = initial();
