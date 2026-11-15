@@ -10,7 +10,13 @@ describe("console greeting", () => {
     expect(greetConsole(win)).toBe(true);
     expect(greetConsole(win)).toBe(false);
     expect(log).toHaveBeenCalledTimes(3);
-    expect(log.mock.calls[0][0]).toContain(CONSOLE_BANNER);
+    expect(log.mock.calls[0][0].replaceAll("%c", "")).toBe(CONSOLE_BANNER);
+    // One red per line of the word mark.
+    expect(
+      log.mock.calls[0]
+        .slice(1)
+        .every((css: string) => /color: #[0-9a-f]{6}/.test(css))
+    ).toBe(true);
     expect(log.mock.calls[2][0]).toContain("help@ariyaday.com");
   });
 
