@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { designFromEvent } from "./design";
-import { AI_BACKUP_PREFIX } from "./versions-actions";
+import { AI_BACKUP_PREFIX } from "./version-names";
 import type { InvitationDesign } from "./types";
 
 const idSchema = z.string().uuid();
@@ -93,6 +93,8 @@ export async function getEventTablesFingerprintAction(eventId: string): Promise<
       eventsRev: string | null;
       guestsRev: string | null;
       tablesRev: string | null;
+      rsvpsRev: string | null;
+      seatsRev: string | null;
     }
   | { ok: false; error: string }
 > {
@@ -100,27 +102,42 @@ export async function getEventTablesFingerprintAction(eventId: string): Promise<
     return { ok: false, error: UNAVAILABLE };
   try {
     const supabase = await createClient();
-    const [eventRes, guestsRes, tablesRes] = await Promise.all([
-      supabase
-        .from("events")
-        .select("updated_at")
-        .eq("id", eventId)
-        .maybeSingle(),
-      supabase
-        .from("guests")
-        .select("updated_at")
-        .eq("event_id", eventId)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("tables")
-        .select("updated_at")
-        .eq("event_id", eventId)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    const [eventRes, guestsRes, tablesRes, rsvpsRes, seatsRes] =
+      await Promise.all([
+        supabase
+          .from("events")
+          .select("updated_at")
+          .eq("id", eventId)
+          .maybeSingle(),
+        supabase
+          .from("guests")
+          .select("updated_at")
+          .eq("event_id", eventId)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("tables")
+          .select("updated_at")
+          .eq("event_id", eventId)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        // A reply saved straight to rsvps, or a seat taken away, does not always touch guests or
+        // tables, so their newest stamp and row count are part of the fingerprint too.
+        supabase
+          .from("rsvps")
+          .select("updated_at, guests!inner(event_id)", { count: "exact" })
+          .eq("guests.event_id", eventId)
+          .order("updated_at", { ascending: false })
+          .limit(1),
+        supabase
+          .from("seat_assignments")
+          .select("updated_at, tables!inner(event_id)", { count: "exact" })
+          .eq("tables.event_id", eventId)
+          .order("updated_at", { ascending: false })
+          .limit(1),
+      ]);
     if (eventRes.error || !eventRes.data)
       return { ok: false, error: UNAVAILABLE };
     return {
@@ -130,8 +147,20 @@ export async function getEventTablesFingerprintAction(eventId: string): Promise<
         (guestsRes.data?.updated_at as string | null | undefined) ?? null,
       tablesRev:
         (tablesRes.data?.updated_at as string | null | undefined) ?? null,
+      rsvpsRev: stampOf(rsvpsRes),
+      seatsRev: stampOf(seatsRes),
     };
   } catch {
     return { ok: false, error: UNAVAILABLE };
   }
+}
+
+/** Newest stamp plus row count, so a deleted row moves the fingerprint as well. */
+function stampOf(res: {
+  data: { updated_at: string | null }[] | null;
+  count: number | null;
+  error: unknown;
+}): string | null {
+  if (res.error) return null;
+  return `${res.data?.[0]?.updated_at ?? "-"}#${res.count ?? 0}`;
 }

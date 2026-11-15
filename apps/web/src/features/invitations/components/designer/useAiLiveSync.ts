@@ -16,6 +16,8 @@ export interface AiLiveSyncDoc {
   design: InvitationDesign;
   isDirty: boolean;
   getRevision: () => string | undefined;
+  /** True while the host's own save is in flight; its echo must not read as a remote change. */
+  isSaving: () => boolean;
   applyRemoteDesign: (
     next: InvitationDesign,
     revision: string,
@@ -70,7 +72,15 @@ export function useAiLiveSync(
   const fetchingRef = useRef(false);
   const mountedRef = useRef(true);
 
-  const checkForRemoteChange = useCallback(async () => {
+  const checkForRemoteChange = useCallback(async (): Promise<void> => {
+    // The host's own save also moves the event row. Until it returns (and sets the revision),
+    // a change could not be told apart from theirs, so look again once it has landed.
+    if (getRef.current()?.isSaving()) {
+      window.setTimeout(() => {
+        if (mountedRef.current) void checkRef.current();
+      }, 800);
+      return;
+    }
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     try {
@@ -84,6 +94,13 @@ export function useAiLiveSync(
       if (!mountedRef.current || !state.ok) return;
       const doc = getRef.current();
       if (!doc || state.revision === handledRef.current) return;
+      // A save that started while this read was on the wire: wait for it, then look again.
+      if (doc.isSaving()) {
+        window.setTimeout(() => {
+          if (mountedRef.current) void checkRef.current();
+        }, 800);
+        return;
+      }
       const known = doc.getRevision();
       if (known && state.revision === known) {
         handledRef.current = state.revision;

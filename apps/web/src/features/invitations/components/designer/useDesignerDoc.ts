@@ -238,6 +238,9 @@ export function useDesignerDoc(
     revisionRef.current = revision;
   }, []);
 
+  /** True while a save of this canvas is on its way to the server. */
+  const isSaving = useCallback(() => inFlightRef.current !== null, []);
+
   /** The revision the next serialized write will check against. */
   const getRevision = useCallback(() => revisionRef.current, []);
 
@@ -413,5 +416,6 @@ export function useDesignerDoc(
     noteRemoteDesign,
     adoptRevision,
     getRevision,
+    isSaving,
   };
 }

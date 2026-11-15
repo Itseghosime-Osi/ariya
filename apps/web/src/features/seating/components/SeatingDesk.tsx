@@ -120,7 +120,13 @@ export function SeatingDesk({
           return null;
         }
         if (!mounted || !state.ok) return null;
-        return [state.eventsRev, state.guestsRev, state.tablesRev].join("|");
+        return [
+          state.eventsRev,
+          state.guestsRev,
+          state.tablesRev,
+          state.rsvpsRev,
+          state.seatsRev,
+        ].join("|");
       } finally {
         fetching = false;
       }

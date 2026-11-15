@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { invitationDesignSchema } from "./schemas";
+import { AI_BACKUP_PREFIX } from "./version-names";
 import type { InvitationDesign } from "./types";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -12,7 +13,6 @@ const MAX_VERSIONS = 30;
  * backups have their own small allowance, so a busy AI session can never push out the
  * versions the host chose to keep.
  */
-export const AI_BACKUP_PREFIX = "Before AI:";
 const MAX_AI_BACKUPS = 5;
 
 export type DesignVersion = { id: string; name: string; createdAt: string };
