@@ -69,8 +69,8 @@ export default async function AdminPaymentsPage({
                 {p.paystack_reference}
               </Link>
             </Td>
-            <Td>{p.event?.title ?? "Deleted celebration"}</Td>
-            <Td>{p.profile?.email ?? "—"}</Td>
+            <Td wide>{p.event?.title ?? "Deleted celebration"}</Td>
+            <Td wide>{p.profile?.email ?? "—"}</Td>
             <Td className="tabular-nums">{naira(p.amount_kobo)}</Td>
             <Td>
               <span className="flex flex-wrap gap-1">

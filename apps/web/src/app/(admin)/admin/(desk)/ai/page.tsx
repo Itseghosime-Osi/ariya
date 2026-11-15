@@ -58,7 +58,7 @@ export default async function AdminAiPage() {
                   {c.redirect_uris}
                 </span>
               </Td>
-              <Td>
+              <Td wide>
                 <Link
                   className="text-burgundy hover:underline"
                   href={adm(`/admin/accounts/${c.user_id}`)}

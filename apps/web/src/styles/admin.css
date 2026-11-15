@@ -101,7 +101,9 @@
     inset 0 0 0 1px rgba(7, 14, 34, 0.05);
 }
 
-/* Tables on a phone: each row a card, each cell a "label  value" line. */
+/* Tables on a phone: each row a card. The first cell is the card's title; the rest sit in a
+   two-column grid of small "label over value" facts. Cells marked .adm-wide (emails, reasons,
+   names) take the full width so they never break mid-word. */
 @media (max-width: 639px) {
   .admin-theme .adm-table thead {
     position: absolute;
@@ -112,35 +114,44 @@
     white-space: nowrap;
   }
   .admin-theme .adm-table table,
-  .admin-theme .adm-table tbody,
-  .admin-theme .adm-table tr,
-  .admin-theme .adm-table td {
+  .admin-theme .adm-table tbody {
     display: block;
     width: 100%;
   }
   .admin-theme .adm-table tr {
-    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 16px;
+    padding: 14px 16px;
   }
   .admin-theme .adm-table td {
-    display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: 12px;
-    justify-items: start;
-    padding: 4px 0;
-    overflow-wrap: anywhere;
+    display: block;
+    min-width: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: none;
   }
   .admin-theme .adm-table td::before {
     content: attr(data-label);
-    font-size: 11px;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-label-2);
-    padding-top: 2px;
+    color: var(--color-label-3);
+  }
+  .admin-theme .adm-table td.adm-wide {
+    grid-column: 1 / -1;
   }
   .admin-theme .adm-table td:first-child {
-    grid-template-columns: minmax(0, 1fr);
-    padding-bottom: 6px;
+    grid-column: 1 / -1;
+    font-size: 15px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--color-hairline);
   }
   .admin-theme .adm-table td:first-child::before {
     content: none;

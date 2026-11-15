@@ -10,6 +10,11 @@ import {
   motion,
 } from "motion/react";
 import {
+  SHEET_MOTION,
+  SHEET_RULE_MOTION,
+  sheetItemMotion,
+} from "@/components/layout/sheet-motion";
+import {
   CreditCard,
   LayoutDashboard,
   LayoutGrid,
@@ -103,29 +108,13 @@ export function AdminDock({ base }: { base: string }) {
               data-testid="admin-more-sheet"
               className="absolute inset-x-0 bottom-full mx-auto mb-3 max-w-md rounded-[28px] bg-white/95 p-4 shadow-[0_24px_50px_-20px_rgba(7,14,34,0.5),0_2px_8px_-2px_rgba(7,14,34,0.12)] ring-1 ring-black/5"
               style={{ transformOrigin: "88% 100%" }}
-              initial={{ opacity: 0, scaleX: 0.05, scaleY: 0.05 }}
-              animate={{
-                opacity: 1,
-                scaleX: 1,
-                scaleY: 1,
-                transition: {
-                  scaleX: {
-                    type: "spring",
-                    stiffness: 108,
-                    damping: 7.46,
-                    mass: 1.2,
-                  },
-                  scaleY: {
-                    type: "spring",
-                    stiffness: 79.5,
-                    damping: 6.39,
-                    mass: 1.2,
-                  },
-                  opacity: { duration: 0.25 },
-                },
-              }}
-              exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.2 } }}
+              {...SHEET_MOTION}
             >
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-8 top-0 h-px origin-center bg-gradient-to-r from-transparent via-gold to-transparent"
+                {...SHEET_RULE_MOTION}
+              />
               <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
                 <h2 className="font-display text-lg font-bold text-night">
                   Admin desk
@@ -136,16 +125,7 @@ export function AdminDock({ base }: { base: string }) {
                 {moreItems.map((item, i) => {
                   const active = isActive(pathname, at(item.href), base);
                   return (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, y: 14, scale: 0.92 }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        transition: { ...SPRING, delay: 0.25 + i * 0.05 },
-                      }}
-                    >
+                    <motion.div key={item.href} {...sheetItemMotion(i)}>
                       <Link
                         href={at(item.href)}
                         aria-current={active ? "page" : undefined}

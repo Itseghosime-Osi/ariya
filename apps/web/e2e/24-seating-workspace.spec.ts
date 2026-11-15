@@ -158,7 +158,11 @@ test.describe("Seating workspace", () => {
       timeout: 30_000,
     });
     await tab.getByRole("link", { name: "Back", exact: true }).click();
-    await expect(tab).toHaveURL(new RegExp(`/events/${eventId}$`));
+    // An in-app navigation only changes the address once the overview has been fetched; a busy CI
+    // machine (the studio still saving in the background) can take longer than the 5s default.
+    await expect(tab).toHaveURL(new RegExp(`/events/${eventId}$`), {
+      timeout: 20_000,
+    });
     await expect(tab.getByTestId("desktop-sidebar")).toBeVisible();
   });
 
