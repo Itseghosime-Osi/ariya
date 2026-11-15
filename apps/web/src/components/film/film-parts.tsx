@@ -179,6 +179,7 @@ export function Opening({ status }: { status: FilmStatus }) {
         <button
           type="button"
           id="obPlay"
+          aria-label="Play the film"
           aria-pressed={status.playing ? "true" : "false"}
           hidden={status.how !== "watch"}
         >
@@ -257,7 +258,15 @@ export function Opening({ status }: { status: FilmStatus }) {
             Skip<span className="long"> the opening</span>
           </span>
         </button>
-        <button type="button" id="obMode">
+        <button
+          type="button"
+          id="obMode"
+          aria-label={
+            status.how === "watch"
+              ? "Scroll instead, at your own pace"
+              : "Watch: the film plays itself"
+          }
+        >
           <svg className="i i-scroll" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="7" y="3" width="10" height="18" rx="5" />
             <path d="M12 8v3" />
