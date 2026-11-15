@@ -30,7 +30,10 @@ export function GuestBoard() {
     <div className="tools">
       <div className="board">
         <h3>
-          Guest list <Link href="/events">Open the planner</Link>
+          Guest list{" "}
+          <Link prefetch={false} href="/events">
+            Open the planner
+          </Link>
         </h3>
         <div className="stats">
           <div className="stat">
@@ -108,7 +111,10 @@ export function GuestBoard() {
 
       <div className="board">
         <h3>
-          Seating <Link href="/events">Assign tables</Link>
+          Seating{" "}
+          <Link prefetch={false} href="/events">
+            Assign tables
+          </Link>
         </h3>
         <div className="tables-mini">
           {SAMPLE_TABLES.map((t) => {

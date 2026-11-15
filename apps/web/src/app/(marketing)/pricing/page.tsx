@@ -203,7 +203,7 @@ export default function PricingPage() {
               Start with your <em className="foil-text">guest list.</em>
             </h2>
             <div className="next">
-              <Link className="btn btn-primary" href="/events">
+              <Link prefetch={false} className="btn btn-primary" href="/events">
                 Start planning
               </Link>
               <Link className="btn btn-ghost" href="/product">

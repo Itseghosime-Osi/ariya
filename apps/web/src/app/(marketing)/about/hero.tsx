@@ -109,7 +109,7 @@ export function Hero() {
             celebrations.
           </p>
           <div className="actions">
-            <Link className="btn btn-primary" href="/events">
+            <Link prefetch={false} className="btn btn-primary" href="/events">
               Start planning
             </Link>
             <Link className="btn btn-ghost" href="/product">
