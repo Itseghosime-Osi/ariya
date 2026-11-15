@@ -58,7 +58,7 @@ import {
 
 /** The schema caps layers at 60; kept in step with `invitationLayerSchema`. */
 const MAX_LAYERS = 60;
-/** The studio keeps 30 versions; kept in step with `saveDesignVersionAction`. */
+/** The most brand styles a card keeps. */
 const MAX_TEXT_STYLES = 24;
 
 const NO_ACCESS =
@@ -96,7 +96,8 @@ type Refused = { refusal: string };
 
 /**
  * Saves the change the studio's own way: the previous design is kept first as
- * "Before AI: <summary>" (one restore undoes the whole change, inside the 30-version cap),
+ * "Before AI: <summary>" (one restore undoes the whole change; AI backups have their own small
+ * allowance, so they never push out the host's own versions),
  * then the new design is saved with the revision that was read, so a change from another tab
  * is never silently overwritten.
  */
@@ -515,7 +516,6 @@ function applyReplacement(
   design: InvitationDesign,
   args: ReplaceInvitationDesignArgs
 ): Applied | Refused {
-  void design;
   const parsed = invitationDesignSchema.safeParse(args.design);
   if (!parsed.success) {
     const lines = parsed.error.issues.map(
@@ -527,7 +527,46 @@ function applyReplacement(
         `Fix these and try again; paths are in the card's own terms:\n${lines.join("\n")}\nNothing was changed.`,
     };
   }
-  return { design: constrainEntrySeals(ensureEntrySeal(parsed.data)) };
+
+  // The host's locked layers and the card's entry seal come through a replacement exactly as
+  // they were: a locked layer the new design changed is put back, one it left out is restored
+  // at its old place in the stack.
+  const kept = design.layers.filter(
+    (layer) => layer.locked || layer.kind === "code"
+  );
+  const keptById = new Map(kept.map((layer) => [layer.id, layer]));
+  const hasOwnSeal = kept.some((layer) => layer.kind === "code");
+  let layers = parsed.data.layers
+    .filter(
+      (layer) =>
+        !(hasOwnSeal && layer.kind === "code" && !keptById.has(layer.id))
+    )
+    .map((layer) => keptById.get(layer.id) ?? layer);
+  for (const layer of kept) {
+    if (layers.some((item) => item.id === layer.id)) continue;
+    const at = Math.min(design.layers.indexOf(layer), layers.length);
+    layers = [...layers.slice(0, at), layer, ...layers.slice(at)];
+  }
+
+  if (layers.length > MAX_LAYERS) {
+    return {
+      refusal:
+        `With the host's locked layers and the entry seal kept, this card would hold ${layers.length} layers, and a card holds at most ${MAX_LAYERS}. ` +
+        `Send a design with fewer layers. Nothing was changed.`,
+    };
+  }
+
+  const restored = kept.filter((layer) => layer.locked).map(labelOf);
+  return {
+    design: constrainEntrySeals(ensureEntrySeal({ ...parsed.data, layers })),
+    extra:
+      restored.length > 0
+        ? {
+            keptLockedLayers: restored,
+            lockedNote: `Kept ${quotedList(restored)} exactly as the host locked ${restored.length > 1 ? "them" : "it"}.`,
+          }
+        : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -711,7 +750,7 @@ export function registerDesignEditTools(
     "replace_invitation_design",
     {
       title: "Replace the whole invitation design",
-      description: `Replaces the entire invitation card with a complete design at once, for "design me a card in emerald and gold". The design is validated against the same schema the studio saves with; an invalid design is refused with the exact fields that failed, and nothing is changed. Replaces everything except the entry seal, which is kept; the previous card stays one restore away. Prefer the smaller edit tools when only a few layers need changing. ${DESIGN_TEXT_NOTE}`,
+      description: `Replaces the entire invitation card with a complete design at once, for "design me a card in emerald and gold". The design is validated against the same schema the studio saves with; an invalid design is refused with the exact fields that failed, and nothing is changed. Replaces everything except the entry seal and any layer the host locked, which are kept exactly as they are; the previous card stays one restore away. Prefer the smaller edit tools when only a few layers need changing. ${DESIGN_TEXT_NOTE}`,
       inputSchema: replaceInvitationDesignInput,
       annotations: {
         readOnlyHint: false,
@@ -729,7 +768,10 @@ export function registerDesignEditTools(
             ctx,
             args.eventId,
             (design) => applyReplacement(design, args),
-            () => ({ summary: "replaced the whole design" })
+            (_next, applyExtra) => ({
+              summary: "replaced the whole design",
+              extra: applyExtra,
+            })
           )
       )
   );

@@ -7,6 +7,13 @@ import type { InvitationDesign } from "./types";
 import type { Json } from "@/lib/supabase/database.types";
 
 const MAX_VERSIONS = 30;
+/**
+ * A connected AI keeps the card as it was before each change, named "Before AI: …". Those
+ * backups have their own small allowance, so a busy AI session can never push out the
+ * versions the host chose to keep.
+ */
+const AI_BACKUP_PREFIX = "Before AI:";
+const MAX_AI_BACKUPS = 5;
 
 export type DesignVersion = { id: string; name: string; createdAt: string };
 type Result<T> = ({ ok: true } & T) | { ok: false; error: string };
@@ -46,7 +53,7 @@ export async function listDesignVersionsAction(
       .select("id, name, created_at")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false })
-      .limit(MAX_VERSIONS);
+      .limit(MAX_VERSIONS + MAX_AI_BACKUPS);
     if (error || !Array.isArray(data)) return { ok: false, error: UNAVAILABLE };
     return {
       ok: true,
@@ -85,15 +92,20 @@ export async function saveDesignVersionAction(
     const row = data as { id: string; name: string; created_at: string } | null;
     if (error || !row)
       return { ok: false, error: "The version could not be saved. Try again." };
-    // Keep the newest MAX_VERSIONS: drop whatever is older than that.
-    const { data: extra } = await db
+    // Keep the host's newest MAX_VERSIONS and the AI's newest MAX_AI_BACKUPS, each on its own.
+    const { data: all } = await db
       .from("invitation_versions")
-      .select("id")
+      .select("id, name")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false })
-      .range(MAX_VERSIONS, MAX_VERSIONS + 99);
-    for (const old of (extra as { id: string }[] | null) ?? [])
-      await db.from("invitation_versions").delete().eq("id", old.id);
+      .range(0, 299);
+    let host = 0;
+    let ai = 0;
+    for (const old of (all as { id: string; name: string }[] | null) ?? []) {
+      const isAi = old.name.startsWith(AI_BACKUP_PREFIX);
+      const kept = isAi ? ++ai <= MAX_AI_BACKUPS : ++host <= MAX_VERSIONS;
+      if (!kept) await db.from("invitation_versions").delete().eq("id", old.id);
+    }
     return {
       ok: true,
       version: { id: row.id, name: row.name, createdAt: row.created_at },

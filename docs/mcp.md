@@ -145,24 +145,25 @@ owner or planner.
 
 ### Write
 
-| Tool                        | Effect                                                                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `create_event`              | Creates a celebration owned by the host. Subject to the 10-per-24-hours ceiling.                                                 |
-| `update_event`              | Changes title, couple, date, venue, area, dress code, description, status, visibility or RSVP deadline.                          |
-| `add_guest`                 | Adds one guest party.                                                                                                            |
-| `update_guest`              | Changes one guest party; omitted fields keep their stored value.                                                                 |
-| `import_guests`             | Adds up to 200 parties at once. Rows are validated together — one bad row rejects the whole import.                              |
-| `update_invitation_design`  | Sets the invitation theme, headline, subheadline, attire note and personal message.                                              |
-| `edit_invitation_text`      | Changes layer words and styling by id — font, size, weight, case, alignment, colour. Omitted fields keep their stored value.     |
-| `edit_invitation_layers`    | Moves, resizes, reorders, adds and removes layers. The entry seal and locked layers are refused; a card holds at most 60 layers. |
-| `apply_invitation_look`     | Applies a theme, a layout preset or a canvas shape — the same result as the studio's own buttons.                                |
-| `edit_invitation_styles`    | Creates a brand style from a layer, puts a style on layers, or rewrites a style so every following layer changes too.            |
-| `replace_invitation_design` | Replaces the whole card at once. Invalid designs are refused with the exact fields that failed.                                  |
+| Tool                        | Effect                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_event`              | Creates a celebration owned by the host. Subject to the 10-per-24-hours ceiling.                                                                              |
+| `update_event`              | Changes title, couple, date, venue, area, dress code, description, status, visibility or RSVP deadline.                                                       |
+| `add_guest`                 | Adds one guest party.                                                                                                                                         |
+| `update_guest`              | Changes one guest party; omitted fields keep their stored value.                                                                                              |
+| `import_guests`             | Adds up to 200 parties at once. Rows are validated together — one bad row rejects the whole import.                                                           |
+| `update_invitation_design`  | Sets the invitation theme, headline, subheadline, attire note and personal message.                                                                           |
+| `edit_invitation_text`      | Changes layer words and styling by id — font, size, weight, case, alignment, colour. Omitted fields keep their stored value.                                  |
+| `edit_invitation_layers`    | Moves, resizes, reorders, adds and removes layers. The entry seal and locked layers are refused; a card holds at most 60 layers.                              |
+| `apply_invitation_look`     | Applies a theme, a layout preset or a canvas shape — the same result as the studio's own buttons.                                                             |
+| `edit_invitation_styles`    | Creates a brand style from a layer, puts a style on layers, or rewrites a style so every following layer changes too.                                         |
+| `replace_invitation_design` | Replaces the whole card at once, keeping locked layers and the entry seal exactly as they are. Invalid designs are refused with the exact fields that failed. |
 
 Every card edit is saved at once through the studio's revision check: a save that lands on a design
 another tab changed is refused, and the model is told to read the design again and retry. Before
 writing, the previous design is kept as `Before AI: <summary>` in the card's versions, so restoring
-that version undoes the whole change; the answer also carries the layout check's findings on the new
+that version undoes the whole change. The newest 5 AI backups are kept on their own allowance, so
+they never push out the 30 versions the host saved; the answer also carries the layout check's findings on the new
 design. Refusals that name a locked layer, the entry seal, an unknown id or the 60-layer limit
 change nothing.
 

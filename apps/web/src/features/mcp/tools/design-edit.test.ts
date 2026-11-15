@@ -614,6 +614,65 @@ describe("replace_invitation_design", () => {
     );
   });
 
+  it("keeps the host's locked layers and the card's own entry seal", async () => {
+    const seal = {
+      ...SAVED_DESIGN.layers.find((layer) => layer.id === "names")!,
+      id: "code-own",
+      kind: "code" as const,
+      text: "",
+      x: 40,
+      y: 80,
+      width: 18,
+    };
+    const current: InvitationDesign = {
+      ...SAVED_DESIGN,
+      layers: [
+        ...SAVED_DESIGN.layers.map((layer) =>
+          layer.id === "names" || layer.id === "venue"
+            ? { ...layer, locked: true }
+            : layer
+        ),
+        seal,
+      ],
+    };
+    // The AI's design changes the locked names, leaves out the locked venue and brings a seal
+    // of its own somewhere else.
+    const replacement: InvitationDesign = {
+      ...SAVED_DESIGN,
+      theme: "emerald_regal",
+      layers: [
+        ...SAVED_DESIGN.layers
+          .filter((layer) => layer.id !== "venue")
+          .map((layer) =>
+            layer.id === "names" ? { ...layer, text: "Someone else" } : layer
+          ),
+        { ...seal, id: "code-ai", x: 5, y: 5 },
+      ],
+    };
+    const result = await call(
+      "replace_invitation_design",
+      { eventId: EVENT_ID, design: replacement },
+      context(
+        fakeClient({
+          data: { ...EVENT_ROW, invitation_design: current },
+          error: null,
+        })
+      )
+    );
+
+    expect(result.isError).toBeFalsy();
+    const saved = mockedSaveDesign.mock.calls[0][1] as InvitationDesign;
+    expect(saved.theme).toBe("emerald_regal");
+    const names = saved.layers.find((layer) => layer.id === "names")!;
+    expect(names.text).toBe(current.layers.find((l) => l.id === "names")!.text);
+    expect(saved.layers.some((layer) => layer.id === "venue")).toBe(true);
+    const seals = saved.layers.filter((layer) => layer.kind === "code");
+    expect(seals.map((layer) => layer.id)).toEqual(["code-own"]);
+    expect(
+      jsonOf<{ keptLockedLayers: string[] }>(result).keptLockedLayers
+    ).toHaveLength(2);
+  });
+
   it("refuses an invalid design with the exact paths that failed", async () => {
     const invalid = {
       ...SAVED_DESIGN,
