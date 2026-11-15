@@ -37,7 +37,7 @@ export default async function AdminLogPage({
         sub="Every admin action and every guest list opened. It cannot be edited."
       />
       <DataTable
-        head={["When", "Admin", "What", "Reason"]}
+        head={["What", "When", "Admin", "Reason"]}
         rows={rows.length}
         empty="Nothing yet."
       >
@@ -47,10 +47,10 @@ export default async function AdminLogPage({
             r.action === "delete_event" || r.action === "delete_account";
           return (
             <tr key={r.id}>
-              <Td className="whitespace-nowrap">{when(r.created_at)}</Td>
-              <Td>{r.admin_email}</Td>
               <Td>
-                {actionLabel(r.action)}
+                <span className="font-semibold text-night">
+                  {actionLabel(r.action)}
+                </span>
                 {r.target_label && (
                   <span className="block text-xs">
                     {path && r.target_id && !deleted ? (
@@ -66,7 +66,11 @@ export default async function AdminLogPage({
                   </span>
                 )}
               </Td>
-              <Td className="max-w-xs">{r.reason ?? "—"}</Td>
+              <Td className="whitespace-nowrap">{when(r.created_at)}</Td>
+              <Td wide>{r.admin_email}</Td>
+              <Td wide className="sm:max-w-xs">
+                {r.reason ? `“${r.reason}”` : "—"}
+              </Td>
             </tr>
           );
         })}

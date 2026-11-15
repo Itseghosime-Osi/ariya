@@ -95,13 +95,13 @@ export default async function AdminEmailsPage({
           {rows.map((e) => (
             <tr key={e.id}>
               <Td>{e.recipient_email}</Td>
-              <Td>
+              <Td wide>
                 {e.subject}
                 <span className="block text-xs text-label-2">
                   {TYPE_LABELS[e.template_type] ?? e.template_type}
                 </span>
               </Td>
-              <Td>
+              <Td wide>
                 <Link
                   className="text-burgundy hover:underline"
                   href={adm(`/admin/events/${e.event_id}`)}

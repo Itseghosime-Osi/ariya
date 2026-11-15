@@ -44,7 +44,7 @@ export default async function AdminEventsPage({
       <SearchBar
         action={adm("/admin/events")}
         query={q}
-        placeholder="Search by name, couple or page address"
+        placeholder="Name, couple or page address"
         filters={EVENT_FILTERS}
         filter={filter}
       />
@@ -64,7 +64,7 @@ export default async function AdminEventsPage({
               </Link>
               <span className="block text-xs text-label-2">{e.couple}</span>
             </Td>
-            <Td>{e.owner_email ?? "—"}</Td>
+            <Td wide>{e.owner_email ?? "—"}</Td>
             <Td>
               {when(e.date, false)}
               {(e.status === "archived" || e.ended) && (
