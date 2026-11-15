@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import { AppSplash, splashScript } from "@/components/layout/app-splash";
 import { OfflineCache } from "@/components/layout/offline-cache";
 import { SITE_URL } from "@/lib/site-url";
+import { ConsoleGreeting } from "@/components/site/console-greeting";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -81,6 +82,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
         <AppSplash />
         <OfflineCache />
+        <ConsoleGreeting />
         {children}
       </body>
     </html>

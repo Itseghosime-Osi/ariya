@@ -927,10 +927,7 @@ export function FilmClose() {
             <Link href="/documentation">Docs</Link>
             <Link href="/events">Demo planner</Link>
           </nav>
-          <span>
-            Àríyá (ah-ree-YAH): merriment, in Yoruba · Tech4Youth Edo · Project
-            36 prototype
-          </span>
+          <span>Àríyá (ah-ree-YAH): merriment, in Yoruba</span>
         </div>
       </footer>
     </main>
