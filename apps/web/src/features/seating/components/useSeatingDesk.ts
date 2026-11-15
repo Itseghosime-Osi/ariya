@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   assignSeatAction,
   bulkAssignSeatsAction,
@@ -386,6 +386,16 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     return true;
   };
 
+  /**
+   * B5: take fresh server data (an AI seating change) without a reload. Only called when the
+   * desk has no in-flight optimistic edit, so the server copy cleanly replaces the local one.
+   */
+  const resync = useCallback((next: SeatingDeskData) => {
+    lastBulk.current = null;
+    setCanUndoBulk(false);
+    setData(next);
+  }, []);
+
   return {
     addTables,
     updateTable,
@@ -393,6 +403,7 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     bulkAssign,
     undoBulkAssign,
     canUndoBulk,
+    resync,
     data,
     errorMsg,
     successMsg,

@@ -285,6 +285,22 @@ export async function createTablesBulkAction(
 }
 
 /**
+ * B5: re-read the desk's server data so an AI seating change appears without a reload.
+ * Membership is checked the same way as the writes; a non-member learns nothing.
+ */
+export async function getSeatingDataAction(
+  eventId: string
+): Promise<ActionResult<import("./types").SeatingDeskData>> {
+  const { z } = await import("zod");
+  if (!z.string().uuid().safeParse(eventId).success)
+    return { ok: false, error: NOT_A_MEMBER };
+  const supabase = await memberClient(eventId);
+  if (!supabase) return { ok: false, error: NOT_A_MEMBER };
+  const { getEventSeatingData } = await import("./queries");
+  return { ok: true, data: await getEventSeatingData(eventId) };
+}
+
+/**
  * Seat many guests in one go (used by "Seat everyone"). Each seat still goes through the
  * assign_seat function, so capacity and permissions are checked exactly as for a single drag.
  */

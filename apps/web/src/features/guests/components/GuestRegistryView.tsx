@@ -21,6 +21,7 @@ import { GuestFormModal } from "./GuestFormModal";
 import { DeleteGuestDialog } from "./DeleteGuestDialog";
 import { CsvImportModal } from "./import/CsvImportModal";
 import { deleteGuestAction } from "../actions";
+import { useEventTablesSync } from "@/features/events/components/useEventTablesSync";
 
 interface GuestRegistryViewProps {
   eventId: string;
@@ -58,6 +59,9 @@ export function GuestRegistryView({
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [isImportOpen, setIsImportOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+
+  // B5: a guest the AI adds, edits, imports or approves appears without a reload.
+  useEventTablesSync(eventId);
 
   React.useEffect(() => {
     const onFocus = () => router.refresh();

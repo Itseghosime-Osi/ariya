@@ -14,6 +14,12 @@ interface Doc {
   past: InvitationDesign[];
   present: InvitationDesign;
   future: InvitationDesign[];
+  /**
+   * Parallel to [...past, present, ...future]: how each step reached the canvas, or null for the
+   * host's own edits. Index 0 is always null. Undo, redo and restore only repartition the timeline,
+   * so labels travel with their entries untouched.
+   */
+  labels: (string | null)[];
 }
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -54,6 +60,7 @@ export function useDesignerDoc(
     past: [],
     present: constrainEntrySeals(recovered ?? initial),
     future: [],
+    labels: [null],
   });
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -78,24 +85,38 @@ export function useDesignerDoc(
         const candidate = typeof next === "function" ? next(s.present) : next;
         if (candidate === s.present) return s;
         const updated = constrainEntrySealsFast(candidate);
-        return record
-          ? {
-              past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],
-              present: updated,
-              future: [],
-            }
-          : { ...s, present: updated };
+        if (!record) return { ...s, present: updated };
+        // The pushed entry keeps the label the present carries; the dropped redo branch takes
+        // its labels with it, so the array always parallels [...past, present, ...future].
+        const pastLabels = s.labels
+          .slice(0, s.past.length)
+          .slice(-(MAX_UNDO_STEPS - 1));
+        const presentLabel = s.labels[s.past.length] ?? null;
+        return {
+          past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],
+          present: updated,
+          future: [],
+          labels: [...pastLabels, presentLabel, null],
+        };
       });
     },
     []
   );
 
   const recordSnapshot = useCallback((snapshot: InvitationDesign) => {
-    setDoc((s) => ({
-      past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), snapshot],
-      present: s.present,
-      future: [],
-    }));
+    setDoc((s) => {
+      // The filed snapshot is a host-side state (label null); the present keeps its label.
+      const pastLabels = s.labels
+        .slice(0, s.past.length)
+        .slice(-(MAX_UNDO_STEPS - 1));
+      const presentLabel = s.labels[s.past.length] ?? null;
+      return {
+        past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), snapshot],
+        present: s.present,
+        future: [],
+        labels: [...pastLabels, null, presentLabel],
+      };
+    });
   }, []);
 
   const undo = useCallback(() => {
@@ -105,6 +126,7 @@ export function useDesignerDoc(
             past: s.past.slice(0, -1),
             present: s.past[s.past.length - 1],
             future: [s.present, ...s.future],
+            labels: s.labels,
           }
         : s
     );
@@ -117,6 +139,7 @@ export function useDesignerDoc(
             past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],
             present: s.future[0],
             future: s.future.slice(1),
+            labels: s.labels,
           }
         : s
     );
@@ -128,19 +151,98 @@ export function useDesignerDoc(
       const all = [...s.past, s.present, ...s.future];
       const targetIdx = all.findIndex((d) => d === target);
       if (targetIdx === -1) {
+        const pastLabels = s.labels
+          .slice(0, s.past.length)
+          .slice(-(MAX_UNDO_STEPS - 1));
+        const presentLabel = s.labels[s.past.length] ?? null;
         return {
           past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],
           present: target,
           future: [],
+          labels: [...pastLabels, presentLabel, null],
         };
       }
       return {
         past: all.slice(0, targetIdx),
         present: all[targetIdx],
         future: all.slice(targetIdx + 1),
+        labels: s.labels,
       };
     });
   }, []);
+
+  /**
+   * A design that arrived from elsewhere (the AI, through realtime or polling): one undo step
+   * back to exactly this moment, labelled "AI: <summary>". Only called when nothing is unsaved,
+   * so the step below the AI change always matches the server. Sets the revision the save would
+   * have returned, marks the step clean, and drops any pending conflict: the server's copy and
+   * this one agree again.
+   */
+  const applyRemoteDesign = useCallback(
+    (next: InvitationDesign, revision: string, label: string) => {
+      const updated = constrainEntrySeals(normaliseDesign(next) ?? next);
+      setDoc((s) => {
+        const pastLabels = s.labels
+          .slice(0, s.past.length)
+          .slice(-(MAX_UNDO_STEPS - 1));
+        const presentLabel = s.labels[s.past.length] ?? null;
+        return {
+          past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), s.present],
+          present: updated,
+          future: [],
+          labels: [...pastLabels, presentLabel, label],
+        };
+      });
+      revisionRef.current = revision;
+      savedRef.current = JSON.stringify(updated);
+      try {
+        localStorage.removeItem(recoveryKey);
+      } catch {
+        /* Storage is optional; the server remains authoritative. */
+      }
+      setSaveState("saved");
+      setSaveError(null);
+    },
+    [recoveryKey]
+  );
+
+  /**
+   * "Keep mine" for a conflict: the host's unsaved edits stay on the canvas and keep saving as
+   * usual, but the AI design is filed as the step below the present — one Undo reaches exactly
+   * what the AI made, so nothing the AI did is lost. The remote revision is adopted so the next
+   * save still carries the revision check instead of racing the AI's write.
+   */
+  const noteRemoteDesign = useCallback(
+    (next: InvitationDesign, revision: string, label: string) => {
+      const updated = constrainEntrySeals(normaliseDesign(next) ?? next);
+      setDoc((s) => {
+        const pastLabels = s.labels
+          .slice(0, s.past.length)
+          .slice(-(MAX_UNDO_STEPS - 1));
+        const presentLabel = s.labels[s.past.length] ?? null;
+        return {
+          past: [...s.past.slice(-(MAX_UNDO_STEPS - 1)), updated],
+          present: s.present,
+          future: [],
+          labels: [...pastLabels, label, presentLabel],
+        };
+      });
+      revisionRef.current = revision;
+      if (mountedRef.current) setSaveState("saved");
+    },
+    []
+  );
+
+  /** After noticing a remote save whose design cannot change this view, still track its revision. */
+  const adoptRevision = useCallback((revision: string) => {
+    revisionRef.current = revision;
+  }, []);
+
+  /** True while a save of this canvas is on its way to the server. */
+  const isSaving = useCallback(() => inFlightRef.current !== null, []);
+
+  /** The revision the next serialized write will check against. */
+  const getRevision = useCallback(() => revisionRef.current, []);
 
   // Serialize writes: a slow older request must never overwrite a newer design.
   const flushSave = useCallback((): Promise<boolean> => {
@@ -309,5 +411,11 @@ export function useDesignerDoc(
     past: doc.past,
     future: doc.future,
     restoreState,
+    stepLabels: doc.labels,
+    applyRemoteDesign,
+    noteRemoteDesign,
+    adoptRevision,
+    getRevision,
+    isSaving,
   };
 }
