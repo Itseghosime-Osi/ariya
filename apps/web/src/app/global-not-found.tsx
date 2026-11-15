@@ -12,12 +12,15 @@ const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
   variable: "--font-bodoni-moda",
   display: "swap",
+  // This page is shown rarely; preloading its fonts would make every page fetch them for nothing.
+  preload: false,
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
   variable: "--font-plus-jakarta-sans",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

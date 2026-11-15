@@ -4,6 +4,7 @@ import "@/styles/site/nav.css";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
+import { ConsoleGreeting } from "@/components/site/console-greeting";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -75,7 +76,10 @@ export default function FilmLayout({
         />
         <script dangerouslySetInnerHTML={{ __html: curtainBoot }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ConsoleGreeting />
+      </body>
     </html>
   );
 }

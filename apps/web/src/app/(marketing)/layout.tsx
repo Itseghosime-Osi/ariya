@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
+import { ConsoleGreeting } from "@/components/site/console-greeting";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -71,6 +72,7 @@ export default function MarketingLayout({
         <SiteHeader />
         {children}
         <SiteFooter />
+        <ConsoleGreeting />
       </body>
     </html>
   );

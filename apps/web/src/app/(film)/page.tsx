@@ -54,6 +54,7 @@ export default function HomePage() {
         }}
       >
         <Link
+          prefetch={false}
           href="/privacy"
           style={{
             pointerEvents: "auto",
@@ -68,6 +69,7 @@ export default function HomePage() {
           Privacy
         </Link>
         <Link
+          prefetch={false}
           href="/terms"
           style={{
             pointerEvents: "auto",

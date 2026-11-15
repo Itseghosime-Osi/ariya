@@ -154,7 +154,7 @@ export default function ProductPage() {
               ))}
             </ol>
             <div className="next">
-              <Link className="btn btn-primary" href="/events">
+              <Link prefetch={false} className="btn btn-primary" href="/events">
                 Start planning
               </Link>
               <Link className="btn btn-ghost" href="/pricing">
@@ -180,8 +180,14 @@ export default function ProductPage() {
               read your email, contacts or files, and never sell your data.
               Guest details that hosts add are used only to run that
               host&rsquo;s celebration. Read the full{" "}
-              <Link href="/privacy">Privacy Policy</Link> and{" "}
-              <Link href="/terms">Terms of Service</Link>.
+              <Link prefetch={false} href="/privacy">
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link prefetch={false} href="/terms">
+                Terms of Service
+              </Link>
+              .
             </p>
           </div>
         </section>
