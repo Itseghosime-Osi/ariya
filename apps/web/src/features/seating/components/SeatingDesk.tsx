@@ -35,6 +35,9 @@ import { TableListView } from "./TableListView";
 import { TableFormModal } from "./TableFormModal";
 import { useSeatingDesk } from "./useSeatingDesk";
 import { HallStudio } from "../hall/HallStudio";
+import { getSeatingDataAction } from "../actions";
+import { createClient } from "@/lib/supabase/client";
+import { getEventTablesFingerprintAction } from "@/features/invitations/live-sync-actions";
 import type { SeatingDeskData } from "../types";
 
 interface SeatingDeskProps {
@@ -95,7 +98,113 @@ export function SeatingDesk({
     cancelDelete,
     confirmDelete,
     deleteTables,
+    resync,
   } = useSeatingDesk(eventId, initialData);
+
+  // B5: an AI seating change re-reads the desk's server data without a reload. While the host
+  // has an in-flight optimistic edit the refresh waits; the hook's writers own the local copy.
+  useEffect(() => {
+    let mounted = true;
+    let known: string | null = null;
+    let realtime = false;
+    let fetching = false;
+
+    const stamp = async (): Promise<string | null> => {
+      if (fetching) return null;
+      fetching = true;
+      try {
+        let state: Awaited<ReturnType<typeof getEventTablesFingerprintAction>>;
+        try {
+          state = await getEventTablesFingerprintAction(eventId);
+        } catch {
+          return null;
+        }
+        if (!mounted || !state.ok) return null;
+        return [state.eventsRev, state.guestsRev, state.tablesRev].join("|");
+      } finally {
+        fetching = false;
+      }
+    };
+
+    const check = async () => {
+      const next = await stamp();
+      if (!mounted || next === null) return;
+      if (known === null) {
+        known = next;
+        return;
+      }
+      if (next === known) return;
+      known = next;
+      try {
+        const fresh = await getSeatingDataAction(eventId);
+        if (mounted && fresh.ok && fresh.data) resync(fresh.data);
+      } catch {
+        /* Offline: the next check picks it up (B6). */
+      }
+    };
+
+    void check();
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`seating_${eventId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tables",
+          filter: `event_id=eq.${eventId}`,
+        },
+        () => {
+          void check();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "seat_assignments" },
+        () => {
+          void check();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "guests",
+          filter: `event_id=eq.${eventId}`,
+        },
+        () => {
+          void check();
+        }
+      )
+      .subscribe((status) => {
+        realtime = status === "SUBSCRIBED";
+      });
+    const poll = window.setInterval(() => {
+      if (
+        !realtime &&
+        document.visibilityState === "visible" &&
+        navigator.onLine !== false
+      )
+        void check();
+    }, 5000);
+    const recheck = () => {
+      void check();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") recheck();
+    };
+    window.addEventListener("online", recheck);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      mounted = false;
+      window.clearInterval(poll);
+      window.removeEventListener("online", recheck);
+      document.removeEventListener("visibilitychange", onVisible);
+      supabase.removeChannel(channel);
+    };
+  }, [eventId, resync]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
