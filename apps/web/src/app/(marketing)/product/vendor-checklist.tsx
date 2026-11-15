@@ -45,7 +45,11 @@ export function VendorChecklist() {
           {finished} of {SAMPLE_VENDORS.length} vendor tasks done
         </p>
         <p style={{ marginTop: 18 }}>
-          <Link className="btn btn-ghost btn-small" href="/events">
+          <Link
+            prefetch={false}
+            className="btn btn-ghost btn-small"
+            href="/events"
+          >
             Edit the checklist
           </Link>
         </p>

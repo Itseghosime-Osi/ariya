@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { SITE_URL } from "@/lib/site-url";
+import { ConsoleGreeting } from "@/components/site/console-greeting";
 
 /**
  * The root for pages shared outside the app (a view-only floor plan). It has no loading screen on
@@ -45,6 +46,7 @@ export default function ShareLayout({
     >
       <body className="min-h-screen bg-ivory text-night antialiased">
         {children}
+        <ConsoleGreeting />
       </body>
     </html>
   );

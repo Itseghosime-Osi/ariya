@@ -19,12 +19,23 @@ export function SiteFooter() {
         </span>
         <span>Àríyá (ah-ree-YAH) is Yoruba for merriment.</span>
         <span>
-          <Link href="/">The film</Link> · <Link href="/about">About</Link> ·{" "}
+          <Link prefetch={false} href="/">
+            The film
+          </Link>{" "}
+          · <Link href="/about">About</Link> ·{" "}
           <Link href="/product">What we do</Link> ·{" "}
           <Link href="/pricing">Pricing</Link> ·{" "}
-          <Link href="/documentation">Docs</Link> ·{" "}
-          <Link href="/privacy">Privacy</Link> ·{" "}
-          <Link href="/terms">Terms</Link>
+          <Link prefetch={false} href="/documentation">
+            Docs
+          </Link>{" "}
+          ·{" "}
+          <Link prefetch={false} href="/privacy">
+            Privacy
+          </Link>{" "}
+          ·{" "}
+          <Link prefetch={false} href="/terms">
+            Terms
+          </Link>
         </span>
       </div>
     </footer>

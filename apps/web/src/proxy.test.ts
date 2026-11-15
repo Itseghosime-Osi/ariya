@@ -42,6 +42,7 @@ describe("proxy route protection", () => {
     "/pricing",
     "/robots.txt",
     "/sitemap.xml",
+    "/llms.txt",
   ])("serves %s without a Supabase authentication request", async (path) => {
     const response = await proxy(
       new NextRequest(`http://localhost:3000${path}`)

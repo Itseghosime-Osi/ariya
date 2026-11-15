@@ -27,6 +27,7 @@ export async function proxy(request: NextRequest) {
       "/terms",
       "/robots.txt",
       "/sitemap.xml",
+      "/llms.txt",
       "/sw.js",
     ].includes(pathname)
   ) {

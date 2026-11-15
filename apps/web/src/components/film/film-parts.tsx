@@ -134,7 +134,7 @@ export function FilmNav({ open, onMenuClick }: SiteMenuTrigger) {
         <span id="whereName" />
       </div>
       <div className="right">
-        <Link className="btn gold small" href="/events">
+        <Link prefetch={false} className="btn gold small" href="/events">
           Start planning
         </Link>
         <button
@@ -179,6 +179,7 @@ export function Opening({ status }: { status: FilmStatus }) {
         <button
           type="button"
           id="obPlay"
+          aria-label="Play the film"
           aria-pressed={status.playing ? "true" : "false"}
           hidden={status.how !== "watch"}
         >
@@ -257,7 +258,15 @@ export function Opening({ status }: { status: FilmStatus }) {
             Skip<span className="long"> the opening</span>
           </span>
         </button>
-        <button type="button" id="obMode">
+        <button
+          type="button"
+          id="obMode"
+          aria-label={
+            status.how === "watch"
+              ? "Scroll instead, at your own pace"
+              : "Watch: the film plays itself"
+          }
+        >
           <svg className="i i-scroll" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="7" y="3" width="10" height="18" rx="5" />
             <path d="M12 8v3" />
@@ -778,10 +787,10 @@ export function NewLayer() {
           Plan your <em>àríyá.</em>
         </h2>
         <div className="row">
-          <Link className="btn gold" href="/events">
+          <Link prefetch={false} className="btn gold" href="/events">
             Start planning
           </Link>
-          <Link className="btn" href="/about">
+          <Link prefetch={false} className="btn" href="/about">
             About Àríyá
           </Link>
           <button className="btn" id="replay" type="button">
@@ -902,13 +911,13 @@ export function FilmClose() {
             </figure>
           </div>
           <div className="close-cta">
-            <Link className="btn gold" href="/events">
+            <Link prefetch={false} className="btn gold" href="/events">
               Start planning
             </Link>
-            <Link className="btn" href="/rsvp?g=k701Qx">
+            <Link prefetch={false} className="btn" href="/rsvp?g=k701Qx">
               Try a personal invitation
             </Link>
-            <Link className="quiet-link" href="/pricing">
+            <Link prefetch={false} className="quiet-link" href="/pricing">
               Pricing: free for small events, ₦50,000 per celebration{" "}
               <small>(per event)</small>
             </Link>
@@ -917,20 +926,27 @@ export function FilmClose() {
       </section>
       <footer className="foot">
         <div className="wrap">
-          <Link className="wordmark" href="/about">
+          <Link prefetch={false} className="wordmark" href="/about">
             Àríyá
           </Link>
           <nav aria-label="Footer">
-            <Link href="/about">About</Link>
-            <Link href="/product">What we do</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/documentation">Docs</Link>
-            <Link href="/events">Demo planner</Link>
+            <Link prefetch={false} href="/about">
+              About
+            </Link>
+            <Link prefetch={false} href="/product">
+              What we do
+            </Link>
+            <Link prefetch={false} href="/pricing">
+              Pricing
+            </Link>
+            <Link prefetch={false} href="/documentation">
+              Docs
+            </Link>
+            <Link prefetch={false} href="/events">
+              Demo planner
+            </Link>
           </nav>
-          <span>
-            Àríyá (ah-ree-YAH): merriment, in Yoruba · Tech4Youth Edo · Project
-            36 prototype
-          </span>
+          <span>Àríyá (ah-ree-YAH): merriment, in Yoruba</span>
         </div>
       </footer>
     </main>

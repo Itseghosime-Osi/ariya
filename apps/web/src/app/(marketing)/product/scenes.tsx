@@ -279,7 +279,11 @@ export function SeatsScene() {
               <b>{seated}</b>
               <span>of 52 confirmed seated</span>
             </div>
-            <Link className="btn btn-ghost" href="/documentation/seating">
+            <Link
+              prefetch={false}
+              className="btn btn-ghost"
+              href="/documentation/seating"
+            >
               How seating works
             </Link>
           </div>
@@ -340,7 +344,11 @@ export function HelperScene() {
               work. Anything that changes your event waits on your approvals
               desk. It can never send, delete or touch a guest&rsquo;s reply.
             </p>
-            <Link className="btn btn-ghost" href="/documentation/connect-ai">
+            <Link
+              prefetch={false}
+              className="btn btn-ghost"
+              href="/documentation/connect-ai"
+            >
               How the connection works
             </Link>
           </div>
