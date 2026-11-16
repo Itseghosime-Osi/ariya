@@ -42,7 +42,7 @@ begin
   v_event_res := public.create_event(
     p_title := 'Phase 6 Gala Nuptials',
     p_couple := 'Kemi & Tunde',
-    p_date := '2026-11-20 14:00:00+00',
+    p_date := now() + ('2026-11-20 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Eko Hotel',
     p_area := 'Victoria Island'
   );
@@ -298,7 +298,7 @@ begin
   v_res := public.create_event(
     p_title := 'Unpaid Gathering',
     p_couple := 'A & B',
-    p_date := '2026-12-01 10:00:00+00',
+    p_date := now() + ('2026-12-01 10:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Small Hall',
     p_area := 'Ikeja'
   );

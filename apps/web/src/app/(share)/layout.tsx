@@ -4,6 +4,8 @@ import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { SITE_URL } from "@/lib/site-url";
 import { ConsoleGreeting } from "@/components/site/console-greeting";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 /**
  * The root for pages shared outside the app (a view-only floor plan). It has no loading screen on
@@ -44,7 +46,11 @@ export default function ShareLayout({
       lang="en-NG"
       className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
+      </head>
       <body className="min-h-screen bg-ivory text-night antialiased">
+        <ScrollToTop />
         {children}
         <ConsoleGreeting />
       </body>

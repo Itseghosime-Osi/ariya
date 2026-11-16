@@ -38,7 +38,7 @@ begin
   v_ea := (public.create_event(
     p_title := 'Royal Coronation Gala 2026',
     p_couple := 'Folake & Femi',
-    p_date := '2026-12-20 14:00:00+00',
+    p_date := now() + ('2026-12-20 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Federal Palace Hotel',
     p_area := 'Victoria Island'
   )->>'id')::uuid;
@@ -56,7 +56,7 @@ begin
   v_eb := (public.create_event(
     p_title := 'Secret Midnight Soiree',
     p_couple := 'Zainab & Kazeem',
-    p_date := '2026-12-25 18:00:00+00',
+    p_date := now() + ('2026-12-25 18:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Private Island',
     p_area := 'Lekki'
   )->>'id')::uuid;

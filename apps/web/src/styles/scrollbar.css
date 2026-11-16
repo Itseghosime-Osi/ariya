@@ -1,0 +1,212 @@
+/* Àríyá scrollbars: the thumb is a strip of gold foil, lit from one side like the foil on the
+   invitation card, sitting inlaid in a track the colour of the page. Every part of the site loads
+   this one file; each part only sets the colours.
+
+     --sb-track        the gutter (match the page so it reads as part of it)
+     --sb-edge         the hairline that separates the gutter from the page
+     --sb-shine        the lit edge of the foil
+     --sb-thumb        the foil itself (also the flat colour Firefox uses)
+     --sb-shade        the far edge of the foil
+     --sb-thumb-hover  the foil under the pointer
+     --sb-thumb-active the thumb while dragged
+
+   Kept in a cascade layer so a scroller that hides its bar on purpose ([scrollbar-width:none],
+   [&::-webkit-scrollbar]:hidden, .sb-nav, .fan) always wins over these defaults. */
+
+@layer base {
+  /* The app: warm ivory and gold. */
+  :root {
+    --sb-track: #f3ebdc;
+    --sb-edge: rgba(200, 155, 60, 0.22);
+    --sb-shine: #ecd7a4;
+    --sb-thumb: #c89b3c;
+    --sb-shade: #9a6f1f;
+    --sb-thumb-hover: #b8862e;
+    --sb-thumb-active: #6b1e2e;
+  }
+
+  /* Dark mode and the studio's dark theme: champagne on velvet black. */
+  .dark {
+    --sb-track: #140c10;
+    --sb-edge: rgba(232, 210, 166, 0.12);
+    --sb-shine: #f3e2bd;
+    --sb-thumb: #c9a35a;
+    --sb-shade: #8f6a2c;
+    --sb-thumb-hover: #e3c27f;
+    --sb-thumb-active: #f3e2bd;
+  }
+
+  /* The staff desk keeps its own navy so staff always know where they are. */
+  .admin-theme {
+    --sb-track: #e8ecf4;
+    --sb-edge: rgba(22, 38, 77, 0.12);
+    --sb-shine: #b6c1d6;
+    --sb-thumb: #7d8aa6;
+    --sb-shade: #4b5873;
+    --sb-thumb-hover: #16264d;
+    --sb-thumb-active: #1d4ed8;
+  }
+
+  /* ---------- Chrome, Edge, Safari ---------- */
+
+  html::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  html::-webkit-scrollbar-button {
+    display: none;
+  }
+  /* The page gutter: the page's own colour, set off by a hairline of gold. */
+  html::-webkit-scrollbar-track {
+    background: var(--sb-track, #f3ebdc);
+  }
+  html::-webkit-scrollbar-track:vertical {
+    box-shadow: inset 1px 0 0 var(--sb-edge, rgba(200, 155, 60, 0.22));
+  }
+  html::-webkit-scrollbar-track:horizontal {
+    box-shadow: inset 0 1px 0 var(--sb-edge, rgba(200, 155, 60, 0.22));
+  }
+  /* The foil: lit across its width, with a gap of track around it so it looks inlaid. */
+  html::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    min-width: 48px;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    background-color: var(--sb-thumb, #c89b3c);
+  }
+  html::-webkit-scrollbar-thumb:vertical {
+    background-image: linear-gradient(
+      90deg,
+      var(--sb-shine, #ecd7a4) 0%,
+      var(--sb-thumb, #c89b3c) 45%,
+      var(--sb-shade, #9a6f1f) 100%
+    );
+  }
+  html::-webkit-scrollbar-thumb:horizontal {
+    background-image: linear-gradient(
+      180deg,
+      var(--sb-shine, #ecd7a4) 0%,
+      var(--sb-thumb, #c89b3c) 45%,
+      var(--sb-shade, #9a6f1f) 100%
+    );
+  }
+  /* Under the pointer the foil warms and widens into the gap. */
+  html::-webkit-scrollbar-thumb:hover {
+    border-width: 2px;
+    background-color: var(--sb-thumb-hover, #b8862e);
+  }
+  html::-webkit-scrollbar-thumb:active {
+    border-width: 2px;
+    background-image: none;
+    background-color: var(--sb-thumb-active, #6b1e2e);
+  }
+  html::-webkit-scrollbar-corner {
+    background: var(--sb-track, #f3ebdc);
+  }
+
+  /* Panels and lists inside the page: a slimmer bar on a clear track. At rest it is a faint wash of
+     gold, so a page full of cards never wears a row of bright stripes; with the pointer over the
+     panel it becomes the full foil. */
+  body *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  body *::-webkit-scrollbar-track,
+  body *::-webkit-scrollbar-corner {
+    background: transparent;
+    box-shadow: none;
+  }
+  /* Keep the bar inside a rounded card: it starts and stops clear of the curved corners instead
+     of running into them. 14px covers the cards' 16–28px radii at their narrowest point. */
+  body *::-webkit-scrollbar-track:vertical {
+    margin-block: 14px;
+  }
+  body *::-webkit-scrollbar-track:horizontal {
+    margin-inline: 14px;
+  }
+  body *::-webkit-scrollbar-thumb {
+    min-height: 32px;
+    min-width: 32px;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    background-color: color-mix(
+      in srgb,
+      var(--sb-thumb, #c89b3c) 38%,
+      transparent
+    );
+    background-image: none;
+  }
+  body *:hover::-webkit-scrollbar-thumb:vertical,
+  body *:focus-within::-webkit-scrollbar-thumb:vertical {
+    background-color: var(--sb-thumb, #c89b3c);
+    background-image: linear-gradient(
+      90deg,
+      var(--sb-shine, #ecd7a4),
+      var(--sb-thumb, #c89b3c) 45%,
+      var(--sb-shade, #9a6f1f)
+    );
+  }
+  body *:hover::-webkit-scrollbar-thumb:horizontal,
+  body *:focus-within::-webkit-scrollbar-thumb:horizontal {
+    background-color: var(--sb-thumb, #c89b3c);
+    background-image: linear-gradient(
+      180deg,
+      var(--sb-shine, #ecd7a4),
+      var(--sb-thumb, #c89b3c) 45%,
+      var(--sb-shade, #9a6f1f)
+    );
+  }
+  body *:hover::-webkit-scrollbar-thumb:hover {
+    border-width: 1px;
+    background-image: none;
+    background-color: var(--sb-thumb-hover, #b8862e);
+  }
+  body *:hover::-webkit-scrollbar-thumb:active {
+    background-image: none;
+    background-color: var(--sb-thumb-active, #6b1e2e);
+  }
+
+  /* Touch screens have no pointer to hover with: keep inner bars visible there. */
+  @media (hover: none) {
+    body *::-webkit-scrollbar-thumb {
+      background-color: var(--sb-thumb, #c89b3c);
+    }
+  }
+
+  /* ---------- Firefox (and any browser without the WebKit hooks) ----------
+     Chromium honours these too and would then ignore the foil above, so they are only set where
+     the WebKit hooks are missing. Firefox draws flat colours: the foil's middle tone. */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-color: var(--sb-thumb, #c89b3c) var(--sb-track, #f3ebdc);
+    }
+    body * {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(
+          in srgb,
+          var(--sb-thumb, #c89b3c) 38%,
+          transparent
+        )
+        transparent;
+    }
+    body *:hover,
+    body *:focus-within {
+      scrollbar-color: var(--sb-thumb, #c89b3c) transparent;
+    }
+    @media (hover: none) {
+      body * {
+        scrollbar-color: var(--sb-thumb, #c89b3c) transparent;
+      }
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --sb-thumb: #7a5612;
+      --sb-shine: #7a5612;
+      --sb-shade: #593d08;
+    }
+  }
+}

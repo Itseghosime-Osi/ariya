@@ -7,6 +7,8 @@ import {
   ERROR_SECONDARY,
   ErrorScreen,
 } from "@/components/errors/error-screen";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -35,7 +37,11 @@ export default function GlobalNotFound() {
       lang="en-NG"
       className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
+      </head>
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
+        <ScrollToTop />
         <ErrorScreen
           code="404"
           eyebrow="Page not found"

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "@/styles/scrollbar.css";
 import "@/styles/site/ariya.css";
 import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";
@@ -7,6 +8,8 @@ import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 import { ConsoleGreeting } from "@/components/site/console-greeting";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -57,6 +60,7 @@ export default function MarketingLayout({
   return (
     <html lang="en-NG" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
         <WebFonts href={FONTS} />
         {/* /about mounts the film's 3D module directly; it imports three by bare specifier. */}
         <script
@@ -66,6 +70,7 @@ export default function MarketingLayout({
         <script dangerouslySetInnerHTML={{ __html: curtainBoot }} />
       </head>
       <body>
+        <ScrollToTop />
         <a className="skip" href="#main">
           Skip to content
         </a>

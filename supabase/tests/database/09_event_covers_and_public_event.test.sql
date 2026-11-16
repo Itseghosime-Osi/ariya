@@ -43,7 +43,7 @@ begin
   v_e_pub := (public.create_event(
     p_title := 'Royal Lagos Jubilee',
     p_couple := 'Ade & Bisi',
-    p_date := '2026-11-15 13:00:00+00',
+    p_date := now() + ('2026-11-15 13:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Eko Hotel Ballroom',
     p_area := 'Victoria Island',
     p_slug := v_slug_pub
@@ -62,7 +62,7 @@ begin
   v_e_priv := (public.create_event(
     p_title := 'Secret Private Dinner',
     p_couple := 'Ade & Bisi',
-    p_date := '2026-11-20 19:00:00+00',
+    p_date := now() + ('2026-11-20 19:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Private Residence',
     p_slug := v_slug_priv
   )->>'id')::uuid;
@@ -75,7 +75,7 @@ begin
   v_e_draft := (public.create_event(
     p_title := 'Draft Unreleased Gala',
     p_couple := 'Ade & Bisi',
-    p_date := '2026-11-25 18:00:00+00',
+    p_date := now() + ('2026-11-25 18:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Civic Centre',
     p_slug := v_slug_draft
   )->>'id')::uuid;

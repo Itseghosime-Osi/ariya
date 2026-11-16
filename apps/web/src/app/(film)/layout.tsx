@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import "@/styles/scrollbar.css";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
 import { WebFonts } from "@/components/site/web-fonts";
 import { SCENE_IMPORT_MAP } from "@/lib/site/scene-import-map";
 import { ConsoleGreeting } from "@/components/site/console-greeting";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -69,6 +72,7 @@ export default function FilmLayout({
   return (
     <html lang="en-NG" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
         <WebFonts href={FONTS} />
         <script
           type="importmap"
@@ -77,6 +81,7 @@ export default function FilmLayout({
         <script dangerouslySetInnerHTML={{ __html: curtainBoot }} />
       </head>
       <body>
+        <ScrollToTop />
         {children}
         <ConsoleGreeting />
       </body>
