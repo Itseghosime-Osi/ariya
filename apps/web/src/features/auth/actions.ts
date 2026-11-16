@@ -1,12 +1,12 @@
 "use server";
 
-import { render } from "@react-email/components";
 import { clientEnv } from "@/lib/env/client";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAuthEmail } from "@/lib/email/auth-mail";
 import { checkRateLimit, getClientIpHmac } from "@/lib/rate-limit";
-import { AuthLinkEmail } from "@/emails/AuthLinkEmail";
+import { authLinkEmail } from "@/lib/email/templates";
+import { SITE_URL } from "@/lib/site-url";
 import { mapError } from "@/lib/errors";
 import {
   forgotPasswordSchema,
@@ -111,17 +111,14 @@ export async function signUpAction(
     };
   }
 
-  const sent = await sendAuthEmail({
-    to: email,
-    subject: "Confirm your email for Àríyá",
-    html: await render(
-      AuthLinkEmail({
-        kind: "confirm",
-        name: fullName,
-        url: authLink(linkData.properties.hashed_token, "signup", "/events"),
-      })
-    ),
+  const confirmEmail = authLinkEmail({
+    kind: "confirm",
+    name: fullName,
+    email,
+    url: authLink(linkData.properties.hashed_token, "signup", "/events"),
+    siteUrl: SITE_URL,
   });
+  const sent = await sendAuthEmail({ to: email, ...confirmEmail });
 
   if (!sent) {
     // No email could go out at all: rather than strand them, confirm the account and sign them in.
@@ -217,18 +214,14 @@ export async function forgotPasswordAction(
     "recovery",
     "/reset-password"
   );
-  const sent = await sendAuthEmail({
-    to: parsed.data.email,
-    subject: "Reset your Àríyá passcode",
-    html: await render(
-      AuthLinkEmail({
-        kind: "reset",
-        name:
-          (data.user.user_metadata?.full_name as string | undefined) ?? null,
-        url: link,
-      })
-    ),
+  const resetEmail = authLinkEmail({
+    kind: "reset",
+    name: (data.user.user_metadata?.full_name as string | undefined) ?? null,
+    email: parsed.data.email,
+    url: link,
+    siteUrl: SITE_URL,
   });
+  const sent = await sendAuthEmail({ to: parsed.data.email, ...resetEmail });
 
   if (!sent) {
     return {

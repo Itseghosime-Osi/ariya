@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env/server";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
+import { reminderEmail } from "@/lib/email/templates";
+import { formatLagosDate } from "@/lib/format";
+import { SITE_URL } from "@/lib/site-url";
 
 function verifyCronSecret(authHeader: string | null, secret: string): boolean {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -82,13 +85,23 @@ export async function GET(request: Request) {
       }
 
       const rsvpUrl = `${origin}/i/${guest.rsvp_token}`;
+      const reminder = reminderEmail({
+        guestName: guest.name,
+        couple: event.couple,
+        title: event.title,
+        date: formatLagosDate(event.date),
+        venue: event.venue,
+        rsvpUrl,
+        siteUrl: SITE_URL,
+      });
       const emailRes = await dispatchRsvpEmail({
         eventId: event.id,
         guestId: guest.id,
         recipientEmail: guest.email,
-        subject: `Gentle Reminder: Celebration of ${event.couple}`,
+        subject: reminder.subject,
         templateType: "reminder",
-        html: `<p>Hello ${guest.name},</p><p>We are looking forward to celebrating the union of ${event.couple}.</p><p>Date: ${event.date}<br/>Venue: ${event.venue}</p><p><a href="${rsvpUrl}">Please confirm your attendance here</a></p>`,
+        html: reminder.html,
+        text: reminder.text,
       });
 
       if (emailRes.success) {

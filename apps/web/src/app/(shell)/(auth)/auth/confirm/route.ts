@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { sendWelcomeEmailOnce } from "@/features/auth/welcome";
 
 const TYPES: EmailOtpType[] = ["signup", "recovery", "email"];
 
@@ -17,11 +18,15 @@ export async function GET(request: NextRequest) {
 
   if (tokenHash && type && TYPES.includes(type)) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       type,
       token_hash: tokenHash,
     });
-    if (!error) return NextResponse.redirect(new URL(next, request.url));
+    if (!error) {
+      // A confirmed sign-up is the moment the account becomes real: welcome them, once.
+      if (type === "signup") await sendWelcomeEmailOnce(data?.user);
+      return NextResponse.redirect(new URL(next, request.url));
+    }
   }
 
   return NextResponse.redirect(

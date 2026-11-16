@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { landingAfterSignIn } from "@/features/admin/landing";
 import { isNewOAuthAccount } from "@/features/auth/new-account";
+import { sendWelcomeEmailOnce } from "@/features/auth/welcome";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
       // email and password (the app shell plays them for ?welcome=1, then tidies the address).
       if (isNewOAuthAccount(data?.user)) {
         destination.searchParams.set("welcome", "1");
+        await sendWelcomeEmailOnce(data?.user);
       }
       return NextResponse.redirect(destination);
     }
