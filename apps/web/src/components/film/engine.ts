@@ -241,6 +241,18 @@ export class FilmEngine {
     });
   }
 
+  /**
+   * While the film plays itself, the page's scroll position follows it, so the scrollbar shows how
+   * far through the film you are. This only writes the scroll position: watching, the scroll
+   * handler ignores it and the film keeps reading its own clock, so the picture cannot skip.
+   */
+  private followScroll(r: number) {
+    if (!this.watching()) return;
+    const y = Math.round(r * this.totalScroll());
+    if (Math.abs(window.scrollY - y) < 1) return;
+    window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+  }
+
   /** Puts the page where the film is, without animating, for when Scroll takes over from Watch. */
   private syncScroll(r: number) {
     window.scrollTo({
@@ -875,6 +887,7 @@ export class FilmEngine {
     }
     this.wt = clamp(this.wt, 0, TT);
     this.target = this.map.rawFromS(this.map.sFromT(this.wt));
+    this.followScroll(this.target);
     if (this.wt >= TT) {
       // The story is told. The song plays out its last seconds, fades, and does not come round again.
       this.finished = true;

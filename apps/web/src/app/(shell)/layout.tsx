@@ -6,6 +6,8 @@ import { AppSplash, splashScript } from "@/components/layout/app-splash";
 import { OfflineCache } from "@/components/layout/offline-cache";
 import { SITE_URL } from "@/lib/site-url";
 import { ConsoleGreeting } from "@/components/site/console-greeting";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
@@ -77,9 +79,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
         <script dangerouslySetInnerHTML={{ __html: splashScript }} />
       </head>
       <body className="antialiased min-h-screen bg-ivory text-on-surface">
+        <ScrollToTop />
         <AppSplash />
         <OfflineCache />
         <ConsoleGreeting />

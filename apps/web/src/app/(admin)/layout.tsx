@@ -4,6 +4,8 @@ import { Bodoni_Moda, Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import "@/styles/admin.css";
 import { SITE_URL } from "@/lib/site-url";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { SCROLL_TOP_BOOT } from "@/lib/scroll-top-boot";
 
 /**
  * The root for the admin desk. Like the shared floor plan, it has no loading screen on purpose:
@@ -43,7 +45,11 @@ export default function AdminRootLayout({
       lang="en-NG"
       className={`${bodoniModa.variable} ${plusJakartaSans.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_TOP_BOOT }} />
+      </head>
       <body className="min-h-screen bg-ivory text-night antialiased">
+        <ScrollToTop />
         {children}
       </body>
     </html>
