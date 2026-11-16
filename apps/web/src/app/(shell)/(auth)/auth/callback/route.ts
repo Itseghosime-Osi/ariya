@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { landingAfterSignIn } from "@/features/admin/landing";
+import { isNewOAuthAccount } from "@/features/auth/new-account";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -29,8 +30,14 @@ export async function GET(request: NextRequest) {
       // A link that asked for a page goes there; otherwise an admin lands on the admin desk.
       const target = rawNext
         ? next
-        : await landingAfterSignIn(data.user?.id, null);
-      return NextResponse.redirect(new URL(target, request.url));
+        : await landingAfterSignIn(data?.user?.id, null);
+      const destination = new URL(target, request.url);
+      // A brand-new account made with Google gets the same welcome fireworks as one made with an
+      // email and password (the app shell plays them for ?welcome=1, then tidies the address).
+      if (isNewOAuthAccount(data?.user)) {
+        destination.searchParams.set("welcome", "1");
+      }
+      return NextResponse.redirect(destination);
     }
   }
 

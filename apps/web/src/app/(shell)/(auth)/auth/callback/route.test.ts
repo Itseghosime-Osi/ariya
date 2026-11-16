@@ -9,6 +9,7 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 import { GET } from "./route";
+import { isNewOAuthAccount } from "@/features/auth/new-account";
 
 const call = (query: string) =>
   GET(new NextRequest(`https://ariyaday.com/auth/callback${query}`));
@@ -45,11 +46,79 @@ describe("the auth callback", () => {
     );
   });
 
+  it("welcomes a brand-new Google account with fireworks", async () => {
+    exchange.mockResolvedValueOnce({
+      error: null,
+      data: {
+        user: {
+          id: "u1",
+          created_at: new Date().toISOString(),
+          app_metadata: { provider: "google" },
+        },
+      },
+    });
+    const res = await call("?code=abc&next=/events");
+    expect(res.headers.get("location")).toBe(
+      "https://ariyaday.com/events?welcome=1"
+    );
+  });
+
+  it("does not replay the welcome for a returning Google account", async () => {
+    exchange.mockResolvedValueOnce({
+      error: null,
+      data: {
+        user: {
+          id: "u1",
+          created_at: "2026-01-01T00:00:00Z",
+          app_metadata: { provider: "google" },
+        },
+      },
+    });
+    const res = await call("?code=abc&next=/events");
+    expect(res.headers.get("location")).toBe("https://ariyaday.com/events");
+  });
+
   it("sends an unusable code back to sign-in", async () => {
     exchange.mockResolvedValueOnce({ error: new Error("expired") });
     const res = await call("?code=stale");
     expect(res.headers.get("location")).toBe(
       "https://ariyaday.com/sign-in?error=auth_callback_failed"
     );
+  });
+});
+
+describe("isNewOAuthAccount", () => {
+  const now = Date.parse("2026-11-16T12:00:00Z");
+  it("counts a provider account made in the last few minutes", () => {
+    expect(
+      isNewOAuthAccount(
+        {
+          created_at: "2026-11-16T11:58:00Z",
+          app_metadata: { provider: "google" },
+        },
+        now
+      )
+    ).toBe(true);
+  });
+  it("ignores email accounts, old accounts and missing users", () => {
+    expect(
+      isNewOAuthAccount(
+        {
+          created_at: "2026-11-16T11:59:00Z",
+          app_metadata: { provider: "email" },
+        },
+        now
+      )
+    ).toBe(false);
+    expect(
+      isNewOAuthAccount(
+        {
+          created_at: "2026-11-16T10:00:00Z",
+          app_metadata: { provider: "google" },
+        },
+        now
+      )
+    ).toBe(false);
+    expect(isNewOAuthAccount(null, now)).toBe(false);
   });
 });
