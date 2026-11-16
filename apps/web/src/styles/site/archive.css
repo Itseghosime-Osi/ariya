@@ -6,7 +6,10 @@
 :root {
   /* Scrollbars (src/styles/scrollbar.css): champagne gold on the velvet black. */
   --sb-track: #16040a;
-  --sb-thumb: #b8935a;
+  --sb-edge: rgba(227, 194, 127, 0.14);
+  --sb-shine: #f3e2bd;
+  --sb-thumb: #c9a35a;
+  --sb-shade: #8f6a2c;
   --sb-thumb-hover: #e3c27f;
   --sb-thumb-active: #f3e2bd;
   --ink: #0c0406;
