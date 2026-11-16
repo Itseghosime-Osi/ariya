@@ -2,6 +2,11 @@
    Deep burgundy and warm ivory alternate section by section; champagne gold is an accent only.
    Bodoni Moda carries emotion in headlines; Figtree carries everything people read and operate. */
 :root {
+  /* Scrollbars (src/styles/scrollbar.css): champagne gold on the velvet black. */
+  --sb-track: #16040a;
+  --sb-thumb: #b8935a;
+  --sb-thumb-hover: #e3c27f;
+  --sb-thumb-active: #f3e2bd;
   --wine-950: #16040a;
   --wine-900: #250812;
   --wine-800: #3a0c1a;

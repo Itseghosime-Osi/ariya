@@ -4,6 +4,11 @@
    A long track drives seventeen chapters, then the page becomes the company's site.
    One committed night look: burgundy black, ivory, champagne gold. Type pulls focus the way the lens does. */
 :root {
+  /* Scrollbars (src/styles/scrollbar.css): champagne gold on the velvet black. */
+  --sb-track: #16040a;
+  --sb-thumb: #b8935a;
+  --sb-thumb-hover: #e3c27f;
+  --sb-thumb-active: #f3e2bd;
   --ink: #0c0406;
   --night: #1c070d;
   --wine: #6e1426;

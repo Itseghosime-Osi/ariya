@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "@/styles/scrollbar.css";
 import "@/styles/site/ariya.css";
 import "@/styles/site/nav.css";
 import { SiteHeader } from "@/components/site/site-header";

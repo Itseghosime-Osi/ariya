@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "@/styles/scrollbar.css";
 import "@/styles/site/archive.css";
 import "@/styles/site/nav.css";
 import { SITE_URL, SITE_ICONS, TWITTER_HANDLE } from "@/lib/site-url";
