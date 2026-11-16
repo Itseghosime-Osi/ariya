@@ -117,6 +117,14 @@
     background: transparent;
     box-shadow: none;
   }
+  /* Keep the bar inside a rounded card: it starts and stops clear of the curved corners instead
+     of running into them. 14px covers the cards' 16–28px radii at their narrowest point. */
+  body *::-webkit-scrollbar-track:vertical {
+    margin-block: 14px;
+  }
+  body *::-webkit-scrollbar-track:horizontal {
+    margin-inline: 14px;
+  }
   body *::-webkit-scrollbar-thumb {
     min-height: 32px;
     min-width: 32px;
