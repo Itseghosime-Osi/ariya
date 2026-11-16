@@ -92,7 +92,7 @@ begin
   v_created_event := public.create_event(
     p_title := 'Robust Event Creation',
     p_couple := 'Femi & Yemi',
-    p_date := '2026-12-20 12:00:00+00',
+    p_date := now() + ('2026-12-20 12:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Lekki Coliseum',
     p_area := 'Lekki Phase 1',
     p_slug := 'robust-event-' || substr(gen_random_uuid()::text, 1, 8)

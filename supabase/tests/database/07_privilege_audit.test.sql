@@ -147,7 +147,7 @@ begin
   v_event_res := public.create_event(
     p_title := 'Audit Nuptials',
     p_couple := 'Shola & Deji',
-    p_date := '2026-12-10 14:00:00+00',
+    p_date := now() + ('2026-12-10 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Civic Centre',
     p_area := 'Victoria Island'
   );
@@ -282,7 +282,7 @@ begin
   v_unpaid_event := (public.create_event(
     p_title := 'Unpaid Limit Gala',
     p_couple := 'Amina & Farouk',
-    p_date := '2026-12-15 14:00:00+00',
+    p_date := now() + ('2026-12-15 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Harbour Point',
     p_area := 'Victoria Island'
   )->>'id')::uuid;

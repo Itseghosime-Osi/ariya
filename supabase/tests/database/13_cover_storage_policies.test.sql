@@ -45,7 +45,7 @@ begin
   v_e1 := (public.create_event(
     p_title := 'Cover Test Event 1',
     p_couple := 'Kemi & Femi',
-    p_date := '2026-12-20 14:00:00+00',
+    p_date := now() + ('2026-12-20 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Lagos Oriental Hotel',
     p_area := 'Victoria Island',
     p_slug := 'cov-test-1-' || substr(gen_random_uuid()::text, 1, 8)
@@ -66,7 +66,7 @@ begin
   v_e2 := (public.create_event(
     p_title := 'Cover Test Event 2',
     p_couple := 'Zara & Tunde',
-    p_date := '2026-12-25 14:00:00+00',
+    p_date := now() + ('2026-12-25 14:00:00+00'::timestamptz - '2026-11-01 00:00:00+00'::timestamptz),
     p_venue := 'Federal Palace',
     p_slug := 'cov-test-2-' || substr(gen_random_uuid()::text, 1, 8)
   )->>'id')::uuid;
