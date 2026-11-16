@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
 import { dispatchRsvpEmail } from "@/lib/email/dispatcher";
+import { reminderEmail } from "@/lib/email/templates";
+import { formatLagosDate } from "@/lib/format";
+import { SITE_URL } from "@/lib/site-url";
 import { sendBatchReminderSchema } from "./schemas";
 
 export interface BatchReminderResult {
@@ -106,13 +109,25 @@ export async function sendBatchReminderAction(
     }
 
     const rsvpUrl = `${origin}/i/${guest.rsvp_token}`;
+    const reminder = reminderEmail({
+      guestName: guest.name,
+      couple: event.couple,
+      title: event.title,
+      date: formatLagosDate(event.date),
+      venue: event.venue,
+      subject: parsed.data.subject,
+      message: parsed.data.customMessage,
+      rsvpUrl,
+      siteUrl: SITE_URL,
+    });
     const emailRes = await dispatchRsvpEmail({
       eventId,
       guestId: guest.id,
       recipientEmail: guest.email,
-      subject: parsed.data.subject,
+      subject: reminder.subject,
       templateType: "reminder",
-      html: `<p>Hello ${guest.name},</p><p>This is a gentle celebration reminder from <strong>${event.couple}</strong>.</p><p>Date: ${event.date}<br/>Venue: ${event.venue}</p>${parsed.data.customMessage ? `<p>${parsed.data.customMessage}</p>` : ""}<p><a href="${rsvpUrl}">Please confirm your attendance here</a></p>`,
+      html: reminder.html,
+      text: reminder.text,
     });
 
     if (emailRes.success) {

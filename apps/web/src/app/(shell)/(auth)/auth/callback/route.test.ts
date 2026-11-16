@@ -8,6 +8,11 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+const welcome = vi.fn();
+vi.mock("@/features/auth/welcome", () => ({
+  sendWelcomeEmailOnce: (...args: unknown[]) => welcome(...args),
+}));
+
 import { GET } from "./route";
 import { isNewOAuthAccount } from "@/features/auth/new-account";
 
@@ -15,7 +20,10 @@ const call = (query: string) =>
   GET(new NextRequest(`https://ariyaday.com/auth/callback${query}`));
 
 describe("the auth callback", () => {
-  beforeEach(() => exchange.mockClear());
+  beforeEach(() => {
+    exchange.mockClear();
+    welcome.mockClear();
+  });
 
   it("signs the person in and follows a safe next path", async () => {
     exchange.mockResolvedValueOnce({ error: null });
@@ -61,6 +69,7 @@ describe("the auth callback", () => {
     expect(res.headers.get("location")).toBe(
       "https://ariyaday.com/events?welcome=1"
     );
+    expect(welcome).toHaveBeenCalledTimes(1);
   });
 
   it("does not replay the welcome for a returning Google account", async () => {
@@ -76,6 +85,7 @@ describe("the auth callback", () => {
     });
     const res = await call("?code=abc&next=/events");
     expect(res.headers.get("location")).toBe("https://ariyaday.com/events");
+    expect(welcome).not.toHaveBeenCalled();
   });
 
   it("sends an unusable code back to sign-in", async () => {

@@ -11,10 +11,12 @@ export async function sendAuthEmail({
   to,
   subject,
   html,
+  text,
 }: {
   to: string;
   subject: string;
   html: string;
+  text?: string;
 }): Promise<boolean> {
   try {
     if (serverEnv.EMAIL_TRANSPORT === "resend") {
@@ -24,6 +26,7 @@ export async function sendAuthEmail({
         to,
         subject,
         html,
+        ...(text ? { text } : {}),
       });
       if (res.error) {
         console.error("Auth email rejected by Resend:", res.error.name);
@@ -41,6 +44,7 @@ export async function sendAuthEmail({
           To: [{ Address: to }],
           Subject: subject,
           HTML: html,
+          ...(text ? { Text: text } : {}),
         }),
       }
     );

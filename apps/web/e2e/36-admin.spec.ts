@@ -4,6 +4,17 @@ import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
 import { serviceRoleClient } from "./fixtures/service-role";
 import { DESK, makeAdmin, totp, userIdFor } from "./fixtures/admin";
 
+/**
+ * An admin action shows a "status" line once the server has answered. On a busy CI machine a
+ * server action can take longer than the 5s default, so this allows 20s; the check itself is the
+ * same.
+ */
+async function expectDone(page: Page, text: string) {
+  await expect(page.getByRole("status")).toContainText(text, {
+    timeout: 20_000,
+  });
+}
+
 /** The test server's secret desk address (see playwright.config.ts) for an internal /admin path. */
 const D = (path: string) => path.replace(/^\/admin(?=\/|\?|$)/, DESK);
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -107,9 +118,7 @@ test.describe("Admin desk", () => {
     await page
       .getByRole("button", { name: "Confirm: grant a complimentary pass" })
       .click();
-    await expect(page.getByRole("status")).toContainText(
-      "Complimentary pass granted"
-    );
+    await expectDone(page, "Complimentary pass granted");
     await expect(page.getByText("Paid", { exact: true }).first()).toBeVisible();
 
     // The guest list asks why, then is shown and logged.
@@ -136,9 +145,7 @@ test.describe("Admin desk", () => {
     await expect(confirm).toBeDisabled();
     await page.getByLabel(/Type the reference/).fill(reference);
     await confirm.click();
-    await expect(page.getByRole("status")).toContainText(
-      "no longer has a pass"
-    );
+    await expectDone(page, "no longer has a pass");
 
     // Accounts: suspend, then restore, someone else.
     await page.goto(D(`/admin/accounts?q=${encodeURIComponent(other)}`));
@@ -148,14 +155,14 @@ test.describe("Admin desk", () => {
     await page
       .getByRole("button", { name: "Confirm: suspend account" })
       .click();
-    await expect(page.getByRole("status")).toContainText("suspended");
+    await expectDone(page, "suspended");
     await expect(page.getByText("Suspended", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Restore account" }).click();
     await page.getByLabel(/Why\?/).fill("Resolved with the host");
     await page
       .getByRole("button", { name: "Confirm: restore account" })
       .click();
-    await expect(page.getByRole("status")).toContainText("restored");
+    await expectDone(page, "restored");
 
     // Delete it for good: the email must be typed.
     await page.getByRole("button", { name: "Delete account" }).click();
@@ -163,7 +170,7 @@ test.describe("Admin desk", () => {
     await page.getByLabel(/Type their email/).fill(other);
     await page.getByRole("button", { name: "Confirm: delete account" }).click();
     await page.waitForURL(DESK_RE("/accounts?notice="));
-    await expect(page.getByRole("status")).toContainText("was deleted");
+    await expectDone(page, "was deleted");
     const { data: gone } = await serviceRoleClient().auth.admin.getUserById(
       created.user!.id
     );
@@ -182,7 +189,7 @@ test.describe("Admin desk", () => {
       .getByRole("button", { name: "Confirm: delete celebration" })
       .click();
     await page.waitForURL(DESK_RE("/events?notice="));
-    await expect(page.getByRole("status")).toContainText("was deleted");
+    await expectDone(page, "was deleted");
     expect((await page.goto(D(`/admin/events/${eventId}`)))?.status()).toBe(
       404
     );

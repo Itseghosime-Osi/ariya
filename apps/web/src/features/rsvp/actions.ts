@@ -4,7 +4,6 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
-import { render } from "@react-email/components";
 import { createClient } from "@/lib/supabase/server";
 import { mapError } from "@/lib/errors";
 import { isEventExpired } from "@/lib/event-expiry";
@@ -14,9 +13,12 @@ import { formatLagosDate } from "@/lib/format";
 import { clientEnv } from "@/lib/env/client";
 import { sendPushToEventHosts } from "@/lib/push";
 import { rsvpPushMessage } from "./push-message";
-import { RsvpAcceptedEmail } from "@/emails/RsvpAcceptedEmail";
-import { RsvpDeclinedEmail } from "@/emails/RsvpDeclinedEmail";
-import { RsvpRevisedEmail } from "@/emails/RsvpRevisedEmail";
+import {
+  rsvpAcceptedEmail,
+  rsvpDeclinedEmail,
+  rsvpRevisedEmail,
+} from "@/lib/email/templates";
+import { SITE_URL } from "@/lib/site-url";
 import {
   contactEmailSchema,
   invitationDataSchema,
@@ -220,56 +222,39 @@ async function sendConfirmationEmail({
   try {
     const origin = clientEnv.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const passUrl = `${origin}/i/${token}`;
-    let emailHtml = "";
-    let subject = "";
-
-    if (isRevision) {
-      subject = `Updated RSVP: ${invitation.event.title}`;
-      emailHtml = await render(
-        RsvpRevisedEmail({
-          guestName: invitation.guest.display_name,
-          couple: invitation.event.couple,
-          title: invitation.event.title,
+    const base = {
+      guestName: invitation.guest.display_name,
+      couple: invitation.event.couple,
+      title: invitation.event.title,
+      passUrl,
+      siteUrl: SITE_URL,
+    };
+    const email = isRevision
+      ? rsvpRevisedEmail({
+          ...base,
           status,
           attendingCount: status === "accepted" ? attendingCount : 0,
           dietary,
-          passUrl,
         })
-      );
-    } else if (status === "accepted") {
-      subject = `Your Seat is Reserved: ${invitation.event.title}`;
-      emailHtml = await render(
-        RsvpAcceptedEmail({
-          guestName: invitation.guest.display_name,
-          couple: invitation.event.couple,
-          title: invitation.event.title,
-          date: formatLagosDate(invitation.event.date),
-          venue: invitation.event.venue,
-          attendingCount,
-          dressCode: invitation.event.dress_code,
-          tableName: invitation.table_name,
-          passUrl,
-        })
-      );
-    } else {
-      subject = `Invitation Regrets: ${invitation.event.title}`;
-      emailHtml = await render(
-        RsvpDeclinedEmail({
-          guestName: invitation.guest.display_name,
-          couple: invitation.event.couple,
-          title: invitation.event.title,
-          passUrl,
-        })
-      );
-    }
+      : status === "accepted"
+        ? rsvpAcceptedEmail({
+            ...base,
+            date: formatLagosDate(invitation.event.date),
+            venue: invitation.event.venue,
+            attendingCount,
+            dressCode: invitation.event.dress_code,
+            tableName: invitation.table_name,
+          })
+        : rsvpDeclinedEmail(base);
 
     await dispatchRsvpEmail({
       eventId: invitation.event.id,
       guestId: invitation.guest.id,
       recipientEmail: targetEmail,
-      subject,
+      subject: email.subject,
       templateType: isRevision ? "revised" : status,
-      html: emailHtml,
+      html: email.html,
+      text: email.text,
     });
   } catch (err) {
     console.error("Email dispatch error in submitRsvpAction:", err);
