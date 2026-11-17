@@ -415,17 +415,33 @@ export const publicPages: DocPage[] = [
     title: "The Celebration Pass",
     group: "hosts",
     audience: "Hosts and planners",
-    summary: "Free up to 50 invitations; pay once to invite everyone.",
+    summary:
+      "Free up to 50 invitations; pay once for the day itself: check-in, team, 3D hall, import and AI.",
     blocks: [
       { t: "h2", x: "What is free" },
       {
         t: "p",
-        x: "Every celebration is free up to 50 guest invitations, with the same tools as a paid one. An invitation is one guest party, so a couple or a family counts once.",
+        x: "Every celebration is free up to 50 guest invitations. An invitation is one guest party, so a couple or a family counts once. A free celebration has the guest list, RSVPs and a live headcount, the invitation designer (picture downloads), a seating plan seen from above, vendor checklists and the run sheet.",
       },
-      { t: "h2", x: "The pass" },
+      { t: "h2", x: "What the pass unlocks" },
       {
         t: "p",
-        x: "The Celebration Pass costs ₦50,000, once for the celebration, and unlocks unlimited guest invitations. There is no subscription. Planners buy one pass per client celebration. See [pricing](/pricing).",
+        x: "The Celebration Pass costs ₦50,000, once for the celebration. There is no subscription. Planners buy one pass per client celebration. See [pricing](/pricing).",
+      },
+      {
+        t: "ul",
+        x: [
+          "Unlimited guest invitations and reminders, past the first 50.",
+          "The door check-in desk: scan passes, find guests by name, and keep going with no signal.",
+          "Team access: invite your planner, family and ushers. People already on the team stay either way.",
+          "The 3D hall, the floor-plan PDF and share link, and the print-quality invitation PDF.",
+          "Guest-list import from a spreadsheet or your contacts. Adding guests one by one stays free.",
+          "Connecting your AI assistant. A connected AI only reaches celebrations that have the pass.",
+        ],
+      },
+      {
+        t: "p",
+        x: "Everything you added before paying stays as it is. Where a free celebration reaches a pass feature, Àríyá shows what it does and a button to unlock it.",
       },
       { t: "h2", x: "How to pay" },
       {

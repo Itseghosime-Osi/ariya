@@ -53,6 +53,8 @@ interface SeatingDeskProps {
   eventDate?: string | null;
   /** Risk rules that already have a checklist task, so the button does not offer them twice. */
   addedRiskIds?: string[];
+  /** The 3D view and the floor-plan exports come with the Celebration Pass. */
+  hasPass?: boolean;
 }
 
 export function SeatingDesk({
@@ -64,6 +66,7 @@ export function SeatingDesk({
   hallLayoutAvailable = false,
   eventDate = null,
   addedRiskIds = [],
+  hasPass = true,
 }: SeatingDeskProps) {
   // The hall studio is for tablets and laptops; phones get the table list, which suits them. On a
   // laptop the list is a tab in the studio's left dock, so there is no separate list view there.
@@ -348,6 +351,7 @@ export function SeatingDesk({
             layoutAvailable={hallLayoutAvailable}
             eventDate={eventDate}
             addedRiskIds={addedRiskIds}
+            hasPass={hasPass}
             addTables={addTables}
             updateTable={updateTable}
             setTablePositions={setTablePositions}

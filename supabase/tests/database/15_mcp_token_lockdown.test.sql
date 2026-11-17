@@ -59,6 +59,15 @@ begin
     p_title := 'Lockdown B', p_couple := 'C & D', p_date := now() + interval '30 days',
     p_venue := 'Hall B', p_area := 'Ikoyi')->>'id')::uuid;
 
+  -- The app-token tests run on A, which needs the Celebration Pass; B stays free for the quota tests.
+  perform set_config('test.prev_claims', coalesce(current_setting('request.jwt.claims', true), ''), true);
+  perform set_config('test.prev_role', coalesce(current_setting('request.jwt.claim.role', true), ''), true);
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform set_config('request.jwt.claim.role', 'service_role', true);
+  update public.events set paid_at = now() where id = v_a;
+  perform set_config('request.jwt.claims', current_setting('test.prev_claims'), true);
+  perform set_config('request.jwt.claim.role', current_setting('test.prev_role'), true);
+
   insert into public.guests (event_id, name, party_size) values (v_a, 'Deletable', 1)
     returning id into v_del;
   insert into public.guests (event_id, name, party_size) values (v_a, 'Stable', 1);

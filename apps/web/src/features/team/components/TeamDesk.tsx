@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useTransition } from "react";
+import { PassLock } from "@/components/layout/pass-lock";
 import { Icon } from "@/components/ui/icon";
 import { DeskPageHeader } from "@/components/ui/desk-page-header";
 import { ScreenHeader } from "@/components/layout/screen-header";
@@ -21,9 +22,17 @@ interface TeamDeskProps {
   eventId: string;
   eventTitle: string;
   data: TeamDeskData;
+  /** Team invitations come with the Celebration Pass; the people already here stay either way. */
+  hasPass?: boolean;
 }
 
-export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
+export function TeamDesk({
+  eventId,
+  eventTitle,
+  data,
+  hasPass = true,
+}: TeamDeskProps) {
+  const canInvite = data.canManageMembers && hasPass;
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [query, setQuery] = useState("");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -88,7 +97,7 @@ export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
         subtitle={eventTitle}
         backHref={`/events/${eventId}`}
         action={
-          data.canManageMembers
+          canInvite
             ? {
                 icon: "add_circle",
                 label: "Invite member",
@@ -106,7 +115,7 @@ export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
             title="The people behind the day"
             description="Bring in co-planners, the couple and the door staff, and give each of them only what they need."
           >
-            {data.canManageMembers && (
+            {canInvite && (
               <button
                 type="button"
                 onClick={() => setIsInviteModalOpen(true)}
@@ -118,6 +127,12 @@ export function TeamDesk({ eventId, eventTitle, data }: TeamDeskProps) {
             )}
           </DeskPageHeader>
         </DeskItem>
+
+        {data.canManageMembers && !hasPass && (
+          <DeskItem>
+            <PassLock eventId={eventId} feature="team" compact />
+          </DeskItem>
+        )}
 
         <DeskItem>
           <TeamHero

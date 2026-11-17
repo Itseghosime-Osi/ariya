@@ -63,6 +63,11 @@ begin
   );
 end $$;
 
+-- Team invitations need the Celebration Pass; the payment tests further down start it unpaid again.
+set local session_replication_role = replica; -- skip the paid_at guard for the fixture
+update public.events set paid_at = now() where id = (select event_id from _test_p6_feat_data);
+set local session_replication_role = origin;
+
 -- Test 1: Owner can invite a new team member
 select lives_ok(
   $$
@@ -210,6 +215,10 @@ select throws_matching(
   'Members cannot remove themselves',
   'Owner cannot remove themselves'
 );
+
+set local session_replication_role = replica; -- skip the paid_at guard for the fixture
+update public.events set paid_at = null where id = (select event_id from _test_p6_feat_data);
+set local session_replication_role = origin;
 
 -- Test 11: Staff is blocked by RLS from viewing payments
 do $$

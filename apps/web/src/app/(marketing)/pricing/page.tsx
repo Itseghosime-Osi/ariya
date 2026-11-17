@@ -4,6 +4,7 @@ import "@/styles/site/story.css";
 import { pageMetadata } from "@/lib/site-metadata";
 import { ProductEngines } from "../product/product-engines";
 import { PriceScene } from "./price-scene";
+import { PASS_FEATURES, PASS_FEATURE_ORDER } from "@/lib/pass";
 
 export const metadata = pageMetadata({
   title: "Pricing",
@@ -90,8 +91,9 @@ export default function PricingPage() {
                   Intimate<small>Up to 50 guest invitations</small>
                 </h3>
                 <p className="muted">
-                  Personal invitations and RSVP links, a live headcount and
-                  confirmation emails.
+                  Personal invitations and RSVP links, a live headcount, a guest
+                  list, a seating plan from above, vendor checklists and the run
+                  sheet.
                 </p>
                 <div className="amt">Free</div>
               </div>
@@ -109,8 +111,9 @@ export default function PricingPage() {
                   </small>
                 </h3>
                 <p className="muted">
-                  Unlimited guest invitations and reminders, plus guest-list
-                  import, seating plans and vendor checklists.
+                  Unlimited invitations and reminders, the door check-in desk,
+                  team access, the 3D hall and print exports, guest import and
+                  your AI assistant.
                 </p>
                 <div className="amt">
                   ₦50,000<small>per event</small>
@@ -142,15 +145,9 @@ export default function PricingPage() {
                 </h2>
               </div>
               <ul className="pr-checks">
-                <li>Unlimited guest invitations for the event</li>
-                <li>
-                  Email invitations in batches, with each guest&rsquo;s own link
-                </li>
-                <li>Automated reminders</li>
-                <li>Seating plans with the 3D hall</li>
-                <li>Guest-list import from a spreadsheet or your contacts</li>
-                <li>Vendor checklists</li>
-                <li>Team access for planners and ushers</li>
+                {PASS_FEATURE_ORDER.map((k) => (
+                  <li key={k}>{PASS_FEATURES[k].title}</li>
+                ))}
               </ul>
             </div>
             <div>

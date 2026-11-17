@@ -5,6 +5,7 @@ import { formatEventDate } from "@/lib/format";
 import { pluralise } from "@/lib/metrics";
 import { InvitationDownload } from "./InvitationDownload";
 import { MyInvitation } from "./MyInvitation";
+import { PlanYourOwn } from "@/components/site/guest-mark";
 import type { InvitationDesign } from "@/features/invitations/types";
 import type {
   RsvpAnswers,
@@ -278,6 +279,8 @@ export function RsvpSummaryCard({
           <span>Update RSVP or dietary preferences</span>
         </Link>
       </section>
+
+      <PlanYourOwn />
     </article>
   );
 }

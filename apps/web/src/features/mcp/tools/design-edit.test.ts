@@ -92,6 +92,8 @@ function context(
     if (name === "ai_connection_read_only")
       return { data: readOnly, error: null };
     if (name === "has_event_role") return { data: role, error: null };
+    // These tests are about scope and read-only; the celebration has the Celebration Pass.
+    if (name === "event_has_pass") return { data: true, error: null };
     return { data: null, error: null };
   };
   return {

@@ -38,6 +38,8 @@ select couple_id, 'couple@owambe.test' from _test_data;
 insert into public.events (id, slug, title, couple, date, venue, status, is_public)
 select event_id, 'phase-5-gala', 'Phase 5 Gala', 'Ada & Femi', now() + interval '30 days', 'Lagos Hall', 'active', true
 from _test_data;
+-- Check-ins need the Celebration Pass.
+update public.events set paid_at = now() where id = (select event_id from _test_data);
 
 insert into public.event_members (event_id, user_id, role)
 select event_id, owner_id, 'owner' from _test_data

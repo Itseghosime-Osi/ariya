@@ -65,6 +65,9 @@ function mockSupabase(overrides: Record<string, unknown> = {}) {
           error: null,
         });
       }
+      if (proc === "event_has_pass") {
+        return Promise.resolve({ data: true, error: null });
+      }
       if (proc === "import_guests") {
         return Promise.resolve({
           data: { ok: true, imported_count: 2 },

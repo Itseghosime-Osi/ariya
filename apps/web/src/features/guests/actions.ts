@@ -1,5 +1,6 @@
 "use server";
 
+import { passRequiredMessage } from "@/lib/pass";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -169,6 +170,13 @@ export async function importGuestsAction(
   }
 
   const supabase = await createClient();
+  // Importing a list comes with the Celebration Pass; adding guests one by one stays free.
+  const { data: hasPass } = await supabase.rpc("event_has_pass", {
+    p_event_id: eventId,
+  });
+  if (!hasPass) {
+    return { ok: false, error: passRequiredMessage("import") };
+  }
   const { data, error } = await supabase.rpc("import_guests", {
     p_event_id: eventId,
     p_guests: JSON.parse(JSON.stringify(validPayload)) as Json,

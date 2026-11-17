@@ -98,3 +98,36 @@ describe("requireReadAccess", () => {
     );
   });
 });
+
+describe("a connected app on a celebration without the Celebration Pass", () => {
+  const appContext = (answers: Record<string, unknown>): ToolContext => ({
+    client: {
+      rpc: async (name: string) => ({
+        data: answers[name] ?? null,
+        error: null,
+      }),
+    } as unknown as ToolContext["client"],
+    user: { id: "user-1" } as unknown as ToolContext["user"],
+    clientId: "client-1",
+  });
+
+  it("is told the pass is needed, not that the connection is out of scope", async () => {
+    const ctx = appContext({
+      ai_connection_event_allowed: false,
+      event_has_pass: false,
+    });
+    await expect(requireReadAccess(ctx, EVENT_ID)).rejects.toThrow(
+      /comes with the Celebration Pass/
+    );
+  });
+
+  it("still names the scope setting on a paid celebration outside it", async () => {
+    const ctx = appContext({
+      ai_connection_event_allowed: false,
+      event_has_pass: true,
+    });
+    await expect(requireReadAccess(ctx, EVENT_ID)).rejects.toThrow(
+      /not set up to reach that celebration/
+    );
+  });
+});

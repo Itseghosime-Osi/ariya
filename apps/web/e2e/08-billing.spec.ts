@@ -36,7 +36,7 @@ test.describe("Billing & Paystack Checkout", () => {
     context,
   }) => {
     await createAndLoginUser(page, context, "billing_owner");
-    const { eventId } = await createTestEvent(page);
+    const { eventId } = await createTestEvent(page, { free: true });
 
     // Navigate to billing
     await page.goto(`/events/${eventId}/billing`);

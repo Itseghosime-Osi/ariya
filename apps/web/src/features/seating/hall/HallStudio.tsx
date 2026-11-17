@@ -44,7 +44,9 @@ import {
   Wand2,
   X,
   History as HistoryIcon,
+  Lock,
 } from "lucide-react";
+import { PassLock } from "@/components/layout/pass-lock";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { CreateTableInput } from "../schemas";
@@ -231,6 +233,11 @@ interface HallStudioProps {
   backHref?: string;
   /** Opens the new-table form. */
   onNewTable?: () => void;
+  /**
+   * The 3D view, the floor-plan PDF and the share link come with the Celebration Pass. Without it
+   * the hall stays in the flat Top view, which is all a seating plan needs.
+   */
+  hasPass?: boolean;
 }
 
 export function HallStudio({
@@ -254,7 +261,10 @@ export function HallStudio({
   onNewTable,
   onUndoSeatEveryone,
   canUndoSeatEveryone = false,
+  hasPass = true,
 }: HallStudioProps) {
+  // Shown when a free celebration reaches for a pass-only part of the studio.
+  const [passPrompt, setPassPrompt] = useState(false);
   const hall = useHallLayout({
     eventId,
     initialLayout,
@@ -1892,9 +1902,11 @@ export function HallStudio({
         ctrl: !!m.ctrl,
         meta: !!m.meta,
       });
-    else if (m.t === "camera")
-      setCam({ pct: m.pct ?? 100, view: m.view ?? "3d" });
-    else if (m.t === "rain") setRain(!!m.on);
+    else if (m.t === "camera") {
+      const camView = m.view ?? "3d";
+      if (!hasPass && camView === "3d") view3d.current?.command("top");
+      setCam({ pct: m.pct ?? 100, view: hasPass ? camView : "top" });
+    } else if (m.t === "rain") setRain(!!m.on);
   };
 
   const layers = [
@@ -2093,6 +2105,33 @@ export function HallStudio({
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
+      {passPrompt && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Celebration Pass"
+          className="fixed inset-0 z-[80] grid place-items-center bg-night/40 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPassPrompt(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setPassPrompt(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg rounded-[28px] bg-ivory shadow-xl">
+            <PassLock eventId={eventId} feature="hall-3d" />
+            <button
+              type="button"
+              autoFocus
+              onClick={() => setPassPrompt(false)}
+              className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full text-night hover:bg-night/5 focus-visible:outline-2 focus-visible:outline-burgundy"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
       {/* About 25 Tab presses used to stand between the page top and the panel. These links
           appear on focus and jump straight there. */}
       <nav
@@ -2315,28 +2354,41 @@ export function HallStudio({
                   <Redo2 size={17} />
                 </button>
                 <HistoryMenu entries={historyEntries} className={chip} />
-                <ShareMenu
-                  eventId={eventId}
-                  eventTitle={eventTitle}
-                  layout={layout}
-                  tables={data.tables.map((t) => ({
-                    name: t.name,
-                    shape: t.shape,
-                    capacity: t.capacity,
-                    x: positions[t.id]?.x ?? 0,
-                    y: positions[t.id]?.y ?? 0,
-                    rot: rotationOf(t.id),
-                    seated: t.occupiedSeats,
-                  }))}
-                  initialToken={shareOf(initialLayout)?.token ?? null}
-                  currentRev={hall.currentRev}
-                  adoptRev={hall.adoptRev}
-                  whenIdle={hall.whenIdle}
-                  onSnapshot={() => view3d.current?.command("snapshot")}
-                  printHref={`/events/${eventId}/seating/print`}
-                  className={chip}
-                  onSay={say}
-                />
+                {!hasPass ? (
+                  <button
+                    type="button"
+                    className={chip}
+                    onClick={() => setPassPrompt(true)}
+                    aria-label="Share and print the floor plan (Celebration Pass)"
+                    title="Share and print the floor plan"
+                    data-testid="hall-share-locked"
+                  >
+                    <Lock size={16} />
+                  </button>
+                ) : (
+                  <ShareMenu
+                    eventId={eventId}
+                    eventTitle={eventTitle}
+                    layout={layout}
+                    tables={data.tables.map((t) => ({
+                      name: t.name,
+                      shape: t.shape,
+                      capacity: t.capacity,
+                      x: positions[t.id]?.x ?? 0,
+                      y: positions[t.id]?.y ?? 0,
+                      rot: rotationOf(t.id),
+                      seated: t.occupiedSeats,
+                    }))}
+                    initialToken={shareOf(initialLayout)?.token ?? null}
+                    currentRev={hall.currentRev}
+                    adoptRev={hall.adoptRev}
+                    whenIdle={hall.whenIdle}
+                    onSnapshot={() => view3d.current?.command("snapshot")}
+                    printHref={`/events/${eventId}/seating/print`}
+                    className={chip}
+                    onSay={say}
+                  />
+                )}
                 <span
                   className="mx-0.5 h-5 w-px bg-hairline"
                   aria-hidden="true"
@@ -3004,7 +3056,11 @@ export function HallStudio({
                         type="button"
                         role="radio"
                         aria-checked={cam.view === k}
-                        onClick={() => view3d.current?.command(cmd)}
+                        onClick={() =>
+                          k === "3d" && !hasPass
+                            ? setPassPrompt(true)
+                            : view3d.current?.command(cmd)
+                        }
                         className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-night transition-colors hover:bg-[#f1ece4] aria-checked:bg-night aria-checked:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
                       >
                         <I size={15} /> {l}

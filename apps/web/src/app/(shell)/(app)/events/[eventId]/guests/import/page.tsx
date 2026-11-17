@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/features/events/queries";
 import { CsvImportPageFlow } from "@/features/guests/components/import/CsvImportPageFlow";
+import { PassLock } from "@/components/layout/pass-lock";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface ImportGuestsPageProps {
   params: Promise<{ eventId: string }>;
@@ -34,7 +36,17 @@ export default async function ImportGuestsPage({
   return (
     <>
       <EndedLock ended={isEventExpired(data.event.date)}>
-        <CsvImportPageFlow eventId={data.event.id} />
+        {data.event.paid_at ? (
+          <CsvImportPageFlow eventId={data.event.id} />
+        ) : (
+          <div className="space-y-6">
+            <PageHeader
+              title="Import guests"
+              description="Bring in a whole guest list from a spreadsheet or your contacts."
+            />
+            <PassLock eventId={data.event.id} feature="import" />
+          </div>
+        )}
       </EndedLock>
     </>
   );

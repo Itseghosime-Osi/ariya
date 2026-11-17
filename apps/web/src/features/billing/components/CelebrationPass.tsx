@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import { Icon } from "@/components/ui/icon";
 import { formatKobo } from "@/lib/format";
 import { FREE_PLAN_LIMIT } from "@/lib/plan";
+import { PASS_FEATURES, PASS_FEATURE_ORDER } from "@/lib/pass";
 import { TiltCard } from "@/features/events/components/desk/TiltCard";
 import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import { PassStamp } from "./PassStamp";
@@ -18,21 +19,11 @@ interface CelebrationPassProps {
   passAmountKobo: number;
 }
 
-const INCLUDED = [
-  {
-    full: "Unlimited guest invitations and delivery",
-    short: "Unlimited invitations",
-  },
-  { full: "Automated WhatsApp and email reminders", short: "Auto reminders" },
-  {
-    full: "Unlimited tables and seating re-allocations",
-    short: "Unlimited seating",
-  },
-  {
-    full: "Team collaboration and reception check-in",
-    short: "Team & check-in",
-  },
-];
+// What the pass unlocks, from the one list the pricing page and the lock prompts also read.
+const INCLUDED = PASS_FEATURE_ORDER.map((k) => ({
+  full: PASS_FEATURES[k].title,
+  short: PASS_FEATURES[k].short,
+}));
 
 /**
  * The pass as a piece of ticket stock: the couple's seal, what the pass unlocks, a barcode along the
