@@ -57,6 +57,20 @@ export default async function ConnectAiPage() {
         </DeskItem>
 
         <DeskItem>
+          <p
+            className="rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-night"
+            data-testid="connect-ai-pass-note"
+          >
+            <span className="font-semibold">
+              Comes with the Celebration Pass.
+            </span>{" "}
+            A connected AI can reach a celebration once it has the pass.
+            Celebrations without it stay hidden from the AI until you unlock
+            them on their Billing page.
+          </p>
+        </DeskItem>
+
+        <DeskItem>
           <ConnectWizard address={address} connectedIds={connectedIds} />
         </DeskItem>
 

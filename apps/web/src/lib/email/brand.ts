@@ -156,7 +156,7 @@ ${
 <p style="margin:6px 0 0;font-size:12px;line-height:1.8;color:#eddbc7;">${e(signature)}</p>
 <table role="presentation" width="120" cellpadding="0" cellspacing="0" border="0" style="margin:20px auto;"><tr><td style="border-top:1px solid #6e3646;"></td></tr></table>
 <p style="margin:0;font-size:10px;line-height:1.8;color:#c9aeb3;overflow-wrap:anywhere;">${e(input.reason)}</p>
-<p style="margin:10px 0 0;font-size:10px;line-height:1.8;letter-spacing:1px;color:#c9aeb3;">Àríyá · <a href="${e(site)}" style="color:#edcf8f;text-decoration:none;">${e(host)}</a></p>
+<p style="margin:10px 0 0;font-size:10px;line-height:1.8;letter-spacing:1px;color:#c9aeb3;">Planned with Àríyá · <a href="${e(site)}" style="color:#edcf8f;text-decoration:none;">Plan your own celebration at ${e(host)}</a></p>
 </td></tr>
 </table></td></tr></table>
 </body></html>`;
@@ -180,6 +180,7 @@ ${
     signature,
     "",
     input.reason,
+    `Planned with Àríyá · Plan your own celebration at ${site}`,
   ]
     .filter((line): line is string => line !== null)
     .join("\n")

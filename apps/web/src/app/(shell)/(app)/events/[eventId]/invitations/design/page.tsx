@@ -46,6 +46,7 @@ export default async function InvitationDesignPage({
         coupleName={data.coupleName}
         backHref={`/events/${eventId}/invitations`}
         requireAccessCard={data.requireAccessCard}
+        hasPass={data.hasPass}
         settingsHref={`/events/${eventId}/page-editor`}
       />
     </EndedLock>

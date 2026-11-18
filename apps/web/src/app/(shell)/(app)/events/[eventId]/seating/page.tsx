@@ -47,6 +47,7 @@ export default async function SeatingPageRoute({ params }: SeatingPageProps) {
           hallLayoutAvailable={hall.available}
           eventDate={eventData.event.date ?? null}
           addedRiskIds={addedRiskIds}
+          hasPass={Boolean(eventData.event.paid_at)}
         />
       </EndedLock>
     </>

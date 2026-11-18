@@ -22,6 +22,10 @@ const NO_ACCESS =
 const OUT_OF_SCOPE =
   "This connection is not set up to reach that celebration. Change which celebrations it can see in Àríyá, under Connect your AI.";
 
+/** Connected AI apps reach a celebration only once it has the Celebration Pass. */
+const NO_PASS =
+  "Connecting an AI assistant comes with the Celebration Pass, and this celebration does not have it yet. The host can unlock it in Àríyá, on the celebration's Billing page.";
+
 const READ_ONLY =
   "This connection is read-only, so it cannot make changes. Switch that off in Àríyá, under Connect your AI.";
 
@@ -65,7 +69,12 @@ async function requireScope(ctx: ToolContext, eventId: string): Promise<void> {
     });
   }
   if (!data) {
-    throw new ToolError(OUT_OF_SCOPE, { denied: true });
+    // The database also refuses an app on a celebration without the Celebration Pass; name that,
+    // rather than the scope setting the host never changed.
+    const { data: hasPass } = await ctx.client.rpc("event_has_pass", {
+      p_event_id: eventId,
+    });
+    throw new ToolError(hasPass ? OUT_OF_SCOPE : NO_PASS, { denied: true });
   }
 }
 

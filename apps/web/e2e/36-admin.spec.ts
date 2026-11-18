@@ -83,7 +83,7 @@ test.describe("Admin desk", () => {
     expect(created.user?.id).toBeTruthy();
 
     const me = await createAndLoginUser(page, context, "admin_user");
-    const { eventId, title } = await createTestEvent(page);
+    const { eventId, title } = await createTestEvent(page, { free: true });
     makeAdmin(await userIdFor(me.email));
 
     // Signing in as an admin lands on the desk (its code screen), not on the celebrations.

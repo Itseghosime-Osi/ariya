@@ -47,6 +47,11 @@ update public.guests set rsvp_token = 'token_valid_guest_1' where id = 'c0000000
 update public.guests set rsvp_token = 'token_valid_guest_2' where id = 'c0000000-0000-0000-0000-000000000002';
 
 -- TEST 1: User 1 (owner) CAN see their event
+-- The Celebration Pass: the check-in tests below run on a paid celebration.
+set local session_replication_role = replica; -- skip the paid_at guard for the fixture
+update public.events set paid_at = now() - interval '1 day' where id = 'a0000000-0000-0000-0000-000000000001';
+set local session_replication_role = origin;
+
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 select results_eq(

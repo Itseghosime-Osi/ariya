@@ -1,6 +1,7 @@
 import http from "http";
 import crypto from "crypto";
 import { Page, BrowserContext, expect } from "@playwright/test";
+import { serviceRoleClient } from "./service-role";
 
 /**
  * Wait for CSS transitions and finite animations to finish before measuring.
@@ -80,7 +81,16 @@ export async function createAndLoginUser(
 
 export async function createTestEvent(
   page: Page,
-  options?: { title?: string; couple?: string; venue?: string }
+  options?: {
+    title?: string;
+    couple?: string;
+    venue?: string;
+    /**
+     * Leave the celebration on the free plan. By default a test celebration gets the Celebration
+     * Pass, so the features it unlocks (check-in, team, 3D hall, import, AI) are there to test.
+     */
+    free?: boolean;
+  }
 ): Promise<{ eventId: string; title: string; couple: string; venue: string }> {
   const timestamp = Date.now();
   const couple =
@@ -136,6 +146,8 @@ export async function createTestEvent(
   const url = page.url();
   const match = url.match(/\/events\/([0-9a-fA-F-]+)/);
   const eventId = match ? match[1] : "";
+
+  if (eventId && !options?.free) await grantPass(eventId);
 
   return { eventId, title, couple, venue };
 }
@@ -336,4 +348,13 @@ export async function showAllInspectorOptions(page: Page) {
       // Storage unavailable: the options simply stay folded.
     }
   });
+}
+
+/** Give a test celebration the Celebration Pass, as Paystack's webhook would (service role). */
+export async function grantPass(eventId: string) {
+  const { error } = await serviceRoleClient()
+    .from("events")
+    .update({ paid_at: new Date().toISOString() })
+    .eq("id", eventId);
+  if (error) throw new Error(`Could not grant the pass: ${error.message}`);
 }

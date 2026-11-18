@@ -105,3 +105,11 @@ describe("mapError", () => {
     );
   });
 });
+
+describe("the Celebration Pass", () => {
+  it("explains a pass-only action in plain words", () => {
+    expect(
+      mapError({ message: "x", code: "P0001", hint: "PASS_REQUIRED" })
+    ).toMatch(/comes with the Celebration Pass/);
+  });
+});

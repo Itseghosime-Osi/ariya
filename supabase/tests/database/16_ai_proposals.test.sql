@@ -56,6 +56,15 @@ begin
     p_date := now() + interval '30 days',
     p_venue := 'Hall C', p_area := 'Lekki')->>'id')::uuid;
 
+  -- A connected app reaches only celebrations with the Celebration Pass.
+  perform set_config('test.prev_claims', coalesce(current_setting('request.jwt.claims', true), ''), true);
+  perform set_config('test.prev_role', coalesce(current_setting('request.jwt.claim.role', true), ''), true);
+  perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
+  perform set_config('request.jwt.claim.role', 'service_role', true);
+  update public.events set paid_at = now() where id in (v_a, v_b, v_other_event);
+  perform set_config('request.jwt.claims', current_setting('test.prev_claims'), true);
+  perform set_config('request.jwt.claim.role', current_setting('test.prev_role'), true);
+
   insert into public.ai_connection_settings (user_id, client_id, event_ids, read_only)
   values (v_host, 'client-scoped', array[v_a], false),
          (v_host, 'client-ro', null, true);

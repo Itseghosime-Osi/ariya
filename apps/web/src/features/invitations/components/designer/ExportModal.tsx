@@ -26,6 +26,8 @@ interface ExportModalProps {
   getCardElement: () => HTMLElement | null;
   /** Called after a file has been handed to the browser, so the studio can confirm it. */
   onExported?: (format: ExportFormat, missingFonts: string[]) => void;
+  /** The print-quality PDF comes with the Celebration Pass; the pictures and backup stay free. */
+  hasPass?: boolean;
 }
 
 interface FormatCard {
@@ -90,6 +92,7 @@ export function ExportModal({
   coupleName,
   getCardElement,
   onExported,
+  hasPass = true,
 }: ExportModalProps) {
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
@@ -98,7 +101,10 @@ export function ExportModal({
     onClose();
   };
   const returnFocus = useRef<HTMLElement | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(
+    hasPass ? "pdf" : "png"
+  );
+  const pdfLocked = !hasPass && selectedFormat === "pdf";
   const [exporting, setExporting] = useState(false);
   const [printMarks, setPrintMarks] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -272,14 +278,21 @@ export function ExportModal({
                         focusRing
                       )}
                     >
-                      <span className="text-sm font-semibold">{f.title}</span>
+                      <span className="text-sm font-semibold">
+                        {f.title}
+                        {f.id === "pdf" && !hasPass && (
+                          <span className="sr-only"> (Celebration Pass)</span>
+                        )}
+                      </span>
                       <span
                         className={cn(
                           "mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold",
                           on ? t.badgeOn : t.badge
                         )}
                       >
-                        {f.badge}
+                        {f.id === "pdf" && !hasPass
+                          ? "Celebration Pass"
+                          : f.badge}
                       </span>
                       <span
                         className={cn("mt-2 text-xs leading-relaxed", t.muted)}
@@ -418,28 +431,42 @@ export function ExportModal({
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleExport}
-                disabled={exporting}
-                className={cn(
-                  "inline-flex min-h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold shadow-md transition disabled:opacity-50",
-                  t.primary,
-                  focusRing
-                )}
-              >
-                {exporting ? (
-                  <>
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none" />
-                    Preparing {selectedFormat.toUpperCase()}…
-                  </>
-                ) : (
-                  <>
-                    <Icon name="download" size={16} />
-                    Download {selectedFormat.toUpperCase()}
-                  </>
-                )}
-              </button>
+              {pdfLocked ? (
+                <a
+                  href={`/events/${eventId}/billing`}
+                  data-testid="export-pdf-locked"
+                  className={cn(
+                    "inline-flex min-h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold shadow-md transition",
+                    t.primary,
+                    focusRing
+                  )}
+                >
+                  Unlock print PDF with the Celebration Pass
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={exporting}
+                  className={cn(
+                    "inline-flex min-h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold shadow-md transition disabled:opacity-50",
+                    t.primary,
+                    focusRing
+                  )}
+                >
+                  {exporting ? (
+                    <>
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none" />
+                      Preparing {selectedFormat.toUpperCase()}…
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="download" size={16} />
+                      Download {selectedFormat.toUpperCase()}
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </Dialog.Content>

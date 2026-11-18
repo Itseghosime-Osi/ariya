@@ -160,6 +160,7 @@ export function InvitationDesigner({
   backHref,
   requireAccessCard,
   settingsHref,
+  hasPass = true,
 }: {
   eventId: string;
   eventTitle: string;
@@ -172,6 +173,8 @@ export function InvitationDesigner({
   requireAccessCard: boolean;
   /** Where the access pass is switched on and off. */
   settingsHref: string;
+  /** The print-quality PDF comes with the Celebration Pass. */
+  hasPass?: boolean;
 }) {
   const doc = useDesignerDoc(eventId, initialDesign, initialRevision);
   const {
@@ -2615,6 +2618,7 @@ export function InvitationDesigner({
       />
 
       <ExportModal
+        hasPass={hasPass}
         dark={dark}
         open={exportOpen}
         onClose={() => setExportOpen(false)}

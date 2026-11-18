@@ -62,6 +62,8 @@ export function mapError(
         return "Celebration could not be found.";
       case "TABLE_NOT_FOUND":
         return "Assigned table could not be found.";
+      case "PASS_REQUIRED":
+        return "This comes with the Celebration Pass. Open Billing to unlock it for this celebration.";
       default:
         break;
     }

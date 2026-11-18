@@ -1510,6 +1510,7 @@ export type Database = {
         Returns: Json;
       };
       event_is_expired: { Args: { p_date: string }; Returns: boolean };
+      event_has_pass: { Args: { p_event_id: string }; Returns: boolean };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
         Returns: {

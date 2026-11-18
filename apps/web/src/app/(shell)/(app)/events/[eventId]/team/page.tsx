@@ -33,7 +33,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   return (
     <EndedLock ended={isEventExpired(eventData?.event.date)}>
-      <TeamDesk eventId={eventId} eventTitle={eventTitle} data={data} />
+      <TeamDesk
+        eventId={eventId}
+        eventTitle={eventTitle}
+        data={data}
+        hasPass={Boolean(eventData?.event.paid_at)}
+      />
     </EndedLock>
   );
 }

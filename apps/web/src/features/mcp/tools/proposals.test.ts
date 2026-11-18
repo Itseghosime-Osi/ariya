@@ -112,6 +112,7 @@ const ALLOWED_RPC = {
   ai_connection_event_allowed: { data: true, error: null },
   ai_connection_read_only: { data: false, error: null },
   has_event_role: { data: true, error: null },
+  event_has_pass: { data: true, error: null },
 };
 
 function context(

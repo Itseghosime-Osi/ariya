@@ -14,6 +14,8 @@ export async function getInvitationDesignerData(eventId: string): Promise<{
   dressCode: string | null;
   rsvpBy: string | null;
   requireAccessCard: boolean;
+  /** The print-quality PDF comes with the Celebration Pass. */
+  hasPass: boolean;
   revision: string;
   design: ReturnType<typeof designFromEvent>;
 } | null> {
@@ -45,6 +47,7 @@ export async function getInvitationDesignerData(eventId: string): Promise<{
     dressCode: event.dress_code,
     rsvpBy: event.rsvp_by,
     requireAccessCard: true,
+    hasPass: Boolean(event.paid_at),
     revision: event.updated_at,
     design: designFromEvent({
       title: event.title,

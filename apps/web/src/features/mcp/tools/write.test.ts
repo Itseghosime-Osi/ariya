@@ -132,6 +132,7 @@ describe("a write tool the database refuses", () => {
     ai_connection_event_allowed: { data: true, error: null },
     ai_connection_read_only: { data: false, error: null },
     has_event_role: { data: true, error: null },
+    event_has_pass: { data: true, error: null },
   };
 
   /** The driver's error, with a message and details that must not survive the trip. */
