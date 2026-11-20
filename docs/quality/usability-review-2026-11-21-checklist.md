@@ -28,9 +28,15 @@ was resolved. Paths are under `apps/web/src` unless they say otherwise.
       past due when they were added are kept apart: they no longer pick the "next" task or the
       current phase, show "Before you started" instead of a red date, and a card offers to set
       them all aside. `features/checklist/late-start.ts` (+ tests), checklist page.
+      End to end: `e2e/38-checklist-late-start.spec.ts` (event tomorrow, no hall: the list opens on
+      "Day of", 18 earlier rows are set apart and can be set aside together).
 - [x] **5. Checklist needed a saved hall plan before it would generate.** It now builds from the
       date, guest count and table count, treating the room as an indoor hall until a hall plan
       exists (no tent, weather or outdoor rows). `features/checklist/queries.ts`.
+      When a hall is drawn later, opening the checklist adds only the rows it lacks (e.g. a
+      marquee's rain and wind plans); existing rows keep the host's edits and deleted rows stay
+      deleted. `features/checklist/plan-sync.ts` (+ tests), `addMissingPlanRowsAction`.
+      End to end: the second test in `e2e/38-checklist-late-start.spec.ts`.
 
 ## P1 — confusing or error-prone
 

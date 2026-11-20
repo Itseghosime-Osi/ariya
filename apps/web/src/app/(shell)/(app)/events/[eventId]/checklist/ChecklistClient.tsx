@@ -28,7 +28,9 @@ import type { ChecklistPlan, Phase, Reconciliation } from "@ariya/studio";
 import type { StudioEngine } from "@ariya/studio";
 import { useStudioEngine } from "@/features/seating/hall/useStudioEngine";
 import { wasPastWhenAdded } from "@/features/checklist/late-start";
+import { missingPlanTasks } from "@/features/checklist/plan-sync";
 import {
+  addMissingPlanRowsAction,
   deleteTaskAction,
   moveOpenToThisWeekAction,
   restoreTaskAction,
@@ -140,6 +142,39 @@ export function ChecklistClient({
     seededOnce.current = true;
     void seed(engine);
   }, [engine, status, data.seeded, seed]);
+
+  // A list built before the hall was drawn lacks the venue's rows (power, tents, weather). Once a
+  // hall plan exists, add just those: nothing the host has, edited or deleted is touched.
+  const syncedOnce = useRef(false);
+  useEffect(() => {
+    if (!engine || status !== "ready" || !data.seeded || !data.fromHallPlan)
+      return;
+    if (!data.input || syncedOnce.current) return;
+    syncedOnce.current = true;
+    let plan: ChecklistPlan;
+    try {
+      plan = engine.checklist(data.input);
+    } catch (error) {
+      console.error("[ChecklistClient] plan for sync failed:", error);
+      return;
+    }
+    if (missingPlanTasks(plan.tasks, data.knownKeys).length === 0) return;
+    void addMissingPlanRowsAction(eventId, plan).then((result) => {
+      if (result.error) {
+        setToast({ kind: "error", message: result.error });
+        return;
+      }
+      if (result.added) window.location.reload();
+    });
+  }, [
+    engine,
+    status,
+    data.seeded,
+    data.fromHallPlan,
+    data.input,
+    data.knownKeys,
+    eventId,
+  ]);
 
   const now = useMemo(() => new Date(), []);
   // "This week" is the seven days ahead, in UTC days to match the stored `date` column. An

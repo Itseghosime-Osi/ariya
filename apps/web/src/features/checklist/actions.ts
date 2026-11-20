@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { ChecklistPlan, Reconciliation } from "@ariya/studio";
 import { createClient } from "@/lib/supabase/server";
 import { RISK_KEY_PREFIX, type TaskStatus } from "./types";
+import { missingPlanTasks, type PlanTask } from "./plan-sync";
 
 export interface SeedResult {
   success?: boolean;
@@ -60,25 +61,7 @@ export async function seedChecklistAction(
 
   const inserts = reconciliation.insert
     .map((t) => taskByKey.get(t.sourceKey) ?? t)
-    .map((t) => ({
-      event_id: eventId,
-      title: t.title,
-      detail: t.detail ?? null,
-      phase: asPhase(t.phase),
-      due_date: t.dueDate ?? null,
-      source: "template" as const,
-      source_key: t.sourceKey,
-      mitigation: t.mitigation ?? null,
-      advice_source: t.adviceSource ?? null,
-      time_slot: t.when ?? null,
-      derivation: {
-        kind: t.riskId ? "risk" : "plan",
-        count: t.daysBefore ?? undefined,
-        why: t.derivation,
-      },
-      template_version: plan.templateVersion,
-      sort: t.sort,
-    }));
+    .map((t) => toTaskRow(eventId, t, plan.templateVersion));
 
   if (inserts.length > 0) {
     const { error } = await supabase.from("tasks").insert(inserts);
@@ -131,6 +114,73 @@ export async function seedChecklistAction(
     updated: reconciliation.update.length,
     retired: reconciliation.retire.length,
   };
+}
+
+function toTaskRow(eventId: string, t: PlanTask, templateVersion: number) {
+  return {
+    event_id: eventId,
+    title: t.title,
+    detail: t.detail ?? null,
+    phase: asPhase(t.phase),
+    due_date: t.dueDate ?? null,
+    source: "template" as const,
+    source_key: t.sourceKey,
+    mitigation: t.mitigation ?? null,
+    advice_source: t.adviceSource ?? null,
+    time_slot: t.when ?? null,
+    derivation: {
+      kind: t.riskId ? "risk" : "plan",
+      count: t.daysBefore ?? undefined,
+      why: t.derivation,
+    },
+    template_version: templateVersion,
+    sort: t.sort,
+  };
+}
+
+/**
+ * Add the plan's rows this checklist does not have yet — the venue rows that appear once a hall
+ * is drawn after the list was first built. Existing rows are left exactly as they are (so a host's
+ * own times and edits survive), and a deleted row is never brought back: the keys are re-read
+ * here, tombstones included, rather than trusted from the page.
+ */
+export async function addMissingPlanRowsAction(
+  eventId: string,
+  plan: ChecklistPlan
+): Promise<{ success?: boolean; error?: string; added?: number }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const { data: rows, error: readError } = await supabase
+    .from("tasks")
+    .select("source_key")
+    .eq("event_id", eventId)
+    .not("source_key", "is", null);
+  if (readError) {
+    console.error("[addMissingPlanRowsAction] read failed:", readError);
+    return { error: "Could not read the checklist." };
+  }
+
+  const missing = missingPlanTasks(
+    plan.tasks,
+    (rows ?? []).map((r) => r.source_key as string)
+  );
+  if (missing.length === 0) return { success: true, added: 0 };
+
+  const { error } = await supabase
+    .from("tasks")
+    .insert(missing.map((t) => toTaskRow(eventId, t, plan.templateVersion)));
+  if (error) {
+    console.error("[addMissingPlanRowsAction] insert failed:", error);
+    return { error: `Could not add the hall's tasks: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}/day-of`);
+  return { success: true, added: missing.length };
 }
 
 /**

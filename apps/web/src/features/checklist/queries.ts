@@ -70,7 +70,7 @@ export async function getChecklistData(
   }
   if (!event) return null;
 
-  const [tasksResult, guestsResult, tablesResult, membersResult] =
+  const [tasksResult, guestsResult, tablesResult, membersResult, keysResult] =
     await Promise.all([
       supabase
         .from("tasks")
@@ -93,6 +93,12 @@ export async function getChecklistData(
         .from("event_members")
         .select("user_id, role, profiles(full_name)")
         .eq("event_id", cleanId),
+      // Every generated key, deleted rows included, so the page can tell what the plan lacks.
+      supabase
+        .from("tasks")
+        .select("source_key")
+        .eq("event_id", cleanId)
+        .not("source_key", "is", null),
     ]);
 
   if (tasksResult.error) {
@@ -157,6 +163,9 @@ export async function getChecklistData(
     // draw the hall before they can see a checklist.
     input: checklistInput(layout, guests, tablesResult.count ?? 0, event.date),
     fromHallPlan: Boolean(layout),
+    knownKeys: (keysResult.data ?? [])
+      .map((r) => r.source_key)
+      .filter((k): k is string => Boolean(k)),
     guests,
     tables: tablesResult.count ?? 0,
   };

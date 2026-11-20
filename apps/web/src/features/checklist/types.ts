@@ -63,6 +63,8 @@ export interface ChecklistData {
   input: ChecklistInput | null;
   /** The request read a saved hall plan; false means venue-specific rows are not in it yet. */
   fromHallPlan: boolean;
+  /** Every generated row's key, deleted rows included. */
+  knownKeys: string[];
   guests: number;
   tables: number;
 }
