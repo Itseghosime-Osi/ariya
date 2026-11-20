@@ -59,8 +59,10 @@ was resolved. Paths are under `apps/web/src` unless they say otherwise.
       before. Set-aside rows no longer show. `features/day-of/order.ts` (+ tests),
       `features/checklist/actions.ts` (`setRunSheetTimeAction`, `addRunSheetRowAction`),
       `day-of/RunSheetClient.tsx`.
-- [ ] **12. Seating: unexpected movement, chair totals, save reliability (earlier review).**
-      Fixed in `b28f954` and `2466a58` before this review. E2E result below.
+- [x] **12. Seating: unexpected movement, chair totals, save reliability (earlier review).**
+      Fixed in `b28f954` and `2466a58` before this review. Re-verified on 20 Nov 2026: `05-seating`,
+      `24-seating-workspace` and `30-seating-safety` (including "a failed save says Not saved, and
+      Retry saves it") pass.
 
 ## P2 — simplification
 
@@ -83,8 +85,15 @@ was resolved. Paths are under `apps/web/src` unless they say otherwise.
 
 ## Previously untested
 
-- [ ] **17. Check-in at the door.**
-- [ ] **18. Team invitations and collaboration.**
-- [ ] **19. CSV import, message sending, payment, offline behaviour.**
+Run locally on 20 Nov 2026 against a local Supabase stack, 42 end-to-end tests across the
+specs below, all passing.
+
+- [x] **17. Check-in at the door.** `06-check-in` and `35-offline-check-in` pass end to end with
+      a paid (mocked) event.
+- [x] **18. Team invitations and collaboration.** `07-team` passes.
+- [x] **19. CSV import, message sending, payment, offline behaviour.** `03-guests-and-import`,
+      `04-rsvp-and-email` (email through Mailpit), `08-billing` (Paystack mocked),
+      `18-offline-run-sheet` and `35-offline-check-in` pass. Not covered: a real Paystack charge
+      and real WhatsApp/email delivery, which need a manual pass on staging.
 - [ ] **20. 3D seating on a real device with WebGL.** Cannot be run in a cloud container; needs a
       manual pass on a phone and a laptop.
