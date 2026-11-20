@@ -47,7 +47,6 @@ export default defineConfig({
     env: {
       PAYSTACK_API_BASE: "http://127.0.0.1:57328",
       // The admin desk opens only at a secret address; this is the test server's (e2e/fixtures/admin.ts).
-      ADMIN_PATH: "/e2e-desk-4f7a2c9b8d",
     },
   },
 });

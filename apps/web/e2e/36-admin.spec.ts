@@ -15,7 +15,7 @@ async function expectDone(page: Page, text: string) {
   });
 }
 
-/** The test server's secret desk address (see playwright.config.ts) for an internal /admin path. */
+/** The desk's address for an /admin path (kept as a helper so the desk can move again easily). */
 const D = (path: string) => path.replace(/^\/admin(?=\/|\?|$)/, DESK);
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 /** A URL pattern under the desk; "$" means the desk's front page itself. */
@@ -210,9 +210,9 @@ test.describe("Admin desk", () => {
       await expect(log.getByText(text).first()).toBeVisible();
     }
 
-    // Even for an admin, the plain address stays "not found": the desk lives only at its secret one.
-    expect((await page.goto("/admin"))?.status()).toBe(404);
-    expect((await page.goto("/admin/accounts"))?.status()).toBe(404);
+    // The desk lives at /admin: an admin who has passed two-step sign-in reaches it there.
+    expect((await page.goto("/admin"))?.status()).toBe(200);
+    expect((await page.goto("/admin/accounts"))?.status()).toBe(200);
 
     // Every page renders, without accessibility errors.
     for (const [path, heading] of [

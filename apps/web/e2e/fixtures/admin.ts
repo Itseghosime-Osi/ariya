@@ -6,8 +6,8 @@ import { serviceRoleClient } from "./service-role";
  * Admins are added in SQL by the database owner only (the website's service-role key cannot), so
  * the tests do the same, straight against the local database.
  */
-/** The desk's secret address on the test server; playwright.config.ts passes it as ADMIN_PATH. */
-export const DESK = "/e2e-desk-4f7a2c9b8d";
+/** The desk's address. */
+export const DESK = "/admin";
 
 const DB_URL =
   process.env.SUPABASE_DB_URL ??
