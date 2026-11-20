@@ -172,6 +172,35 @@ test.describe("Events Creation & Overview", () => {
     });
   }
 
+  test("event settings shows the WAT time and saving keeps it (21 Nov usability review)", async ({
+    browser,
+  }) => {
+    // Settings once showed 1:00 PM for a 2:00 PM WAT event and saved it back an hour early.
+    const context = await browser.newContext({ timezoneId: "UTC" });
+    const page = await context.newPage();
+    try {
+      await createAndLoginUser(page, context, "settings_wat_time");
+      // The wizard's default slot is the afternoon: 14:00 WAT.
+      const { eventId, title } = await createTestEvent(page);
+
+      await page.goto(`/events/${eventId}/settings`);
+      await expect(page.locator("#setting-date")).toContainText("2:00 PM");
+
+      await page
+        .locator(`input[value="${title}"]`)
+        .fill(`${title} (time kept)`);
+      await page.getByRole("button", { name: /save settings/i }).click();
+      await expect(page.getByText(/settings saved successfully/i)).toBeVisible({
+        timeout: 10000,
+      });
+
+      await page.reload();
+      await expect(page.locator("#setting-date")).toContainText("2:00 PM");
+    } finally {
+      await context.close();
+    }
+  });
+
   test("page editor date picker updates the preview to 2:00 PM WAT before saving", async ({
     browser,
   }) => {
