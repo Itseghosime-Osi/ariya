@@ -11,6 +11,7 @@ import {
 } from "@/features/events/components/desk/DeskMotion";
 import type { RunSheetData } from "@/features/day-of/queries";
 import { isClockTime } from "@/features/day-of/order";
+import { TimeField, formatClock } from "@/components/ui/time-field";
 import {
   addRunSheetRowAction,
   setRunSheetTimeAction,
@@ -229,30 +230,22 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
                   >
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {editing && (
-                        <label className="flex items-center gap-2 text-[12px] text-label-2">
-                          <span className="sr-only">Time for {row.title}</span>
-                          <input
-                            type="time"
-                            disabled={pending}
-                            defaultValue={
-                              isClockTime(row.timeSlot) ? row.timeSlot! : ""
-                            }
-                            onBlur={(e) => {
-                              const before = isClockTime(row.timeSlot)
-                                ? row.timeSlot!
-                                : "";
-                              if (e.target.value !== before)
-                                saveTime(row.id, e.target.value);
-                            }}
-                            className="desk-field min-h-10 rounded-lg px-2 text-sm text-night"
-                          />
-                        </label>
+                        <TimeField
+                          label={`Time for ${row.title}`}
+                          disabled={pending}
+                          value={isClockTime(row.timeSlot) ? row.timeSlot! : ""}
+                          onChange={(time) => saveTime(row.id, time)}
+                        />
                       )}
-                      {row.timeSlot && (
-                        <span className="font-display text-[1.05rem] font-semibold leading-tight text-gold-ink">
-                          {row.timeSlot}
-                        </span>
-                      )}
+                      {/* While editing, an exact time is already in the field beside it. */}
+                      {row.timeSlot &&
+                        !(editing && isClockTime(row.timeSlot)) && (
+                          <span className="font-display text-[1.05rem] font-semibold leading-tight text-gold-ink">
+                            {isClockTime(row.timeSlot)
+                              ? formatClock(row.timeSlot!)
+                              : row.timeSlot}
+                          </span>
+                        )}
                       {isNext && (
                         <span className="rounded-full bg-gold/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-gold-ink">
                           Next up
@@ -303,18 +296,17 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Caterer arrives"
-                  className="desk-field min-h-11 rounded-lg px-3 text-sm text-night"
+                  className="desk-field min-h-11 rounded-2xl px-3.5 text-sm text-night"
                 />
               </label>
-              <label className="flex flex-col gap-1 text-[12px] font-semibold text-label-2">
-                Time
-                <input
-                  type="time"
+              <div className="flex flex-col gap-1 text-[12px] font-semibold text-label-2">
+                <span aria-hidden="true">Time</span>
+                <TimeField
+                  label="Time for the new row"
                   value={newTime}
-                  onChange={(e) => setNewTime(e.target.value)}
-                  className="desk-field min-h-11 rounded-lg px-2 text-sm text-night"
+                  onChange={setNewTime}
                 />
-              </label>
+              </div>
               <button
                 type="submit"
                 disabled={pending || newTitle.trim().length < 2}

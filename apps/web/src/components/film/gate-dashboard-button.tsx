@@ -40,30 +40,21 @@ export function GateDashboardButton() {
   }, []);
 
   // The gate leads with planning; the film's colour, sound and viewing choices come second.
+  // One door: new visitors start planning (sign-up links to sign-in for returning hosts).
   if (!isLoggedIn) {
     return (
-      <>
-        <Link
-          prefetch={false}
-          className="btn gold gate-dashboard-btn gate-start-btn"
-          id="gateDashboardBtn"
-          href="/sign-up"
-          title="Create your first event"
-        >
-          <span>Start planning</span>
-          <span aria-hidden="true" className="arrow">
-            →
-          </span>
-        </Link>
-        <Link
-          prefetch={false}
-          className="quiet"
-          id="gateSignIn"
-          href="/sign-in?next=%2Fevents"
-        >
-          Sign in to dashboard
-        </Link>
-      </>
+      <Link
+        prefetch={false}
+        className="btn gold gate-dashboard-btn gate-start-btn"
+        id="gateDashboardBtn"
+        href="/sign-up"
+        title="Create your first event"
+      >
+        <span>Start planning</span>
+        <span aria-hidden="true" className="arrow">
+          →
+        </span>
+      </Link>
     );
   }
 
