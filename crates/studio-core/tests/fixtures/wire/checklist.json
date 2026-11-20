@@ -437,7 +437,7 @@
         "riskId": "programme.overrun",
         "sort": 35,
         "sourceKey": "day.hard-stops",
-        "title": "Hold the hard stops",
+        "title": "Keep to the fixed times",
         "when": "All day"
       },
       {

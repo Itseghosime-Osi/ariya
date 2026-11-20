@@ -52,6 +52,10 @@ describe("GateDashboardButton", () => {
       name: /Sign in to dashboard/i,
     });
     expect(link).toHaveAttribute("href", "/sign-in?next=%2Fevents");
+    // A new visitor's first choice is to start planning, not the film's colour or sound.
+    expect(
+      screen.getByRole("link", { name: /Start planning/i })
+    ).toHaveAttribute("href", "/sign-up");
   });
 
   it("updates dynamically when authentication state changes", async () => {

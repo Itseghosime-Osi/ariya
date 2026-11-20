@@ -16,7 +16,7 @@ describe("run sheet order", () => {
 
   it("puts a host's exact times in clock order among the template's words", () => {
     const ordered = orderRunSheet([
-      row("Hold the hard stops", "All day"),
+      row("Keep to the fixed times", "All day"),
       row("Load in the decor", "Morning, before load-in"),
       row("Check the generator", null),
       row("Guests arrive", "14:00"),
@@ -24,7 +24,7 @@ describe("run sheet order", () => {
       row("Last dance", "Evening"),
     ]);
     expect(ordered.map((r) => r.title)).toEqual([
-      "Hold the hard stops",
+      "Keep to the fixed times",
       "Load in the decor",
       "Check the generator",
       "Caterer arrives",

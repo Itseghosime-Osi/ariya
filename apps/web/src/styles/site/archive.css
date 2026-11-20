@@ -549,6 +549,16 @@ html.watching .scrollcue {
 .gate .actions .gate-dashboard-btn:hover .arrow {
   transform: translateX(3px);
 }
+/* Planning leads the gate; the film's own buttons follow it. */
+.gate .actions .gate-start-btn {
+  background: linear-gradient(180deg, #f3d98f, #d4a85a);
+  border-color: var(--gold);
+  color: #2a0610;
+}
+.gate .actions .gate-start-btn:hover {
+  background: linear-gradient(180deg, #f6e2ad, #dcb066);
+  color: #2a0610;
+}
 .gate .quiet {
   background: none;
   border: 0;

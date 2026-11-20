@@ -81,9 +81,7 @@ export function GuestConstellation({
           <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#e9c98a]">
             Guests
           </div>
-          <h2 className="mt-1 font-display text-2xl font-bold">
-            Your constellation
-          </h2>
+          <h2 className="mt-1 font-display text-2xl font-bold">Who's coming</h2>
         </div>
         <div className="text-right">
           <div className="font-display text-4xl font-bold leading-none text-[#e9c98a] tabular-nums">

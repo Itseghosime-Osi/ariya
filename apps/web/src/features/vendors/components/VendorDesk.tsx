@@ -213,7 +213,7 @@ export function VendorDesk({
           <DeskPageHeader
             compact
             eyebrow={`Vendors · ${eventTitle}`}
-            title="The vendor loom"
+            title="Vendors"
             description="Every supplier, contract and deliverable in one place. Tick the work off as the owambe comes together."
           >
             <button

@@ -326,6 +326,7 @@ export function AppShell({
               eventId={activeEvent?.id}
               userEmail={userEmail}
               pendingProposals={pendingProposals}
+              hasEvents={events.length + archivedEvents.length > 0}
             />
 
             <main

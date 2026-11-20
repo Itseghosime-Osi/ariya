@@ -1,6 +1,7 @@
 import type { IconName } from "@/components/ui/icon";
 
-export type NavGroup = "home" | "plan" | "day" | "manage" | "account";
+export type NavGroup =
+  "home" | "plan" | "day" | "manage" | "design" | "account";
 
 export interface NavItem {
   name: string;
@@ -16,6 +17,8 @@ export const NAV_GROUPS: { id: NavGroup; label: string; panel: boolean }[] = [
   { id: "plan", label: "Planning", panel: true },
   { id: "day", label: "On the day", panel: true },
   { id: "manage", label: "Manage", panel: false },
+  // Presentation tools sit apart from the everyday workflow, so they read as optional.
+  { id: "design", label: "Design tools", panel: false },
   { id: "account", label: "Account", panel: false },
 ];
 
@@ -51,6 +54,8 @@ export function getEventSections(eventId?: string | null): NavItem[] {
   if (!isValidEventId(eventId)) return [];
   const baseUrl = `/events/${eventId.trim()}`;
 
+  // The everyday workflow first: guests and replies, invitations, seating, suppliers and tasks;
+  // then the day itself; then admin; design tools last.
   return [
     { name: "Overview", href: baseUrl, icon: "space_dashboard", group: "home" },
     {
@@ -72,15 +77,21 @@ export function getEventSections(eventId?: string | null): NavItem[] {
       group: "plan",
     },
     {
-      name: "Checklist",
-      href: `${baseUrl}/checklist`,
-      icon: "checklist",
-      group: "plan",
-    },
-    {
       name: "Seating",
       href: `${baseUrl}/seating`,
       icon: "table_restaurant",
+      group: "plan",
+    },
+    {
+      name: "Vendors",
+      href: `${baseUrl}/vendors`,
+      icon: "restaurant_menu",
+      group: "plan",
+    },
+    {
+      name: "Checklist",
+      href: `${baseUrl}/checklist`,
+      icon: "checklist",
       group: "plan",
     },
     {
@@ -96,10 +107,10 @@ export function getEventSections(eventId?: string | null): NavItem[] {
       group: "day",
     },
     {
-      name: "Vendors",
-      href: `${baseUrl}/vendors`,
-      icon: "restaurant_menu",
-      group: "day",
+      name: "Event settings",
+      href: `${baseUrl}/settings`,
+      icon: "tune",
+      group: "manage",
     },
     {
       name: "Team",
@@ -108,22 +119,16 @@ export function getEventSections(eventId?: string | null): NavItem[] {
       group: "manage",
     },
     {
-      name: "Page editor",
-      href: `${baseUrl}/page-editor`,
-      icon: "layout_template",
-      group: "plan",
-    },
-    {
       name: "Billing",
       href: `${baseUrl}/billing`,
       icon: "credit_card",
       group: "manage",
     },
     {
-      name: "Event settings",
-      href: `${baseUrl}/settings`,
-      icon: "tune",
-      group: "plan",
+      name: "Page editor",
+      href: `${baseUrl}/page-editor`,
+      icon: "layout_template",
+      group: "design",
     },
   ];
 }

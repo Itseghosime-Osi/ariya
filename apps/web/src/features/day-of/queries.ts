@@ -68,7 +68,8 @@ export async function getRunSheetData(
         timeSlot: t.timeSlot,
         detail: t.detail,
         status: t.status,
-        isHardStop: /hard stop/i.test(t.title),
+        // "Hold the hard stops" is the old wording of the same template row.
+        isHardStop: /hard stop|fixed times/i.test(t.title),
       }))
   );
 

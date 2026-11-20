@@ -38,7 +38,9 @@ export function Gate({ status }: { status: FilmStatus }) {
         </h1>
         <p className="value">One invitation for every guest.</p>
         <fieldset className="hue" id="hue">
-          <legend className="sr-only">Choose the colour of the day</legend>
+          <legend className="sr-only">
+            Choose the film&apos;s colour (optional)
+          </legend>
           <label>
             <input type="radio" name="hue" value="burgundy" defaultChecked />
             <span
@@ -80,16 +82,11 @@ export function Gate({ status }: { status: FilmStatus }) {
           <span id="loadTxt" />
         </div>
         <div className="actions">
-          <button
-            className="btn gold enter"
-            id="enterSound"
-            type="button"
-            disabled
-          >
-            <span className="ring" aria-hidden="true" />
-            Enter the wedding
-          </button>
           <GateDashboardButton />
+          <button className="btn enter" id="enterSound" type="button" disabled>
+            <span className="ring" aria-hidden="true" />
+            Watch the film
+          </button>
           <button className="quiet" id="enterQuiet" type="button">
             Enter in silence
           </button>

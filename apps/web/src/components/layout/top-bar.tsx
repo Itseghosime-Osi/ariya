@@ -12,6 +12,11 @@ interface TopBarProps {
   eventId?: string;
   userEmail?: string;
   pendingProposals?: number;
+  /**
+   * The account has at least one event. Before then, AI connections and approvals are a decision
+   * a new host need not face; both stay reachable from Settings.
+   */
+  hasEvents?: boolean;
   /** Installed app on a phone: leave the bar out, for screens with their own (screen-header.tsx). */
   hideOnPhone?: boolean;
 }
@@ -20,8 +25,11 @@ export function TopBar({
   eventId,
   userEmail,
   pendingProposals = 0,
+  hasEvents = true,
   hideOnPhone = false,
 }: TopBarProps) {
+  // A waiting proposal is always shown, even before the first event, so nothing goes unseen.
+  const showApprovals = hasEvents || pendingProposals > 0;
   const [searchOpen, setSearchOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountButtonRef = useRef<HTMLButtonElement>(null);
@@ -69,26 +77,28 @@ export function TopBar({
 
         <div className="flex items-center gap-2">
           <HelpButton className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold-ink/25 bg-white/70 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy" />
-          <Link
-            href="/approvals"
-            aria-label={
-              pendingProposals > 0
-                ? `Approvals, ${pendingProposals} waiting`
-                : "Approvals"
-            }
-            data-testid="approvals-link"
-            className="relative flex h-11 items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-3 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
-          >
-            <Icon name="pending" size={18} className="shrink-0" />
-            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] sm:inline">
-              Approvals
-            </span>
-            {pendingProposals > 0 ? (
-              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-burgundy px-1 text-[11px] font-semibold leading-none text-champagne">
-                {pendingProposals > 9 ? "9+" : pendingProposals}
+          {showApprovals && (
+            <Link
+              href="/approvals"
+              aria-label={
+                pendingProposals > 0
+                  ? `Approvals, ${pendingProposals} waiting`
+                  : "Approvals"
+              }
+              data-testid="approvals-link"
+              className="relative flex h-11 items-center gap-2 rounded-full border border-gold-ink/25 bg-white/70 px-3 text-night transition-colors hover:border-gold-ink/60 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              <Icon name="pending" size={18} className="shrink-0" />
+              <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] sm:inline">
+                Approvals
               </span>
-            ) : null}
-          </Link>
+              {pendingProposals > 0 ? (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-burgundy px-1 text-[11px] font-semibold leading-none text-champagne">
+                  {pendingProposals > 9 ? "9+" : pendingProposals}
+                </span>
+              ) : null}
+            </Link>
+          )}
 
           <button
             type="button"
@@ -100,21 +110,23 @@ export function TopBar({
             <Icon name="search" size={18} />
           </button>
 
-          {/* Desktop: the one door for a connected app */}
-          <Link
-            href="/connect-ai"
-            data-testid="connect-ai-link"
-            className="group relative hidden h-11 items-center gap-2 overflow-hidden rounded-full border border-gold/45 bg-burgundy pl-3 pr-4 text-champagne transition-[transform,background-color,box-shadow] duration-200 hover:bg-wine hover:shadow-[0_12px_26px_-14px_rgba(107,30,46,0.9)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy motion-safe:hover:-translate-y-px md:flex"
-          >
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 -left-full w-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[200%]"
-            />
-            <Icon name="styler" size={17} className="relative shrink-0" />
-            <span className="relative text-[11px] font-semibold uppercase tracking-[0.14em]">
-              Connect to an AI
-            </span>
-          </Link>
+          {/* Desktop: the one door for a connected app, once there is an event to connect it to */}
+          {hasEvents && (
+            <Link
+              href="/connect-ai"
+              data-testid="connect-ai-link"
+              className="group relative hidden h-11 items-center gap-2 overflow-hidden rounded-full border border-gold/45 bg-burgundy pl-3 pr-4 text-champagne transition-[transform,background-color,box-shadow] duration-200 hover:bg-wine hover:shadow-[0_12px_26px_-14px_rgba(107,30,46,0.9)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy motion-safe:hover:-translate-y-px md:flex"
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 -left-full w-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[200%]"
+              />
+              <Icon name="styler" size={17} className="relative shrink-0" />
+              <span className="relative text-[11px] font-semibold uppercase tracking-[0.14em]">
+                Connect to an AI
+              </span>
+            </Link>
+          )}
 
           {/* Phone: the account icon opens the sheet */}
           <button
