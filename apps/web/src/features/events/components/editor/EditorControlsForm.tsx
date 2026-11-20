@@ -59,6 +59,13 @@ export function EditorControlsForm({
           />
         </div>
 
+        {/* Which edits are facts and which are looks, so a host knows what else changes. */}
+        <p className="rounded-2xl bg-wine/5 px-3.5 py-2.5 text-[12px] text-on-surface-variant">
+          Names, date and venue are the event&apos;s details: changing them here
+          changes them in Event Settings, on invitations and on guest passes
+          too. Everything else on this page only changes how it looks.
+        </p>
+
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-wine/80">

@@ -62,4 +62,12 @@ describe("Formatting utilities", () => {
     );
     expect(formatWatDatetimeLocal("")).toBe("");
   });
+
+  it("round-trips a stored time through the settings field without shifting it", () => {
+    // Event Settings once showed 13:00 for a 2 PM WAT event and saved it an hour early.
+    const stored = "2026-11-21T13:00:00.000Z";
+    const field = formatWatDatetimeLocal(stored);
+    expect(field).toBe("2026-11-21T14:00");
+    expect(parseWatDateToUtc(field)).toBe(stored);
+  });
 });

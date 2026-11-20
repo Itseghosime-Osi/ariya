@@ -125,7 +125,8 @@ export async function createTestEvent(
   }
   await page.getByTestId("wizard-next").click();
 
-  // Step 2: when. A Saturday is already chosen once the page has loaded.
+  // Step 2: when. Nothing is chosen for the host, so pick a shortcut date.
+  await page.getByRole("button", { name: "In 3 months" }).click();
   await expect(page.getByTestId("wizard-next")).toBeEnabled();
   await page.getByTestId("wizard-next").click();
 

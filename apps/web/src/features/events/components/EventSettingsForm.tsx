@@ -9,6 +9,11 @@ import { MonogramSeal } from "@/features/events/components/desk/MonogramSeal";
 import type { Event } from "@/features/events/types";
 import { updateEventSettingsAction } from "@/features/events/settings-actions";
 import { EventDangerZone } from "./EventDangerZone";
+import {
+  formatEventDate,
+  formatWatDatetimeLocal,
+  parseWatDateToUtc,
+} from "@/lib/format";
 
 interface EventSettingsFormProps {
   event: Event;
@@ -40,7 +45,10 @@ export function EventSettingsForm({
   const [title, setTitle] = useState(event.title);
   const [couple, setCouple] = useState(event.couple);
   const [slug, setSlug] = useState(event.slug);
-  const [date, setDate] = useState(event.date ? event.date.slice(0, 16) : "");
+  // The field edits Lagos wall-clock time; the stored value is UTC. Slicing the stored
+  // string showed 13:00 for a 2 PM WAT event and saved it back an hour early.
+  const savedDate = formatWatDatetimeLocal(event.date);
+  const [date, setDate] = useState(savedDate);
   const [venue, setVenue] = useState(event.venue);
   const [area, setArea] = useState(event.area || "");
   const [dressCode, setDressCode] = useState(event.dress_code || "");
@@ -58,16 +66,13 @@ export function EventSettingsForm({
     title !== event.title ||
     couple !== event.couple ||
     slug !== event.slug ||
-    date !== (event.date ? event.date.slice(0, 16) : "") ||
+    date !== savedDate ||
     venue !== event.venue ||
     area !== (event.area || "") ||
     dressCode !== (event.dress_code || "") ||
     isPublic !== Boolean(event.is_public);
-  const when = date ? new Date(date) : null;
-  const whenLabel =
-    when && !Number.isNaN(when.getTime())
-      ? `${when.toLocaleDateString("en-NG", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} · ${when.toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}`
-      : "Pick a date";
+  const whenUtc = date ? parseWatDateToUtc(date) : "";
+  const whenLabel = whenUtc ? formatEventDate(whenUtc) : "Pick a date";
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +249,11 @@ export function EventSettingsForm({
         >
           {tab === "details" ? (
             <div className={`${CARD} space-y-3 p-4 sm:space-y-4 sm:p-5`}>
+              <p className="px-1 text-[12px] text-label-2">
+                These are the event&apos;s details. The guest page, invitations
+                and guest passes all read them. To change how those look, use
+                the Page Editor or Invitation Designer.
+              </p>
               <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {field("setting-title", "Celebration title", title, setTitle)}
                 {field("setting-couple", "Couple names", couple, setCouple)}

@@ -247,7 +247,11 @@ export function GuestConstellation({
             ≈ <NumberFlow value={expected} respectMotionPreference />
           </div>
           <div className="text-[11px] text-ivory/70">
-            An estimate for plates and souvenirs
+            {metrics.acceptedGuests} confirmed
+            {multiplier !== 1
+              ? ` + ${Math.round((multiplier - 1) * 100)}% for walk-ins`
+              : ""}
+            . An estimate for plates and souvenirs, not a headcount.
           </div>
         </div>
         <div

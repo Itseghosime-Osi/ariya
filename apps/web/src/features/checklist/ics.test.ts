@@ -19,6 +19,7 @@ function task(overrides: Partial<ChecklistTask> = {}): ChecklistTask {
     timeSlot: null,
     sort: 3,
     completedAt: null,
+    createdAt: null,
     ...overrides,
   };
 }

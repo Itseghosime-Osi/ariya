@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getChecklistData } from "@/features/checklist/queries";
 import type { ChecklistTask } from "@/features/checklist/types";
+import { orderRunSheet } from "./order";
 
 /**
  * The run sheet for the day itself (6.4.4): the day-phase rows in the order they happen, with the
@@ -37,7 +38,7 @@ export interface RunSheetData {
   eventId: string;
   eventTitle: string;
   eventDate: string | null;
-  /** Rows with a time slot first, in slot order; the rest after, in their template order. */
+  /** In the order they happen: exact times by the clock, worded slots where their words say. */
   rows: RunSheetRow[];
   doneCount: number;
   /** Only vendors that gave a phone or an email; a name alone cannot be reached on the day. */
@@ -58,20 +59,18 @@ export async function getRunSheetData(
 
   const dayRows = data.tasks.filter((t) => t.phase === "day");
 
-  const rows: RunSheetRow[] = dayRows
-    .map((t) => ({
-      id: t.id,
-      title: t.title,
-      timeSlot: t.timeSlot,
-      detail: t.detail,
-      status: t.status,
-      isHardStop: /hard stop/i.test(t.title),
-    }))
-    .sort((a, b) => {
-      if (Boolean(a.timeSlot) !== Boolean(b.timeSlot))
-        return a.timeSlot ? -1 : 1;
-      return 0;
-    });
+  const rows: RunSheetRow[] = orderRunSheet(
+    dayRows
+      .filter((t) => t.status !== "skipped")
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        timeSlot: t.timeSlot,
+        detail: t.detail,
+        status: t.status,
+        isHardStop: /hard stop/i.test(t.title),
+      }))
+  );
 
   const contacts = await getRunSheetContacts(eventId);
 

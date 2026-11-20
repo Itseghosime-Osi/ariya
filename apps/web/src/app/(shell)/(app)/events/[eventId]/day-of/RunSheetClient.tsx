@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, Lock, Mail, Phone, WifiOff } from "lucide-react";
 import { ScreenHeader } from "@/components/layout/screen-header";
 import {
@@ -8,6 +10,12 @@ import {
   DeskMotion,
 } from "@/features/events/components/desk/DeskMotion";
 import type { RunSheetData } from "@/features/day-of/queries";
+import { isClockTime } from "@/features/day-of/order";
+import {
+  addRunSheetRowAction,
+  setRunSheetTimeAction,
+} from "@/features/checklist/actions";
+import { getLagosDateKey } from "@/lib/format";
 
 const EYEBROW =
   "text-[11px] font-bold uppercase tracking-[0.16em] text-gold-ink";
@@ -18,11 +26,44 @@ const CONTACT_BTN =
 /**
  * The day itself, as a sheet you can hold in one hand (6.4.4).
  *
- * Deliberately quiet: a time, what happens, and whether it is done. Nothing here is editable on the
- * day: the checklist is where a host changes their mind, and a run sheet that could be rewritten
- * under pressure is a liability rather than a help.
+ * Deliberately quiet: a time, what happens, and whether it is done. Before the day a host can set
+ * exact times and add their own rows; on the day itself it is locked, because a run sheet that
+ * could be rewritten under pressure is a liability rather than a help.
  */
 export function RunSheetClient({ data }: { data: RunSheetData }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const eventKey = getLagosDateKey(data.eventDate);
+  const todayKey = getLagosDateKey(new Date());
+  const lockedForTheDay = Boolean(eventKey && todayKey && todayKey >= eventKey);
+
+  const saveTime = (id: string, time: string) =>
+    startTransition(async () => {
+      setError(null);
+      const res = await setRunSheetTimeAction(data.eventId, id, time);
+      if (res.error) setError(res.error);
+      else router.refresh();
+    });
+
+  const addRow = () =>
+    startTransition(async () => {
+      setError(null);
+      const res = await addRunSheetRowAction(data.eventId, {
+        title: newTitle,
+        time: newTime,
+      });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      setNewTitle("");
+      setNewTime("");
+      router.refresh();
+    });
   const header = (
     <ScreenHeader
       title="Run sheet"
@@ -124,6 +165,29 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
           </section>
         </DeskItem>
 
+        {!lockedForTheDay && (
+          <DeskItem className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[13px] text-label-2">
+              {editing
+                ? "Set exact times so suppliers know when to arrive. Locked on the day."
+                : "Give rows exact times and add your own before the day."}
+            </p>
+            <button
+              type="button"
+              onClick={() => setEditing((v) => !v)}
+              aria-pressed={editing}
+              className={CONTACT_BTN}
+            >
+              {editing ? "Done editing" : "Edit times"}
+            </button>
+          </DeskItem>
+        )}
+        {error && (
+          <p role="alert" className="text-sm font-semibold text-burgundy">
+            {error}
+          </p>
+        )}
+
         <DeskItem>
           <ol className="relative space-y-3">
             <span
@@ -164,6 +228,26 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
                     }`}
                   >
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      {editing && (
+                        <label className="flex items-center gap-2 text-[12px] text-label-2">
+                          <span className="sr-only">Time for {row.title}</span>
+                          <input
+                            type="time"
+                            disabled={pending}
+                            defaultValue={
+                              isClockTime(row.timeSlot) ? row.timeSlot! : ""
+                            }
+                            onBlur={(e) => {
+                              const before = isClockTime(row.timeSlot)
+                                ? row.timeSlot!
+                                : "";
+                              if (e.target.value !== before)
+                                saveTime(row.id, e.target.value);
+                            }}
+                            className="desk-field min-h-10 rounded-lg px-2 text-sm text-night"
+                          />
+                        </label>
+                      )}
                       {row.timeSlot && (
                         <span className="font-display text-[1.05rem] font-semibold leading-tight text-gold-ink">
                           {row.timeSlot}
@@ -203,6 +287,44 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
             })}
           </ol>
         </DeskItem>
+
+        {editing && (
+          <DeskItem>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                addRow();
+              }}
+              className={`${CARD} flex flex-wrap items-end gap-2 px-4 py-3.5`}
+            >
+              <label className="flex min-w-0 flex-1 flex-col gap-1 text-[12px] font-semibold text-label-2">
+                What happens
+                <input
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Caterer arrives"
+                  className="desk-field min-h-11 rounded-lg px-3 text-sm text-night"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-[12px] font-semibold text-label-2">
+                Time
+                <input
+                  type="time"
+                  value={newTime}
+                  onChange={(e) => setNewTime(e.target.value)}
+                  className="desk-field min-h-11 rounded-lg px-2 text-sm text-night"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={pending || newTitle.trim().length < 2}
+                className="inline-flex min-h-11 items-center rounded-full bg-burgundy px-5 text-sm font-semibold text-ivory disabled:opacity-50"
+              >
+                Add to the day
+              </button>
+            </form>
+          </DeskItem>
+        )}
 
         {data.contacts.length > 0 && (
           <DeskItem>

@@ -31,7 +31,6 @@ import {
   daysFromToday,
   occasionOf,
   paletteOf,
-  suggestedSaturday,
 } from "./wizard/wizard-data";
 
 const STEPS: {
@@ -74,9 +73,11 @@ const INITIAL: Draft = {
   ymd: "",
   slot: "afternoon",
   venue: "",
-  area: "Victoria Island, Lagos",
+  // Nothing the host hasn't chosen is saved as theirs: no preset area or dress code, and no date
+  // until they pick one. The palette only colours the preview until they choose.
+  area: "",
   paletteKey: "burgundy",
-  dressCode: paletteOf("burgundy").dressCode,
+  dressCode: "",
   parties: 200,
   intake: "csv",
 };
@@ -95,9 +96,7 @@ export function CreateEventWizard() {
   const moved = useRef(false);
 
   useEffect(() => {
-    const today = new Date();
-    setNow(today);
-    setDraft((d) => (d.ymd ? d : { ...d, ymd: suggestedSaturday(today) }));
+    setNow(new Date());
   }, []);
 
   const set = useCallback(

@@ -35,6 +35,8 @@ export interface ChecklistTask {
   timeSlot: string | null;
   sort: number;
   completedAt: string | null;
+  /** When the row was added; a due date before this was already past when the list began. */
+  createdAt: string | null;
 }
 
 export interface ChecklistMember {
@@ -55,10 +57,12 @@ export interface ChecklistData {
   /** The event has never had a list, so the page offers the first run. */
   seeded: boolean;
   /**
-   * The generator's request for this event, or null when there is no hall plan to read. The first
-   * run needs a hall; a hand-typed list does not.
+   * The generator's request for this event. Without a hall plan it is built from the guest and
+   * table counts alone, so the list never waits on drawing the room.
    */
   input: ChecklistInput | null;
+  /** The request read a saved hall plan; false means venue-specific rows are not in it yet. */
+  fromHallPlan: boolean;
   guests: number;
   tables: number;
 }

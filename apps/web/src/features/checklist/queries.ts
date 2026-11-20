@@ -75,7 +75,7 @@ export async function getChecklistData(
       supabase
         .from("tasks")
         .select(
-          "id, title, detail, phase, due_date, status, owner_id, source, source_key, derivation, mitigation, advice_source, time_slot, sort, completed_at, template_version"
+          "id, title, detail, phase, due_date, status, owner_id, source, source_key, derivation, mitigation, advice_source, time_slot, sort, completed_at, created_at, template_version"
         )
         .eq("event_id", cleanId)
         .is("deleted_at", null)
@@ -131,6 +131,7 @@ export async function getChecklistData(
     timeSlot: t.time_slot,
     sort: t.sort,
     completedAt: t.completed_at,
+    createdAt: t.created_at,
   }));
 
   const members = (membersResult.data ?? []).map((m) => {
@@ -152,9 +153,10 @@ export async function getChecklistData(
     tasks,
     members,
     seeded: tasks.length > 0,
-    input: layout
-      ? checklistInput(layout, guests, tablesResult.count ?? 0, event.date)
-      : null,
+    // The everyday tasks do not depend on the room, so build without one rather than make a host
+    // draw the hall before they can see a checklist.
+    input: checklistInput(layout, guests, tablesResult.count ?? 0, event.date),
+    fromHallPlan: Boolean(layout),
     guests,
     tables: tablesResult.count ?? 0,
   };
@@ -200,21 +202,22 @@ function asSource(value: string): ChecklistTaskSource {
 }
 
 export function checklistInput(
-  layout: HallLayout,
+  layout: HallLayout | null,
   guests: number,
   tables: number,
   eventDate: string | null
 ): ChecklistInput {
-  const { venue } = layout;
+  const venue = layout?.venue;
   return {
     eventDate,
     guests,
-    venue: venue.type,
-    environment: venue.environment,
+    // No hall yet: an indoor hall adds no tent, weather or outdoor rows the host would have to undo.
+    venue: venue?.type ?? "hall",
+    environment: venue?.environment ?? "indoor",
     tables,
-    zoneKinds: layout.zones.map((z) => z.kind),
+    zoneKinds: layout ? layout.zones.map((z) => z.kind) : [],
     month: monthOf(eventDate),
-    power: venue.services?.power ?? null,
+    power: venue?.services?.power ?? null,
     acUnits: false,
     service: null,
   };
