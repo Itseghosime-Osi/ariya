@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { clamp, round2 } from "./model";
 
@@ -341,11 +341,24 @@ export function MetreField({
   unit?: string;
 }) {
   const [text, setText] = useState(String(value));
-  useEffect(() => setText(String(value)), [value]);
+  // Follow the hall while the host is not typing here. A refresh that lands mid-typing (an
+  // autosave answer, a live update) must not wipe out the number being entered.
+  const editing = useRef(false);
+  useEffect(() => {
+    if (!editing.current) setText(String(value));
+  }, [value]);
   const commit = () => {
+    editing.current = false;
     const v = Number(text.replace(",", "."));
-    if (Number.isFinite(v)) onCommit(round2(clamp(v, min, max)));
-    else setText(String(value));
+    if (!Number.isFinite(v)) {
+      setText(String(value));
+      return;
+    }
+    // Show what was actually applied: a number past the room's edge is brought back inside it,
+    // and the field says so rather than keep showing a value that was never used.
+    const applied = round2(clamp(v, min, max));
+    setText(String(applied));
+    onCommit(applied);
   };
   return (
     <div>
@@ -358,7 +371,10 @@ export function MetreField({
           type="text"
           inputMode="decimal"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            editing.current = true;
+            setText(e.target.value);
+          }}
           onBlur={commit}
           onKeyDown={(e) => e.key === "Enter" && commit()}
           className="h-10 w-full min-w-0 rounded-lg bg-transparent px-2.5 text-base tabular-nums text-night outline-none sm:text-sm"

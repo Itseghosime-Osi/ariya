@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { people, seatingCounts } from "./counts";
+import { partyWords, people, seatingCounts } from "./counts";
 import type { SeatingGuest, TableWithGuests } from "./types";
 
 function guest(
@@ -100,5 +100,14 @@ describe("people", () => {
   it("says person or people", () => {
     expect(people(1)).toBe("1 person");
     expect(people(3)).toBe("3 people");
+  });
+});
+
+describe("partyWords", () => {
+  it("never calls a party of four one guest", () => {
+    expect(partyWords(2, 4)).toBe("2 parties (4 people)");
+    expect(partyWords(1, 3)).toBe("1 party (3 people)");
+    expect(partyWords(4, 4)).toBe("4 guests");
+    expect(partyWords(1, 1)).toBe("1 guest");
   });
 });

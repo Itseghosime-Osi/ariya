@@ -23,9 +23,17 @@ import {
 const SERIOUS = new Set(["serious", "critical"]);
 
 async function audit(page: Page, label: string) {
-  await waitForAnimationsToSettle(page);
-  const results = await new AxeBuilder({ page }).analyze();
-  const bad = results.violations.filter((v) => SERIOUS.has(v.impact ?? ""));
+  // A page that is still fading in reads as low contrast (its text is part-transparent), and a fade
+  // can begin after hydration, past the settle check. A real problem is still there a moment later;
+  // a fade is not, so look again before failing.
+  let bad: Awaited<ReturnType<AxeBuilder["analyze"]>>["violations"] = [];
+  for (let look = 0; look < 3; look++) {
+    if (look > 0) await page.waitForTimeout(1_000);
+    await waitForAnimationsToSettle(page);
+    const results = await new AxeBuilder({ page }).analyze();
+    bad = results.violations.filter((v) => SERIOUS.has(v.impact ?? ""));
+    if (bad.length === 0) break;
+  }
   expect(
     bad.map((v) => `${v.id} (${v.nodes.length} node(s))`),
     `${label} has serious or critical axe violations`

@@ -77,3 +77,13 @@ export function seatingCounts(
 export function people(n: number) {
   return `${n} ${n === 1 ? "person" : "people"}`;
 }
+
+/**
+ * A group seated, in words that never mix up parties and people: "4 guests" when every party is
+ * one person, otherwise "2 parties (4 people)".
+ */
+export function partyWords(parties: number, people: number): string {
+  if (parties === people)
+    return `${people} ${people === 1 ? "guest" : "guests"}`;
+  return `${parties} ${parties === 1 ? "party" : "parties"} (${people} ${people === 1 ? "person" : "people"})`;
+}

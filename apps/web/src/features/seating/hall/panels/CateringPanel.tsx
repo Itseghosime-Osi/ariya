@@ -232,8 +232,11 @@ export function CateringPanel({
               <span className="text-sm font-semibold text-night">
                 {report.effectiveGuests}
               </span>{" "}
-              to cook for, not {guests}: plus-ones and vendors eat too. Add{" "}
-              {Math.round(report.overage * 100)} % spare food and you are
+              to cook for
+              {report.effectiveGuests > guests
+                ? `, not ${guests}: plus-ones and vendors eat too`
+                : ""}
+              . Add {Math.round(report.overage * 100)} % spare food and you are
               plating{" "}
               <span className="font-semibold text-night">
                 {report.portions}

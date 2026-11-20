@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     # The suite grows with every spec: main took about 34 minutes by November 2026, so 40 left no
     # room for a slow runner once the seating safety and floor plan sharing specs joined it.
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 

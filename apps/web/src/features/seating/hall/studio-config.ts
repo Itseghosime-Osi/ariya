@@ -122,6 +122,17 @@ export function nextTableNames(
   );
 }
 
+/**
+ * True when focus sits on a button or control (the seat stepper, a tab, a menu…). The keys that
+ * change the selection itself — arrows move it, Delete removes it, R turns it — are then left to
+ * that control: pressing ↓ after tapping "Fewer seats" must not walk the table across the hall.
+ */
+export const onControl = (el: EventTarget | null) =>
+  el instanceof HTMLElement &&
+  el.closest(
+    'button, a[href], summary, [role="button"], [role="tab"], [role="radio"], [role="slider"], [role="option"], [role="menuitem"], [role="switch"], [role="checkbox"], [role="spinbutton"], [role="listbox"], [role="dialog"]'
+  ) !== null;
+
 export const isTyping = (el: EventTarget | null) =>
   el instanceof HTMLElement &&
   (el.tagName === "INPUT" ||
