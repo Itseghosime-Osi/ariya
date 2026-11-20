@@ -89,9 +89,17 @@ test.describe("Seating workspace", () => {
     await page.locator('input[placeholder*="Table 01"]').fill("Head table");
     await page.locator('input[type="number"]').fill("4");
     await page.getByRole("button", { name: /create table/i }).click();
+    // The create is a server action: wait for it to land rather than racing a busy server.
+    await expect(
+      page.getByRole("heading", { name: "Add Table", exact: true })
+    ).toHaveCount(0, { timeout: 30_000 });
 
-    // Layers: the table is a layer, and a layer can be renamed from its pencil.
+    // Layers: the table is a layer, and a layer can be renamed from its pencil. The dock opens by
+    // itself on a wide screen; its button brings it back if it is not out yet.
     const dock = page.getByTestId("left-dock");
+    const dockButton = page.getByRole("button", { name: "Layers and tables" });
+    await expect(dockButton).toBeVisible();
+    if ((await dock.count()) === 0) await dockButton.click();
     await expect(dock).toBeVisible();
     await dock.getByRole("button", { name: /^Rename Head table/ }).click();
     const name = dock.getByRole("textbox", { name: /^Name of Head table/ });
