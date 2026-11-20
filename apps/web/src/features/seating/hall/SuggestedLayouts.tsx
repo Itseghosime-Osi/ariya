@@ -75,15 +75,21 @@ function OptionCard({
           <p className="text-[11px] text-label-2">{option.strategy_label}</p>
         </div>
         <div className="text-right">
-          <p className="font-display text-2xl font-bold leading-none tabular-nums text-night">
-            {seats}
-          </p>
-          <p className="text-[11px] text-label-2">seats</p>
+          {tables.length > 0 && (
+            <>
+              <p className="font-display text-2xl font-bold leading-none tabular-nums text-night">
+                {seats}
+              </p>
+              <p className="text-[11px] text-label-2">seats</p>
+            </>
+          )}
         </div>
       </div>
 
       <p className="mt-2 text-[11px] text-label-2">
-        {count} {count === 1 ? "table" : "tables"}
+        {tables.length === 0
+          ? "Areas only"
+          : `${count} ${count === 1 ? "table" : "tables"}`}
         {unplaced > 0 && (
           <span className="text-[#7a1f20]"> · {unplaced} did not fit</span>
         )}
@@ -160,6 +166,17 @@ export function SuggestedLayouts({
         <Sparkles size={13} /> Ranked by seats, sightlines, circulation and
         service.
       </p>
+      {tables.length === 0 && (
+        // An empty hall has nothing to seat yet, so every option would read "0 seats".
+        <p
+          data-testid="suggest-no-tables"
+          className="mb-2 rounded-xl bg-[#f6f1e8] px-3 py-2 text-[11px] leading-snug text-night"
+        >
+          There are no tables in the hall yet, so these only arrange your areas.
+          Add tables, or let the Fit tab work out how many you need, then ask
+          again to see how many people each layout seats.
+        </p>
+      )}
       <ul className="flex flex-col gap-2">
         {options.map((option, i) => (
           <OptionCard

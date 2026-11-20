@@ -6,6 +6,64 @@ import { defaultLayout, normaliseLayout, type HallLayout } from "./model";
 
 export type SaveState = "saved" | "saving" | "failed" | "conflict" | "local";
 
+/**
+ * True when a server action was refused because this tab runs an older build than the server (a
+ * new version went live while the studio was open): its action ids no longer exist.
+ */
+export function isStaleBuildError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const { name, message } = err as { name?: unknown; message?: unknown };
+  return (
+    name === "UnrecognizedActionError" ||
+    (typeof message === "string" &&
+      /Server Action .* was not found on the server|Failed to find Server Action/i.test(
+        message
+      ))
+  );
+}
+
+type SaveResult = Awaited<ReturnType<typeof saveHallLayoutAction>>;
+
+/**
+ * The same save through the plain hall-layout address. It does not depend on this tab's build,
+ * so it still works after a new version has gone live, when the server action no longer exists.
+ */
+export async function saveViaRoute(
+  eventId: string,
+  layout: HallLayout,
+  baseRev?: number
+): Promise<SaveResult> {
+  const res = await fetch(`/api/events/${eventId}/hall-layout`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(
+      baseRev === undefined ? { layout } : { layout, baseRev }
+    ),
+  });
+  const body = (await res.json().catch(() => ({}))) as {
+    ok?: boolean;
+    rev?: number;
+    fallback?: boolean;
+    conflict?: boolean;
+    layout?: unknown;
+  };
+  if (res.ok && body.ok) return { ok: true, data: { rev: body.rev } };
+  if (res.ok && body.fallback)
+    return {
+      ok: false,
+      data: { fallback: true },
+      error: "Saved on this device",
+    };
+  if (res.status === 409 && body.conflict) {
+    return {
+      ok: false,
+      data: { conflict: true, rev: body.rev, layout: body.layout },
+      error: "Someone else changed this hall since you opened it.",
+    };
+  }
+  throw new Error(`save failed (${res.status})`);
+}
+
 function revOf(doc: unknown): number {
   if (!doc || typeof doc !== "object") return 0;
   const r = (doc as { rev?: unknown }).rev;
@@ -59,6 +117,10 @@ export function describeChange(prev: HallLayout, next: HallLayout): string {
 }
 
 const LOCAL_KEY = (eventId: string) => `ariya:hall:${eventId}`;
+/** The undo steps of the last visit, kept on this device so a reload does not wipe them. */
+const HISTORY_KEY = (eventId: string) => `ariya:hall-history:${eventId}`;
+/** Enough to step back through a working session without filling the device's storage. */
+const KEPT_STEPS = 15;
 
 /**
  * The hall document plus an undo history that also covers table positions. Layout changes are
@@ -84,6 +146,8 @@ export function useHallLayout({
    * someone else saved a newer hall. `failed` and `conflict` stay until a save goes through.
    */
   const [saveState, setSaveState] = useState<SaveState>("saved");
+  /** A new version of Àríyá went live while this studio was open: saving still works, reload. */
+  const [updateReady, setUpdateReady] = useState(false);
   const [conflict, setConflict] = useState<{
     rev: number;
     layout: unknown;
@@ -98,7 +162,7 @@ export function useHallLayout({
   const queued = useRef<{ next: HallLayout; force: boolean } | null>(null);
   const past = useRef<Snapshot[]>([]);
   const future = useRef<Snapshot[]>([]);
-  const [, bump] = useState(0);
+  const [tick, bump] = useState(0);
   const timer = useRef<number | null>(null);
   // The document the pause is holding, so it can be sent before the page goes away.
   const latest = useRef<HallLayout | null>(null);
@@ -134,7 +198,14 @@ export function useHallLayout({
       inFlight.current = true;
       setSaving(true);
       setSaveState("saving");
-      saveHallLayoutAction(eventId, next, force ? undefined : rev.current)
+      const baseRev = force ? undefined : rev.current;
+      saveHallLayoutAction(eventId, next, baseRev)
+        // A tab left open across a release holds action ids the server no longer knows, and every
+        // save would fail until it is reloaded. The plain address does the same save without them.
+        .catch((err: unknown) => {
+          if (isStaleBuildError(err)) setUpdateReady(true);
+          return saveViaRoute(eventId, next, baseRev);
+        })
         .then((res) => {
           if (res.ok) {
             if (typeof res.data?.rev === "number") rev.current = res.data.rev;
@@ -271,6 +342,58 @@ export function useHallLayout({
     },
     []
   );
+
+  // Bring back the undo steps of the last visit, but only when the stored hall is exactly the one
+  // they led to: if anything changed since (another tab, a connected app), they no longer apply.
+  const historyLoaded = useRef(false);
+  useEffect(() => {
+    if (historyLoaded.current) return;
+    historyLoaded.current = true;
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY(eventId));
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { rev?: unknown; steps?: unknown };
+      if (saved.rev !== rev.current || !Array.isArray(saved.steps)) return;
+      const steps: Snapshot[] = [];
+      for (const s of saved.steps as Partial<Snapshot>[]) {
+        const layout = normaliseLayout(s?.layout);
+        if (!layout || typeof s?.label !== "string") continue;
+        steps.push({
+          layout,
+          positions:
+            s.positions && typeof s.positions === "object" ? s.positions : {},
+          label: s.label,
+          at: typeof s.at === "number" ? s.at : Date.now(),
+        });
+      }
+      if (steps.length && past.current.length === 0) {
+        past.current = steps;
+        bump((n) => n + 1);
+      }
+    } catch {
+      /* nothing kept, or storage is off */
+    }
+  }, [eventId]);
+
+  // Keep the newest steps once the hall they lead to is safely saved.
+  useEffect(() => {
+    if (saveState !== "saved") return;
+    try {
+      if (past.current.length === 0) {
+        localStorage.removeItem(HISTORY_KEY(eventId));
+        return;
+      }
+      localStorage.setItem(
+        HISTORY_KEY(eventId),
+        JSON.stringify({
+          rev: rev.current,
+          steps: past.current.slice(-KEPT_STEPS),
+        })
+      );
+    } catch {
+      /* storage full or off: the history simply lasts this visit */
+    }
+  }, [eventId, saveState, tick]);
 
   // A layout kept on this device wins over the empty default when the database has none.
   useEffect(() => {
@@ -424,6 +547,8 @@ export function useHallLayout({
     history: past.current.map((s) => ({ label: s.label, at: s.at })),
     canRedo: future.current.length > 0,
     storedLocally,
+    /** True once this tab is known to be older than the live site; offer a reload. */
+    updateReady,
     saving,
     saveState,
     conflict: conflict !== null,

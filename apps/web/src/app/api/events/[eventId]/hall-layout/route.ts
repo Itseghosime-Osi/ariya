@@ -53,7 +53,7 @@ export async function PUT(
   if (!res.ok) {
     if (res.conflict) {
       return NextResponse.json(
-        { conflict: true, rev: res.rev },
+        { conflict: true, rev: res.rev, layout: res.layout },
         { status: 409 }
       );
     }

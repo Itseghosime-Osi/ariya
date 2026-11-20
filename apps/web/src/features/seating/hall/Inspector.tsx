@@ -19,6 +19,8 @@ import {
 import type { TableShape, TableWithGuests } from "../types";
 import {
   CHAIR_TYPES,
+  chairAfterDrop,
+  chairPlacement,
   ZONE_DEFAULTS,
   ZONE_COLOURS,
   styleOf,
@@ -734,11 +736,32 @@ export function ZoneInspector({
               ))}
             </div>
           )}
+          {(() => {
+            // Chairs dropped on this stage stand on it too; say so, so the list is never empty
+            // while the stage plainly has seats on it.
+            const chairs = layout.chairs.filter((c) => c.stageId === zone.id);
+            if (chairs.length === 0) return null;
+            const seats = chairs.reduce((n, c) => n + (c.seats ?? 1), 0);
+            return (
+              <p
+                data-testid="stage-chairs"
+                className="mb-2 rounded-lg border border-hairline bg-white/60 px-2 py-1.5 text-xs font-semibold text-night"
+              >
+                {`${chairs.length} ${chairs.length === 1 ? "chair" : "chairs"} on this stage`}
+                {seats !== chairs.length ? ` (${seats} seats)` : ""}
+                <span className="block text-[11px] font-normal text-label-2">
+                  They move with the stage. Select one to change it.
+                </span>
+              </p>
+            );
+          })()}
           {stageItems.length === 0 ? (
-            <p className="text-[11px] text-label-2">
-              Nothing on the stage yet. Whatever you add here moves with the
-              stage.
-            </p>
+            layout.chairs.some((c) => c.stageId === zone.id) ? null : (
+              <p className="text-[11px] text-label-2">
+                Nothing on the stage yet. Whatever you add here moves with the
+                stage.
+              </p>
+            )
           ) : (
             <ul className="space-y-1.5">
               {stageItems.map((item) => (
@@ -920,15 +943,31 @@ export function ChairInspector({
           </button>
         )}
       </Section>
-      <Position
-        id="insp-c"
-        x={chair.x}
-        y={chair.y}
-        rot={chair.rot}
-        layout={layout}
-        onMove={(x, y) => onChange({ x, y })}
-        onRot={(rot) => onChange({ rot })}
-      />
+      {(() => {
+        // A chair on a stage stores its place from the stage's corner; the fields speak in room
+        // metres like every other thing in the hall, and a move goes through the same rule as a
+        // drag (it stays on the stage, or steps down to the floor).
+        const at = chairPlacement(chair, layout.zones);
+        return (
+          <Position
+            id="insp-c"
+            x={Math.round(at.x * 100) / 100}
+            y={Math.round(at.y * 100) / 100}
+            rot={chair.rot}
+            layout={layout}
+            onMove={(x, y) => {
+              const moved = chairAfterDrop(chair, { x, y }, layout.zones);
+              onChange({
+                x: moved.x,
+                y: moved.y,
+                rot: moved.rot,
+                stageId: moved.stageId,
+              });
+            }}
+            onRot={(rot) => onChange({ rot })}
+          />
+        );
+      })()}
     </div>
   );
 }

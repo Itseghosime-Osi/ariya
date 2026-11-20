@@ -9,6 +9,7 @@ import {
   saveTablePositionsAction,
 } from "../actions";
 import type { CreateTableInput } from "../schemas";
+import { partyWords } from "../counts";
 import type {
   SeatingDeskData,
   SeatingGuest,
@@ -210,6 +211,58 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     return true;
   };
 
+  /**
+   * Table edits on their way to the server. A live refresh (an AI change, another tab, or the
+   * echo of our own write) can arrive before they land; it must not put a table back where it
+   * was a moment ago, so these are laid over whatever the refresh brings.
+   */
+  const pendingTables = useRef(
+    new Map<
+      string,
+      Partial<
+        Pick<
+          TableWithGuests,
+          "position_x" | "position_y" | "name" | "capacity" | "shape"
+        >
+      >
+    >()
+  );
+  // A refresh that was asked for just before a write landed can arrive just after it, still
+  // carrying the old table. So a finished edit keeps winning for a few seconds more.
+  const releaseTimers = useRef(new Map<string, number>());
+  const holdTable = (
+    id: string,
+    patch: Partial<
+      Pick<
+        TableWithGuests,
+        "position_x" | "position_y" | "name" | "capacity" | "shape"
+      >
+    >
+  ) => {
+    const timer = releaseTimers.current.get(id);
+    if (timer) {
+      window.clearTimeout(timer);
+      releaseTimers.current.delete(id);
+    }
+    pendingTables.current.set(id, {
+      ...pendingTables.current.get(id),
+      ...patch,
+    });
+  };
+  const releaseTables = (ids: string[]) => {
+    for (const id of ids) {
+      const prev = releaseTimers.current.get(id);
+      if (prev) window.clearTimeout(prev);
+      releaseTimers.current.set(
+        id,
+        window.setTimeout(() => {
+          pendingTables.current.delete(id);
+          releaseTimers.current.delete(id);
+        }, 4000)
+      );
+    }
+  };
+
   /** Change a table's name, seats or shape straight from the hall studio (optimistic). */
   const updateTable = async (
     tableId: string,
@@ -231,7 +284,10 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
         };
       });
     apply({ ...before, ...patch });
-    const res = await updateTableAction(eventId, tableId, patch);
+    holdTable(tableId, patch);
+    const res = await updateTableAction(eventId, tableId, patch).finally(() =>
+      releaseTables([tableId])
+    );
     if (!res.ok) {
       apply(before);
       setErrorMsg(res.error || "Could not update the table.");
@@ -291,13 +347,17 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
       }),
     }));
     if (!persist) return;
-    const res = await saveTablePositionsAction(eventId, items);
+    for (const i of items)
+      holdTable(i.id, { position_x: i.x, position_y: i.y });
+    const res = await saveTablePositionsAction(eventId, items).finally(() =>
+      releaseTables(items.map((i) => i.id))
+    );
     if (!res.ok) setErrorMsg(res.error || "Could not save table positions.");
   };
 
   /** Seat many guests at once (auto-seat). Optimistic, then reconciled with what the server accepted. */
   const bulkAssign = async (pairs: { guestId: string; tableId: string }[]) => {
-    if (pairs.length === 0) return { seated: 0, failed: 0 };
+    if (pairs.length === 0) return { seated: 0, failed: 0, people: 0 };
     setErrorMsg(null);
     setSuccessMsg(null);
     const previous = data;
@@ -342,14 +402,21 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
     if (!res.ok || !res.data) {
       setData(previous);
       setErrorMsg(res.error || "Could not seat the guests.");
-      return { seated: 0, failed: pairs.length };
+      return { seated: 0, failed: pairs.length, people: 0 };
     }
     const failed = new Set(res.data.failed);
     if (failed.size > 0) setData(apply(previous, (id) => !failed.has(id)));
+    // Parties and people are different numbers: a party of four is one name and four seats.
+    const sizeOf = new Map(
+      previous.unseatedGuests.map((g) => [g.id, g.attending_count])
+    );
+    const people = pairs
+      .filter((p) => !failed.has(p.guestId))
+      .reduce((n, p) => n + (sizeOf.get(p.guestId) ?? 1), 0);
     setSuccessMsg(
       failed.size > 0
-        ? `Seated ${res.data.seated}; ${failed.size} could not be seated.`
-        : `Seating chart updated: ${res.data.seated} guests seated.`
+        ? `Seated ${partyWords(res.data.seated, people)}; ${failed.size} could not be seated.`
+        : `Seating chart updated: ${partyWords(res.data.seated, people)} seated.`
     );
     // Remember who this run seated, so it can be taken back in one step.
     lastBulk.current = {
@@ -357,7 +424,7 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
       before: previous,
     };
     setCanUndoBulk(true);
-    return { seated: res.data.seated, failed: failed.size };
+    return { seated: res.data.seated, failed: failed.size, people };
   };
 
   /**
@@ -393,7 +460,18 @@ export function useSeatingDesk(eventId: string, initialData: SeatingDeskData) {
   const resync = useCallback((next: SeatingDeskData) => {
     lastBulk.current = null;
     setCanUndoBulk(false);
-    setData(next);
+    const pending = pendingTables.current;
+    setData(
+      pending.size === 0
+        ? next
+        : {
+            ...next,
+            tables: next.tables.map((t) => {
+              const held = pending.get(t.id);
+              return held ? { ...t, ...held } : t;
+            }),
+          }
+    );
   }, []);
 
   return {

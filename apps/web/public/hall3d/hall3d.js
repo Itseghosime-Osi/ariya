@@ -3312,6 +3312,12 @@ function frame(now) {
  */
 function declutter() {
   if (!state.labels) return;
+  // Seen from far enough to take in the whole hall, a full-size tag is bigger than the table under
+  // it. The tags shrink to a slim chip there, so the tables stay visible; zooming in restores them.
+  labelRenderer.domElement.classList.toggle(
+    "compact",
+    cam.dist > fitDist * 0.7
+  );
   const list = [];
   for (const [k, l] of labels) {
     if (l.el.style.display === "none") continue;

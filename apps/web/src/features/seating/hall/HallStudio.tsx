@@ -54,7 +54,7 @@ import type { SeatingDeskData, TableShape, TableWithGuests } from "../types";
 import { useHallLayout } from "./useHallLayout";
 import { LeftDock } from "./LeftDock";
 import { WorkspaceBar } from "./WorkspaceBar";
-import { seatingCounts } from "../counts";
+import { partyWords, seatingCounts } from "../counts";
 import { SeatRulesPanel } from "./SeatRulesPanel";
 import { HistoryMenu, HistoryPanel, type HistoryEntry } from "./HistoryMenu";
 import { ShareMenu } from "./ShareMenu";
@@ -62,7 +62,7 @@ import { RoofControl, useRoofSetting } from "./RoofControl";
 import { shareOf } from "./share";
 import { clearanceOf, gapText } from "./clearance";
 import { ruleBreaks, type SeatRule } from "./rules";
-import { ConflictBanner, SaveStatus } from "./SaveStatus";
+import { ConflictBanner, SaveStatus, UpdateReadyBanner } from "./SaveStatus";
 import {
   moveLayer,
   nudgeLayer,
@@ -191,6 +191,7 @@ import {
   TOOL_GROUPS,
   ZONE_GALLERY,
   isTyping,
+  onControl,
   nextTableNames,
 } from "./studio-config";
 import { GroupBar, ModeSwitch, RailTip, ShortcutSheet } from "./studio-chrome";
@@ -215,7 +216,7 @@ interface HallStudioProps {
   ) => Promise<void>;
   bulkAssign: (
     pairs: { guestId: string; tableId: string }[]
-  ) => Promise<{ seated: number; failed: number }>;
+  ) => Promise<{ seated: number; failed: number; people: number }>;
   onAssignTable: (guestId: string, tableId: string | null) => void;
   onDeleteTable: (tableId: string) => void;
   /** Remove several tables without asking for each (shrinking a crowded hall). */
@@ -673,7 +674,15 @@ export function HallStudio({
     eventDate,
   ]);
 
-  const seats = data.tables.reduce((a, t) => a + t.capacity, 0);
+  /** Seats at tables, plus guest chairs and couches standing on their own. */
+  const tableSeats = data.tables.reduce((a, t) => a + t.capacity, 0);
+  // The couple's and the celebrant's chairs belong to the ceremony, not the guest seating.
+  const freeSeats = layout.chairs.reduce(
+    (a, c) =>
+      c.seat === "couple" || c.seat === "celebrant" ? a : a + (c.seats ?? 1),
+    0
+  );
+  const seats = tableSeats + freeSeats;
   const area = layout.width * layout.length;
   const zoneArea = layout.zones.reduce((a, z) => a + z.w * z.h, 0);
   const fireGuide = Math.floor(
@@ -938,7 +947,11 @@ export function HallStudio({
     void setTablePositions(moves);
   };
   // When "Seat everyone" is the newest step, Undo (and Ctrl+Z) takes back the seats first.
-  const [bulkAt, setBulkAt] = useState<{ at: number; n: number } | null>(null);
+  const [bulkAt, setBulkAt] = useState<{
+    at: number;
+    n: number;
+    people: number;
+  } | null>(null);
   const lastEditAt = hall.history.at(-1)?.at ?? 0;
   const seatUndoFirst =
     !!bulkAt && canUndoSeatEveryone && bulkAt.at >= lastEditAt;
@@ -988,7 +1001,7 @@ export function HallStudio({
       ? [
           {
             key: `seat-${bulkAt.at}`,
-            label: `Seated ${bulkAt.n} guests`,
+            label: `Seated ${partyWords(bulkAt.n, bulkAt.people)}`,
             at: bulkAt.at,
             onRevert: () => void undoSeats(),
           },
@@ -1193,7 +1206,9 @@ export function HallStudio({
   const posOf = (p: Pick): { x: number; y: number } | undefined => {
     if (p.type === "table") return positions[p.id];
     if (p.type === "zone") return layout.zones.find((z) => z.id === p.id);
-    return layout.chairs.find((c) => c.id === p.id);
+    const chair = layout.chairs.find((c) => c.id === p.id);
+    // A chair on a stage is stored from the stage's corner; moves speak in room metres.
+    return chair ? chairPlacement(chair, layout.zones) : undefined;
   };
 
   const nudge = (dx: number, dy: number) => {
@@ -1770,7 +1785,8 @@ export function HallStudio({
   const seatEveryone = async () => {
     setBusy("seat");
     const res = await bulkAssign(seatPlan.plan.assignments);
-    if (res.seated > 0) setBulkAt({ at: Date.now(), n: res.seated });
+    if (res.seated > 0)
+      setBulkAt({ at: Date.now(), n: res.seated, people: res.people });
     setBusy(null);
     view3d.current?.command("fit");
   };
@@ -1848,6 +1864,15 @@ export function HallStudio({
       if (
         isTyping(e.target) ||
         !studio.current?.contains(document.activeElement)
+      )
+        return;
+      // Keys that change the selected thing belong to the control that has focus, if any.
+      if (
+        onControl(e.target) &&
+        (e.key.startsWith("Arrow") ||
+          e.key === "Delete" ||
+          e.key === "Backspace" ||
+          e.key.toLowerCase() === "r")
       )
         return;
       if (
@@ -2054,9 +2079,10 @@ export function HallStudio({
           k: "Seats",
           v: seats,
           note:
-            seats >= target
+            (seats >= target
               ? "enough"
-              : `${target - seats} short${buffer ? ` with ${buffer}% buffer` : ""}`,
+              : `${target - seats} short${buffer ? ` with ${buffer}% buffer` : ""}`) +
+            (freeSeats > 0 ? ` · ${freeSeats} on free chairs` : ""),
           bad: seats < target,
         },
         { k: "Hall fits", v: fitEmpty.seats, wide: true },
@@ -2227,6 +2253,12 @@ export function HallStudio({
                       ? "A connected app suggested a change. Review it"
                       : `Connected apps suggested ${pendingProposals} changes. Review them`}
                   </Link>
+                )}
+                {hall.updateReady && !hall.conflict && (
+                  <UpdateReadyBanner
+                    saved={hall.saveState === "saved"}
+                    onReload={() => window.location.reload()}
+                  />
                 )}
                 {hall.conflict && (
                   <ConflictBanner

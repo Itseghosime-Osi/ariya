@@ -111,3 +111,41 @@ export function ConflictBanner({
     </div>
   );
 }
+
+/**
+ * A new version of Àríyá went live while this studio was open. Saving still works (it goes
+ * through the plain address), but other buttons belong to the old version, so offer a reload once
+ * the hall is safely saved.
+ */
+export function UpdateReadyBanner({
+  saved,
+  onReload,
+}: {
+  saved: boolean;
+  onReload: () => void;
+}) {
+  return (
+    <div
+      role="status"
+      data-testid="hall-update-ready"
+      className="pointer-events-auto flex max-w-md flex-wrap items-center gap-2 rounded-2xl border border-[#c89b3c]/40 bg-white px-4 py-3 text-sm text-night shadow-lg"
+    >
+      <p className="min-w-0 flex-1">
+        <strong className="font-semibold">
+          A new version of Àríyá is ready.
+        </strong>{" "}
+        {saved
+          ? "Your hall is saved. Reload to keep everything working."
+          : "Saving your hall first…"}
+      </p>
+      <button
+        type="button"
+        onClick={onReload}
+        disabled={!saved}
+        className="min-h-11 rounded-full bg-burgundy px-4 text-xs font-semibold text-white hover:bg-wine disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+      >
+        Reload
+      </button>
+    </div>
+  );
+}
