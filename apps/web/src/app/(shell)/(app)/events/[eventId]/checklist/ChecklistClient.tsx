@@ -27,7 +27,10 @@ import {
 import type { ChecklistPlan, Phase, Reconciliation } from "@ariya/studio";
 import type { StudioEngine } from "@ariya/studio";
 import { useStudioEngine } from "@/features/seating/hall/useStudioEngine";
+import { wasPastWhenAdded } from "@/features/checklist/late-start";
+import { missingPlanTasks } from "@/features/checklist/plan-sync";
 import {
+  addMissingPlanRowsAction,
   deleteTaskAction,
   moveOpenToThisWeekAction,
   restoreTaskAction,
@@ -95,7 +98,7 @@ export function ChecklistClient({
     async (studioEngine: StudioEngine | null) => {
       if (!data.input) {
         setSeedError(
-          "There is no hall plan yet. Open Seating and draw the room, and the checklist can be built from it."
+          "The checklist could not read this event. Reload and try again."
         );
         return;
       }
@@ -140,6 +143,39 @@ export function ChecklistClient({
     void seed(engine);
   }, [engine, status, data.seeded, seed]);
 
+  // A list built before the hall was drawn lacks the venue's rows (power, tents, weather). Once a
+  // hall plan exists, add just those: nothing the host has, edited or deleted is touched.
+  const syncedOnce = useRef(false);
+  useEffect(() => {
+    if (!engine || status !== "ready" || !data.seeded || !data.fromHallPlan)
+      return;
+    if (!data.input || syncedOnce.current) return;
+    syncedOnce.current = true;
+    let plan: ChecklistPlan;
+    try {
+      plan = engine.checklist(data.input);
+    } catch (error) {
+      console.error("[ChecklistClient] plan for sync failed:", error);
+      return;
+    }
+    if (missingPlanTasks(plan.tasks, data.knownKeys).length === 0) return;
+    void addMissingPlanRowsAction(eventId, plan).then((result) => {
+      if (result.error) {
+        setToast({ kind: "error", message: result.error });
+        return;
+      }
+      if (result.added) window.location.reload();
+    });
+  }, [
+    engine,
+    status,
+    data.seeded,
+    data.fromHallPlan,
+    data.input,
+    data.knownKeys,
+    eventId,
+  ]);
+
   const now = useMemo(() => new Date(), []);
   // "This week" is the seven days ahead, in UTC days to match the stored `date` column. An
   // unbounded upper compare would quietly pull every overdue row in, which is the opposite of
@@ -181,18 +217,28 @@ export function ChecklistClient({
     [tasks, weekEnd]
   );
 
+  // Rows already past due when the list was built (a late start) don't decide what comes next.
+  const ahead = useMemo(
+    () => visible.filter((t) => !wasPastWhenAdded(t)),
+    [visible]
+  );
+  const pastWhenAdded = useMemo(
+    () => tasks.filter((t) => wasPastWhenAdded(t)),
+    [tasks]
+  );
+
   const currentPhase = useMemo<Phase>(() => {
     const phase = PHASE_ORDER.find((p) =>
-      visible.some((t) => t.phase === p && t.status !== "done")
+      ahead.some((t) => t.phase === p && t.status !== "done")
     );
     return phase ?? PHASE_ORDER[PHASE_ORDER.length - 1];
-  }, [visible]);
+  }, [ahead]);
 
   const [expanded, setExpanded] = useState<Phase | null>(currentPhase);
   useEffect(() => setExpanded(currentPhase), [currentPhase]);
 
   const nextBest = useMemo(() => {
-    const ranked = visible
+    const ranked = ahead
       .filter((t) => t.status !== "done" && t.status !== "skipped")
       .filter((t) => t.phase === currentPhase)
       .sort((a, b) => {
@@ -206,7 +252,7 @@ export function ChecklistClient({
       });
     if (ranked.length === 0) return null;
     return ranked[showAnother % ranked.length];
-  }, [visible, currentPhase, showAnother]);
+  }, [ahead, currentPhase, showAnother]);
 
   const changeStatus = useCallback(
     async (task: ChecklistTask, next: TaskStatus) => {
@@ -265,6 +311,41 @@ export function ChecklistClient({
     },
     [eventId]
   );
+
+  const [settingAside, setSettingAside] = useState(false);
+  const setAsidePastWhenAdded = useCallback(async () => {
+    const rows = tasks.filter((t) => wasPastWhenAdded(t));
+    if (rows.length === 0) return;
+    setSettingAside(true);
+    const failed: string[] = [];
+    for (const t of rows) {
+      try {
+        const result = await setTaskStatusAction(eventId, t.id, "skipped");
+        if (result.error) failed.push(t.id);
+      } catch {
+        // Offline: count it as not done rather than let the page fall over.
+        failed.push(t.id);
+      }
+    }
+    setSettingAside(false);
+    const ids = new Set(
+      rows.map((t) => t.id).filter((id) => !failed.includes(id))
+    );
+    setTasks((list) =>
+      list.map((t) => (ids.has(t.id) ? { ...t, status: "skipped" } : t))
+    );
+    setToast(
+      failed.length > 0
+        ? {
+            kind: "error",
+            message: `${failed.length} could not be set aside. Try again.`,
+          }
+        : {
+            kind: "info",
+            message: `Set aside ${ids.size} earlier ${ids.size === 1 ? "task" : "tasks"}.`,
+          }
+    );
+  }, [tasks, eventId]);
 
   const moveToThisWeek = useCallback(async () => {
     const result = await moveOpenToThisWeekAction(eventId, weekEnd);
@@ -381,6 +462,35 @@ export function ChecklistClient({
             </DeskItem>
 
             {seedError && <ErrorNote message={seedError} />}
+
+            {pastWhenAdded.length > 0 && (
+              <DeskItem>
+                <section
+                  aria-label="Tasks from before you started"
+                  className={`${CARD} px-5 py-4`}
+                >
+                  <p className="text-sm font-semibold text-on-surface">
+                    {pastWhenAdded.length}{" "}
+                    {pastWhenAdded.length === 1 ? "task was" : "tasks were"} due
+                    before this checklist began
+                  </p>
+                  <p className="mt-1 text-[13px] text-label-2">
+                    They are usually handled already. Tick any you still need,
+                    and set the rest aside so the list shows what is ahead.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void setAsidePastWhenAdded()}
+                    disabled={settingAside}
+                    className="mt-3 inline-flex min-h-11 items-center rounded-full desk-chip px-4 text-[13px] font-semibold text-burgundy disabled:opacity-50"
+                  >
+                    {settingAside
+                      ? "Setting aside…"
+                      : `Set aside all ${pastWhenAdded.length}`}
+                  </button>
+                </section>
+              </DeskItem>
+            )}
 
             {nextBest && (
               <DeskItem>
@@ -651,8 +761,9 @@ function FirstRun({
           Build {title}&apos;s checklist
         </h1>
         <p className="mt-2 text-sm text-label-2">
-          We will read your hall plan and add the tasks it needs, each one
-          saying why it is there and when it is due.
+          We will build it from your date, guests and tables, each task saying
+          why it is there and when it is due. A hall plan from Seating adds
+          venue tasks such as power and weather.
         </p>
         {error && <ErrorNote message={error} className="mt-4" />}
         <button
@@ -670,21 +781,21 @@ function FirstRun({
           )}
         </button>
         {canSeed && !engineReady && (
-          // The button is inert until the hall plan loads; without this the click just does nothing.
+          // The button is inert until the engine loads; without this the click just does nothing.
           <p role="status" className="mt-3 text-xs text-label-2">
-            Reading your hall plan…
+            Getting the planner ready…
           </p>
         )}
         {!canSeed && (
           <p className="mt-3 text-xs text-label-2">
-            No hall plan yet.{" "}
+            This event could not be read.{" "}
             <Link
               href="../seating"
               className="font-semibold text-burgundy underline"
             >
               Open Seating
             </Link>{" "}
-            and draw the room first.
+            or reload the page.
           </p>
         )}
       </div>
@@ -826,9 +937,11 @@ function TaskRow({
   onDelete: () => void;
 }) {
   const isDone = task.status === "done";
+  const beforeStart = wasPastWhenAdded(task);
   const overdue =
     task.dueDate !== null &&
     !isDone &&
+    !beforeStart &&
     Date.parse(`${task.dueDate}T23:59:59Z`) < Date.now();
 
   return (
@@ -874,7 +987,7 @@ function TaskRow({
                 className={`flex items-center gap-1 ${overdue ? "font-semibold text-burgundy" : ""}`}
               >
                 <Clock className="h-3 w-3" aria-hidden />
-                {shortDate(task.dueDate)}
+                {beforeStart ? "Before you started" : shortDate(task.dueDate)}
               </span>
             )}
           </span>

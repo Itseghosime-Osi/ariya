@@ -854,7 +854,7 @@ const BASELINE: &[Spec] = &[
     Spec {
         key: "day.hard-stops",
         phase: Phase::Day,
-        title: "Hold the hard stops",
+        title: "Keep to the fixed times",
         detail: "The times that cannot move: caterer on site, guests in, cake, last set.",
         derivation: "the day has fixed times",
         days_before: None,

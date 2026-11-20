@@ -5,17 +5,25 @@ import { serviceRoleClient } from "./fixtures/service-role";
 import { DESK, makeAdmin, totp, userIdFor } from "./fixtures/admin";
 
 /**
- * An admin action shows a "status" line once the server has answered. On a busy CI machine a
- * server action can take longer than the 5s default, so this allows 20s; the check itself is the
- * same.
+ * An admin action shows a "status" line once the server has answered, or an "alert" if it failed.
+ * CI runs the dev server, which compiles each action the first time it is called, so the first one
+ * can take well over 20s on a busy machine: allow 45s. If the action reports a failure instead,
+ * fail at once with its message rather than waiting out the clock.
  */
 async function expectDone(page: Page, text: string) {
-  await expect(page.getByRole("status")).toContainText(text, {
-    timeout: 20_000,
-  });
+  const status = page.getByRole("status").filter({ hasText: text });
+  // The action's own error line; not Next's route announcer, which is also an alert.
+  const failed = page.locator('p[role="alert"]').filter({ hasText: /\S/ });
+  await expect(status.or(failed).first()).toBeVisible({ timeout: 45_000 });
+  if (await failed.first().isVisible()) {
+    throw new Error(
+      `The admin action failed: ${await failed.first().textContent()}`
+    );
+  }
+  await expect(status.first()).toContainText(text);
 }
 
-/** The test server's secret desk address (see playwright.config.ts) for an internal /admin path. */
+/** The desk's address for an /admin path (kept as a helper so the desk can move again easily). */
 const D = (path: string) => path.replace(/^\/admin(?=\/|\?|$)/, DESK);
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 /** A URL pattern under the desk; "$" means the desk's front page itself. */
@@ -107,7 +115,8 @@ test.describe("Admin desk", () => {
 
     // Celebrations: find mine, grant a complimentary pass.
     await page.goto(D(`/admin/events?q=${encodeURIComponent(title)}`));
-    await page.getByRole("link", { name: title }).click();
+    // By its address, not its title: titles in a long test run can repeat.
+    await page.locator(`a[href$="/admin/events/${eventId}"]`).first().click();
     await expect(
       page.getByRole("heading", { name: title, level: 1 })
     ).toBeVisible();
@@ -210,9 +219,9 @@ test.describe("Admin desk", () => {
       await expect(log.getByText(text).first()).toBeVisible();
     }
 
-    // Even for an admin, the plain address stays "not found": the desk lives only at its secret one.
-    expect((await page.goto("/admin"))?.status()).toBe(404);
-    expect((await page.goto("/admin/accounts"))?.status()).toBe(404);
+    // The desk lives at /admin: an admin who has passed two-step sign-in reaches it there.
+    expect((await page.goto("/admin"))?.status()).toBe(200);
+    expect((await page.goto("/admin/accounts"))?.status()).toBe(200);
 
     // Every page renders, without accessibility errors.
     for (const [path, heading] of [

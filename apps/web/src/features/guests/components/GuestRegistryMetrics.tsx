@@ -15,9 +15,11 @@ export function GuestRegistryMetrics({
   stats,
 }: GuestRegistryMetricsProps) {
   const confirmed = stats.acceptedGuests;
-  const total = stats.totalAttendees;
   const declined = stats.declinedGuests;
-  const awaiting = Math.max(0, total - confirmed - declined);
+  // Count the people still to reply directly. Deriving it as invited − accepted − declined
+  // read 0 whenever a plus-one pushed an accepted party above its invited size.
+  const awaiting = stats.pendingGuests;
+  const total = confirmed + declined + awaiting;
   const seated = stats.seatedCount;
 
   const legend = [
@@ -87,7 +89,7 @@ export function GuestRegistryMetrics({
         <dl className="grid grid-cols-2 divide-x divide-gold/15 rounded-2xl bg-black/20 py-3 text-center ring-1 ring-inset ring-gold/15">
           <div className="flex flex-col items-center gap-0.5 px-2">
             <dt className="text-[9px] font-bold uppercase tracking-[0.18em] text-champagne/55">
-              Awaiting reply
+              Parties to reply
             </dt>
             <dd className="flex flex-col items-center gap-0.5">
               <span className="font-display text-2xl tabular-nums text-[#fff6dc]">

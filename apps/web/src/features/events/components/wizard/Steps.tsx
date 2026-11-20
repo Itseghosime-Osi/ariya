@@ -197,7 +197,17 @@ export function StepWhen({
   const picked = dayParts(draft.ymd);
   const quick = now
     ? [
-        { label: "Next Saturday", ymd: saturdayOnOrAfter(addDays(now, 7)) },
+        // Name the date on the chip: "Next Saturday" picked the 28th on Friday the 20th, when
+        // most people meant the 21st.
+        ...[1, 8].map((ahead, i) => {
+          const ymd = saturdayOnOrAfter(addDays(now, ahead));
+          const p = dayParts(ymd);
+          const when = p ? `${p.day} ${p.monthShort}` : ymd;
+          return {
+            label: `${i === 0 ? "This Saturday" : "Saturday after"} · ${when}`,
+            ymd,
+          };
+        }),
         { label: "In 3 months", ymd: saturdayInMonths(now, 3) },
         { label: "In 6 months", ymd: saturdayInMonths(now, 6) },
         { label: "In a year", ymd: saturdayInMonths(now, 12) },
@@ -542,7 +552,8 @@ export function StepGuests({ draft, set }: StepProps) {
             <strong className="tabular-nums text-night">
               {draft.parties * GUESTS_PER_PARTY}
             </strong>{" "}
-            guests, at {GUESTS_PER_PARTY} per invitation
+            guests if each invitation brings {GUESTS_PER_PARTY}. A rough guess
+            you can change any time; replies set the real count.
           </p>
         </div>
         <div className="flex items-center gap-3">

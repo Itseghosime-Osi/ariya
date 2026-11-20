@@ -230,6 +230,24 @@ describe("metrics", () => {
         `${pluralise(metrics.awaitingParties, "party", "parties")} (${metrics.awaitingPartiesPct}%)`
       ).toBe("0 parties (0%)");
     });
+
+    it("still counts a waiting party when a plus-one lifts attendance above invited seats", () => {
+      // The 21 Nov review: Amina accepted for 2 (invited as 1), Tola pending, Chidi declined.
+      // invited seats (3) − attending (2) − declined (1) is 0, yet Tola is still to reply.
+      const metrics = calculateCelebrationMetrics([
+        {
+          id: "amina",
+          party_size: 1,
+          rsvp: { status: "accepted", attending_count: 2 },
+        },
+        { id: "tola", party_size: 1, rsvp: { status: "pending" } },
+        { id: "chidi", party_size: 1, rsvp: { status: "declined" } },
+      ]);
+      expect(metrics.totalAttendees).toBe(3);
+      expect(metrics.expectedPeople).toBe(2);
+      expect(metrics.awaitingParties).toBe(1);
+      expect(metrics.awaitingGuests).toBe(1);
+    });
   });
 
   describe("pluralise and pluralNoun helpers", () => {

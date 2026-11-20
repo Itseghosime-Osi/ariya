@@ -12,6 +12,7 @@ import type {
 } from "@/features/rsvp-questions/model";
 import { AcceptedGuestFields } from "./AcceptedGuestFields";
 import { RsvpQuestionFields } from "./RsvpQuestionFields";
+import { formatEventDate } from "@/lib/format";
 
 interface RsvpInteractiveFormProps {
   data: InvitationData;
@@ -77,6 +78,36 @@ export function RsvpInteractiveForm({
             &ldquo;{event.invitation_message}&rdquo;
           </p>
         )}
+        {/* Guests should know when and where before they say yes, not only after. */}
+        <dl
+          aria-label="When and where"
+          className="mx-auto mt-4 grid max-w-md gap-2 rounded-2xl border border-outline-variant/30 px-4 py-3 text-left text-sm text-on-surface"
+        >
+          {event.date && (
+            <div className="flex items-start gap-2">
+              <dt className="sr-only">When</dt>
+              <Icon name="calendar" className="mt-0.5 text-base" />
+              <dd>{formatEventDate(event.date)}</dd>
+            </div>
+          )}
+          {event.venue && (
+            <div className="flex items-start gap-2">
+              <dt className="sr-only">Where</dt>
+              <Icon name="location" className="mt-0.5 text-base" />
+              <dd>
+                {event.venue}
+                {event.area ? `, ${event.area}` : ""}
+              </dd>
+            </div>
+          )}
+          {event.dress_code && (
+            <div className="flex items-start gap-2">
+              <dt className="sr-only">Dress code</dt>
+              <Icon name="styler" className="mt-0.5 text-base" />
+              <dd>{event.dress_code}</dd>
+            </div>
+          )}
+        </dl>
       </section>
 
       {state?.error && (

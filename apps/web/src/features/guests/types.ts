@@ -60,6 +60,8 @@ export interface GuestOverviewStats {
   acceptedCount: number;
   acceptedGuests: number;
   pendingCount: number;
+  /** People in parties that haven't replied (their invited party size). */
+  pendingGuests: number;
   declinedCount: number;
   declinedGuests: number;
   seatedCount: number;

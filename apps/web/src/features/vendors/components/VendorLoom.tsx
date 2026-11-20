@@ -52,7 +52,7 @@ export function VendorLoom({
             id="vendor-loom-title"
             className="mt-0.5 font-display text-xl font-bold text-[#fff6dc] sm:mt-1 sm:text-2xl"
           >
-            The contracts, woven
+            Paid and owed
           </h2>
           <p className="mt-1 hidden max-w-md text-sm text-champagne/65 sm:block">
             Solid cloth is paid; the hatched stretch is still owed.

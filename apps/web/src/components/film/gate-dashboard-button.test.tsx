@@ -41,17 +41,19 @@ describe("GateDashboardButton", () => {
     expect(link).toHaveAttribute("href", "/events");
   });
 
-  it("renders 'Sign in to dashboard' and links to /sign-in when user is not signed in", async () => {
+  it("renders 'Start planning' and links to /sign-up when user is not signed in", async () => {
     mockGetSession.mockResolvedValue({
       data: { session: null },
     });
 
     render(<GateDashboardButton />);
 
-    const link = await screen.findByRole("link", {
-      name: /Sign in to dashboard/i,
-    });
-    expect(link).toHaveAttribute("href", "/sign-in?next=%2Fevents");
+    const link = await screen.findByRole("link", { name: /Start planning/i });
+    expect(link).toHaveAttribute("href", "/sign-up");
+    // One door only: no separate sign-in link on the gate.
+    expect(
+      screen.queryByRole("link", { name: /Sign in to dashboard/i })
+    ).toBeNull();
   });
 
   it("updates dynamically when authentication state changes", async () => {
@@ -64,10 +66,8 @@ describe("GateDashboardButton", () => {
 
     render(<GateDashboardButton />);
 
-    const link = await screen.findByRole("link", {
-      name: /Sign in to dashboard/i,
-    });
-    expect(link).toHaveAttribute("href", "/sign-in?next=%2Fevents");
+    const link = await screen.findByRole("link", { name: /Start planning/i });
+    expect(link).toHaveAttribute("href", "/sign-up");
 
     // Simulate login event
     act(() => {

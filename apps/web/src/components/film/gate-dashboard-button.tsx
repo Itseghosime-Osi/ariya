@@ -39,22 +39,34 @@ export function GateDashboardButton() {
     }
   }, []);
 
-  const href = isLoggedIn ? "/events" : "/sign-in?next=%2Fevents";
-  const label = isLoggedIn ? "Go to dashboard" : "Sign in to dashboard";
+  // The gate leads with planning; the film's colour, sound and viewing choices come second.
+  // One door: new visitors start planning (sign-up links to sign-in for returning hosts).
+  if (!isLoggedIn) {
+    return (
+      <Link
+        prefetch={false}
+        className="btn gold gate-dashboard-btn gate-start-btn"
+        id="gateDashboardBtn"
+        href="/sign-up"
+        title="Create your first event"
+      >
+        <span>Start planning</span>
+        <span aria-hidden="true" className="arrow">
+          →
+        </span>
+      </Link>
+    );
+  }
 
   return (
     <Link
       prefetch={false}
-      className="btn gate-dashboard-btn"
+      className="btn gold gate-dashboard-btn gate-start-btn"
       id="gateDashboardBtn"
-      href={href}
-      title={
-        isLoggedIn
-          ? "Go directly to your celebration dashboard"
-          : "Sign in to access your dashboard"
-      }
+      href="/events"
+      title="Go directly to your celebration dashboard"
     >
-      <span>{label}</span>
+      <span>Go to dashboard</span>
       <span aria-hidden="true" className="arrow">
         →
       </span>

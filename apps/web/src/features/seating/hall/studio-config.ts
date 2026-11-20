@@ -145,9 +145,12 @@ export const isTyping = (el: EventTarget | null) =>
  * chairs and areas, an inspector to design whatever is selected, and a deck of planning tools
  * (guests, room, fit, seat, décor) on the side.
  */
-/** The planning tools, grouped the way a host thinks about the day. */
+/**
+ * The planning tools, grouped the way a host thinks about the day: seating guests first, since
+ * that is why most hosts open this screen; the room next; the estimates last and marked optional.
+ */
 export const TOOL_GROUPS: { label: string; keys: Deck[] }[] = [
-  { label: "Design", keys: ["room", "fit", "decor"] },
-  { label: "Seat and history", keys: ["guests", "seat", "history"] },
-  { label: "Plan", keys: ["catering", "thermal", "risk"] },
+  { label: "Seat guests", keys: ["guests", "seat", "history"] },
+  { label: "Room", keys: ["room", "fit", "decor"] },
+  { label: "Estimates (optional)", keys: ["catering", "thermal", "risk"] },
 ];

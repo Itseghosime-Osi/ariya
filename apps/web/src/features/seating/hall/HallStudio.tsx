@@ -3205,9 +3205,9 @@ export function HallStudio({
                   </ol>
                 </div>
               )}
-              {/* Eight tools in three groups, so every label and number has room: Design (the room
-                  itself), Seat (who sits where) and Plan (what the day needs). All eight stay tabs
-                  of one list, so arrow keys and links to a tool keep working. */}
+              {/* Nine tools in three groups, so every label and number has room: Seat guests (who
+                  sits where), Room (the room itself) and Estimates (optional: food, cooling,
+                  risks). All stay tabs of one list, so arrow keys and links to a tool keep working. */}
               <div
                 id="hall-tools"
                 role="tablist"

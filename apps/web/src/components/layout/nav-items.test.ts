@@ -27,12 +27,12 @@ describe("getPhoneMoreSections", () => {
     expect(names).not.toContain("Settings");
   });
 
-  it("files Event settings under Planning", () => {
+  it("files Event settings under Manage", () => {
     const item = getEventSections(EVENT_ID).find(
       (i) => i.name === "Event settings"
     );
 
-    expect(item?.group).toBe("plan");
+    expect(item?.group).toBe("manage");
     expect(item?.href).toBe(`/events/${EVENT_ID}/settings`);
   });
 
@@ -41,6 +41,20 @@ describe("getPhoneMoreSections", () => {
       ["Profile", "/profile"],
       ["Settings", "/settings"],
     ]);
+  });
+
+  it("keeps the everyday workflow in Planning and design tools apart", () => {
+    const groupOf = (name: string) =>
+      getEventSections(EVENT_ID).find((i) => i.name === name)?.group;
+    for (const name of [
+      "Guests",
+      "Invitations",
+      "Seating",
+      "Vendors",
+      "Checklist",
+    ])
+      expect(groupOf(name)).toBe("plan");
+    expect(groupOf("Page editor")).toBe("design");
   });
 
   it("has nothing to show without a real event", () => {

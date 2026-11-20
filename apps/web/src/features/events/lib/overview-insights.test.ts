@@ -201,9 +201,41 @@ describe("pickNextAction", () => {
   it("celebrates when everything is done", () => {
     const a = pickNextAction({
       ...base,
+      vendors: [vendor({ depositKobo: 100_000_00 })],
       metrics: metrics({ awaitingParties: 0, unassignedGuests: 0 }),
     });
     expect(a.tone).toBe("celebrate");
+  });
+
+  it("does not claim everything is on track with an open task and an unpaid balance", () => {
+    // The 21 Nov review: replies in, guests seated, event tomorrow, ₦75,000 owed, one open task.
+    const list = pickNextActions({
+      ...base,
+      vendors: [vendor({ costKobo: 100_000_00, depositKobo: 25_000_00 })],
+      tasks: [task({ dueDate: "2026-11-02", task: "Confirm arrival time" })],
+      metrics: metrics({
+        daysAway: 1,
+        awaitingParties: 0,
+        unassignedGuests: 0,
+      }),
+    });
+    expect(list.map((a) => a.title)).toEqual([
+      "Finish 1 task due before the day",
+      "₦75,000 still owed to vendors",
+    ]);
+    expect(list.every((a) => a.tone === "urgent")).toBe(true);
+  });
+
+  it("says what is still open instead of 'everything' when nothing is urgent", () => {
+    const a = pickNextAction({
+      ...base,
+      tasks: [task({ dueDate: "2027-03-01" })],
+      metrics: metrics({ awaitingParties: 0, unassignedGuests: 0 }),
+    });
+    expect(a.title).toBe("Nothing urgent right now");
+    expect(a.reason).toBe(
+      "All replies are in, every confirmed guest is seated, 1 task is still open, ₦60,000 is still owed to vendors."
+    );
   });
 });
 
@@ -282,8 +314,10 @@ describe("pickNextActions", () => {
       "Send reminders",
       "Open seating",
       "Open vendors",
+      "Open vendors",
     ]);
     expect(list[3].title).toBe("Confirm 1 vendor");
+    expect(list[4].title).toBe("₦120,000 still owed to vendors");
   });
 
   it("puts seating conflicts ahead of everything else", () => {

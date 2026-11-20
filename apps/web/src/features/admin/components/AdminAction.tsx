@@ -46,7 +46,18 @@ export function AdminAction({
     e.preventDefault();
     if (!ready) return;
     start(async () => {
-      const res = await run(reason, typed);
+      let res: AdminResult;
+      try {
+        res = await run(reason, typed);
+      } catch {
+        // The request itself failed (connection dropped, server restarting): say so rather than
+        // leave the admin unsure whether anything happened.
+        res = {
+          ok: false,
+          error:
+            "Could not reach the server, so this may not have happened. Reload the page to check before trying again.",
+        };
+      }
       setResult(res);
       if (res.ok && redirectTo) {
         router.replace(

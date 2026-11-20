@@ -52,11 +52,9 @@ test.describe("My Events Bento Dashboard (/events) & Glass Navigation Shell", ()
     await expect(createFirstEvent).toHaveText("Create your first event");
     await expect(createFirstEvent).toHaveAttribute("href", "/events/new");
 
-    // Desktop's top bar keeps one door to the connected app, not an account chip.
-    await expect(page.getByTestId("connect-ai-link")).toHaveAttribute(
-      "href",
-      "/connect-ai"
-    );
+    // Before the first event, the top bar does not ask about AI connections or approvals.
+    await expect(page.getByTestId("connect-ai-link")).toHaveCount(0);
+    await expect(page.getByTestId("approvals-link")).toHaveCount(0);
     await expect(page.getByTestId("user-avatar-menu")).toBeHidden();
 
     await page.setViewportSize({ width: 390, height: 844 });

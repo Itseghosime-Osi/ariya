@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { ChecklistPlan, Reconciliation } from "@ariya/studio";
 import { createClient } from "@/lib/supabase/server";
 import { RISK_KEY_PREFIX, type TaskStatus } from "./types";
+import { missingPlanTasks, type PlanTask } from "./plan-sync";
 
 export interface SeedResult {
   success?: boolean;
@@ -60,25 +61,7 @@ export async function seedChecklistAction(
 
   const inserts = reconciliation.insert
     .map((t) => taskByKey.get(t.sourceKey) ?? t)
-    .map((t) => ({
-      event_id: eventId,
-      title: t.title,
-      detail: t.detail ?? null,
-      phase: asPhase(t.phase),
-      due_date: t.dueDate ?? null,
-      source: "template" as const,
-      source_key: t.sourceKey,
-      mitigation: t.mitigation ?? null,
-      advice_source: t.adviceSource ?? null,
-      time_slot: t.when ?? null,
-      derivation: {
-        kind: t.riskId ? "risk" : "plan",
-        count: t.daysBefore ?? undefined,
-        why: t.derivation,
-      },
-      template_version: plan.templateVersion,
-      sort: t.sort,
-    }));
+    .map((t) => toTaskRow(eventId, t, plan.templateVersion));
 
   if (inserts.length > 0) {
     const { error } = await supabase.from("tasks").insert(inserts);
@@ -131,6 +114,73 @@ export async function seedChecklistAction(
     updated: reconciliation.update.length,
     retired: reconciliation.retire.length,
   };
+}
+
+function toTaskRow(eventId: string, t: PlanTask, templateVersion: number) {
+  return {
+    event_id: eventId,
+    title: t.title,
+    detail: t.detail ?? null,
+    phase: asPhase(t.phase),
+    due_date: t.dueDate ?? null,
+    source: "template" as const,
+    source_key: t.sourceKey,
+    mitigation: t.mitigation ?? null,
+    advice_source: t.adviceSource ?? null,
+    time_slot: t.when ?? null,
+    derivation: {
+      kind: t.riskId ? "risk" : "plan",
+      count: t.daysBefore ?? undefined,
+      why: t.derivation,
+    },
+    template_version: templateVersion,
+    sort: t.sort,
+  };
+}
+
+/**
+ * Add the plan's rows this checklist does not have yet — the venue rows that appear once a hall
+ * is drawn after the list was first built. Existing rows are left exactly as they are (so a host's
+ * own times and edits survive), and a deleted row is never brought back: the keys are re-read
+ * here, tombstones included, rather than trusted from the page.
+ */
+export async function addMissingPlanRowsAction(
+  eventId: string,
+  plan: ChecklistPlan
+): Promise<{ success?: boolean; error?: string; added?: number }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const { data: rows, error: readError } = await supabase
+    .from("tasks")
+    .select("source_key")
+    .eq("event_id", eventId)
+    .not("source_key", "is", null);
+  if (readError) {
+    console.error("[addMissingPlanRowsAction] read failed:", readError);
+    return { error: "Could not read the checklist." };
+  }
+
+  const missing = missingPlanTasks(
+    plan.tasks,
+    (rows ?? []).map((r) => r.source_key as string)
+  );
+  if (missing.length === 0) return { success: true, added: 0 };
+
+  const { error } = await supabase
+    .from("tasks")
+    .insert(missing.map((t) => toTaskRow(eventId, t, plan.templateVersion)));
+  if (error) {
+    console.error("[addMissingPlanRowsAction] insert failed:", error);
+    return { error: `Could not add the hall's tasks: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}/day-of`);
+  return { success: true, added: missing.length };
 }
 
 /**
@@ -375,4 +425,90 @@ export async function moveOpenToThisWeekAction(
 
   revalidatePath(`/events/${eventId}/checklist`);
   return { success: true, moved: ids.length };
+}
+
+/** "14:30" style times, so the run sheet can sort and a supplier can read it at a glance. */
+const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * Give a day row an exact time on the run sheet, or clear it back to the template's wording
+ * (an empty string). The run sheet reads the checklist, so the two never disagree.
+ */
+export async function setRunSheetTimeAction(
+  eventId: string,
+  taskId: string,
+  time: string
+): Promise<{ success?: boolean; error?: string }> {
+  const value = time.trim();
+  if (value && !CLOCK.test(value)) {
+    return { error: "Use a time like 14:30." };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ time_slot: value || null })
+    .eq("id", taskId)
+    .eq("event_id", eventId)
+    .eq("phase", "day")
+    .select("id");
+  if (error) {
+    console.error("[setRunSheetTimeAction] update failed:", error);
+    return { error: `Could not change the time: ${error.message}` };
+  }
+  if (!data || data.length === 0)
+    return { error: "That row could not be found." };
+
+  revalidatePath(`/events/${eventId}/day-of`);
+  revalidatePath(`/events/${eventId}/checklist`);
+  return { success: true };
+}
+
+/** Add a timed row to the day itself, such as "Caterer arrives" at 10:00. */
+export async function addRunSheetRowAction(
+  eventId: string,
+  input: { title: string; time: string }
+): Promise<{ success?: boolean; error?: string; id?: string }> {
+  const title = input.title.trim();
+  const time = input.time.trim();
+  if (title.length < 2) return { error: "Say what happens." };
+  if (time && !CLOCK.test(time)) return { error: "Use a time like 14:30." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("id")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event) return { error: "This celebration could not be found." };
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert({
+      event_id: eventId,
+      title,
+      phase: "day",
+      time_slot: time || null,
+      source: "manual" as const,
+      sort: 0,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[addRunSheetRowAction] insert failed:", error);
+    return { error: `Could not add the row: ${error.message}` };
+  }
+
+  revalidatePath(`/events/${eventId}/day-of`);
+  revalidatePath(`/events/${eventId}/checklist`);
+  return { success: true, id: data.id };
 }

@@ -4,6 +4,7 @@
  * Everything here is pure and computed from data the app already holds.
  */
 import type { EventMetrics } from "../types";
+import { formatKobo } from "@/lib/format";
 
 export interface PlanningVendor {
   id: string;
@@ -450,17 +451,82 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
       tone: "steady",
     });
   }
-  if (out.length === 0) {
+  // Open tasks due within two weeks (or before the day) that are not yet overdue.
+  const soonKey = addDaysKey(todayKey, Math.min(14, Math.max(0, days)));
+  const dueSoon = tasks.filter(
+    (t) =>
+      !t.isDone && t.dueDate && t.dueDate >= todayKey && t.dueDate <= soonKey
+  );
+  if (dueSoon.length > 0) {
     out.push({
-      title: "E kú iṣẹ́! Everything is on track",
+      title: `Finish ${dueSoon.length} ${dueSoon.length === 1 ? "task" : "tasks"} due before the day`,
       reason:
-        "Every guest has replied and every confirmed guest has a seat. Enjoy the run-up.",
-      href: `${base}/check-in`,
-      cta: "Preview check-in",
-      tone: "celebrate",
+        dueSoon.length === 1
+          ? `"${dueSoon[0].task}" is still open.`
+          : `Starting with "${dueSoon[0].task}".`,
+      href: `${base}/vendors`,
+      cta: "Open tasks",
+      tone: days <= 7 ? "urgent" : "steady",
     });
   }
+  const owedKobo = vendors.reduce(
+    (s, v) => s + Math.max(0, v.costKobo - Math.max(0, v.depositKobo)),
+    0
+  );
+  if (owedKobo > 0 && days <= 30) {
+    out.push({
+      title: `${formatKobo(owedKobo)} still owed to vendors`,
+      reason:
+        "Settle or schedule the balances before the day so nobody is chasing payment at the door.",
+      href: `${base}/vendors`,
+      cta: "Open vendors",
+      tone: days <= 7 ? "urgent" : "steady",
+    });
+  }
+  if (out.length === 0) {
+    const openTasks = tasks.filter((t) => !t.isDone).length;
+    // Only claim "everything" when everything we measure is done; otherwise say what is true.
+    out.push(
+      openTasks === 0 && owedKobo === 0
+        ? {
+            title: "E kú iṣẹ́! Everything is on track",
+            reason:
+              "Every guest has replied and has a seat, every task is done and every vendor is paid.",
+            href: `${base}/check-in`,
+            cta: "Preview check-in",
+            tone: "celebrate",
+          }
+        : {
+            title: "Nothing urgent right now",
+            reason: [
+              metrics.awaitingParties === 0 ? "All replies are in" : null,
+              metrics.unassignedGuests === 0
+                ? "every confirmed guest is seated"
+                : null,
+              openTasks > 0
+                ? `${openTasks} ${openTasks === 1 ? "task is" : "tasks are"} still open`
+                : null,
+              owedKobo > 0
+                ? `${formatKobo(owedKobo)} is still owed to vendors`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(", ")
+              .replace(/^./, (c) => c.toUpperCase())
+              .concat("."),
+            href: `${base}/vendors`,
+            cta: "Review what's open",
+            tone: "steady",
+          }
+    );
+  }
   return out;
+}
+
+function addDaysKey(key: string, n: number): string {
+  const d = new Date(`${key}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
 }
 
 /** The single most pressing next step. */

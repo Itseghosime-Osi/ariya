@@ -3,7 +3,7 @@ import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { adm, adminBase } from "./path";
+import { adm } from "./path";
 
 /**
  * Who may open /admin.
@@ -28,8 +28,6 @@ export type AdminState =
   | { kind: "admin"; admin: AdminIdentity };
 
 export const getAdminState = cache(async (): Promise<AdminState> => {
-  // No secret address configured: the desk is closed.
-  if (!adminBase()) return { kind: "none" };
   const supabase = await createClient();
   const {
     data: { user },
