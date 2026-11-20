@@ -319,8 +319,13 @@ export function ChecklistClient({
     setSettingAside(true);
     const failed: string[] = [];
     for (const t of rows) {
-      const result = await setTaskStatusAction(eventId, t.id, "skipped");
-      if (result.error) failed.push(t.id);
+      try {
+        const result = await setTaskStatusAction(eventId, t.id, "skipped");
+        if (result.error) failed.push(t.id);
+      } catch {
+        // Offline: count it as not done rather than let the page fall over.
+        failed.push(t.id);
+      }
     }
     setSettingAside(false);
     const ids = new Set(

@@ -104,7 +104,7 @@ export function TimeField({
           sideOffset={8}
           collisionPadding={16}
           aria-label={label ? `Choose a time for ${label}` : "Choose a time"}
-          className="z-[80] w-[min(19rem,calc(100vw-2rem))] space-y-3 rounded-3xl border border-hairline bg-ivory p-4 shadow-[0_24px_48px_-20px_rgba(42,10,20,0.45)] focus:outline-none"
+          className="z-[80] max-h-[var(--radix-popover-content-available-height)] w-[min(19rem,calc(100vw-2rem))] space-y-3 overflow-y-auto rounded-3xl border border-hairline bg-ivory p-4 shadow-[0_24px_48px_-20px_rgba(42,10,20,0.45)] focus:outline-none"
         >
           <p className="text-center font-serif text-[22px] font-semibold tabular-nums text-night">
             {hasDraft ? formatClock(draft) : "—:—"}

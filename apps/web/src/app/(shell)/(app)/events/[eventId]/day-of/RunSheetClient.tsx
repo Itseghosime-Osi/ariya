@@ -42,21 +42,34 @@ export function RunSheetClient({ data }: { data: RunSheetData }) {
   const todayKey = getLagosDateKey(new Date());
   const lockedForTheDay = Boolean(eventKey && todayKey && todayKey >= eventKey);
 
+  // A dropped connection makes the action throw rather than return an error; catch it here so the
+  // sheet says so in place instead of the whole page falling over to the error screen.
+  const OFFLINE = "Couldn't save. Check your connection and try again.";
   const saveTime = (id: string, time: string) =>
     startTransition(async () => {
       setError(null);
-      const res = await setRunSheetTimeAction(data.eventId, id, time);
-      if (res.error) setError(res.error);
-      else router.refresh();
+      try {
+        const res = await setRunSheetTimeAction(data.eventId, id, time);
+        if (res.error) setError(res.error);
+        else router.refresh();
+      } catch {
+        setError(OFFLINE);
+      }
     });
 
   const addRow = () =>
     startTransition(async () => {
       setError(null);
-      const res = await addRunSheetRowAction(data.eventId, {
-        title: newTitle,
-        time: newTime,
-      });
+      let res: Awaited<ReturnType<typeof addRunSheetRowAction>>;
+      try {
+        res = await addRunSheetRowAction(data.eventId, {
+          title: newTitle,
+          time: newTime,
+        });
+      } catch {
+        setError(OFFLINE);
+        return;
+      }
       if (res.error) {
         setError(res.error);
         return;
