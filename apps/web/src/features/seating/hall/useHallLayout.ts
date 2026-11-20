@@ -202,8 +202,11 @@ export function useHallLayout({
       saveHallLayoutAction(eventId, next, baseRev)
         // A tab left open across a release holds action ids the server no longer knows, and every
         // save would fail until it is reloaded. The plain address does the same save without them.
+        // Any other failure (no signal, a server error) is not hidden: it says Not saved, retries
+        // and offers Retry, as before.
         .catch((err: unknown) => {
-          if (isStaleBuildError(err)) setUpdateReady(true);
+          if (!isStaleBuildError(err)) throw err;
+          setUpdateReady(true);
           return saveViaRoute(eventId, next, baseRev);
         })
         .then((res) => {
