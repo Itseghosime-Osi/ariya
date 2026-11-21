@@ -84,18 +84,7 @@ export function CateringPanel({
   onExport: () => void;
   exporting: boolean;
 }) {
-  if (status !== "ready") {
-    return (
-      <Section title="Catering">
-        <p className="text-[11px] leading-snug text-label-2">
-          {status === "loading"
-            ? "Working out what to buy…"
-            : "The catering model needs the layout engine, which did not load on this device. The rest of the studio still works."}
-        </p>
-      </Section>
-    );
-  }
-
+  // The questions need no engine, so they show at once; only the list waits for it to load.
   return (
     <div>
       <Section title="The three questions that matter">
@@ -225,7 +214,17 @@ export function CateringPanel({
         )}
       </Section>
 
-      {report && (
+      {status !== "ready" && (
+        <Section title="The shopping list">
+          <p role="status" className="text-[11px] leading-snug text-label-2">
+            {status === "loading"
+              ? "Working out what to buy…"
+              : "The shopping list needs the layout engine, which did not load on this device. The rest of the studio still works."}
+          </p>
+        </Section>
+      )}
+
+      {status === "ready" && report && (
         <>
           <Section title="Who you are cooking for">
             <p className="text-[11px] leading-relaxed text-label-2">
