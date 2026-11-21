@@ -57,14 +57,15 @@ test.describe("Checklist for a late start", () => {
     });
     await expect(earlier).toBeVisible();
     await expect(earlier).toContainText(/due before this checklist began/);
-    // The list opens on what is ahead — the day itself — not on January's "Fix the date".
-    await expect(page.getByRole("button", { name: /^Day of/ })).toHaveAttribute(
-      "aria-expanded",
-      "true"
+    // What is ahead leads the list: the day itself sits in "This week", and January's
+    // "Fix the date" is not among the overdue tasks.
+    await expect(page.getByRole("region", { name: "This week" })).toContainText(
+      "Keep to the fixed times"
     );
-    // The earlier rows say so instead of showing a red date months in the past.
-    await page.getByRole("button", { name: /^Foundations/ }).click();
-    await expect(page.getByText("Before you started").first()).toBeVisible();
+    await expect(page.getByRole("region", { name: "Overdue" })).toHaveCount(0);
+    // The earlier rows are kept apart, and say so instead of showing a red date months ago.
+    await earlier.getByRole("button", { name: "Show them" }).click();
+    await expect(earlier.getByText("Before you started").first()).toBeVisible();
 
     await earlier.getByRole("button", { name: /^Set aside all \d+/ }).click();
     await expect(earlier).toBeHidden({ timeout: 15_000 });

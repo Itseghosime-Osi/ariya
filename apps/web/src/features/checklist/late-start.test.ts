@@ -19,6 +19,8 @@ const task = (over: Partial<ChecklistTask> = {}): ChecklistTask => ({
   sort: 0,
   completedAt: null,
   createdAt: "2026-11-20T10:00:00Z",
+  daysBefore: null,
+  editedAt: null,
   ...over,
 });
 

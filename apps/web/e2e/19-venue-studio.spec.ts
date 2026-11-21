@@ -62,10 +62,18 @@ test.describe("Venue studio", () => {
 
     // 6. Take the plan to the checklist. The first visit seeds it from the hall.
     await page.goto(`/events/${eventId}/checklist`);
-    const firstTask = page.getByRole("checkbox").first();
+    const firstTask = page.getByRole("checkbox", { name: /^Tick / }).first();
     await expect(firstTask).toBeVisible({ timeout: 30_000 });
     await expect(firstTask).toHaveAttribute("aria-checked", "false");
+    const title = (await firstTask.getAttribute("aria-label"))!.replace(
+      /^Tick /,
+      ""
+    );
     await firstTask.click();
-    await expect(firstTask).toHaveAttribute("aria-checked", "true");
+    // Ticked, it moves into the folded Done group; open it to see it there, ticked.
+    await page.getByRole("button", { name: /^Done/ }).click();
+    await expect(
+      page.getByRole("checkbox", { name: `Un-tick ${title}` })
+    ).toHaveAttribute("aria-checked", "true");
   });
 });

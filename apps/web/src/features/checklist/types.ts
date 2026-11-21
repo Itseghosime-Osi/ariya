@@ -37,6 +37,10 @@ export interface ChecklistTask {
   completedAt: string | null;
   /** When the row was added; a due date before this was already past when the list began. */
   createdAt: string | null;
+  /** Days before the event it is due (negative: after); null when the date is fixed or absent. */
+  daysBefore: number | null;
+  /** When a host last changed its wording, details, phase or due date. */
+  editedAt: string | null;
 }
 
 export interface ChecklistMember {

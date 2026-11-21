@@ -1168,10 +1168,12 @@ export type Database = {
           advice_source: string | null;
           completed_at: string | null;
           created_at: string;
+          days_before: number | null;
           deleted_at: string | null;
           derivation: Json | null;
           detail: string | null;
           due_date: string | null;
+          edited_at: string | null;
           event_id: string;
           id: string;
           mitigation: string | null;
@@ -1191,10 +1193,12 @@ export type Database = {
           advice_source?: string | null;
           completed_at?: string | null;
           created_at?: string;
+          days_before?: number | null;
           deleted_at?: string | null;
           derivation?: Json | null;
           detail?: string | null;
           due_date?: string | null;
+          edited_at?: string | null;
           event_id: string;
           id?: string;
           mitigation?: string | null;
@@ -1213,10 +1217,12 @@ export type Database = {
           advice_source?: string | null;
           completed_at?: string | null;
           created_at?: string;
+          days_before?: number | null;
           deleted_at?: string | null;
           derivation?: Json | null;
           detail?: string | null;
           due_date?: string | null;
+          edited_at?: string | null;
           event_id?: string;
           id?: string;
           mitigation?: string | null;
@@ -1509,8 +1515,8 @@ export type Database = {
         Args: { p_decision: string; p_id: string };
         Returns: Json;
       };
-      event_is_expired: { Args: { p_date: string }; Returns: boolean };
       event_has_pass: { Args: { p_event_id: string }; Returns: boolean };
+      event_is_expired: { Args: { p_date: string }; Returns: boolean };
       find_import_duplicates: {
         Args: { p_event_id: string; p_rows: Json };
         Returns: {

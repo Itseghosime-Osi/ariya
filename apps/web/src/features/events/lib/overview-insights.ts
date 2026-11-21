@@ -21,6 +21,8 @@ export interface PlanningTask {
   dueDate: string | null; // YYYY-MM-DD
   isDone: boolean;
   vendorName: string | null;
+  /** Where the task lives: a vendor's own task, or the event checklist. Defaults to vendor. */
+  source?: "vendor" | "checklist";
 }
 
 export interface ConstellationGuest {
@@ -394,9 +396,9 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
     const t = overdue[0];
     out.push({
       title: `Overdue: ${t.task}`,
-      reason: `${overdue.length === 1 ? "1 vendor task is" : `${overdue.length} vendor tasks are`} past due${t.vendorName ? `, starting with ${t.vendorName}` : ""}.`,
-      href: `${base}/vendors`,
-      cta: "Open vendors",
+      reason: `${overdue.length === 1 ? "1 task is" : `${overdue.length} tasks are`} past due${t.vendorName ? `, starting with ${t.vendorName}` : ""}.`,
+      href: t.source === "checklist" ? `${base}/checklist` : `${base}/vendors`,
+      cta: t.source === "checklist" ? "Open checklist" : "Open vendors",
       tone: "urgent",
     });
   }
@@ -464,7 +466,10 @@ export function pickNextActions(input: NextActionInput): NextAction[] {
         dueSoon.length === 1
           ? `"${dueSoon[0].task}" is still open.`
           : `Starting with "${dueSoon[0].task}".`,
-      href: `${base}/vendors`,
+      href:
+        dueSoon[0].source === "checklist"
+          ? `${base}/checklist`
+          : `${base}/vendors`,
       cta: "Open tasks",
       tone: days <= 7 ? "urgent" : "steady",
     });

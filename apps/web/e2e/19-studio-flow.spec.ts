@@ -114,7 +114,7 @@ test.describe("Venue studio flow", () => {
     // The checklist is a view over the plan (6.3.8): it seeds itself from the hall on first run.
     await page.goto(`/events/${eventId}/checklist`);
     const build = page.getByRole("button", { name: /Build the checklist/i });
-    let firstTick = page.getByRole("checkbox", { name: /^Tick / }).first();
+    const firstTick = page.getByRole("checkbox", { name: /^Tick / }).first();
     await expect(build.or(firstTick)).toBeVisible({ timeout: 30_000 });
     // The button stays disabled until the hall plan has loaded and the engine is ready, so a click
     // straight after navigation is silently dropped. Seeding twice is safe: the action only inserts
@@ -132,17 +132,16 @@ test.describe("Venue studio flow", () => {
     await expect(firstTick).toBeVisible({ timeout: 30_000 });
 
     // ---- 7. Tick a task -------------------------------------------------
-    // The tick is optimistic, but the row can re-key while the phase re-renders and swallow the
-    // click. Retry the click itself, so a dropped click costs a retry rather than a 10 s wait.
+    // A ticked task moves into the folded "Done" group, and the page says so with an undo.
     await expect(async () => {
-      // Idempotent: if the first attempt did land, ticking again would undo it.
-      if (await firstTick.isVisible()) await firstTick.click();
-      const untick = page.getByRole("checkbox", { name: /^Un-tick / }).first();
-      await expect(untick).toBeVisible({ timeout: 2_000 });
-      firstTick = untick;
+      await page
+        .getByRole("checkbox", { name: /^Tick / })
+        .first()
+        .click();
+      await expect(page.getByText(/Marked done/i)).toBeVisible({
+        timeout: 2_000,
+      });
     }).toPass({ timeout: 30_000 });
-    await expect(page.getByText(/Marked done/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.getByRole("region", { name: "Done" })).toContainText("1");
   });
 });

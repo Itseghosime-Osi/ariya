@@ -75,7 +75,7 @@ export async function getChecklistData(
       supabase
         .from("tasks")
         .select(
-          "id, title, detail, phase, due_date, status, owner_id, source, source_key, derivation, mitigation, advice_source, time_slot, sort, completed_at, created_at, template_version"
+          "id, title, detail, phase, due_date, status, owner_id, source, source_key, derivation, mitigation, advice_source, time_slot, sort, completed_at, created_at, days_before, edited_at, template_version"
         )
         .eq("event_id", cleanId)
         .is("deleted_at", null)
@@ -138,6 +138,8 @@ export async function getChecklistData(
     sort: t.sort,
     completedAt: t.completed_at,
     createdAt: t.created_at,
+    daysBefore: t.days_before,
+    editedAt: t.edited_at,
   }));
 
   const members = (membersResult.data ?? []).map((m) => {
