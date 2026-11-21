@@ -4,6 +4,7 @@ import {
   createAndLoginUser,
   createTestEvent,
   waitForAnimationsToSettle,
+  openStudioTab,
 } from "./fixtures/test-helpers";
 
 /**
@@ -71,7 +72,7 @@ async function studioWithTables(
   await expect(page.getByTestId("hall-studio")).toBeVisible({
     timeout: 30_000,
   });
-  await page.getByRole("tab", { name: /^Fit/ }).click();
+  await openStudioTab(page, /^Fit/);
   await page.getByLabel(/Set the number of tables/i).fill("6");
   const apply = page.getByRole("button", { name: "Apply", exact: true });
   await apply.click();
@@ -190,7 +191,7 @@ test.describe("Studio accessibility", () => {
     );
 
     // The Fit deck's primary actions.
-    await page.getByRole("tab", { name: /^Fit/ }).click();
+    await openStudioTab(page, /^Fit/);
     await expectTargets(
       page.getByRole("button", { name: /Suggest three layouts/i })
     );

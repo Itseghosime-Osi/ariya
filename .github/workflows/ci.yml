@@ -226,6 +226,16 @@ jobs:
         env:
           PAYSTACK_SECRET_KEY: sk_test_ci_mock_secret
 
+      # Keep what a failed or retried test saw (error context, screenshots, traces from retries),
+      # so a flaky failure can be diagnosed instead of guessed at. Only uploaded when a test failed.
+      - name: Upload Playwright results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: apps/web/test-results/
+          retention-days: 7
+
   cross-browser:
     name: Export check in Firefox and WebKit
     runs-on: ubuntu-latest

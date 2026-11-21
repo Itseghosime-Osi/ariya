@@ -359,3 +359,20 @@ export async function grantPass(eventId: string) {
     .eq("id", eventId);
   if (error) throw new Error(`Could not grant the pass: ${error.message}`);
 }
+
+/**
+ * Open one of the hall studio's tool tabs and make sure it opened.
+ *
+ * The studio's HTML is on screen before React has wired up its buttons, so a click in that moment
+ * does nothing and the tab stays where it was. Click, then confirm the tab is selected, and click
+ * again if it is not, rather than trusting the first click.
+ */
+export async function openStudioTab(page: Page, name: RegExp) {
+  const tab = page.getByRole("tab", { name });
+  await expect(async () => {
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+    await expect(tab).toHaveAttribute("aria-selected", "true", {
+      timeout: 1_000,
+    });
+  }).toPass({ timeout: 30_000 });
+}

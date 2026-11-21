@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { createAndLoginUser, createTestEvent } from "./fixtures/test-helpers";
+import {
+  createAndLoginUser,
+  createTestEvent,
+  openStudioTab,
+} from "./fixtures/test-helpers";
 
 /**
  * The catering deck: the three questions, the shopping list they produce, and the PDF a host
@@ -38,7 +42,7 @@ test.describe("Catering shopping list", () => {
     await expect(page.getByRole("main")).toBeVisible({ timeout: 30_000 });
 
     // The deck is reachable from the rail.
-    await page.getByRole("tab", { name: /^Catering/ }).click();
+    await openStudioTab(page, /^Catering/);
 
     // The three questions are the first thing on the deck.
     await expect(page.getByText(/Will you serve alcohol\?/i)).toBeVisible();
@@ -47,7 +51,10 @@ test.describe("Catering shopping list", () => {
 
     // The list renders, grouped by purchase unit.
     await expect(page.getByText(/The shopping list/i)).toBeVisible();
-    await expect(page.getByText(/Jollof rice/i).first()).toBeVisible();
+    // The list waits for the layout engine, which a busy machine can take a while to load.
+    await expect(page.getByText(/Jollof rice/i).first()).toBeVisible({
+      timeout: 30_000,
+    });
 
     // Choosing "no alcohol" removes the bar lines entirely — 4.2.3.
     expect(await page.getByText(/^Beer$/).count()).toBeGreaterThan(0);
@@ -88,7 +95,7 @@ test.describe("Catering shopping list", () => {
 
     await page.goto(`/events/${eventId}/seating`);
     await expect(page.getByRole("main")).toBeVisible({ timeout: 30_000 });
-    await page.getByRole("tab", { name: /^Catering/ }).click();
+    await openStudioTab(page, /^Catering/);
 
     await page
       .getByRole("radio", { name: /^Dessert$/ })
