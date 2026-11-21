@@ -193,6 +193,24 @@ describe("pickNextAction", () => {
     expect(a.title).toBe("Overdue: Pay DJ deposit");
   });
 
+  it("sends an overdue checklist task to the checklist, not to vendors", () => {
+    const a = pickNextAction({
+      ...base,
+      metrics: metrics(),
+      tasks: [
+        task({
+          dueDate: "2026-10-01",
+          task: "Book the talking drummer",
+          vendorName: null,
+          source: "checklist",
+        }),
+      ],
+    });
+    expect(a.title).toBe("Overdue: Book the talking drummer");
+    expect(a.href).toBe("/events/e1/checklist");
+    expect(a.cta).toBe("Open checklist");
+  });
+
   it("nudges pending replies inside the last month", () => {
     const a = pickNextAction({ ...base, metrics: metrics({ daysAway: 20 }) });
     expect(a.title).toBe("Nudge 6 parties still to reply");

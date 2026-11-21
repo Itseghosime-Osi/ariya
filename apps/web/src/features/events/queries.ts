@@ -421,7 +421,10 @@ export async function getEventMilestones(
 
 export interface EventPlanningSnapshot {
   vendors: PlanningVendor[];
+  /** Vendors' own tasks: the planning ribbon shows and ticks these. */
   tasks: PlanningTask[];
+  /** The event checklist's live tasks, counted in readiness and the next thing to do. */
+  checklistTasks: PlanningTask[];
   guests: ConstellationGuest[];
   checkedInPeople: number;
 }
@@ -435,31 +438,39 @@ export async function getEventPlanningSnapshot(
   eventId: string
 ): Promise<EventPlanningSnapshot> {
   const supabase = await createClient();
-  const [vendorsRes, tasksRes, guestsRes, checkInsRes] = await Promise.all([
-    supabase
-      .from("vendors")
-      .select("id, name, category, cost_kobo, deposit_kobo, status")
-      .eq("event_id", eventId),
-    supabase
-      .from("vendor_tasks")
-      .select("id, task, due_date, is_done, vendors (name)")
-      .eq("event_id", eventId),
-    supabase
-      .from("guests")
-      .select("id, name, side, party_size, rsvps (status)")
-      .eq("event_id", eventId)
-      .limit(1200),
-    supabase
-      .from("check_ins")
-      .select("checked_in_count")
-      .eq("event_id", eventId),
-  ]);
+  const [vendorsRes, tasksRes, guestsRes, checkInsRes, checklistRes] =
+    await Promise.all([
+      supabase
+        .from("vendors")
+        .select("id, name, category, cost_kobo, deposit_kobo, status")
+        .eq("event_id", eventId),
+      supabase
+        .from("vendor_tasks")
+        .select("id, task, due_date, is_done, vendors (name)")
+        .eq("event_id", eventId),
+      supabase
+        .from("guests")
+        .select("id, name, side, party_size, rsvps (status)")
+        .eq("event_id", eventId)
+        .limit(1200),
+      supabase
+        .from("check_ins")
+        .select("checked_in_count")
+        .eq("event_id", eventId),
+      supabase
+        .from("tasks")
+        .select("id, title, due_date, status")
+        .eq("event_id", eventId)
+        .is("deleted_at", null)
+        .neq("status", "skipped"),
+    ]);
 
   for (const [label, res] of [
     ["vendors", vendorsRes],
     ["vendor_tasks", tasksRes],
     ["guests", guestsRes],
     ["check_ins", checkInsRes],
+    ["tasks", checklistRes],
   ] as const) {
     if (res.error) {
       console.error(`[getEventPlanningSnapshot] Could not load ${label}:`, {
@@ -489,6 +500,15 @@ export async function getEventPlanningSnapshot(
     };
   });
 
+  const checklistTasks: PlanningTask[] = (checklistRes.data ?? []).map((t) => ({
+    id: t.id,
+    task: t.title,
+    dueDate: t.due_date,
+    isDone: t.status === "done",
+    vendorName: null,
+    source: "checklist",
+  }));
+
   const guests: ConstellationGuest[] = (guestsRes.data ?? []).map((g) => {
     const rsvp = Array.isArray(g.rsvps) ? g.rsvps[0] : g.rsvps;
     const status =
@@ -509,7 +529,7 @@ export async function getEventPlanningSnapshot(
     0
   );
 
-  return { vendors, tasks, guests, checkedInPeople };
+  return { vendors, tasks, checklistTasks, guests, checkedInPeople };
 }
 
 /**

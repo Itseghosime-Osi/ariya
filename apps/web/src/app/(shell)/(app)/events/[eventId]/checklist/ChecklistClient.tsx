@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Clock,
   Loader2,
+  Plus,
   RotateCcw,
   Sparkles,
   TriangleAlert,
@@ -29,8 +30,17 @@ import type { StudioEngine } from "@ariya/studio";
 import { useStudioEngine } from "@/features/seating/hall/useStudioEngine";
 import { wasPastWhenAdded } from "@/features/checklist/late-start";
 import { missingPlanTasks } from "@/features/checklist/plan-sync";
+import { TaskForm } from "@/features/checklist/components/TaskForm";
+import {
+  describeRelative,
+  dueOf,
+  resolveDue,
+  type TaskInput,
+} from "@/features/checklist/task-input";
 import {
   addMissingPlanRowsAction,
+  addTaskAction,
+  updateTaskAction,
   deleteTaskAction,
   moveOpenToThisWeekAction,
   restoreTaskAction,
@@ -82,6 +92,7 @@ export function ChecklistClient({
   const [tasks, setTasks] = useState(data.tasks);
   const [filter, setFilter] = useState<ChecklistFilter>("all");
   const [open, setOpen] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [seedError, setSeedError] = useState<string | null>(null);
@@ -284,6 +295,70 @@ export function ChecklistClient({
       });
     },
     [eventId]
+  );
+
+  // A host's own task goes straight into the list; its due date is worked out the same way the
+  // server does, so nothing needs reloading.
+  const addTask = useCallback(
+    async (input: TaskInput) => {
+      const res = await addTaskAction(eventId, input);
+      if (res.error || !res.id)
+        return { error: res.error ?? "Could not add the task." };
+      const { due_date, days_before } = resolveDue(input.due, data.event.date);
+      const task: ChecklistTask = {
+        id: res.id,
+        title: input.title.trim(),
+        detail: input.detail?.trim() || null,
+        phase: input.phase as Phase,
+        dueDate: due_date,
+        status: "todo",
+        ownerId: null,
+        source: "manual",
+        sourceKey: null,
+        derivation: null,
+        mitigation: null,
+        adviceSource: null,
+        timeSlot: null,
+        sort: 0,
+        completedAt: null,
+        createdAt: new Date().toISOString(),
+        daysBefore: days_before,
+        editedAt: null,
+      };
+      setTasks((list) => [...list, task]);
+      setAdding(false);
+      setExpanded(task.phase);
+      setToast({ kind: "info", message: `Added "${task.title}".` });
+      return {};
+    },
+    [eventId, data.event.date]
+  );
+
+  const saveTask = useCallback(
+    async (task: ChecklistTask, input: TaskInput) => {
+      const res = await updateTaskAction(eventId, task.id, input);
+      if (res.error) return { error: res.error };
+      const { due_date, days_before } = resolveDue(input.due, data.event.date);
+      setTasks((list) =>
+        list.map((t) =>
+          t.id === task.id
+            ? {
+                ...t,
+                title: input.title.trim(),
+                detail: input.detail?.trim() || null,
+                phase: input.phase as Phase,
+                dueDate: due_date,
+                daysBefore: days_before,
+                editedAt: new Date().toISOString(),
+              }
+            : t
+        )
+      );
+      setExpanded(input.phase as Phase);
+      setToast({ kind: "info", message: "Saved." });
+      return {};
+    },
+    [eventId, data.event.date]
   );
 
   const remove = useCallback(
@@ -540,6 +615,42 @@ export function ChecklistClient({
               </div>
             </DeskItem>
 
+            <DeskItem>
+              {adding ? (
+                <section
+                  aria-label="Add a task"
+                  className={`${CARD} px-5 py-5`}
+                >
+                  <h2 className="mb-4 font-serif text-lg font-bold text-on-surface">
+                    Add a task
+                  </h2>
+                  <TaskForm
+                    initial={{
+                      title: "",
+                      detail: "",
+                      phase: currentPhase,
+                      due: { kind: "none" },
+                    }}
+                    submitLabel="Add the task"
+                    onSubmit={addTask}
+                    onCancel={() => setAdding(false)}
+                  />
+                </section>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAdding(true)}
+                  className={`${CARD} flex min-h-14 w-full items-center gap-3 px-5 py-3 text-left font-semibold text-burgundy transition-colors hover:bg-white/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy`}
+                >
+                  <Plus className="h-5 w-5" aria-hidden />
+                  Add a task
+                  <span className="ml-auto hidden text-xs font-normal text-label-2 sm:inline">
+                    Anything this plan doesn&apos;t cover
+                  </span>
+                </button>
+              )}
+            </DeskItem>
+
             <DeskItem className="space-y-3">
               {PHASE_ORDER.map((phase) => {
                 const rows = visible.filter((t) => t.phase === phase);
@@ -616,6 +727,7 @@ export function ChecklistClient({
                             )
                           }
                           onDelete={() => void remove(task)}
+                          onSave={(input) => saveTask(task, input)}
                         />
                       ))}
                     </ul>
@@ -928,6 +1040,7 @@ function TaskRow({
   onToggle,
   onWait,
   onDelete,
+  onSave,
 }: {
   task: ChecklistTask;
   open: boolean;
@@ -935,7 +1048,9 @@ function TaskRow({
   onToggle: () => void;
   onWait: () => void;
   onDelete: () => void;
+  onSave: (input: TaskInput) => Promise<{ error?: string }>;
 }) {
+  const [editing, setEditing] = useState(false);
   const isDone = task.status === "done";
   const beforeStart = wasPastWhenAdded(task);
   const overdue =
@@ -977,6 +1092,15 @@ function TaskRow({
             {task.title}
           </span>
           <span className="flex shrink-0 items-center gap-2 text-[11px] text-label-2">
+            {task.source === "manual" ? (
+              <span className="hidden rounded-full bg-burgundy/10 px-2 py-0.5 font-semibold text-burgundy sm:inline">
+                Your task
+              </span>
+            ) : task.editedAt ? (
+              <span className="hidden rounded-full bg-night/[0.06] px-2 py-0.5 font-semibold text-label-2 sm:inline">
+                Edited
+              </span>
+            ) : null}
             {task.status === "waiting" && (
               <span className="rounded-full bg-gold/15 px-2 py-0.5 font-semibold text-gold-ink">
                 Waiting
@@ -993,8 +1117,35 @@ function TaskRow({
           </span>
         </button>
       </div>
-      {open && (
+      {open && editing && (
+        <div className="border-t border-hairline bg-white/30 px-5 py-4">
+          <TaskForm
+            initial={{
+              title: task.title,
+              detail: task.detail ?? "",
+              phase: task.phase,
+              due: dueOf(task),
+            }}
+            submitLabel="Save the task"
+            onSubmit={async (input) => {
+              const res = await onSave(input);
+              if (!res.error) setEditing(false);
+              return res;
+            }}
+            onCancel={() => setEditing(false)}
+          />
+        </div>
+      )}
+      {open && !editing && (
         <div className="space-y-2 border-t border-hairline bg-white/30 px-5 py-4 text-xs text-label-2">
+          {task.daysBefore !== null && (
+            <p>
+              <span className="font-semibold text-night">Due: </span>
+              {describeRelative(task.daysBefore).toLowerCase()} the day
+              {task.dueDate ? ` (${shortDate(task.dueDate)})` : ""}. Moves if
+              the event date changes.
+            </p>
+          )}
           {task.detail && (
             <p className="text-sm text-night/80">{task.detail}</p>
           )}
@@ -1024,6 +1175,13 @@ function TaskRow({
               {task.status === "waiting"
                 ? "No longer waiting"
                 : "Waiting on someone"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="desk-chip inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-burgundy"
+            >
+              Edit
             </button>
             <button
               type="button"

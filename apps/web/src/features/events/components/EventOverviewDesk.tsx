@@ -84,14 +84,16 @@ export function EventOverviewDesk({
     }
   }, [searchParams]);
 
-  const readiness = computeReadiness(metrics, planning.vendors, planning.tasks);
+  // Readiness and the next thing to do weigh every task: vendors' and the checklist's.
+  const allTasks = [...planning.tasks, ...planning.checklistTasks];
+  const readiness = computeReadiness(metrics, planning.vendors, allTasks);
   const phases = buildPlanningPhases(eventDateKey, planning.tasks, todayKey);
   const budget = summariseBudget(planning.vendors);
   const nextActions = pickNextActions({
     eventId: event.id,
     metrics,
     vendors: planning.vendors,
-    tasks: planning.tasks,
+    tasks: allTasks,
     todayKey,
   });
 

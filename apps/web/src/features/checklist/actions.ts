@@ -5,6 +5,7 @@ import type { ChecklistPlan, Reconciliation } from "@ariya/studio";
 import { createClient } from "@/lib/supabase/server";
 import { RISK_KEY_PREFIX, type TaskStatus } from "./types";
 import { missingPlanTasks, type PlanTask } from "./plan-sync";
+import { resolveDue, taskInputSchema, type TaskInput } from "./task-input";
 
 export interface SeedResult {
   success?: boolean;
@@ -135,6 +136,8 @@ function toTaskRow(eventId: string, t: PlanTask, templateVersion: number) {
     },
     template_version: templateVersion,
     sort: t.sort,
+    // Relative to the event, so the row moves when the event date does.
+    days_before: t.daysBefore ?? null,
   };
 }
 
@@ -511,4 +514,110 @@ export async function addRunSheetRowAction(
   revalidatePath(`/events/${eventId}/day-of`);
   revalidatePath(`/events/${eventId}/checklist`);
   return { success: true, id: data.id };
+}
+
+/** Read the event's date for working out a relative due date. Null when there is no such event. */
+async function eventDateFor(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  eventId: string
+): Promise<{ date: string | null } | null> {
+  const { data } = await supabase
+    .from("events")
+    .select("id, date")
+    .eq("id", eventId)
+    .maybeSingle();
+  return data ? { date: data.date } : null;
+}
+
+/** A host's own task: their wording, phase, notes and due date. */
+export async function addTaskAction(
+  eventId: string,
+  input: TaskInput
+): Promise<{ success?: boolean; error?: string; id?: string }> {
+  const parsed = taskInputSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const event = await eventDateFor(supabase, eventId);
+  if (!event) return { error: "This celebration could not be found." };
+
+  const { title, detail, phase, due } = parsed.data;
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert({
+      event_id: eventId,
+      title,
+      detail,
+      phase,
+      source: "manual" as const,
+      sort: 0,
+      ...resolveDue(due, event.date),
+    })
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[addTaskAction] insert failed:", error);
+    return {
+      error: /row-level security/i.test(error.message)
+        ? "Only the owner or a planner can add tasks."
+        : `Could not add the task: ${error.message}`,
+    };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}`);
+  return { success: true, id: data.id };
+}
+
+/**
+ * Change a task's wording, notes, phase or due date. Works on generated tasks too: from then on
+ * the task is the host's (edited_at is set), and refreshing the plan never rewrites it.
+ */
+export async function updateTaskAction(
+  eventId: string,
+  taskId: string,
+  input: TaskInput
+): Promise<{ success?: boolean; error?: string }> {
+  const parsed = taskInputSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session has ended. Sign in again." };
+
+  const event = await eventDateFor(supabase, eventId);
+  if (!event) return { error: "This celebration could not be found." };
+
+  const { title, detail, phase, due } = parsed.data;
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({
+      title,
+      detail,
+      phase,
+      edited_at: new Date().toISOString(),
+      ...resolveDue(due, event.date),
+    })
+    .eq("id", taskId)
+    .eq("event_id", eventId)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) {
+    console.error("[updateTaskAction] update failed:", error);
+    return { error: `Could not save the task: ${error.message}` };
+  }
+  if (!data || data.length === 0) {
+    return { error: "That task could not be found, or you can't edit it." };
+  }
+
+  revalidatePath(`/events/${eventId}/checklist`);
+  revalidatePath(`/events/${eventId}`);
+  return { success: true };
 }
