@@ -351,7 +351,8 @@ describe("Events Domain", () => {
         slug: "royal-wedding",
         title: "The Royal Wedding",
         couple: "Chidinma & Babatunde",
-        date: "2026-11-20T14:00:00Z",
+        // Always in the future: a fixed date made this test fail once that day had passed.
+        date: new Date(Date.now() + 30 * 86_400_000).toISOString(),
         venue: "Grand Ballroom",
         area: "Lagos",
         dress_code: "Wine Velvet",
