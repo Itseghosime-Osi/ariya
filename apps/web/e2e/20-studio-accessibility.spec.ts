@@ -240,12 +240,12 @@ test.describe("Studio accessibility", () => {
     // The checklist's own controls.
     await openChecklist(page, eventId);
     await expectTargets(
-      page
-        .getByRole("toolbar", { name: /Filter the checklist/i })
-        .getByRole("button")
+      page.getByRole("button", { name: "Add a task", exact: true }).first()
     );
     await expectTargets(page.getByRole("checkbox", { name: /^Tick / }).first());
-    await expectTargets(page.getByRole("button", { name: /^Done$/ }).first());
+    await expectTargets(
+      page.getByRole("button", { name: /^Set aside all|^Show them/ }).first()
+    );
   });
 
   test("a table can be moved without dragging", async ({ page, context }) => {

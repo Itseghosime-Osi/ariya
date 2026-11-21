@@ -73,7 +73,8 @@ test.describe("The host's own checklist", () => {
     await expect(page.getByText("Baba Ayo, 0803 000 0000")).toBeVisible();
 
     // Edit a suggested task: its wording becomes the host's, and it is marked as edited.
-    await page.getByRole("button", { name: /^Foundations/ }).click();
+    // "Lock the budget" was due before the list began, so it sits with the earlier tasks.
+    await page.getByRole("button", { name: "Show them" }).click();
     await page.getByRole("button", { name: /^Lock the budget/ }).click();
     await page.getByRole("button", { name: "Edit", exact: true }).click();
     const edit = page.getByRole("form", { name: "Save the task" });
@@ -89,7 +90,7 @@ test.describe("The host's own checklist", () => {
     await expect(
       page.getByRole("checkbox", { name: "Tick Book the talking drummer" })
     ).toBeAttached({ timeout: 30_000 });
-    await page.getByRole("button", { name: /^Foundations/ }).click();
+    await page.getByRole("button", { name: "Show them" }).click();
     await expect(
       page.getByRole("checkbox", {
         name: "Tick Lock the budget with both families",

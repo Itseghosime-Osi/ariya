@@ -3,7 +3,7 @@
 Goal: the checklist becomes the planner's own. They shape each event's list, keep reusable checklists
 for any event, and work through it with their team, each person seeing what their role allows.
 
-Tick an item when it is merged and verified. Sizes: **S** about a day, **M** a few days, **L** a week
+Tick an item when it is built and tested; **(PR pending)** marks work on a branch that is not merged yet. Sizes: **S** about a day, **M** a few days, **L** a week
 or more.
 
 ## What exists today
@@ -32,7 +32,16 @@ or more.
 | Own reusable checklists                 | Yes   | Yes                      | No               | No                                             |
 | Manage the team's shared checklists     | Yes   | Yes, if the owner allows | No               | No                                             |
 
+## Done alongside release 1
+
+- [x] **Checklist page redesign (PR pending).** Tasks grouped by when they are due (Overdue, This
+      week, This month, Later, No date, Done) instead of by stage; one "Add a task" action; a
+      progress card with counts per group; two columns on wide screens, one on phones; Back and Add
+      in the installed app's bar on a phone. Stage names stay on each task.
+
 ## Release 1: roles and the planner's own checklist
+
+Team-role items (1–4) are deferred to their own PR.
 
 - [ ] **1. Pages match the role** (M). The sidebar, phone menu and pages show only what a role can
       use. Staff land on check-in and the run sheet; the couple sees the overview, guests, seating and
@@ -46,10 +55,10 @@ or more.
 - [ ] **4. "My tasks" across all my events** (M). One page listing every task assigned to me, across
       every event I'm on, by due date. _Benefit:_ staff and planners working several events see their
       week in one place.
-- [ ] **5. Add your own task** (S). Title, phase, notes, owner, and a due date that is either fixed
+- [x] **5. Add your own task** (S) **(PR pending)**. Built without the owner field, which comes with team roles. Title, phase, notes, owner, and a due date that is either fixed
       or relative ("3 weeks before"), so it moves when the event date moves. _Benefit:_ covers
       everything the generated list can't know, such as aso-ebi money or the talking drummer.
-- [ ] **6. Edit any task** (S–M). Wording, details, due date and phase, including generated tasks.
+- [x] **6. Edit any task** (S–M) **(PR pending)**. Wording, details, due date and phase, including generated tasks.
       Your edits are never overwritten when the list refreshes. _Benefit:_ the list speaks the
       planner's language.
 - [ ] **7. Save the event type and start from a matching list** (M). Wedding, engagement/introduction,
@@ -68,7 +77,7 @@ or more.
 - [ ] **11. "Also add to my checklist"** (S). When adding a task to an event, tick a box to add it to
       a reusable checklist too. One-off tasks still stay on that event only. _Benefit:_ reusable
       checklists improve with every event without separate upkeep.
-- [ ] **12. Overview counts your own tasks** (S). The "next thing to do" and readiness score include
+- [x] **12. Overview counts your own tasks** (S) **(PR pending)**. The "next thing to do" and readiness score include
       custom and checklist tasks. _Benefit:_ the dashboard reflects the real plan.
 
 ## Release 2: real events and real teams
